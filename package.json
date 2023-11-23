@@ -33,6 +33,7 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
+    "@hilla/react-components": "2.3.0-alpha11",
     "@nx/js": "^16.10.0",
     "@types/karma": "^6.3.5",
     "@types/node": "^20.7.1",
@@ -43,6 +44,7 @@
     "esbuild": "^0.19.4",
     "eslint": "^8.50.0",
     "eslint-config-vaadin": "^1.0.0-alpha.18",
+    "eslint-plugin-mocha": "^10.2.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-tsdoc": "^0.2.17",
     "glob": "^10.3.10",
@@ -64,7 +66,7 @@
     "simple-git-hooks": "^2.9.0",
     "sync-request": "^6.1.0",
     "tsx": "3.13.0",
-    "typescript": "5.1.6",
+    "typescript": "5.2.2",
     "vite": "^4.4.9"
   }
 }

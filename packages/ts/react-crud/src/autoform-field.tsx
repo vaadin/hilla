@@ -1,6 +1,7 @@
 import { _enum, type EnumModel } from '@hilla/form';
 import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
 import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
+import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
 import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
 import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectProps } from '@hilla/react-components/Select.js';
@@ -52,15 +53,15 @@ export type FieldOptions = Readonly<{
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
+  const pathParts = propertyInfo.name.split('.');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return form.model[propertyInfo.name];
+  return pathParts.reduce<any>((model, property) => (model ? model[property] : undefined), form.model);
 }
 
 type AutoFormTextFieldProps = SharedFieldProps & TextFieldProps;
 
 function AutoFormTextField({ propertyInfo, form, options, label, ...other }: AutoFormTextFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the typing issue
   return <TextField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -68,7 +69,6 @@ type AutoFormIntegerFieldProps = IntegerFieldProps & SharedFieldProps;
 
 function AutoFormIntegerField({ propertyInfo, form, label, ...other }: AutoFormIntegerFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <IntegerField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -76,7 +76,6 @@ type AutoFormNumberFieldProps = NumberFieldProps & SharedFieldProps;
 
 function AutoFormDecimalField({ propertyInfo, form, label, ...other }: AutoFormNumberFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <NumberField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -85,7 +84,6 @@ type AutoFormDateFieldProps = DatePickerProps & SharedFieldProps;
 function AutoFormDateField({ propertyInfo, form, label, ...other }: AutoFormDateFieldProps) {
   const i18n = useDatePickerI18n();
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <DatePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
 }
 
@@ -93,8 +91,14 @@ type AutoFormTimeFieldProps = SharedFieldProps & TimePickerProps;
 
 function AutoFormTimeField({ propertyInfo, form, label, ...other }: AutoFormTimeFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <TimePicker {...other} {...form.field(model)} label={label} />;
+}
+
+type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
+
+function AutoFormDateTimeField({ propertyInfo, form, label, ...other }: AutoFormDateTimeFieldProps) {
+  const model = getPropertyModel(form, propertyInfo);
+  return <DateTimePicker {...other} {...form.field(model)} label={label} />;
 }
 
 type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
@@ -112,12 +116,12 @@ type AutoFormBooleanFieldProps = CheckboxProps & SharedFieldProps;
 
 function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormBooleanFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <Checkbox {...other} {...form.field(model)} label={label} />;
 }
 
 export type AutoFormFieldProps = CheckboxProps &
   DatePickerProps &
+  DateTimePickerProps &
   IntegerFieldProps &
   NumberFieldProps &
   SelectProps &
@@ -143,6 +147,8 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
       return <AutoFormDateField {...props} label={label}></AutoFormDateField>;
     case 'time':
       return <AutoFormTimeField {...props} label={label}></AutoFormTimeField>;
+    case 'datetime':
+      return <AutoFormDateTimeField {...props} label={label}></AutoFormDateTimeField>;
     case 'enum':
       return <AutoFormEnumField {...props} label={label}></AutoFormEnumField>;
     case 'boolean':

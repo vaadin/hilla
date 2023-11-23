@@ -39,11 +39,15 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-async function assertColumns(grid: GridController, ...ids: string[]) {
+async function assertColumnsOrder(grid: GridController, ...ids: string[]) {
   const columns = await grid.getColumns();
   expect(columns).to.have.length(ids.length);
   await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(grid.generateColumnHeaders(ids));
+}
 
+async function assertColumns(grid: GridController, ...ids: string[]) {
+  await assertColumnsOrder(grid, ...ids);
+  const columns = await grid.getColumns();
   for (let i = 0; i < ids.length; i++) {
     if (ids[i] === '') {
       expect(columns[i].path).to.equal(undefined);
@@ -83,6 +87,10 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
       });
 
@@ -99,6 +107,10 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -269,20 +281,20 @@ describe('@hilla/react-crud', () => {
         it('created for string columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 0);
-          expect(cell.firstElementChild?.localName).to.equal('vaadin-text-field');
+          expect(cell.querySelector('vaadin-text-field')).to.exist;
         });
 
         it('created for number columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 4);
-          expect(cell.firstElementChild?.localName).to.equal('vaadin-select');
+          expect(cell.querySelector('vaadin-select')).to.exist;
         });
 
         it('filter when you type in the field for a string column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
 
-          const firstNameFilterField = grid.getHeaderCellContent(1, 0).firstElementChild as TextFieldElement;
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'filter-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await nextFrame();
@@ -487,6 +499,17 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('customize columns', () => {
+      const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName} {item.lastName}
+        </span>
+      );
+      const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName}-{item.lastName}
+        </span>
+      );
+
       it('should only show configured columns in specified order', async () => {
         const grid = await GridController.init(render(<TestAutoGrid visibleColumns={['email', 'firstName']} />), user);
         await assertColumns(grid, 'email', 'firstName');
@@ -505,21 +528,58 @@ describe('@hilla/react-crud', () => {
         await assertColumns(grid, 'email', 'firstName');
       });
 
-      it('renders custom columns at the end', async () => {
-        const NameRenderer = ({ item }: { item: Person }): JSX.Element => (
-          <span>
-            {item.firstName} {item.lastName}
-          </span>
-        );
+      it('renders custom columns at the specified index by visibleColumns', async () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid
-              customColumns={[<GridColumn key="test-column" autoWidth renderer={NameRenderer}></GridColumn>]}
+              noHeaderFilters
+              visibleColumns={['fullName', 'gender', 'email', 'secondFullName', 'vip', 'birthDate', 'shiftStart']}
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
             />,
           ),
           user,
         );
-        await assertColumns(
+        await assertColumnsOrder(
+          grid,
+          'fullName',
+          'gender',
+          'email',
+          'secondFullName',
+          'vip',
+          'birthDate',
+          'shiftStart',
+        );
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 3)).to.have.rendered.text('Jane-Love');
+      });
+
+      it('renders custom columns at the end if visibleColumns is absent', async () => {
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              noHeaderFilters
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
+            />,
+          ),
+          user,
+        );
+        await assertColumnsOrder(
           grid,
           'firstName',
           'lastName',
@@ -530,9 +590,38 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
-          '',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
+          'fullName',
+          'secondFullName',
         );
-        expect(grid.getBodyCellContent(0, 9)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 13)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 14)).to.have.rendered.text('Jane-Love');
+      });
+
+      it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              noHeaderFilters
+              visibleColumns={['fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart']}
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
+            />,
+          ),
+          user,
+        );
+        await assertColumnsOrder(grid, 'fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -552,12 +641,16 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         const janeCell = grid.getBodyCellContent(0, 0);
         expect(janeCell).to.have.rendered.text('JANE');
         // The header filter was not overridden
         const cell = grid.getHeaderCellContent(1, 0);
-        expect(cell.firstElementChild).to.have.tagName('vaadin-text-field');
+        expect(cell.firstElementChild!.querySelector('vaadin-text-field')).to.exist;
       });
 
       it('respects the header setting from custom column options', async () => {
@@ -587,6 +680,10 @@ describe('@hilla/react-crud', () => {
           'vip',
           'birthDate',
           'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
       });

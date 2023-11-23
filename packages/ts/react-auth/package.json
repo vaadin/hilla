@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-auth",
-  "version": "2.4.0-beta2",
+  "version": "2.4.0-rc1",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "2.4.0-beta2"
+    "@hilla/frontend": "2.4.0-rc1"
   },
   "peerDependencies": {
     "react": "^18",
@@ -67,6 +67,6 @@
     "react-router-dom": "^6.16.0",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.1.6"
+    "typescript": "5.2.2"
   }
 }

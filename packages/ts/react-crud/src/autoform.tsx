@@ -16,16 +16,57 @@ registerStylesheet(css);
 
 export const emptyItem = Symbol();
 
+/**
+ * An event that is fired when an error occurs while submitting the form.
+ */
 export type SubmitErrorEvent = {
+  /**
+   * The error that occurred.
+   */
   error: EndpointError;
+  /**
+   * A function that can be used to set a custom error message. This will be
+   * shown in the form at the same position as the default error message.
+   * You are not required to call this function if you want to handle the
+   * error differently.
+   */
+  setMessage(message: string): void;
 };
+
+/**
+ * An event that is fired when the form has been successfully submitted.
+ */
 export type SubmitEvent<TItem> = {
+  /**
+   * The item that was submitted, as returned by the service.
+   */
   item: TItem;
 };
+
+/**
+ * An event that is fired when an error occurs while deleting an item.
+ */
 export type DeleteErrorEvent = {
+  /**
+   * The error that occurred.
+   */
   error: EndpointError;
+  /**
+   * A function that can be used to set a custom error message. This will be
+   * shown in the form at the same position as the default error message.
+   * You are not required to call this function if you want to handle the
+   * error differently.
+   */
+  setMessage(message: string): void;
 };
+
+/**
+ * An event that is fired when the form has been successfully deleted.
+ */
 export type DeleteEvent<TItem> = {
+  /**
+   * The item that was deleted, as returned by the service.
+   */
   item: TItem;
 };
 
@@ -61,6 +102,11 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      *
      * Use the `onSubmitSuccess` callback to get notified when the item has been
      * saved.
+     *
+     * When submitting a new item (i.e. when `item` is null or undefined), the
+     * form will be automatically cleared, allowing to submit another new item.
+     * In order to keep editing the same item after submitting, set the `item`
+     * prop to the new item.
      */
     item?: Value<M> | typeof emptyItem | null;
     /**
@@ -143,6 +189,11 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     /**
      * A callback that will be called after the form has been successfully
      * submitted and the item has been saved.
+     *
+     * When submitting a new item (i.e. when `item` is null or undefined), the
+     * form will be automatically cleared, allowing to submit another new item.
+     * In order to keep editing the same item after submitting, set the `item`
+     * prop to the new item.
      */
     onSubmitSuccess?({ item }: SubmitEvent<Value<M>>): void;
     /**
@@ -220,6 +271,13 @@ export function AutoForm<M extends AbstractModel>({
       } else if (onSubmitSuccess) {
         onSubmitSuccess({ item: newItem });
       }
+      // Automatically clear the form after submitting a new item.
+      // Otherwise, there would be no way for the developer to clear it, as the
+      // there is no new value to set for the item prop to trigger the above
+      // effect in case the prop is already null, undefined or the empty item.
+      if (!item || item === emptyItem) {
+        form.clear();
+      }
     } catch (error) {
       if (error instanceof ValidationError) {
         // Handled automatically
@@ -227,7 +285,7 @@ export function AutoForm<M extends AbstractModel>({
       }
       if (error instanceof EndpointError) {
         if (onSubmitError) {
-          onSubmitError({ error });
+          onSubmitError({ error, setMessage: setFormError });
         } else {
           setFormError(error.message);
         }
@@ -256,7 +314,7 @@ export function AutoForm<M extends AbstractModel>({
     } catch (error) {
       if (error instanceof EndpointError) {
         if (onDeleteError) {
-          onDeleteError({ error });
+          onDeleteError({ error, setMessage: setFormError });
         } else {
           setFormError(error.message);
         }

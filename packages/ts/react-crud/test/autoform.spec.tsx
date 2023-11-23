@@ -42,18 +42,11 @@ describe('@hilla/react-crud', () => {
       'Vip',
       'Birth date',
       'Shift start',
+      'Appointment time',
+      'Street',
+      'City',
+      'Country',
     ] as const;
-    const KEYS = [
-      'firstName',
-      'lastName',
-      'gender',
-      'email',
-      'someInteger',
-      'someDecimal',
-      'vip',
-      'birthDate',
-      'shiftStart',
-    ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
       lastName: '',
@@ -66,13 +59,31 @@ describe('@hilla/react-crud', () => {
       vip: false,
       birthDate: '',
       shiftStart: '',
+      appointmentTime: '',
+      address: {
+        street: '',
+        city: '',
+        country: '',
+      },
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
     function getExpectedValues(person: Person) {
-      return (Object.entries(person) as ReadonlyArray<[keyof Person, Person[keyof Person]]>)
-        .filter(([key]) => KEYS.includes(key))
-        .map(([, value]) => value.toString());
+      return [
+        person.firstName,
+        person.lastName,
+        person.gender,
+        person.email,
+        person.someInteger.toString(),
+        person.someDecimal.toString(),
+        person.vip.toString(),
+        person.birthDate,
+        person.shiftStart,
+        person.appointmentTime,
+        person.address?.street ?? '',
+        person.address?.city ?? '',
+        person.address?.country ?? '',
+      ];
     }
 
     async function expectFieldColSpan(form: FormController, fieldName: string, expectedColSpan: string | null) {
@@ -121,6 +132,12 @@ describe('@hilla/react-crud', () => {
         vip: false,
         birthDate: '1999-12-31',
         shiftStart: '08:30',
+        appointmentTime: '2020-12-31T08:30',
+        address: {
+          street: 'Some street 1',
+          city: 'Some city',
+          country: 'Some country',
+        },
       };
 
       const form = await FormController.init(
@@ -142,6 +159,10 @@ describe('@hilla/react-crud', () => {
         'vaadin-checkbox',
         'vaadin-date-picker',
         'vaadin-time-picker',
+        'vaadin-date-time-picker',
+        'vaadin-text-field',
+        'vaadin-text-field',
+        'vaadin-text-field',
       ]);
     });
 
@@ -203,6 +224,7 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('Last name', 'Quinby');
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '0.12');
+      await form.typeInField('Street', '123 Fake Street');
       await form.submit();
 
       expect(saveSpy).to.have.been.calledOnce;
@@ -211,22 +233,23 @@ describe('@hilla/react-crud', () => {
       expect(newItem.lastName).to.equal('Quinby');
       expect(newItem.someInteger).to.equal(12);
       expect(newItem.someDecimal).to.equal(0.12);
+      expect(newItem.address?.street).to.equal('123 Fake Street');
     });
 
-    it('retains the form values a valid submit', async () => {
+    it('retains the form values after submitting an existing item', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const form = await FormController.init(
         user,
         render(<AutoForm service={service} model={PersonModel} item={person} />).container,
       );
-      await form.typeInField('First name', 'bar');
+      await form.typeInField('First name', 'foo');
       await form.submit();
-      const newPerson: Person = { ...person! };
-      newPerson.firstName = 'bar';
-      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
+      const updatedPerson: Person = { ...person!, firstName: 'foo' };
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(updatedPerson));
     });
-    it('retains the form values after a valid submit when using onSubmitSuccess', async () => {
+
+    it('retains the form values after submitting an existing item when using onSubmitSuccess', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       const person = await getItem(service, 1);
       const submitSpy = sinon.spy();
@@ -235,11 +258,33 @@ describe('@hilla/react-crud', () => {
         user,
         render(<AutoForm service={service} model={PersonModel} item={person} onSubmitSuccess={submitSpy} />).container,
       );
-      await form.typeInField('First name', 'baz');
+      await form.typeInField('First name', 'foo');
       await form.submit();
-      const newPerson: Person = { ...person! };
-      newPerson.firstName = 'baz';
-      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(newPerson));
+      const updatedPerson: Person = { ...person!, firstName: 'foo' };
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(updatedPerson));
+    });
+
+    it('clears the form values after submitting a new item', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+
+      // Item is undefined
+      const result = render(<AutoForm service={service} model={PersonModel} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
+
+      // Item is null
+      result.rerender(<AutoForm service={service} model={PersonModel} item={null} />);
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
+
+      // Item is emptyItem
+      result.rerender(<AutoForm service={service} model={PersonModel} item={emptyItem} />);
+      await form.typeInField('First name', 'foo');
+      await form.submit();
+      await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
 
     it('calls onSubmitSuccess with the new item', async () => {
@@ -335,7 +380,7 @@ describe('@hilla/react-crud', () => {
       expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'No update performed'));
     });
 
-    it('calls onSubmitSuccessError and does not show error if the endpoint call fails', async () => {
+    it('calls onSubmitError and does not show error if the endpoint call fails', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (_item: Person): Promise<Person | undefined> => {
@@ -359,6 +404,27 @@ describe('@hilla/react-crud', () => {
       expect(result.queryByText('foobar')).to.be.null;
       expect(submitSpy).to.have.not.been.called;
       expect(errorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'foobar'));
+    });
+
+    it('allows to show a custom error message if the endpoint call fails', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      sinon.stub(service, 'save').rejects(new EndpointError('foobar'));
+      const person = await getItem(service, 1);
+      const submitSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          onSubmitSuccess={submitSpy}
+          onSubmitError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(submitSpy).to.have.not.been.called;
+      expect(result.queryByText('Got error: foobar')).to.not.be.null;
     });
 
     it('disables all fields and buttons when disabled', async () => {
@@ -610,6 +676,32 @@ describe('@hilla/react-crud', () => {
         expect(onDeleteErrorSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
       });
+    });
+
+    it('allows to show a custom error message if deletion fails', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      sinon.stub(service, 'delete').rejects(new EndpointError('foobar'));
+      const person = await getItem(service, 1);
+      const deleteSpy = sinon.spy();
+      const result = render(
+        <AutoForm
+          service={service}
+          model={PersonModel}
+          item={person}
+          deleteButtonVisible={true}
+          onDeleteSuccess={deleteSpy}
+          onDeleteError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
+        />,
+      );
+      const form = await FormController.init(user, result.container);
+      const deleteButton = await form.findButton('Delete...');
+      await userEvent.click(deleteButton);
+
+      const dialog = await ConfirmDialogController.init(document.body, user);
+      await dialog.confirm();
+
+      expect(deleteSpy).to.not.have.been.called;
+      expect(result.queryByText('Got error: foobar')).to.not.be.null;
     });
 
     describe('AutoFormEnumField', () => {

@@ -32,6 +32,16 @@ export interface Named {
   lastName: string;
 }
 
+export interface Address {
+  street: string;
+  city: string;
+  country: string;
+}
+
+export interface Department extends HasIdVersion {
+  name: string;
+}
+
 export interface Person extends HasIdVersion, Named {
   gender: Gender;
   email: string;
@@ -40,6 +50,9 @@ export interface Person extends HasIdVersion, Named {
   vip: boolean;
   birthDate: string;
   shiftStart: string;
+  appointmentTime: string;
+  address?: Address;
+  department?: Department;
 }
 
 export interface NestedTestValues {
@@ -75,6 +88,46 @@ export class NamedModel<T extends Named = Named> extends ObjectModel<T> {
 
   get lastName(): StringModel {
     return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
+  }
+}
+
+export class AddressModel<T extends Address = Address> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(AddressModel);
+
+  get street(): StringModel {
+    return this[_getPropertyModel]('street', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get city(): StringModel {
+    return this[_getPropertyModel]('city', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get country(): StringModel {
+    return this[_getPropertyModel]('country', (parent, key) => new StringModel(parent, key, false));
+  }
+}
+
+export class DepartmentModel<T extends Department = Department> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(DepartmentModel);
+
+  get id(): NumberModel {
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
+  }
+
+  get version(): NumberModel {
+    return this[_getPropertyModel](
+      'version',
+      (parent, key) =>
+        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+    );
+  }
+
+  get name(): StringModel {
+    return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, false));
   }
 }
 
@@ -134,6 +187,29 @@ export class PersonModel<T extends Person = Person> extends NamedModel<T> {
     return this[_getPropertyModel](
       'shiftStart',
       (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
+    );
+  }
+
+  get appointmentTime(): StringModel {
+    return this[_getPropertyModel](
+      'appointmentTime',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
+    );
+  }
+
+  get address(): AddressModel {
+    return this[_getPropertyModel](
+      'address',
+      (parent, key) =>
+        new AddressModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.OneToOne' }] } }),
+    );
+  }
+
+  get department(): DepartmentModel {
+    return this[_getPropertyModel](
+      'department',
+      (parent, key) =>
+        new DepartmentModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.ManyToOne' }] } }),
     );
   }
 }
@@ -353,6 +429,17 @@ export const personData: Person[] = [
     vip: true,
     birthDate: '1999-12-31',
     shiftStart: '08:30',
+    appointmentTime: '2021-05-13T08:45',
+    address: {
+      street: '122 North Street',
+      city: 'North Town',
+      country: 'US',
+    },
+    department: {
+      id: 1,
+      version: 1,
+      name: 'Sales',
+    },
   },
   {
     id: 2,
@@ -366,6 +453,17 @@ export const personData: Person[] = [
     vip: false,
     birthDate: '1999-12-31',
     shiftStart: '08:30',
+    appointmentTime: '2025-08-21T14:30',
+    address: {
+      street: '122 South Street',
+      city: 'South Town',
+      country: 'US',
+    },
+    department: {
+      id: 2,
+      version: 1,
+      name: 'IT',
+    },
   },
 ];
 
