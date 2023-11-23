@@ -417,6 +417,17 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal(expectedFilter);
         });
 
+        it('does not show a filter for object column', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid service={service} visibleColumns={['address', 'department']} />),
+            user,
+          );
+
+          expect(grid.getHeaderCellContent(1, 0).childElementCount).to.equal(0);
+          expect(grid.getHeaderCellContent(1, 1).childElementCount).to.equal(0);
+        });
+
         it('combine filters (and) when you type in multiple fields', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
@@ -841,11 +852,21 @@ describe('@hilla/react-crud', () => {
         );
       });
 
-      it('renders java.util.Date as right aligned', async () => {
+      it('renders nested java.util.Date as right aligned', async () => {
         const columnIndex = await grid.findColumnIndexByHeaderText('Nested date');
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021');
         expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('');
+      });
+
+      it('renders objects without error', async () => {
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonModel} visibleColumns={['address', 'department']} />),
+          user,
+        );
+
+        expect(grid.getBodyCellContent(0, 0)).to.have.text('[object Object]');
+        expect(grid.getBodyCellContent(0, 1)).to.have.text('[object Object]');
       });
     });
   });

@@ -574,6 +574,12 @@ describe('@hilla/react-crud', () => {
         expect(fields.localName).to.eql('vaadin-text-field');
       });
 
+      it('renders no fields for object properties', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['address', 'department'] });
+        expect(form.queryField('Address')).to.be.undefined;
+        expect(form.queryField('Department')).to.be.undefined;
+      });
+
       it('property binds fields for nested properties that are not included by default', async () => {
         const service = personService();
         const saveSpy = sinon.spy(service, 'save');
