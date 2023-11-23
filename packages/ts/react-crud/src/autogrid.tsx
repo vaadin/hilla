@@ -10,14 +10,14 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { type JSX, type MutableRefObject, useEffect, useRef, useState } from 'react';
+import { type JSX, type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
-import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
@@ -160,16 +160,11 @@ function useColumns(
     rowNumbers?: boolean;
   },
 ) {
-  const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
-  const effectiveProperties = effectiveColumns
-    .map((name) => properties.find((prop) => prop.name === name))
-    .filter(Boolean) as PropertyInfo[];
-
   const [sortState, setSortState] = useState<SortState>(
-    effectiveProperties.length > 0 ? { [effectiveProperties[0].name]: { direction: 'asc' } } : {},
+    properties.length > 0 ? { [properties[0].name]: { direction: 'asc' } } : {},
   );
 
-  let columns = effectiveProperties.map((propertyInfo) => {
+  let columns = properties.map((propertyInfo) => {
     let column;
 
     const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
@@ -213,7 +208,7 @@ function useColumns(
         return map;
       }, new Map<string, JSX.Element>());
 
-      columns = effectiveColumns.map((key) => columnMap.get(key)).filter(Boolean) as JSX.Element[];
+      columns = options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
     } else {
       columns = [...columns, ...options.customColumns];
     }
@@ -277,7 +272,8 @@ export function AutoGrid<TItem>({
     }
   };
 
-  const properties = getProperties(model);
+  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
+  const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     noHeaderFilters,
@@ -315,7 +311,7 @@ export function AutoGrid<TItem>({
   }, [experimentalFilter, internalFilter, refreshTrigger]);
 
   return (
-    <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={ref}>
+    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={ref}>
       {children}
     </Grid>
   );

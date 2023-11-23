@@ -17,7 +17,7 @@ import {
   StringHeaderFilter,
   TimeHeaderFilter,
 } from './header-filter';
-import type { PropertyInfo } from './property-info';
+import type { PropertyInfo } from './model-info';
 
 export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
