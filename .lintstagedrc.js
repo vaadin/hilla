@@ -14,5 +14,5 @@ export const extensions = ['ts', 'js', 'tsx'].join(',');
 export const commands = [createExcludeCallback('eslint --fix'), createExcludeCallback('prettier --write')];
 
 export default {
-  [`./*.{${extensions}`]: commands,
+  [`./*.{${extensions}}`]: commands,
 };
