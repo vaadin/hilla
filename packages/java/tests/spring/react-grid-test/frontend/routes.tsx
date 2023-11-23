@@ -7,6 +7,7 @@ import { ReadOnlyGrid } from './views/ReadOnlyGrid.js';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter.js';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter.js';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter.js';
+import { CrudWithDtos } from "Frontend/views/CrudWithDtos";
 
 export const routes = [
   {
@@ -32,6 +33,10 @@ export const routes = [
       {
         path: '/grid-entityrefs',
         element: <GridWithEntityReferences />,
+      },
+      {
+        path: '/crud-dtos',
+        element: <CrudWithDtos />,
       },
       {
         path: '/auto-form',
