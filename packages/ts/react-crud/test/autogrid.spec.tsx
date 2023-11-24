@@ -395,6 +395,39 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
         });
 
+        it('filter for nested properties that are not included by default', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid service={service} visibleColumns={['department.name']} />),
+            user,
+          );
+
+          const departmentNameField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          departmentNameField.value = 'filter-value';
+          departmentNameField.dispatchEvent(new CustomEvent('input'));
+          await nextFrame();
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: 'filter-value',
+            propertyId: 'department.name',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+        });
+
+        it('does not show a filter for object column', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid service={service} visibleColumns={['address', 'department']} />),
+            user,
+          );
+
+          expect(grid.getHeaderCellContent(1, 0).childElementCount).to.equal(0);
+          expect(grid.getHeaderCellContent(1, 1).childElementCount).to.equal(0);
+        });
+
         it('combine filters (and) when you type in multiple fields', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
@@ -520,9 +553,17 @@ describe('@hilla/react-crud', () => {
         await assertColumns(grid, 'id', 'version');
       });
 
+      it('should show columns for nested properties that are not included by default', async () => {
+        const grid = await GridController.init(render(<TestAutoGrid visibleColumns={['department.name']} />), user);
+        await assertColumns(grid, 'department.name');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('IT');
+      });
+
       it('should ignore unknown columns', async () => {
         const grid = await GridController.init(
-          render(<TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName']} />),
+          render(
+            <TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName', 'address.foo', 'department.foo']} />,
+          ),
           user,
         );
         await assertColumns(grid, 'email', 'firstName');
@@ -626,8 +667,18 @@ describe('@hilla/react-crud', () => {
 
       it('uses custom column options on top of the type defaults', async () => {
         const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
+        const StreetRenderer = ({ item }: { item: Person }): JSX.Element => (
+          <span>{item.address?.street.toUpperCase()}</span>
+        );
         const grid = await GridController.init(
-          render(<TestAutoGrid columnOptions={{ firstName: { renderer: NameRenderer } }} />),
+          render(
+            <TestAutoGrid
+              columnOptions={{
+                firstName: { renderer: NameRenderer },
+                'address.street': { renderer: StreetRenderer },
+              }}
+            />,
+          ),
           user,
         );
         await assertColumns(
@@ -646,8 +697,10 @@ describe('@hilla/react-crud', () => {
           'address.city',
           'address.country',
         );
-        const janeCell = grid.getBodyCellContent(0, 0);
-        expect(janeCell).to.have.rendered.text('JANE');
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('JANE');
+        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
+        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('122 SOUTH STREET');
+        expect(grid.getBodyCellContent(0, 11)).to.have.rendered.text('South Town');
         // The header filter was not overridden
         const cell = grid.getHeaderCellContent(1, 0);
         expect(cell.firstElementChild!.querySelector('vaadin-text-field')).to.exist;
@@ -799,11 +852,21 @@ describe('@hilla/react-crud', () => {
         );
       });
 
-      it('renders java.util.Date as right aligned', async () => {
+      it('renders nested java.util.Date as right aligned', async () => {
         const columnIndex = await grid.findColumnIndexByHeaderText('Nested date');
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('5/13/2021');
         expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('');
+      });
+
+      it('renders objects without error', async () => {
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonModel} visibleColumns={['address', 'department']} />),
+          user,
+        );
+
+        expect(grid.getBodyCellContent(0, 0)).to.have.text('[object Object]');
+        expect(grid.getBodyCellContent(0, 1)).to.have.text('[object Object]');
       });
     });
   });
