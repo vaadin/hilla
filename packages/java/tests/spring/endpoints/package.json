@@ -40,6 +40,9 @@
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
   },
+  "scripts": {
+    "preinstall": "node \"console.log(process.cwd())\""
+  },
   "vaadin": {
     "dependencies": {
       "@hilla/form": "2.4.0-rc1",
