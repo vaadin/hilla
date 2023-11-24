@@ -47,6 +47,7 @@ packages/java/hilla/src/main/java/dev/hilla/theme/
 packages/java/hilla-react/src/main/java/dev/hilla/theme/
 
 # npm pack
+/*.tgz
 packages/ts/*/*.tgz
 
 # temporary scripts from platform for preparations

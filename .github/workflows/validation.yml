@@ -233,6 +233,8 @@ jobs:
           TB_LICENSE=${{secrets.TB_LICENSE}}
           mkdir -p ~/.vaadin/
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      - name: Prepare npm packages
+        run: npm run build:pack
       - name: Verify
         run: |
           (
@@ -289,6 +291,8 @@ jobs:
           TB_LICENSE=${{secrets.TB_LICENSE}}
           mkdir -p ~/.vaadin/
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      - name: Prepare npm packages
+        run: npm run build:pack
       - name: Test gradle-plugin's functional tests
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
