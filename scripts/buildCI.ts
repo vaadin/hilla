@@ -12,9 +12,9 @@ await Promise.all(
     .map(async (file) => {
       const fileUrl = new URL(file, root);
       const [, name] = pattern.exec(file) ?? [];
-      const newName = `hilla-${name}.tgz`;
-      await rename(fileUrl, new URL(newName, root));
+      const newUrl = new URL(`hilla-${name}.tgz`, root);
+      await rename(fileUrl, newUrl);
       // eslint-disable-next-line no-console
-      console.log(newName);
+      console.log(newUrl);
     }),
 );
