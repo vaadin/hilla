@@ -16,6 +16,7 @@
 
     <properties>
         <testbench.element.version>24.3.0.alpha5</testbench.element.version>
+        <jetty.version>11.0.7</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
         <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
@@ -182,8 +183,8 @@
                 </plugin>
                 <!-- jetty plugin for those child modules that need it -->
                 <plugin>
-                    <groupId>org.eclipse.jetty.ee10</groupId>
-                    <artifactId>jetty-ee10-maven-plugin</artifactId>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
                     <version>${jetty.version}</version>
                     <executions>
                         <execution>
