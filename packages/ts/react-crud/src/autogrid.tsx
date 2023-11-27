@@ -47,6 +47,16 @@ interface AutoGridOwnProps<TItem> {
    */
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   /**
+   * The property to use to detect an item's ID. The item ID is used to keep
+   * the selection state when reloading the grid.
+   *
+   * By default, the component uses the property annotated with
+   * `jakarta.persistence.Id`, or a property named `id`, in that order.
+   * This option can be used to override the default behavior, or define the ID
+   * property in case a class doesn't have a property matching the defaults.
+   */
+  itemIdProperty?: string;
+  /**
    * Allows to provide a filter that is applied when fetching data from the
    * service. This can be used for implementing an external filter UI outside
    * the grid. A custom filter is not compatible with header filters.
@@ -241,6 +251,7 @@ function useColumns(
 export function AutoGrid<TItem>({
   service,
   model,
+  itemIdProperty,
   experimentalFilter,
   visibleColumns,
   noHeaderFilters,
@@ -275,7 +286,7 @@ export function AutoGrid<TItem>({
     }
   };
 
-  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
+  const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,

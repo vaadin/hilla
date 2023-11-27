@@ -909,6 +909,13 @@ describe('@hilla/react-crud', () => {
         );
         expect(grid.instance.itemIdPath).to.equal('id');
 
+        // Model with custom ID property
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonModel} itemIdProperty="email" />),
+          user,
+        );
+        expect(grid.instance.itemIdPath).to.equal('email');
+
         // Model without discernible ID property
         grid = await GridController.init(
           render(<AutoGrid service={personService()} model={PersonWithoutIdPropertyModel} />),

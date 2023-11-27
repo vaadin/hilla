@@ -774,7 +774,6 @@ describe('@hilla/react-crud', () => {
             />,
           ).container,
         );
-        expect(form.queryButton('Delete...')).to.exist;
         const deleteButton = await form.findButton('Delete...');
         await userEvent.click(deleteButton);
 
@@ -783,6 +782,29 @@ describe('@hilla/react-crud', () => {
 
         expect(deleteStub).to.have.been.calledOnce;
         expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a custom ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonModel}
+              itemIdProperty="email"
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.email);
       });
     });
 
