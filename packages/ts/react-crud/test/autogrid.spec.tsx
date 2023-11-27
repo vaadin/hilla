@@ -739,6 +739,7 @@ describe('@hilla/react-crud', () => {
           'address.country',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
+        expect(grid.getBodyCell(0, 0).style.flexGrow).to.equal('0');
       });
     });
 

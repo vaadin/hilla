@@ -215,7 +215,10 @@ function useColumns(
   }
 
   if (options.rowNumbers) {
-    columns = [<GridColumn key="rownumbers" width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
+    columns = [
+      <GridColumn key="rownumbers" width="4em" flexGrow={0} renderer={AutoGridRowNumberRenderer}></GridColumn>,
+      ...columns,
+    ];
   }
 
   return columns;
