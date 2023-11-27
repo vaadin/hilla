@@ -250,10 +250,10 @@ export function AutoForm<M extends AbstractModel>({
   });
   const [formError, setFormError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
-
-  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
+  const showDeleteButton = deleteButtonVisible && isEditMode && modelInfo.idProperty;
 
   useEffect(() => {
     if (item !== emptyItem) {
@@ -378,7 +378,7 @@ export function AutoForm<M extends AbstractModel>({
             Discard
           </Button>
         ) : null}
-        {deleteButtonVisible && isEditMode && (
+        {showDeleteButton && (
           <Button className="auto-form-delete-button" theme="tertiary error" onClick={deleteItem}>
             Delete...
           </Button>

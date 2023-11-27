@@ -104,9 +104,19 @@ export class ModelInfo {
     this.modelInstance = createDetachedModel(model);
 
     // Try to find id property
-    this.idProperty = this.getRootProperties().find((propertyInfo) =>
-      hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'),
-    );
+    this.idProperty = ModelInfo.resolveIdProperty(this);
+  }
+
+  private static resolveIdProperty(modelInfo: ModelInfo): PropertyInfo | undefined {
+    const rootProperties = modelInfo.getRootProperties();
+    // Check for @Id annotation
+    let idProperty = rootProperties.find((propertyInfo) => hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'));
+    // Check for id name as fallback
+    if (!idProperty) {
+      idProperty = rootProperties.find((propertyInfo) => propertyInfo.name === 'id');
+    }
+
+    return idProperty;
   }
 
   private static resolvePropertyModel(modelInstance: AbstractModel, path: string): AbstractModel | undefined {
