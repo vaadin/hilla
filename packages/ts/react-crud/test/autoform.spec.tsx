@@ -99,11 +99,11 @@ describe('@hilla/react-crud', () => {
       formProps?: Omit<AutoFormProps<PersonModel>, 'item' | 'model' | 'service'>,
       screenSize?: string,
       disabled?: boolean,
+      service: CrudService<Person> & HasTestInfo = personService(),
     ): Promise<FormController> {
       if (screenSize) {
         viewport.set(screenSize);
       }
-      const service = personService();
       const person = await getItem(service, personId);
       const result = render(
         <AutoForm service={service} model={PersonModel} item={person} disabled={disabled} {...formProps} />,
@@ -550,14 +550,44 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('visibleFields', () => {
-      it('renders the form according to visibleFields if defined', async () => {
-        const form = await populatePersonForm(1, { visibleFields: ['firstName', 'lastName', 'id', 'dummy'] });
+      it('renders fields only for the specified properties', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['firstName', 'lastName', 'id'] });
         const fields = await form.getFields('First name', 'Last name', 'Id');
         const tagNames = fields.map((field) => field.localName);
         expect(tagNames).to.eql(['vaadin-text-field', 'vaadin-text-field', 'vaadin-number-field']);
-        expect(form.queryField('Dummy')).to.be.undefined;
         const genderField = form.queryField('Gender');
         expect(genderField).to.be.undefined;
+      });
+
+      it('ignores non-existing properties', async () => {
+        const form = await populatePersonForm(1, {
+          visibleFields: ['firstName', 'lastName', 'foo', 'address.foo', 'department.foo'],
+        });
+        expect(form.queryField('First name')).to.exist;
+        expect(form.queryField('Last name')).to.exist;
+        expect(form.queryField('Foo')).to.be.undefined;
+      });
+
+      it('renders fields for nested properties that are not included by default', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['department.name'] });
+        const fields = await form.getField('Name');
+        expect(fields.localName).to.eql('vaadin-text-field');
+      });
+
+      it('renders no fields for object properties', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['address', 'department'] });
+        expect(form.queryField('Address')).to.be.undefined;
+        expect(form.queryField('Department')).to.be.undefined;
+      });
+
+      it('properly binds fields for nested properties that are not included by default', async () => {
+        const service = personService();
+        const saveSpy = sinon.spy(service, 'save');
+        const form = await populatePersonForm(1, { visibleFields: ['department.name'] }, undefined, false, service);
+        await form.typeInField('Name', 'foo');
+        await form.submit();
+        expect(saveSpy).to.have.been.calledOnce;
+        expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('department.name', 'foo'));
       });
     });
 
