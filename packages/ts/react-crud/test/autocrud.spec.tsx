@@ -1,6 +1,7 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
+import { TextField } from '@hilla/react-components/TextField.js';
 import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiDom from 'chai-dom';
@@ -11,7 +12,7 @@ import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
 import FormController from './FormController';
 import GridController from './GridController';
-import { type Person, PersonModel, personService } from './test-models-and-services.js';
+import { PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -30,7 +31,7 @@ describe('@hilla/react-crud', () => {
       viewport.reset();
     });
 
-    function TestAutoCrud(props: Partial<AutoCrudProps<Person>> = {}) {
+    function TestAutoCrud(props: Partial<AutoCrudProps<PersonModel>> = {}) {
       return <AutoCrud service={personService()} model={PersonModel} {...props} />;
     }
 
@@ -350,6 +351,24 @@ describe('@hilla/react-crud', () => {
         expect(form.queryField('First name')).to.exist;
         expect(form.queryField('Last name')).to.exist;
         expect(form.queryField('Email')).not.to.exist;
+      });
+
+      it('allows using form model instance', async () => {
+        const { grid, form: formController } = await CrudController.init(
+          render(
+            <AutoCrud
+              service={personService()}
+              model={PersonModel}
+              formProps={{
+                layoutRenderer: ({ form }) => <TextField {...form.field(form.model.firstName)} label="First name" />,
+              }}
+            />,
+          ),
+          user,
+        );
+
+        await grid.toggleRowSelected(0);
+        expect((await formController.getField('First name')).value).to.equal('Jane');
       });
     });
 
