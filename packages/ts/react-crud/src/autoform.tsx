@@ -5,11 +5,11 @@ import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
-import { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
+import { type ComponentType, type JSX, type ReactElement, useEffect, useMemo, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
-import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
 registerStylesheet(css);
@@ -253,6 +253,8 @@ export function AutoForm<M extends AbstractModel>({
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
 
+  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
+
   useEffect(() => {
     if (item !== emptyItem) {
       form.read(item);
@@ -303,8 +305,7 @@ export function AutoForm<M extends AbstractModel>({
     // At this point, item can not be null or emptyItem
     const deletedItem = item as Value<M>;
     try {
-      const properties = getProperties(model);
-      const idProperty = getIdProperty(properties)!;
+      const idProperty = modelInfo.idProperty!;
       // eslint-disable-next-line
       const id = (item as any)[idProperty.name];
       await service.delete(id);
@@ -347,14 +348,7 @@ export function AutoForm<M extends AbstractModel>({
     );
   }
 
-  const defaultProperties = getProperties(model);
-
-  const visibleProperties = visibleFields
-    ? visibleFields.reduce<PropertyInfo[]>((foundProperties, propertyName) => {
-        const maybeProperty = defaultProperties.find((p) => p.name === propertyName);
-        return maybeProperty ? [...foundProperties, maybeProperty] : foundProperties;
-      }, [])
-    : defaultProperties.filter(includeProperty);
+  const visibleProperties = visibleFields ? modelInfo.getProperties(visibleFields) : getDefaultProperties(modelInfo);
 
   const fields = visibleProperties.map(createAutoFormField);
 

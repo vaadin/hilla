@@ -1,7 +1,7 @@
 import type { GridSorterDirection } from '@hilla/react-components/GridSorter.js';
 import { type Dispatch, type SetStateAction, createContext } from 'react';
 import type { ColumnOptions } from './autogrid-columns';
-import type { PropertyInfo } from './property-info';
+import type { PropertyInfo } from './model-info';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 
 export interface SorterState {
