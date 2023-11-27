@@ -17,21 +17,22 @@
     "@vaadin/common-frontend": "0.0.18",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.8.0"
+    "lit": "3.1.0"
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "5.0.2",
-    "@rollup/pluginutils": "5.0.2",
-    "@vitejs/plugin-react": "4.0.4",
+    "@rollup/plugin-replace": "5.0.4",
+    "@rollup/pluginutils": "5.0.5",
+    "@vitejs/plugin-react": "4.2.0",
+    "@vitejs/plugin-react-swc": "3.5.0",
     "async": "3.2.4",
     "glob": "10.3.3",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "5.9.2",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.1.6",
-    "vite": "4.4.11",
-    "vite-plugin-checker": "0.6.1",
+    "typescript": "5.3.2",
+    "vite": "5.0.2",
+    "vite-plugin-checker": "0.6.2",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
@@ -52,26 +53,27 @@
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.8.0"
+      "lit": "3.1.0"
     },
     "devDependencies": {
-      "@rollup/plugin-replace": "5.0.2",
-      "@rollup/pluginutils": "5.0.2",
-      "@vitejs/plugin-react": "4.0.4",
+      "@rollup/plugin-replace": "5.0.4",
+      "@rollup/pluginutils": "5.0.5",
+      "@vitejs/plugin-react": "4.2.0",
+      "@vitejs/plugin-react-swc": "3.5.0",
       "async": "3.2.4",
       "glob": "10.3.3",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "5.9.2",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.1.6",
-      "vite": "4.4.11",
-      "vite-plugin-checker": "0.6.1",
+      "typescript": "5.3.2",
+      "vite": "5.0.2",
+      "vite-plugin-checker": "0.6.2",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "3a458762edee5ad04c3cdb63064ac985fdacf9badaa95c2d3bcca14ebaa260ae"
+    "hash": "c0db2e6355722c958fcfe24e5535ae7e78f8424886a9722bb7d46e24e7cf6211"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
