@@ -5,6 +5,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 /**
  * Empty class that adds <code>@hilla/react-crud</code> npm package dependency.
  */
-@NpmPackage(value = "@hilla/react-crud", version = "2.3.3")
+@NpmPackage(value = "@hilla/react-crud", version = "2.3.4")
 public class HillaReactCrud {
 }
