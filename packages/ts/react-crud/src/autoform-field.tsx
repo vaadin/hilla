@@ -9,7 +9,7 @@ import { TextField, type TextFieldProps } from '@hilla/react-components/TextFiel
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
-import { useDatePickerI18n } from './locale.js';
+import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
 import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
 
@@ -97,8 +97,9 @@ function AutoFormTimeField({ propertyInfo, form, label, ...other }: AutoFormTime
 type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
 
 function AutoFormDateTimeField({ propertyInfo, form, label, ...other }: AutoFormDateTimeFieldProps) {
+  const i18n = useDateTimePickerI18n();
   const model = getPropertyModel(form, propertyInfo);
-  return <DateTimePicker {...other} {...form.field(model)} label={label} />;
+  return <DateTimePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
 }
 
 type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;

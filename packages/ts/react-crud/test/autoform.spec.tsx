@@ -12,19 +12,20 @@ import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem, AutoForm } from '../src/autoform.js';
+import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
+import { LocaleContext } from '../src/locale.js';
 import ConfirmDialogController from './ConfirmDialogController';
 import FormController from './FormController.js';
 import {
   createService,
+  Gender,
   getItem,
   type HasTestInfo,
   type Person,
   personData,
   PersonModel,
   personService,
-  Gender,
 } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -732,6 +733,49 @@ describe('@hilla/react-crud', () => {
 
       expect(deleteSpy).to.not.have.been.called;
       expect(result.queryByText('Got error: foobar')).to.not.be.null;
+    });
+
+    describe('AutoFormDateField', () => {
+      it('formats and parses values using localized date format', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(
+          <LocaleContext.Provider value="de-DE">
+            <AutoForm service={service} model={PersonModel} item={person} />
+          </LocaleContext.Provider>,
+        );
+        const form = await FormController.init(user, result.container);
+        const dateField = await form.getField('Birth date');
+        const input = dateField.querySelector('input')!;
+        expect(input.value).to.equal('31.12.1999');
+
+        await user.clear(input);
+        await user.type(input, '01.01.2000{enter}');
+        expect(dateField.value).to.equal('2000-01-01');
+      });
+    });
+
+    describe('AutoFormDateTimeField', () => {
+      it('formats and parses values using localized date format', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(
+          <LocaleContext.Provider value="de-DE">
+            <AutoForm service={service} model={PersonModel} item={person} />
+          </LocaleContext.Provider>,
+        );
+        const form = await FormController.init(user, result.container);
+        const dateTimeField = await form.getField('Appointment time');
+        const [dateInput, timeInput] = Array.from(dateTimeField.querySelectorAll('input'));
+        expect(dateInput.value).to.equal('13.5.2021');
+        expect(timeInput.value).to.equal('08:45');
+
+        await user.clear(dateInput);
+        await user.type(dateInput, '12.5.2021{enter}');
+        await user.clear(timeInput);
+        await user.type(timeInput, '09:00{enter}');
+        expect(dateTimeField.value).to.equal('2021-05-12T09:00');
+      });
     });
 
     describe('AutoFormEnumField', () => {
