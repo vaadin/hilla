@@ -214,6 +214,18 @@ export class PersonModel<T extends Person = Person> extends NamedModel<T> {
   }
 }
 
+export class PersonWithSimpleIdPropertyModel<T extends Person = Person> extends NamedModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
+
+  get id(): NumberModel {
+    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+  }
+}
+
+export class PersonWithoutIdPropertyModel<T extends Person = Person> extends NamedModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
+}
+
 export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
   declare static createEmptyValue: () => Company;
 

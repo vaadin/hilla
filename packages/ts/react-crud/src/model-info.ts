@@ -100,13 +100,29 @@ export class ModelInfo {
 
   readonly idProperty?: PropertyInfo;
 
-  constructor(model: DetachedModelConstructor<AbstractModel>) {
+  constructor(model: DetachedModelConstructor<AbstractModel>, idPropertyName?: string) {
     this.modelInstance = createDetachedModel(model);
 
     // Try to find id property
-    this.idProperty = this.getRootProperties().find((propertyInfo) =>
-      hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'),
-    );
+    this.idProperty = ModelInfo.resolveIdProperty(this, idPropertyName);
+  }
+
+  private static resolveIdProperty(modelInfo: ModelInfo, idPropertyName?: string): PropertyInfo | undefined {
+    // Return explicit property if defined
+    if (idPropertyName) {
+      return modelInfo.getProperty(idPropertyName);
+    }
+
+    // Otherwise check defaults
+    const rootProperties = modelInfo.getRootProperties();
+    // Check for @Id annotation
+    let idProperty = rootProperties.find((propertyInfo) => hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'));
+    // Check for id name as fallback
+    if (!idProperty) {
+      idProperty = rootProperties.find((propertyInfo) => propertyInfo.name === 'id');
+    }
+
+    return idProperty;
   }
 
   private static resolvePropertyModel(modelInstance: AbstractModel, path: string): AbstractModel | undefined {

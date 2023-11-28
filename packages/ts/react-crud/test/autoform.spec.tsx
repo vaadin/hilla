@@ -12,19 +12,22 @@ import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem, AutoForm } from '../src/autoform.js';
+import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
+import { LocaleContext } from '../src/locale.js';
 import ConfirmDialogController from './ConfirmDialogController';
 import FormController from './FormController.js';
 import {
   createService,
+  Gender,
   getItem,
   type HasTestInfo,
   type Person,
   personData,
   PersonModel,
   personService,
-  Gender,
+  PersonWithSimpleIdPropertyModel,
+  PersonWithoutIdPropertyModel,
 } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -655,6 +658,43 @@ describe('@hilla/react-crud', () => {
         expect(form.queryButton('Delete...')).to.not.exist;
       });
 
+      it('only shows delete button for models that have an ID property', async () => {
+        // Model with JPA annotations
+        let form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+        );
+        expect(form.queryButton('Delete...')).to.exist;
+
+        // Model with simple ID property
+        form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithSimpleIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).to.exist;
+
+        // Model without discernible ID property
+        form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithoutIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).not.to.exist;
+      });
+
       it('does shows confirmation dialog before deleting', async () => {
         const form = await renderForm(person, true);
         const deleteButton = await form.findButton('Delete...');
@@ -706,6 +746,66 @@ describe('@hilla/react-crud', () => {
         expect(onDeleteErrorSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
       });
+
+      it('passes proper item ID when using a model using JPA annotations', async () => {
+        const form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a simple ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithSimpleIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a custom ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonModel}
+              itemIdProperty="email"
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.email);
+      });
     });
 
     it('allows to show a custom error message if deletion fails', async () => {
@@ -732,6 +832,49 @@ describe('@hilla/react-crud', () => {
 
       expect(deleteSpy).to.not.have.been.called;
       expect(result.queryByText('Got error: foobar')).to.not.be.null;
+    });
+
+    describe('AutoFormDateField', () => {
+      it('formats and parses values using localized date format', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(
+          <LocaleContext.Provider value="de-DE">
+            <AutoForm service={service} model={PersonModel} item={person} />
+          </LocaleContext.Provider>,
+        );
+        const form = await FormController.init(user, result.container);
+        const dateField = await form.getField('Birth date');
+        const input = dateField.querySelector('input')!;
+        expect(input.value).to.equal('31.12.1999');
+
+        await user.clear(input);
+        await user.type(input, '01.01.2000{enter}');
+        expect(dateField.value).to.equal('2000-01-01');
+      });
+    });
+
+    describe('AutoFormDateTimeField', () => {
+      it('formats and parses values using localized date format', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(
+          <LocaleContext.Provider value="de-DE">
+            <AutoForm service={service} model={PersonModel} item={person} />
+          </LocaleContext.Provider>,
+        );
+        const form = await FormController.init(user, result.container);
+        const dateTimeField = await form.getField('Appointment time');
+        const [dateInput, timeInput] = Array.from(dateTimeField.querySelectorAll('input'));
+        expect(dateInput.value).to.equal('13.5.2021');
+        expect(timeInput.value).to.equal('08:45');
+
+        await user.clear(dateInput);
+        await user.type(dateInput, '12.5.2021{enter}');
+        await user.clear(timeInput);
+        await user.type(timeInput, '09:00{enter}');
+        expect(dateTimeField.value).to.equal('2021-05-12T09:00');
+      });
     });
 
     describe('AutoFormEnumField', () => {
