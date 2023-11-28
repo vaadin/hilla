@@ -68,12 +68,6 @@ type ComparationSelectionProps = {
   onMatcherChanged(matcher: Matcher): void;
 };
 
-export type HeaderFilterProps = Readonly<{
-  filterPlaceholder?: string;
-  filterDebounceTime?: number;
-  filterMinLength?: number;
-}>;
-
 function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionProps): ReactElement {
   const select = useRef<SelectElement>(null);
 
@@ -113,18 +107,14 @@ export function StringHeaderFilter(): ReactElement {
 
   useEffect(() => {
     if (filterMinLength && inputValue && inputValue.length < filterMinLength) {
+      updateFilter(Matcher.CONTAINS, '');
       return () => {};
     }
 
-    if (filterDebounceTime) {
-      const delayInputTimeoutId = setTimeout(() => {
-        updateFilter(Matcher.CONTAINS, inputValue);
-      }, filterDebounceTime);
-      return () => clearTimeout(delayInputTimeoutId);
-    }
-    updateFilter(Matcher.CONTAINS, inputValue);
-
-    return () => {};
+    const delayInputTimeoutId = setTimeout(() => {
+      updateFilter(Matcher.CONTAINS, inputValue);
+    }, filterDebounceTime ?? 200);
+    return () => clearTimeout(delayInputTimeoutId);
   }, [inputValue]);
 
   return (
@@ -151,15 +141,10 @@ export function NumberHeaderFilter(): ReactElement {
   useSelectInitWorkaround(select);
 
   useEffect(() => {
-    if (filterDebounceTime) {
-      const delayInputTimeoutId = setTimeout(() => {
-        updateFilter(matcher, inputValue);
-      }, filterDebounceTime);
-      return () => clearTimeout(delayInputTimeoutId);
-    }
-    updateFilter(matcher, inputValue);
-
-    return () => {};
+    const delayInputTimeoutId = setTimeout(() => {
+      updateFilter(matcher, inputValue);
+    }, filterDebounceTime ?? 200);
+    return () => clearTimeout(delayInputTimeoutId);
   }, [inputValue]);
 
   return (
