@@ -16,6 +16,7 @@ import {
   type JSX,
   type MutableRefObject,
   useEffect,
+  useMemo,
   useImperativeHandle,
   useRef,
   useState,
@@ -26,7 +27,7 @@ import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { HeaderSorter } from './header-sorter';
-import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
@@ -59,6 +60,16 @@ interface AutoGridOwnProps<TItem> {
    * which columns to show and in which order.
    */
   model: DetachedModelConstructor<AbstractModel<TItem>>;
+  /**
+   * The property to use to detect an item's ID. The item ID is used to keep
+   * the selection state when reloading the grid.
+   *
+   * By default, the component uses the property annotated with
+   * `jakarta.persistence.Id`, or a property named `id`, in that order.
+   * This option can be used to override the default behavior, or define the ID
+   * property in case a class doesn't have a property matching the defaults.
+   */
+  itemIdProperty?: string;
   /**
    * Allows to provide a filter that is applied when fetching data from the
    * service. This can be used for implementing an external filter UI outside
@@ -173,16 +184,11 @@ function useColumns(
     rowNumbers?: boolean;
   },
 ) {
-  const effectiveColumns = options.visibleColumns ?? properties.filter(includeProperty).map((p) => p.name);
-  const effectiveProperties = effectiveColumns
-    .map((name) => properties.find((prop) => prop.name === name))
-    .filter(Boolean) as PropertyInfo[];
-
   const [sortState, setSortState] = useState<SortState>(
-    effectiveProperties.length > 0 ? { [effectiveProperties[0].name]: { direction: 'asc' } } : {},
+    properties.length > 0 ? { [properties[0].name]: { direction: 'asc' } } : {},
   );
 
-  let columns = effectiveProperties.map((propertyInfo) => {
+  let columns = properties.map((propertyInfo) => {
     let column;
 
     const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
@@ -226,14 +232,17 @@ function useColumns(
         return map;
       }, new Map<string, JSX.Element>());
 
-      columns = effectiveColumns.map((key) => columnMap.get(key)).filter(Boolean) as JSX.Element[];
+      columns = options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
     } else {
       columns = [...columns, ...options.customColumns];
     }
   }
 
   if (options.rowNumbers) {
-    columns = [<GridColumn key="rownumbers" width="4em" renderer={AutoGridRowNumberRenderer}></GridColumn>, ...columns];
+    columns = [
+      <GridColumn key="rownumbers" width="4em" flexGrow={0} renderer={AutoGridRowNumberRenderer}></GridColumn>,
+      ...columns,
+    ];
   }
 
   return columns;
@@ -243,6 +252,7 @@ function AutoGridInner<TItem>(
   {
     service,
     model,
+    itemIdProperty,
     experimentalFilter,
     visibleColumns,
     noHeaderFilters,
@@ -292,7 +302,8 @@ function AutoGridInner<TItem>(
     }
   };
 
-  const properties = getProperties(model);
+  const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
+  const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     noHeaderFilters,
@@ -327,7 +338,7 @@ function AutoGridInner<TItem>(
   }, [experimentalFilter, internalFilter, triggerRefresh]);
 
   return (
-    <Grid itemIdPath={getIdProperty(properties)?.name} {...gridProps} ref={gridRef}>
+    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
       {children}
     </Grid>
   );

@@ -5,14 +5,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
-  <version>2.4-SNAPSHOT</version>
+  <version>2.5-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-parent</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
   </parent>
 
   <modules>
@@ -71,7 +71,7 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.163</classgraph.version>
+    <classgraph.version>4.8.164</classgraph.version>
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.13.0</jna.version>
@@ -79,18 +79,20 @@
     <swagger.models.version>2.2.18</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
     <jackson.version>2.15.3</jackson.version>
-    <junit.version>5.8.0</junit.version>
+    <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.2.3</flow.version>
-    <slf4j.version>2.0.7</slf4j.version>
-    <spring.boot.version>3.1.5</spring.boot.version>
+    <flow.version>24.3.0.beta1</flow.version>
+    <copilot.version>24.3.0.alpha8</copilot.version>
+    <slf4j.version>2.0.9</slf4j.version>
+    <spring.boot.version>3.2.0</spring.boot.version>
     <testbench.version>9.1.0</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
-    <hibernate.validator.version>8.0.0.Final</hibernate.validator.version>
-    <jaxb.version>4.0.1</jaxb.version>
-    <github.javaparser.core.version>3.25.5</github.javaparser.core.version>
+    <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
+    <jaxb.version>4.0.4</jaxb.version>
+    <github.javaparser.core.version>3.25.6</github.javaparser.core.version>
+    <jetty.version>12.0.3</jetty.version>
   </properties>
 
   <organization>

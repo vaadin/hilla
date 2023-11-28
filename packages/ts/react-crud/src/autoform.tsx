@@ -5,11 +5,11 @@ import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
-import { type ComponentType, type JSX, type ReactElement, useEffect, useState } from 'react';
+import { type ComponentType, type JSX, type ReactElement, useEffect, useMemo, useState } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
-import { getIdProperty, getProperties, includeProperty, type PropertyInfo } from './property-info.js';
+import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
 registerStylesheet(css);
@@ -96,6 +96,17 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     model: DetachedModelConstructor<M>;
     /**
+     * The property to use to detect an item's ID. The item ID is required for
+     * deleting items via the `CrudService.delete` method. The delete button
+     * will not be shown if no item ID can be found.
+     *
+     * By default, the component uses the property annotated with
+     * `jakarta.persistence.Id`, or a property named `id`, in that order.
+     * This option can be used to override the default behavior, or define the ID
+     * property in case a class doesn't have a property matching the defaults.
+     */
+    itemIdProperty?: string;
+    /**
      * The item to edit in the form. The form fields are automatically populated
      * with values from the item's properties. In order to create a new item,
      * either pass `null`, or leave this prop as undefined.
@@ -167,7 +178,9 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     /**
      * Whether to show the delete button in the form. This is disabled by
      * default. If enabled, the delete button will only be shown when editing
-     * an existing item, which means that `item` is not null.
+     * an existing item, which means that `item` is not null. The delete button
+     * will also only be shown if an item has a discernible ID. See the
+     * `itemIdProperty` prop for details how the item ID is detected.
      *
      * Use the `onDeleteSuccess` callback to get notified when the item has been
      * deleted.
@@ -230,6 +243,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
 export function AutoForm<M extends AbstractModel>({
   service,
   model,
+  itemIdProperty,
   item = emptyItem,
   onSubmitError,
   onSubmitSuccess,
@@ -250,8 +264,10 @@ export function AutoForm<M extends AbstractModel>({
   });
   const [formError, setFormError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
+  const showDeleteButton = deleteButtonVisible && isEditMode && modelInfo.idProperty;
 
   useEffect(() => {
     if (item !== emptyItem) {
@@ -303,8 +319,7 @@ export function AutoForm<M extends AbstractModel>({
     // At this point, item can not be null or emptyItem
     const deletedItem = item as Value<M>;
     try {
-      const properties = getProperties(model);
-      const idProperty = getIdProperty(properties)!;
+      const idProperty = modelInfo.idProperty!;
       // eslint-disable-next-line
       const id = (item as any)[idProperty.name];
       await service.delete(id);
@@ -347,14 +362,7 @@ export function AutoForm<M extends AbstractModel>({
     );
   }
 
-  const defaultProperties = getProperties(model);
-
-  const visibleProperties = visibleFields
-    ? visibleFields.reduce<PropertyInfo[]>((foundProperties, propertyName) => {
-        const maybeProperty = defaultProperties.find((p) => p.name === propertyName);
-        return maybeProperty ? [...foundProperties, maybeProperty] : foundProperties;
-      }, [])
-    : defaultProperties.filter(includeProperty);
+  const visibleProperties = visibleFields ? modelInfo.getProperties(visibleFields) : getDefaultProperties(modelInfo);
 
   const fields = visibleProperties.map(createAutoFormField);
 
@@ -384,7 +392,7 @@ export function AutoForm<M extends AbstractModel>({
             Discard
           </Button>
         ) : null}
-        {deleteButtonVisible && isEditMode && (
+        {showDeleteButton && (
           <Button className="auto-form-delete-button" theme="tertiary error" onClick={deleteItem}>
             Delete...
           </Button>

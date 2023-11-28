@@ -12,19 +12,22 @@ import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem, AutoForm } from '../src/autoform.js';
+import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
+import { LocaleContext } from '../src/locale.js';
 import ConfirmDialogController from './ConfirmDialogController';
 import FormController from './FormController.js';
 import {
   createService,
+  Gender,
   getItem,
   type HasTestInfo,
   type Person,
   personData,
   PersonModel,
   personService,
-  Gender,
+  PersonWithSimpleIdPropertyModel,
+  PersonWithoutIdPropertyModel,
 } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -43,19 +46,10 @@ describe('@hilla/react-crud', () => {
       'Birth date',
       'Shift start',
       'Appointment time',
+      'Street',
+      'City',
+      'Country',
     ] as const;
-    const KEYS = [
-      'firstName',
-      'lastName',
-      'gender',
-      'email',
-      'someInteger',
-      'someDecimal',
-      'vip',
-      'birthDate',
-      'shiftStart',
-      'appointmentTime',
-    ] as ReadonlyArray<keyof Person>;
     const DEFAULT_PERSON: Person = {
       firstName: '',
       lastName: '',
@@ -69,13 +63,30 @@ describe('@hilla/react-crud', () => {
       birthDate: '',
       shiftStart: '',
       appointmentTime: '',
+      address: {
+        street: '',
+        city: '',
+        country: '',
+      },
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
     function getExpectedValues(person: Person) {
-      return (Object.entries(person) as ReadonlyArray<[keyof Person, Person[keyof Person]]>)
-        .filter(([key]) => KEYS.includes(key))
-        .map(([, value]) => value.toString());
+      return [
+        person.firstName,
+        person.lastName,
+        person.gender,
+        person.email,
+        person.someInteger.toString(),
+        person.someDecimal.toString(),
+        person.vip.toString(),
+        person.birthDate,
+        person.shiftStart,
+        person.appointmentTime,
+        person.address?.street ?? '',
+        person.address?.city ?? '',
+        person.address?.country ?? '',
+      ];
     }
 
     async function expectFieldColSpan(form: FormController, fieldName: string, expectedColSpan: string | null) {
@@ -91,11 +102,11 @@ describe('@hilla/react-crud', () => {
       formProps?: Omit<AutoFormProps<PersonModel>, 'item' | 'model' | 'service'>,
       screenSize?: string,
       disabled?: boolean,
+      service: CrudService<Person> & HasTestInfo = personService(),
     ): Promise<FormController> {
       if (screenSize) {
         viewport.set(screenSize);
       }
-      const service = personService();
       const person = await getItem(service, personId);
       const result = render(
         <AutoForm service={service} model={PersonModel} item={person} disabled={disabled} {...formProps} />,
@@ -125,6 +136,11 @@ describe('@hilla/react-crud', () => {
         birthDate: '1999-12-31',
         shiftStart: '08:30',
         appointmentTime: '2020-12-31T08:30',
+        address: {
+          street: 'Some street 1',
+          city: 'Some city',
+          country: 'Some country',
+        },
       };
 
       const form = await FormController.init(
@@ -147,6 +163,9 @@ describe('@hilla/react-crud', () => {
         'vaadin-date-picker',
         'vaadin-time-picker',
         'vaadin-date-time-picker',
+        'vaadin-text-field',
+        'vaadin-text-field',
+        'vaadin-text-field',
       ]);
     });
 
@@ -208,6 +227,7 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('Last name', 'Quinby');
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '0.12');
+      await form.typeInField('Street', '123 Fake Street');
       await form.submit();
 
       expect(saveSpy).to.have.been.calledOnce;
@@ -216,6 +236,7 @@ describe('@hilla/react-crud', () => {
       expect(newItem.lastName).to.equal('Quinby');
       expect(newItem.someInteger).to.equal(12);
       expect(newItem.someDecimal).to.equal(0.12);
+      expect(newItem.address?.street).to.equal('123 Fake Street');
     });
 
     it('retains the form values after submitting an existing item', async () => {
@@ -532,14 +553,44 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('visibleFields', () => {
-      it('renders the form according to visibleFields if defined', async () => {
-        const form = await populatePersonForm(1, { visibleFields: ['firstName', 'lastName', 'id', 'dummy'] });
+      it('renders fields only for the specified properties', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['firstName', 'lastName', 'id'] });
         const fields = await form.getFields('First name', 'Last name', 'Id');
         const tagNames = fields.map((field) => field.localName);
         expect(tagNames).to.eql(['vaadin-text-field', 'vaadin-text-field', 'vaadin-number-field']);
-        expect(form.queryField('Dummy')).to.be.undefined;
         const genderField = form.queryField('Gender');
         expect(genderField).to.be.undefined;
+      });
+
+      it('ignores non-existing properties', async () => {
+        const form = await populatePersonForm(1, {
+          visibleFields: ['firstName', 'lastName', 'foo', 'address.foo', 'department.foo'],
+        });
+        expect(form.queryField('First name')).to.exist;
+        expect(form.queryField('Last name')).to.exist;
+        expect(form.queryField('Foo')).to.be.undefined;
+      });
+
+      it('renders fields for nested properties that are not included by default', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['department.name'] });
+        const fields = await form.getField('Name');
+        expect(fields.localName).to.eql('vaadin-text-field');
+      });
+
+      it('renders no fields for object properties', async () => {
+        const form = await populatePersonForm(1, { visibleFields: ['address', 'department'] });
+        expect(form.queryField('Address')).to.be.undefined;
+        expect(form.queryField('Department')).to.be.undefined;
+      });
+
+      it('properly binds fields for nested properties that are not included by default', async () => {
+        const service = personService();
+        const saveSpy = sinon.spy(service, 'save');
+        const form = await populatePersonForm(1, { visibleFields: ['department.name'] }, undefined, false, service);
+        await form.typeInField('Name', 'foo');
+        await form.submit();
+        expect(saveSpy).to.have.been.calledOnce;
+        expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('department.name', 'foo'));
       });
     });
 
@@ -607,6 +658,43 @@ describe('@hilla/react-crud', () => {
         expect(form.queryButton('Delete...')).to.not.exist;
       });
 
+      it('only shows delete button for models that have an ID property', async () => {
+        // Model with JPA annotations
+        let form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+        );
+        expect(form.queryButton('Delete...')).to.exist;
+
+        // Model with simple ID property
+        form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithSimpleIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).to.exist;
+
+        // Model without discernible ID property
+        form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithoutIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).not.to.exist;
+      });
+
       it('does shows confirmation dialog before deleting', async () => {
         const form = await renderForm(person, true);
         const deleteButton = await form.findButton('Delete...');
@@ -658,6 +746,66 @@ describe('@hilla/react-crud', () => {
         expect(onDeleteErrorSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
       });
+
+      it('passes proper item ID when using a model using JPA annotations', async () => {
+        const form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a simple ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithSimpleIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a custom ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonModel}
+              itemIdProperty="email"
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.email);
+      });
     });
 
     it('allows to show a custom error message if deletion fails', async () => {
@@ -684,6 +832,49 @@ describe('@hilla/react-crud', () => {
 
       expect(deleteSpy).to.not.have.been.called;
       expect(result.queryByText('Got error: foobar')).to.not.be.null;
+    });
+
+    describe('AutoFormDateField', () => {
+      it('formats and parses values using localized date format', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(
+          <LocaleContext.Provider value="de-DE">
+            <AutoForm service={service} model={PersonModel} item={person} />
+          </LocaleContext.Provider>,
+        );
+        const form = await FormController.init(user, result.container);
+        const dateField = await form.getField('Birth date');
+        const input = dateField.querySelector('input')!;
+        expect(input.value).to.equal('31.12.1999');
+
+        await user.clear(input);
+        await user.type(input, '01.01.2000{enter}');
+        expect(dateField.value).to.equal('2000-01-01');
+      });
+    });
+
+    describe('AutoFormDateTimeField', () => {
+      it('formats and parses values using localized date format', async () => {
+        const service = personService();
+        const person = await getItem(service, 1);
+        const result = render(
+          <LocaleContext.Provider value="de-DE">
+            <AutoForm service={service} model={PersonModel} item={person} />
+          </LocaleContext.Provider>,
+        );
+        const form = await FormController.init(user, result.container);
+        const dateTimeField = await form.getField('Appointment time');
+        const [dateInput, timeInput] = Array.from(dateTimeField.querySelectorAll('input'));
+        expect(dateInput.value).to.equal('13.5.2021');
+        expect(timeInput.value).to.equal('08:45');
+
+        await user.clear(dateInput);
+        await user.type(dateInput, '12.5.2021{enter}');
+        await user.clear(timeInput);
+        await user.type(timeInput, '09:00{enter}');
+        expect(dateTimeField.value).to.equal('2021-05-12T09:00');
+      });
     });
 
     describe('AutoFormEnumField', () => {

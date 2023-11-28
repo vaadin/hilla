@@ -9,8 +9,8 @@ import { TextField, type TextFieldProps } from '@hilla/react-components/TextFiel
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
 import type { JSX } from 'react';
-import { useDatePickerI18n } from './locale.js';
-import type { PropertyInfo } from './property-info.js';
+import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
+import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
 
 export type SharedFieldProps = Readonly<{
@@ -53,15 +53,15 @@ export type FieldOptions = Readonly<{
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
+  const pathParts = propertyInfo.name.split('.');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return form.model[propertyInfo.name];
+  return pathParts.reduce<any>((model, property) => (model ? model[property] : undefined), form.model);
 }
 
 type AutoFormTextFieldProps = SharedFieldProps & TextFieldProps;
 
 function AutoFormTextField({ propertyInfo, form, options, label, ...other }: AutoFormTextFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the typing issue
   return <TextField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -69,7 +69,6 @@ type AutoFormIntegerFieldProps = IntegerFieldProps & SharedFieldProps;
 
 function AutoFormIntegerField({ propertyInfo, form, label, ...other }: AutoFormIntegerFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <IntegerField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -77,7 +76,6 @@ type AutoFormNumberFieldProps = NumberFieldProps & SharedFieldProps;
 
 function AutoFormDecimalField({ propertyInfo, form, label, ...other }: AutoFormNumberFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <NumberField {...other} {...form.field(model)} label={label} />;
 }
 
@@ -86,7 +84,6 @@ type AutoFormDateFieldProps = DatePickerProps & SharedFieldProps;
 function AutoFormDateField({ propertyInfo, form, label, ...other }: AutoFormDateFieldProps) {
   const i18n = useDatePickerI18n();
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <DatePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
 }
 
@@ -94,16 +91,15 @@ type AutoFormTimeFieldProps = SharedFieldProps & TimePickerProps;
 
 function AutoFormTimeField({ propertyInfo, form, label, ...other }: AutoFormTimeFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <TimePicker {...other} {...form.field(model)} label={label} />;
 }
 
 type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
 
 function AutoFormDateTimeField({ propertyInfo, form, label, ...other }: AutoFormDateTimeFieldProps) {
+  const i18n = useDateTimePickerI18n();
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
-  return <DateTimePicker {...other} {...form.field(model)} label={label} />;
+  return <DateTimePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
 }
 
 type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
@@ -121,7 +117,6 @@ type AutoFormBooleanFieldProps = CheckboxProps & SharedFieldProps;
 
 function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormBooleanFieldProps) {
   const model = getPropertyModel(form, propertyInfo);
-  // @ts-expect-error: TODO: fix the dangerouslySetInnerHTML typing issue
   return <Checkbox {...other} {...form.field(model)} label={label} />;
 }
 

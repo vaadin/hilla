@@ -66,11 +66,11 @@ public interface CommandRunner {
      */
     default void run(Consumer<OutputStream> stdIn)
             throws CommandRunnerException {
+        var execs = executables();
         // Find the first executable that works
-        var executable = executables().stream()
-                .filter(this::executeWithTestArguments).findFirst()
-                .orElseThrow(() -> new CommandNotFoundException(
-                        "No valid executable found"));
+        var executable = execs.stream().filter(this::executeWithTestArguments)
+                .findFirst().orElseThrow(() -> new CommandNotFoundException(
+                        "No valid executable found between " + execs));
         getLogger().debug("Running command {}", executable);
         // Execute the command with the given arguments
         executeCommand(executable, arguments(), stdIn, true);
@@ -204,7 +204,7 @@ public interface CommandRunner {
      */
     private String getCurrentJavaProcessJavaHome() {
         return getCurrentProcessInfo().command().map(javaExecPath -> {
-            String pathToExclude = IS_WINDOWS ? "\\bin\\java.exe" : "/bin/java";
+            String pathToExclude = IS_WINDOWS ? "\\bin\\java" : "/bin/java";
             return javaExecPath.substring(0,
                     javaExecPath.lastIndexOf(pathToExclude));
         }).orElse(System.getProperty("java.home"));
