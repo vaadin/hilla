@@ -76,6 +76,7 @@ public class CommandRunnerTest {
                 () -> runner.run(null));
         assertNull(e.getCause());
         assertFalse(e.getMessage().contains("exit"));
+        assertTrue(e.getMessage().contains("unknownCommand"));
     }
 
     @Test
