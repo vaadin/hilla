@@ -1,0 +1,38 @@
+{
+  "name": "@hilla/hilla-tests",
+  "private": true,
+  "description": "Hilla integration tests",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=16.19.0",
+    "npm": ">=9"
+  },
+  "workspaces": [
+    "csrf",
+    "csrf-context",
+    "gradle/single-module-tests",
+    "spring/endpoints",
+    "endpoints",
+    "endpoints-contextpath",
+    "endpoints-custom-client",
+    "endpoints-discovery",
+    "endpoints-latest-java",
+    "endpoints-maven-engine",
+    "native",
+    "react-grid-test",
+    "security",
+    "security-contextpath",
+    "security-jwt",
+    "security-urlmapping"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "github.com/vaadin/hilla/tests"
+  },
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "overrides": {
+    "lit": "3.0.0"
+  }
+}

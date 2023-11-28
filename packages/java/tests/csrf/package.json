@@ -1,27 +1,27 @@
 {
-  "name": "no-name",
+  "name": "@hilla/tests-csrf",
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@hilla/form": "file:../../../../../hilla-form.tgz",
-    "@hilla/frontend": "file:../../../../../hilla-frontend.tgz",
-    "@hilla/generator-typescript-cli": "file:../../../../../hilla-generator-typescript-cli.tgz",
-    "@hilla/generator-typescript-core": "file:../../../../../hilla-generator-typescript-core.tgz",
-    "@hilla/generator-typescript-plugin-backbone": "file:../../../../../hilla-generator-typescript-plugin-backbone.tgz",
-    "@hilla/generator-typescript-plugin-barrel": "file:../../../../../hilla-generator-typescript-plugin-barrel.tgz",
-    "@hilla/generator-typescript-plugin-client": "file:../../../../../hilla-generator-typescript-plugin-client.tgz",
-    "@hilla/generator-typescript-plugin-model": "file:../../../../../hilla-generator-typescript-plugin-model.tgz",
-    "@hilla/generator-typescript-plugin-push": "file:../../../../../hilla-generator-typescript-plugin-push.tgz",
-    "@hilla/generator-typescript-plugin-subtypes": "file:../../../../../hilla-generator-typescript-plugin-subtypes.tgz",
-    "@hilla/generator-typescript-utils": "file:../../../../../hilla-generator-typescript-utils.tgz",
-    "@hilla/react-auth": "file:../../../../../hilla-react-auth.tgz",
-    "@hilla/react-crud": "file:../../../../../hilla-react-crud.tgz",
-    "@hilla/react-form": "file:../../../../../hilla-react-form.tgz",
+    "@hilla/form": "file:../../../../hilla-form.tgz",
+    "@hilla/frontend": "file:../../../../hilla-frontend.tgz",
+    "@hilla/generator-typescript-cli": "file:../../../../hilla-generator-typescript-cli.tgz",
+    "@hilla/generator-typescript-core": "file:../../../../hilla-generator-typescript-core.tgz",
+    "@hilla/generator-typescript-plugin-backbone": "file:../../../../hilla-generator-typescript-plugin-backbone.tgz",
+    "@hilla/generator-typescript-plugin-barrel": "file:../../../../hilla-generator-typescript-plugin-barrel.tgz",
+    "@hilla/generator-typescript-plugin-client": "file:../../../../hilla-generator-typescript-plugin-client.tgz",
+    "@hilla/generator-typescript-plugin-model": "file:../../../../hilla-generator-typescript-plugin-model.tgz",
+    "@hilla/generator-typescript-plugin-push": "file:../../../../hilla-generator-typescript-plugin-push.tgz",
+    "@hilla/generator-typescript-plugin-subtypes": "file:../../../../hilla-generator-typescript-plugin-subtypes.tgz",
+    "@hilla/generator-typescript-utils": "file:../../../../hilla-generator-typescript-utils.tgz",
+    "@hilla/react-auth": "file:../../../../hilla-react-auth.tgz",
+    "@hilla/react-crud": "file:../../../../hilla-react-crud.tgz",
+    "@hilla/react-form": "file:../../../../hilla-react-form.tgz",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.18",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.8.0"
+    "lit": "3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.2",
@@ -56,7 +56,7 @@
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.8.0"
+      "lit": "3.0.0"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.2",
@@ -80,7 +80,7 @@
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
-    "lit": "$lit",
+    "lit": "3.0.0",
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@hilla/frontend": "$@hilla/frontend",

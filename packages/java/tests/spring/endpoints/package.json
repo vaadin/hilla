@@ -1,5 +1,5 @@
 {
-  "name": "no-name",
+  "name": "@hilla/tests-spring-endpoint",
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
@@ -21,7 +21,7 @@
     "@vaadin/common-frontend": "0.0.18",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.0"
+    "lit": "3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.4",
@@ -40,9 +40,6 @@
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
   },
-  "scripts": {
-    "preinstall": "node \"console.log(process.cwd())\""
-  },
   "vaadin": {
     "dependencies": {
       "@hilla/form": "2.4.0-rc1",
@@ -60,7 +57,7 @@
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.0"
+      "lit": "3.0.0"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.4",
@@ -84,7 +81,7 @@
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
-    "lit": "$lit",
+    "lit": "3.0.0",
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@hilla/frontend": "$@hilla/frontend",

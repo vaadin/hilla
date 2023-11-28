@@ -24,7 +24,7 @@
     "@vaadin/router": "1.7.5",
     "classnames": "^2.3.2",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.7.6",
+    "lit": "3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.2"
@@ -54,7 +54,7 @@
     "@vaadin/router": "$@vaadin/router",
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
-    "lit": "$lit",
+    "lit": "3.0.0",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/bundles": "$@vaadin/bundles",
     "@hilla/react-components": "$@hilla/react-components",
@@ -92,7 +92,7 @@
       "@vaadin/common-frontend": "0.0.18",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.7.6"
+      "lit": "3.0.0"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.2",

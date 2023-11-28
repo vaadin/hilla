@@ -1,5 +1,5 @@
 {
-  "name": "no-name",
+  "name": "@hilla/tests-spring-endpoints-discovery",
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
@@ -88,7 +88,7 @@
     "@vaadin/vertical-layout": "24.2.3",
     "@vaadin/virtual-list": "24.2.3",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.8.0"
+    "lit": "3.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.2",
@@ -191,7 +191,7 @@
       "@vaadin/vertical-layout": "24.2.3",
       "@vaadin/virtual-list": "24.2.3",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.8.0"
+      "lit": "3.0.0"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.2",
@@ -215,7 +215,7 @@
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
-    "lit": "$lit",
+    "lit": "3.0.0",
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@hilla/frontend": "$@hilla/frontend",

@@ -1,5 +1,5 @@
 {
-  "name": "no-name",
+  "name": "@hilla/tests-spring-security-contextpath",
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
@@ -94,7 +94,7 @@
     "@vaadin/vertical-layout": "24.2.3",
     "@vaadin/virtual-list": "24.2.3",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "2.8.0",
+    "lit": "3.0.0",
     "mobx": "6.3.3"
   },
   "devDependencies": {
@@ -199,7 +199,7 @@
       "@vaadin/vertical-layout": "24.2.3",
       "@vaadin/virtual-list": "24.2.3",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "2.8.0",
+      "lit": "3.0.0",
       "mobx": "6.3.3"
     },
     "devDependencies": {
@@ -229,7 +229,7 @@
     "@vaadin/router": "$@vaadin/router",
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
-    "lit": "$lit",
+    "lit": "3.0.0",
     "@polymer/polymer": "$@polymer/polymer",
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
     "@hilla/frontend": "$@hilla/frontend",
