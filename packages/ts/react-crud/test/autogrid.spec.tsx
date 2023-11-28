@@ -174,7 +174,7 @@ describe('@hilla/react-crud', () => {
 
       it('data provider provides data', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        expect(grid.getVisibleRowCount()).to.equal(2);
+        expect(grid.getRowCount()).to.equal(2);
         const firstNameColumnIndex = await grid.findColumnIndexByHeaderText('First name');
         const lastNameColumnIndex = await grid.findColumnIndexByHeaderText('Last name');
         expect(grid.getBodyCellContent(0, firstNameColumnIndex)).to.have.rendered.text('Jane');
@@ -205,7 +205,7 @@ describe('@hilla/react-crud', () => {
         };
 
         const grid = await GridController.init(render(<TestAutoGrid experimentalFilter={filter} />), user);
-        expect(grid.getVisibleRowCount()).to.equal(1);
+        expect(grid.getRowCount()).to.equal(1);
         const firstNameColumnIndex = await grid.findColumnIndexByHeaderText('First name');
         const lastNameColumnIndex = await grid.findColumnIndexByHeaderText('Last name');
         expect(grid.getBodyCellContent(0, firstNameColumnIndex)).to.have.rendered.text('Jane');
@@ -223,7 +223,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGridNoHeaderFilters service={service} />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(387);
+          expect(grid.getRowCount()).to.equal(387);
         });
 
         it('Shows total item count', async () => {
@@ -236,7 +236,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGridNoHeaderFilters service={service} totalCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(387);
+          expect(grid.getRowCount()).to.equal(387);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 387'));
         });
 
@@ -250,7 +250,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(156);
+          expect(grid.getRowCount()).to.equal(156);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 156'));
         });
 
@@ -262,7 +262,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGridNoHeaderFilters service={service} totalCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(0);
+          expect(grid.getRowCount()).to.equal(0);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 0'));
         });
 
@@ -274,7 +274,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(0);
+          expect(grid.getRowCount()).to.equal(0);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0'));
         });
 
@@ -286,7 +286,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount totalCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(0);
+          expect(grid.getRowCount()).to.equal(0);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0 (0)'));
         });
 
@@ -301,7 +301,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(387);
+          expect(grid.getRowCount()).to.equal(387);
           await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 387'));
 
           sinon.reset();
@@ -311,7 +311,7 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'field-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await waitFor(() => expect(grid.getVisibleRowCount()).to.equal(2));
+          await waitFor(() => expect(grid.getRowCount()).to.equal(2));
 
           const updatedFooterContent = grid.getFooterCellContent(2, 0);
           expect(updatedFooterContent).to.have.rendered.text('Showing: 2');
@@ -330,7 +330,7 @@ describe('@hilla/react-crud', () => {
           const result = render(<TestAutoGrid service={service} model={PersonModel} totalCount filteredCount />);
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(3);
+          expect(grid.getRowCount()).to.equal(3);
           await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 (100)'));
 
           sinon.reset();
@@ -341,7 +341,7 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'field-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await waitFor(() => expect(grid.getVisibleRowCount()).to.equal(2));
+          await waitFor(() => expect(grid.getRowCount()).to.equal(2));
 
           const updatedContent = grid.getFooterCellContent(2, 0);
           expect(updatedContent).to.have.rendered.text('Showing: 2 (100)');
@@ -374,7 +374,7 @@ describe('@hilla/react-crud', () => {
           );
           const grid = await GridController.init(result, user);
 
-          expect(grid.getVisibleRowCount()).to.equal(3);
+          expect(grid.getRowCount()).to.equal(3);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 of 100'));
         });
       });

@@ -49,7 +49,7 @@ export default class GridController {
     return getCellContent(cell);
   }
 
-  getVisibleRowCount(): number {
+  getRowCount(): number {
     // @ts-expect-error: getting internal property
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return this.instance._cache.size;
