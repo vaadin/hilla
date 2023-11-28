@@ -139,7 +139,7 @@
             <modules>
                 <module>endpoints</module>
                 <module>endpoints-contextpath</module>
-                <module>endpoints discovery</module>
+                <module>endpoints-discovery</module>
                 <module>endpoints-custom-client</module>
                 <!--
         TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
@@ -159,7 +159,7 @@
             <id>it-modules-group-1</id>
             <modules>
                 <module>endpoints</module>
-                <module>endpoints discovery</module>
+                <module>endpoints-discovery</module>
                 <module>endpoints-custom-client</module>
                 <!--
         TODO: Reenable when https://github.com/vaadin/flow/issues/16763 is fixed
@@ -184,7 +184,7 @@
             <id>it-modules-some</id>
             <modules>
                 <module>endpoints</module>
-                <module>endpoints discovery</module>
+                <module>endpoints-discovery</module>
                 <module>security</module>
             </modules>
         </profile>
