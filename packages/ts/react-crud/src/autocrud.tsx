@@ -49,6 +49,17 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     model: DetachedModelConstructor<TModel>;
     /**
+     * The property to use to detect an item's ID. The item ID is required for
+     * deleting items via the `CrudService.delete` method as well as keeping the
+     * selection state after reloading the grid.
+     *
+     * By default, the component uses the property annotated with
+     * `jakarta.persistence.Id`, or a property named `id`, in that order.
+     * This option can be used to override the default behavior, or define the ID
+     * property in case a class doesn't have a property matching the defaults.
+     */
+    itemIdProperty?: string;
+    /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
     formProps?: AutoCrudFormProps<TModel>;
@@ -76,6 +87,7 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
 export function AutoCrud<TModel extends AbstractModel>({
   service,
   model,
+  itemIdProperty,
   formProps,
   gridProps,
   style,
@@ -101,6 +113,7 @@ export function AutoCrud<TModel extends AbstractModel>({
         refreshTrigger={refreshTrigger}
         service={service}
         model={model as DetachedModelConstructor<AbstractModel<Value<TModel>>>}
+        itemIdProperty={itemIdProperty}
         selectedItems={item && item !== emptyItem ? [item] : []}
         onActiveItemChanged={(e) => {
           const activeItem = e.detail.value;
@@ -122,6 +135,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       disabled={!item}
       service={service}
       model={model}
+      itemIdProperty={itemIdProperty}
       item={item}
       onSubmitSuccess={({ item: submittedItem }) => {
         if (fullScreen) {

@@ -1,9 +1,9 @@
 import { expect, use } from '@esm-bundle/chai';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
@@ -25,6 +25,8 @@ import {
   type Person,
   PersonModel,
   personService,
+  PersonWithoutIdPropertyModel,
+  PersonWithSimpleIdPropertyModel,
 } from './test-models-and-services.js';
 import TextFieldController from './TextFieldController.js';
 
@@ -868,6 +870,58 @@ describe('@hilla/react-crud', () => {
 
         expect(grid.getBodyCellContent(0, 0)).to.have.text('[object Object]');
         expect(grid.getBodyCellContent(0, 1)).to.have.text('[object Object]');
+      });
+    });
+
+    describe('refresh trigger', () => {
+      it('reloads data when increasing refreshTrigger', async () => {
+        const service = personService();
+        const listSpy = sinon.spy(service, 'list');
+        const result = render(<AutoGrid service={service} model={PersonModel} refreshTrigger={0} />);
+        await nextFrame();
+        await nextFrame();
+        expect(listSpy).to.have.been.calledOnce;
+
+        // Does not refresh if refreshTrigger is not changed
+        result.rerender(<AutoGrid service={service} model={PersonModel} refreshTrigger={0} />);
+        await nextFrame();
+        await nextFrame();
+        expect(listSpy).to.have.been.calledOnce;
+
+        // Does refresh if refreshTrigger changes
+        result.rerender(<AutoGrid service={service} model={PersonModel} refreshTrigger={1} />);
+        await nextFrame();
+        await nextFrame();
+        expect(listSpy).to.have.been.calledTwice;
+      });
+    });
+
+    describe('item id path', () => {
+      it('properly configures item ID path for models that have an ID property', async () => {
+        // Model with JPA annotations
+        let grid = await GridController.init(render(<AutoGrid service={personService()} model={PersonModel} />), user);
+        expect(grid.instance.itemIdPath).to.equal('id');
+
+        // Model with simple ID property
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonWithSimpleIdPropertyModel} />),
+          user,
+        );
+        expect(grid.instance.itemIdPath).to.equal('id');
+
+        // Model with custom ID property
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonModel} itemIdProperty="email" />),
+          user,
+        );
+        expect(grid.instance.itemIdPath).to.equal('email');
+
+        // Model without discernible ID property
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonWithoutIdPropertyModel} />),
+          user,
+        );
+        expect(grid.instance.itemIdPath).to.be.undefined;
       });
     });
   });

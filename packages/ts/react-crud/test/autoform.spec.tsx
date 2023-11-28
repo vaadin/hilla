@@ -26,6 +26,8 @@ import {
   personData,
   PersonModel,
   personService,
+  PersonWithSimpleIdPropertyModel,
+  PersonWithoutIdPropertyModel,
 } from './test-models-and-services.js';
 
 use(sinonChai);
@@ -656,6 +658,43 @@ describe('@hilla/react-crud', () => {
         expect(form.queryButton('Delete...')).to.not.exist;
       });
 
+      it('only shows delete button for models that have an ID property', async () => {
+        // Model with JPA annotations
+        let form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+        );
+        expect(form.queryButton('Delete...')).to.exist;
+
+        // Model with simple ID property
+        form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithSimpleIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).to.exist;
+
+        // Model without discernible ID property
+        form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithoutIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).not.to.exist;
+      });
+
       it('does shows confirmation dialog before deleting', async () => {
         const form = await renderForm(person, true);
         const deleteButton = await form.findButton('Delete...');
@@ -706,6 +745,66 @@ describe('@hilla/react-crud', () => {
         expect(onDeleteSuccessSpy).to.not.have.been.called;
         expect(onDeleteErrorSpy).to.have.been.calledOnce;
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
+      });
+
+      it('passes proper item ID when using a model using JPA annotations', async () => {
+        const form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a simple ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithSimpleIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.id);
+      });
+
+      it('passes proper item ID when using a model with a custom ID property', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonModel}
+              itemIdProperty="email"
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.email);
       });
     });
 
