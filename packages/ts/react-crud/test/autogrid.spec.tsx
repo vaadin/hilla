@@ -1,13 +1,11 @@
 import { expect, use } from '@esm-bundle/chai';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import { useContext } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { AutoGridItemCountHolder } from '../autogrid';
 import { FooterContext } from '../src/autogrid-renderers';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
@@ -239,8 +237,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(387);
-          const content = grid.getFooterCellContent(1, 0);
-          expect(content).to.have.rendered.text('Total: 387');
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 387'));
         });
 
         it('Shows filtered item count ', async () => {
@@ -254,8 +251,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(156);
-          const content = grid.getFooterCellContent(1, 0);
-          expect(content).to.have.rendered.text('Showing: 156');
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 156'));
         });
 
         it('Shows zero as total item count ', async () => {
@@ -267,8 +263,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(0);
-          const content = grid.getFooterCellContent(1, 0);
-          expect(content).to.have.rendered.text('Total: 0');
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 0'));
         });
 
         it('Shows zero as filtered item count ', async () => {
@@ -280,8 +275,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(0);
-          const content = grid.getFooterCellContent(1, 0);
-          expect(content).to.have.rendered.text('Showing: 0');
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0'));
         });
 
         it('Shows zero as total and filtered item count ', async () => {
@@ -293,11 +287,10 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(0);
-          const content = grid.getFooterCellContent(1, 0);
-          expect(content).to.have.rendered.text('Showing: 0 (0)');
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0 (0)'));
         });
 
-        it('Show filtered item count and changes', async () => {
+        it('Shows filtered item count and changes', async () => {
           const service = personService();
           const personTestData: Person[] = Array(387)
             .fill(null)
@@ -309,14 +302,13 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(387);
-          const footerContent = grid.getFooterCellContent(2, 0);
-          expect(footerContent).to.have.rendered.text('Showing: 387');
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 387'));
 
           sinon.reset();
           listStub.resolves([personTestData[0], personTestData[1]]);
           countStub.resolves(2);
 
-          const firstNameFilterField = grid.getHeaderCellContent(2, 0).firstElementChild as TextFieldElement;
+          const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'field-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await waitFor(() => expect(grid.getVisibleRowCount()).to.equal(2));
@@ -339,15 +331,14 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(3);
-          const content = grid.getFooterCellContent(2, 0);
-          expect(content).to.have.rendered.text('Showing: 3 (100)');
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 (100)'));
 
           sinon.reset();
           listStub.resolves([personTestData[0], personTestData[1]]);
           countStub.withArgs(undefined).resolves(100);
           countStub.withArgs(sinon.match.defined).resolves(2);
 
-          const firstNameFilterField = grid.getHeaderCellContent(2, 0).firstElementChild as TextFieldElement;
+          const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'field-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await waitFor(() => expect(grid.getVisibleRowCount()).to.equal(2));
@@ -384,8 +375,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getVisibleRowCount()).to.equal(3);
-          const content = grid.getFooterCellContent(1, 0);
-          expect(content).to.have.rendered.text('Custom: 3 of 100');
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 of 100'));
         });
       });
 
