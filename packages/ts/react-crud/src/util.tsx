@@ -1,4 +1,4 @@
-import React, { type CSSProperties, type FunctionComponent } from 'react';
+import React, { type CSSProperties, forwardRef } from 'react';
 
 export type ComponentStyleProps = Readonly<{
   id?: string;
@@ -41,11 +41,8 @@ function useFeatureRegistration(feature: string): void {
 }
 
 export function featureRegistration<C extends (...args: any[]) => any>(Component: C, feature: string): C {
-  // TODO: fix me
-  // const ComponentWithFeatureRegistration = (...args: any[]) => {
-  //   useFeatureRegistration(feature);
-  //   return Component(...args);
-  // };
-  // return ComponentWithFeatureRegistration as C;
-  return Component;
+  return forwardRef<unknown, React.JSX.LibraryManagedAttributes<C, NonNullable<unknown>>>((props, ref) => {
+    useFeatureRegistration(feature);
+    return <Component {...props} ref={ref} />;
+  }) as unknown as C;
 }
