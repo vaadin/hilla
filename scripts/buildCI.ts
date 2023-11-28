@@ -15,6 +15,6 @@ await Promise.all(
       const newUrl = new URL(`hilla-${name}.tgz`, root);
       await rename(fileUrl, newUrl);
       // eslint-disable-next-line no-console
-      console.log(newUrl);
+      console.log(newUrl.toString());
     }),
 );

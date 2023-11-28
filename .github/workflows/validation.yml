@@ -235,6 +235,8 @@ jobs:
           echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
       - name: Prepare npm packages
         run: npm run build:pack
+      - name: \[Check\]
+        run: ls
       - name: Verify
         run: |
           (
