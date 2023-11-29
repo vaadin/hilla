@@ -12,7 +12,7 @@ public interface GetService<T, ID> {
      *
      * @param id
      *            the id of the object
-     * @return the object, or null if no object was found
+     * @return the object, or an empty optional if no object with the given id
      */
     Optional<T> get(ID id);
 
