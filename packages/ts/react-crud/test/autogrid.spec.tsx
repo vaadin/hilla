@@ -309,7 +309,6 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'filter-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
           await clock.tickAsync(200);
 
           const expectedPropertyFilter: PropertyStringFilter = {
@@ -419,7 +418,6 @@ describe('@hilla/react-crud', () => {
           const departmentNameField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           departmentNameField.value = 'filter-value';
           departmentNameField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
           await clock.tickAsync(200);
 
           const expectedPropertyFilter: PropertyStringFilter = {
@@ -529,21 +527,35 @@ describe('@hilla/react-crud', () => {
 
         it('shows custom placeholder of filter', async () => {
           const grid = await GridController.init(
-            render(<TestAutoGrid columnOptions={{ firstName: { filterPlaceholder: 'Custom placeholder' } }} />),
+            render(
+              <TestAutoGrid
+                columnOptions={{
+                  firstName: { filterPlaceholder: 'Custom placeholder' },
+                  someInteger: { filterPlaceholder: 'Custom placeholder' },
+                  birthDate: { filterPlaceholder: 'Custom placeholder' },
+                  shiftStart: { filterPlaceholder: 'Custom placeholder' },
+                }}
+              />,
+            ),
             user,
           );
 
           const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           expect(firstNameFilterField.placeholder).to.deep.equal('Custom placeholder');
+          const someIntegerFilterField = grid.getHeaderCellContent(1, 4).querySelector('vaadin-number-field')!;
+          expect(someIntegerFilterField.placeholder).to.deep.equal('Custom placeholder');
+          const birthDateFilterField = grid.getHeaderCellContent(1, 7).querySelector('vaadin-date-picker')!;
+          expect(birthDateFilterField.placeholder).to.deep.equal('Custom placeholder');
+          const shiftStartFilterField = grid.getHeaderCellContent(1, 8).querySelector('vaadin-time-picker')!;
+          expect(shiftStartFilterField.placeholder).to.deep.equal('Custom placeholder');
         });
 
-        it('waits custom debounce time to filter results', async () => {
+        it('waits custom debounce time to filter string column', async () => {
           const service = personService();
           const grid = await GridController.init(
             render(<TestAutoGrid columnOptions={{ firstName: { filterDebounceTime: 1000 } }} service={service} />),
             user,
           );
-          await clock.tickAsync(100);
 
           const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'filter-value';
@@ -562,17 +574,14 @@ describe('@hilla/react-crud', () => {
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
-
-          clock.reset();
         });
 
-        it('waits custom debounce time to filter results by number', async () => {
+        it('waits custom debounce time to filter number column', async () => {
           const service = personService();
           const grid = await GridController.init(
             render(<TestAutoGrid columnOptions={{ someInteger: { filterDebounceTime: 1000 } }} service={service} />),
             user,
           );
-          await clock.tickAsync(100);
 
           const someNumberFilter = grid.getHeaderCellContent(1, 4);
           const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
@@ -607,14 +616,12 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'fi';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
           await clock.tickAsync(200);
 
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
 
           firstNameFilterField.value = 'filter-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
           await clock.tickAsync(200);
 
           const expectedPropertyFilter: PropertyStringFilter = {
@@ -628,7 +635,6 @@ describe('@hilla/react-crud', () => {
 
           firstNameFilterField.value = 'fi';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
           await clock.tickAsync(200);
 
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });

@@ -16,6 +16,7 @@ import { convertToTitleCase } from './util';
 export type HeaderFilterProps = Readonly<{
   /**
    * Placeholder text for the filter input.
+   * Only applies to string, number and date/time value filters.
    */
   filterPlaceholder?: string;
   /**
