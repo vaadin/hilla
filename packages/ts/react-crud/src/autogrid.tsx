@@ -90,11 +90,6 @@ interface AutoGridOwnProps<TItem> {
    */
   noHeaderFilters?: boolean;
   /**
-   * Can be used to force the grid to reload data. Passing a different value
-   * between renders will trigger a reload.
-   */
-  refreshTrigger?: number;
-  /**
    * Allows to add custom columns to the grid. This must be an array of
    * `GridColumn` component instances. Custom columns are added after the
    * auto-generated columns.
@@ -256,7 +251,6 @@ function AutoGridInner<TItem>(
     experimentalFilter,
     visibleColumns,
     noHeaderFilters,
-    refreshTrigger = 0,
     customColumns,
     columnOptions,
     rowNumbers,
@@ -265,7 +259,6 @@ function AutoGridInner<TItem>(
   ref: ForwardedRef<AutoGridRef>,
 ): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
-  const [triggerRefresh, setTriggerRefresh] = useState(0);
   const gridRef = useRef<GridElement<TItem>>(null);
   const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
 
@@ -335,7 +328,7 @@ function AutoGridInner<TItem>(
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
       grid.clearCache();
     }
-  }, [experimentalFilter, internalFilter, triggerRefresh]);
+  }, [experimentalFilter, internalFilter]);
 
   return (
     <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
