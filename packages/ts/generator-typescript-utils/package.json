@@ -1,6 +1,6 @@
 {
   "name": "@hilla/generator-typescript-utils",
-  "version": "24.1.15",
+  "version": "2.1.15",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
