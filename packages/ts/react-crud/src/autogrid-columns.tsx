@@ -102,6 +102,7 @@ export function getColumnOptions(
   const typeColumnOptions = getTypeColumnOptions(propertyInfo);
   const finalHeaderRenderer =
     customColumnOptions?.filterable === false ? NoHeaderFilter : typeColumnOptions.headerRenderer;
+  // TODO: Remove eslint-disable when all TypeScript version issues are resolved
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const columnOptions = customColumnOptions
     ? { ...typeColumnOptions, ...customColumnOptions, headerRenderer: finalHeaderRenderer }
