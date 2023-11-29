@@ -20,7 +20,15 @@ import {
 import type { PropertyInfo } from './model-info';
 
 export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
+  /**
+   * If true, the column can be sorted. This is useful to disable sorting on
+   * columns that are not sortable or that require excessive processing.
+   */
   sortable?: boolean;
+  /**
+   * If true, the column can be filtered. This is useful to disable filtering on
+   * columns that are not filterable or that require excessive processing.
+   */
   filterable?: boolean;
 };
 
