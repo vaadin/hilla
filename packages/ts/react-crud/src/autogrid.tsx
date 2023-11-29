@@ -403,7 +403,7 @@ export function AutoGrid<TItem>({
     filteredItemCount,
   };
 
-  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
+  const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
