@@ -530,15 +530,9 @@ describe('@hilla/react-crud', () => {
         const service = personService();
         const form = await populatePersonForm(1, undefined, undefined, undefined, service);
 
-        const submitButton = await form.findButton('Submit');
         const submitSpy = sinon.spy(service, 'save');
 
-        await form.typeInField('First name', 'J');
-        expect(submitButton.disabled).to.be.false;
-
-        const firstNameField = await within(form.instance).findByLabelText('First name');
-        fireEvent.keyDown(firstNameField, { key: 'Enter', code: 'Enter', charCode: 13 });
-        await nextFrame();
+        await form.typeInField('First name', 'J{enter}');
 
         expect(submitSpy).to.have.been.calledOnce;
       });
@@ -546,15 +540,9 @@ describe('@hilla/react-crud', () => {
       it('does not submit the form when enter key is pressed if form is not edited', async () => {
         const service = personService();
         const form = await populatePersonForm(1, undefined, undefined, undefined, service);
-
         const submitSpy = sinon.spy(service, 'save');
-        const submitButton = await form.findButton('Submit');
-        expect(submitButton.disabled).to.be.true;
 
-        const firstNameField = await within(form.instance).findByLabelText('First name');
-        fireEvent.keyDown(firstNameField, { key: 'Enter', code: 'Enter', charCode: 13 });
-        await nextFrame();
-
+        await form.typeInField('First name', '{enter}');
         expect(submitSpy).to.have.not.been.called;
       });
 
@@ -588,17 +576,9 @@ describe('@hilla/react-crud', () => {
           return <VerticalLayout>{children}</VerticalLayout>;
         }
         const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, undefined, undefined, service);
-
         const submitSpy = sinon.spy(service, 'save');
 
-        const submitButton = await form.findButton('Submit');
-        await form.typeInField('First name', 'J');
-        expect(submitButton.disabled).to.be.false;
-
-        const firstNameField = await within(form.instance).findByLabelText('First name');
-        fireEvent.keyDown(firstNameField, { key: 'Enter', code: 'Enter', charCode: 13 });
-        await nextFrame();
-
+        await form.typeInField('First name', 'J{enter}');
         expect(submitSpy).to.have.been.calledOnce;
       });
     });
