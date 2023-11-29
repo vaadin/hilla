@@ -19,7 +19,7 @@ export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
 
 export type AutoCrudGridProps<TItem> = Omit<
   Partial<AutoGridProps<TItem>>,
-  'model' | 'onActiveItemChanged' | 'refreshTrigger' | 'selectedItems' | 'service'
+  'model' | 'onActiveItemChanged' | 'selectedItems' | 'service'
 >;
 
 export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = ComponentStyleProps &
@@ -95,13 +95,11 @@ export function AutoCrud<TModel extends AbstractModel>({
   className,
 }: AutoCrudProps<TModel>): JSX.Element {
   const [item, setItem] = useState<Value<TModel> | typeof emptyItem | undefined>(undefined);
-  // const [refreshTrigger, setRefreshTrigger] = useState(0);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
 
   const autoGridRef = useRef<{ refresh(): void }>(null);
 
   function refreshGrid() {
-    // setRefreshTrigger(refreshTrigger + 1);
     autoGridRef.current?.refresh();
   }
 
@@ -113,7 +111,6 @@ export function AutoCrud<TModel extends AbstractModel>({
     <div className="auto-crud-main">
       <AutoGrid
         {...gridProps}
-        // refreshTrigger={refreshTrigger}
         service={service}
         model={model as DetachedModelConstructor<AbstractModel<Value<TModel>>>}
         itemIdProperty={itemIdProperty}
