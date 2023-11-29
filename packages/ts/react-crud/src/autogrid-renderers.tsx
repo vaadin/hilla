@@ -105,7 +105,7 @@ export function AutoGridFooterItemCountRenderer(): JSX.Element {
   if (filteredCount && filteredItemCount.current >= 0) {
     filterCountText =
       totalCount && totalItemCount.current >= 0
-        ? `Showing: ${filteredItemCount.current} (${totalItemCount.current})`
+        ? `Showing: ${filteredItemCount.current} out of ${totalItemCount.current}`
         : `Showing: ${filteredItemCount.current}`;
   } else if (totalCount && totalItemCount.current >= 0) {
     filterCountText = `Total: ${totalItemCount.current}`;

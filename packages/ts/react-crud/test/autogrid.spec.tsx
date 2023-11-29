@@ -285,7 +285,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getRowCount()).to.equal(0);
-          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0 (0)'));
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0 out of 0'));
         });
 
         it('Shows filtered item count and changes', async () => {
@@ -329,7 +329,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getRowCount()).to.equal(3);
-          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 (100)'));
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 out of 100'));
 
           sinon.reset();
           listStub.resolves([personTestData[0], personTestData[1]]);
@@ -342,7 +342,7 @@ describe('@hilla/react-crud', () => {
           await waitFor(() => expect(grid.getRowCount()).to.equal(2));
 
           const updatedContent = grid.getFooterCellContent(2, 0);
-          expect(updatedContent).to.have.rendered.text('Showing: 2 (100)');
+          expect(updatedContent).to.have.rendered.text('Showing: 2 out of 100');
         });
 
         it('Shows custom renderer for total and filtered item count ', async () => {
@@ -361,7 +361,7 @@ describe('@hilla/react-crud', () => {
               totalCount
               footerCountRenderer={({ filteredItemCount, totalItemCount }) => (
                 <p>
-                  Custom: {filteredItemCount.current} of {totalItemCount.current}
+                  Custom: {filteredItemCount.current} / {totalItemCount.current}
                 </p>
               )}
             />,
@@ -369,7 +369,7 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(result, user);
 
           expect(grid.getRowCount()).to.equal(3);
-          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 of 100'));
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 / 100'));
         });
       });
 
