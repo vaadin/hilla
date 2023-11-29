@@ -19,7 +19,10 @@ import {
 } from './header-filter';
 import type { PropertyInfo } from './model-info';
 
-export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
+export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
+  sortable?: boolean;
+  filterable?: boolean;
+};
 
 // eslint-disable-next-line consistent-return
 function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
@@ -97,7 +100,12 @@ export function getColumnOptions(
   customColumnOptions: ColumnOptions | undefined,
 ): ColumnOptions {
   const typeColumnOptions = getTypeColumnOptions(propertyInfo);
-  const columnOptions = customColumnOptions ? { ...typeColumnOptions, ...customColumnOptions } : typeColumnOptions;
+  const finalHeaderRenderer =
+    customColumnOptions?.filterable === false ? NoHeaderFilter : typeColumnOptions.headerRenderer;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const columnOptions = customColumnOptions
+    ? { ...typeColumnOptions, ...customColumnOptions, headerRenderer: finalHeaderRenderer }
+    : typeColumnOptions;
   if (!columnOptions.headerRenderer) {
     console.error(`No header renderer defined for column ${propertyInfo.name}`);
   }
