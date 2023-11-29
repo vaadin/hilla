@@ -6,6 +6,7 @@ import {
   AutoGridDecimalRenderer,
   AutoGridEnumRenderer,
   AutoGridIntegerRenderer,
+  AutoGridJsonRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
 import {
@@ -83,6 +84,12 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
       return {
         autoWidth: true,
         headerRenderer: StringHeaderFilter,
+      };
+    case 'object':
+      return {
+        autoWidth: true,
+        renderer: AutoGridJsonRenderer,
+        headerRenderer: NoHeaderFilter,
       };
     default:
       return {
