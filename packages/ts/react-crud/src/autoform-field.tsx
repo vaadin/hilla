@@ -1,4 +1,4 @@
-import { _enum, type EnumModel } from '@hilla/form';
+import { _enum, type EnumModel, type Validator } from '@hilla/form';
 import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
 import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
 import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
@@ -8,7 +8,9 @@ import { Select, type SelectProps } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldProps } from '@hilla/react-components/TextField.js';
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
+import { useFormPart } from '@hilla/react-form';
 import type { JSX } from 'react';
+import { useEffect } from 'react';
 import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
 import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
@@ -50,6 +52,11 @@ export type FieldOptions = Readonly<{
    * ignored.
    */
   colspan?: number;
+  /**
+   * Validators to apply to the field. The validators are added to the form
+   * when the field is rendered.
+   */
+  validators?: Validator[];
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
@@ -133,6 +140,16 @@ export type AutoFormFieldProps = CheckboxProps &
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
   const { form, propertyInfo, options } = props;
   const label = options?.label ?? propertyInfo.humanReadableName;
+
+  const formPart = useFormPart(getPropertyModel(form, propertyInfo));
+  useEffect(() => {
+    if (options?.validators) {
+      options.validators.forEach((validator) => {
+        formPart.addValidator(validator);
+      });
+    }
+  }, [formPart, options]);
+
   if (options?.renderer) {
     const customFieldProps = { ...form.field(getPropertyModel(form, propertyInfo)), disabled: props.disabled, label };
     return options.renderer({ field: customFieldProps });
