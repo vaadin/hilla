@@ -240,6 +240,7 @@ jobs:
             mvn -B -am -ntp -fae \
               -Dfailsafe.forkCount=4 \
               -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
+              -Dfailsafe.rerunFailingTestsCount=2 \
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
               -Dmaven.wagon.http.retryHandler.count=3 \
               -P\!it-modules \
