@@ -37,6 +37,31 @@ import { registerStylesheet } from './util';
 
 registerStylesheet(css);
 
+export type AutoGridItemCountHolder = Readonly<{
+  /**
+   * Passed from AutoGrid to AutoGridFooterItemCountRenderer
+   * see: {@link AutoGrid#totalCount}
+   */
+  totalCount: boolean | undefined;
+  /**
+   * Passed from AutoGrid to AutoGridFooterItemCountRenderer
+   * see: {@link AutoGrid#filteredCount}
+   */
+  filteredCount: boolean | undefined;
+  /**
+   * Ref to the total item count, which is used to show the total count in the
+   * grid footer. This is updated when the grid is loaded for the first time.
+   * Only available when the service implements the `CountService` interface and
+   * the `totalCount` option is enabled.
+   */
+  totalItemCount: MutableRefObject<number>;
+  /**
+   * Ref to the filtered item count, which is used to show the filtered count in
+   * the grid footer. This is updated when the grid filter changes.
+   */
+  filteredItemCount: MutableRefObject<number>;
+}>;
+
 interface AutoGridOwnProps<TItem> {
   /**
    * The service to use for fetching the data. This must be a TypeScript service
@@ -122,7 +147,7 @@ interface AutoGridOwnProps<TItem> {
    * Allows to customize the grid footer with a custom renderer component for
    *  the total count and filtered item count.
    */
-  footerCountRenderer?: ComponentType;
+  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
 }
 
 export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<TItem>>;
@@ -133,13 +158,6 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
       size?: number;
     };
   }>;
-
-export type AutoGridItemCountHolder = {
-  totalCount: boolean | undefined;
-  filteredCount: boolean | undefined;
-  totalItemCount: MutableRefObject<number>;
-  filteredItemCount: MutableRefObject<number>;
-};
 
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
@@ -279,7 +297,7 @@ function useColumns(
     columnOptions?: Record<string, ColumnOptions>;
     rowNumbers?: boolean;
     itemCountHolder: AutoGridItemCountHolder;
-    footerCountRenderer?: ComponentType;
+    footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
     footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
   },
 ) {

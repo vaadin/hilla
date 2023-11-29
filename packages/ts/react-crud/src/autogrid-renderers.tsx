@@ -87,20 +87,17 @@ export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TIte
 export type FooterContextType = {
   itemCountHolder: AutoGridItemCountHolder;
   footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
-  footerCountRenderer?: ComponentType;
+  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
 };
 export const FooterContext = createContext<FooterContextType>(undefined!);
 
 export function AutoGridFooterItemCountRenderer(): JSX.Element {
   const [, setReRender] = useState(-1); // Force re-render to update the footer
-  const { itemCountHolder, footerRef, footerCountRenderer } = useContext(FooterContext);
-  useEffect(() => {
-    footerRef.current = setReRender;
-  }, []);
+  const { itemCountHolder, footerRef, footerCountRenderer: FooterRenderer } = useContext(FooterContext);
+  footerRef.current = setReRender;
 
-  if (footerCountRenderer) {
-    const FooterRenderer = footerCountRenderer;
-    return <FooterRenderer />;
+  if (FooterRenderer) {
+    return <FooterRenderer {...itemCountHolder} />;
   }
 
   let filterCountText: string | undefined;

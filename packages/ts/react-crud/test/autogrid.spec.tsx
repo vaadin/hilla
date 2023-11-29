@@ -3,10 +3,8 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
-import { useContext } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { FooterContext } from '../src/autogrid-renderers';
 import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
@@ -356,20 +354,16 @@ describe('@hilla/react-crud', () => {
           const countStub = sinon.stub(service, 'count');
           countStub.withArgs(undefined).resolves(100);
           countStub.withArgs(sinon.match.defined).resolves(personTestData.length);
-          // const FooterRenderer =
           const result = render(
             <TestAutoGridNoHeaderFilters
               service={service}
               filteredCount
               totalCount
-              footerCountRenderer={() => {
-                const { itemCountHolder } = useContext(FooterContext);
-                return (
-                  <p>
-                    Custom: {itemCountHolder.filteredItemCount.current} of {itemCountHolder.totalItemCount.current}
-                  </p>
-                );
-              }}
+              footerCountRenderer={({ filteredItemCount, totalItemCount }) => (
+                <p>
+                  Custom: {filteredItemCount.current} of {totalItemCount.current}
+                </p>
+              )}
             />,
           );
           const grid = await GridController.init(result, user);
