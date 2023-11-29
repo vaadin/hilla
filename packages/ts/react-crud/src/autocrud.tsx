@@ -1,7 +1,7 @@
 import type { AbstractModel, DetachedModelConstructor, Value } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { SplitLayout } from '@hilla/react-components/SplitLayout.js';
-import { type JSX, useEffect, useRef, useState } from 'react';
+import { type JSX, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';

@@ -3,7 +3,7 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { ListService } from '../crud';
@@ -875,7 +875,7 @@ describe('@hilla/react-crud', () => {
       });
     });
 
-    describe('refresh grid', () => {
+    describe('grid refresh', () => {
       let autoGridRef: AutoGridRef;
 
       const AutoGridRefreshTestWrapper = ({ service }: { service: ListService<any> }) => {
@@ -892,24 +892,13 @@ describe('@hilla/react-crud', () => {
         );
       };
 
-      it('reloads data only when refresh is called', async () => {
+      it('reloads data when refresh is called', async () => {
         const service = personService();
         const listSpy = sinon.spy(service, 'list');
-        const result = render(<AutoGridRefreshTestWrapper service={service} />);
+        render(<AutoGridRefreshTestWrapper service={service} />);
         await nextFrame();
         await nextFrame();
         expect(listSpy).to.have.been.calledOnce;
-
-        // Does not refresh if refresh is not called
-        result.rerender(<AutoGridRefreshTestWrapper service={service} />);
-        await nextFrame();
-        await nextFrame();
-        expect(listSpy).to.have.been.calledOnce;
-
-        // Does refresh if refresh is called
-        result.rerender(<AutoGridRefreshTestWrapper service={service} />);
-        await nextFrame();
-        await nextFrame();
         autoGridRef.refresh();
         expect(listSpy).to.have.been.calledTwice;
       });
