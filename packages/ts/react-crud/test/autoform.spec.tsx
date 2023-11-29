@@ -7,7 +7,7 @@ import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { render, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
@@ -15,6 +15,7 @@ import sinonChai from 'sinon-chai';
 import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
+import { nextFrame } from './autogrid.spec';
 import ConfirmDialogController from './ConfirmDialogController';
 import FormController from './FormController.js';
 import {
@@ -522,6 +523,64 @@ describe('@hilla/react-crud', () => {
 
       await form.discard();
       expect(submitButton.disabled).to.be.true;
+    });
+
+    describe('keyboard shortcuts', () => {
+      it('submits the form when enter key is pressed on field', async () => {
+        const service = personService();
+        const form = await populatePersonForm(1, undefined, undefined, undefined, service);
+
+        const submitSpy = sinon.spy(service, 'save');
+
+        await form.typeInField('First name', 'J{enter}');
+
+        expect(submitSpy).to.have.been.calledOnce;
+      });
+
+      it('does not submit the form when enter key is pressed if form is not edited', async () => {
+        const service = personService();
+        const form = await populatePersonForm(1, undefined, undefined, undefined, service);
+        const submitSpy = sinon.spy(service, 'save');
+
+        await form.typeInField('First name', '{enter}');
+        expect(submitSpy).to.have.not.been.called;
+      });
+
+      it('does not submit the form when enter key is pressed with delete or discard button focused', async () => {
+        const service = personService();
+        const form = await populatePersonForm(1, { deleteButtonVisible: true }, undefined, undefined, service);
+
+        const submitSpy = sinon.spy(service, 'save');
+        const deleteButton = await form.findButton('Delete...');
+        expect(deleteButton.disabled).to.be.false;
+
+        const submitButton = await form.findButton('Submit');
+        await form.typeInField('First name', 'J');
+        expect(submitButton.disabled).to.be.false;
+
+        fireEvent.keyDown(deleteButton, { key: 'Enter', code: 'Enter', charCode: 13 });
+        await nextFrame();
+        expect(submitSpy).to.have.not.been.called;
+
+        const discardButton = await form.findButton('Discard');
+        expect(discardButton.disabled).to.be.false;
+
+        fireEvent.keyDown(discardButton, { key: 'Enter', code: 'Enter', charCode: 13 });
+        await nextFrame();
+        expect(submitSpy).to.have.not.been.called;
+      });
+
+      it('submits the form when enter key is pressed with custom layout renderer', async () => {
+        const service = personService();
+        function MyLayoutRenderer({ children }: AutoFormLayoutRendererProps<PersonModel>) {
+          return <VerticalLayout>{children}</VerticalLayout>;
+        }
+        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, undefined, undefined, service);
+        const submitSpy = sinon.spy(service, 'save');
+
+        await form.typeInField('First name', 'J{enter}');
+        expect(submitSpy).to.have.been.calledOnce;
+      });
     });
 
     describe('layoutRenderer', () => {
