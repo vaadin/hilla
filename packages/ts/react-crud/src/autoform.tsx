@@ -268,6 +268,7 @@ export function AutoForm<M extends AbstractModel>({
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
   const showDeleteButton = deleteButtonVisible && isEditMode && modelInfo.idProperty;
+  const isSubmitDisabled = !!disabled || (isEditMode && !form.dirty);
 
   useEffect(() => {
     if (item !== emptyItem) {
@@ -346,7 +347,7 @@ export function AutoForm<M extends AbstractModel>({
   }
 
   const handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Enter' && (disabled === false || (isEditMode && form.dirty))) {
+    if (event.key === 'Enter' && !isSubmitDisabled) {
       // eslint-disable-next-line no-void
       void handleSubmit();
     }
@@ -388,7 +389,7 @@ export function AutoForm<M extends AbstractModel>({
       <div className="auto-form-toolbar">
         <Button
           theme="primary"
-          disabled={!!disabled || (isEditMode && !form.dirty)}
+          disabled={isSubmitDisabled}
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={handleSubmit}
         >

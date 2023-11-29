@@ -525,8 +525,8 @@ describe('@hilla/react-crud', () => {
       expect(submitButton.disabled).to.be.true;
     });
 
-    describe('form submit', () => {
-      it('submit when enter key is pressed', async () => {
+    describe('keyboard shortcuts', () => {
+      it('submits the form when enter key is pressed on field', async () => {
         const service = personService();
         const form = await populatePersonForm(1, undefined, undefined, undefined, service);
 
@@ -536,13 +536,14 @@ describe('@hilla/react-crud', () => {
         await form.typeInField('First name', 'J');
         expect(submitButton.disabled).to.be.false;
 
-        fireEvent.keyDown(form.formLayout, { key: 'Enter', code: 'Enter', charCode: 13 });
+        const firstNameField = await within(form.instance).findByLabelText('First name');
+        fireEvent.keyDown(firstNameField, { key: 'Enter', code: 'Enter', charCode: 13 });
         await nextFrame();
 
         expect(submitSpy).to.have.been.calledOnce;
       });
 
-      it('do not submit when enter key is pressed if form is not edited', async () => {
+      it('does not submit the form when enter key is pressed if form is not edited', async () => {
         const service = personService();
         const form = await populatePersonForm(1, undefined, undefined, undefined, service);
 
@@ -557,7 +558,7 @@ describe('@hilla/react-crud', () => {
         expect(submitSpy).to.have.not.been.called;
       });
 
-      it('do no submit when enter key is pressed with delete or discard button focused', async () => {
+      it('does not submit the form when enter key is pressed with delete or discard button focused', async () => {
         const service = personService();
         const form = await populatePersonForm(1, { deleteButtonVisible: true }, undefined, undefined, service);
 
@@ -581,7 +582,7 @@ describe('@hilla/react-crud', () => {
         expect(submitSpy).to.have.not.been.called;
       });
 
-      it('submit when enter key is pressed with custom layout renderer', async () => {
+      it('submits the form when enter key is pressed with custom layout renderer', async () => {
         const service = personService();
         function MyLayoutRenderer({ children }: AutoFormLayoutRendererProps<PersonModel>) {
           return <VerticalLayout>{children}</VerticalLayout>;
@@ -594,9 +595,8 @@ describe('@hilla/react-crud', () => {
         await form.typeInField('First name', 'J');
         expect(submitButton.disabled).to.be.false;
 
-        const element = form.instance.getElementsByTagName('vaadin-vertical-layout')[0];
-
-        fireEvent.keyDown(element, { key: 'Enter', code: 'Enter', charCode: 13 });
+        const firstNameField = await within(form.instance).findByLabelText('First name');
+        fireEvent.keyDown(firstNameField, { key: 'Enter', code: 'Enter', charCode: 13 });
         await nextFrame();
 
         expect(submitSpy).to.have.been.calledOnce;
