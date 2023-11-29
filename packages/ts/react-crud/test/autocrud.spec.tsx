@@ -12,7 +12,7 @@ import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
 import FormController from './FormController';
 import GridController from './GridController';
-import { PersonModel, personService } from './test-models-and-services.js';
+import { getItem, PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -399,6 +399,39 @@ describe('@hilla/react-crud', () => {
         expect(autoCrudElement.id).to.equal('my-id');
         expect(autoCrudElement.className.trim()).to.equal('auto-crud custom-auto-crud');
         expect(autoCrudElement.getAttribute('style')).to.equal('background-color: blue;');
+      });
+    });
+
+    describe('item ID property', () => {
+      it('should relay the item ID property to the grid', async () => {
+        const { grid } = await CrudController.init(
+          render(<AutoCrud service={personService()} model={PersonModel} itemIdProperty="email" />),
+          user,
+        );
+
+        expect(grid.instance.itemIdPath).to.equal('email');
+      });
+
+      it('should relay the item ID property to the form', async () => {
+        // Deleting an item is the only way to properly test the form's item ID property
+        const service = personService();
+        const deleteStub = sinon.stub(service, 'delete');
+        deleteStub.returns(Promise.resolve());
+        const person = (await getItem(service, 2))!;
+        const { grid, form } = await CrudController.init(
+          render(<AutoCrud service={service} model={PersonModel} itemIdProperty="email" />),
+          user,
+        );
+        await grid.toggleRowSelected(0);
+
+        const deleteButton = await form.findButton('Delete...');
+        await userEvent.click(deleteButton);
+
+        const dialog = await ConfirmDialogController.init(document.body, user);
+        await dialog.confirm();
+
+        expect(deleteStub).to.have.been.calledOnce;
+        expect(deleteStub).to.have.been.calledWith(person.email);
       });
     });
   });

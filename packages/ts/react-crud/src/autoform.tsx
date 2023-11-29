@@ -96,6 +96,17 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     model: DetachedModelConstructor<M>;
     /**
+     * The property to use to detect an item's ID. The item ID is required for
+     * deleting items via the `CrudService.delete` method. The delete button
+     * will not be shown if no item ID can be found.
+     *
+     * By default, the component uses the property annotated with
+     * `jakarta.persistence.Id`, or a property named `id`, in that order.
+     * This option can be used to override the default behavior, or define the ID
+     * property in case a class doesn't have a property matching the defaults.
+     */
+    itemIdProperty?: string;
+    /**
      * The item to edit in the form. The form fields are automatically populated
      * with values from the item's properties. In order to create a new item,
      * either pass `null`, or leave this prop as undefined.
@@ -167,7 +178,9 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
     /**
      * Whether to show the delete button in the form. This is disabled by
      * default. If enabled, the delete button will only be shown when editing
-     * an existing item, which means that `item` is not null.
+     * an existing item, which means that `item` is not null. The delete button
+     * will also only be shown if an item has a discernible ID. See the
+     * `itemIdProperty` prop for details how the item ID is detected.
      *
      * Use the `onDeleteSuccess` callback to get notified when the item has been
      * deleted.
@@ -230,6 +243,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
 export function AutoForm<M extends AbstractModel>({
   service,
   model,
+  itemIdProperty,
   item = emptyItem,
   onSubmitError,
   onSubmitSuccess,
@@ -250,10 +264,10 @@ export function AutoForm<M extends AbstractModel>({
   });
   const [formError, setFormError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
-
-  const modelInfo = useMemo(() => new ModelInfo(model), [model]);
+  const showDeleteButton = deleteButtonVisible && isEditMode && modelInfo.idProperty;
 
   useEffect(() => {
     if (item !== emptyItem) {
@@ -378,7 +392,7 @@ export function AutoForm<M extends AbstractModel>({
             Discard
           </Button>
         ) : null}
-        {deleteButtonVisible && isEditMode && (
+        {showDeleteButton && (
           <Button className="auto-form-delete-button" theme="tertiary error" onClick={deleteItem}>
             Delete...
           </Button>
