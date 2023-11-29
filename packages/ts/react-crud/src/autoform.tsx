@@ -5,7 +5,15 @@ import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
 import { FormLayout } from '@hilla/react-components/FormLayout';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { useForm, type UseFormResult } from '@hilla/react-form';
-import { type ComponentType, type JSX,  type KeyboardEvent, type ReactElement, useEffect, useMemo, useState } from 'react';
+import {
+  type ComponentType,
+  type JSX,
+  type KeyboardEvent,
+  type ReactElement,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
 import css from './autoform.obj.css';
 import type { CrudService } from './crud.js';
