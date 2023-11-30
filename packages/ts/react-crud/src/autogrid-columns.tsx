@@ -16,21 +16,11 @@ import {
   NumberHeaderFilter,
   StringHeaderFilter,
   TimeHeaderFilter,
+  type HeaderFilterProps,
 } from './header-filter';
 import type { PropertyInfo } from './model-info';
 
-export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
-  /**
-   * If true, the column can be sorted. This is useful to disable sorting for
-   * properties that are not sortable in the backend, or that require excessive processing.
-   */
-  sortable?: boolean;
-  /**
-   * If true, the column can be filtered. This is useful to disable filtering for
-   * properties that are not sortable in the backend, or that require excessive processing.
-   */
-  filterable?: boolean;
-};
+export type ColumnOptions = HeaderFilterProps & Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
 function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
