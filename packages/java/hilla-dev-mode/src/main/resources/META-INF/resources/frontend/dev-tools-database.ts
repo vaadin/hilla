@@ -17,12 +17,10 @@ type H2Data = {
 @customElement('devtools-database')
 export class DevToolsDatabase extends LitElement implements MessageHandler {
   @state()
-  h2path?: string;
+  declare h2path?: string;
 
   @state()
-  h2jdbcUrl?: string;
-
-  activeGrid: any;
+  declare h2jdbcUrl?: string;
 
   connectedCallback(): void {
     super.connectedCallback();
