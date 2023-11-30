@@ -23,12 +23,11 @@ export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'
   /**
    * If true, the column can be sorted. This is useful to disable sorting for
    * properties that are not sortable in the backend, or that require excessive processing.
-   * columns that are not sortable or that require excessive processing.
    */
   sortable?: boolean;
   /**
-   * If true, the column can be filtered. This is useful to disable filtering on
-   * columns that are not filterable or that require excessive processing.
+   * If true, the column can be filtered. This is useful to disable filtering for
+   * properties that are not sortable in the backend, or that require excessive processing.
    */
   filterable?: boolean;
 };
