@@ -1,4 +1,4 @@
-import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
+import type { AbstractModel, DetachedModelConstructor, Value } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
 import { SplitLayout } from '@hilla/react-components/SplitLayout';
 import { type JSX, useState } from 'react';
@@ -12,8 +12,8 @@ import { type ComponentStyleProps, registerStylesheet } from './util';
 
 registerStylesheet(css);
 
-export type AutoCrudFormProps<TItem> = Omit<
-  Partial<AutoFormProps<AbstractModel<TItem>>>,
+export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
+  Partial<AutoFormProps<TModel>>,
   'disabled' | 'item' | 'model' | 'onDeleteSuccess' | 'onSubmitSuccess' | 'service'
 >;
 
@@ -22,7 +22,7 @@ export type AutoCrudGridProps<TItem> = Omit<
   'model' | 'onActiveItemChanged' | 'refreshTrigger' | 'selectedItems' | 'service'
 >;
 
-export type AutoCrudProps<TItem> = ComponentStyleProps &
+export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = ComponentStyleProps &
   Readonly<{
     /**
      * The service to use for fetching the data, as well saving and deleting
@@ -30,7 +30,7 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
      * from a backend Java service that implements the
      * `dev.hilla.crud.CrudService` interface.
      */
-    service: CrudService<TItem>;
+    service: CrudService<Value<TModel>>;
     /**
      * The entity model to use for the CRUD. This determines which columns to
      * show in the grid, and which fields to show in the form. This must be a
@@ -47,15 +47,26 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
      * have a type that is supported. Use the `formProps.visibleFields`
      * option to customize which fields to show and in which order.
      */
-    model: DetachedModelConstructor<AbstractModel<TItem>>;
+    model: DetachedModelConstructor<TModel>;
+    /**
+     * The property to use to detect an item's ID. The item ID is required for
+     * deleting items via the `CrudService.delete` method as well as keeping the
+     * selection state after reloading the grid.
+     *
+     * By default, the component uses the property annotated with
+     * `jakarta.persistence.Id`, or a property named `id`, in that order.
+     * This option can be used to override the default behavior, or define the ID
+     * property in case a class doesn't have a property matching the defaults.
+     */
+    itemIdProperty?: string;
     /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
-    formProps?: AutoCrudFormProps<TItem>;
+    formProps?: AutoCrudFormProps<TModel>;
     /**
      * Props to pass to the grid. See the `AutoGrid` component for details.
      */
-    gridProps?: AutoCrudGridProps<TItem>;
+    gridProps?: AutoCrudGridProps<Value<TModel>>;
   }>;
 
 /**
@@ -73,25 +84,22 @@ export type AutoCrudProps<TItem> = ComponentStyleProps &
  * <AutoCrud service={PersonService} model={PersonModel} />
  * ```
  */
-export function AutoCrud<TItem>({
+export function AutoCrud<TModel extends AbstractModel>({
   service,
   model,
+  itemIdProperty,
   formProps,
   gridProps,
   style,
   id,
   className,
-}: AutoCrudProps<TItem>): JSX.Element {
-  const [item, setItem] = useState<TItem | typeof emptyItem | undefined>(undefined);
+}: AutoCrudProps<TModel>): JSX.Element {
+  const [item, setItem] = useState<Value<TModel> | typeof emptyItem | undefined>(undefined);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
 
   function refreshGrid() {
     setRefreshTrigger(refreshTrigger + 1);
-  }
-
-  function editItem(itemToEdit: TItem) {
-    setItem(itemToEdit);
   }
 
   function handleCancel() {
@@ -104,7 +112,8 @@ export function AutoCrud<TItem>({
         {...gridProps}
         refreshTrigger={refreshTrigger}
         service={service}
-        model={model}
+        model={model as DetachedModelConstructor<AbstractModel<Value<TModel>>>}
+        itemIdProperty={itemIdProperty}
         selectedItems={item && item !== emptyItem ? [item] : []}
         onActiveItemChanged={(e) => {
           const activeItem = e.detail.value;
@@ -126,6 +135,7 @@ export function AutoCrud<TItem>({
       disabled={!item}
       service={service}
       model={model}
+      itemIdProperty={itemIdProperty}
       item={item}
       onSubmitSuccess={({ item: submittedItem }) => {
         if (fullScreen) {

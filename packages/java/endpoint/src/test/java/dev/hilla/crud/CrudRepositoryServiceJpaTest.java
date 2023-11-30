@@ -57,9 +57,10 @@ public class CrudRepositoryServiceJpaTest {
     @Test
     public void get() {
         TestObject object = testObjects.get(2);
-        Assert.assertEquals(object.getName(),
-                testCrudRepositoryService.get(object.getId()).getName());
-        Assert.assertNull(testCrudRepositoryService.get(object.getId() + 10));
+        Assert.assertEquals(object.getName(), testCrudRepositoryService
+                .get(object.getId()).orElseThrow().getName());
+        Assert.assertFalse(
+                testCrudRepositoryService.get(object.getId() + 10).isPresent());
     }
 
     @Test

@@ -38,10 +38,15 @@ export default class GridController {
     return headers.indexOf(text);
   }
 
-  getBodyCellContent(row: number, col: number): HTMLElement {
+  getBodyCell(row: number, col: number): HTMLElement {
     const physicalRow = this.getBodyRow(row);
     const cells = getRowCells(physicalRow) as readonly HTMLElement[];
-    return getCellContent(cells[col]);
+    return cells[col];
+  }
+
+  getBodyCellContent(row: number, col: number): HTMLElement {
+    const cell = this.getBodyCell(row, col);
+    return getCellContent(cell);
   }
 
   getVisibleRowCount(): number {
