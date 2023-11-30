@@ -77,6 +77,8 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
 
     protected void assertRowCount(int i) {
         waitUntil(driver -> {
+            // Workaround to prevent scrollToRow from stalling, likely because
+            // this waits until the grid has finished loading
             grid.getRowCount();
             // The infinite data provider in auto grid will always add a 1 to
             // the total count until the last page is reached.
