@@ -21,7 +21,8 @@ import type { PropertyInfo } from './model-info';
 
 export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'> & {
   /**
-   * If true, the column can be sorted. This is useful to disable sorting on
+   * If true, the column can be sorted. This is useful to disable sorting for
+   * properties that are not sortable in the backend, or that require excessive processing.
    * columns that are not sortable or that require excessive processing.
    */
   sortable?: boolean;
