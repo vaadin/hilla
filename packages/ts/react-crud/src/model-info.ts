@@ -18,6 +18,7 @@ export type PropertyType =
   | 'decimal'
   | 'enum'
   | 'integer'
+  | 'object'
   | 'string'
   | 'time'
   | undefined;
@@ -57,6 +58,8 @@ function determinePropertyType(model: AbstractModel): PropertyType {
     return 'boolean';
   } else if (model instanceof EnumModel) {
     return 'enum';
+  } else if (model instanceof ObjectModel) {
+    return 'object';
   }
 
   return undefined;
