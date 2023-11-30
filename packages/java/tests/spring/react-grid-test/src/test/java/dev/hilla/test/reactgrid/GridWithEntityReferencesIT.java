@@ -10,8 +10,10 @@ public class GridWithEntityReferencesIT extends AbstractGridTest {
 
     @Test
     public void expectedColumnsShown() {
-        assertColumns("Name", "Street address", "City", "Country");
-        assertRow(0, "Alice", "12 Baker St", "London", "UK");
+        assertColumns("Name", "Street address", "City", "Country",
+                "Department");
+        assertRow(0, "Alice", "12 Baker St", "London", "UK",
+                "{\"id\":1,\"version\":1,\"name\":\"IT\"}");
     }
 
 }

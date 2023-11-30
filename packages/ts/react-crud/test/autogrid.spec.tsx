@@ -20,9 +20,12 @@ import {
   columnRendererTestService,
   CompanyModel,
   companyService,
+  createService,
   Gender,
+  getItem,
   type HasTestInfo,
   type Person,
+  personData,
   PersonModel,
   personService,
   PersonWithoutIdPropertyModel,
@@ -93,6 +96,7 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
         );
       });
 
@@ -113,6 +117,7 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -771,11 +776,12 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
           'fullName',
           'secondFullName',
         );
-        expect(grid.getBodyCellContent(0, 13)).to.have.rendered.text('Jane Love');
-        expect(grid.getBodyCellContent(0, 14)).to.have.rendered.text('Jane-Love');
+        expect(grid.getBodyCellContent(0, 14)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 15)).to.have.rendered.text('Jane-Love');
       });
 
       it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
@@ -832,6 +838,7 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('JANE');
         expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
@@ -873,6 +880,7 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
         );
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
         expect(grid.getBodyCell(0, 0).style.flexGrow).to.equal('0');
@@ -996,14 +1004,31 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('');
       });
 
-      it('renders objects without error', async () => {
+      it('renders objects as JSON string', async () => {
+        const service = personService();
+        const person = (await getItem(service, 1))!;
         grid = await GridController.init(
-          render(<AutoGrid service={personService()} model={PersonModel} visibleColumns={['address', 'department']} />),
+          render(<AutoGrid service={service} model={PersonModel} visibleColumns={['address', 'department']} />),
           user,
         );
 
-        expect(grid.getBodyCellContent(0, 0)).to.have.text('[object Object]');
-        expect(grid.getBodyCellContent(0, 1)).to.have.text('[object Object]');
+        // JSON is truncated to fifty chars
+        // Assert that test data matches that
+        const addressJson = JSON.stringify(person.address);
+        expect(addressJson.length).to.be.greaterThan(50);
+        const truncatedAddressJson = `${addressJson.substring(0, 50)}...`;
+        expect(grid.getBodyCellContent(0, 0)).to.have.text(truncatedAddressJson);
+        expect(grid.getBodyCellContent(0, 1)).to.have.text(JSON.stringify(person.department));
+      });
+
+      it('renders undefined objects as empty string', async () => {
+        const service = createService(personData.map((p) => ({ ...p, address: undefined })));
+        grid = await GridController.init(
+          render(<AutoGrid service={service} model={PersonModel} visibleColumns={['address']} />),
+          user,
+        );
+
+        expect(grid.getBodyCellContent(0, 0)).to.have.text('');
       });
     });
 
