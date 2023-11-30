@@ -23,7 +23,7 @@ class FormArrayTypesModel<T extends FormArrayTypes_1 = FormArrayTypes_1> extends
     get entityMatrix(): ArrayModel_1<ArrayModel_1<FormEntityModel_1>> {
         return this[_getPropertyModel_1]("entityMatrix", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new FormEntityModel_1(parent, key, true))));
     }
-    get nestedArrays(): ArrayModel_1<ArrayModel_1<ObjectModel_1<Record<string, ReadonlyArray<string>>>>> {
+    get nestedArrays(): ArrayModel_1<ArrayModel_1<ObjectModel_1<Record<string, ReadonlyArray<string | undefined> | undefined>>>> {
         return this[_getPropertyModel_1]("nestedArrays", (parent, key) => new ArrayModel_1(parent, key, false, (parent, key) => new ArrayModel_1(parent, key, true, (parent, key) => new ObjectModel_1(parent, key, true))));
     }
 }
