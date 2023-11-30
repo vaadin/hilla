@@ -17,8 +17,8 @@ public class ReadOnlyGridSinglePropertyFilterIT extends AbstractGridTest {
         assertName(0, "Alice", "Johnson");
 
         setFilter("");
-        assertName(0, "Abigail", "Carter");
         assertRowCount(50);
+        assertName(0, "Abigail", "Carter");
 
         setFilter("xan");
         assertRowCount(2);
