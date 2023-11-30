@@ -3,9 +3,11 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
+import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
+import type { ListService } from '../crud';
+import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
@@ -1032,25 +1034,31 @@ describe('@hilla/react-crud', () => {
       });
     });
 
-    describe('refresh trigger', () => {
-      it('reloads data when increasing refreshTrigger', async () => {
+    describe('grid refresh', () => {
+      let autoGridRef: AutoGridRef;
+
+      const AutoGridRefreshTestWrapper = ({ service }: { service: ListService<any> }) => {
+        const ref = useRef<AutoGridRef>(null);
+        useEffect(() => {
+          if (ref.current) {
+            autoGridRef = ref.current;
+          }
+        }, []);
+        return (
+          <span>
+            <AutoGrid service={service} model={PersonModel} ref={ref} />
+          </span>
+        );
+      };
+
+      it('reloads data when refresh is called', async () => {
         const service = personService();
         const listSpy = sinon.spy(service, 'list');
-        const result = render(<AutoGrid service={service} model={PersonModel} refreshTrigger={0} />);
+        render(<AutoGridRefreshTestWrapper service={service} />);
         await nextFrame();
         await nextFrame();
         expect(listSpy).to.have.been.calledOnce;
-
-        // Does not refresh if refreshTrigger is not changed
-        result.rerender(<AutoGrid service={service} model={PersonModel} refreshTrigger={0} />);
-        await nextFrame();
-        await nextFrame();
-        expect(listSpy).to.have.been.calledOnce;
-
-        // Does refresh if refreshTrigger changes
-        result.rerender(<AutoGrid service={service} model={PersonModel} refreshTrigger={1} />);
-        await nextFrame();
-        await nextFrame();
+        autoGridRef.refresh();
         expect(listSpy).to.have.been.calledTwice;
       });
     });

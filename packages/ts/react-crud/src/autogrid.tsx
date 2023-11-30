@@ -10,7 +10,17 @@ import {
 } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
-import { type JSX, type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ForwardedRef,
+  forwardRef,
+  type JSX,
+  type MutableRefObject,
+  useEffect,
+  useMemo,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridRowNumberRenderer } from './autogrid-renderers.js';
@@ -26,6 +36,10 @@ import Direction from './types/org/springframework/data/domain/Sort/Direction.js
 import { registerStylesheet } from './util';
 
 registerStylesheet(css);
+
+export interface AutoGridRef {
+  refresh(): void;
+}
 
 interface AutoGridOwnProps<TItem> {
   /**
@@ -75,11 +89,6 @@ interface AutoGridOwnProps<TItem> {
    * Disables header filters, which are otherwise enabled by default.
    */
   noHeaderFilters?: boolean;
-  /**
-   * Can be used to force the grid to reload data. Passing a different value
-   * between renders will trigger a reload.
-   */
-  refreshTrigger?: number;
   /**
    * Allows to add custom columns to the grid. This must be an array of
    * `GridColumn` component instances. Custom columns are added after the
@@ -234,34 +243,34 @@ function useColumns(
   return columns;
 }
 
-/**
- * Auto Grid is a component for displaying tabular data based on a Java backend
- * service. It automatically generates columns based on the properties of a
- * Java class and provides features such as lazy-loading, sorting and filtering.
- *
- * Example usage:
- * ```tsx
- * import { AutoGrid } from '@hilla/react-crud';
- * import PersonService from 'Frontend/generated/endpoints';
- * import PersonModel from 'Frontend/generated/com/example/application/Person';
- *
- * <AutoGrid service={PersonService} model={PersonModel} />
- * ```
- */
-export function AutoGrid<TItem>({
-  service,
-  model,
-  itemIdProperty,
-  experimentalFilter,
-  visibleColumns,
-  noHeaderFilters,
-  refreshTrigger = 0,
-  customColumns,
-  columnOptions,
-  rowNumbers,
-  ...gridProps
-}: AutoGridProps<TItem>): JSX.Element {
+function AutoGridInner<TItem>(
+  {
+    service,
+    model,
+    itemIdProperty,
+    experimentalFilter,
+    visibleColumns,
+    noHeaderFilters,
+    customColumns,
+    columnOptions,
+    rowNumbers,
+    ...gridProps
+  }: AutoGridProps<TItem>,
+  ref: ForwardedRef<AutoGridRef>,
+): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
+  const gridRef = useRef<GridElement<TItem>>(null);
+  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh() {
+        gridRef.current?.clearCache();
+      },
+    }),
+    [],
+  );
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -303,12 +312,9 @@ export function AutoGrid<TItem>({
     }
   }, [noHeaderFilters]);
 
-  const ref = useRef<GridElement<TItem>>(null);
-  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
-
   useEffect(() => {
     // Sets the data provider, should be done only once
-    const grid = ref.current!;
+    const grid = gridRef.current!;
     setTimeout(() => {
       // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
       grid.dataProvider = createDataProvider(grid, service, dataProviderFilter);
@@ -317,16 +323,36 @@ export function AutoGrid<TItem>({
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
-    const grid = ref.current;
+    const grid = gridRef.current;
     if (grid) {
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
       grid.clearCache();
     }
-  }, [experimentalFilter, internalFilter, refreshTrigger]);
+  }, [experimentalFilter, internalFilter]);
 
   return (
-    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={ref}>
+    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
       {children}
     </Grid>
   );
 }
+
+type AutoGrid = <TItem>(
+  props: AutoGridProps<TItem> & { ref?: ForwardedRef<AutoGridRef> },
+) => ReturnType<typeof AutoGridInner>;
+
+/**
+ * Auto Grid is a component for displaying tabular data based on a Java backend
+ * service. It automatically generates columns based on the properties of a
+ * Java class and provides features such as lazy-loading, sorting and filtering.
+ *
+ * Example usage:
+ * ```tsx
+ * import { AutoGrid } from '@hilla/react-crud';
+ * import PersonService from 'Frontend/generated/endpoints';
+ * import PersonModel from 'Frontend/generated/com/example/application/Person';
+ *
+ * <AutoGrid service={PersonService} model={PersonModel} />
+ * ```
+ */
+export const AutoGrid: AutoGrid = forwardRef(AutoGridInner) as AutoGrid;

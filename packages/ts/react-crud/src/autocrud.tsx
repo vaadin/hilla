@@ -1,14 +1,14 @@
 import type { AbstractModel, DetachedModelConstructor, Value } from '@hilla/form';
 import { Button } from '@hilla/react-components/Button.js';
-import { SplitLayout } from '@hilla/react-components/SplitLayout';
-import { type JSX, useState } from 'react';
-import { AutoCrudDialog } from './autocrud-dialog';
+import { SplitLayout } from '@hilla/react-components/SplitLayout.js';
+import { type JSX, useRef, useState } from 'react';
+import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
-import { AutoGrid, type AutoGridProps } from './autogrid.js';
+import { type AutoGridProps, AutoGrid } from './autogrid.js';
 import type { CrudService } from './crud.js';
-import { useMediaQuery } from './media-query';
-import { type ComponentStyleProps, registerStylesheet } from './util';
+import { useMediaQuery } from './media-query.js';
+import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
 registerStylesheet(css);
 
@@ -19,7 +19,7 @@ export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
 
 export type AutoCrudGridProps<TItem> = Omit<
   Partial<AutoGridProps<TItem>>,
-  'model' | 'onActiveItemChanged' | 'refreshTrigger' | 'selectedItems' | 'service'
+  'model' | 'onActiveItemChanged' | 'selectedItems' | 'service'
 >;
 
 export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = ComponentStyleProps &
@@ -95,11 +95,12 @@ export function AutoCrud<TModel extends AbstractModel>({
   className,
 }: AutoCrudProps<TModel>): JSX.Element {
   const [item, setItem] = useState<Value<TModel> | typeof emptyItem | undefined>(undefined);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
 
+  const autoGridRef = useRef<{ refresh(): void }>(null);
+
   function refreshGrid() {
-    setRefreshTrigger(refreshTrigger + 1);
+    autoGridRef.current?.refresh();
   }
 
   function handleCancel() {
@@ -110,7 +111,6 @@ export function AutoCrud<TModel extends AbstractModel>({
     <div className="auto-crud-main">
       <AutoGrid
         {...gridProps}
-        refreshTrigger={refreshTrigger}
         service={service}
         model={model as DetachedModelConstructor<AbstractModel<Value<TModel>>>}
         itemIdProperty={itemIdProperty}
@@ -119,6 +119,7 @@ export function AutoCrud<TModel extends AbstractModel>({
           const activeItem = e.detail.value;
           setItem(activeItem ?? undefined);
         }}
+        ref={autoGridRef}
       ></AutoGrid>
       <div className="auto-crud-toolbar">
         <Button theme="primary" onClick={() => setItem(emptyItem)}>
