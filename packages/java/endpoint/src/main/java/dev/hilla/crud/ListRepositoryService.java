@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 
 import com.googlecode.gentyref.GenericTypeReflector;
 import dev.hilla.EndpointExposed;
@@ -75,8 +76,8 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
     }
 
     @Override
-    public T get(ID id) {
-        return getRepository().findById(id).orElse(null);
+    public Optional<T> get(ID id) {
+        return getRepository().findById(id);
     }
 
     @Override

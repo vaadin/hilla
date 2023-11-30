@@ -6,7 +6,7 @@ import dev.hilla.Nullable;
  * A browser-callable service that can create, read and update a given type of
  * object.
  */
-public interface CrudService<T, ID> extends ListService<T>, GetService<T, ID> {
+public interface CrudService<T, ID> extends ListService<T> {
 
     /**
      * Saves the given object and returns the (potentially) updated object.
