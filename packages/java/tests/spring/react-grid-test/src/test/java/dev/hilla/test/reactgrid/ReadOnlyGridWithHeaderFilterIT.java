@@ -54,8 +54,8 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         assertRowCount(50);
         sortByColumn(LUCKY_NUMBER_COLUMN);
         setHeaderFilter(LUCKY_NUMBER_COLUMN, null, "150");
-        assertName(0, "George", "Lee");
         assertRowCount(4);
+        assertName(0, "George", "Lee");
 
         setHeaderFilter(LUCKY_NUMBER_COLUMN, Matcher.LESS_THAN, (String) null);
         assertRowCount(50 - 4);
@@ -72,8 +72,8 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         // Default is greater_than
         assertRowCount(50);
         setBooleanHeaderFilter(EMAIL_VERIFIED_COLUMN, true);
-        assertName(0, "Abigail", "Carter");
         assertRowCount(42);
+        assertName(0, "Abigail", "Carter");
 
         setBooleanHeaderFilter(EMAIL_VERIFIED_COLUMN, false);
         assertRowCount(50 - 42);
@@ -89,8 +89,8 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     public void enumFilterWorks() {
         assertRowCount(50);
         setEnumHeaderFilter(GENDER_COLUMN, "Male");
-        assertName(0, "Abigail", "Carter");
         assertRowCount(44);
+        assertName(0, "Abigail", "Carter");
 
         setEnumHeaderFilter(GENDER_COLUMN, "Female");
         assertRowCount(3);
