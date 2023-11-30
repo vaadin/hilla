@@ -1,6 +1,5 @@
 import type { GridItemModel } from '@hilla/react-components/Grid.js';
 import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
-import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup';
 import { Icon } from '@hilla/react-components/Icon.js';
 // eslint-disable-next-line
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
@@ -13,7 +12,6 @@ import {
   type MutableRefObject,
   type SetStateAction,
   useContext,
-  useEffect,
   useState,
 } from 'react';
 import type { AutoGridItemCountHolder } from './autogrid';

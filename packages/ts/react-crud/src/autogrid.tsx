@@ -159,6 +159,59 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
+async function getDataProviderCountFromService<TItem>(
+  service: ListService<TItem>,
+  itemCountHolder: AutoGridItemCountHolder,
+  filter: MutableRefObject<FilterUnion | undefined>,
+  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
+  callback: GridDataProviderCallback<TItem>,
+  items: TItem[],
+) {
+  const countService: CountService<TItem> = service as any;
+  const { totalCount, totalItemCount, filteredItemCount } = itemCountHolder;
+
+  if (totalCount && totalItemCount.current < 0) {
+    totalItemCount.current = await countService.count(undefined);
+  }
+
+  let realSize = filteredItemCount.current;
+  if (realSize < 0) {
+    realSize = await countService.count(filter.current);
+    filteredItemCount.current = realSize;
+    footerRef.current(realSize);
+  }
+
+  callback(items, realSize);
+}
+
+function getDataProviderCountFromCache<TItem>(
+  items: TItem[],
+  pageSize: number,
+  pageNumber: number,
+  grid: GridElement<TItem>,
+  itemCountHolder: AutoGridItemCountHolder,
+  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
+  callback: GridDataProviderCallback<TItem>,
+) {
+  let infiniteScrollingSize;
+  if (items.length === pageSize) {
+    infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
+
+    const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
+    if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
+      // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
+      infiniteScrollingSize = undefined;
+    }
+  } else {
+    infiniteScrollingSize = pageNumber * pageSize + items.length;
+  }
+  const size = infiniteScrollingSize ?? -1;
+  itemCountHolder.filteredItemCount.current = size;
+  footerRef.current(size);
+
+  callback(items, infiniteScrollingSize);
+}
+
 function createDataProvider<TItem>(
   grid: GridElement<TItem>,
   service: ListService<TItem>,
@@ -190,39 +243,9 @@ function createDataProvider<TItem>(
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if ((service as any).count) {
-      const countService: CountService<TItem> = service as any;
-      const { totalCount, totalItemCount, filteredItemCount } = itemCountHolder;
-
-      if (totalCount && totalItemCount.current < 0) {
-        totalItemCount.current = await countService.count(undefined);
-      }
-
-      let realSize = filteredItemCount.current;
-      if (realSize < 0) {
-        realSize = await countService.count(filter.current);
-        filteredItemCount.current = realSize;
-        footerRef.current(realSize);
-      }
-
-      callback(items, realSize);
+      await getDataProviderCountFromService(service, itemCountHolder, filter, footerRef, callback, items);
     } else {
-      let infiniteScrollingSize;
-      if (items.length === pageSize) {
-        infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
-
-        const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
-        if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
-          // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-          infiniteScrollingSize = undefined;
-        }
-      } else {
-        infiniteScrollingSize = pageNumber * pageSize + items.length;
-      }
-      const size = infiniteScrollingSize ?? -1;
-      itemCountHolder.filteredItemCount.current = size;
-      footerRef.current(size);
-
-      callback(items, infiniteScrollingSize);
+      getDataProviderCountFromCache(items, pageSize, pageNumber, grid, itemCountHolder, footerRef, callback);
     }
 
     if (first) {
@@ -233,7 +256,7 @@ function createDataProvider<TItem>(
   };
 }
 
-function createColumns(
+function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   noHeaderFilters?: boolean,
@@ -278,7 +301,7 @@ function createColumns(
   });
 }
 
-function useColumns(
+function useUserColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
   {
@@ -301,7 +324,7 @@ function useColumns(
     footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
   },
 ) {
-  let columns = createColumns(properties, setPropertyFilter, noHeaderFilters, columnOptions);
+  let columns = useColumns(properties, setPropertyFilter, noHeaderFilters, columnOptions);
 
   if (customColumns) {
     if (visibleColumns) {
@@ -405,7 +428,7 @@ export function AutoGrid<TItem>({
 
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
-  const children = useColumns(properties, setHeaderPropertyFilter, {
+  const children = useUserColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     noHeaderFilters,
     customColumns,
