@@ -337,7 +337,7 @@ function AutoGridInner<TItem>(
   );
 }
 
-type AutoGridSignature = <TItem>(
+type AutoGrid = <TItem>(
   props: AutoGridProps<TItem> & { ref?: ForwardedRef<AutoGridRef> },
 ) => ReturnType<typeof AutoGridInner>;
 
@@ -355,4 +355,4 @@ type AutoGridSignature = <TItem>(
  * <AutoGrid service={PersonService} model={PersonModel} />
  * ```
  */
-export const AutoGrid: AutoGridSignature = forwardRef(AutoGridInner) as AutoGridSignature;
+export const AutoGrid: AutoGrid = forwardRef(AutoGridInner) as AutoGrid;
