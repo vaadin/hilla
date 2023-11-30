@@ -13,6 +13,24 @@ import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { convertToTitleCase } from './util';
 
+export type HeaderFilterProps = Readonly<{
+  /**
+   * Placeholder text for the filter input.
+   * Only applies to string, number and date/time value filters.
+   */
+  filterPlaceholder?: string;
+  /**
+   * Debounce time for the filter input in milliseconds.
+   * Only applies to string value filters and number value filters.
+   */
+  filterDebounceTime?: number;
+  /**
+   * Minimum length for the filter input.
+   * Only applies to string value filters.
+   */
+  filterMinLength?: number;
+}>;
+
 function useFilterState(initialMatcher: Matcher) {
   const context = useContext(ColumnContext)!;
   const [matcher, setMatcher] = useState(initialMatcher);
@@ -83,16 +101,31 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
 }
 
 export function StringHeaderFilter(): ReactElement {
+  const context = useContext(ColumnContext)!;
+  const { filterPlaceholder, filterDebounceTime, filterMinLength } = context.customColumnOptions ?? {};
   const { updateFilter } = useFilterState(Matcher.CONTAINS);
+  const [inputValue, setInputValue] = useState('');
+
+  useEffect(() => {
+    if (filterMinLength && inputValue && inputValue.length < filterMinLength) {
+      updateFilter(Matcher.CONTAINS, '');
+      return () => {};
+    }
+
+    const delayInputTimeoutId = setTimeout(() => {
+      updateFilter(Matcher.CONTAINS, inputValue);
+    }, filterDebounceTime ?? 200);
+    return () => clearTimeout(delayInputTimeoutId);
+  }, [inputValue]);
 
   return (
     <div className="auto-grid-string-filter">
       <TextField
         theme="small"
-        placeholder="Filter..."
+        placeholder={filterPlaceholder ?? 'Filter...'}
         onInput={(e: any) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-          updateFilter(Matcher.CONTAINS, fieldValue);
+          setInputValue(fieldValue);
         }}
       ></TextField>
     </div>
@@ -100,20 +133,30 @@ export function StringHeaderFilter(): ReactElement {
 }
 
 export function NumberHeaderFilter(): ReactElement {
+  const context = useContext(ColumnContext)!;
+  const { filterPlaceholder, filterDebounceTime } = context.customColumnOptions ?? {};
+  const [inputValue, setInputValue] = useState('');
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const select = useRef<SelectElement>(null);
 
   useSelectInitWorkaround(select);
+
+  useEffect(() => {
+    const delayInputTimeoutId = setTimeout(() => {
+      updateFilter(matcher, inputValue);
+    }, filterDebounceTime ?? 200);
+    return () => clearTimeout(delayInputTimeoutId);
+  }, [inputValue]);
 
   return (
     <div className="auto-grid-number-filter">
       <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
       <NumberField
         theme="small"
-        placeholder="Filter..."
+        placeholder={filterPlaceholder ?? 'Filter...'}
         onInput={(e) => {
           const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
-          updateFilter(matcher, fieldValue);
+          setInputValue(fieldValue);
         }}
       />
     </div>
@@ -182,6 +225,7 @@ export function BooleanHeaderFilter(): ReactElement {
 }
 
 export function DateHeaderFilter(): ReactElement {
+  const context = useContext(ColumnContext)!;
   const i18n = useDatePickerI18n();
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const [invalid, setInvalid] = useState(false);
@@ -192,7 +236,7 @@ export function DateHeaderFilter(): ReactElement {
       <DatePicker
         theme="small"
         value={filterValue}
-        placeholder="Filter..."
+        placeholder={context.customColumnOptions?.filterPlaceholder ?? 'Filter...'}
         i18n={i18n}
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
@@ -208,6 +252,7 @@ export function DateHeaderFilter(): ReactElement {
 }
 
 export function TimeHeaderFilter(): ReactElement {
+  const context = useContext(ColumnContext)!;
   const { matcher, filterValue, updateFilter } = useFilterState(Matcher.GREATER_THAN);
   const [invalid, setInvalid] = useState(false);
 
@@ -217,7 +262,7 @@ export function TimeHeaderFilter(): ReactElement {
       <TimePicker
         theme="small"
         value={filterValue}
-        placeholder="Filter..."
+        placeholder={context.customColumnOptions?.filterPlaceholder ?? 'Filter...'}
         onInvalidChanged={({ detail: { value } }) => {
           setInvalid(value);
         }}
