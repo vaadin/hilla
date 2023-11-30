@@ -87,8 +87,6 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
             grid.scrollToRow(3403034);
             return grid.getRowCount() == i;
         });
-        // Scroll back up
-        grid.scrollToRow(0);
     }
 
 }
