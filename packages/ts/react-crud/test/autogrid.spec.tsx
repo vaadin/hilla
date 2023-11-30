@@ -280,6 +280,16 @@ describe('@hilla/react-crud', () => {
       });
 
       describe('header filters', () => {
+        let clock: sinon.SinonFakeTimers;
+
+        beforeEach(() => {
+          clock = sinon.useFakeTimers({ shouldAdvanceTime: true });
+        });
+
+        afterEach(() => {
+          clock.restore();
+        });
+
         it('created for string columns', async () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 0);
@@ -299,7 +309,7 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'filter-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
+          await clock.tickAsync(200);
 
           const expectedPropertyFilter: PropertyStringFilter = {
             '@type': 'propertyString',
@@ -320,6 +330,7 @@ describe('@hilla/react-crud', () => {
             SelectController.init(someNumberFilter, user),
           ]);
           await someNumberFilterField.type('123');
+          await clock.tickAsync(200);
 
           const expectedPropertyFilter: PropertyStringFilter = {
             '@type': 'propertyString',
@@ -407,7 +418,7 @@ describe('@hilla/react-crud', () => {
           const departmentNameField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
           departmentNameField.value = 'filter-value';
           departmentNameField.dispatchEvent(new CustomEvent('input'));
-          await nextFrame();
+          await clock.tickAsync(200);
 
           const expectedPropertyFilter: PropertyStringFilter = {
             '@type': 'propertyString',
@@ -437,6 +448,7 @@ describe('@hilla/react-crud', () => {
           await firstNameFilterField.type('filterFirst');
           const lastNameFilterField = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 1), user);
           await lastNameFilterField.type('filterLast');
+          await clock.tickAsync(200);
 
           const expectedFirstNameFilter: PropertyStringFilter = {
             '@type': 'propertyString',
@@ -464,6 +476,7 @@ describe('@hilla/react-crud', () => {
 
           const companyNameFilter = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user);
           await companyNameFilter.type('Joh');
+          await clock.tickAsync(200);
 
           const filter: PropertyStringFilter = {
             '@type': 'propertyString',
@@ -500,6 +513,8 @@ describe('@hilla/react-crud', () => {
           const companyNameFilter = await TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user);
           await companyNameFilter.type('vaad');
 
+          await clock.tickAsync(200);
+
           const expectedPropertyFilter: PropertyStringFilter = {
             '@type': 'propertyString',
             filterValue: 'vaad',
@@ -509,27 +524,146 @@ describe('@hilla/react-crud', () => {
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(_personService.lastFilter).to.deep.equal(expectedFilter);
         });
-      });
 
-      it('removes the filters when you clear the fields', async () => {
-        const service = personService();
-        const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
-        const [firstNameFilter, lastNameFilter] = await Promise.all([
-          TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user),
-          TextFieldController.initByParent(grid.getHeaderCellContent(1, 1), user),
-        ]);
-        await firstNameFilter.type('filterFirst');
-        await lastNameFilter.type('filterLast');
+        it('shows custom placeholder of filter', async () => {
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                columnOptions={{
+                  firstName: { filterPlaceholder: 'Custom placeholder' },
+                  someInteger: { filterPlaceholder: 'Custom placeholder' },
+                  birthDate: { filterPlaceholder: 'Custom placeholder' },
+                  shiftStart: { filterPlaceholder: 'Custom placeholder' },
+                }}
+              />,
+            ),
+            user,
+          );
 
-        const expectedFilter: AndFilter = {
-          '@type': 'and',
-          children: [],
-        };
-        expect(service.lastFilter).not.to.deep.equal(expectedFilter);
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          expect(firstNameFilterField.placeholder).to.deep.equal('Custom placeholder');
+          const someIntegerFilterField = grid.getHeaderCellContent(1, 4).querySelector('vaadin-number-field')!;
+          expect(someIntegerFilterField.placeholder).to.deep.equal('Custom placeholder');
+          const birthDateFilterField = grid.getHeaderCellContent(1, 7).querySelector('vaadin-date-picker')!;
+          expect(birthDateFilterField.placeholder).to.deep.equal('Custom placeholder');
+          const shiftStartFilterField = grid.getHeaderCellContent(1, 8).querySelector('vaadin-time-picker')!;
+          expect(shiftStartFilterField.placeholder).to.deep.equal('Custom placeholder');
+        });
 
-        await firstNameFilter.type('[Delete]');
-        await lastNameFilter.type('[Delete]');
-        expect(service.lastFilter).to.deep.equal(expectedFilter);
+        it('waits custom debounce time to filter string column', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid columnOptions={{ firstName: { filterDebounceTime: 1000 } }} service={service} />),
+            user,
+          );
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          firstNameFilterField.value = 'filter-value';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
+          await clock.tickAsync(500);
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
+          await clock.tickAsync(500);
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: 'filter-value',
+            propertyId: 'firstName',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+        });
+
+        it('waits custom debounce time to filter number column', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid columnOptions={{ someInteger: { filterDebounceTime: 1000 } }} service={service} />),
+            user,
+          );
+
+          const someNumberFilter = grid.getHeaderCellContent(1, 4);
+          const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
+            TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
+            SelectController.init(someNumberFilter, user),
+          ]);
+          await someNumberFilterField.type('123');
+
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
+          await clock.tickAsync(500);
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
+          await clock.tickAsync(500);
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: '123',
+            propertyId: 'someInteger',
+            matcher: Matcher.GREATER_THAN,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+          clock.restore();
+        });
+
+        it('filters with custom min length of filter and clears filter', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid columnOptions={{ firstName: { filterMinLength: 3 } }} service={service} />),
+            user,
+          );
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          firstNameFilterField.value = 'fi';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+          await clock.tickAsync(200);
+
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
+
+          firstNameFilterField.value = 'filter-value';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+          await clock.tickAsync(200);
+
+          const expectedPropertyFilter: PropertyStringFilter = {
+            '@type': 'propertyString',
+            filterValue: 'filter-value',
+            propertyId: 'firstName',
+            matcher: Matcher.CONTAINS,
+          };
+          const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+
+          firstNameFilterField.value = 'fi';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+          await clock.tickAsync(200);
+
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
+        });
+
+        it('removes the filters when you clear the fields', async () => {
+          const service = personService();
+          const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
+          const [firstNameFilter, lastNameFilter] = await Promise.all([
+            TextFieldController.initByParent(grid.getHeaderCellContent(1, 0), user),
+            TextFieldController.initByParent(grid.getHeaderCellContent(1, 1), user),
+          ]);
+          await firstNameFilter.type('filterFirst');
+          await clock.tickAsync(200);
+          await lastNameFilter.type('filterLast');
+          await clock.tickAsync(200);
+
+          const expectedFilter: AndFilter = {
+            '@type': 'and',
+            children: [],
+          };
+          expect(service.lastFilter).not.to.deep.equal(expectedFilter);
+
+          await firstNameFilter.type('[Delete]');
+          await clock.tickAsync(200);
+          await lastNameFilter.type('[Delete]');
+          await clock.tickAsync(200);
+          expect(service.lastFilter).to.deep.equal(expectedFilter);
+        });
       });
     });
 

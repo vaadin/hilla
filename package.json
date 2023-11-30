@@ -33,7 +33,7 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
-    "@hilla/react-components": "2.3.0-alpha11",
+    "@hilla/react-components": "2.3.0-beta1",
     "@nx/js": "^16.10.0",
     "@types/karma": "^6.3.5",
     "@types/node": "^20.7.1",
