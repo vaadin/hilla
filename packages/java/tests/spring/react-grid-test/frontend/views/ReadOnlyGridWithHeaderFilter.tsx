@@ -32,7 +32,7 @@ export function ReadOnlyGridWithHeaderFilters(): JSX.Element {
       >
         Toggle header filters
       </Button>
-      <AutoGrid pageSize={10} service={service} model={model[0]} noHeaderFilters={noHeaderFilters} />
+      <AutoGrid service={service} model={model[0]} noHeaderFilters={noHeaderFilters} />
     </>
   );
   /* page size is defined only to make testing easier */
