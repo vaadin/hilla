@@ -77,8 +77,6 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
 
     protected void assertRowCount(int i) {
         waitUntil(driver -> {
-            System.out.println("rowCount: " + grid.getRowCount() + " i: " + i
-                    + " _lastVisibleIndex: " + grid.getLastVisibleRowIndex());
             // The infinite data provider in auto grid will always add a 1 to
             // the total count until the last page is reached.
             // So we scroll down until we reach the last page and then check the
