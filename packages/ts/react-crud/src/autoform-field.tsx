@@ -55,6 +55,8 @@ export type FieldOptions = Readonly<{
   /**
    * Validators to apply to the field. The validators are added to the form
    * when the field is rendered.
+   * UseMemo is recommended for the validators, so that they are not recreated
+   * on every render.
    */
   validators?: Validator[];
 }>;
