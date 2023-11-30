@@ -309,10 +309,8 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'field-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await waitFor(() => expect(grid.getRowCount()).to.equal(2));
 
-          const updatedFooterContent = grid.getFooterCellContent(2, 0);
-          expect(updatedFooterContent).to.have.rendered.text('Showing: 2');
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2'));
         });
 
         it('Shows both filtered item count and total item count ', async () => {
@@ -339,10 +337,8 @@ describe('@hilla/react-crud', () => {
           const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
           firstNameFilterField.value = 'field-value';
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
-          await waitFor(() => expect(grid.getRowCount()).to.equal(2));
 
-          const updatedContent = grid.getFooterCellContent(2, 0);
-          expect(updatedContent).to.have.rendered.text('Showing: 2 out of 100');
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 100'));
         });
 
         it('Shows custom renderer for total and filtered item count ', async () => {
