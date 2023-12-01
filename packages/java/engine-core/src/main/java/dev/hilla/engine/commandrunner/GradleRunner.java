@@ -76,8 +76,9 @@ public class GradleRunner implements CommandRunner {
         if (customExecutable != null) {
             executableList.add(customExecutable);
         }
-        executableList.addAll(IS_WINDOWS ? List.of(".\\gradlew.bat", "gradle.bat", "gradle")
-            : List.of("./gradlew", "gradle"));
+        executableList.addAll(
+                IS_WINDOWS ? List.of(".\\gradlew.bat", "gradle.bat", "gradle")
+                        : List.of("./gradlew", "gradle"));
         return List.copyOf(executableList);
     }
 }

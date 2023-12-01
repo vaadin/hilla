@@ -45,19 +45,24 @@ public class GradleRunnerTest {
 
     @Test
     void shouldListProvidedExecutable() {
-        String originalValue = System.getProperty(GradleRunner.EXECUTABLE_PROPERTY);
+        String originalValue = System
+                .getProperty(GradleRunner.EXECUTABLE_PROPERTY);
         try {
             String customMavenPath = "/path/to/gradle/bin/gradle";
-            System.setProperty(GradleRunner.EXECUTABLE_PROPERTY, customMavenPath);
+            System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
+                    customMavenPath);
             var runner = new GradleRunner(tmpDir.toFile(), "-v");
             if (CommandRunner.IS_WINDOWS) {
-                assertEquals(List.of(customMavenPath, ".\\gradlew.bat", "gradle.bat", "gradle"), runner.executables());
+                assertEquals(List.of(customMavenPath, ".\\gradlew.bat",
+                        "gradle.bat", "gradle"), runner.executables());
             } else {
-                assertEquals(List.of(customMavenPath, "./gradlew", "gradle"), runner.executables());
+                assertEquals(List.of(customMavenPath, "./gradlew", "gradle"),
+                        runner.executables());
             }
         } finally {
             if (originalValue != null) {
-                System.setProperty(GradleRunner.EXECUTABLE_PROPERTY, originalValue);
+                System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
+                        originalValue);
             } else {
                 System.clearProperty(MavenRunner.EXECUTABLE_PROPERTY);
             }

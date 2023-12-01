@@ -35,19 +35,24 @@ public class MavenRunnerTest {
 
     @Test
     void shouldListProvidedExecutable() {
-        String originalValue = System.getProperty(MavenRunner.EXECUTABLE_PROPERTY);
+        String originalValue = System
+                .getProperty(MavenRunner.EXECUTABLE_PROPERTY);
         try {
             String customMavenPath = "/path/to/maven/bin/mvn";
-            System.setProperty(MavenRunner.EXECUTABLE_PROPERTY, customMavenPath);
+            System.setProperty(MavenRunner.EXECUTABLE_PROPERTY,
+                    customMavenPath);
             var runner = new MavenRunner(tmpDir.toFile(), "-v");
             if (CommandRunner.IS_WINDOWS) {
-                assertEquals(List.of(customMavenPath, ".\\mvnw.cmd", "mvn.cmd"), runner.executables());
+                assertEquals(List.of(customMavenPath, ".\\mvnw.cmd", "mvn.cmd"),
+                        runner.executables());
             } else {
-                assertEquals(List.of(customMavenPath, "./mvnw", "mvn"), runner.executables());
+                assertEquals(List.of(customMavenPath, "./mvnw", "mvn"),
+                        runner.executables());
             }
         } finally {
             if (originalValue != null) {
-                System.setProperty(MavenRunner.EXECUTABLE_PROPERTY, originalValue);
+                System.setProperty(MavenRunner.EXECUTABLE_PROPERTY,
+                        originalValue);
             } else {
                 System.clearProperty(MavenRunner.EXECUTABLE_PROPERTY);
             }
