@@ -67,6 +67,14 @@ export function AutoGridDateTimeRenderer<TItem>({ item }: RendererOptions<TItem>
   return <span style={fontVariantStyle}>{formatter.formatLocalDateTime(getColumnValue(context, item))}</span>;
 }
 
+export function AutoGridJsonRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
+  const context = useContext(ColumnContext)!;
+  const value = getColumnValue(context, item);
+  const jsonString = value ? JSON.stringify(value) : '';
+  const jsonPreview = jsonString.length > 50 ? `${jsonString.substring(0, 50)}...` : jsonString;
+  return <span>{jsonPreview}</span>;
+}
+
 export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TItem>): JSX.Element {
   return <>{model.index + 1}</>;
 }
