@@ -114,8 +114,10 @@ export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
   Readonly<{
-    _cache: {
-      size?: number;
+    _dataProviderController: {
+      rootCache: {
+        size?: number;
+      };
     };
   }>;
 
@@ -151,7 +153,7 @@ function createDataProvider<TItem>(
     if (items.length === pageSize) {
       size = (pageNumber + 1) * pageSize + 1;
 
-      const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
+      const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._dataProviderController.rootCache.size;
       if (cacheSize !== undefined && size < cacheSize) {
         // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
         size = undefined;
