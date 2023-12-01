@@ -1,6 +1,6 @@
 {
   "name": "@hilla/frontend",
-  "version": "2.5.0-alpha10",
+  "version": "2.5.0-alpha11",
   "description": "Hilla frontend utils",
   "main": "index.js",
   "module": "index.js",
