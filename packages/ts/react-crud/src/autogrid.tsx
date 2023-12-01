@@ -179,8 +179,11 @@ function useColumns(
     rowNumbers?: boolean;
   },
 ) {
+  const sortableProperties = properties.filter(
+    (propertyInfo) => options.columnOptions?.[propertyInfo.name]?.sortable !== false,
+  );
   const [sortState, setSortState] = useState<SortState>(
-    properties.length > 0 ? { [properties[0].name]: { direction: 'asc' } } : {},
+    sortableProperties.length > 0 ? { [sortableProperties[0].name]: { direction: 'asc' } } : {},
   );
 
   let columns = properties.map((propertyInfo) => {

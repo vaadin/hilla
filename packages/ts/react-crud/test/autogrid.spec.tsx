@@ -165,6 +165,22 @@ describe('@hilla/react-crud', () => {
         ]);
       });
 
+      it('allows to disable sorting on specific columns', async () => {
+        const service = personService();
+        const grid = await GridController.init(
+          render(<TestAutoGridNoHeaderFilters service={service} columnOptions={{ lastName: { sortable: false } }} />),
+          user,
+        );
+
+        try {
+          await grid.sort('firstName', 'desc');
+          await grid.sort('lastName', 'desc');
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(Error);
+          expect((error as Error).message).to.equal('No sorter found for path lastName');
+        }
+      });
+
       it('sets a data provider, but only once', async () => {
         const service = personService();
         const result = render(<TestAutoGridNoHeaderFilters service={service} />);
@@ -445,6 +461,23 @@ describe('@hilla/react-crud', () => {
           );
 
           expect(grid.getHeaderCellContent(1, 0).childElementCount).to.equal(0);
+          expect(grid.getHeaderCellContent(1, 1).childElementCount).to.equal(0);
+        });
+
+        it('can be disabled on specific columns', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                service={service}
+                visibleColumns={['firstName', 'lastName']}
+                columnOptions={{ lastName: { filterable: false } }}
+              />,
+            ),
+            user,
+          );
+
+          expect(grid.getHeaderCellContent(1, 0).childElementCount).to.be.greaterThan(0);
           expect(grid.getHeaderCellContent(1, 1).childElementCount).to.equal(0);
         });
 

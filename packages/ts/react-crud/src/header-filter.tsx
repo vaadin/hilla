@@ -15,6 +15,16 @@ import { convertToTitleCase } from './util';
 
 export type HeaderFilterProps = Readonly<{
   /**
+   * If true, the column can be sorted. This is useful to disable sorting for
+   * properties that are not sortable in the backend, or that require excessive processing.
+   */
+  sortable?: boolean;
+  /**
+   * If true, the column can be filtered. This is useful to disable filtering for
+   * properties that are not sortable in the backend, or that require excessive processing.
+   */
+  filterable?: boolean;
+  /**
    * Placeholder text for the filter input.
    * Only applies to string, number and date/time value filters.
    */
