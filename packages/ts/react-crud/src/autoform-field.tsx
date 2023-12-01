@@ -5,9 +5,11 @@ import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-component
 import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
 import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectProps } from '@hilla/react-components/Select.js';
+import { TextArea, type TextAreaProps } from '@hilla/react-components/TextArea.js';
 import { TextField, type TextFieldProps } from '@hilla/react-components/TextField.js';
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
+import { useFormPart } from '@hilla/react-form';
 import type { JSX } from 'react';
 import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
 import type { PropertyInfo } from './model-info.js';
@@ -120,6 +122,15 @@ function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormB
   return <Checkbox {...other} {...form.field(model)} label={label} />;
 }
 
+type AutoFormObjectFieldProps = SharedFieldProps & TextAreaProps;
+
+function AutoFormObjectField({ propertyInfo, form, label, ...other }: AutoFormObjectFieldProps) {
+  const model = getPropertyModel(form, propertyInfo);
+  const part = useFormPart(model);
+  const jsonString = part.value ? JSON.stringify(part.value) : '';
+  return <TextArea {...other} value={jsonString} label={label} readonly />;
+}
+
 export type AutoFormFieldProps = CheckboxProps &
   DatePickerProps &
   DateTimePickerProps &
@@ -154,6 +165,8 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
       return <AutoFormEnumField {...props} label={label}></AutoFormEnumField>;
     case 'boolean':
       return <AutoFormBooleanField {...props} label={label}></AutoFormBooleanField>;
+    case 'object':
+      return <AutoFormObjectField {...props} label={label}></AutoFormObjectField>;
     default:
       return null;
   }
