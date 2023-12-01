@@ -62,3 +62,36 @@ export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
     return this[_getPropertyModel]('rememberMe', (parent, key) => new BooleanModel(parent, key, true));
   }
 }
+
+export interface Entity {
+  projectId?: number;
+  contractId?: number;
+}
+
+export class EntityModel<T extends Entity> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(EntityModel);
+
+  get projectId(): NumberModel {
+    return this[_getPropertyModel](
+      'projectId',
+      (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Long' } }),
+    );
+  }
+
+  get contractId(): NumberModel {
+    return this[_getPropertyModel](
+      'contractId',
+      (parent, key) => new NumberModel(parent, key, true, { meta: { javaType: 'java.lang.Long' } }),
+    );
+  }
+}
+
+export interface Project {
+  id: number;
+  name: string;
+}
+
+export interface Contract {
+  id: number;
+  name: string;
+}

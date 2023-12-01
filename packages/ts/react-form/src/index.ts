@@ -68,10 +68,10 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     reset(): void;
     clear(): void;
     read(value: Value<M> | null | undefined): void;
+    update(): void;
   }>;
 
 type FieldState<T = unknown> = {
-  value?: T;
   required: boolean;
   invalid: boolean;
   errorMessage: string;
@@ -162,23 +162,18 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.strategy.invalid = false;
               // When bad input is detected, skip reading new value in binder state
               fieldState!.strategy.checkValidity();
-              if (!fieldState!.strategy.validity.badInput) {
-                fieldState!.value = fieldState!.strategy.value;
-              }
               n[_validity] = fieldState!.strategy.validity;
-              n.value = convertFieldValue(model, fieldState!.value);
+              n.value = convertFieldValue(model, fieldState!.strategy.value);
             }
           },
-          value: undefined,
         };
 
         registry.set(model, fieldState);
       }
 
       if (fieldState.strategy) {
-        const valueFromField = convertFieldValue(model, fieldState.value);
+        const valueFromField = convertFieldValue(model, fieldState.strategy.value);
         if (valueFromField !== n.value && !(Number.isNaN(n.value) && Number.isNaN(valueFromField))) {
-          fieldState.value = n.value;
           fieldState.strategy.value = n.value;
         }
 
@@ -237,6 +232,7 @@ export function useForm<M extends AbstractModel>(
     },
     submit: binder.submit.bind(binder),
     value: binder.value,
+    update,
   };
 }
 
