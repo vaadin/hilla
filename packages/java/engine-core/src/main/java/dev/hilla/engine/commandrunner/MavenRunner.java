@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ public class MavenRunner implements CommandRunner {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(MavenRunner.class);
 
+    static final String EXECUTABLE_PROPERTY = "hilla.mavenExecutable";
     private final File projectDir;
     private final String[] args;
 
@@ -71,8 +73,14 @@ public class MavenRunner implements CommandRunner {
 
     @Override
     public List<String> executables() {
+        List<String> executableList = new ArrayList<>();
+        String customExecutable = System.getProperty(EXECUTABLE_PROPERTY);
+        if (customExecutable != null) {
+            executableList.add(customExecutable);
+        }
         // Prefer the wrapper over a global installation
-        return IS_WINDOWS ? List.of(".\\mvnw.cmd", "mvn.cmd")
-                : List.of("./mvnw", "mvn");
+        executableList.addAll(IS_WINDOWS ? List.of(".\\mvnw.cmd", "mvn.cmd")
+            : List.of("./mvnw", "mvn"));
+        return List.copyOf(executableList);
     }
 }
