@@ -85,7 +85,7 @@
     <copilot.version>24.3.0.alpha8</copilot.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>3.2.0</spring.boot.version>
-    <testbench.version>9.2.0.beta1</testbench.version>
+    <testbench.version>9.2.0.rc1</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
