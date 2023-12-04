@@ -75,8 +75,8 @@
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.13.0</jna.version>
-    <swagger.core.version>2.2.18</swagger.core.version>
-    <swagger.models.version>2.2.18</swagger.models.version>
+    <swagger.core.version>2.2.19</swagger.core.version>
+    <swagger.models.version>2.2.19</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
     <jackson.version>2.15.3</jackson.version>
     <junit.version>5.10.1</junit.version>
