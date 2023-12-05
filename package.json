@@ -33,10 +33,11 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
-    "@hilla/react-components": "2.3.0-beta1",
+    "@hilla/react-components": "^2.3.0-rc1",
     "@nx/js": "^16.10.0",
     "@types/karma": "^6.3.5",
     "@types/node": "^20.7.1",
+    "@vaadin/vaadin-lumo-styles": "^24.3.0-rc1",
     "chai-dom": "^1.11.0",
     "compare-versions": "^6.1.0",
     "concurrently": "^8.2.1",
