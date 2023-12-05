@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ public class GradleRunner implements CommandRunner {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GradleRunner.class);
 
+    static final String EXECUTABLE_PROPERTY = "hilla.gradleExecutable";
     private final File projectDir;
     private final String[] args;
 
@@ -69,7 +71,19 @@ public class GradleRunner implements CommandRunner {
 
     @Override
     public List<String> executables() {
-        return IS_WINDOWS ? List.of(".\\gradlew.bat", "gradle.bat", "gradle")
-                : List.of("./gradlew", "gradle");
+        List<String> executableList = new ArrayList<>();
+        String customExecutable = System.getProperty(EXECUTABLE_PROPERTY);
+        if (customExecutable != null) {
+            executableList.add(customExecutable);
+        }
+        if (IS_WINDOWS) {
+            executableList.add(".\\gradlew.bat");
+            executableList.add("gradle.bat");
+            executableList.add("gradle");
+        } else {
+            executableList.add("./gradlew");
+            executableList.add("gradle");
+        }
+        return List.copyOf(executableList);
     }
 }
