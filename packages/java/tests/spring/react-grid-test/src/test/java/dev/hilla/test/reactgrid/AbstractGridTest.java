@@ -20,7 +20,7 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getTestPath());
-        grid = $(GridElement.class).first();
+        grid = $(GridElement.class).waitForFirst();
         waitUntil(driver -> {
             Object prop = grid.getProperty("_lastVisibleIndex");
             return prop != null;
@@ -76,11 +76,17 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
     }
 
     protected void assertRowCount(int i) {
-        grid.scrollToRow(3403034);
         waitUntil(driver -> {
+            // Workaround to prevent scrollToRow from stalling, likely because
+            // this waits until the grid has finished loading
+            grid.getRowCount();
+            // The infinite data provider in auto grid will always add a 1 to
+            // the total count until the last page is reached.
+            // So we scroll down until we reach the last page and then check the
+            // total count.
+            grid.scrollToRow(3403034);
             return grid.getRowCount() == i;
         });
-
     }
 
 }

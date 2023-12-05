@@ -6,6 +6,7 @@ import {
   AutoGridDecimalRenderer,
   AutoGridEnumRenderer,
   AutoGridIntegerRenderer,
+  AutoGridJsonRenderer,
   AutoGridTimeRenderer,
 } from './autogrid-renderers';
 import {
@@ -16,10 +17,11 @@ import {
   NumberHeaderFilter,
   StringHeaderFilter,
   TimeHeaderFilter,
+  type HeaderFilterProps,
 } from './header-filter';
 import type { PropertyInfo } from './model-info';
 
-export type ColumnOptions = Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
+export type ColumnOptions = HeaderFilterProps & Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
 function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
@@ -84,6 +86,12 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         autoWidth: true,
         headerRenderer: StringHeaderFilter,
       };
+    case 'object':
+      return {
+        autoWidth: true,
+        renderer: AutoGridJsonRenderer,
+        headerRenderer: NoHeaderFilter,
+      };
     default:
       return {
         autoWidth: true,
@@ -97,7 +105,13 @@ export function getColumnOptions(
   customColumnOptions: ColumnOptions | undefined,
 ): ColumnOptions {
   const typeColumnOptions = getTypeColumnOptions(propertyInfo);
-  const columnOptions = customColumnOptions ? { ...typeColumnOptions, ...customColumnOptions } : typeColumnOptions;
+  const finalHeaderRenderer =
+    customColumnOptions?.filterable === false ? NoHeaderFilter : typeColumnOptions.headerRenderer;
+  // TODO: Remove eslint-disable when all TypeScript version issues are resolved
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const columnOptions = customColumnOptions
+    ? { ...typeColumnOptions, ...customColumnOptions, headerRenderer: finalHeaderRenderer }
+    : typeColumnOptions;
   if (!columnOptions.headerRenderer) {
     console.error(`No header renderer defined for column ${propertyInfo.name}`);
   }

@@ -93,10 +93,19 @@ export abstract class ModelSchemaPartProcessor<T> {
   protected abstract [$processUnknown](schema: Schema): T;
 }
 
+function handleNullableInternalType(schema: Schema, typeNode: TypeNode): TypeNode {
+  return isNullableSchema(schema)
+    ? ts.factory.createUnionTypeNode([typeNode, ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)])
+    : typeNode;
+}
+
 class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode> {
   protected override [$processArray](schema: ArraySchema): TypeNode {
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [
-      new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
+      handleNullableInternalType(
+        schema.items,
+        new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
+      ),
     ]);
   }
 
@@ -112,7 +121,7 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     const valueType =
       typeof props === 'boolean'
         ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
-        : new ModelSchemaInternalTypeProcessor(props, this[$dependencies]).process();
+        : handleNullableInternalType(props, new ModelSchemaInternalTypeProcessor(props, this[$dependencies]).process());
 
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
       ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
