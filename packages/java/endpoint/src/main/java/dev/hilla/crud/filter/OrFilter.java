@@ -4,6 +4,9 @@ import java.util.List;
 
 /**
  * A filter that requires at least one of its children to pass.
+ * <p>
+ * Custom filter implementations need to handle this filter by running all child
+ * filters and verifying that at least one of them passes.
  */
 public class OrFilter extends Filter {
 
