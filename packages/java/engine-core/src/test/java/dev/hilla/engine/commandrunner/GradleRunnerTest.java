@@ -1,66 +1,70 @@
 package dev.hilla.engine.commandrunner;
 
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GradleRunnerTest {
 
+    @TempDir
+    Path tmpDir;
+
     @Test
     void shouldRunIfBuildGradleIsAvailable() throws IOException {
-        Path tmpDir = null;
-
-        try {
-            tmpDir = Files.createTempDirectory("prepareCommandGradle");
-            Files.createFile(tmpDir.resolve("build.gradle"));
-            var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
-            assertTrue(opt.isPresent());
-            var runner = opt.orElseThrow();
-            assertEquals(1, runner.arguments().length);
-            assertDoesNotThrow(() -> runner.run(null));
-        } finally {
-            if (tmpDir != null) {
-                Files.deleteIfExists(tmpDir.resolve("build.gradle"));
-                Files.deleteIfExists(tmpDir);
-            }
-        }
+        Files.createFile(tmpDir.resolve("build.gradle"));
+        var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
+        assertTrue(opt.isPresent());
+        var runner = opt.orElseThrow();
+        assertEquals(1, runner.arguments().length);
+        assertDoesNotThrow(() -> runner.run(null));
     }
 
     @Test
     void shouldRunIfBuildGradleKtsIsAvailable() throws IOException {
-        Path tmpDir = null;
-
-        try {
-            tmpDir = Files.createTempDirectory("prepareCommandGradle");
-            Files.createFile(tmpDir.resolve("build.gradle.kts"));
-            var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
-            assertTrue(opt.isPresent());
-            var runner = opt.orElseThrow();
-            assertEquals(1, runner.arguments().length);
-            assertDoesNotThrow(() -> runner.run(null));
-        } finally {
-            if (tmpDir != null) {
-                Files.deleteIfExists(tmpDir.resolve("build.gradle.kts"));
-                Files.deleteIfExists(tmpDir);
-            }
-        }
+        Files.createFile(tmpDir.resolve("build.gradle.kts"));
+        var opt = GradleRunner.forProject(tmpDir.toFile(), "-v");
+        assertTrue(opt.isPresent());
+        var runner = opt.orElseThrow();
+        assertEquals(1, runner.arguments().length);
+        assertDoesNotThrow(() -> runner.run(null));
     }
 
     @Test
-    void shouldNotCreateRunnerForUnknownProjectType() throws IOException {
-        Path tmpDir = null;
+    void shouldNotCreateRunnerForUnknownProjectType() {
+        var runner = GradleRunner.forProject(tmpDir.toFile());
+        assertTrue(runner.isEmpty());
+    }
 
+    @Test
+    void shouldListProvidedExecutable() {
+        String originalValue = System
+                .getProperty(GradleRunner.EXECUTABLE_PROPERTY);
         try {
-            tmpDir = Files.createTempDirectory("prepareCommandGradle");
-            var runner = GradleRunner.forProject(tmpDir.toFile());
-            assertTrue(runner.isEmpty());
+            String customMavenPath = "/path/to/gradle/bin/gradle";
+            System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
+                    customMavenPath);
+            var runner = new GradleRunner(tmpDir.toFile(), "-v");
+            if (CommandRunner.IS_WINDOWS) {
+                assertEquals(List.of(customMavenPath, ".\\gradlew.bat",
+                        "gradle.bat", "gradle"), runner.executables());
+            } else {
+                assertEquals(List.of(customMavenPath, "./gradlew", "gradle"),
+                        runner.executables());
+            }
         } finally {
-            if (tmpDir != null) {
-                Files.deleteIfExists(tmpDir);
+            if (originalValue != null) {
+                System.setProperty(GradleRunner.EXECUTABLE_PROPERTY,
+                        originalValue);
+            } else {
+                System.clearProperty(MavenRunner.EXECUTABLE_PROPERTY);
             }
         }
     }
