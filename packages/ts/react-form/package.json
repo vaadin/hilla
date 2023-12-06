@@ -1,6 +1,6 @@
 {
   "name": "@hilla/react-form",
-  "version": "2.5.0-alpha11",
+  "version": "2.5.0-alpha12",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/form": "2.5.0-alpha11"
+    "@hilla/form": "2.5.0-alpha12"
   },
   "peerDependencies": {
     "react": "^18"
