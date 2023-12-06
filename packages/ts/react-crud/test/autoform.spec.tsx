@@ -6,6 +6,7 @@ import { ValidationError } from '@hilla/form';
 import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@hilla/react-components/TextArea.js';
+import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -1153,6 +1154,53 @@ describe('@hilla/react-crud', () => {
         expect(autoFormElement.id).to.equal('my-id');
         expect(autoFormElement.className.trim()).to.equal('auto-form custom-auto-form');
         expect(autoFormElement.getAttribute('style')).to.equal('background-color: blue;');
+      });
+    });
+
+    describe('custom client-side validators', () => {
+      it('validates form field with custom validator ', async () => {
+        const form = await populatePersonForm(1, {
+          fieldOptions: {
+            firstName: {
+              validators: [
+                {
+                  message: 'First name must longer than 3 characters',
+                  validate: (value: string) => value.length > 3,
+                },
+              ],
+            },
+          },
+        });
+        const firstNameField = (await form.getField('First name')) as TextFieldElement;
+        expect(firstNameField.invalid).to.be.false;
+        await form.typeInField('First name', 'Dan{enter}');
+        expect(firstNameField.invalid).to.be.true;
+        expect(firstNameField.errorMessage).to.equal('First name must longer than 3 characters');
+        await form.typeInField('First name', 'Daniel{enter}');
+        expect(firstNameField.invalid).to.be.false;
+      });
+
+      it('renders form field with multiple custom validators', async () => {
+        const form = await populatePersonForm(1, {
+          fieldOptions: {
+            firstName: {
+              validators: [
+                {
+                  message: 'First name must longer than 3 characters',
+                  validate: (value: string) => value.length > 3,
+                },
+                {
+                  message: 'First name must start with M',
+                  validate: (value: string) => value.startsWith('M'),
+                },
+              ],
+            },
+          },
+        });
+        await form.typeInField('First name', 'Dan{enter}');
+        const firstNameField = (await form.getField('First name')) as TextFieldElement;
+        expect(firstNameField.invalid).to.be.true;
+        expect(firstNameField.errorMessage).to.equal('First name must longer than 3 characters');
       });
     });
   });
