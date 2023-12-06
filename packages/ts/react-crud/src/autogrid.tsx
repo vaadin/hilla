@@ -20,6 +20,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  cloneElement,
 } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
@@ -223,8 +224,22 @@ function useColumns(
   });
 
   if (options.customColumns) {
+    // When using header filters, wrap custom columns into column groups and
+    // move header text or renderer to group
+    const customColumns = options.noHeaderFilters
+      ? options.customColumns
+      : options.customColumns.map((column) => {
+          const { header, headerRenderer } = column.props;
+          const { key } = column;
+          const columnWithoutHeader = cloneElement(column, { header: undefined, headerRenderer: undefined });
+          return (
+            <GridColumnGroup key={key} header={header} headerRenderer={headerRenderer}>
+              {columnWithoutHeader}
+            </GridColumnGroup>
+          );
+        });
     if (options.visibleColumns) {
-      const columnMap = [...columns, ...options.customColumns].reduce((map, column) => {
+      const columnMap = [...columns, ...customColumns].reduce((map, column) => {
         const { key } = column;
         if (key) {
           map.set(key, column);
@@ -234,7 +249,7 @@ function useColumns(
 
       columns = options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
     } else {
-      columns = [...columns, ...options.customColumns];
+      columns = [...columns, ...customColumns];
     }
   }
 
