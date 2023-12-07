@@ -52,7 +52,7 @@ export default class GridController {
   getVisibleRowCount(): number {
     // @ts-expect-error: getting internal property
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.instance._cache.size;
+    return this.instance._dataProviderController.rootCache.size;
   }
 
   getHeaderRows(): HTMLElement[] {
