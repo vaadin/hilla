@@ -4,6 +4,9 @@ import java.util.List;
 
 /**
  * A filter that requires all children to pass.
+ * <p>
+ * Custom filter implementations need to handle this filter by running all child
+ * filters and verifying that all of them pass.
  */
 public class AndFilter extends Filter {
     private List<Filter> children;

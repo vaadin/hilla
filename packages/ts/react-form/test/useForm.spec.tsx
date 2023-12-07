@@ -1,14 +1,17 @@
 import { expect, use } from '@esm-bundle/chai';
 import { act, render, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
+import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Login, LoginModel, type UserModel } from './models.js';
+import { type Contract, EntityModel, type Login, LoginModel, type Project, type UserModel } from './models.js';
 
 use(sinonChai);
 use(chaiDom);
+use(chaiAsPromised);
 
 describe('@hilla/react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
@@ -234,6 +237,68 @@ describe('@hilla/react-form', () => {
 
         expect(onChange).to.have.been.calledOnce;
       });
+    });
+
+    it('should be updatable', async () => {
+      function UpdatableForm() {
+        const [projects, setProjects] = useState<Project[]>([
+          { id: 1, name: 'P1' },
+          { id: 2, name: 'P2' },
+        ]);
+        const [contracts, setContracts] = useState<Contract[]>([]);
+        const { model, value, field, clear, read, update } = useForm(EntityModel);
+        const contractField = useFormPart(model.contractId);
+
+        useEffect(() => {
+          if (value.projectId != null) {
+            setContracts([
+              { id: value.projectId * 100 + 1, name: `${value.projectId}-C1` },
+              { id: value.projectId * 100 + 2, name: `${value.projectId}-C2` },
+            ]);
+          } else {
+            setContracts([]);
+          }
+        }, [value.projectId]);
+
+        useEffect(() => {
+          if (value.contractId != null && !contracts.find((c) => c.id === value.contractId)) {
+            contractField.setValue(undefined);
+          }
+          update();
+        }, [contracts]);
+
+        function loadForm() {
+          read({ projectId: 2, contractId: 202 });
+        }
+
+        return (
+          <>
+            <select data-testid="projects" {...field(model.projectId)}>
+              {projects.map(({ id, name }) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <select data-testid="contracts" {...field(model.contractId)}>
+              <option>-</option>
+              {contracts.map(({ id, name }) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <button data-testid="load" onClick={loadForm}>
+              Load
+            </button>
+          </>
+        );
+      }
+
+      const { findByTestId } = render(<UpdatableForm />);
+      const loadFormBtn = await findByTestId('load');
+      await user.click(loadFormBtn);
+      await expect(findByTestId('contracts')).to.eventually.have.nested.property('selectedOptions.0.value', '202');
     });
   });
 });

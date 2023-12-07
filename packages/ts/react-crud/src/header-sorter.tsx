@@ -8,7 +8,9 @@ export function HeaderSorter(): ReactElement {
   const direction = sorterState?.direction ?? null;
   const headerLabel = context.customColumnOptions?.header ?? context.propertyInfo.humanReadableName;
 
-  return (
+  return context.customColumnOptions?.sortable === false ? (
+    <>{headerLabel}</>
+  ) : (
     <GridSorter
       path={context.propertyInfo.name}
       direction={direction}

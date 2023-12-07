@@ -5,7 +5,8 @@ import { expect, use } from '@esm-bundle/chai';
 import { ValidationError } from '@hilla/form';
 import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
-import { TextArea } from '@hilla/react-components/TextArea.js';
+import { TextArea, type TextAreaElement } from '@hilla/react-components/TextArea.js';
+import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -50,6 +51,7 @@ describe('@hilla/react-crud', () => {
       'Street',
       'City',
       'Country',
+      'Department',
     ] as const;
     const DEFAULT_PERSON: Person = {
       firstName: '',
@@ -69,6 +71,11 @@ describe('@hilla/react-crud', () => {
         city: '',
         country: '',
       },
+      department: {
+        id: 0,
+        version: 0,
+        name: '',
+      },
     };
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -87,6 +94,7 @@ describe('@hilla/react-crud', () => {
         person.address?.street ?? '',
         person.address?.city ?? '',
         person.address?.country ?? '',
+        person.department ? JSON.stringify(person.department) : '',
       ];
     }
 
@@ -167,6 +175,7 @@ describe('@hilla/react-crud', () => {
         'vaadin-text-field',
         'vaadin-text-field',
         'vaadin-text-field',
+        'vaadin-text-area',
       ]);
     });
 
@@ -636,12 +645,6 @@ describe('@hilla/react-crud', () => {
         expect(fields.localName).to.eql('vaadin-text-field');
       });
 
-      it('renders no fields for object properties', async () => {
-        const form = await populatePersonForm(1, { visibleFields: ['address', 'department'] });
-        expect(form.queryField('Address')).to.be.undefined;
-        expect(form.queryField('Department')).to.be.undefined;
-      });
-
       it('properly binds fields for nested properties that are not included by default', async () => {
         const service = personService();
         const saveSpy = sinon.spy(service, 'save');
@@ -961,6 +964,39 @@ describe('@hilla/react-crud', () => {
       });
     });
 
+    describe('AutoFormObjectField', () => {
+      it('renders readonly text area with JSON string', async () => {
+        const service = personService();
+        const person = (await getItem(service, 1))!;
+        const result = render(
+          <AutoForm service={service} model={PersonModel} item={person} visibleFields={['address', 'department']} />,
+        );
+        const form = await FormController.init(user, result.container);
+        const [addressField, departmentField] = await form.getFields('Address', 'Department');
+        expect(addressField.localName).to.equal('vaadin-text-area');
+        expect((addressField as TextAreaElement).readonly).to.be.true;
+        expect(departmentField.localName).to.equal('vaadin-text-area');
+        expect((departmentField as TextAreaElement).readonly).to.be.true;
+
+        const addressJson = JSON.stringify(person.address);
+        const departmentJson = JSON.stringify(person.department);
+        expect(addressField.value).to.equal(addressJson);
+        expect(departmentField.value).to.equal(departmentJson);
+      });
+
+      it('renders JSON string with default values when creating new item', async () => {
+        const service = personService();
+        const result = render(
+          <AutoForm service={service} model={PersonModel} visibleFields={['address', 'department']} />,
+        );
+        const form = await FormController.init(user, result.container);
+        const [addressField, departmentField] = await form.getFields('Address', 'Department');
+
+        expect(addressField.value).to.equal(JSON.stringify(DEFAULT_PERSON.address));
+        expect(departmentField.value).to.equal(JSON.stringify(DEFAULT_PERSON.department));
+      });
+    });
+
     describe('Field Options', () => {
       it('renders custom field from field options instead of the default one', async () => {
         const service = personService();
@@ -1118,6 +1154,53 @@ describe('@hilla/react-crud', () => {
         expect(autoFormElement.id).to.equal('my-id');
         expect(autoFormElement.className.trim()).to.equal('auto-form custom-auto-form');
         expect(autoFormElement.getAttribute('style')).to.equal('background-color: blue;');
+      });
+    });
+
+    describe('custom client-side validators', () => {
+      it('validates form field with custom validator ', async () => {
+        const form = await populatePersonForm(1, {
+          fieldOptions: {
+            firstName: {
+              validators: [
+                {
+                  message: 'First name must longer than 3 characters',
+                  validate: (value: string) => value.length > 3,
+                },
+              ],
+            },
+          },
+        });
+        const firstNameField = (await form.getField('First name')) as TextFieldElement;
+        expect(firstNameField.invalid).to.be.false;
+        await form.typeInField('First name', 'Dan{enter}');
+        expect(firstNameField.invalid).to.be.true;
+        expect(firstNameField.errorMessage).to.equal('First name must longer than 3 characters');
+        await form.typeInField('First name', 'Daniel{enter}');
+        expect(firstNameField.invalid).to.be.false;
+      });
+
+      it('renders form field with multiple custom validators', async () => {
+        const form = await populatePersonForm(1, {
+          fieldOptions: {
+            firstName: {
+              validators: [
+                {
+                  message: 'First name must longer than 3 characters',
+                  validate: (value: string) => value.length > 3,
+                },
+                {
+                  message: 'First name must start with M',
+                  validate: (value: string) => value.startsWith('M'),
+                },
+              ],
+            },
+          },
+        });
+        await form.typeInField('First name', 'Dan{enter}');
+        const firstNameField = (await form.getField('First name')) as TextFieldElement;
+        expect(firstNameField.invalid).to.be.true;
+        expect(firstNameField.errorMessage).to.equal('First name must longer than 3 characters');
       });
     });
   });

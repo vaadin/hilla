@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@hilla/form';
-import { ModelInfo } from '../model-info';
-import { PersonModel } from './test-models-and-services';
+import { ModelInfo } from '../src/model-info.js';
+import { PersonModel } from './test-models-and-services.js';
 
 describe('@hilla/react-crud', () => {
   describe('ModelInfo', () => {

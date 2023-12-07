@@ -3,9 +3,11 @@ import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
+import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { AutoGrid, type AutoGridProps } from '../src/autogrid.js';
+import type { ListService } from '../crud';
+import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
 import type { CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
@@ -20,7 +22,9 @@ import {
   columnRendererTestService,
   CompanyModel,
   companyService,
+  createService,
   Gender,
+  getItem,
   type HasTestInfo,
   type Person,
   personData,
@@ -94,6 +98,7 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
         );
       });
 
@@ -114,6 +119,7 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
         );
         result.rerender(<AutoGrid service={companyService()} model={CompanyModel} />);
         await assertColumns(await GridController.init(result, user), 'name', 'foundedDate');
@@ -157,6 +163,22 @@ describe('@hilla/react-crud', () => {
         await expect(grid.getSortOrder()).to.eventually.deep.equal([
           { property: 'firstName', direction: Direction.DESC },
         ]);
+      });
+
+      it('allows to disable sorting on specific columns', async () => {
+        const service = personService();
+        const grid = await GridController.init(
+          render(<TestAutoGridNoHeaderFilters service={service} columnOptions={{ lastName: { sortable: false } }} />),
+          user,
+        );
+
+        try {
+          await grid.sort('firstName', 'desc');
+          await grid.sort('lastName', 'desc');
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(Error);
+          expect((error as Error).message).to.equal('No sorter found for path lastName');
+        }
       });
 
       it('sets a data provider, but only once', async () => {
@@ -601,6 +623,23 @@ describe('@hilla/react-crud', () => {
           expect(grid.getHeaderCellContent(1, 1).childElementCount).to.equal(0);
         });
 
+        it('can be disabled on specific columns', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                service={service}
+                visibleColumns={['firstName', 'lastName']}
+                columnOptions={{ lastName: { filterable: false } }}
+              />,
+            ),
+            user,
+          );
+
+          expect(grid.getHeaderCellContent(1, 0).childElementCount).to.be.greaterThan(0);
+          expect(grid.getHeaderCellContent(1, 1).childElementCount).to.equal(0);
+        });
+
         it('combine filters (and) when you type in multiple fields', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
@@ -828,17 +867,6 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('customize columns', () => {
-      const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
-        <span>
-          {item.firstName} {item.lastName}
-        </span>
-      );
-      const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
-        <span>
-          {item.firstName}-{item.lastName}
-        </span>
-      );
-
       it('should only show configured columns in specified order', async () => {
         const grid = await GridController.init(render(<TestAutoGrid visibleColumns={['email', 'firstName']} />), user);
         await assertColumns(grid, 'email', 'firstName');
@@ -864,6 +892,98 @@ describe('@hilla/react-crud', () => {
         );
         await assertColumns(grid, 'email', 'firstName');
       });
+
+      it('uses custom column options on top of the type defaults', async () => {
+        const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
+        const StreetRenderer = ({ item }: { item: Person }): JSX.Element => (
+          <span>{item.address?.street.toUpperCase()}</span>
+        );
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              columnOptions={{
+                firstName: { renderer: NameRenderer },
+                'address.street': { renderer: StreetRenderer },
+              }}
+            />,
+          ),
+          user,
+        );
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
+          'department',
+        );
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('JANE');
+        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
+        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('122 SOUTH STREET');
+        expect(grid.getBodyCellContent(0, 11)).to.have.rendered.text('South Town');
+        // The header filter was not overridden
+        const cell = grid.getHeaderCellContent(1, 0);
+        expect(cell.firstElementChild!.querySelector('vaadin-text-field')).to.exist;
+      });
+
+      it('respects the header setting from custom column options', async () => {
+        // With header filters
+        let result = render(<TestAutoGrid columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
+        let grid = await GridController.init(result, user);
+        expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
+
+        // Without header filters
+        result.unmount();
+        result = render(<TestAutoGrid noHeaderFilters columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
+        grid = await GridController.init(result, user);
+        expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
+      });
+
+      it('renders row numbers if requested', async () => {
+        const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
+        await assertColumns(
+          grid,
+          '',
+          'firstName',
+          'lastName',
+          'gender',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'birthDate',
+          'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
+          'department',
+        );
+        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
+        expect(grid.getBodyCell(0, 0).style.flexGrow).to.equal('0');
+      });
+    });
+
+    describe('custom columns', () => {
+      const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName} {item.lastName}
+        </span>
+      );
+      const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
+        <span>
+          {item.firstName}-{item.lastName}
+        </span>
+      );
 
       it('renders custom columns at the specified index by visibleColumns', async () => {
         const grid = await GridController.init(
@@ -931,11 +1051,12 @@ describe('@hilla/react-crud', () => {
           'address.street',
           'address.city',
           'address.country',
+          'department',
           'fullName',
           'secondFullName',
         );
-        expect(grid.getBodyCellContent(0, 13)).to.have.rendered.text('Jane Love');
-        expect(grid.getBodyCellContent(0, 14)).to.have.rendered.text('Jane-Love');
+        expect(grid.getBodyCellContent(0, 14)).to.have.rendered.text('Jane Love');
+        expect(grid.getBodyCellContent(0, 15)).to.have.rendered.text('Jane-Love');
       });
 
       it('if visibleColumns is present, renders only the custom columns listed in visibleColumns', async () => {
@@ -961,81 +1082,53 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
       });
 
-      it('uses custom column options on top of the type defaults', async () => {
-        const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
-        const StreetRenderer = ({ item }: { item: Person }): JSX.Element => (
-          <span>{item.address?.street.toUpperCase()}</span>
-        );
-        const grid = await GridController.init(
-          render(
-            <TestAutoGrid
-              columnOptions={{
-                firstName: { renderer: NameRenderer },
-                'address.street': { renderer: StreetRenderer },
-              }}
-            />,
-          ),
-          user,
-        );
-        await assertColumns(
-          grid,
-          'firstName',
-          'lastName',
-          'gender',
-          'email',
-          'someInteger',
-          'someDecimal',
-          'vip',
-          'birthDate',
-          'shiftStart',
-          'appointmentTime',
-          'address.street',
-          'address.city',
-          'address.country',
-        );
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('JANE');
-        expect(grid.getBodyCellContent(0, 1)).to.have.rendered.text('Love');
-        expect(grid.getBodyCellContent(0, 10)).to.have.rendered.text('122 SOUTH STREET');
-        expect(grid.getBodyCellContent(0, 11)).to.have.rendered.text('South Town');
-        // The header filter was not overridden
-        const cell = grid.getHeaderCellContent(1, 0);
-        expect(cell.firstElementChild!.querySelector('vaadin-text-field')).to.exist;
-      });
+      describe('with header filters', () => {
+        it('wraps custom columns in a column group and moves header text', async () => {
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                visibleColumns={['fullName']}
+                customColumns={[
+                  <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                ]}
+              />,
+            ),
+            user,
+          );
+          // Group header row has header text
+          expect(grid.getHeaderCellContent(0, 0)).to.have.rendered.text('Full name');
+          // Column header row is empty
+          expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.empty;
+          expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.text('');
+        });
 
-      it('respects the header setting from custom column options', async () => {
-        // With header filters
-        let result = render(<TestAutoGrid columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
-        let grid = await GridController.init(result, user);
-        expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
+        it('wraps custom columns in a column group and moves header renderer', async () => {
+          function HeaderRenderer() {
+            return <span>Full name</span>;
+          }
 
-        // Without header filters
-        result.unmount();
-        result = render(<TestAutoGrid noHeaderFilters columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
-        grid = await GridController.init(result, user);
-        expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
-      });
-
-      it('renders row numbers if requested', async () => {
-        const grid = await GridController.init(render(<TestAutoGrid rowNumbers />), user);
-        await assertColumns(
-          grid,
-          '',
-          'firstName',
-          'lastName',
-          'gender',
-          'email',
-          'someInteger',
-          'someDecimal',
-          'vip',
-          'birthDate',
-          'shiftStart',
-          'appointmentTime',
-          'address.street',
-          'address.city',
-          'address.country',
-        );
-        expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('1');
-        expect(grid.getBodyCell(0, 0).style.flexGrow).to.equal('0');
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                visibleColumns={['fullName']}
+                customColumns={[
+                  <GridColumn
+                    key="fullName"
+                    headerRenderer={HeaderRenderer}
+                    autoWidth
+                    renderer={FullNameRenderer}
+                  ></GridColumn>,
+                ]}
+              />,
+            ),
+            user,
+          );
+          // Group header row has header text
+          expect(grid.getHeaderCellContent(0, 0)).to.have.rendered.text('Full name');
+          // Column header row is empty
+          expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.empty;
+          expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.text('');
+        });
       });
     });
 
@@ -1156,36 +1249,59 @@ describe('@hilla/react-crud', () => {
         expect(grid.getBodyCellContent(1, columnIndex)).to.have.text('');
       });
 
-      it('renders objects without error', async () => {
+      it('renders objects as JSON string', async () => {
+        const service = personService();
+        const person = (await getItem(service, 1))!;
         grid = await GridController.init(
-          render(<AutoGrid service={personService()} model={PersonModel} visibleColumns={['address', 'department']} />),
+          render(<AutoGrid service={service} model={PersonModel} visibleColumns={['address', 'department']} />),
           user,
         );
 
-        expect(grid.getBodyCellContent(0, 0)).to.have.text('[object Object]');
-        expect(grid.getBodyCellContent(0, 1)).to.have.text('[object Object]');
+        // JSON is truncated to fifty chars
+        // Assert that test data matches that
+        const addressJson = JSON.stringify(person.address);
+        expect(addressJson.length).to.be.greaterThan(50);
+        const truncatedAddressJson = `${addressJson.substring(0, 50)}...`;
+        expect(grid.getBodyCellContent(0, 0)).to.have.text(truncatedAddressJson);
+        expect(grid.getBodyCellContent(0, 1)).to.have.text(JSON.stringify(person.department));
+      });
+
+      it('renders undefined objects as empty string', async () => {
+        const service = createService(personData.map((p) => ({ ...p, address: undefined })));
+        grid = await GridController.init(
+          render(<AutoGrid service={service} model={PersonModel} visibleColumns={['address']} />),
+          user,
+        );
+
+        expect(grid.getBodyCellContent(0, 0)).to.have.text('');
       });
     });
 
-    describe('refresh trigger', () => {
-      it('reloads data when increasing refreshTrigger', async () => {
+    describe('grid refresh', () => {
+      let autoGridRef: AutoGridRef;
+
+      const AutoGridRefreshTestWrapper = ({ service }: { service: ListService<any> }) => {
+        const ref = useRef<AutoGridRef>(null);
+        useEffect(() => {
+          if (ref.current) {
+            autoGridRef = ref.current;
+          }
+        }, []);
+        return (
+          <span>
+            <AutoGrid service={service} model={PersonModel} ref={ref} />
+          </span>
+        );
+      };
+
+      it('reloads data when refresh is called', async () => {
         const service = personService();
         const listSpy = sinon.spy(service, 'list');
-        const result = render(<AutoGrid service={service} model={PersonModel} refreshTrigger={0} />);
+        render(<AutoGridRefreshTestWrapper service={service} />);
         await nextFrame();
         await nextFrame();
         expect(listSpy).to.have.been.calledOnce;
-
-        // Does not refresh if refreshTrigger is not changed
-        result.rerender(<AutoGrid service={service} model={PersonModel} refreshTrigger={0} />);
-        await nextFrame();
-        await nextFrame();
-        expect(listSpy).to.have.been.calledOnce;
-
-        // Does refresh if refreshTrigger changes
-        result.rerender(<AutoGrid service={service} model={PersonModel} refreshTrigger={1} />);
-        await nextFrame();
-        await nextFrame();
+        autoGridRef.refresh();
         expect(listSpy).to.have.been.calledTwice;
       });
     });

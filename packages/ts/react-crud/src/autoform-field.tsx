@@ -1,14 +1,17 @@
-import { _enum, type EnumModel } from '@hilla/form';
+import { _enum, type EnumModel, type Validator } from '@hilla/form';
 import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
 import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
 import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
 import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
 import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectProps } from '@hilla/react-components/Select.js';
+import { TextArea, type TextAreaProps } from '@hilla/react-components/TextArea.js';
 import { TextField, type TextFieldProps } from '@hilla/react-components/TextField.js';
 import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
+import { useFormPart } from '@hilla/react-form';
 import type { JSX } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
 import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
@@ -17,7 +20,7 @@ export type SharedFieldProps = Readonly<{
   propertyInfo: PropertyInfo;
   colSpan?: number;
   form: UseFormResult<any>;
-  options?: FieldOptions;
+  options: FieldOptions;
 }>;
 
 type CustomFormFieldProps = FieldDirectiveResult & Readonly<{ label?: string; disabled?: boolean }>;
@@ -50,6 +53,13 @@ export type FieldOptions = Readonly<{
    * ignored.
    */
   colspan?: number;
+  /**
+   * Validators to apply to the field. The validators are added to the form
+   * when the field is rendered.
+   * UseMemo is recommended for the validators, so that they are not recreated
+   * on every render.
+   */
+  validators?: Validator[];
 }>;
 
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
@@ -120,6 +130,15 @@ function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormB
   return <Checkbox {...other} {...form.field(model)} label={label} />;
 }
 
+type AutoFormObjectFieldProps = SharedFieldProps & TextAreaProps;
+
+function AutoFormObjectField({ propertyInfo, form, label, ...other }: AutoFormObjectFieldProps) {
+  const model = getPropertyModel(form, propertyInfo);
+  const part = useFormPart(model);
+  const jsonString = part.value ? JSON.stringify(part.value) : '';
+  return <TextArea {...other} value={jsonString} label={label} readonly />;
+}
+
 export type AutoFormFieldProps = CheckboxProps &
   DatePickerProps &
   DateTimePickerProps &
@@ -132,8 +151,16 @@ export type AutoFormFieldProps = CheckboxProps &
 
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
   const { form, propertyInfo, options } = props;
-  const label = options?.label ?? propertyInfo.humanReadableName;
-  if (options?.renderer) {
+  const label = options.label ?? propertyInfo.humanReadableName;
+
+  const formPart = useFormPart(getPropertyModel(form, propertyInfo));
+  const defaultValidators = useMemo(() => formPart.validators, []);
+  const { validators } = options;
+  useEffect(() => {
+    formPart.setValidators([...defaultValidators, ...(validators ?? [])]);
+  }, [validators]);
+
+  if (options.renderer) {
     const customFieldProps = { ...form.field(getPropertyModel(form, propertyInfo)), disabled: props.disabled, label };
     return options.renderer({ field: customFieldProps });
   }
@@ -154,6 +181,8 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
       return <AutoFormEnumField {...props} label={label}></AutoFormEnumField>;
     case 'boolean':
       return <AutoFormBooleanField {...props} label={label}></AutoFormBooleanField>;
+    case 'object':
+      return <AutoFormObjectField {...props} label={label}></AutoFormObjectField>;
     default:
       return null;
   }

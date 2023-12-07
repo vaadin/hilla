@@ -13,13 +13,17 @@ import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import {
   type ComponentType,
   type Dispatch,
+  type ForwardedRef,
+  forwardRef,
   type JSX,
   type MutableRefObject,
   type SetStateAction,
   useEffect,
   useMemo,
+  useImperativeHandle,
   useRef,
   useState,
+  cloneElement,
 } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
@@ -61,6 +65,10 @@ export type AutoGridItemCountHolder = Readonly<{
    */
   filteredItemCount: MutableRefObject<number>;
 }>;
+
+export interface AutoGridRef {
+  refresh(): void;
+}
 
 interface AutoGridOwnProps<TItem> {
   /**
@@ -111,11 +119,6 @@ interface AutoGridOwnProps<TItem> {
    */
   noHeaderFilters?: boolean;
   /**
-   * Can be used to force the grid to reload data. Passing a different value
-   * between renders will trigger a reload.
-   */
-  refreshTrigger?: number;
-  /**
    * Allows to add custom columns to the grid. This must be an array of
    * `GridColumn` component instances. Custom columns are added after the
    * auto-generated columns.
@@ -154,8 +157,10 @@ export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
   Readonly<{
-    _cache: {
-      size?: number;
+    _dataProviderController: {
+      rootCache: {
+        size?: number;
+      };
     };
   }>;
 
@@ -256,26 +261,73 @@ function createDataProvider<TItem>(
   };
 }
 
+interface ColumnConfigurationOptions {
+  visibleColumns?: string[];
+  noHeaderFilters?: boolean;
+  customColumns?: JSX.Element[];
+  columnOptions?: Record<string, ColumnOptions>;
+  rowNumbers?: boolean;
+  itemCountHolder: AutoGridItemCountHolder;
+  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
+  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
+}
+
+function addCustomColumns(columns: JSX.Element[], options: ColumnConfigurationOptions): JSX.Element[] {
+  if (!options.customColumns) {
+    return columns;
+  }
+
+  // When using header filters, wrap custom columns into column groups and
+  // move header text or renderer to group
+  const customColumns = options.noHeaderFilters
+    ? options.customColumns
+    : options.customColumns.map((column) => {
+        const { header, headerRenderer } = column.props;
+        const { key } = column;
+        const columnWithoutHeader = cloneElement(column, { header: undefined, headerRenderer: undefined });
+        return (
+          <GridColumnGroup key={key} header={header} headerRenderer={headerRenderer}>
+            {columnWithoutHeader}
+          </GridColumnGroup>
+        );
+      });
+
+  // When using a custom column order, insert custom columns into auto-generated
+  // ones using their `key`
+  if (options.visibleColumns) {
+    const columnMap = [...columns, ...customColumns].reduce((map, column) => {
+      const { key } = column;
+      if (key) {
+        map.set(key, column);
+      }
+      return map;
+    }, new Map<string, JSX.Element>());
+
+    return options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
+  }
+
+  // Otherwise just append custom columns at the end
+  return [...columns, ...customColumns];
+}
+
 function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  noHeaderFilters?: boolean,
-  columnOptions?: Record<string, ColumnOptions>,
+  options: ColumnConfigurationOptions,
 ) {
-  const [sortState, setSortState] = useState<SortState>(
-    properties.length > 0 ? { [properties[0].name]: { direction: 'asc' } } : {},
+  const sortableProperties = properties.filter(
+    (propertyInfo) => options.columnOptions?.[propertyInfo.name]?.sortable !== false,
   );
-
-  return properties.map((propertyInfo) => {
+  const [sortState, setSortState] = useState<SortState>(
+    sortableProperties.length > 0 ? { [sortableProperties[0].name]: { direction: 'asc' } } : {},
+  );
+  let columns = properties.map((propertyInfo) => {
     let column;
-
-    const customColumnOptions = columnOptions ? columnOptions[propertyInfo.name] : undefined;
-
+    const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
     // Header renderer is effectively the header filter, which should only be
     // applied when header filters are enabled
     const { headerRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
-
-    if (!noHeaderFilters) {
+    if (!options.noHeaderFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
           <GridColumn path={propertyInfo.name} headerRenderer={headerRenderer} {...columnProps}></GridColumn>
@@ -299,56 +351,16 @@ function useColumns(
       </ColumnContext.Provider>
     );
   });
-}
 
-function useUserColumns(
-  properties: PropertyInfo[],
-  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  {
-    columnOptions,
-    customColumns,
-    footerCountRenderer,
-    itemCountHolder,
-    noHeaderFilters,
-    rowNumbers,
-    visibleColumns,
-    footerRef,
-  }: {
-    visibleColumns?: string[];
-    noHeaderFilters?: boolean;
-    customColumns?: JSX.Element[];
-    columnOptions?: Record<string, ColumnOptions>;
-    rowNumbers?: boolean;
-    itemCountHolder: AutoGridItemCountHolder;
-    footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
-    footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
-  },
-) {
-  let columns = useColumns(properties, setPropertyFilter, noHeaderFilters, columnOptions);
+  columns = addCustomColumns(columns, options);
 
-  if (customColumns) {
-    if (visibleColumns) {
-      const columnMap = [...columns, ...customColumns].reduce((map, column) => {
-        const { key } = column;
-        if (key) {
-          map.set(key, column);
-        }
-        return map;
-      }, new Map<string, JSX.Element>());
-
-      columns = visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
-    } else {
-      columns = [...columns, ...customColumns];
-    }
-  }
-
-  if (rowNumbers) {
+  if (options.rowNumbers) {
     columns = [
       <GridColumn key="rownumbers" width="4em" flexGrow={0} renderer={AutoGridRowNumberRenderer}></GridColumn>,
       ...columns,
     ];
   }
-
+  
   if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
     const col = (
       <FooterContext.Provider key="grid-footer" value={{ itemCountHolder, footerRef, footerCountRenderer }}>
@@ -361,40 +373,40 @@ function useUserColumns(
   return columns;
 }
 
-/**
- * Auto Grid is a component for displaying tabular data based on a Java backend
- * service. It automatically generates columns based on the properties of a
- * Java class and provides features such as lazy-loading, sorting and filtering.
- *
- * Example usage:
- * ```tsx
- * import { AutoGrid } from '@hilla/react-crud';
- * import PersonService from 'Frontend/generated/endpoints';
- * import PersonModel from 'Frontend/generated/com/example/application/Person';
- *
- * <AutoGrid service={PersonService} model={PersonModel} />
- * ```
- */
-export function AutoGrid<TItem>({
-  service,
-  model,
-  itemIdProperty,
-  experimentalFilter,
-  visibleColumns,
-  noHeaderFilters,
-  refreshTrigger = 0,
-  customColumns,
-  columnOptions,
-  rowNumbers,
-  totalCount,
-  filteredCount,
-  footerCountRenderer,
-  ...gridProps
-}: AutoGridProps<TItem>): JSX.Element {
+function AutoGridInner<TItem>(
+  {
+    service,
+    model,
+    itemIdProperty,
+    experimentalFilter,
+    visibleColumns,
+    noHeaderFilters,
+    customColumns,
+    columnOptions,
+    rowNumbers,
+    totalCount,
+    filteredCount,
+    footerCountRenderer,
+    ...gridProps
+  }: AutoGridProps<TItem>,
+  ref: ForwardedRef<AutoGridRef>,
+): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
+  const gridRef = useRef<GridElement<TItem>>(null);
+  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
   const totalItemCount = useRef(-1);
   const filteredItemCount = useRef(-1);
   const footerRef = useRef<Dispatch<SetStateAction<number>>>(() => {});
+  
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh() {
+        gridRef.current?.clearCache();
+      },
+    }),
+    [],
+  );
 
   const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
     const filterIndex = internalFilter.children.findIndex(
@@ -428,7 +440,7 @@ export function AutoGrid<TItem>({
 
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
-  const children = useUserColumns(properties, setHeaderPropertyFilter, {
+  const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     noHeaderFilters,
     customColumns,
@@ -446,12 +458,9 @@ export function AutoGrid<TItem>({
     }
   }, [noHeaderFilters]);
 
-  const ref = useRef<GridElement<TItem>>(null);
-  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
-
   useEffect(() => {
     // Sets the data provider, should be done only once
-    const grid = ref.current!;
+    const grid = gridRef.current!;
     setTimeout(() => {
       // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
       grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, itemCountHolder, footerRef);
@@ -460,17 +469,37 @@ export function AutoGrid<TItem>({
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
-    const grid = ref.current;
+    const grid = gridRef.current;
     if (grid) {
       dataProviderFilter.current = experimentalFilter ?? internalFilter;
       filteredItemCount.current = -1;
       grid.clearCache();
     }
-  }, [experimentalFilter, internalFilter, refreshTrigger]);
+  }, [experimentalFilter, internalFilter]);
 
   return (
-    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={ref}>
+    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
       {children}
     </Grid>
   );
 }
+
+type AutoGrid = <TItem>(
+  props: AutoGridProps<TItem> & { ref?: ForwardedRef<AutoGridRef> },
+) => ReturnType<typeof AutoGridInner>;
+
+/**
+ * Auto Grid is a component for displaying tabular data based on a Java backend
+ * service. It automatically generates columns based on the properties of a
+ * Java class and provides features such as lazy-loading, sorting and filtering.
+ *
+ * Example usage:
+ * ```tsx
+ * import { AutoGrid } from '@hilla/react-crud';
+ * import PersonService from 'Frontend/generated/endpoints';
+ * import PersonModel from 'Frontend/generated/com/example/application/Person';
+ *
+ * <AutoGrid service={PersonService} model={PersonModel} />
+ * ```
+ */
+export const AutoGrid: AutoGrid = forwardRef(AutoGridInner) as AutoGrid;

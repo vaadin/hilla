@@ -12,6 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+/**
+ * Utility class for converting Hilla {@link Filter} specifications into JPA
+ * filter specifications. This class can be used to implement filtering for
+ * custom {@link ListService} or {@link CrudService} implementations that use
+ * JPA as the data source.
+ * <p>
+ * This class requires an EntityManager to be available as a Spring bean and
+ * thus should be injected into the bean that wants to use the converter.
+ * Manually creating new instances of this class will not work.
+ */
 @Component
 public class JpaFilterConverter {
 
@@ -20,7 +30,12 @@ public class JpaFilterConverter {
 
     /**
      * Converts the given Hilla filter specification into a JPA filter
-     * specification.
+     * specification for the specified entity class.
+     * <p>
+     * If the filter contains {@link PropertyStringFilter} instances, their
+     * properties, or nested property paths, need to match the structure of the
+     * entity class. Likewise, their filter values should be in a format that
+     * can be parsed into the type that the property is of.
      *
      * @param <T>
      *            the type of the entity
