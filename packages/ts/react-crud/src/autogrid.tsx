@@ -492,7 +492,10 @@ function AutoGridInner<TItem>(
   };
 
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
-  const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
+  const pathsWithRenderer = Object.entries(columnOptions ?? {})
+    .filter(([path, options]: [string, ColumnOptions]) => !!options.renderer)
+    .map(([path]: [string, unknown]) => path);
+  const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo, pathsWithRenderer);
   const children = useColumns(properties, setHeaderPropertyFilter, {
     visibleColumns,
     noHeaderFilters,

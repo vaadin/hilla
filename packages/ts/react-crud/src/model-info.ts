@@ -1,14 +1,15 @@
 import {
+  AbstractModel,
   BooleanModel,
   NumberModel,
   StringModel,
   _meta,
   createDetachedModel,
-  type AbstractModel,
   type DetachedModelConstructor,
   type ModelMetadata,
   EnumModel,
   ObjectModel,
+  _parent,
 } from '@hilla/form';
 
 export type PropertyType =
@@ -181,27 +182,35 @@ export class ModelInfo {
   }
 }
 
-export function getDefaultProperties(modelInfo: ModelInfo): PropertyInfo[] {
+export function getDefaultProperties(modelInfo: ModelInfo, pathsWithRenderer: string[] = []): PropertyInfo[] {
+  function hasNestedPathWithRenderer(path: string): boolean {
+    return (
+      pathsWithRenderer.some((pathWithRenderer: string) => pathWithRenderer.startsWith(path)) &&
+      !pathsWithRenderer.includes(path)
+    );
+  }
+
   // Start from root properties
   const properties = modelInfo.getRootProperties();
   return (
     properties
       // Auto-expand nested properties of one-to-one relations
       .flatMap((prop) => {
-        if (hasAnnotation(prop.meta, 'jakarta.persistence.OneToOne')) {
+        if (hasAnnotation(prop.meta, 'jakarta.persistence.OneToOne') || hasNestedPathWithRenderer(prop.name)) {
           return modelInfo.getRootProperties(prop.name);
         }
         return prop;
       })
       // Exclude properties that have an unknown type, or are annotated with id
-      // and version
+      // and version, while keeping paths with renderer
       .filter(
         (prop) =>
-          !!prop.type &&
-          !(
-            hasAnnotation(prop.meta, 'jakarta.persistence.Id') ||
-            hasAnnotation(prop.meta, 'jakarta.persistence.Version')
-          ),
+          (!!prop.type &&
+            !(
+              hasAnnotation(prop.meta, 'jakarta.persistence.Id') ||
+              hasAnnotation(prop.meta, 'jakarta.persistence.Version')
+            )) ||
+          pathsWithRenderer.includes(prop.name),
       )
   );
 }

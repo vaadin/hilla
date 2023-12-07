@@ -3,9 +3,14 @@ import { useState } from 'react';
 import type Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment.js';
 import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel.js';
 import { AppointmentService } from 'Frontend/generated/endpoints.js';
+import {
+  BinderRoot,
+  ValidationResult
+} from "@hilla/form";
 
 export function AutoFormView(): JSX.Element {
   const [submitted, setSubmitted] = useState<Appointment | undefined>(undefined);
+  const [count, setCount] = useState(0);
 
   function handleSubmit({ item }: SubmitEvent<Appointment>) {
     setSubmitted(item);
@@ -30,7 +35,9 @@ export function AutoFormView(): JSX.Element {
       ) : (
         <>
           <h1>Make a new appointment</h1>
+          <button onClick={() => setCount(count + 1)}>Count: {count}</button>
           <br />
+
           <AutoForm
             service={AppointmentService}
             model={AppointmentModel}
@@ -38,6 +45,13 @@ export function AutoFormView(): JSX.Element {
             onSubmitError={handleSubmitError}
             onDeleteSuccess={handleDelete}
             onDeleteError={handleDeleteError}
+            fieldOptions={{doctor: {validators: [
+                  {message: 'fail',
+                  validate(value: unknown, binder: BinderRoot): boolean {
+                    return (!value) || String(value).length < 3;
+                  }
+                  }
+                ]}}}
           />
         </>
       )}

@@ -375,7 +375,13 @@ export function AutoForm<M extends AbstractModel>({
     );
   }
 
-  const visibleProperties = visibleFields ? modelInfo.getProperties(visibleFields) : getDefaultProperties(modelInfo);
+  const pathsWithRenderer = Object.entries(fieldOptions ?? {})
+    .filter(([path, options]: [string, FieldOptions]) => !!options.renderer)
+    .map(([path]: [string, unknown]) => path);
+
+  const visibleProperties = visibleFields
+    ? modelInfo.getProperties(visibleFields)
+    : getDefaultProperties(modelInfo, pathsWithRenderer);
 
   const fields = visibleProperties.map(createAutoFormField);
 
