@@ -20,6 +20,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  cloneElement,
 } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
@@ -170,16 +171,56 @@ function createDataProvider<TItem>(
   };
 }
 
+interface ColumnConfigurationOptions {
+  visibleColumns?: string[];
+  noHeaderFilters?: boolean;
+  customColumns?: JSX.Element[];
+  columnOptions?: Record<string, ColumnOptions>;
+  rowNumbers?: boolean;
+}
+
+function addCustomColumns(columns: JSX.Element[], options: ColumnConfigurationOptions): JSX.Element[] {
+  if (!options.customColumns) {
+    return columns;
+  }
+
+  // When using header filters, wrap custom columns into column groups and
+  // move header text or renderer to group
+  const customColumns = options.noHeaderFilters
+    ? options.customColumns
+    : options.customColumns.map((column) => {
+        const { header, headerRenderer } = column.props;
+        const { key } = column;
+        const columnWithoutHeader = cloneElement(column, { header: undefined, headerRenderer: undefined });
+        return (
+          <GridColumnGroup key={key} header={header} headerRenderer={headerRenderer}>
+            {columnWithoutHeader}
+          </GridColumnGroup>
+        );
+      });
+
+  // When using a custom column order, insert custom columns into auto-generated
+  // ones using their `key`
+  if (options.visibleColumns) {
+    const columnMap = [...columns, ...customColumns].reduce((map, column) => {
+      const { key } = column;
+      if (key) {
+        map.set(key, column);
+      }
+      return map;
+    }, new Map<string, JSX.Element>());
+
+    return options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
+  }
+
+  // Otherwise just append custom columns at the end
+  return [...columns, ...customColumns];
+}
+
 function useColumns(
   properties: PropertyInfo[],
   setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
-  options: {
-    visibleColumns?: string[];
-    noHeaderFilters?: boolean;
-    customColumns?: JSX.Element[];
-    columnOptions?: Record<string, ColumnOptions>;
-    rowNumbers?: boolean;
-  },
+  options: ColumnConfigurationOptions,
 ) {
   const sortableProperties = properties.filter(
     (propertyInfo) => options.columnOptions?.[propertyInfo.name]?.sortable !== false,
@@ -222,21 +263,7 @@ function useColumns(
     );
   });
 
-  if (options.customColumns) {
-    if (options.visibleColumns) {
-      const columnMap = [...columns, ...options.customColumns].reduce((map, column) => {
-        const { key } = column;
-        if (key) {
-          map.set(key, column);
-        }
-        return map;
-      }, new Map<string, JSX.Element>());
-
-      columns = options.visibleColumns.map((path) => columnMap.get(path)).filter(Boolean) as JSX.Element[];
-    } else {
-      columns = [...columns, ...options.customColumns];
-    }
-  }
+  columns = addCustomColumns(columns, options);
 
   if (options.rowNumbers) {
     columns = [
