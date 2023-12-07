@@ -15,4 +15,3 @@ export interface CountService<T> {
 }
 
 export interface CrudService<T> extends FormService<T>, ListService<T> {}
-

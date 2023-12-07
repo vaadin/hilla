@@ -176,11 +176,13 @@ async function getDataProviderCountFromService<TItem>(
   const { totalCount, totalItemCount, filteredItemCount } = itemCountHolder;
 
   if (totalCount && totalItemCount.current < 0) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
     totalItemCount.current = await countService.count(undefined);
   }
 
   let realSize = filteredItemCount.current;
   if (realSize < 0) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
     realSize = await countService.count(filter.current);
     filteredItemCount.current = realSize;
     footerRef.current(realSize);
@@ -202,7 +204,7 @@ function getDataProviderCountFromCache<TItem>(
   if (items.length === pageSize) {
     infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
 
-    const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._cache.size;
+    const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._dataProviderController.rootCache.size;
     if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
       // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
       infiniteScrollingSize = undefined;
@@ -360,7 +362,7 @@ function useColumns(
       ...columns,
     ];
   }
-  
+  const { itemCountHolder, footerRef, footerCountRenderer } = options;
   if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
     const col = (
       <FooterContext.Provider key="grid-footer" value={{ itemCountHolder, footerRef, footerCountRenderer }}>
@@ -397,7 +399,7 @@ function AutoGridInner<TItem>(
   const totalItemCount = useRef(-1);
   const filteredItemCount = useRef(-1);
   const footerRef = useRef<Dispatch<SetStateAction<number>>>(() => {});
-  
+
   useImperativeHandle(
     ref,
     () => ({
