@@ -404,6 +404,8 @@ function AutoGridInner<TItem>(
     ref,
     () => ({
       refresh() {
+        filteredItemCount.current = -1;
+        totalItemCount.current = -1;
         gridRef.current?.clearCache();
       },
     }),
