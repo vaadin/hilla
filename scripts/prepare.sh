@@ -4,7 +4,7 @@
 # cannot use maven project.version here, as file generation happens before building maven
 version=`jq .version packages/ts/generator-typescript-core/package.json | cut -d '"' -f 2`
 # TODO: compute this number when we maintain multiple hilla branches
-branch=24.3.0.beta1
+branch=24.3.0.rc1
 
 # download needed files from vaadin/platform
 url=https://raw.githubusercontent.com/vaadin
