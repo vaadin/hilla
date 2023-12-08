@@ -86,7 +86,8 @@ public class Remapper {
             return newFilter;
         }
 
-        // never happens
+        // unknown filters are returned as-is: they are supposed to be already
+        // customized according to the use case
         return filter;
     }
 
