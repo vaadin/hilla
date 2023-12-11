@@ -1,36 +1,74 @@
-import { _enum, type EnumModel, type Validator } from '@hilla/form';
-import { Checkbox, type CheckboxProps } from '@hilla/react-components/Checkbox.js';
-import { DatePicker, type DatePickerProps } from '@hilla/react-components/DatePicker.js';
-import { DateTimePicker, type DateTimePickerProps } from '@hilla/react-components/DateTimePicker.js';
-import { IntegerField, type IntegerFieldProps } from '@hilla/react-components/IntegerField.js';
-import { NumberField, type NumberFieldProps } from '@hilla/react-components/NumberField.js';
-import { Select, type SelectProps } from '@hilla/react-components/Select.js';
-import { TextArea, type TextAreaProps } from '@hilla/react-components/TextArea.js';
-import { TextField, type TextFieldProps } from '@hilla/react-components/TextField.js';
-import { TimePicker, type TimePickerProps } from '@hilla/react-components/TimePicker.js';
+import { _enum, type AbstractModel, type EnumModel, type Validator } from '@hilla/form';
+import { Checkbox } from '@hilla/react-components/Checkbox.js';
+import { DatePicker } from '@hilla/react-components/DatePicker.js';
+import { DateTimePicker } from '@hilla/react-components/DateTimePicker.js';
+import { IntegerField } from '@hilla/react-components/IntegerField.js';
+import { NumberField } from '@hilla/react-components/NumberField.js';
+import { Select } from '@hilla/react-components/Select.js';
+import { TextArea } from '@hilla/react-components/TextArea.js';
+import { TextField } from '@hilla/react-components/TextField.js';
+import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
 import { useFormPart } from '@hilla/react-form';
-import type { JSX } from 'react';
+import type { CSSProperties, JSX } from 'react';
 import { useEffect, useMemo } from 'react';
 import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
 import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
 
-export type SharedFieldProps = Readonly<{
+export type AutoFormFieldProps = Readonly<{
   propertyInfo: PropertyInfo;
-  colSpan?: number;
   form: UseFormResult<any>;
   options: FieldOptions;
+  disabled?: boolean;
 }>;
 
 type CustomFormFieldProps = FieldDirectiveResult & Readonly<{ label?: string; disabled?: boolean }>;
 
 export type FieldOptions = Readonly<{
   /**
+   * The id to apply to the field.
+   */
+  id?: string;
+  /**
+   * The class names to add to the field.
+   */
+  className?: string;
+  /**
+   * The style to apply to the field.
+   */
+  style?: CSSProperties;
+  /**
    * The label to show for the field. If not specified, a human-readable label
    * is generated from the property name.
    */
   label?: string;
+  /**
+   * The placeholder to when the field is empty.
+   *
+   * Note that some field types, such as checkbox, do not support a placeholder.
+   */
+  placeholder?: string;
+  /**
+   * The helper text to display below the field.
+   *
+   * Note that some field types, such as checkbox, do not support a helper text.
+   */
+  helperText?: string;
+  /**
+   * The number of columns to span. This value is passed to the underlying
+   * FormLayout, unless a custom layout is used. In that case, the value is
+   * ignored.
+   */
+  colspan?: number;
+  /**
+   * Whether the field should be disabled.
+   */
+  disabled?: boolean;
+  /**
+   * Whether the field should be readonly.
+   */
+  readonly?: boolean;
   /**
    * Allows to specify a custom renderer for the field, for example to render a
    * custom type of field or apply an additional layout around the field. The
@@ -48,12 +86,6 @@ export type FieldOptions = Readonly<{
    */
   renderer?(props: { field: CustomFormFieldProps }): JSX.Element;
   /**
-   * The number of columns to span. This value is passed to the underlying
-   * FormLayout, unless a custom layout is used. In that case, the value is
-   * ignored.
-   */
-  colspan?: number;
-  /**
    * Validators to apply to the field. The validators are added to the form
    * when the field is rendered.
    * UseMemo is recommended for the validators, so that they are not recreated
@@ -62,98 +94,75 @@ export type FieldOptions = Readonly<{
   validators?: Validator[];
 }>;
 
+type CommonFieldProps = Pick<
+  FieldOptions,
+  'className' | 'colspan' | 'disabled' | 'helperText' | 'id' | 'label' | 'placeholder' | 'readonly' | 'style'
+>;
+
+type FieldRendererProps = Readonly<{
+  model: AbstractModel;
+  field: FieldDirectiveResult;
+  fieldProps: CommonFieldProps;
+}>;
+
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
   const pathParts = propertyInfo.name.split('.');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return pathParts.reduce<any>((model, property) => (model ? model[property] : undefined), form.model);
 }
 
-type AutoFormTextFieldProps = SharedFieldProps & TextFieldProps;
-
-function AutoFormTextField({ propertyInfo, form, options, label, ...other }: AutoFormTextFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
-  return <TextField {...other} {...form.field(model)} label={label} />;
+function AutoFormTextField({ field, fieldProps }: FieldRendererProps) {
+  return <TextField {...field} {...fieldProps} />;
 }
 
-type AutoFormIntegerFieldProps = IntegerFieldProps & SharedFieldProps;
-
-function AutoFormIntegerField({ propertyInfo, form, label, ...other }: AutoFormIntegerFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
-  return <IntegerField {...other} {...form.field(model)} label={label} />;
+function AutoFormIntegerField({ field, fieldProps }: FieldRendererProps) {
+  return <IntegerField {...field} {...fieldProps} />;
 }
 
-type AutoFormNumberFieldProps = NumberFieldProps & SharedFieldProps;
-
-function AutoFormDecimalField({ propertyInfo, form, label, ...other }: AutoFormNumberFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
-  return <NumberField {...other} {...form.field(model)} label={label} />;
+function AutoFormDecimalField({ field, fieldProps }: FieldRendererProps) {
+  return <NumberField {...field} {...fieldProps} />;
 }
 
-type AutoFormDateFieldProps = DatePickerProps & SharedFieldProps;
-
-function AutoFormDateField({ propertyInfo, form, label, ...other }: AutoFormDateFieldProps) {
+function AutoFormDateField({ field, fieldProps }: FieldRendererProps) {
   const i18n = useDatePickerI18n();
-  const model = getPropertyModel(form, propertyInfo);
-  return <DatePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
+  return <DatePicker i18n={i18n} {...field} {...fieldProps} />;
 }
 
-type AutoFormTimeFieldProps = SharedFieldProps & TimePickerProps;
-
-function AutoFormTimeField({ propertyInfo, form, label, ...other }: AutoFormTimeFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
-  return <TimePicker {...other} {...form.field(model)} label={label} />;
+function AutoFormTimeField({ field, fieldProps }: FieldRendererProps) {
+  return <TimePicker {...field} {...fieldProps} />;
 }
 
-type AutoFormDateTimeFieldProps = DateTimePickerProps & SharedFieldProps;
-
-function AutoFormDateTimeField({ propertyInfo, form, label, ...other }: AutoFormDateTimeFieldProps) {
+function AutoFormDateTimeField({ field, fieldProps }: FieldRendererProps) {
   const i18n = useDateTimePickerI18n();
-  const model = getPropertyModel(form, propertyInfo);
-  return <DateTimePicker i18n={i18n} {...other} {...form.field(model)} label={label} />;
+  return <DateTimePicker i18n={i18n} {...field} {...fieldProps} />;
 }
 
-type AutoFormEnumFieldProps = SelectProps & SharedFieldProps;
-
-function AutoFormEnumField({ propertyInfo, form, label, ...other }: AutoFormEnumFieldProps) {
-  const model = getPropertyModel(form, propertyInfo) as EnumModel;
-  const options = Object.keys(model[_enum]).map((value) => ({
+function AutoFormEnumField({ model, field, fieldProps }: FieldRendererProps) {
+  const enumModel = model as EnumModel;
+  const options = Object.keys(enumModel[_enum]).map((value) => ({
     label: convertToTitleCase(value),
     value,
   }));
-  return <Select {...other} {...form.field(model)} label={label} items={options} />;
+  return <Select {...field} {...fieldProps} items={options} />;
 }
 
-type AutoFormBooleanFieldProps = CheckboxProps & SharedFieldProps;
-
-function AutoFormBooleanField({ propertyInfo, form, label, ...other }: AutoFormBooleanFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
-  return <Checkbox {...other} {...form.field(model)} label={label} />;
+function AutoFormBooleanField({ field, fieldProps }: FieldRendererProps) {
+  return <Checkbox {...field} {...fieldProps} />;
 }
 
-type AutoFormObjectFieldProps = SharedFieldProps & TextAreaProps;
-
-function AutoFormObjectField({ propertyInfo, form, label, ...other }: AutoFormObjectFieldProps) {
-  const model = getPropertyModel(form, propertyInfo);
+function AutoFormObjectField({ model, fieldProps }: FieldRendererProps) {
   const part = useFormPart(model);
   const jsonString = part.value ? JSON.stringify(part.value) : '';
-  return <TextArea {...other} value={jsonString} label={label} readonly />;
+  return <TextArea {...fieldProps} value={jsonString} readonly />;
 }
-
-export type AutoFormFieldProps = CheckboxProps &
-  DatePickerProps &
-  DateTimePickerProps &
-  IntegerFieldProps &
-  NumberFieldProps &
-  SelectProps &
-  SharedFieldProps &
-  TextFieldProps &
-  TimePickerProps;
 
 export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
   const { form, propertyInfo, options } = props;
   const label = options.label ?? propertyInfo.humanReadableName;
+  const model = getPropertyModel(form, propertyInfo);
+  const field = form.field(model);
 
-  const formPart = useFormPart(getPropertyModel(form, propertyInfo));
+  const formPart = useFormPart(model);
   const defaultValidators = useMemo(() => formPart.validators, []);
   const { validators } = options;
   useEffect(() => {
@@ -161,28 +170,41 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
   }, [validators]);
 
   if (options.renderer) {
-    const customFieldProps = { ...form.field(getPropertyModel(form, propertyInfo)), disabled: props.disabled, label };
+    const customFieldProps = { ...field, disabled: props.disabled, label };
     return options.renderer({ field: customFieldProps });
   }
+
+  const fieldProps: CommonFieldProps = {
+    id: options.id,
+    className: options.className,
+    style: options.style,
+    label,
+    placeholder: options.placeholder,
+    helperText: options.helperText,
+    colspan: options.colspan,
+    disabled: options.disabled ?? props.disabled,
+    readonly: options.readonly,
+  };
+
   switch (props.propertyInfo.type) {
     case 'string':
-      return <AutoFormTextField {...props} label={label}></AutoFormTextField>;
+      return <AutoFormTextField model={model} field={field} fieldProps={fieldProps}></AutoFormTextField>;
     case 'integer':
-      return <AutoFormIntegerField {...props} label={label}></AutoFormIntegerField>;
+      return <AutoFormIntegerField model={model} field={field} fieldProps={fieldProps}></AutoFormIntegerField>;
     case 'decimal':
-      return <AutoFormDecimalField {...props} label={label}></AutoFormDecimalField>;
+      return <AutoFormDecimalField model={model} field={field} fieldProps={fieldProps}></AutoFormDecimalField>;
     case 'date':
-      return <AutoFormDateField {...props} label={label}></AutoFormDateField>;
+      return <AutoFormDateField model={model} field={field} fieldProps={fieldProps}></AutoFormDateField>;
     case 'time':
-      return <AutoFormTimeField {...props} label={label}></AutoFormTimeField>;
+      return <AutoFormTimeField model={model} field={field} fieldProps={fieldProps}></AutoFormTimeField>;
     case 'datetime':
-      return <AutoFormDateTimeField {...props} label={label}></AutoFormDateTimeField>;
+      return <AutoFormDateTimeField model={model} field={field} fieldProps={fieldProps}></AutoFormDateTimeField>;
     case 'enum':
-      return <AutoFormEnumField {...props} label={label}></AutoFormEnumField>;
+      return <AutoFormEnumField model={model} field={field} fieldProps={fieldProps}></AutoFormEnumField>;
     case 'boolean':
-      return <AutoFormBooleanField {...props} label={label}></AutoFormBooleanField>;
+      return <AutoFormBooleanField model={model} field={field} fieldProps={fieldProps}></AutoFormBooleanField>;
     case 'object':
-      return <AutoFormObjectField {...props} label={label}></AutoFormObjectField>;
+      return <AutoFormObjectField model={model} field={field} fieldProps={fieldProps}></AutoFormObjectField>;
     default:
       return null;
   }
