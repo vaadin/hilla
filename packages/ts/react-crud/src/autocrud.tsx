@@ -5,7 +5,7 @@ import { type JSX, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
-import { type AutoGridProps, AutoGrid } from './autogrid.js';
+import { type AutoGridProps, AutoGrid, type AutoGridRef } from './autogrid.js';
 import type { CrudService } from './crud.js';
 import { useMediaQuery } from './media-query.js';
 import { type ComponentStyleProps, registerStylesheet } from './util.js';
@@ -97,7 +97,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   const [item, setItem] = useState<Value<TModel> | typeof emptyItem | undefined>(undefined);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
 
-  const autoGridRef = useRef<{ refresh(): void }>(null);
+  const autoGridRef = useRef<AutoGridRef>(null);
 
   function refreshGrid() {
     autoGridRef.current?.refresh();
