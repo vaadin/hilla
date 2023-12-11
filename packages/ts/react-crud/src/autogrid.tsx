@@ -147,16 +147,24 @@ interface AutoGridOwnProps<TItem> {
   rowNumbers?: boolean;
   /**
    * When enabled, shows the total count of items in the grid footer.
+   * This requires the provided service to implement the CountService interface,
+   *  otherwise an error will be logged to the console, without any count being
+   *  rendered.
    */
   totalCount?: boolean;
   /**
    * When enabled, shows the filtered item count in the grid footer.
-   * if totalCount is also enabled, it will show both totalCount and filteredCount
+   * if totalCount is also enabled, it will show both totalCount and filteredCount.
+   * This requires the provided service to implement the CountService interface,
+   *  otherwise an error will be logged to the console, without any count being
+   *  rendered.
    */
   filteredCount?: boolean;
   /**
    * Allows to customize the grid footer with a custom renderer component for
    *  the total count and filtered item count.
+   * This requires the provided service to implement the CountService interface,
+   * See {@link AutoGrid#totalCount} and {@link AutoGrid#filteredCount}.
    */
   footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
 }

@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { ListService } from '../crud';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
-import type { CrudService } from '../src/crud.js';
+import type { CountService, CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
@@ -239,6 +239,22 @@ describe('@hilla/react-crud', () => {
       });
 
       describe('Grid item count', () => {
+        let autoGridRef: AutoGridRef;
+
+        const AutoGridWithCountAndRefresh = ({ service }: { service: CountService<any> & ListService<any> }) => {
+          const ref = useRef<AutoGridRef>(null);
+          useEffect(() => {
+            if (ref.current) {
+              autoGridRef = ref.current;
+            }
+          }, []);
+          return (
+            <span>
+              <AutoGrid service={service} model={PersonModel} totalCount filteredCount ref={ref} />
+            </span>
+          );
+        };
+
         it('Works with a larger data set', async () => {
           const service = personService();
           const personTestData: Person[] = Array(387)
@@ -394,6 +410,29 @@ describe('@hilla/react-crud', () => {
 
           expect(grid.getRowCount()).to.equal(3);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 / 100'));
+        });
+
+        it('Shows correct counts after adding and removing an item and calling refresh', async () => {
+          const service = personService();
+          const result = render(<AutoGridWithCountAndRefresh service={service} />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(2);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 2'));
+
+          await service.save({ ...personData[0], id: 3 });
+          autoGridRef.refresh();
+          await nextFrame();
+
+          expect(grid.getRowCount()).to.equal(3);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 out of 3'));
+
+          await service.delete(3);
+          autoGridRef.refresh();
+          await nextFrame();
+
+          expect(grid.getRowCount()).to.equal(2);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 2'));
         });
 
         it('provides error in console when either of totalCount or filterCount are present and the service does not implement CountService', async () => {
