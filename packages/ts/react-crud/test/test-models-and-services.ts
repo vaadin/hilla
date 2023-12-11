@@ -9,7 +9,7 @@ import {
   makeEnumEmptyValueCreator,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
-import type { CountService, CrudService } from '../src/crud.js';
+import type { CountService, CrudService, ListService } from '../src/crud.js';
 import type FilterUnion from '../src/types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
@@ -436,6 +436,16 @@ export const createService = <T extends HasIdVersion>(
   };
 };
 
+export const createListService = <T extends HasIdVersion>(initialData: T[]): HasTestInfo & ListService<T> => {
+  const service = createService(initialData);
+  return {
+    callCount: 0,
+    lastFilter: undefined,
+    lastSort: undefined,
+    list: async (request: Pageable, filter: FilterUnion | undefined): Promise<T[]> => service.list(request, filter),
+  };
+};
+
 export const personData: Person[] = [
   {
     id: 1,
@@ -552,6 +562,7 @@ export type HasTestInfo = {
 };
 
 export const personService = (): CountService<Person> & CrudService<Person> & HasTestInfo => createService(personData);
+export const personListService = (): ListService<Person> => createListService(personData);
 export const companyService = (): CountService<Company> & CrudService<Company> & HasTestInfo =>
   createService(companyData);
 export const columnRendererTestService = (): CountService<ColumnRendererTestValues> &

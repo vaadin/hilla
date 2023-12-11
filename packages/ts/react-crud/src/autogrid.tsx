@@ -11,6 +11,7 @@ import {
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import {
+  cloneElement,
   type ComponentType,
   type Dispatch,
   type ForwardedRef,
@@ -19,11 +20,10 @@ import {
   type MutableRefObject,
   type SetStateAction,
   useEffect,
-  useMemo,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
-  cloneElement,
 } from 'react';
 import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
@@ -164,7 +164,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
-async function getDataProviderCountFromService<TItem>(
+async function initDataProviderUsingCountService<TItem>(
   service: ListService<TItem>,
   itemCountHolder: AutoGridItemCountHolder,
   filter: MutableRefObject<FilterUnion | undefined>,
@@ -191,13 +191,11 @@ async function getDataProviderCountFromService<TItem>(
   callback(items, realSize);
 }
 
-function getDataProviderCountFromCache<TItem>(
+function initDataProviderUsingInfiniteScrolling<TItem>(
   items: TItem[],
   pageSize: number,
   pageNumber: number,
   grid: GridElement<TItem>,
-  itemCountHolder: AutoGridItemCountHolder,
-  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
   callback: GridDataProviderCallback<TItem>,
 ) {
   let infiniteScrollingSize;
@@ -212,9 +210,6 @@ function getDataProviderCountFromCache<TItem>(
   } else {
     infiniteScrollingSize = pageNumber * pageSize + items.length;
   }
-  const size = infiniteScrollingSize ?? -1;
-  itemCountHolder.filteredItemCount.current = size;
-  footerRef.current(size);
 
   callback(items, infiniteScrollingSize);
 }
@@ -249,10 +244,15 @@ function createDataProvider<TItem>(
     const items = await service.list(req, filter.current);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if ((service as any).count) {
-      await getDataProviderCountFromService(service, itemCountHolder, filter, footerRef, callback, items);
+    if (!(service as any).count) {
+      if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
+        console.error(
+          '"totalCount" and/or "filteredCount" props require the provided service to implement the CountService interface.',
+        );
+      }
+      initDataProviderUsingInfiniteScrolling(items, pageSize, pageNumber, grid, callback);
     } else {
-      getDataProviderCountFromCache(items, pageSize, pageNumber, grid, itemCountHolder, footerRef, callback);
+      await initDataProviderUsingCountService(service, itemCountHolder, filter, footerRef, callback, items);
     }
 
     if (first) {

@@ -28,6 +28,7 @@ import {
   type HasTestInfo,
   type Person,
   personData,
+  personListService,
   PersonModel,
   personService,
   PersonWithoutIdPropertyModel,
@@ -78,6 +79,11 @@ describe('@hilla/react-crud', () => {
 
     beforeEach(() => {
       user = userEvent.setup();
+      sinon.spy(console, 'error');
+    });
+
+    afterEach(() => {
+      sinon.restore();
     });
 
     describe('basics', () => {
@@ -260,7 +266,7 @@ describe('@hilla/react-crud', () => {
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 387'));
         });
 
-        it('Shows filtered item count ', async () => {
+        it('Shows filtered item count', async () => {
           const service = personService();
           const personTestData: Person[] = Array(156)
             .fill(null)
@@ -274,7 +280,7 @@ describe('@hilla/react-crud', () => {
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 156'));
         });
 
-        it('Shows zero as total item count ', async () => {
+        it('Shows zero as total item count', async () => {
           const service = personService();
           const personTestData: Person[] = [];
           sinon.stub(service, 'list').resolves(personTestData);
@@ -286,7 +292,7 @@ describe('@hilla/react-crud', () => {
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 0'));
         });
 
-        it('Shows zero as filtered item count ', async () => {
+        it('Shows zero as filtered item count', async () => {
           const service = personService();
           const personTestData: Person[] = [];
           sinon.stub(service, 'list').resolves(personTestData);
@@ -298,7 +304,7 @@ describe('@hilla/react-crud', () => {
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0'));
         });
 
-        it('Shows zero as total and filtered item count ', async () => {
+        it('Shows zero as total and filtered item count', async () => {
           const service = personService();
           const personTestData: Person[] = [];
           sinon.stub(service, 'list').resolves(personTestData);
@@ -388,6 +394,21 @@ describe('@hilla/react-crud', () => {
 
           expect(grid.getRowCount()).to.equal(3);
           await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 / 100'));
+        });
+
+        it('provides error in console when either of totalCount or filterCount are present and the service does not implement CountService', async () => {
+          const service = personListService();
+          const personTestData: Person[] = Array(3)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+
+          const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount totalCount />);
+          await GridController.init(result, user);
+
+          expect(console.error).to.have.been.calledWith(
+            '"totalCount" and/or "filteredCount" props require the provided service to implement the CountService interface.',
+          );
         });
       });
 
