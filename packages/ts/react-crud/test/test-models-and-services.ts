@@ -437,11 +437,11 @@ export const createService = <T extends HasIdVersion>(
 };
 
 export const createListService = <T extends HasIdVersion>(initialData: T[]): HasTestInfo & ListService<T> => {
-  const service = createService(initialData);
+  const service = createService(initialData)!;
   return {
-    callCount: 0,
-    lastFilter: undefined,
-    lastSort: undefined,
+    callCount: service.callCount,
+    lastFilter: service.lastFilter,
+    lastSort: service.lastSort,
     list: async (request: Pageable, filter: FilterUnion | undefined): Promise<T[]> => service.list(request, filter),
   };
 };
