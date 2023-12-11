@@ -363,8 +363,6 @@ export function AutoForm<M extends AbstractModel>({
 
   function createAutoFormField(propertyInfo: PropertyInfo): JSX.Element {
     const fieldOptionsForProperty = fieldOptions?.[propertyInfo.name] ?? {};
-    const colspanValue = fieldOptionsForProperty.colspan;
-    const colspan = colspanValue ? { colspan: colspanValue } : {};
 
     return (
       <AutoFormField
@@ -373,7 +371,6 @@ export function AutoForm<M extends AbstractModel>({
         form={form}
         disabled={disabled}
         options={fieldOptionsForProperty}
-        {...colspan}
       />
     );
   }
