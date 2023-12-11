@@ -1118,7 +1118,7 @@ describe('@hilla/react-crud', () => {
       });
     });
 
-    describe('grid refresh', () => {
+    describe('auto grid ref', () => {
       let autoGridRef: AutoGridRef;
 
       const AutoGridRefreshTestWrapper = ({ service }: { service: ListService<any> }) => {
@@ -1135,7 +1135,7 @@ describe('@hilla/react-crud', () => {
         );
       };
 
-      it('reloads data when refresh is called', async () => {
+      it('reloads data when refresh is called on ref', async () => {
         const service = personService();
         const listSpy = sinon.spy(service, 'list');
         render(<AutoGridRefreshTestWrapper service={service} />);
@@ -1144,6 +1144,12 @@ describe('@hilla/react-crud', () => {
         expect(listSpy).to.have.been.calledOnce;
         autoGridRef.refresh();
         expect(listSpy).to.have.been.calledTwice;
+      });
+
+      it('exposes vaadin-grid element on ref', () => {
+        render(<AutoGridRefreshTestWrapper service={personService()} />);
+        expect(autoGridRef.grid).to.exist;
+        expect(autoGridRef.grid!.localName).to.equal('vaadin-grid');
       });
     });
 
