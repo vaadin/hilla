@@ -1000,77 +1000,200 @@ describe('@hilla/react-crud', () => {
     });
 
     describe('Field Options', () => {
-      it('renders custom field from field options instead of the default one', async () => {
-        const service = personService();
-        const saveSpy = sinon.spy(service, 'save');
+      describe('renderer', () => {
+        it('renders custom field instead of the default field', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
 
-        const result = await FormController.init(
-          user,
-          render(
-            <AutoForm
-              service={service}
-              model={PersonModel}
-              fieldOptions={{
-                lastName: {
-                  label: 'Custom last name',
-                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
-                },
-              }}
-            />,
-          ).container,
-        );
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={service}
+                model={PersonModel}
+                fieldOptions={{
+                  lastName: {
+                    label: 'Custom last name',
+                    renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                  },
+                }}
+              />,
+            ).container,
+          );
 
-        const field = await result.getField('Custom last name');
-        expect(field.localName).to.equal('vaadin-text-area');
+          const field = await result.getField('Custom last name');
+          expect(field.localName).to.equal('vaadin-text-area');
 
-        await result.typeInField('Custom last name', 'Maxwell\nSmart');
-        await result.submit();
+          await result.typeInField('Custom last name', 'Maxwell\nSmart');
+          await result.submit();
 
-        expect(saveSpy).to.have.been.calledOnce;
-        expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
+          expect(saveSpy).to.have.been.calledOnce;
+          expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
+        });
+
+        it('disables custom field when form is disabled', async () => {
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={personService()}
+                model={PersonModel}
+                disabled
+                fieldOptions={{
+                  lastName: {
+                    renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                  },
+                }}
+              />,
+            ).container,
+          );
+
+          const field = await result.getField('Last name');
+          expect(field.disabled).to.be.true;
+        });
+
+        it('prefers custom fields props over field options props', async () => {
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={personService()}
+                model={PersonModel}
+                disabled
+                fieldOptions={{
+                  lastName: {
+                    label: 'This should not be used',
+                    renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
+                  },
+                }}
+              />,
+            ).container,
+          );
+
+          const field = result.queryField('Custom last name');
+          expect(field).to.exist;
+        });
       });
 
-      it('disables custom field from field options when form is disabled', async () => {
-        const result = await FormController.init(
-          user,
-          render(
-            <AutoForm
-              service={personService()}
-              model={PersonModel}
-              disabled
-              fieldOptions={{
-                lastName: {
-                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
-                },
-              }}
-            />,
-          ).container,
-        );
+      describe('element', () => {
+        it('renders custom field instead of the default field', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
 
-        const field = await result.getField('Last name');
-        expect(field.disabled).to.be.true;
-      });
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={service}
+                model={PersonModel}
+                fieldOptions={{
+                  lastName: {
+                    element: <TextArea label="Custom last name" />,
+                  },
+                }}
+              />,
+            ).container,
+          );
 
-      it('allows setting a custom label on a custom field from field options', async () => {
-        const result = await FormController.init(
-          user,
-          render(
-            <AutoForm
-              service={personService()}
-              model={PersonModel}
-              disabled
-              fieldOptions={{
-                lastName: {
-                  label: 'This should not be used',
-                  renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
-                },
-              }}
-            />,
-          ).container,
-        );
+          const field = await result.getField('Custom last name');
+          expect(field.localName).to.equal('vaadin-text-area');
 
-        const field = result.queryField('Custom last name');
-        expect(field).to.exist;
+          await result.typeInField('Custom last name', 'Maxwell\nSmart');
+          await result.submit();
+
+          expect(saveSpy).to.have.been.calledOnce;
+          expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
+        });
+
+        it('disables custom field when form is disabled', async () => {
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={personService()}
+                model={PersonModel}
+                disabled
+                fieldOptions={{
+                  lastName: {
+                    element: <TextArea />,
+                  },
+                }}
+              />,
+            ).container,
+          );
+
+          const field = await result.getField('Last name');
+          expect(field.disabled).to.be.true;
+        });
+
+        it('applies field options props to custom field', async () => {
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={personService()}
+                model={PersonModel}
+                disabled
+                fieldOptions={{
+                  lastName: {
+                    placeholder: 'Custom placeholder',
+                    helperText: 'Custom helper text',
+                    element: <TextArea />,
+                  },
+                }}
+              />,
+            ).container,
+          );
+
+          const field = (await result.getField('Last name')) as TextAreaElement;
+          expect(field.placeholder).to.equal('Custom placeholder');
+          expect(field.helperText).to.equal('Custom helper text');
+        });
+
+        it('prefers custom fields props over field options props', async () => {
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={personService()}
+                model={PersonModel}
+                disabled
+                fieldOptions={{
+                  lastName: {
+                    label: 'This should not be used',
+                    placeholder: 'This should not be used',
+                    element: <TextArea label="Custom last name" placeholder="Custom placeholder" />,
+                  },
+                }}
+              />,
+            ).container,
+          );
+
+          const field = result.queryField('Custom last name') as TextAreaElement;
+          expect(field).to.exist;
+          expect(field.placeholder).to.equal('Custom placeholder');
+        });
+
+        it('preserves custom field props', async () => {
+          const result = await FormController.init(
+            user,
+            render(
+              <AutoForm
+                service={personService()}
+                model={PersonModel}
+                disabled
+                fieldOptions={{
+                  lastName: {
+                    element: <TextArea clearButtonVisible />,
+                  },
+                }}
+              />,
+            ).container,
+          );
+
+          const field = (await result.getField('Last name')) as TextAreaElement;
+          expect(field.clearButtonVisible).to.be.true;
+        });
       });
 
       it('allows customizing common field props', async () => {

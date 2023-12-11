@@ -10,8 +10,15 @@ import { TextField } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
 import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
 import { useFormPart } from '@hilla/react-form';
-import type { CSSProperties, JSX } from 'react';
-import { useEffect, useMemo } from 'react';
+import {
+  cloneElement,
+  type ComponentType,
+  createElement,
+  type CSSProperties,
+  type JSX,
+  useEffect,
+  useMemo,
+} from 'react';
 import { useDatePickerI18n, useDateTimePickerI18n } from './locale.js';
 import type { PropertyInfo } from './model-info.js';
 import { convertToTitleCase } from './util.js';
@@ -70,16 +77,51 @@ export type FieldOptions = Readonly<{
    */
   readonly?: boolean;
   /**
+   * The element to render for the field. This allows customizing field props
+   * that are not supported by the field options, or to render a different field
+   * component. Other field options are automatically applied to the element,
+   * and the element is automatically bound to the form. If not specified, a
+   * default field element is rendered based on the property type.
+   *
+   * The element must be a field component, such as TextField, TextArea,
+   * NumberField, etc., otherwise form binding will not work. For more
+   * sophisticated customizations, use the `renderer` option.
+   *
+   * If the field options also specify a renderer function, then the element is
+   * ignored.
+   *
+   * Example enabling the clear button for a text field:
+   * ```tsx
+   * {
+   *   element: <TextField clearButtonVisible />
+   * }
+   * ```
+   *
+   * Example rendering a text area instead of a text field:
+   * ```tsx
+   * {
+   *   element: <TextArea />
+   * }
+   * ```
+   */
+  element?: JSX.Element;
+  /**
    * Allows to specify a custom renderer for the field, for example to render a
    * custom type of field or apply an additional layout around the field. The
    * renderer receives field props that must be applied to the custom field
    * component in order to connect it to the form.
    *
+   * In order to customize one of the default fields, or render a different type
+   * of field, consider using the `element` option instead.
+   *
    * Example:
    * ```tsx
    * {
    *   renderer: ({ field }) => (
-   *     <TextArea {...field} />
+   *     <div>
+   *       <TextArea {...field} />
+   *       <p>Number of words: {calculateNumberOfWords()}</p>
+   *     </div>
    *   )
    * }
    * ```
@@ -102,6 +144,7 @@ type CommonFieldProps = Pick<
 type FieldRendererProps = Readonly<{
   model: AbstractModel;
   field: FieldDirectiveResult;
+  element?: JSX.Element;
   fieldProps: CommonFieldProps;
 }>;
 
@@ -111,43 +154,52 @@ function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) 
   return pathParts.reduce<any>((model, property) => (model ? model[property] : undefined), form.model);
 }
 
-function AutoFormTextField({ field, fieldProps }: FieldRendererProps) {
-  return <TextField {...field} {...fieldProps} />;
+function renderFieldElement(
+  defaultComponentType: ComponentType,
+  { element, field, fieldProps }: FieldRendererProps,
+  additionalProps: any = {},
+) {
+  const fieldElement = element ?? createElement(defaultComponentType);
+  return cloneElement(fieldElement, { ...fieldProps, ...additionalProps, ...fieldElement.props, ...field });
 }
 
-function AutoFormIntegerField({ field, fieldProps }: FieldRendererProps) {
-  return <IntegerField {...field} {...fieldProps} />;
+function AutoFormTextField(props: FieldRendererProps) {
+  return renderFieldElement(TextField, props);
 }
 
-function AutoFormDecimalField({ field, fieldProps }: FieldRendererProps) {
-  return <NumberField {...field} {...fieldProps} />;
+function AutoFormIntegerField(props: FieldRendererProps) {
+  return renderFieldElement(IntegerField, props);
 }
 
-function AutoFormDateField({ field, fieldProps }: FieldRendererProps) {
+function AutoFormDecimalField(props: FieldRendererProps) {
+  return renderFieldElement(NumberField, props);
+}
+
+function AutoFormDateField(props: FieldRendererProps) {
   const i18n = useDatePickerI18n();
-  return <DatePicker i18n={i18n} {...field} {...fieldProps} />;
+  return renderFieldElement(DatePicker, props, { i18n });
 }
 
-function AutoFormTimeField({ field, fieldProps }: FieldRendererProps) {
-  return <TimePicker {...field} {...fieldProps} />;
+function AutoFormTimeField(props: FieldRendererProps) {
+  return renderFieldElement(TimePicker, props);
 }
 
-function AutoFormDateTimeField({ field, fieldProps }: FieldRendererProps) {
+function AutoFormDateTimeField(props: FieldRendererProps) {
   const i18n = useDateTimePickerI18n();
-  return <DateTimePicker i18n={i18n} {...field} {...fieldProps} />;
+  return renderFieldElement(DateTimePicker, props, { i18n });
 }
 
-function AutoFormEnumField({ model, field, fieldProps }: FieldRendererProps) {
-  const enumModel = model as EnumModel;
-  const options = Object.keys(enumModel[_enum]).map((value) => ({
+function AutoFormEnumField(props: FieldRendererProps) {
+  const enumModel = props.model as EnumModel;
+  const items = Object.keys(enumModel[_enum]).map((value) => ({
     label: convertToTitleCase(value),
     value,
   }));
-  return <Select {...field} {...fieldProps} items={options} />;
+  return renderFieldElement(Select, props, { items });
 }
 
-function AutoFormBooleanField({ field, fieldProps }: FieldRendererProps) {
-  return <Checkbox {...field} {...fieldProps} />;
+function AutoFormBooleanField(props: FieldRendererProps) {
+  return renderFieldElement(Checkbox, props);
 }
 
 function AutoFormObjectField({ model, fieldProps }: FieldRendererProps) {
@@ -186,25 +238,27 @@ export function AutoFormField(props: AutoFormFieldProps): JSX.Element | null {
     readonly: options.readonly,
   };
 
+  const rendererProps: FieldRendererProps = { model, field, element: options.element, fieldProps };
+
   switch (props.propertyInfo.type) {
     case 'string':
-      return <AutoFormTextField model={model} field={field} fieldProps={fieldProps}></AutoFormTextField>;
+      return <AutoFormTextField {...rendererProps}></AutoFormTextField>;
     case 'integer':
-      return <AutoFormIntegerField model={model} field={field} fieldProps={fieldProps}></AutoFormIntegerField>;
+      return <AutoFormIntegerField {...rendererProps}></AutoFormIntegerField>;
     case 'decimal':
-      return <AutoFormDecimalField model={model} field={field} fieldProps={fieldProps}></AutoFormDecimalField>;
+      return <AutoFormDecimalField {...rendererProps}></AutoFormDecimalField>;
     case 'date':
-      return <AutoFormDateField model={model} field={field} fieldProps={fieldProps}></AutoFormDateField>;
+      return <AutoFormDateField {...rendererProps}></AutoFormDateField>;
     case 'time':
-      return <AutoFormTimeField model={model} field={field} fieldProps={fieldProps}></AutoFormTimeField>;
+      return <AutoFormTimeField {...rendererProps}></AutoFormTimeField>;
     case 'datetime':
-      return <AutoFormDateTimeField model={model} field={field} fieldProps={fieldProps}></AutoFormDateTimeField>;
+      return <AutoFormDateTimeField {...rendererProps}></AutoFormDateTimeField>;
     case 'enum':
-      return <AutoFormEnumField model={model} field={field} fieldProps={fieldProps}></AutoFormEnumField>;
+      return <AutoFormEnumField {...rendererProps}></AutoFormEnumField>;
     case 'boolean':
-      return <AutoFormBooleanField model={model} field={field} fieldProps={fieldProps}></AutoFormBooleanField>;
+      return <AutoFormBooleanField {...rendererProps}></AutoFormBooleanField>;
     case 'object':
-      return <AutoFormObjectField model={model} field={field} fieldProps={fieldProps}></AutoFormObjectField>;
+      return <AutoFormObjectField {...rendererProps}></AutoFormObjectField>;
     default:
       return null;
   }
