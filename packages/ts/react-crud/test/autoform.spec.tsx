@@ -581,9 +581,11 @@ describe('@hilla/react-crud', () => {
 
       it('submits the form when enter key is pressed with custom layout renderer', async () => {
         const service = personService();
+
         function MyLayoutRenderer({ children }: AutoFormLayoutRendererProps<PersonModel>) {
           return <VerticalLayout>{children}</VerticalLayout>;
         }
+
         const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, undefined, undefined, service);
         const submitSpy = sinon.spy(service, 'save');
 
@@ -1071,22 +1073,43 @@ describe('@hilla/react-crud', () => {
         expect(field).to.exist;
       });
 
-      it('renders custom label from field options instead of the default one', () => {
+      it('allows customizing common field props', async () => {
         const result = render(
           <AutoForm
             service={personService()}
             model={PersonModel}
             fieldOptions={{
-              firstName: { label: 'Employee First Name' },
-              lastName: { label: 'Employee Last Name' },
+              firstName: {
+                id: 'first-name-id',
+                className: 'first-name-class',
+                style: {
+                  color: 'red',
+                },
+                label: 'Employee First Name',
+                placeholder: 'First Name Placeholder',
+                helperText: 'First Name Helper Text',
+                colspan: 3,
+                disabled: true,
+                readonly: true,
+              },
             }}
           />,
         );
+        const form = await FormController.init(user, result.container);
 
-        expect(within(result.container).queryByLabelText('Employee First Name')).to.exist;
-        expect(within(result.container).queryByLabelText('First name')).to.not.exist;
-        expect(within(result.container).queryByLabelText('Employee Last Name')).to.exist;
-        expect(within(result.container).queryByLabelText('Last name')).to.not.exist;
+        const field = form.queryField('Employee First Name');
+        expect(field).to.exist;
+        expect(form.queryField('First name')).to.not.exist;
+
+        const textField = field as TextFieldElement;
+        expect(textField.id).to.equal('first-name-id');
+        expect(textField.getAttribute('class')).to.equal('first-name-class');
+        expect(textField.style.color).to.equal('red');
+        expect(textField.placeholder).to.equal('First Name Placeholder');
+        expect(textField.helperText).to.equal('First Name Helper Text');
+        expect(textField.getAttribute('colspan')).to.equal('3');
+        expect(textField.disabled).to.be.true;
+        expect(textField.readonly).to.be.true;
       });
 
       it('passes colspan to fields', async () => {
