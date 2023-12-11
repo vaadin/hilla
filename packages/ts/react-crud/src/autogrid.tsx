@@ -38,7 +38,15 @@ import { registerStylesheet } from './util';
 
 registerStylesheet(css);
 
-export interface AutoGridRef {
+export interface AutoGridRef<TItem = any> {
+  /**
+   * The underlying vaadin-grid DOM element.
+   */
+  grid: GridElement<TItem> | null;
+
+  /**
+   * Refreshes the grid by reloading the data from the backend.
+   */
   refresh(): void;
 }
 
@@ -288,7 +296,7 @@ function AutoGridInner<TItem>(
     rowNumbers,
     ...gridProps
   }: AutoGridProps<TItem>,
-  ref: ForwardedRef<AutoGridRef>,
+  ref: ForwardedRef<AutoGridRef<TItem>>,
 ): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
   const gridRef = useRef<GridElement<TItem>>(null);
@@ -297,6 +305,9 @@ function AutoGridInner<TItem>(
   useImperativeHandle(
     ref,
     () => ({
+      get grid() {
+        return gridRef.current;
+      },
       refresh() {
         gridRef.current?.clearCache();
       },
@@ -370,7 +381,7 @@ function AutoGridInner<TItem>(
 }
 
 type AutoGrid = <TItem>(
-  props: AutoGridProps<TItem> & { ref?: ForwardedRef<AutoGridRef> },
+  props: AutoGridProps<TItem> & { ref?: ForwardedRef<AutoGridRef<TItem>> },
 ) => ReturnType<typeof AutoGridInner>;
 
 /**
