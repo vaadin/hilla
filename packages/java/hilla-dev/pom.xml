@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>copilot-client-free</artifactId>
+            <artifactId>copilot</artifactId>
             <version>${copilot.version}</version>
         </dependency>
     </dependencies>
