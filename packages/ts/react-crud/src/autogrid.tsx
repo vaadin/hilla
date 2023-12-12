@@ -180,54 +180,104 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
     };
   }>;
 
-async function initDataProviderUsingCountService<TItem>(
-  service: ListService<TItem>,
-  itemCountHolder: AutoGridItemCountHolder,
-  filter: MutableRefObject<FilterUnion | undefined>,
-  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
-  callback: GridDataProviderCallback<TItem>,
-  items: TItem[],
-) {
-  const countService: CountService<TItem> = service as any;
-  const { totalCount, totalItemCount, filteredItemCount } = itemCountHolder;
-
-  if (totalCount && totalItemCount.current < 0) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
-    totalItemCount.current = await countService.count(undefined);
-  }
-
-  let realSize = filteredItemCount.current;
-  if (realSize < 0) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
-    realSize = await countService.count(filter.current);
-    filteredItemCount.current = realSize;
-    footerRef.current(realSize);
-  }
-
-  callback(items, realSize);
+function createSort<TItem>(params: GridDataProviderParams<TItem>): Sort {
+  return {
+    orders: params.sortOrders
+      .filter((order) => order.direction != null)
+      .map((order) => ({
+        property: order.path,
+        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
+        ignoreCase: false,
+      })),
+  };
 }
 
-function initDataProviderUsingInfiniteScrolling<TItem>(
-  items: TItem[],
-  pageSize: number,
-  pageNumber: number,
+type PageRequest = {
+  pageNumber: number;
+  pageSize: number;
+  sort: Sort;
+};
+
+type DataPage<TItem> = {
+  items: TItem[];
+  pageRequest: PageRequest;
+};
+
+async function fetchDataPage<TItem>(
+  params: GridDataProviderParams<TItem>,
+  service: ListService<TItem>,
+  filter: MutableRefObject<FilterUnion | undefined>,
+): Promise<DataPage<TItem>> {
+  const sort = createSort(params);
+
+  const pageNumber = params.page;
+  const { pageSize } = params;
+  const pageRequest = {
+    pageNumber,
+    pageSize,
+    sort,
+  };
+  const items = await service.list(pageRequest, filter.current);
+
+  return { items, pageRequest };
+}
+
+function createInfiniteDataProvider<TItem>(
+  service: ListService<TItem>,
+  filter: MutableRefObject<FilterUnion | undefined>,
   grid: GridElement<TItem>,
-  callback: GridDataProviderCallback<TItem>,
-) {
-  let infiniteScrollingSize;
-  if (items.length === pageSize) {
-    infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
-
-    const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._dataProviderController.rootCache.size;
-    if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
-      // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-      infiniteScrollingSize = undefined;
+  afterCallBackExecuted: () => void,
+): GridDataProvider<TItem> {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
+    const { items, pageRequest } = await fetchDataPage(params, service, filter);
+    const { pageNumber, pageSize } = pageRequest;
+    let infiniteScrollingSize;
+    if (items.length === pageSize) {
+      infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
+      const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._dataProviderController.rootCache.size;
+      if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
+        // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
+        infiniteScrollingSize = undefined;
+      }
+    } else {
+      infiniteScrollingSize = pageNumber * pageSize + items.length;
     }
-  } else {
-    infiniteScrollingSize = pageNumber * pageSize + items.length;
-  }
 
-  callback(items, infiniteScrollingSize);
+    callback(items, infiniteScrollingSize);
+    afterCallBackExecuted();
+  };
+}
+
+function createFiniteDataProvider<TItem>(
+  service: CountService<TItem> & ListService<TItem>,
+  filter: MutableRefObject<FilterUnion | undefined>,
+  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
+  itemCountHolder: AutoGridItemCountHolder,
+  afterCallBackExecuted: () => void,
+): GridDataProvider<TItem> {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
+    const { items } = await fetchDataPage(params, service, filter);
+
+    const { totalCount, totalItemCount, filteredItemCount } = itemCountHolder;
+
+    if (totalCount && totalItemCount.current < 0) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+      totalItemCount.current = await service.count(undefined);
+    }
+
+    let realSize = filteredItemCount.current;
+    if (realSize < 0) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+      realSize = await service.count(filter.current);
+      filteredItemCount.current = realSize;
+      footerRef.current(realSize);
+    }
+
+    callback(items, realSize);
+    afterCallBackExecuted();
+  };
 }
 
 function createDataProvider<TItem>(
@@ -238,45 +288,25 @@ function createDataProvider<TItem>(
   footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
 ): GridDataProvider<TItem> {
   let first = true;
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
-    const sort: Sort = {
-      orders: params.sortOrders
-        .filter((order) => order.direction != null)
-        .map((order) => ({
-          property: order.path,
-          direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-          ignoreCase: false,
-        })),
-    };
-
-    const pageNumber = params.page;
-    const { pageSize } = params;
-    const req = {
-      pageNumber,
-      pageSize,
-      sort,
-    };
-    const items = await service.list(req, filter.current);
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!(service as any).count) {
-      if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
-        console.error(
-          '"totalCount" and/or "filteredCount" props require the provided service to implement the CountService interface.',
-        );
-      }
-      initDataProviderUsingInfiniteScrolling(items, pageSize, pageNumber, grid, callback);
-    } else {
-      await initDataProviderUsingCountService(service, itemCountHolder, filter, footerRef, callback, items);
-    }
-
+  const afterCallbackExecuted = () => {
     if (first) {
       // Workaround for https://github.com/vaadin/react-components/issues/129
       first = false;
       setTimeout(() => grid.recalculateColumnWidths(), 0);
     }
   };
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (!(service as any).count) {
+    if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
+      console.error(
+        '"totalCount" and/or "filteredCount" props require the provided service to implement the CountService interface.',
+      );
+    }
+    return createInfiniteDataProvider(service, filter, grid, afterCallbackExecuted);
+  }
+  const countService = service as unknown as CountService<TItem> & ListService<TItem>;
+  return createFiniteDataProvider(countService, filter, footerRef, itemCountHolder, afterCallbackExecuted);
 }
 
 interface ColumnConfigurationOptions {
