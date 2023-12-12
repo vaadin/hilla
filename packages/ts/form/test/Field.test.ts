@@ -511,7 +511,7 @@ describe('@hilla/form', () => {
           const renderElement = () => {
             render(
               html`
-              <${tagName} ${field(model)}></${tagName}>`,
+                <${tagName} ${field(model)}></${tagName}>`,
               div,
             );
             return div.firstElementChild as Element & { value?: any };
@@ -535,6 +535,38 @@ describe('@hilla/form', () => {
         });
       });
 
+      [{ tag: 'vaadin-time-picker' }].forEach(({ tag }) => {
+        describe(`VaadinStringFieldStrategy ${tag}`, () => {
+          const tagName = unsafeStatic(tag);
+          let currentStrategy: FieldStrategy;
+          let element: Element & { value?: any };
+
+          function renderTag(model: AbstractModel) {
+            render(
+              html`
+                <${tagName} ${field(model)}></${tagName}>`,
+              div,
+            );
+            currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+            element = div.firstElementChild as Element & { value?: string };
+          }
+
+          it('should clear optional field to an empty string', () => {
+            const model = binder.model.fieldOptionalString;
+
+            binder.read({ ...TestModel.createEmptyValue(), fieldOptionalString: 'test-value' });
+            renderTag(model);
+            expect(currentStrategy.value).to.be.equal('test-value');
+            expect(element.value).to.be.equal('test-value');
+
+            binder.clear();
+            renderTag(model);
+            expect(currentStrategy.value).to.be.equal('');
+            expect(element.value).to.be.equal('');
+          });
+        });
+      });
+
       [
         { tag: 'input', type: 'checkbox' },
         { tag: 'input', type: 'radio' },
@@ -552,13 +584,13 @@ describe('@hilla/form', () => {
             if (type) {
               render(
                 html`
-                <${tagName} type="${type}" ${field(model)}></${tagName}>`,
+                  <${tagName} type="${type}" ${field(model)}></${tagName}>`,
                 div,
               );
             } else {
               render(
                 html`
-                <${tagName} ${field(model)}></${tagName}>`,
+                  <${tagName} ${field(model)}></${tagName}>`,
                 div,
               );
             }
@@ -823,7 +855,7 @@ describe('@hilla/form', () => {
 
           render(
             html`
-            <${tagName} ${field(renderModel)}></${tagName}>`,
+              <${tagName} ${field(renderModel)}></${tagName}>`,
             div,
           );
 
