@@ -58,9 +58,9 @@
   "dependencies": {
     "@hilla/form": "2.5.0-beta1",
     "@hilla/frontend": "2.5.0-beta1",
-    "@hilla/react-components": "2.3.0-rc1",
+    "@hilla/react-components": "2.3.0",
     "@hilla/react-form": "2.5.0-beta1",
-    "@vaadin/vaadin-lumo-styles": "24.3.0-rc1"
+    "@vaadin/vaadin-lumo-styles": "24.3.0"
   },
   "peerDependencies": {
     "react": "^18"
