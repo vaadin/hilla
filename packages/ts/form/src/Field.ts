@@ -24,6 +24,7 @@ export type FieldConstraintValidation = Readonly<{
 export type FieldElement<T = unknown> = FieldBase<T> & HTMLElement & Partial<FieldConstraintValidation>;
 
 const props = ['required', 'invalid', 'errorMessage', 'value', 'validity', 'checkValidity'];
+
 export function isFieldElement<T>(element: HTMLElement): element is FieldElement<T> {
   return props.some((prop) => prop in element);
 }
@@ -250,6 +251,18 @@ export class ComboBoxFieldStrategy<
   }
 }
 
+export class VaadinStringFieldStrategy extends VaadinFieldStrategy<string> {
+  override get value(): string | undefined {
+    return super.value;
+  }
+
+  override set value(val: string | undefined) {
+    // Some Vaadin components (e.g. vaadin-time-picker) do not support setting
+    // the value to `null` or `undefined`. Instead, set it to an empty string.
+    super.value = val ?? '';
+  }
+}
+
 type MultiSelectComboBoxFieldElement<T> = FieldElement<T> & {
   value: never;
   selectedItems: T;
@@ -303,6 +316,11 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
       return new MultiSelectComboBoxFieldStrategy(elm as MultiSelectComboBoxFieldElement<T>, model);
     case 'vaadin-rich-text-editor':
       return new GenericFieldStrategy(elm, model);
+    case 'vaadin-time-picker':
+      return new VaadinStringFieldStrategy(
+        elm as FieldElement<string>,
+        model as AbstractModel<string>,
+      ) as AbstractFieldStrategy<T>;
     default:
       if (elm.localName === 'input' && /^(checkbox|radio)$/u.test((elm as unknown as HTMLInputElement).type)) {
         return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
