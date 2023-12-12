@@ -139,6 +139,12 @@ export default class GridController {
     return Array.from(await waitFor(() => Array.from(this.instance.querySelectorAll('vaadin-grid-sorter'))));
   }
 
+  getFooterRows(): HTMLElement[] {
+    // @ts-expect-error: getting internal property
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return getRows(this.instance.$.footer);
+  }
+
   getFooterCellContent(row: number, col: number): HTMLElement {
     return getCellContent(this.getFooterCell(row, col));
   }

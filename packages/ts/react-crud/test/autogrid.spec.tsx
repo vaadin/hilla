@@ -435,6 +435,19 @@ describe('@hilla/react-crud', () => {
           await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 2'));
         });
 
+        it('does not render footer row to display counts when the service does not implement CountService', async () => {
+          const service = personListService();
+          const personTestData: Person[] = Array(387)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          const listStub = sinon.stub(service, 'list').resolves(personTestData);
+          const result = render(<TestAutoGrid service={service} />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(387);
+          expect(grid.getFooterRows().length).to.equal(2);
+        });
+
         it('provides error in console when either of totalCount or filterCount are present and the service does not implement CountService', async () => {
           const service = personListService();
           const personTestData: Person[] = Array(3)
