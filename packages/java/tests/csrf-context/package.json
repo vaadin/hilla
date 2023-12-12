@@ -14,7 +14,7 @@
     "@hilla/generator-typescript-plugin-subtypes": "../../../ts/generator-typescript-plugin-subtypes",
     "@hilla/generator-typescript-utils": "../../../ts/generator-typescript-utils",
     "@polymer/polymer": "3.5.1",
-    "@vaadin/common-frontend": "0.0.18",
+    "@vaadin/common-frontend": "0.0.19",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.1.0"
@@ -30,8 +30,8 @@
     "rollup-plugin-visualizer": "5.9.2",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.3.2",
-    "vite": "5.0.2",
+    "typescript": "5.3.3",
+    "vite": "5.0.6",
     "vite-plugin-checker": "0.6.2",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
@@ -50,7 +50,7 @@
       "@hilla/generator-typescript-plugin-subtypes": "2.5.0-beta1",
       "@hilla/generator-typescript-utils": "2.5.0-beta1",
       "@polymer/polymer": "3.5.1",
-      "@vaadin/common-frontend": "0.0.18",
+      "@vaadin/common-frontend": "0.0.19",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.0"
@@ -66,14 +66,14 @@
       "rollup-plugin-visualizer": "5.9.2",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.3.2",
-      "vite": "5.0.2",
+      "typescript": "5.3.3",
+      "vite": "5.0.6",
       "vite-plugin-checker": "0.6.2",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "c0db2e6355722c958fcfe24e5535ae7e78f8424886a9722bb7d46e24e7cf6211"
+    "hash": "1b8553844a6d9e4cba3d5b654eae883006a247470b926f3b022d121256bdcaa2"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
