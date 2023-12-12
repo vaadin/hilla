@@ -440,7 +440,7 @@ describe('@hilla/react-crud', () => {
           const personTestData: Person[] = Array(387)
             .fill(null)
             .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
-          const listStub = sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'list').resolves(personTestData);
           const result = render(<TestAutoGrid service={service} />);
           const grid = await GridController.init(result, user);
 
