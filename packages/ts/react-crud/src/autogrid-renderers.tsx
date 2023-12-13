@@ -3,7 +3,18 @@ import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { Icon } from '@hilla/react-components/Icon.js';
 // eslint-disable-next-line
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
-import { type CSSProperties, type JSX, useContext } from 'react';
+import {
+  type ComponentType,
+  createContext,
+  type CSSProperties,
+  type Dispatch,
+  type JSX,
+  type MutableRefObject,
+  type SetStateAction,
+  useContext,
+  useState,
+} from 'react';
+import type { AutoGridItemCountHolder } from './autogrid';
 import { ColumnContext } from './autogrid-column-context';
 import { useLocaleFormatter } from './locale.js';
 import { convertToTitleCase } from './util';
@@ -77,4 +88,36 @@ export function AutoGridJsonRenderer<TItem>({ item }: RendererOptions<TItem>): J
 
 export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TItem>): JSX.Element {
   return <>{model.index + 1}</>;
+}
+
+export type FooterContextType = {
+  itemCountHolder: AutoGridItemCountHolder;
+  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
+  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
+};
+export const FooterContext = createContext<FooterContextType>(undefined!);
+
+export function AutoGridFooterItemCountRenderer(): JSX.Element {
+  const [, setReRender] = useState(-1); // Force re-render to update the footer
+  const { itemCountHolder, footerRef, footerCountRenderer: FooterRenderer } = useContext(FooterContext);
+  footerRef.current = setReRender;
+
+  if (FooterRenderer) {
+    return <FooterRenderer {...itemCountHolder} />;
+  }
+
+  let filterCountText: string | undefined;
+  const { filteredCount, totalCount, filteredItemCount, totalItemCount } = itemCountHolder;
+  if (filteredCount && filteredItemCount.current >= 0) {
+    filterCountText =
+      totalCount && totalItemCount.current >= 0
+        ? `Showing: ${filteredItemCount.current} out of ${totalItemCount.current}`
+        : `Showing: ${filteredItemCount.current}`;
+  } else if (totalCount && totalItemCount.current >= 0) {
+    filterCountText = `Total: ${totalItemCount.current}`;
+  }
+  if (filterCountText) {
+    return <p>{filterCountText}</p>;
+  }
+  return <></>;
 }

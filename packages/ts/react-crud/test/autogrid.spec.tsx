@@ -1,6 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import { useEffect, useRef } from 'react';
@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { ListService } from '../crud';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
-import type { CrudService } from '../src/crud.js';
+import type { CountService, CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
@@ -28,6 +28,7 @@ import {
   type HasTestInfo,
   type Person,
   personData,
+  personListService,
   PersonModel,
   personService,
   PersonWithoutIdPropertyModel,
@@ -78,6 +79,11 @@ describe('@hilla/react-crud', () => {
 
     beforeEach(() => {
       user = userEvent.setup();
+      sinon.spy(console, 'error');
+    });
+
+    afterEach(() => {
+      sinon.restore();
     });
 
     describe('basics', () => {
@@ -194,7 +200,7 @@ describe('@hilla/react-crud', () => {
 
       it('data provider provides data', async () => {
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters />), user);
-        expect(grid.getVisibleRowCount()).to.equal(2);
+        expect(grid.getRowCount()).to.equal(2);
         const firstNameColumnIndex = await grid.findColumnIndexByHeaderText('First name');
         const lastNameColumnIndex = await grid.findColumnIndexByHeaderText('Last name');
         expect(grid.getBodyCellContent(0, firstNameColumnIndex)).to.have.rendered.text('Jane');
@@ -225,11 +231,237 @@ describe('@hilla/react-crud', () => {
         };
 
         const grid = await GridController.init(render(<TestAutoGrid experimentalFilter={filter} />), user);
-        expect(grid.getVisibleRowCount()).to.equal(1);
+        expect(grid.getRowCount()).to.equal(1);
         const firstNameColumnIndex = await grid.findColumnIndexByHeaderText('First name');
         const lastNameColumnIndex = await grid.findColumnIndexByHeaderText('Last name');
         expect(grid.getBodyCellContent(0, firstNameColumnIndex)).to.have.rendered.text('Jane');
         expect(grid.getBodyCellContent(0, lastNameColumnIndex)).to.have.rendered.text('Love');
+      });
+
+      describe('Grid item count', () => {
+        let autoGridRef: AutoGridRef;
+
+        const AutoGridWithCountAndRefresh = ({ service }: { service: CountService<any> & ListService<any> }) => {
+          const ref = useRef<AutoGridRef>(null);
+          useEffect(() => {
+            if (ref.current) {
+              autoGridRef = ref.current;
+            }
+          }, []);
+          return (
+            <span>
+              <AutoGrid service={service} model={PersonModel} totalCount filteredCount ref={ref} />
+            </span>
+          );
+        };
+
+        it('Works with a larger data set', async () => {
+          const service = personService();
+          const personTestData: Person[] = Array(387)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'count').resolves(personTestData.length);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(387);
+        });
+
+        it('Shows total item count', async () => {
+          const service = personService();
+          const personTestData: Person[] = Array(387)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'count').resolves(personTestData.length);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} totalCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(387);
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 387'));
+        });
+
+        it('Shows filtered item count', async () => {
+          const service = personService();
+          const personTestData: Person[] = Array(156)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'count').resolves(personTestData.length);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(156);
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 156'));
+        });
+
+        it('Shows zero as total item count', async () => {
+          const service = personService();
+          const personTestData: Person[] = [];
+          sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'count').resolves(personTestData.length);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} totalCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(0);
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Total: 0'));
+        });
+
+        it('Shows zero as filtered item count', async () => {
+          const service = personService();
+          const personTestData: Person[] = [];
+          sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'count').resolves(personTestData.length);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(0);
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0'));
+        });
+
+        it('Shows zero as total and filtered item count', async () => {
+          const service = personService();
+          const personTestData: Person[] = [];
+          sinon.stub(service, 'list').resolves(personTestData);
+          sinon.stub(service, 'count').resolves(personTestData.length);
+          const result = render(<TestAutoGridNoHeaderFilters service={service} filteredCount totalCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(0);
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Showing: 0 out of 0'));
+        });
+
+        it('Shows filtered item count and changes', async () => {
+          const service = personService();
+          const personTestData: Person[] = Array(387)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          const listStub = sinon.stub(service, 'list').resolves(personTestData);
+          const countStub = sinon.stub(service, 'count').resolves(personTestData.length);
+
+          const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(387);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 387'));
+
+          sinon.reset();
+          listStub.resolves([personTestData[0], personTestData[1]]);
+          countStub.resolves(2);
+
+          const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
+          firstNameFilterField.value = 'field-value';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2'));
+        });
+
+        it('Shows both filtered item count and total item count ', async () => {
+          const service = personService();
+          const personTestData: Person[] = Array(3)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          const listStub = sinon.stub(service, 'list').resolves(personTestData);
+          const countStub = sinon.stub(service, 'count');
+          countStub.withArgs(undefined).resolves(100);
+          countStub.withArgs(sinon.match.defined).resolves(personTestData.length);
+
+          const result = render(<TestAutoGrid service={service} model={PersonModel} totalCount filteredCount />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(3);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 out of 100'));
+
+          sinon.reset();
+          listStub.resolves([personTestData[0], personTestData[1]]);
+          countStub.withArgs(undefined).resolves(100);
+          countStub.withArgs(sinon.match.defined).resolves(2);
+
+          const firstNameFilterField = grid.getHeaderCellContent(2, 0).querySelector('vaadin-text-field')!;
+          firstNameFilterField.value = 'field-value';
+          firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 100'));
+        });
+
+        it('Shows custom renderer for total and filtered item count ', async () => {
+          const service = personService();
+          const personTestData: Person[] = Array(3)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+          const countStub = sinon.stub(service, 'count');
+          countStub.withArgs(undefined).resolves(100);
+          countStub.withArgs(sinon.match.defined).resolves(personTestData.length);
+          const result = render(
+            <TestAutoGridNoHeaderFilters
+              service={service}
+              filteredCount
+              totalCount
+              footerCountRenderer={({ filteredItemCount, totalItemCount }) => (
+                <p>
+                  Custom: {filteredItemCount.current} / {totalItemCount.current}
+                </p>
+              )}
+            />,
+          );
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(3);
+          await waitFor(() => expect(grid.getFooterCellContent(1, 0)).to.have.rendered.text('Custom: 3 / 100'));
+        });
+
+        it('Shows correct counts after adding and removing an item and calling refresh', async () => {
+          const service = personService();
+          const result = render(<AutoGridWithCountAndRefresh service={service} />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(2);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 2'));
+
+          await service.save({ ...personData[0], id: 3 });
+          autoGridRef.refresh();
+          await nextFrame();
+
+          expect(grid.getRowCount()).to.equal(3);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 3 out of 3'));
+
+          await service.delete(3);
+          autoGridRef.refresh();
+          await nextFrame();
+
+          expect(grid.getRowCount()).to.equal(2);
+          await waitFor(() => expect(grid.getFooterCellContent(2, 0)).to.have.rendered.text('Showing: 2 out of 2'));
+        });
+
+        it('does not render footer row to display counts when the service does not implement CountService', async () => {
+          const service = personListService();
+          const personTestData: Person[] = Array(387)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+          const result = render(<TestAutoGrid service={service} />);
+          const grid = await GridController.init(result, user);
+
+          expect(grid.getRowCount()).to.equal(387);
+          expect(grid.getFooterRows().length).to.equal(2);
+        });
+
+        it('provides error in console when either of totalCount or filterCount are present and the service does not implement CountService', async () => {
+          const service = personListService();
+          const personTestData: Person[] = Array(3)
+            .fill(null)
+            .map((i) => ({ ...personData[i % 2], id: i }) satisfies Person);
+          sinon.stub(service, 'list').resolves(personTestData);
+
+          const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount totalCount />);
+          await GridController.init(result, user);
+
+          expect(console.error).to.have.been.calledWith(
+            '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
+          );
+        });
       });
 
       describe('multi-sort', () => {

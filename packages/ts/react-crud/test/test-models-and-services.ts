@@ -9,7 +9,7 @@ import {
   makeEnumEmptyValueCreator,
   makeObjectEmptyValueCreator,
 } from '@hilla/form';
-import type { CrudService } from '../src/crud.js';
+import type { CountService, CrudService, ListService } from '../src/crud.js';
 import type FilterUnion from '../src/types/dev/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type Pageable from '../src/types/dev/hilla/mappedtypes/Pageable.js';
@@ -354,11 +354,26 @@ type HasIdVersion = {
   version: number;
 };
 
-export const createService = <T extends HasIdVersion>(initialData: T[]): CrudService<T> & HasTestInfo => {
+export const createService = <T extends HasIdVersion>(
+  initialData: T[],
+): CountService<T> & CrudService<T> & HasTestInfo => {
   let _lastSort: Sort | undefined;
   let _lastFilter: FilterUnion | undefined;
   let data = initialData;
   let _callCount = 0;
+
+  function filterData(filter: FilterUnion | undefined): T[] {
+    if (filter && filter['@type'] === 'propertyString') {
+      return data.filter((item) => {
+        const propertyValue = (item as Record<string, any>)[filter.propertyId];
+        if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
+          return propertyValue.includes(filter.filterValue);
+        }
+        return propertyValue === filter.filterValue;
+      });
+    }
+    return data;
+  }
 
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -369,17 +384,7 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
 
       let filteredData: T[] = [];
       if (request.pageNumber === 0) {
-        if (filter && filter['@type'] === 'propertyString') {
-          filteredData = data.filter((item) => {
-            const propertyValue = (item as Record<string, any>)[filter.propertyId];
-            if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
-              return propertyValue.includes(filter.filterValue);
-            }
-            return propertyValue === filter.filterValue;
-          });
-        } else {
-          filteredData = data;
-        }
+        filteredData = filterData(filter);
       }
 
       if (request.sort.orders.length === 1) {
@@ -425,6 +430,19 @@ export const createService = <T extends HasIdVersion>(initialData: T[]): CrudSer
     get callCount() {
       return _callCount;
     },
+    async count(filter: FilterUnion | undefined): Promise<number> {
+      return Promise.resolve(filterData(filter).length);
+    },
+  };
+};
+
+export const createListService = <T extends HasIdVersion>(initialData: T[]): HasTestInfo & ListService<T> => {
+  const service = createService(initialData)!;
+  return {
+    callCount: service.callCount,
+    lastFilter: service.lastFilter,
+    lastSort: service.lastSort,
+    list: async (request: Pageable, filter: FilterUnion | undefined): Promise<T[]> => service.list(request, filter),
   };
 };
 
@@ -543,10 +561,13 @@ export type HasTestInfo = {
   callCount: number;
 };
 
-export const personService = (): CrudService<Person> & HasTestInfo => createService(personData);
-export const companyService = (): CrudService<Company> & HasTestInfo => createService(companyData);
-export const columnRendererTestService = (): CrudService<ColumnRendererTestValues> & HasTestInfo =>
-  createService(columnRendererTestData);
+export const personService = (): CountService<Person> & CrudService<Person> & HasTestInfo => createService(personData);
+export const personListService = (): ListService<Person> => createListService(personData);
+export const companyService = (): CountService<Company> & CrudService<Company> & HasTestInfo =>
+  createService(companyData);
+export const columnRendererTestService = (): CountService<ColumnRendererTestValues> &
+  CrudService<ColumnRendererTestValues> &
+  HasTestInfo => createService(columnRendererTestData);
 
 const noSort: Sort = { orders: [] };
 
