@@ -1,5 +1,5 @@
 import { LitElement, type TemplateResult, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { loginUsingUrl, waitForConsole } from './h2-util';
 import type {
   DevToolsInterface,
@@ -16,11 +16,11 @@ type H2Data = {
 };
 @customElement('devtools-database')
 export class DevToolsDatabase extends LitElement implements MessageHandler {
-  @state()
   declare h2path?: string;
 
-  @state()
   declare h2jdbcUrl?: string;
+
+  static properties = { h2path: { type: String }, h2jdbcUrl: { type: String } };
 
   connectedCallback(): void {
     super.connectedCallback();
