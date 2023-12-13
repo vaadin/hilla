@@ -300,7 +300,7 @@ function createDataProvider<TItem>(
   if (!(service as any).count) {
     if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
       console.error(
-        '"totalCount" and/or "filteredCount" props require the provided service to implement the CountService interface.',
+        '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
       );
     }
     return createInfiniteDataProvider(service, filter, grid, afterCallbackExecuted);

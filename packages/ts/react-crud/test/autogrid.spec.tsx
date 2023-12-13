@@ -459,7 +459,7 @@ describe('@hilla/react-crud', () => {
           await GridController.init(result, user);
 
           expect(console.error).to.have.been.calledWith(
-            '"totalCount" and/or "filteredCount" props require the provided service to implement the CountService interface.',
+            '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
           );
         });
       });
