@@ -226,7 +226,7 @@ function createInfiniteDataProvider<TItem>(
   service: ListService<TItem>,
   filter: MutableRefObject<FilterUnion | undefined>,
   grid: GridElement<TItem>,
-  afterCallBackExecuted: () => void,
+  afterPageLoaded: () => void,
 ): GridDataProvider<TItem> {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
@@ -245,7 +245,7 @@ function createInfiniteDataProvider<TItem>(
     }
 
     callback(items, infiniteScrollingSize);
-    afterCallBackExecuted();
+    afterPageLoaded();
   };
 }
 
@@ -254,7 +254,7 @@ function createFiniteDataProvider<TItem>(
   filter: MutableRefObject<FilterUnion | undefined>,
   footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
   itemCountHolder: AutoGridItemCountHolder,
-  afterCallBackExecuted: () => void,
+  afterPageLoaded: () => void,
 ): GridDataProvider<TItem> {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
@@ -276,7 +276,7 @@ function createFiniteDataProvider<TItem>(
     }
 
     callback(items, realSize);
-    afterCallBackExecuted();
+    afterPageLoaded();
   };
 }
 
@@ -288,7 +288,7 @@ function createDataProvider<TItem>(
   footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
 ): GridDataProvider<TItem> {
   let first = true;
-  const afterCallbackExecuted = () => {
+  const afterPageLoaded = () => {
     if (first) {
       // Workaround for https://github.com/vaadin/react-components/issues/129
       first = false;
@@ -303,10 +303,10 @@ function createDataProvider<TItem>(
         '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
       );
     }
-    return createInfiniteDataProvider(service, filter, grid, afterCallbackExecuted);
+    return createInfiniteDataProvider(service, filter, grid, afterPageLoaded);
   }
   const countService = service as unknown as CountService<TItem> & ListService<TItem>;
-  return createFiniteDataProvider(countService, filter, footerRef, itemCountHolder, afterCallbackExecuted);
+  return createFiniteDataProvider(countService, filter, footerRef, itemCountHolder, afterPageLoaded);
 }
 
 interface ColumnConfigurationOptions {
