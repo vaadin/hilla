@@ -10,4 +10,8 @@ export interface ListService<T> {
   list(request: Pageable, filter: FilterUnion | undefined): Promise<T[]>;
 }
 
+export interface CountService<T> {
+  count(filter: FilterUnion | undefined): Promise<number>;
+}
+
 export interface CrudService<T> extends FormService<T>, ListService<T> {}
