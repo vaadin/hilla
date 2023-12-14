@@ -347,15 +347,18 @@ function AutoGridInner<TItem>(
     // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
     setTimeout(() => {
       let firstUpdate = true;
-      const initialFilter = experimentalFilter ?? internalFilter;
-      dataProviderRef.current = createDataProvider(grid, service, initialFilter, (newItemCounts: ItemCounts) => {
-        setItemCounts(newItemCounts);
+      dataProviderRef.current = createDataProvider(grid, service, {
+        initialFilter: experimentalFilter ?? internalFilter,
+        loadTotalCount: totalCount,
+        afterLoad(newItemCounts: ItemCounts) {
+          setItemCounts(newItemCounts);
 
-        if (firstUpdate) {
-          // Workaround for https://github.com/vaadin/react-components/issues/129
-          firstUpdate = false;
-          setTimeout(() => grid.recalculateColumnWidths(), 0);
-        }
+          if (firstUpdate) {
+            // Workaround for https://github.com/vaadin/react-components/issues/129
+            firstUpdate = false;
+            setTimeout(() => grid.recalculateColumnWidths(), 0);
+          }
+        },
       });
     }, 1);
   }, [model, service]);

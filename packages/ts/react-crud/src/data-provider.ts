@@ -37,7 +37,13 @@ export type ItemCounts = {
   filteredCount?: number;
 };
 
-type LoadCallback = (result: ItemCounts) => void;
+type AfterLoadCallback = (result: ItemCounts) => void;
+
+type DataProviderOptions = {
+  initialFilter?: FilterUnion;
+  loadTotalCount?: boolean;
+  afterLoad?: AfterLoadCallback;
+};
 
 function createSort<TItem>(params: GridDataProviderParams<TItem>): Sort {
   return {
@@ -60,22 +66,19 @@ export function isCountService<TItem>(
 export abstract class DataProvider<TItem> {
   protected readonly grid: GridElement;
   protected readonly service: ListAndMaybeCountService<TItem>;
-  protected readonly loadCallback?: LoadCallback;
+  protected readonly loadTotalCount?: boolean;
+  protected readonly afterLoadCallback?: AfterLoadCallback;
 
   protected filter: FilterUnion | undefined;
   protected totalCount: number | undefined;
   protected filteredCount: number | undefined;
 
-  constructor(
-    grid: GridElement,
-    service: ListAndMaybeCountService<TItem>,
-    filter: FilterUnion | undefined,
-    loadCallback?: LoadCallback,
-  ) {
+  constructor(grid: GridElement, service: ListAndMaybeCountService<TItem>, options: DataProviderOptions = {}) {
     this.grid = grid;
     this.service = service;
-    this.filter = filter;
-    this.loadCallback = loadCallback;
+    this.filter = options.initialFilter;
+    this.loadTotalCount = options.loadTotalCount;
+    this.afterLoadCallback = options.afterLoad;
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.grid.dataProvider = this.load.bind(this);
@@ -84,7 +87,7 @@ export abstract class DataProvider<TItem> {
   private async load(params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) {
     // Fetch page, total count and filtered count
     const page = await this.fetchPage(params);
-    if (this.totalCount === undefined) {
+    if (this.loadTotalCount && this.totalCount === undefined) {
       this.totalCount = await this.fetchTotalCount(page);
     }
     if (this.filteredCount === undefined) {
@@ -95,8 +98,8 @@ export abstract class DataProvider<TItem> {
     callback(page.items, this.filteredCount);
 
     // Pass results to callback
-    if (this.loadCallback) {
-      this.loadCallback({
+    if (this.afterLoadCallback) {
+      this.afterLoadCallback({
         totalCount: this.totalCount,
         filteredCount: this.filteredCount,
       });
@@ -179,11 +182,10 @@ class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
 export function createDataProvider<TItem>(
   grid: GridElement,
   service: ListAndMaybeCountService<TItem>,
-  filter: FilterUnion | undefined,
-  loadCallback: LoadCallback,
+  options: DataProviderOptions = {},
 ): DataProvider<TItem> {
   if (isCountService(service)) {
-    return new FixedSizeDataProvider(grid, service, filter, loadCallback);
+    return new FixedSizeDataProvider(grid, service, options);
   }
-  return new InfiniteDataProvider(grid, service, filter, loadCallback);
+  return new InfiniteDataProvider(grid, service, options);
 }
