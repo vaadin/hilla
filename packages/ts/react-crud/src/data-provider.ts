@@ -62,7 +62,6 @@ export abstract class DataProvider<TItem> {
   protected readonly service: ListAndMaybeCountService<TItem>;
   protected readonly loadCallback?: LoadCallback;
 
-  protected firstUpdate = true;
   protected filter: FilterUnion | undefined;
   protected totalCount: number | undefined;
   protected filteredCount: number | undefined;
@@ -83,6 +82,7 @@ export abstract class DataProvider<TItem> {
   }
 
   private async load(params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) {
+    // Fetch page, total count and filtered count
     const page = await this.fetchPage(params);
     if (this.totalCount === undefined) {
       this.totalCount = await this.fetchTotalCount(page);
@@ -91,18 +91,15 @@ export abstract class DataProvider<TItem> {
       this.filteredCount = await this.fetchFilteredCount(page);
     }
 
+    // Pass results to grid
     callback(page.items, this.filteredCount);
+
+    // Pass results to callback
     if (this.loadCallback) {
       this.loadCallback({
         totalCount: this.totalCount,
         filteredCount: this.filteredCount,
       });
-    }
-
-    if (this.firstUpdate) {
-      // Workaround for https://github.com/vaadin/react-components/issues/129
-      this.firstUpdate = false;
-      setTimeout(() => this.grid.recalculateColumnWidths(), 0);
     }
   }
 
