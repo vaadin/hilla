@@ -1,23 +1,14 @@
 import type { GridItemModel } from '@hilla/react-components/Grid.js';
 import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import { Icon } from '@hilla/react-components/Icon.js';
-// eslint-disable-next-line
-import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
-import {
-  type ComponentType,
-  createContext,
-  type CSSProperties,
-  type Dispatch,
-  type JSX,
-  type MutableRefObject,
-  type SetStateAction,
-  useContext,
-  useState,
-} from 'react';
-import type { AutoGridItemCountHolder } from './autogrid';
+import { type ComponentType, createContext, type CSSProperties, type JSX, useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
+import type { ItemCounts } from './data-provider';
 import { useLocaleFormatter } from './locale.js';
 import { convertToTitleCase } from './util';
+
+// eslint-disable-next-line
+import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
 export type RendererOptions<TItem> = {
   item: TItem;
@@ -91,30 +82,30 @@ export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TIte
 }
 
 export type FooterContextType = {
-  itemCountHolder: AutoGridItemCountHolder;
-  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
-  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
+  totalCount?: boolean;
+  filteredCount?: boolean;
+  footerCountRenderer?: ComponentType<ItemCounts>;
+  itemCounts?: ItemCounts;
 };
+
 export const FooterContext = createContext<FooterContextType>(undefined!);
 
 export function AutoGridFooterItemCountRenderer(): JSX.Element {
-  const [, setReRender] = useState(-1); // Force re-render to update the footer
-  const { itemCountHolder, footerRef, footerCountRenderer: FooterRenderer } = useContext(FooterContext);
-  footerRef.current = setReRender;
+  const footerContext = useContext(FooterContext);
+  const { totalCount, filteredCount, itemCounts, footerCountRenderer: FooterRenderer } = footerContext;
 
   if (FooterRenderer) {
-    return <FooterRenderer {...itemCountHolder} />;
+    return <FooterRenderer {...itemCounts} />;
   }
 
   let filterCountText: string | undefined;
-  const { filteredCount, totalCount, filteredItemCount, totalItemCount } = itemCountHolder;
-  if (filteredCount && filteredItemCount.current >= 0) {
+  if (filteredCount && itemCounts?.filteredCount !== undefined) {
     filterCountText =
-      totalCount && totalItemCount.current >= 0
-        ? `Showing: ${filteredItemCount.current} out of ${totalItemCount.current}`
-        : `Showing: ${filteredItemCount.current}`;
-  } else if (totalCount && totalItemCount.current >= 0) {
-    filterCountText = `Total: ${totalItemCount.current}`;
+      totalCount && itemCounts.totalCount !== undefined
+        ? `Showing: ${itemCounts.filteredCount} out of ${itemCounts.totalCount}`
+        : `Showing: ${itemCounts.filteredCount}`;
+  } else if (totalCount && itemCounts?.totalCount !== undefined) {
+    filterCountText = `Total: ${itemCounts.totalCount}`;
   }
   if (filterCountText) {
     return <p>{filterCountText}</p>;

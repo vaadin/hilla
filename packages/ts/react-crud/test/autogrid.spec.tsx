@@ -399,9 +399,9 @@ describe('@hilla/react-crud', () => {
               service={service}
               filteredCount
               totalCount
-              footerCountRenderer={({ filteredItemCount, totalItemCount }) => (
+              footerCountRenderer={({ filteredCount, totalCount }) => (
                 <p>
-                  Custom: {filteredItemCount.current} / {totalItemCount.current}
+                  Custom: {filteredCount} / {totalCount}
                 </p>
               )}
             />,
