@@ -20,6 +20,7 @@ type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
 
 type MaybeCountService<TItem> = Partial<CountService<TItem>>;
 type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
+type ListAndCountService<TItem> = CountService<TItem> & ListService<TItem>;
 
 type PageRequest = {
   pageNumber: number;
@@ -57,9 +58,7 @@ function createSort<TItem>(params: GridDataProviderParams<TItem>): Sort {
   };
 }
 
-export function isCountService<TItem>(
-  service: ListAndMaybeCountService<TItem>,
-): service is CountService<TItem> & ListService<TItem> {
+export function isCountService<TItem>(service: ListAndMaybeCountService<TItem>): service is ListAndCountService<TItem> {
   return !!service.count;
 }
 
@@ -87,12 +86,8 @@ export abstract class DataProvider<TItem> {
   private async load(params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) {
     // Fetch page, total count and filtered count
     const page = await this.fetchPage(params);
-    if (this.loadTotalCount && this.totalCount === undefined) {
-      this.totalCount = await this.fetchTotalCount(page);
-    }
-    if (this.filteredCount === undefined) {
-      this.filteredCount = await this.fetchFilteredCount(page);
-    }
+    this.totalCount = await this.fetchTotalCount(page);
+    this.filteredCount = await this.fetchFilteredCount(page);
 
     // Pass results to grid
     callback(page.items, this.filteredCount);
@@ -136,7 +131,7 @@ export abstract class DataProvider<TItem> {
   }
 }
 
-class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
+export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
   // eslint-disable-next-line @typescript-eslint/require-await
   async fetchTotalCount(): Promise<number | undefined> {
     return undefined;
@@ -163,17 +158,32 @@ class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
   }
 }
 
-class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
-  async fetchTotalCount(): Promise<number | undefined> {
-    if (!isCountService(this.service)) {
+export class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
+  declare service: ListAndCountService<TItem>;
+
+  constructor(grid: GridElement, service: ListAndMaybeCountService<TItem>, options: DataProviderOptions = {}) {
+    if (!isCountService(service)) {
       throw new Error('The provided service does not implement the CountService interface.');
+    }
+    super(grid, service, options);
+  }
+
+  async fetchTotalCount(): Promise<number | undefined> {
+    // Only fetch total count if it's specific in options
+    if (!this.loadTotalCount) {
+      return undefined;
+    }
+    // Use cached count if it's already known
+    if (this.totalCount !== undefined) {
+      return this.totalCount;
     }
     return this.service.count(undefined);
   }
 
   async fetchFilteredCount(): Promise<number | undefined> {
-    if (!isCountService(this.service)) {
-      throw new Error('The provided service does not implement the CountService interface.');
+    // Use cached count if it's already known
+    if (this.filteredCount !== undefined) {
+      return this.filteredCount;
     }
     return this.service.count(this.filter);
   }
