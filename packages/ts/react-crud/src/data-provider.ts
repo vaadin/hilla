@@ -4,12 +4,13 @@ import type {
   GridDefaultItem,
   GridElement,
 } from '@hilla/react-components/Grid';
+import { useEffect, useRef, useState } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 
-type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
+export type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
   Readonly<{
     _dataProviderController: {
       rootCache: {
@@ -198,4 +199,45 @@ export function createDataProvider<TItem>(
     return new FixedSizeDataProvider(grid, service, options);
   }
   return new InfiniteDataProvider(grid, service, options);
+}
+
+export type UseDataProviderResult = Readonly<{
+  gridRef(grid: GridElement | null): void;
+  refresh(): void;
+}>;
+
+export function useDataProvider<TItem>(
+  service: ListAndMaybeCountService<TItem>,
+  filter?: FilterUnion,
+): UseDataProviderResult {
+  const [currentGrid, setCurrentGrid] = useState<GridElement | null>(null);
+  const dataProviderRef = useRef<DataProvider<TItem>>();
+
+  useEffect(() => {
+    if (!currentGrid) {
+      return;
+    }
+    // Delay setting data provider to allow applying custom props such as
+    // pageSize to the grid element. It looks like the ref is always applied
+    // before other props, so the setting the data provider would first load
+    // pages with a default page size, and then reload with a custom page size.
+    setTimeout(() => {
+      dataProviderRef.current = createDataProvider(currentGrid, service, {
+        initialFilter: filter,
+      });
+    });
+  }, [currentGrid, service]);
+
+  useEffect(() => {
+    if (dataProviderRef.current) {
+      dataProviderRef.current.setFilter(filter);
+    }
+  }, [filter]);
+
+  return {
+    gridRef: setCurrentGrid,
+    refresh: () => {
+      dataProviderRef.current?.refresh();
+    },
+  };
 }

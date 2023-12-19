@@ -13,7 +13,7 @@ export type IndexedHTMLTableRowElement = HTMLTableRowElement & { index: number }
 export type SortOrder = Array<{ property: string; direction: Direction }>;
 
 export default class GridController {
-  readonly instance: GridElement<Person>;
+  readonly instance: GridElement;
   readonly #user: ReturnType<(typeof userEvent)['setup']>;
 
   static async init(result: RenderResult, user: ReturnType<(typeof userEvent)['setup']>): Promise<GridController> {

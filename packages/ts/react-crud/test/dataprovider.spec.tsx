@@ -1,14 +1,32 @@
 import { expect, use } from '@esm-bundle/chai';
-import type { GridDataProvider, GridElement, GridSorterDefinition } from '@hilla/react-components/Grid.js';
+import {
+  Grid,
+  type GridDataProvider,
+  type GridElement,
+  type GridSorterDefinition,
+} from '@hilla/react-components/Grid.js';
+import { GridSortColumn } from '@hilla/react-components/GridSortColumn';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { CountService, ListService } from '../crud';
-import { createDataProvider, FixedSizeDataProvider, InfiniteDataProvider, type ItemCounts } from '../src/data-provider';
+import {
+  createDataProvider,
+  FixedSizeDataProvider,
+  type GridElementWithInternalAPI,
+  InfiniteDataProvider,
+  type ItemCounts,
+  type UseDataProviderResult,
+  useDataProvider,
+} from '../src/data-provider';
 import type AndFilter from '../types/dev/hilla/crud/filter/AndFilter';
 import type FilterUnion from '../types/dev/hilla/crud/filter/FilterUnion';
 import type PropertyStringFilter from '../types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from '../types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
 import type Pageable from '../types/dev/hilla/mappedtypes/Pageable';
+import { nextFrame } from './autogrid.spec';
+import GridController from './GridController';
 
 use(sinonChai);
 
@@ -404,6 +422,169 @@ describe('@hilla/react-crud', () => {
       expect(countSpy).to.have.been.calledTwice;
       expect(countSpy).to.have.been.calledWith(filter);
       expect(listSpy.lastCall.args[1]).to.equal(filter);
+    });
+  });
+
+  describe('useDataProvider', () => {
+    type TestItem = { id: number; label: string };
+
+    let user: ReturnType<(typeof userEvent)['setup']>;
+    let testData: TestItem[];
+    let testService: CountService<TestItem> & ListService<TestItem>;
+    let listSpy: sinon.SinonSpy;
+    let countSpy: sinon.SinonSpy;
+    let dataProviderResult: UseDataProviderResult;
+
+    function TestGrid({ service, filter }: { service: ListService<TestItem>; filter?: FilterUnion }) {
+      dataProviderResult = useDataProvider(service, filter);
+
+      return (
+        <Grid ref={dataProviderResult.gridRef}>
+          <GridSortColumn path="id" />
+          <GridSortColumn path="label" />
+          <GridSortColumn path="gender" />
+        </Grid>
+      );
+    }
+
+    beforeEach(() => {
+      user = userEvent.setup();
+      testData = Array.from({ length: 200 }, (_, i) => ({
+        id: i + 1,
+        label: `Label ${i + 1}`,
+      }));
+      testService = {
+        async list(request: Pageable): Promise<any> {
+          const offset = request.pageNumber * request.pageSize;
+          return Promise.resolve(testData.slice(offset, offset + request.pageSize));
+        },
+        async count(): Promise<number> {
+          return Promise.resolve(testData.length);
+        },
+      };
+      listSpy = sinon.spy(testService, 'list');
+      countSpy = sinon.spy(testService, 'count');
+    });
+
+    it('loads data for a custom grid', async () => {
+      const result = render(<TestGrid service={testService} />);
+      const grid = await GridController.init(result, user);
+
+      // First page
+      expect(grid.getBodyCellContent(0, 0)).to.have.text('1');
+      expect(grid.getBodyCellContent(0, 1)).to.have.text('Label 1');
+      expect(grid.getBodyCellContent(1, 0)).to.have.text('2');
+      expect(grid.getBodyCellContent(1, 1)).to.have.text('Label 2');
+
+      // Service calls
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 });
+      expect(countSpy).to.have.been.calledOnce;
+
+      // Correct total size
+      const totalSize = (grid.instance as GridElementWithInternalAPI)._dataProviderController.rootCache.size;
+      expect(totalSize).to.equal(200);
+
+      // Scroll down
+      grid.instance.scrollToIndex(100);
+      await nextFrame();
+      expect(grid.getBodyCellContent(100, 0)).to.have.text('101');
+      expect(grid.getBodyCellContent(100, 1)).to.have.text('Label 101');
+      expect(grid.getBodyCellContent(101, 0)).to.have.text('102');
+      expect(grid.getBodyCellContent(101, 1)).to.have.text('Label 102');
+
+      // Service calls
+      expect(listSpy).to.have.been.calledThrice;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 1, pageSize: 50 });
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 2, pageSize: 50 });
+      expect(countSpy).to.have.been.calledOnce;
+    });
+
+    it('refreshes when refresh is called', async () => {
+      const result = render(<TestGrid service={testService} />);
+      const grid = await GridController.init(result, user);
+
+      // Initial render
+      expect(grid.getBodyCellContent(0, 0)).to.have.text('1');
+      expect(grid.getBodyCellContent(0, 1)).to.have.text('Label 1');
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 });
+      expect(countSpy).to.have.been.calledOnce;
+
+      // Update data and refresh
+      listSpy.resetHistory();
+      countSpy.resetHistory();
+      testData = testData.map((item) => ({
+        ...item,
+        label: `Updated ${item.id}`,
+      }));
+      dataProviderResult.refresh();
+      await nextFrame();
+
+      // Updated render
+      expect(grid.getBodyCellContent(0, 0)).to.have.text('1');
+      expect(grid.getBodyCellContent(0, 1)).to.have.text('Updated 1');
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 });
+      expect(countSpy).to.have.been.calledOnce;
+    });
+
+    it('uses an initial filter', async () => {
+      const testFilter = createTestFilter();
+      const result = render(<TestGrid service={testService} filter={testFilter} />);
+      await GridController.init(result, user);
+
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 }, testFilter);
+      expect(countSpy).to.have.been.calledOnceWithExactly(testFilter);
+    });
+
+    it('allows to update the filter', async () => {
+      const testFilter = createTestFilter();
+      const result = render(<TestGrid service={testService} filter={testFilter} />);
+      await GridController.init(result, user);
+
+      // Initial service calls
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 }, testFilter);
+      expect(countSpy).to.have.been.calledOnceWithExactly(testFilter);
+
+      // Re-render with new filter
+      listSpy.resetHistory();
+      countSpy.resetHistory();
+      const newFilter = createTestFilter();
+      result.rerender(<TestGrid service={testService} filter={newFilter} />);
+      await nextFrame();
+
+      // Updated service calls
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 }, newFilter);
+      expect(countSpy).to.have.been.calledOnceWithExactly(newFilter);
+    });
+
+    it('allows to sort the grid', async () => {
+      const result = render(<TestGrid service={testService} />);
+      const grid = await GridController.init(result, user);
+
+      // Initial service calls
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({ pageNumber: 0, pageSize: 50 });
+      expect(countSpy).to.have.been.calledOnce;
+
+      // Sort by label
+      listSpy.resetHistory();
+      countSpy.resetHistory();
+      await grid.sort('label', 'desc');
+      await nextFrame();
+
+      // Updated service calls
+      expect(listSpy).to.have.been.calledOnce;
+      expect(listSpy).to.have.been.calledWithMatch({
+        pageNumber: 0,
+        pageSize: 50,
+        sort: { orders: [{ property: 'label', direction: 'DESC', ignoreCase: false }] },
+      });
+      expect(countSpy).to.not.have.been.called;
     });
   });
 });
