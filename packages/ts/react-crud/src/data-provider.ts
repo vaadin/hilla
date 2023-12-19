@@ -83,11 +83,28 @@ export abstract class DataProvider<TItem> {
     this.grid.dataProvider = this.load.bind(this);
   }
 
-  private async load(params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) {
-    // Fetch page, total count and filtered count
+  refresh(): void {
+    this.totalCount = undefined;
+    this.filteredCount = undefined;
+    this.grid.clearCache();
+  }
+
+  setFilter(filter: FilterUnion | undefined): void {
+    this.filter = filter;
+    this.refresh();
+  }
+
+  protected async load(
+    params: GridDataProviderParams<TItem>,
+    callback: GridDataProviderCallback<TItem>,
+  ): Promise<void> {
+    // Fetch page and filtered count
     const page = await this.fetchPage(params);
-    this.totalCount = await this.fetchTotalCount(page);
     this.filteredCount = await this.fetchFilteredCount(page);
+    // Only fetch total count if it's specific in options
+    if (this.loadTotalCount) {
+      this.totalCount = await this.fetchTotalCount(page);
+    }
 
     // Pass results to grid
     callback(page.items, this.filteredCount);
@@ -101,7 +118,7 @@ export abstract class DataProvider<TItem> {
     }
   }
 
-  private async fetchPage(params: GridDataProviderParams<TItem>): Promise<DataPage<TItem>> {
+  protected async fetchPage(params: GridDataProviderParams<TItem>): Promise<DataPage<TItem>> {
     const sort = createSort(params);
     const pageNumber = params.page;
     const { pageSize } = params;
@@ -115,30 +132,17 @@ export abstract class DataProvider<TItem> {
     return { items, pageRequest };
   }
 
-  abstract fetchTotalCount(page: DataPage<TItem>): Promise<number | undefined>;
+  protected abstract fetchTotalCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
 
-  abstract fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined>;
-
-  refresh(): void {
-    this.totalCount = undefined;
-    this.filteredCount = undefined;
-    this.grid.clearCache();
-  }
-
-  setFilter(filter: FilterUnion | undefined): void {
-    this.filter = filter;
-    this.refresh();
-  }
+  protected abstract fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
 }
 
 export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async fetchTotalCount(): Promise<number | undefined> {
+  protected fetchTotalCount(): undefined {
     return undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined> {
+  protected fetchFilteredCount(page: DataPage<TItem>): number | undefined {
     const { items, pageRequest } = page;
     const { pageNumber, pageSize } = pageRequest;
     let infiniteScrollingSize;
@@ -154,7 +158,7 @@ export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
       infiniteScrollingSize = pageNumber * pageSize + items.length;
     }
 
-    return Promise.resolve(infiniteScrollingSize);
+    return infiniteScrollingSize;
   }
 }
 
@@ -168,11 +172,7 @@ export class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
     super(grid, service, options);
   }
 
-  async fetchTotalCount(): Promise<number | undefined> {
-    // Only fetch total count if it's specific in options
-    if (!this.loadTotalCount) {
-      return undefined;
-    }
+  protected async fetchTotalCount(): Promise<number | undefined> {
     // Use cached count if it's already known
     if (this.totalCount !== undefined) {
       return this.totalCount;
@@ -180,7 +180,7 @@ export class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
     return this.service.count(undefined);
   }
 
-  async fetchFilteredCount(): Promise<number | undefined> {
+  protected async fetchFilteredCount(): Promise<number | undefined> {
     // Use cached count if it's already known
     if (this.filteredCount !== undefined) {
       return this.filteredCount;

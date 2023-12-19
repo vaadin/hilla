@@ -112,7 +112,7 @@ async function testPageLoad(
   listSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>,
   pageNumber: number,
   expectedItems: number[],
-  expectedSize: number,
+  expectedSize: number | undefined,
 ) {
   listSpy.resetHistory();
   grid.loadSpy.resetHistory();
@@ -159,21 +159,33 @@ describe('@hilla/react-crud', () => {
       const dataProvider = new InfiniteDataProvider(grid, listService);
 
       // First page
-      // Total size is page size + 1
+      // Expected size is page size + 1
       await testPageLoad(grid, listSpy, 0, data.slice(0, 10), 11);
 
       // Second page
-      // Total size is cache size + page size + 1
+      // Expected size is cache size + page size + 1
       await testPageLoad(grid, listSpy, 1, data.slice(10, 20), 21);
 
       // Last page
-      // Total size is cache size + page size
+      // Expected size is cache size + size of last page
       await testPageLoad(grid, listSpy, 2, data.slice(20, 25), 25);
+    });
+
+    it('prevents size from shrinking when requesting previous pages', async () => {
+      const grid = mockGrid();
+      const dataProvider = new InfiniteDataProvider(grid, listService);
+
+      await testPageLoad(grid, listSpy, 0, data.slice(0, 10), 11);
+      await testPageLoad(grid, listSpy, 1, data.slice(10, 20), 21);
+      await testPageLoad(grid, listSpy, 2, data.slice(20, 25), 25);
+
+      // Should return undefined for size to prevent shrinking
+      await testPageLoad(grid, listSpy, 1, data.slice(10, 20), undefined);
     });
 
     it('returns correct item counts', async () => {
       const grid = mockGrid();
-      const afterLoadSpy = sinon.spy() as sinon.SinonSpy<[result: ItemCounts], void>;
+      const afterLoadSpy = sinon.spy();
       const dataProvider = new InfiniteDataProvider(grid, listService, {
         afterLoad: afterLoadSpy,
       });
