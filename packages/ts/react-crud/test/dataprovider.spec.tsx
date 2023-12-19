@@ -82,28 +82,30 @@ function mockGrid() {
   return new MockGrid() as unknown as GridElement & MockGrid;
 }
 
-const data = Array.from({ length: 25 }, (_, i) => i);
+function createListService<TItem>(data: TItem[]): ListService<TItem> {
+  return {
+    async list(request: Pageable, filter: FilterUnion | undefined): Promise<TItem[]> {
+      const offset = request.pageNumber * request.pageSize;
+      return Promise.resolve(data.slice(offset, offset + request.pageSize));
+    },
+  };
+}
 
-const listService: ListService<number> = {
-  async list(request: Pageable, filter: FilterUnion | undefined): Promise<number[]> {
-    const offset = request.pageNumber * request.pageSize;
-    return Promise.resolve(data.slice(offset, offset + request.pageSize));
-  },
-};
-
-const listAndCountService: CountService<number> & ListService<number> = {
-  async list(request: Pageable, filter: FilterUnion | undefined): Promise<number[]> {
-    const offset = request.pageNumber * request.pageSize;
-    return Promise.resolve(data.slice(offset, offset + request.pageSize));
-  },
-  async count(filter: FilterUnion | undefined): Promise<number> {
-    // If there is a filter, just return a different number than the total size
-    if (filter) {
-      return Promise.resolve(10);
-    }
-    return Promise.resolve(data.length);
-  },
-};
+function createListAndCountService<TItem>(
+  data: TItem[],
+  filteredCount?: number,
+): CountService<TItem> & ListService<TItem> {
+  return {
+    async list(request: Pageable): Promise<TItem[]> {
+      const offset = request.pageNumber * request.pageSize;
+      return Promise.resolve(data.slice(offset, offset + request.pageSize));
+    },
+    async count(filter: FilterUnion | undefined): Promise<number> {
+      const result = filter && filteredCount ? filteredCount : data.length;
+      return Promise.resolve(result);
+    },
+  };
+}
 
 function createTestFilter(): FilterUnion {
   const filter1: PropertyStringFilter = {
@@ -150,21 +152,25 @@ describe('@hilla/react-crud', () => {
   describe('createDataProvider', () => {
     it('creates InfiniteDataProvider for list service', () => {
       const grid = mockGrid();
-      const dataProvider = createDataProvider(grid, listService);
+      const dataProvider = createDataProvider(grid, createListService([]));
       expect(dataProvider).to.be.instanceOf(InfiniteDataProvider);
     });
 
     it('creates FixedSizeDataProvider for list and count service', () => {
       const grid = mockGrid();
-      const dataProvider = createDataProvider(grid, listAndCountService);
+      const dataProvider = createDataProvider(grid, createListAndCountService([]));
       expect(dataProvider).to.be.instanceOf(FixedSizeDataProvider);
     });
   });
 
   describe('InfiniteDataProvider', () => {
+    let data: number[];
+    let listService: ListService<number>;
     let listSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>;
 
     beforeEach(() => {
+      data = Array.from({ length: 25 }, (_, i) => i + 1);
+      listService = createListService(data);
       listSpy = sinon.spy(listService, 'list');
     });
 
@@ -280,10 +286,14 @@ describe('@hilla/react-crud', () => {
   });
 
   describe('FixedSizeDataProvider', () => {
+    let data: number[];
+    let listAndCountService: CountService<number> & ListService<number>;
     let listSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>;
     let countSpy: sinon.SinonSpy<[filter: FilterUnion | undefined], Promise<number>>;
 
     beforeEach(() => {
+      data = Array.from({ length: 25 }, (_, i) => i + 1);
+      listAndCountService = createListAndCountService(data, 10);
       listSpy = sinon.spy(listAndCountService, 'list');
       countSpy = sinon.spy(listAndCountService, 'count');
     });
@@ -297,7 +307,7 @@ describe('@hilla/react-crud', () => {
       const grid = mockGrid();
 
       expect(() => {
-        const dataProvider = new FixedSizeDataProvider(grid, listService);
+        const dataProvider = new FixedSizeDataProvider(grid, createListService(data));
       }).to.throw('The provided service does not implement the CountService interface.');
     });
 
@@ -429,8 +439,8 @@ describe('@hilla/react-crud', () => {
     type TestItem = { id: number; label: string };
 
     let user: ReturnType<(typeof userEvent)['setup']>;
-    let testData: TestItem[];
-    let testService: CountService<TestItem> & ListService<TestItem>;
+    let data: TestItem[];
+    let listAndCountService: CountService<TestItem> & ListService<TestItem>;
     let listSpy: sinon.SinonSpy;
     let countSpy: sinon.SinonSpy;
     let dataProviderResult: UseDataProviderResult;
@@ -449,25 +459,17 @@ describe('@hilla/react-crud', () => {
 
     beforeEach(() => {
       user = userEvent.setup();
-      testData = Array.from({ length: 200 }, (_, i) => ({
+      data = Array.from({ length: 200 }, (_, i) => ({
         id: i + 1,
         label: `Label ${i + 1}`,
       }));
-      testService = {
-        async list(request: Pageable): Promise<any> {
-          const offset = request.pageNumber * request.pageSize;
-          return Promise.resolve(testData.slice(offset, offset + request.pageSize));
-        },
-        async count(): Promise<number> {
-          return Promise.resolve(testData.length);
-        },
-      };
-      listSpy = sinon.spy(testService, 'list');
-      countSpy = sinon.spy(testService, 'count');
+      listAndCountService = createListAndCountService(data);
+      listSpy = sinon.spy(listAndCountService, 'list');
+      countSpy = sinon.spy(listAndCountService, 'count');
     });
 
     it('loads data for a custom grid', async () => {
-      const result = render(<TestGrid service={testService} />);
+      const result = render(<TestGrid service={listAndCountService} />);
       const grid = await GridController.init(result, user);
 
       // First page
@@ -501,7 +503,7 @@ describe('@hilla/react-crud', () => {
     });
 
     it('refreshes when refresh is called', async () => {
-      const result = render(<TestGrid service={testService} />);
+      const result = render(<TestGrid service={listAndCountService} />);
       const grid = await GridController.init(result, user);
 
       // Initial render
@@ -514,10 +516,9 @@ describe('@hilla/react-crud', () => {
       // Update data and refresh
       listSpy.resetHistory();
       countSpy.resetHistory();
-      testData = testData.map((item) => ({
-        ...item,
-        label: `Updated ${item.id}`,
-      }));
+      data.forEach((item) => {
+        item.label = `Updated ${item.id}`;
+      });
       dataProviderResult.refresh();
       await nextFrame();
 
@@ -531,7 +532,7 @@ describe('@hilla/react-crud', () => {
 
     it('uses an initial filter', async () => {
       const testFilter = createTestFilter();
-      const result = render(<TestGrid service={testService} filter={testFilter} />);
+      const result = render(<TestGrid service={listAndCountService} filter={testFilter} />);
       await GridController.init(result, user);
 
       expect(listSpy).to.have.been.calledOnce;
@@ -541,7 +542,7 @@ describe('@hilla/react-crud', () => {
 
     it('allows to update the filter', async () => {
       const testFilter = createTestFilter();
-      const result = render(<TestGrid service={testService} filter={testFilter} />);
+      const result = render(<TestGrid service={listAndCountService} filter={testFilter} />);
       await GridController.init(result, user);
 
       // Initial service calls
@@ -553,7 +554,7 @@ describe('@hilla/react-crud', () => {
       listSpy.resetHistory();
       countSpy.resetHistory();
       const newFilter = createTestFilter();
-      result.rerender(<TestGrid service={testService} filter={newFilter} />);
+      result.rerender(<TestGrid service={listAndCountService} filter={newFilter} />);
       await nextFrame();
 
       // Updated service calls
@@ -563,7 +564,7 @@ describe('@hilla/react-crud', () => {
     });
 
     it('allows to sort the grid', async () => {
-      const result = render(<TestGrid service={testService} />);
+      const result = render(<TestGrid service={listAndCountService} />);
       const grid = await GridController.init(result, user);
 
       // Initial service calls
