@@ -45,6 +45,10 @@ const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
     </span>
 );
 
+const HeaderRenderer = () => (
+  <div>Full Name (currently: {new Date().toLocaleString()})</div>
+);
+
 
 export function ReadOnlyGridCustomFilter(): JSX.Element {
   return (
@@ -58,7 +62,7 @@ export function ReadOnlyGridCustomFilter(): JSX.Element {
         ]}
         columnOptions={{
           lastName: { filterPlaceholder: 'Search for last name' },
-          fullName: { headerRenderer: () => <div>Full Name (currently: {new Date().toLocaleString()})</div>, headerFilterRenderer: HeaderFilterRenderer }
+          fullName: { headerRenderer: HeaderRenderer, headerFilterRenderer: HeaderFilterRenderer }
         }}
       />
     </div>

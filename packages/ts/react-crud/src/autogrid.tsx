@@ -162,7 +162,7 @@ function wrapCustomColumn(
   const customOptions = options.columnOptions?.[key!];
   const { header: customHeader, headerRenderer: CustomHeaderRenderer, headerFilterRenderer } = customOptions ?? {};
   const columnWithoutHeader = cloneElement(column, {
-    header: undefined,
+    header: null,
     headerRenderer: InternalCustomHeaderFilterRenderer,
   });
   return (
@@ -185,10 +185,10 @@ function wrapCustomColumn(
 }
 
 function addCustomColumns(
-  columns: React.JSX.Element[],
+  columns: JSX.Element[],
   options: ColumnConfigurationOptions,
   setPropertyFilter: (filter: PropertyStringFilter) => void,
-): React.JSX.Element[] {
+): JSX.Element[] {
   if (!options.customColumns) {
     return columns;
   }

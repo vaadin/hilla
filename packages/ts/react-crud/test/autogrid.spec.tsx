@@ -1,6 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import { TextField } from '@hilla/react-components/TextField.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -951,7 +950,7 @@ describe('@hilla/react-crud', () => {
               <TestAutoGrid
                 columnOptions={{
                   firstName: {
-                    headerFilterRenderer: (props) => <TextField placeholder="Custom filter"></TextField>,
+                    headerFilterRenderer: () => <TextField placeholder="Custom filter"></TextField>,
                   },
                 }}
               />,
