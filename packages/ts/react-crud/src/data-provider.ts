@@ -222,7 +222,7 @@ export type UseDataProviderResult = Readonly<{
  *
  * Example:
  * ```tsx
- * const { gridRef } = useDataProvider(service);
+ * const { gridRef } = useDataProvider(MyListService);
  *
  * <Grid ref={gridRef}>
  *   ...
