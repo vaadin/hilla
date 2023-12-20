@@ -15,7 +15,7 @@ public class HillaAppInitUtility {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(HillaAppInitUtility.class);
 
-    private static final String REACT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-react/archive/refs/heads/v2.5.zip";
+    private static final String REACT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-react/archive/refs/heads/v2.zip";
 
     private static final List<String> REACT_FILE_LIST = List.of("package.json",
             "package-lock.json", "types.d.ts", "vite.config.ts",
