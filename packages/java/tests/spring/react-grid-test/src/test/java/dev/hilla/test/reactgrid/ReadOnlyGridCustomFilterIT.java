@@ -36,7 +36,8 @@ public class ReadOnlyGridCustomFilterIT extends AbstractGridTest {
 
     private void setFilterLastName(String filter) {
         TestBenchElement cont = grid.getHeaderCellContent(1, 1);
-        TextFieldElement textFieldElement = cont.$(TextFieldElement.class).first();
+        TextFieldElement textFieldElement = cont.$(TextFieldElement.class)
+                .first();
         textFieldElement.setValue(filter);
     }
 
