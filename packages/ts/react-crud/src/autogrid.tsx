@@ -1,24 +1,13 @@
 import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
-import {
-  Grid,
-  type GridDataProvider,
-  type GridDataProviderCallback,
-  type GridDataProviderParams,
-  type GridDefaultItem,
-  type GridElement,
-  type GridProps,
-} from '@hilla/react-components/Grid.js';
+import { Grid, type GridElement, type GridProps } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
 import {
   cloneElement,
   type ComponentType,
-  type Dispatch,
   type ForwardedRef,
   forwardRef,
   type JSX,
-  type MutableRefObject,
-  type SetStateAction,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -29,42 +18,16 @@ import { ColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridFooterItemCountRenderer, AutoGridRowNumberRenderer, FooterContext } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
-import type { CountService, ListService } from './crud';
+import type { ListService } from './crud';
+import { createDataProvider, type DataProvider, isCountService, type ItemCounts } from './data-provider.js';
 import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import type Sort from './types/dev/hilla/mappedtypes/Sort.js';
-import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
 import { registerStylesheet } from './util';
 
 registerStylesheet(css);
-
-export type AutoGridItemCountHolder = Readonly<{
-  /**
-   * Passed from AutoGrid to AutoGridFooterItemCountRenderer
-   * see: {@link AutoGrid#totalCount}
-   */
-  totalCount: boolean | undefined;
-  /**
-   * Passed from AutoGrid to AutoGridFooterItemCountRenderer
-   * see: {@link AutoGrid#filteredCount}
-   */
-  filteredCount: boolean | undefined;
-  /**
-   * Ref to the total item count, which is used to show the total count in the
-   * grid footer. This is updated when the grid is loaded for the first time.
-   * Only available when the service implements the `CountService` interface and
-   * the `totalCount` option is enabled.
-   */
-  totalItemCount: MutableRefObject<number>;
-  /**
-   * Ref to the filtered item count, which is used to show the filtered count in
-   * the grid footer. This is updated when the grid filter changes.
-   */
-  filteredItemCount: MutableRefObject<number>;
-}>;
 
 export interface AutoGridRef<TItem = any> {
   /**
@@ -166,148 +129,10 @@ interface AutoGridOwnProps<TItem> {
    * This requires the provided service to implement the CountService interface,
    * See {@link AutoGrid#totalCount} and {@link AutoGrid#filteredCount}.
    */
-  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
+  footerCountRenderer?: ComponentType<ItemCounts>;
 }
 
 export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<TItem>>;
-
-type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
-  Readonly<{
-    _dataProviderController: {
-      rootCache: {
-        size?: number;
-      };
-    };
-  }>;
-
-function createSort<TItem>(params: GridDataProviderParams<TItem>): Sort {
-  return {
-    orders: params.sortOrders
-      .filter((order) => order.direction != null)
-      .map((order) => ({
-        property: order.path,
-        direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
-        ignoreCase: false,
-      })),
-  };
-}
-
-type PageRequest = {
-  pageNumber: number;
-  pageSize: number;
-  sort: Sort;
-};
-
-type DataPage<TItem> = {
-  items: TItem[];
-  pageRequest: PageRequest;
-};
-
-async function fetchDataPage<TItem>(
-  params: GridDataProviderParams<TItem>,
-  service: ListService<TItem>,
-  filter: MutableRefObject<FilterUnion | undefined>,
-): Promise<DataPage<TItem>> {
-  const sort = createSort(params);
-
-  const pageNumber = params.page;
-  const { pageSize } = params;
-  const pageRequest = {
-    pageNumber,
-    pageSize,
-    sort,
-  };
-  const items = await service.list(pageRequest, filter.current);
-
-  return { items, pageRequest };
-}
-
-function createInfiniteDataProvider<TItem>(
-  service: ListService<TItem>,
-  filter: MutableRefObject<FilterUnion | undefined>,
-  grid: GridElement<TItem>,
-  afterPageLoaded: () => void,
-): GridDataProvider<TItem> {
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
-    const { items, pageRequest } = await fetchDataPage(params, service, filter);
-    const { pageNumber, pageSize } = pageRequest;
-    let infiniteScrollingSize;
-    if (items.length === pageSize) {
-      infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
-      const cacheSize = (grid as GridElementWithInternalAPI<TItem>)._dataProviderController.rootCache.size;
-      if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
-        // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-        infiniteScrollingSize = undefined;
-      }
-    } else {
-      infiniteScrollingSize = pageNumber * pageSize + items.length;
-    }
-
-    callback(items, infiniteScrollingSize);
-    afterPageLoaded();
-  };
-}
-
-function createFiniteDataProvider<TItem>(
-  service: CountService<TItem> & ListService<TItem>,
-  filter: MutableRefObject<FilterUnion | undefined>,
-  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
-  itemCountHolder: AutoGridItemCountHolder,
-  afterPageLoaded: () => void,
-): GridDataProvider<TItem> {
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  return async (params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>) => {
-    const { items } = await fetchDataPage(params, service, filter);
-
-    const { totalCount, totalItemCount, filteredItemCount } = itemCountHolder;
-
-    if (totalCount && totalItemCount.current < 0) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
-      totalItemCount.current = await service.count(undefined);
-    }
-
-    let realSize = filteredItemCount.current;
-    if (realSize < 0) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
-      realSize = await service.count(filter.current);
-      filteredItemCount.current = realSize;
-      footerRef.current(realSize);
-    }
-
-    callback(items, realSize);
-    afterPageLoaded();
-  };
-}
-
-function createDataProvider<TItem>(
-  grid: GridElement<TItem>,
-  service: ListService<TItem>,
-  filter: MutableRefObject<FilterUnion | undefined>,
-  itemCountHolder: AutoGridItemCountHolder,
-  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>,
-): GridDataProvider<TItem> {
-  let first = true;
-  const afterPageLoaded = () => {
-    if (first) {
-      // Workaround for https://github.com/vaadin/react-components/issues/129
-      first = false;
-      setTimeout(() => grid.recalculateColumnWidths(), 0);
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (!(service as any).count) {
-    if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
-      console.error(
-        '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
-      );
-    }
-    return createInfiniteDataProvider(service, filter, grid, afterPageLoaded);
-  }
-  const countService = service as unknown as CountService<TItem> & ListService<TItem>;
-  return createFiniteDataProvider(countService, filter, footerRef, itemCountHolder, afterPageLoaded);
-}
 
 interface ColumnConfigurationOptions {
   visibleColumns?: string[];
@@ -315,9 +140,10 @@ interface ColumnConfigurationOptions {
   customColumns?: JSX.Element[];
   columnOptions?: Record<string, ColumnOptions>;
   rowNumbers?: boolean;
-  itemCountHolder: AutoGridItemCountHolder;
-  footerCountRenderer?: ComponentType<AutoGridItemCountHolder>;
-  footerRef: MutableRefObject<Dispatch<SetStateAction<number>>>;
+  totalCount?: boolean;
+  filteredCount?: boolean;
+  footerCountRenderer?: ComponentType<ItemCounts>;
+  itemCounts?: ItemCounts;
 }
 
 function addCustomColumns(columns: JSX.Element[], options: ColumnConfigurationOptions): JSX.Element[] {
@@ -408,10 +234,18 @@ function useColumns(
       ...columns,
     ];
   }
-  const { itemCountHolder, footerRef, footerCountRenderer } = options;
-  if (itemCountHolder.totalCount ?? itemCountHolder.filteredCount) {
+  const { totalCount, filteredCount, itemCounts, footerCountRenderer } = options;
+  if (totalCount ?? filteredCount) {
     const col = (
-      <FooterContext.Provider key="grid-footer" value={{ itemCountHolder, footerRef, footerCountRenderer }}>
+      <FooterContext.Provider
+        key="grid-footer"
+        value={{
+          totalCount,
+          filteredCount,
+          footerCountRenderer,
+          itemCounts,
+        }}
+      >
         <GridColumnGroup footerRenderer={AutoGridFooterItemCountRenderer}>{columns}</GridColumnGroup>
       </FooterContext.Provider>
     );
@@ -440,11 +274,9 @@ function AutoGridInner<TItem>(
   ref: ForwardedRef<AutoGridRef<TItem>>,
 ): JSX.Element {
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
+  const [itemCounts, setItemCounts] = useState<ItemCounts | undefined>();
   const gridRef = useRef<GridElement<TItem>>(null);
-  const dataProviderFilter = useRef<FilterUnion | undefined>(undefined);
-  const totalItemCount = useRef(-1);
-  const filteredItemCount = useRef(-1);
-  const footerRef = useRef<Dispatch<SetStateAction<number>>>(() => {});
+  const dataProviderRef = useRef<DataProvider<TItem>>();
 
   useImperativeHandle(
     ref,
@@ -453,9 +285,7 @@ function AutoGridInner<TItem>(
         return gridRef.current;
       },
       refresh() {
-        filteredItemCount.current = -1;
-        totalItemCount.current = -1;
-        gridRef.current?.clearCache();
+        dataProviderRef.current?.refresh();
       },
     }),
     [],
@@ -484,13 +314,6 @@ function AutoGridInner<TItem>(
     }
   };
 
-  const itemCountHolder: AutoGridItemCountHolder = {
-    totalCount,
-    filteredCount,
-    totalItemCount,
-    filteredItemCount,
-  };
-
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderPropertyFilter, {
@@ -499,9 +322,10 @@ function AutoGridInner<TItem>(
     customColumns,
     columnOptions,
     rowNumbers,
-    itemCountHolder,
+    totalCount,
+    filteredCount,
     footerCountRenderer,
-    footerRef,
+    itemCounts,
   });
 
   useEffect(() => {
@@ -514,19 +338,36 @@ function AutoGridInner<TItem>(
   useEffect(() => {
     // Sets the data provider, should be done only once
     const grid = gridRef.current!;
+    // Log an error if totalCount or filteredCount is enabled but the service doesn't implement CountService
+    if ((!isCountService(service) && totalCount) ?? filteredCount) {
+      console.error(
+        '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
+      );
+    }
+    // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
     setTimeout(() => {
-      // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
-      grid.dataProvider = createDataProvider(grid, service, dataProviderFilter, itemCountHolder, footerRef);
+      let firstUpdate = true;
+      dataProviderRef.current = createDataProvider(grid, service, {
+        initialFilter: experimentalFilter ?? internalFilter,
+        loadTotalCount: totalCount,
+        afterLoad(newItemCounts: ItemCounts) {
+          setItemCounts(newItemCounts);
+
+          if (firstUpdate) {
+            // Workaround for https://github.com/vaadin/react-components/issues/129
+            firstUpdate = false;
+            setTimeout(() => grid.recalculateColumnWidths(), 0);
+          }
+        },
+      });
     }, 1);
   }, [model, service]);
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
-    const grid = gridRef.current;
-    if (grid) {
-      dataProviderFilter.current = experimentalFilter ?? internalFilter;
-      filteredItemCount.current = -1;
-      grid.clearCache();
+    const dataProvider = dataProviderRef.current;
+    if (dataProvider) {
+      dataProvider.setFilter(experimentalFilter ?? internalFilter);
     }
   }, [experimentalFilter, internalFilter]);
 
