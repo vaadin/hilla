@@ -19,8 +19,8 @@ public class AnnotationsTest {
     public void should_GenerateAnnotations()
             throws IOException, URISyntaxException {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
-                .exposedPackages(
-                        Set.of("com.vaadin.hilla.parser.plugins.model.annotations"))
+                .exposedPackages(Set.of(
+                        "com.vaadin.hilla.parser.plugins.model.annotations"))
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())

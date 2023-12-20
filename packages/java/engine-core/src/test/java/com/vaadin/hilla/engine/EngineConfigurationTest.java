@@ -41,9 +41,10 @@ public class EngineConfigurationTest {
         this.baseDirectory = this.temporaryDirectory.resolve("base");
 
         var parserConfiguration = new ParserConfiguration();
-        parserConfiguration.setEndpointAnnotation("com.vaadin.hilla.test.Endpoint");
         parserConfiguration
-                .setEndpointExposedAnnotation("com.vaadin.hilla.test.EndpointExposed");
+                .setEndpointAnnotation("com.vaadin.hilla.test.Endpoint");
+        parserConfiguration.setEndpointExposedAnnotation(
+                "com.vaadin.hilla.test.EndpointExposed");
         parserConfiguration.setPlugins(new ParserConfiguration.Plugins(List.of(
                 new ParserConfiguration.Plugin("parser-jvm-plugin-use"),
                 new ParserConfiguration.Plugin("parser-jvm-plugin-nonnull",

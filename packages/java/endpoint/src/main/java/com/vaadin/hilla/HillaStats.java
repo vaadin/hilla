@@ -43,7 +43,8 @@ class HillaStats {
                 return Optional.empty();
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to determine com.vaadin.hilla/hilla-react version",
+            LOGGER.error(
+                    "Unable to determine com.vaadin.hilla/hilla-react version",
                     e);
         }
         return Optional.of("?");

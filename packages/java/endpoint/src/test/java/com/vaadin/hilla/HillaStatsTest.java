@@ -67,8 +67,9 @@ public class HillaStatsTest {
 
     private URL fakeJar(String artifactId, String version) throws IOException {
         final Path jar = temporary.newFolder().toPath();
-        final Path pomProperties = jar.resolve(
-                "META-INF/maven/com.vaadin.hilla/" + artifactId + "/pom.properties");
+        final Path pomProperties = jar
+                .resolve("META-INF/maven/com.vaadin.hilla/" + artifactId
+                        + "/pom.properties");
         Files.createDirectories(pomProperties.getParent());
         Files.writeString(pomProperties, "version=" + version);
         return jar.toUri().toURL();

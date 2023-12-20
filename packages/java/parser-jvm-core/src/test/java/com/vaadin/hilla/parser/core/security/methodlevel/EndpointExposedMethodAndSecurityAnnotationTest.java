@@ -32,8 +32,8 @@ public class EndpointExposedMethodAndSecurityAnnotationTest {
     public void throws_when_parentEndpointMethod_annotatedWithSecurityAnnotations() {
         var exception = assertThrows(ParserException.class, () -> new Parser()
                 .classLoader(getClass().getClassLoader()).classPath(classPath)
-                .exposedPackages(
-                        Set.of("com.vaadin.hilla.parser.core.security.methodlevel"))
+                .exposedPackages(Set.of(
+                        "com.vaadin.hilla.parser.core.security.methodlevel"))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .execute());
