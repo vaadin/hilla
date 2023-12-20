@@ -1,17 +1,33 @@
 import { _enum, type EnumModel } from '@hilla/form';
 import { DatePicker } from '@hilla/react-components/DatePicker.js';
+import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
+import { type ComponentType, type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 import { useDatePickerI18n } from './locale.js';
-import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
+import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { convertToTitleCase } from './util';
+
+type ExtractComponentTypeProps<T extends ComponentType<any>> = T extends ComponentType<infer U> ? U : never;
+
+export type HeaderRendererProps = ExtractComponentTypeProps<
+  NonNullable<Required<GridColumnProps<unknown>>['headerRenderer']>
+>;
+
+export type HeaderFilterRendererProps = HeaderRendererProps & {
+  /**
+   * Allows to set custom filter for a property. This is used by the header filter components.
+   * @param filter - The filter to set in the filter list.
+   */
+  setPropertyFilter(filter: FilterUnion): void;
+};
 
 export type HeaderFilterProps = Readonly<{
   /**
@@ -39,6 +55,16 @@ export type HeaderFilterProps = Readonly<{
    * Only applies to string value filters.
    */
   filterMinLength?: number;
+
+  /**
+   * Custom renderer for the filter in the header.
+   */
+  headerFilterRenderer?: ComponentType<HeaderFilterRendererProps>;
+
+  /**
+   * Custom renderer for the title/sorter in the header.
+   */
+  headerRenderer?: ComponentType<HeaderRendererProps>;
 }>;
 
 function useFilterState(initialMatcher: Matcher) {
@@ -50,11 +76,11 @@ function useFilterState(initialMatcher: Matcher) {
     setFilterValue(newFilterValue);
     setMatcher(newMatcher);
 
-    const filter: FilterUnion = {
-      '@type': 'propertyString',
+    const filter: PropertyStringFilter = {
       propertyId: context.propertyInfo.name,
       filterValue: newFilterValue,
       matcher: newMatcher,
+      '@type': 'propertyString',
     };
     context.setPropertyFilter(filter);
   }

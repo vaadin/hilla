@@ -1,4 +1,6 @@
 import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import { type JSX, useContext } from 'react';
+import { ColumnContext, CustomColumnContext } from './autogrid-column-context';
 import {
   AutoGridBooleanRenderer,
   AutoGridDateRenderer,
@@ -18,6 +20,7 @@ import {
   StringHeaderFilter,
   TimeHeaderFilter,
   type HeaderFilterProps,
+  type HeaderRendererProps,
 } from './header-filter';
 import type { PropertyInfo } from './model-info';
 
@@ -33,7 +36,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridIntegerRenderer,
-        headerRenderer: NumberHeaderFilter,
+        headerFilterRenderer: NumberHeaderFilter,
       };
     case 'decimal':
       return {
@@ -41,7 +44,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDecimalRenderer,
-        headerRenderer: NumberHeaderFilter,
+        headerFilterRenderer: NumberHeaderFilter,
       };
     case 'boolean':
       return {
@@ -49,7 +52,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridBooleanRenderer,
-        headerRenderer: BooleanHeaderFilter,
+        headerFilterRenderer: BooleanHeaderFilter,
       };
     case 'date':
       return {
@@ -57,7 +60,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateRenderer,
-        headerRenderer: DateHeaderFilter,
+        headerFilterRenderer: DateHeaderFilter,
       };
     case 'time':
       return {
@@ -65,7 +68,7 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridTimeRenderer,
-        headerRenderer: TimeHeaderFilter,
+        headerFilterRenderer: TimeHeaderFilter,
       };
     case 'datetime':
       return {
@@ -73,29 +76,29 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
         textAlign: 'end',
         flexGrow: 0,
         renderer: AutoGridDateTimeRenderer,
-        headerRenderer: DateHeaderFilter,
+        headerFilterRenderer: DateHeaderFilter,
       };
     case 'enum':
       return {
         autoWidth: true,
         renderer: AutoGridEnumRenderer,
-        headerRenderer: EnumHeaderFilter,
+        headerFilterRenderer: EnumHeaderFilter,
       };
     case 'string':
       return {
         autoWidth: true,
-        headerRenderer: StringHeaderFilter,
+        headerFilterRenderer: StringHeaderFilter,
       };
     case 'object':
       return {
         autoWidth: true,
         renderer: AutoGridJsonRenderer,
-        headerRenderer: NoHeaderFilter,
+        headerFilterRenderer: NoHeaderFilter,
       };
     default:
       return {
         autoWidth: true,
-        headerRenderer: NoHeaderFilter,
+        headerFilterRenderer: NoHeaderFilter,
       };
   }
 }
@@ -105,15 +108,31 @@ export function getColumnOptions(
   customColumnOptions: ColumnOptions | undefined,
 ): ColumnOptions {
   const typeColumnOptions = getTypeColumnOptions(propertyInfo);
-  const finalHeaderRenderer =
-    customColumnOptions?.filterable === false ? NoHeaderFilter : typeColumnOptions.headerRenderer;
+  const HeaderFilterRenderer =
+    customColumnOptions?.filterable === false ? NoHeaderFilter : typeColumnOptions.headerFilterRenderer;
   // TODO: Remove eslint-disable when all TypeScript version issues are resolved
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const columnOptions = customColumnOptions
-    ? { ...typeColumnOptions, ...customColumnOptions, headerRenderer: finalHeaderRenderer }
+  const columnOptions: ColumnOptions = customColumnOptions
+    ? { ...typeColumnOptions, headerFilterRenderer: HeaderFilterRenderer, ...customColumnOptions }
     : typeColumnOptions;
-  if (!columnOptions.headerRenderer) {
-    console.error(`No header renderer defined for column ${propertyInfo.name}`);
+  if (!columnOptions.headerFilterRenderer) {
+    console.error(`No filter renderer defined for column ${propertyInfo.name}`);
   }
   return columnOptions;
+}
+
+export function InternalHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
+  const { setPropertyFilter, headerFilterRenderer: HeaderFilterRenderer } = useContext(ColumnContext)!;
+  if (HeaderFilterRenderer) {
+    return <HeaderFilterRenderer original={original} setPropertyFilter={setPropertyFilter} />;
+  }
+  return null;
+}
+
+export function InternalCustomHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
+  const { setPropertyFilter, headerFilterRenderer: HeaderFilterRenderer } = useContext(CustomColumnContext)!;
+  if (HeaderFilterRenderer) {
+    return <HeaderFilterRenderer original={original} setPropertyFilter={setPropertyFilter} />;
+  }
+  return null;
 }
