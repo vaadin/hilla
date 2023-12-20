@@ -23,7 +23,7 @@ public class HillaAppInitUtility {
             "frontend/views/MainView.tsx",
             "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
 
-    private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.5.zip";
+    private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.zip";
 
     private static final List<String> LIT_FILE_LIST = List.of("package.json",
             "package-lock.json", "vite.config.ts", "frontend/index.ts",
