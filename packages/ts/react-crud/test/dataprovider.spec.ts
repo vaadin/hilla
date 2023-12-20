@@ -4,11 +4,11 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { CountService, ListService } from '../crud';
 import { createDataProvider, FixedSizeDataProvider, InfiniteDataProvider, type ItemCounts } from '../src/data-provider';
-import type AndFilter from '../types/dev/hilla/crud/filter/AndFilter';
-import type FilterUnion from '../types/dev/hilla/crud/filter/FilterUnion';
-import type PropertyStringFilter from '../types/dev/hilla/crud/filter/PropertyStringFilter';
-import Matcher from '../types/dev/hilla/crud/filter/PropertyStringFilter/Matcher';
-import type Pageable from '../types/dev/hilla/mappedtypes/Pageable';
+import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter';
+import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter';
+import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
+import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable';
 
 use(sinonChai);
 

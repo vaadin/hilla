@@ -1,7 +1,7 @@
 package com.example.application.service;
 
-import dev.hilla.BrowserCallable;
-import dev.hilla.crud.CrudRepositoryService;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.crud.CrudRepositoryService;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @BrowserCallable

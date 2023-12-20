@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "CustomConfigEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.config.CustomConfigEndpoint"
+    }
+  ],
+  "paths": {
+    "/CustomConfigEndpoint/get": {
+      "post": {
+        "tags": ["CustomConfigEndpoint"],
+        "operationId": "CustomConfigEndpoint_get_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.config.CustomConfigEndpoint$CustomConfigEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.config.CustomConfigEndpoint$CustomConfigEntity": {
+        "type": "object",
+        "properties": {
+          "bar": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "foo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

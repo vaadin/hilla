@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin.hilla</groupId>
         <artifactId>hilla-project</artifactId>
         <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
-    <groupId>dev.hilla</groupId>
+    <groupId>com.vaadin.hilla</groupId>
     <artifactId>hilla-bom</artifactId>
     <packaging>pom</packaging>
     <name>Hilla Platform (Bill of Materials)</name>
@@ -95,38 +95,38 @@
             </dependency>
 
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-dev</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>endpoint</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-react</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>engine-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-react-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>

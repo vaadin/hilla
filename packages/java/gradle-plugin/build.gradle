@@ -66,8 +66,8 @@ repositories {
 
 dependencies {
     implementation('org.jetbrains.kotlin:kotlin-stdlib:1.7.20')
-    implementation("dev.hilla:engine-core:${pom.parent.version}")
-    implementation("dev.hilla:plugin-base:${pom.parent.version}")
+    implementation("com.vaadin.hilla:engine-core:${pom.parent.version}")
+    implementation("com.vaadin.hilla:plugin-base:${pom.parent.version}")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
 
     testImplementation("junit:junit:4.13.2")
@@ -146,8 +146,8 @@ gradlePlugin {
     testSourceSets sourceSets.functionalTest
     plugins {
         hillaPlugin {
-            id = 'dev.hilla'
-            implementationClass = 'dev.hilla.gradle.plugin.HillaPlugin'
+            id = 'com.vaadin.hilla'
+            implementationClass = 'com.vaadin.hilla.gradle.plugin.HillaPlugin'
         }
     }
 }

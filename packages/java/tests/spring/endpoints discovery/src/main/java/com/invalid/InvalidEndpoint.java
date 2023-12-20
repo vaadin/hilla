@@ -1,6 +1,6 @@
 package com.invalid;
 
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 /**
