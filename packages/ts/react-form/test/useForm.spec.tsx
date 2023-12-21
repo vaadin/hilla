@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render, type RenderResult } from '@testing-library/react';
+import { act, render, type RenderResult, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
@@ -45,7 +45,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, submit, value } = useForm(LoginModel, { onChange, onSubmit });
+    const { field, model, submit, value, submitting } = useForm(LoginModel, { onChange, onSubmit });
 
     return (
       <>
@@ -59,6 +59,7 @@ describe('@hilla/react-form', () => {
         <button data-testid="submit" onClick={submit}>
           Submit
         </button>
+        {submitting ? <span data-testid="submitting">Submitting...</span> : null}
       </>
     );
   }
@@ -115,6 +116,26 @@ describe('@hilla/react-form', () => {
       await user.click(getByTestId('submit'));
 
       expect(onSubmit).to.not.have.been.called;
+    });
+
+    it('forwards submitting state from Binder', async () => {
+      let resolveSubmit: () => void = () => {};
+      onSubmit = async (login) =>
+        new Promise((resolve) => {
+          resolveSubmit = () => resolve(login);
+        });
+
+      // Initial render - submitting is false
+      const { getByTestId, queryByTestId } = render(<LoginForm />);
+      expect(queryByTestId('submitting')).to.not.exist;
+
+      // Submit - submitting is true
+      await fillAndSubmitLoginForm(getByTestId, user);
+      expect(queryByTestId('submitting')).to.exist;
+
+      // Resolve submit - submitting is false
+      resolveSubmit();
+      await waitFor(() => expect(queryByTestId('submitting')).to.not.exist);
     });
 
     it('shows empty values by default', () => {
