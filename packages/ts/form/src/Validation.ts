@@ -42,6 +42,7 @@ export type InterpolateMessageCallback<M extends AbstractModel> = (
 export interface Validator<T = unknown> {
   message: string;
   impliesRequired?: boolean;
+  name?: string;
   validate(
     value: T,
     binder: BinderRoot,
@@ -53,6 +54,7 @@ export interface Validator<T = unknown> {
 }
 
 export class ServerValidator implements Validator {
+  name = 'ServerValidator';
   message: string;
 
   constructor(message: string) {
