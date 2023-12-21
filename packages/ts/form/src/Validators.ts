@@ -43,6 +43,7 @@ abstract class AbstractValidator<T> implements Validator<T> {
   }
 
   abstract validate(value: T): Promise<boolean> | boolean;
+  abstract get name(): string;
 }
 
 export class Required<T> extends AbstractValidator<T> {
@@ -57,6 +58,8 @@ export class Required<T> extends AbstractValidator<T> {
     }
     return value !== undefined;
   }
+
+  readonly name: string = 'Required';
 }
 
 function _asValidatorAttributes(attrs: PatternAttributes | RegExp | ValueNumberAttributes | number | string) {
@@ -84,6 +87,8 @@ export class IsNumber extends NumberValidator<number | null | undefined> {
   override validate(value: number | null | undefined): boolean {
     return (this.optional && value == null) || super.validate(value);
   }
+
+  readonly name = 'IsNumber';
 }
 
 abstract class ValueNumberValidator<T> extends NumberValidator<T> {
@@ -105,7 +110,10 @@ export class Email extends AbstractValidator<string> {
   override validate(value: string | null | undefined): boolean {
     return !value || isEmail(value);
   }
+
+  readonly name = 'Email';
 }
+
 export class Null extends AbstractValidator<any> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be null', ...attrs });
@@ -114,7 +122,10 @@ export class Null extends AbstractValidator<any> {
   override validate(value: any): boolean {
     return value == null;
   }
+
+  readonly name = 'Null';
 }
+
 export class NotNull<T> extends Required<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must not be null', ...attrs });
@@ -123,7 +134,10 @@ export class NotNull<T> extends Required<T> {
   override validate(value: T): value is NonNullable<T> {
     return !new Null().validate(value);
   }
+
+  override readonly name = 'NotNull';
 }
+
 export class NotEmpty<T> extends Required<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must not be empty', ...attrs });
@@ -134,7 +148,10 @@ export class NotEmpty<T> extends Required<T> {
       super.validate(value) && new NotNull<T>().validate(value) && ((value as { length?: number }).length ?? 0) > 0
     );
   }
+
+  override readonly name = 'NotEmpty';
 }
+
 export class NotBlank<T> extends Required<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must not be blank', ...attrs });
@@ -143,7 +160,10 @@ export class NotBlank<T> extends Required<T> {
   override validate(value: T): boolean {
     return super.validate(value) && new NotNull<T>().validate(value) && String(value).trim().length > 0;
   }
+
+  override readonly name = 'NotBlank';
 }
+
 export class AssertTrue<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be true', ...attrs });
@@ -152,7 +172,10 @@ export class AssertTrue<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return isBoolean(String(value)) && String(value) === 'true';
   }
+
+  readonly name = 'AssertTrue';
 }
+
 export class AssertFalse<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be false', ...attrs });
@@ -161,6 +184,8 @@ export class AssertFalse<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return !new AssertTrue<T>().validate(value);
   }
+
+  readonly name = 'AssertFalse';
 }
 
 function _asValueNumberAttributes(attrs: ValueNumberAttributes | number | string) {
@@ -178,7 +203,10 @@ export class Min<T> extends ValueNumberValidator<T> {
   override validate(value: T): boolean {
     return super.validate(value) && isFloat(String(value), { min: this.value });
   }
+
+  readonly name = 'Min';
 }
+
 export class Max<T> extends ValueNumberValidator<T> {
   constructor(attrs: ValueNumberAttributes | number | string) {
     super({
@@ -190,6 +218,8 @@ export class Max<T> extends ValueNumberValidator<T> {
   override validate(value: T): boolean {
     return super.validate(value) && isFloat(String(value), { max: this.value });
   }
+
+  readonly name = 'Max';
 }
 
 function _inclusive(attrs: DecimalAttributes | number | string) {
@@ -210,7 +240,10 @@ export class DecimalMin<T> extends ValueNumberValidator<T> {
   override validate(value: T): boolean {
     return super.validate(value) && isFloat(String(value), { [this.inclusive ? 'min' : 'gt']: this.value });
   }
+
+  readonly name = 'DecimalMin';
 }
+
 export class DecimalMax<T> extends ValueNumberValidator<T> {
   inclusive: boolean;
 
@@ -225,7 +258,10 @@ export class DecimalMax<T> extends ValueNumberValidator<T> {
   override validate(value: T): boolean {
     return super.validate(value) && isFloat(String(value), { [this.inclusive ? 'max' : 'lt']: this.value });
   }
+
+  readonly name = 'DecimalMax';
 }
+
 export class Negative<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be less than 0', ...attrs });
@@ -234,7 +270,10 @@ export class Negative<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return toFloat(String(value)) < 0;
   }
+
+  readonly name = 'Negative';
 }
+
 export class NegativeOrZero<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be less than or equal to 0', ...attrs });
@@ -243,7 +282,10 @@ export class NegativeOrZero<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return toFloat(String(value)) <= 0;
   }
+
+  readonly name = 'NegativeOrZero';
 }
+
 export class Positive<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be greater than 0', ...attrs });
@@ -252,7 +294,10 @@ export class Positive<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return toFloat(String(value)) > 0;
   }
+
+  readonly name = 'Positive';
 }
+
 export class PositiveOrZero<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be greater than or equal to 0', ...attrs });
@@ -261,6 +306,8 @@ export class PositiveOrZero<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return toFloat(String(value)) >= 0;
   }
+
+  readonly name = 'PositiveOrZero';
 }
 
 function _min(attrs: SizeAttributes) {
@@ -273,7 +320,6 @@ function _max(attrs: SizeAttributes) {
 
 export class Size extends AbstractValidator<string> {
   min: number;
-
   max: number;
 
   constructor(attrs: SizeAttributes = {}) {
@@ -292,11 +338,12 @@ export class Size extends AbstractValidator<string> {
     // eslint-disable-next-line sort-keys
     return isLength(value, { min: this.min, max: this.max });
   }
+
+  readonly name = 'Size';
 }
 
 export class Digits<T> extends AbstractValidator<T> {
   integer: number;
-
   fraction: number;
 
   constructor(attrs: DigitAttributes) {
@@ -315,6 +362,8 @@ export class Digits<T> extends AbstractValidator<T> {
       isDecimal(String(value), { decimal_digits: `0,${this.fraction}` })
     );
   }
+
+  readonly name = 'Digits';
 }
 
 export class Past<T> extends AbstractValidator<T> {
@@ -325,7 +374,10 @@ export class Past<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return isBefore(String(value));
   }
+
+  readonly name = 'Past';
 }
+
 /*
   @PastOrPresent has no client-side implementation yet.
   It would consider any input valid and let the server-side to do validation.
@@ -340,6 +392,7 @@ export class Past<T> extends AbstractValidator<T> {
 //     return true;
 //   }
 // }
+
 export class Future<T> extends AbstractValidator<T> {
   constructor(attrs?: ValidatorAttributes) {
     super({ message: 'must be a future date', ...attrs });
@@ -348,6 +401,8 @@ export class Future<T> extends AbstractValidator<T> {
   override validate(value: T): boolean {
     return isAfter(String(value));
   }
+
+  readonly name = 'Future';
 }
 
 /*
@@ -393,6 +448,8 @@ export class Pattern extends AbstractValidator<string> {
   override validate(value: any): boolean {
     return matches(value, this.regexp);
   }
+
+  readonly name = 'Pattern';
 }
 
 /**
@@ -410,4 +467,6 @@ export class ValidityStateValidator<T> extends AbstractValidator<T> {
   override validate(): boolean {
     return false;
   }
+
+  readonly name = 'ValidityStateValidator';
 }
