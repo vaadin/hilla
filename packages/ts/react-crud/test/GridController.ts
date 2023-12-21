@@ -49,7 +49,7 @@ export default class GridController {
     return getCellContent(cell);
   }
 
-  getVisibleRowCount(): number {
+  getRowCount(): number {
     // @ts-expect-error: getting internal property
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return this.instance._dataProviderController.rootCache.size;
@@ -137,5 +137,21 @@ export default class GridController {
 
   async #getSorter(): Promise<readonly GridSorterElement[]> {
     return Array.from(await waitFor(() => Array.from(this.instance.querySelectorAll('vaadin-grid-sorter'))));
+  }
+
+  getFooterRows(): HTMLElement[] {
+    // @ts-expect-error: getting internal property
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return getRows(this.instance.$.footer);
+  }
+
+  getFooterCellContent(row: number, col: number): HTMLElement {
+    return getCellContent(this.getFooterCell(row, col));
+  }
+
+  getFooterCell(row: number, col: number): HTMLElement {
+    // @ts-expect-error: getting internal property
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return getContainerCell(this.instance.$.footer, row, col);
   }
 }

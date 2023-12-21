@@ -46,6 +46,7 @@ describe('@hilla/form', () => {
     it('Required', () => {
       const validator = new Required();
       assert.isTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Required');
       assert.isTrue(validator.validate('foo'));
       assert.isFalse(validator.validate(''));
       assert.isFalse(validator.validate(undefined));
@@ -55,6 +56,7 @@ describe('@hilla/form', () => {
     it('Email', () => {
       const validator = new Email();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Email');
       assert.isTrue(validator.validate(undefined));
       assert.isTrue(validator.validate(null));
       assert.isTrue(validator.validate('foo@vaadin.com'));
@@ -67,6 +69,7 @@ describe('@hilla/form', () => {
     it('Null', () => {
       const validator = new Null();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Null');
       assert.isTrue(validator.validate(null));
       assert.isTrue(validator.validate(undefined));
       assert.isFalse(validator.validate(''));
@@ -75,6 +78,7 @@ describe('@hilla/form', () => {
     it('NotNull', () => {
       const validator = new NotNull();
       assert.isTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'NotNull');
       assert.isTrue(validator.validate(''));
       assert.isFalse(validator.validate(null));
       assert.isFalse(validator.validate(undefined));
@@ -83,6 +87,7 @@ describe('@hilla/form', () => {
     it('NotEmpty', () => {
       const validator = new NotEmpty();
       assert.isTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'NotEmpty');
       assert.isTrue(validator.validate('a'));
       assert.isTrue(validator.validate(['a']));
       assert.isFalse(validator.validate(''));
@@ -93,6 +98,7 @@ describe('@hilla/form', () => {
     it('NotBlank', () => {
       const validator = new NotBlank();
       assert.isTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'NotBlank');
       assert.isTrue(validator.validate('a'));
       assert.isFalse(validator.validate(''));
       assert.isFalse(validator.validate(undefined));
@@ -103,6 +109,7 @@ describe('@hilla/form', () => {
     it('AssertTrue', () => {
       const validator = new AssertTrue();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'AssertTrue');
       assert.isTrue(validator.validate('true'));
       assert.isTrue(validator.validate(true));
       assert.isFalse(validator.validate('a'));
@@ -118,6 +125,7 @@ describe('@hilla/form', () => {
     it('AssertFalse', () => {
       const validator = new AssertFalse();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'AssertFalse');
       assert.isTrue(validator.validate('false'));
       assert.isTrue(validator.validate(false));
       assert.isTrue(validator.validate('a'));
@@ -132,6 +140,7 @@ describe('@hilla/form', () => {
     it('IsNumber', () => {
       let validator = new IsNumber(false);
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'IsNumber');
       assert.isTrue(validator.validate(0));
       assert.isTrue(validator.validate(1));
       assert.isTrue(validator.validate(1.2));
@@ -148,6 +157,7 @@ describe('@hilla/form', () => {
     it('Min', () => {
       let validator = new Min(1);
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Min');
       assert.isTrue(validator.validate(1));
       assert.isTrue(validator.validate(1.1));
       assert.isFalse(validator.validate(0.9));
@@ -160,6 +170,7 @@ describe('@hilla/form', () => {
     it('Max', () => {
       const validator = new Max(1);
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Max');
       assert.isTrue(validator.validate(1));
       assert.isTrue(validator.validate(0.9));
       assert.isFalse(validator.validate(1.1));
@@ -168,6 +179,7 @@ describe('@hilla/form', () => {
     it('DecimalMin', () => {
       let validator = new DecimalMin('30.1');
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'DecimalMin');
       assert.isFalse(validator.validate(1));
       assert.isTrue(validator.validate(30.1));
       assert.isTrue(validator.validate(30.2));
@@ -180,17 +192,19 @@ describe('@hilla/form', () => {
     it('DecimalMax', () => {
       let validator = new DecimalMax('30.1');
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'DecimalMax');
       assert.isTrue(validator.validate(30));
       assert.isTrue(validator.validate(30.1));
       assert.isFalse(validator.validate(30.2));
       // eslint-disable-next-line sort-keys
-      validator = new DecimalMin({ value: '30.1', inclusive: false });
+      validator = new DecimalMax({ value: '30.1', inclusive: false });
       assert.isFalse(validator.validate(30.1));
     });
 
     it('Negative', () => {
       const validator = new Negative();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Negative');
       assert.isTrue(validator.validate(-1));
       assert.isTrue(validator.validate(-0.01));
       assert.isFalse(validator.validate(0));
@@ -200,6 +214,7 @@ describe('@hilla/form', () => {
     it('NegativeOrZero', () => {
       const validator = new NegativeOrZero();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'NegativeOrZero');
       assert.isTrue(validator.validate(-1));
       assert.isTrue(validator.validate(-0.01));
       assert.isTrue(validator.validate(0));
@@ -209,6 +224,7 @@ describe('@hilla/form', () => {
     it('Positive', () => {
       const validator = new Positive();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Positive');
       assert.isFalse(validator.validate(-1));
       assert.isFalse(validator.validate(-0.01));
       assert.isFalse(validator.validate(0));
@@ -218,6 +234,7 @@ describe('@hilla/form', () => {
     it('PositiveOrZero', () => {
       const validator = new PositiveOrZero();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'PositiveOrZero');
       assert.isFalse(validator.validate(-1));
       assert.isFalse(validator.validate(-0.01));
       assert.isTrue(validator.validate(0));
@@ -228,6 +245,7 @@ describe('@hilla/form', () => {
       // eslint-disable-next-line sort-keys
       const validator = new Size({ min: 2, max: 4 });
       assert.isTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Size');
       assert.isFalse(validator.validate(''));
       assert.isFalse(validator.validate('a'));
       assert.isTrue(validator.validate('aa'));
@@ -251,6 +269,7 @@ describe('@hilla/form', () => {
       // eslint-disable-next-line sort-keys
       const validator = new Digits({ integer: 2, fraction: 3 });
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Digits');
       assert.isTrue(validator.validate('11.111'), 'Exact number of digits');
       assert.isTrue(validator.validate('1.1'), 'Less digits');
       assert.isTrue(validator.validate('1'), 'Less digits and no fraction');
@@ -270,6 +289,7 @@ describe('@hilla/form', () => {
     it('Past', () => {
       const validator = new Past();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Past');
       assert.isTrue(validator.validate('2019-12-31'), 'past');
       assert.isFalse(validator.validate(String(new Date())), 'present');
       assert.isFalse(validator.validate('3000-01-01'), 'future');
@@ -286,6 +306,7 @@ describe('@hilla/form', () => {
     it('Future', () => {
       const validator = new Future();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Future');
       assert.isFalse(validator.validate('2019-12-31'), 'past');
       assert.isFalse(validator.validate(String(new Date())), 'present');
       assert.isTrue(validator.validate('3000-01-01'), 'future');
@@ -302,6 +323,7 @@ describe('@hilla/form', () => {
     it('Pattern', () => {
       let validator = new Pattern(/^\+?\d(?:[ -]?\d){3,13}$/u);
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'Pattern');
       assert.isFalse(validator.validate(''));
       assert.isFalse(validator.validate('123'));
       assert.isFalse(validator.validate('abcdefghijk'));
@@ -327,6 +349,7 @@ describe('@hilla/form', () => {
     it('ValidityStateValidator', () => {
       const validator = new ValidityStateValidator();
       assert.isNotTrue(validator.impliesRequired);
+      assert.equal(validator.name, 'ValidityStateValidator');
       assert.equal(validator.validate(), false);
       assert.equal(validator.message, '');
     });

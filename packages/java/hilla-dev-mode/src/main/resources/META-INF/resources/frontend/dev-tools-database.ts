@@ -1,5 +1,4 @@
 import { LitElement, type TemplateResult, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
 import { loginUsingUrl, waitForConsole } from './h2-util';
 import type {
   DevToolsInterface,
@@ -14,13 +13,12 @@ type H2Data = {
   path: string;
   jdbcUrl: string;
 };
-@customElement('devtools-database')
 export class DevToolsDatabase extends LitElement implements MessageHandler {
-  @state()
   declare h2path?: string;
 
-  @state()
   declare h2jdbcUrl?: string;
+
+  static properties = { h2path: { type: String }, h2jdbcUrl: { type: String } };
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -64,3 +62,5 @@ const plugin: DevToolsPlugin = {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 (window as any).Vaadin.devToolsPlugins.push(plugin);
+
+customElements.define('devtools-database', DevToolsDatabase);

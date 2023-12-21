@@ -151,7 +151,7 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('First name', 'Jerp');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
-      expect(grid.getVisibleRowCount()).to.equal(3);
+      expect(grid.getRowCount()).to.equal(3);
     });
 
     it('updates grid and form when creating a new item after selecting an existing item', async () => {
@@ -188,13 +188,13 @@ describe('@hilla/react-crud', () => {
 
     it('refreshes grid after confirming delete', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
-      expect(grid.getVisibleRowCount()).to.equal(2);
+      expect(grid.getRowCount()).to.equal(2);
       await grid.toggleRowSelected(1);
       const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.confirm();
-      expect(grid.getVisibleRowCount()).to.equal(1);
+      expect(grid.getRowCount()).to.equal(1);
     });
 
     it('clears and disables the form after confirming delete', async () => {
@@ -214,13 +214,13 @@ describe('@hilla/react-crud', () => {
 
     it('does not refresh grid when not confirming delete', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
-      expect(grid.getVisibleRowCount()).to.equal(2);
+      expect(grid.getRowCount()).to.equal(2);
       await grid.toggleRowSelected(1);
       const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.cancel();
-      expect(grid.getVisibleRowCount()).to.equal(2);
+      expect(grid.getRowCount()).to.equal(2);
     });
 
     it('does render a delete button by default', async () => {

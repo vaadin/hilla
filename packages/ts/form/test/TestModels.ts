@@ -124,6 +124,7 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
 
 export interface TestEntity {
   fieldString: string;
+  fieldOptionalString: string;
   fieldNumber: number;
   fieldBoolean: boolean;
   fieldObject: Record<string, unknown>;
@@ -139,6 +140,10 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
 
   get fieldString(): StringModel {
     return this[_getPropertyModel]('fieldString', (parent, key) => new StringModel(parent, key, false));
+  }
+
+  get fieldOptionalString(): StringModel {
+    return this[_getPropertyModel]('fieldOptionalString', (parent, key) => new StringModel(parent, key, true));
   }
 
   get fieldNumber(): NumberModel {
