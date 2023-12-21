@@ -7,8 +7,17 @@ import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { type ComponentType, type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
-import { ColumnContext } from './autogrid-column-context.js';
+import {
+  type ComponentType,
+  type JSX,
+  type ReactElement,
+  type RefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { ColumnContext, CustomColumnContext } from './autogrid-column-context.js';
 import { useDatePickerI18n } from './locale.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
 import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
@@ -314,4 +323,10 @@ export function TimeHeaderFilter(): ReactElement {
 
 export function NoHeaderFilter(): ReactElement {
   return <></>;
+}
+
+export function InternalHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
+  const { setPropertyFilter, headerFilterRenderer: HeaderFilterRenderer } = (useContext(ColumnContext) ??
+    useContext(CustomColumnContext))!;
+  return <HeaderFilterRenderer original={original} setPropertyFilter={setPropertyFilter} />;
 }

@@ -1,6 +1,4 @@
 import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
-import { type JSX, useContext } from 'react';
-import { ColumnContext, CustomColumnContext } from './autogrid-column-context';
 import {
   AutoGridBooleanRenderer,
   AutoGridDateRenderer,
@@ -15,12 +13,11 @@ import {
   BooleanHeaderFilter,
   DateHeaderFilter,
   EnumHeaderFilter,
+  type HeaderFilterProps,
   NoHeaderFilter,
   NumberHeaderFilter,
   StringHeaderFilter,
   TimeHeaderFilter,
-  type HeaderFilterProps,
-  type HeaderRendererProps,
 } from './header-filter';
 import type { PropertyInfo } from './model-info';
 
@@ -108,31 +105,13 @@ export function getColumnOptions(
   customColumnOptions: ColumnOptions | undefined,
 ): ColumnOptions {
   const typeColumnOptions = getTypeColumnOptions(propertyInfo);
-  const HeaderFilterRenderer =
-    customColumnOptions?.filterable === false ? NoHeaderFilter : typeColumnOptions.headerFilterRenderer;
+  const headerFilterRenderer =
+    customColumnOptions?.filterable === false
+      ? NoHeaderFilter
+      : typeColumnOptions.headerFilterRenderer ?? NoHeaderFilter;
   // TODO: Remove eslint-disable when all TypeScript version issues are resolved
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const columnOptions: ColumnOptions = customColumnOptions
-    ? { ...typeColumnOptions, headerFilterRenderer: HeaderFilterRenderer, ...customColumnOptions }
+  return customColumnOptions
+    ? { ...typeColumnOptions, headerFilterRenderer, ...customColumnOptions }
     : typeColumnOptions;
-  if (!columnOptions.headerFilterRenderer) {
-    console.error(`No filter renderer defined for column ${propertyInfo.name}`);
-  }
-  return columnOptions;
-}
-
-export function InternalHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
-  const { setPropertyFilter, headerFilterRenderer: HeaderFilterRenderer } = useContext(ColumnContext)!;
-  if (HeaderFilterRenderer) {
-    return <HeaderFilterRenderer original={original} setPropertyFilter={setPropertyFilter} />;
-  }
-  return null;
-}
-
-export function InternalCustomHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
-  const { setPropertyFilter, headerFilterRenderer: HeaderFilterRenderer } = useContext(CustomColumnContext)!;
-  if (HeaderFilterRenderer) {
-    return <HeaderFilterRenderer original={original} setPropertyFilter={setPropertyFilter} />;
-  }
-  return null;
 }

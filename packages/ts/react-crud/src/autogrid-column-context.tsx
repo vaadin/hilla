@@ -17,14 +17,14 @@ export type ColumnContext = Readonly<{
   sortState: SortState;
   setSortState: Dispatch<SetStateAction<SortState>>;
   customColumnOptions?: ColumnOptions;
-  headerFilterRenderer?: ComponentType<HeaderFilterRendererProps>;
+  headerFilterRenderer: ComponentType<HeaderFilterRendererProps>;
 }>;
 
 export const ColumnContext = createContext<ColumnContext | null>(null);
 
 export type CustomColumnContext = Readonly<{
   setPropertyFilter(filter: FilterUnion): void;
-  headerFilterRenderer?: ComponentType<HeaderFilterRendererProps>;
+  headerFilterRenderer: ComponentType<HeaderFilterRendererProps>;
 }>;
 
 export const CustomColumnContext = createContext<CustomColumnContext | null>(null);

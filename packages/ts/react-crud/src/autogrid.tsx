@@ -15,17 +15,13 @@ import {
   useState,
 } from 'react';
 import { ColumnContext, CustomColumnContext, type SortState } from './autogrid-column-context.js';
-import {
-  type ColumnOptions,
-  getColumnOptions,
-  InternalCustomHeaderFilterRenderer,
-  InternalHeaderFilterRenderer,
-} from './autogrid-columns.js';
+import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridFooterItemCountRenderer, AutoGridRowNumberRenderer, FooterContext } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { createDataProvider, type DataProvider, isCountService, type ItemCounts } from './data-provider.js';
-import type { HeaderFilterRendererProps } from './header-filter';
+import { type HeaderFilterRendererProps, NoHeaderFilter } from './header-filter';
+import { InternalHeaderFilterRenderer } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
@@ -163,14 +159,14 @@ function wrapCustomColumn(
   const { header: customHeader, headerRenderer: CustomHeaderRenderer, headerFilterRenderer } = customOptions ?? {};
   const columnWithoutHeader = cloneElement(column, {
     header: null,
-    headerRenderer: InternalCustomHeaderFilterRenderer,
+    headerRenderer: InternalHeaderFilterRenderer,
   });
   return (
     <CustomColumnContext.Provider
       key={key}
       value={{
         setPropertyFilter,
-        headerFilterRenderer,
+        headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
       }}
     >
       <GridColumnGroup
@@ -256,7 +252,7 @@ function useColumns(
           sortState,
           setSortState,
           customColumnOptions,
-          headerFilterRenderer,
+          headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
         }}
       >
         {column}
