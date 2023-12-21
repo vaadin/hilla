@@ -240,17 +240,58 @@ describe('@hilla/react-crud', () => {
       expect(deleteButton).to.not.exist;
     });
 
+    it('shows a default header above the form', async () => {
+      // Initial state
+      const result = render(<TestAutoCrud />);
+      let header = await result.findByRole('heading', { name: 'New item' });
+      expect(header).to.exist;
+      expect(header.style.color).to.contain('lumo-disabled-text-color');
+
+      // Create new item
+      const { grid, newButton } = await CrudController.init(result, user);
+      await user.click(newButton);
+      header = await result.findByRole('heading', { name: 'New item' });
+      expect(header).to.exist;
+      expect(header.style.color).to.contain('lumo-text-color');
+
+      // Edit existing item
+      await grid.toggleRowSelected(0);
+      header = await result.findByRole('heading', { name: 'Edit item' });
+      expect(header).to.exist;
+      expect(header.style.color).to.contain('lumo-text-color');
+    });
+
+    it('shows a custom header above the form', async () => {
+      // Initial state
+      const result = render(
+        <TestAutoCrud
+          formProps={{
+            headerRenderer: (editedItem) => (editedItem ? <h2>Edit person</h2> : <h2>Create person</h2>),
+          }}
+        />,
+      );
+      await expect(result.findByRole('heading', { name: 'Create person' })).to.eventually.exist;
+
+      // Create new item
+      const { grid, newButton } = await CrudController.init(result, user);
+      await user.click(newButton);
+      await expect(result.findByRole('heading', { name: 'Create person' })).to.eventually.exist;
+
+      // Edit existing item
+      await grid.toggleRowSelected(0);
+      await expect(result.findByRole('heading', { name: 'Edit person' })).to.eventually.exist;
+    });
+
     describe('mobile layout', () => {
       let saveSpy: sinon.SinonSpy;
-      let result: RenderResult;
+      let service: ReturnType<typeof personService>;
 
       beforeEach(() => {
         // iPhone 13 Pro resolution
         viewport.set(390, 844);
 
-        const service = personService();
+        service = personService();
         saveSpy = sinon.spy(service, 'save');
-        result = render(<TestAutoCrud service={service} />);
       });
 
       afterEach(() => {
@@ -262,6 +303,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('opens the form in a dialog when selecting an item', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
@@ -272,6 +314,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('opens the form in a dialog when creating a new item', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const newButton = await result.findByText('+ New');
         await user.click(newButton);
 
@@ -282,6 +325,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('closes the dialog when clicking close button', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
@@ -300,6 +344,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('closes the dialog when clicking submit button', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
@@ -315,6 +360,64 @@ describe('@hilla/react-crud', () => {
 
         // saves
         expect(saveSpy).to.have.been.called;
+      });
+
+      it('shows a default header above the form', async () => {
+        // Initial state
+        const result = render(<TestAutoCrud />);
+        expect(result.queryByRole('heading', { name: 'New item' })).to.not.exist;
+
+        // Create new item
+        const newButton = await result.findByText('+ New');
+        await user.click(newButton);
+
+        let dialogOverlay = await screen.findByRole('dialog');
+        let header = await within(dialogOverlay).findByRole('heading', { name: 'New item' });
+        expect(header).to.exist;
+        expect(header.style.color).to.contain('lumo-text-color');
+
+        // Close dialog
+        const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
+        await user.click(closeButton);
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // Edit existing item
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+        dialogOverlay = await screen.findByRole('dialog');
+        header = await within(dialogOverlay).findByRole('heading', { name: 'Edit item' });
+        expect(header).to.exist;
+        expect(header.style.color).to.contain('lumo-text-color');
+      });
+
+      it('shows a custom header above the form', async () => {
+        // Initial state
+        const result = render(
+          <TestAutoCrud
+            formProps={{
+              headerRenderer: (editedItem) => (editedItem ? <h2>Edit person</h2> : <h2>Create person</h2>),
+            }}
+          />,
+        );
+        expect(result.queryByRole('heading', { name: 'Create person' })).to.not.exist;
+
+        // Create new item
+        const newButton = await result.findByText('+ New');
+        await user.click(newButton);
+
+        let dialogOverlay = await screen.findByRole('dialog');
+        await expect(within(dialogOverlay).findByRole('heading', { name: 'Create person' })).to.eventually.exist;
+
+        // Close dialog
+        const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
+        await user.click(closeButton);
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // Edit existing item
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+        dialogOverlay = await screen.findByRole('dialog');
+        await expect(within(dialogOverlay).findByRole('heading', { name: 'Edit person' })).to.eventually.exist;
       });
     });
 
