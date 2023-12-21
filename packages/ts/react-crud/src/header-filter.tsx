@@ -32,10 +32,11 @@ export type HeaderRendererProps = ExtractComponentTypeProps<
 
 export type HeaderFilterRendererProps = HeaderRendererProps & {
   /**
-   * Allows to set custom filter for a property. This is used by the header filter components.
+   * Allows to set custom filters for the column.
+   * This is used by the header filter components.
    * @param filter - The filter to set in the filter list.
    */
-  setPropertyFilter(filter: FilterUnion): void;
+  setFilter(filter: FilterUnion): void;
 };
 
 export type HeaderFilterProps = Readonly<{
@@ -69,11 +70,6 @@ export type HeaderFilterProps = Readonly<{
    * Custom renderer for the filter in the header.
    */
   headerFilterRenderer?: ComponentType<HeaderFilterRendererProps>;
-
-  /**
-   * Custom renderer for the title/sorter in the header.
-   */
-  headerRenderer?: ComponentType<HeaderRendererProps>;
 }>;
 
 function useFilterState(initialMatcher: Matcher) {
@@ -91,7 +87,7 @@ function useFilterState(initialMatcher: Matcher) {
       matcher: newMatcher,
       '@type': 'propertyString',
     };
-    context.setPropertyFilter(filter);
+    context.setColumnFilter(filter);
   }
 
   return { matcher, filterValue, updateFilter };
@@ -326,7 +322,7 @@ export function NoHeaderFilter(): ReactElement {
 }
 
 export function InternalHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
-  const { setPropertyFilter, headerFilterRenderer: HeaderFilterRenderer } = (useContext(ColumnContext) ??
+  const { setColumnFilter, headerFilterRenderer: HeaderFilterRenderer } = (useContext(ColumnContext) ??
     useContext(CustomColumnContext))!;
-  return <HeaderFilterRenderer original={original} setPropertyFilter={setPropertyFilter} />;
+  return <HeaderFilterRenderer original={original} setFilter={setColumnFilter} />;
 }

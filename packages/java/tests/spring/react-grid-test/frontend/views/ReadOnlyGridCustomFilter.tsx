@@ -7,7 +7,7 @@ import { GridColumn } from '@hilla/react-components/GridColumn';
 import type FilterUnion from 'Frontend/generated/dev/hilla/crud/filter/FilterUnion.js';
 import type OrFilter from 'Frontend/generated/dev/hilla/crud/filter/OrFilter.js';
 
-const HeaderFilterRenderer = ({ setPropertyFilter }: HeaderFilterRendererProps) => {
+const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => {
   return (
     <TextField
       id="filter"
@@ -33,7 +33,7 @@ const HeaderFilterRenderer = ({ setPropertyFilter }: HeaderFilterRendererProps) 
           key: 'fullName'
         };
 
-        setPropertyFilter(filter as FilterUnion);
+        setFilter(filter as FilterUnion);
       }}
     ></TextField>
   );

@@ -13,7 +13,7 @@ export type SortState = Record<string, SorterState | undefined>;
 
 export type ColumnContext = Readonly<{
   propertyInfo: PropertyInfo;
-  setPropertyFilter(filter: FilterUnion): void;
+  setColumnFilter(filter: FilterUnion): void;
   sortState: SortState;
   setSortState: Dispatch<SetStateAction<SortState>>;
   customColumnOptions?: ColumnOptions;
@@ -23,7 +23,7 @@ export type ColumnContext = Readonly<{
 export const ColumnContext = createContext<ColumnContext | null>(null);
 
 export type CustomColumnContext = Readonly<{
-  setPropertyFilter(filter: FilterUnion): void;
+  setColumnFilter(filter: FilterUnion): void;
   headerFilterRenderer: ComponentType<HeaderFilterRendererProps>;
 }>;
 

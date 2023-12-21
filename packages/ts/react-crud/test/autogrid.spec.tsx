@@ -962,7 +962,7 @@ describe('@hilla/react-crud', () => {
           expect(firstNameFilterField.placeholder).to.deep.equal('Custom filter');
         });
 
-        const CustomFirstNameFilterRenderer = ({ setPropertyFilter }: HeaderFilterRendererProps) => (
+        const CustomFirstNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
           <TextField
             id="firstNameFilter"
             placeholder="Custom filter"
@@ -986,7 +986,7 @@ describe('@hilla/react-crud', () => {
                 key: 'fullName',
               };
 
-              setPropertyFilter(filter);
+              setFilter(filter);
             }}
           ></TextField>
         );
@@ -1155,7 +1155,7 @@ describe('@hilla/react-crud', () => {
           {item.firstName}-{item.lastName}
         </span>
       );
-      const FullNameFilterRenderer = ({ setPropertyFilter }: HeaderFilterRendererProps) => (
+      const FullNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
         <TextField
           id="full-name-filter"
           placeholder="Custom filter"
@@ -1179,7 +1179,7 @@ describe('@hilla/react-crud', () => {
               key: 'fullName',
             };
 
-            setPropertyFilter(filter);
+            setFilter(filter);
           }}
         ></TextField>
       );

@@ -26,7 +26,6 @@ import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
-import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import { registerStylesheet } from './util';
 
 registerStylesheet(css);
@@ -150,13 +149,13 @@ interface ColumnConfigurationOptions {
 
 function wrapCustomColumn(
   column: JSX.Element,
-  setPropertyFilter: (filter: PropertyStringFilter) => void,
+  setColumnFilter: (filter: FilterUnion) => void,
   options: ColumnConfigurationOptions,
 ) {
   const { key } = column;
-  const { header, headerRenderer: HeaderRenderer } = column.props;
+  const { header, headerRenderer } = column.props;
   const customOptions = options.columnOptions?.[key!];
-  const { header: customHeader, headerRenderer: CustomHeaderRenderer, headerFilterRenderer } = customOptions ?? {};
+  const { header: customHeader, headerRenderer: customHeaderRenderer, headerFilterRenderer } = customOptions ?? {};
   const columnWithoutHeader = cloneElement(column, {
     header: null,
     headerRenderer: InternalHeaderFilterRenderer,
@@ -165,14 +164,14 @@ function wrapCustomColumn(
     <CustomColumnContext.Provider
       key={key}
       value={{
-        setPropertyFilter,
+        setColumnFilter,
         headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
       }}
     >
       <GridColumnGroup
         key={key}
         header={customHeader ?? header}
-        headerRenderer={CustomHeaderRenderer ?? HeaderRenderer}
+        headerRenderer={customHeaderRenderer ?? headerRenderer}
       >
         {columnWithoutHeader}
       </GridColumnGroup>
@@ -183,7 +182,7 @@ function wrapCustomColumn(
 function addCustomColumns(
   columns: JSX.Element[],
   options: ColumnConfigurationOptions,
-  setPropertyFilter: (filter: PropertyStringFilter) => void,
+  setColumnFilter: (filter: FilterUnion) => void,
 ): JSX.Element[] {
   if (!options.customColumns) {
     return columns;
@@ -193,7 +192,7 @@ function addCustomColumns(
   // move header text or renderer to group
   const customColumns = options.noHeaderFilters
     ? options.customColumns
-    : options.customColumns.map((column) => wrapCustomColumn(column, setPropertyFilter, options));
+    : options.customColumns.map((column) => wrapCustomColumn(column, setColumnFilter, options));
 
   // When using a custom column order, insert custom columns into auto-generated
   // ones using their `key`
@@ -215,7 +214,7 @@ function addCustomColumns(
 
 function useColumns(
   properties: PropertyInfo[],
-  setPropertyFilter: (filter: PropertyStringFilter) => void,
+  setColumnFilter: (filter: FilterUnion) => void,
   options: ColumnConfigurationOptions,
 ) {
   const sortableProperties = properties.filter(
@@ -248,7 +247,7 @@ function useColumns(
         key={propertyInfo.name}
         value={{
           propertyInfo,
-          setPropertyFilter,
+          setColumnFilter,
           sortState,
           setSortState,
           customColumnOptions,
@@ -260,7 +259,7 @@ function useColumns(
     );
   });
 
-  columns = addCustomColumns(columns, options, setPropertyFilter);
+  columns = addCustomColumns(columns, options, setColumnFilter);
 
   if (options.rowNumbers) {
     columns = [
@@ -343,7 +342,7 @@ function AutoGridInner<TItem>(
     return 'filterValue' in filter && filter.filterValue === '';
   };
 
-  const setHeaderPropertyFilter = (filter: FilterUnion) => {
+  const setHeaderFilter = (filter: FilterUnion) => {
     let changed = false;
     const filterKey = getFilterKey(filter);
     const indexOfFilter = filterKey
@@ -370,7 +369,7 @@ function AutoGridInner<TItem>(
 
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
-  const children = useColumns(properties, setHeaderPropertyFilter, {
+  const children = useColumns(properties, setHeaderFilter, {
     visibleColumns,
     noHeaderFilters,
     customColumns,
