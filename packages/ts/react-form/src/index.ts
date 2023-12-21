@@ -62,6 +62,7 @@ export type UseFormPartResult<M extends AbstractModel> = Readonly<{
 export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
   Readonly<{
     value: Value<M>;
+    submitting: boolean;
     setDefaultValue(value: Value<M>): void;
     setValue(value: Value<M>): void;
     submit(): Promise<Value<M> | undefined | void>;
@@ -232,6 +233,7 @@ export function useForm<M extends AbstractModel>(
     },
     submit: binder.submit.bind(binder),
     value: binder.value,
+    submitting: binder.submitting,
     update,
   };
 }
