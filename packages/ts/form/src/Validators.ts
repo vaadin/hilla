@@ -59,7 +59,7 @@ export class Required<T> extends AbstractValidator<T> {
     return value !== undefined;
   }
 
-  name = 'Required';
+  readonly name: string = 'Required';
 }
 
 function _asValidatorAttributes(attrs: PatternAttributes | RegExp | ValueNumberAttributes | number | string) {
