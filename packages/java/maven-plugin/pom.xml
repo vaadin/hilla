@@ -6,7 +6,7 @@
   <parent>
     <groupId>dev.hilla</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -15,7 +15,7 @@
   <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
-    <maven.version>3.9.5</maven.version>
+    <maven.version>3.9.6</maven.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
