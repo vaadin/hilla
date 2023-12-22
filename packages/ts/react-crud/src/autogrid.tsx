@@ -285,7 +285,8 @@ function AutoGridInner<TItem>(
         return gridRef.current;
       },
       refresh() {
-        dataProviderRef.current?.refresh();
+        dataProviderRef.current?.reset();
+        gridRef.current?.clearCache();
       },
     }),
     [],
@@ -345,9 +346,9 @@ function AutoGridInner<TItem>(
       );
     }
     // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       let firstUpdate = true;
-      dataProviderRef.current = createDataProvider(grid, service, {
+      const dataProvider = createDataProvider(service, {
         initialFilter: experimentalFilter ?? internalFilter,
         loadTotalCount: totalCount,
         afterLoad(newItemCounts: ItemCounts) {
@@ -360,14 +361,21 @@ function AutoGridInner<TItem>(
           }
         },
       });
+      dataProviderRef.current = dataProvider;
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      gridRef.current!.dataProvider = dataProvider.load.bind(dataProvider);
     }, 1);
+
+    return () => clearTimeout(timeoutId);
   }, [model, service]);
 
   useEffect(() => {
     // Update the filtering, whenever the filter changes
     const dataProvider = dataProviderRef.current;
-    if (dataProvider) {
+    const grid = gridRef.current;
+    if (grid && dataProvider) {
       dataProvider.setFilter(experimentalFilter ?? internalFilter);
+      grid.clearCache();
     }
   }, [experimentalFilter, internalFilter]);
 

@@ -1,22 +1,8 @@
-import type {
-  GridDataProviderCallback,
-  GridDataProviderParams,
-  GridDefaultItem,
-  GridElement,
-} from '@hilla/react-components/Grid';
+import type { GridDataProviderCallback, GridDataProviderParams } from '@hilla/react-components/Grid';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
-
-type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &
-  Readonly<{
-    _dataProviderController: {
-      rootCache: {
-        size?: number;
-      };
-    };
-  }>;
 
 type MaybeCountService<TItem> = Partial<CountService<TItem>>;
 type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
@@ -63,7 +49,6 @@ export function isCountService<TItem>(service: ListAndMaybeCountService<TItem>):
 }
 
 export abstract class DataProvider<TItem> {
-  protected readonly grid: GridElement;
   protected readonly service: ListAndMaybeCountService<TItem>;
   protected readonly loadTotalCount?: boolean;
   protected readonly afterLoadCallback?: AfterLoadCallback;
@@ -72,32 +57,26 @@ export abstract class DataProvider<TItem> {
   protected totalCount: number | undefined;
   protected filteredCount: number | undefined;
 
-  constructor(grid: GridElement, service: ListAndMaybeCountService<TItem>, options: DataProviderOptions = {}) {
-    this.grid = grid;
+  constructor(service: ListAndMaybeCountService<TItem>, options: DataProviderOptions = {}) {
     this.service = service;
     this.filter = options.initialFilter;
     this.loadTotalCount = options.loadTotalCount;
     this.afterLoadCallback = options.afterLoad;
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.grid.dataProvider = this.load.bind(this);
+    this.load = this.load.bind(this);
   }
 
-  refresh(): void {
+  reset(): void {
     this.totalCount = undefined;
     this.filteredCount = undefined;
-    this.grid.clearCache();
   }
 
   setFilter(filter: FilterUnion | undefined): void {
+    this.reset();
     this.filter = filter;
-    this.refresh();
   }
 
-  protected async load(
-    params: GridDataProviderParams<TItem>,
-    callback: GridDataProviderCallback<TItem>,
-  ): Promise<void> {
+  async load(params: GridDataProviderParams<TItem>, callback: GridDataProviderCallback<TItem>): Promise<void> {
     // Fetch page and filtered count
     const page = await this.fetchPage(params);
     this.filteredCount = await this.fetchFilteredCount(page);
@@ -149,10 +128,9 @@ export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
 
     if (items.length === pageSize) {
       infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
-      const cacheSize = (this.grid as GridElementWithInternalAPI<TItem>)._dataProviderController.rootCache.size;
-      if (cacheSize !== undefined && infiniteScrollingSize < cacheSize) {
+      if (this.filteredCount !== undefined && infiniteScrollingSize < this.filteredCount) {
         // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-        infiniteScrollingSize = undefined;
+        infiniteScrollingSize = this.filteredCount;
       }
     } else {
       infiniteScrollingSize = pageNumber * pageSize + items.length;
@@ -165,11 +143,11 @@ export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
 export class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
   declare service: ListAndCountService<TItem>;
 
-  constructor(grid: GridElement, service: ListAndMaybeCountService<TItem>, options: DataProviderOptions = {}) {
+  constructor(service: ListAndMaybeCountService<TItem>, options: DataProviderOptions = {}) {
     if (!isCountService(service)) {
       throw new Error('The provided service does not implement the CountService interface.');
     }
-    super(grid, service, options);
+    super(service, options);
   }
 
   protected async fetchTotalCount(): Promise<number | undefined> {
@@ -190,12 +168,11 @@ export class FixedSizeDataProvider<TItem> extends DataProvider<TItem> {
 }
 
 export function createDataProvider<TItem>(
-  grid: GridElement,
   service: ListAndMaybeCountService<TItem>,
   options: DataProviderOptions = {},
 ): DataProvider<TItem> {
   if (isCountService(service)) {
-    return new FixedSizeDataProvider(grid, service, options);
+    return new FixedSizeDataProvider(service, options);
   }
-  return new InfiniteDataProvider(grid, service, options);
+  return new InfiniteDataProvider(service, options);
 }
