@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>2.5-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-endpoints-contextpath</artifactId>
     <name>ITs for Endpoints when using a context path</name>
