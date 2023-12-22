@@ -1,4 +1,5 @@
 import React, { type CSSProperties, forwardRef } from 'react';
+import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
 
 export type ComponentStyleProps = Readonly<{
   id?: string;
@@ -45,4 +46,17 @@ export function featureRegistration<C extends (...args: any[]) => any>(Component
     useFeatureRegistration(feature);
     return <Component {...props} ref={ref} />;
   }) as unknown as C;
+}
+
+export function isFilterEmpty(filter: FilterUnion): boolean {
+  if (filter['@type'] === 'and' || filter['@type'] === 'or') {
+    if (filter.children.length === 0) {
+      return true;
+    }
+    return filter.children.every((child) => isFilterEmpty(child as FilterUnion));
+  }
+  if ('filterValue' in filter) {
+    return filter.filterValue === '';
+  }
+  throw new Error(`Unknown filter type: ${'@type' in filter ? filter['@type'] : JSON.stringify(filter)} `);
 }

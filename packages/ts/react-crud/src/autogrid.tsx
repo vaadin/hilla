@@ -26,7 +26,7 @@ import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
-import { registerStylesheet } from './util';
+import { isFilterEmpty, registerStylesheet } from './util';
 
 registerStylesheet(css);
 
@@ -332,15 +332,6 @@ function AutoGridInner<TItem>(
     }
     return null;
   }
-  const isEmpty = (filter: FilterUnion): boolean => {
-    if (filter['@type'] === 'and' || filter['@type'] === 'or') {
-      if (filter.children.length === 0) {
-        return true;
-      }
-      return filter.children.every((child) => isEmpty(child as FilterUnion));
-    }
-    return 'filterValue' in filter && filter.filterValue === '';
-  };
 
   const setHeaderFilter = (filter: FilterUnion) => {
     let changed = false;
@@ -348,7 +339,7 @@ function AutoGridInner<TItem>(
     const indexOfFilter = filterKey
       ? internalFilter.children.findIndex((f) => getFilterKey(f as FilterUnion) === filterKey)
       : -1;
-    const isEmptyFilter = isEmpty(filter);
+    const isEmptyFilter = isFilterEmpty(filter);
 
     if (indexOfFilter >= 0 && isEmptyFilter) {
       internalFilter.children.splice(indexOfFilter, 1);
