@@ -1005,20 +1005,19 @@ describe('@hilla/react-crud', () => {
           const service = personService();
           const saveSpy = sinon.spy(service, 'save');
 
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={service}
-                model={PersonModel}
-                fieldOptions={{
-                  lastName: {
-                    label: 'Custom last name',
-                    renderer: ({ field }) => <TextArea key={field.name} {...field} />,
-                  },
-                }}
-              />,
-            ).container,
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  label: 'Custom last name',
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                },
+              },
+            },
+            undefined,
+            false,
+            service,
           );
 
           const field = await result.getField('Custom last name');
@@ -1032,20 +1031,17 @@ describe('@hilla/react-crud', () => {
         });
 
         it('disables custom field when form is disabled', async () => {
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={personService()}
-                model={PersonModel}
-                disabled
-                fieldOptions={{
-                  lastName: {
-                    renderer: ({ field }) => <TextArea key={field.name} {...field} />,
-                  },
-                }}
-              />,
-            ).container,
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                },
+              },
+            },
+            undefined,
+            true,
           );
 
           const field = await result.getField('Last name');
@@ -1053,22 +1049,14 @@ describe('@hilla/react-crud', () => {
         });
 
         it('prefers custom fields props over field options props', async () => {
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={personService()}
-                model={PersonModel}
-                disabled
-                fieldOptions={{
-                  lastName: {
-                    label: 'This should not be used',
-                    renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
-                  },
-                }}
-              />,
-            ).container,
-          );
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                label: 'This should not be used',
+                renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
+              },
+            },
+          });
 
           const field = result.queryField('Custom last name');
           expect(field).to.exist;
@@ -1079,20 +1067,18 @@ describe('@hilla/react-crud', () => {
         it('renders custom field instead of the default field', async () => {
           const service = personService();
           const saveSpy = sinon.spy(service, 'save');
-
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={service}
-                model={PersonModel}
-                fieldOptions={{
-                  lastName: {
-                    element: <TextArea label="Custom last name" />,
-                  },
-                }}
-              />,
-            ).container,
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  element: <TextArea label="Custom last name" />,
+                },
+              },
+            },
+            undefined,
+            false,
+            service,
           );
 
           const field = await result.getField('Custom last name');
@@ -1106,20 +1092,17 @@ describe('@hilla/react-crud', () => {
         });
 
         it('disables custom field when form is disabled', async () => {
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={personService()}
-                model={PersonModel}
-                disabled
-                fieldOptions={{
-                  lastName: {
-                    element: <TextArea />,
-                  },
-                }}
-              />,
-            ).container,
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  element: <TextArea />,
+                },
+              },
+            },
+            undefined,
+            true,
           );
 
           const field = await result.getField('Last name');
@@ -1127,23 +1110,15 @@ describe('@hilla/react-crud', () => {
         });
 
         it('applies field options props to custom field', async () => {
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={personService()}
-                model={PersonModel}
-                disabled
-                fieldOptions={{
-                  lastName: {
-                    placeholder: 'Custom placeholder',
-                    helperText: 'Custom helper text',
-                    element: <TextArea />,
-                  },
-                }}
-              />,
-            ).container,
-          );
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                placeholder: 'Custom placeholder',
+                helperText: 'Custom helper text',
+                element: <TextArea />,
+              },
+            },
+          });
 
           const field = (await result.getField('Last name')) as TextAreaElement;
           expect(field.placeholder).to.equal('Custom placeholder');
@@ -1151,23 +1126,15 @@ describe('@hilla/react-crud', () => {
         });
 
         it('prefers custom fields props over field options props', async () => {
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={personService()}
-                model={PersonModel}
-                disabled
-                fieldOptions={{
-                  lastName: {
-                    label: 'This should not be used',
-                    placeholder: 'This should not be used',
-                    element: <TextArea label="Custom last name" placeholder="Custom placeholder" />,
-                  },
-                }}
-              />,
-            ).container,
-          );
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                label: 'This should not be used',
+                placeholder: 'This should not be used',
+                element: <TextArea label="Custom last name" placeholder="Custom placeholder" />,
+              },
+            },
+          });
 
           const field = result.queryField('Custom last name') as TextAreaElement;
           expect(field).to.exist;
@@ -1175,24 +1142,29 @@ describe('@hilla/react-crud', () => {
         });
 
         it('preserves custom field props', async () => {
-          const result = await FormController.init(
-            user,
-            render(
-              <AutoForm
-                service={personService()}
-                model={PersonModel}
-                disabled
-                fieldOptions={{
-                  lastName: {
-                    element: <TextArea clearButtonVisible />,
-                  },
-                }}
-              />,
-            ).container,
-          );
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                element: <TextArea clearButtonVisible />,
+              },
+            },
+          });
 
           const field = (await result.getField('Last name')) as TextAreaElement;
           expect(field.clearButtonVisible).to.be.true;
+        });
+
+        it('is not used if a renderer is defined', async () => {
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                renderer: () => <TextArea label="Rendered element" />,
+                element: <TextArea label="Ignored element" />,
+              },
+            },
+          });
+
+          await expect(result.getField('Rendered element')).to.eventually.exist;
         });
       });
 
