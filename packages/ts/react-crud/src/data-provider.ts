@@ -1,4 +1,6 @@
 import type { GridDataProviderCallback, GridDataProviderParams } from '@hilla/react-components/Grid';
+import type { GridDataProvider } from '@hilla/react-components/Grid.js';
+import { useMemo, useState } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
 import type Sort from './types/dev/hilla/mappedtypes/Sort';
@@ -175,4 +177,33 @@ export function createDataProvider<TItem>(
     return new FixedSizeDataProvider(service, options);
   }
   return new InfiniteDataProvider(service, options);
+}
+
+type UseDataProviderResult<TItem> = Readonly<{
+  dataProvider: GridDataProvider<TItem>;
+  refresh(): void;
+}>;
+
+export function useDataProvider<TItem>(
+  service: ListAndMaybeCountService<TItem>,
+  filter?: FilterUnion,
+): UseDataProviderResult<TItem> {
+  const [refreshCounter, setRefreshCounter] = useState(0);
+  const dataProvider = useMemo(() => createDataProvider(service, { initialFilter: filter }), [service]);
+
+  // Update filter in data provider
+  dataProvider.setFilter(filter);
+
+  // Create a new data provider function reference when the filter changes or the refresh counter is incremented.
+  // This effectively forces the grid to reload
+  const dataProviderFn = useMemo(() => dataProvider.load.bind(dataProvider), [dataProvider, filter, refreshCounter]);
+
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    dataProvider: dataProviderFn,
+    refresh: () => {
+      dataProvider.reset();
+      setRefreshCounter(refreshCounter + 1);
+    },
+  };
 }
