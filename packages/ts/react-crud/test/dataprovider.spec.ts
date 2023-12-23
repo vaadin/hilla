@@ -103,7 +103,6 @@ function createTestFilter(): FilterUnion {
   const andFilter: AndFilter = {
     '@type': 'and',
     children: [filter1, filter2],
-    key: 'fooAndBar',
   };
   return andFilter;
 }

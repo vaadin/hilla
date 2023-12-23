@@ -27,7 +27,7 @@ export function ReadOnlyGridOrFilter(): JSX.Element {
             matcher: 'CONTAINS',
             filterValue: value,
           };
-          setFilter({ '@type': 'or', children: [firstNameFilter, lasttNameFilter], key: "fullName" });
+          setFilter({ '@type': 'or', children: [firstNameFilter, lasttNameFilter]});
         }}
       ></TextField>
       <AutoGrid service={PersonService} model={PersonModel} experimentalFilter={filter} noHeaderFilters />
