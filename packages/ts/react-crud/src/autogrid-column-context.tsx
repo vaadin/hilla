@@ -13,18 +13,20 @@ export type SortState = Record<string, SorterState | undefined>;
 
 export type ColumnContext = Readonly<{
   propertyInfo: PropertyInfo;
-  setColumnFilter(filter: FilterUnion): void;
+  setColumnFilter(filter: FilterUnion, filterKey: string): void;
   sortState: SortState;
   setSortState: Dispatch<SetStateAction<SortState>>;
   customColumnOptions?: ColumnOptions;
   headerFilterRenderer: ComponentType<HeaderFilterRendererProps>;
+  filterKey: string;
 }>;
 
 export const ColumnContext = createContext<ColumnContext | null>(null);
 
 export type CustomColumnContext = Readonly<{
-  setColumnFilter(filter: FilterUnion): void;
+  setColumnFilter(filter: FilterUnion, filterKey: string): void;
   headerFilterRenderer: ComponentType<HeaderFilterRendererProps>;
+  filterKey: string;
 }>;
 
 export const CustomColumnContext = createContext<CustomColumnContext | null>(null);

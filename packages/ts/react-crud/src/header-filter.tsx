@@ -87,7 +87,7 @@ function useFilterState(initialMatcher: Matcher) {
       matcher: newMatcher,
       '@type': 'propertyString',
     };
-    context.setColumnFilter(filter);
+    context.setColumnFilter(filter, context.filterKey);
   }
 
   return { matcher, filterValue, updateFilter };
@@ -321,8 +321,14 @@ export function NoHeaderFilter(): ReactElement {
   return <></>;
 }
 
-export function InternalHeaderFilterRenderer({ original }: HeaderRendererProps): JSX.Element | null {
-  const { setColumnFilter, headerFilterRenderer: HeaderFilterRenderer } = (useContext(ColumnContext) ??
-    useContext(CustomColumnContext))!;
-  return <HeaderFilterRenderer original={original} setFilter={setColumnFilter} />;
+export function HeaderFilterWrapper({ original }: HeaderRendererProps): JSX.Element | null {
+  const context = useContext(ColumnContext);
+  const customContext = useContext(CustomColumnContext);
+  const { setColumnFilter, headerFilterRenderer: HeaderFilterRenderer, filterKey } = (context ?? customContext)!;
+
+  function setFilter(filter: FilterUnion) {
+    setColumnFilter(filter, filterKey);
+  }
+
+  return <HeaderFilterRenderer original={original} setFilter={setFilter} />;
 }

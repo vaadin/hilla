@@ -11,7 +11,6 @@ describe('@hilla/react-crud', () => {
           '@type': 'and',
           children: [],
           filterValue: '',
-          key: 'inner',
         } as FilterUnion);
         expect(filterEmpty).to.be.true;
       });
@@ -43,16 +42,13 @@ describe('@hilla/react-crud', () => {
             {
               '@type': 'and',
               children: [],
-              key: 'and1',
             },
             {
               '@type': 'or',
               children: [],
-              key: 'and2',
             },
           ],
           filterValue: '',
-          key: 'inner',
         } as FilterUnion);
         expect(filterEmpty).to.be.true;
       });
@@ -64,12 +60,10 @@ describe('@hilla/react-crud', () => {
             {
               '@type': 'and',
               children: [],
-              key: 'and1',
             },
             {
               '@type': 'or',
               children: [],
-              key: 'or1',
             },
             {
               '@type': 'or',
@@ -81,11 +75,9 @@ describe('@hilla/react-crud', () => {
                   '@type': 'propertyString',
                 },
               ],
-              key: 'or2',
             },
           ],
           filterValue: '',
-          key: 'inner',
         } as FilterUnion);
         expect(filterEmpty).to.be.true;
       });
@@ -97,7 +89,6 @@ describe('@hilla/react-crud', () => {
             {
               '@type': 'or',
               children: [],
-              key: 'or1',
             },
             {
               '@type': 'and',
@@ -109,11 +100,9 @@ describe('@hilla/react-crud', () => {
                   '@type': 'propertyString',
                 },
               ],
-              key: 'and1',
             },
           ],
           filterValue: '',
-          key: 'inner',
         } as FilterUnion);
         expect(filterEmpty).to.be.false;
       });

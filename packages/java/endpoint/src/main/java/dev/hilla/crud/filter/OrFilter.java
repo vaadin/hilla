@@ -12,8 +12,6 @@ public class OrFilter extends Filter {
 
     private List<Filter> children;
 
-    private String key;
-
     public List<Filter> getChildren() {
         return children;
     }
@@ -22,17 +20,9 @@ public class OrFilter extends Filter {
         this.children = children;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
     @Override
     public String toString() {
-        return "OrFilter [key=" + key + ", children=" + children + "]";
+        return "OrFilter [children=" + children + "]";
     }
 
 }

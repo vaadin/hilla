@@ -20,8 +20,7 @@ import { AutoGridFooterItemCountRenderer, AutoGridRowNumberRenderer, FooterConte
 import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { createDataProvider, type DataProvider, isCountService, type ItemCounts } from './data-provider.js';
-import { type HeaderFilterRendererProps, NoHeaderFilter } from './header-filter';
-import { InternalHeaderFilterRenderer } from './header-filter';
+import { type HeaderFilterRendererProps, NoHeaderFilter, HeaderFilterWrapper } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
@@ -149,16 +148,16 @@ interface ColumnConfigurationOptions {
 
 function wrapCustomColumn(
   column: JSX.Element,
-  setColumnFilter: (filter: FilterUnion) => void,
+  setColumnFilter: (filter: FilterUnion, filterKey: string) => void,
   options: ColumnConfigurationOptions,
 ) {
-  const { key } = column;
+  const key = column.key ?? 'no-key';
   const { header, headerRenderer } = column.props;
-  const customOptions = options.columnOptions?.[key!];
+  const customOptions = options.columnOptions?.[key];
   const { header: customHeader, headerRenderer: customHeaderRenderer, headerFilterRenderer } = customOptions ?? {};
   const columnWithoutHeader = cloneElement(column, {
     header: null,
-    headerRenderer: InternalHeaderFilterRenderer,
+    headerRenderer: HeaderFilterWrapper,
   });
   return (
     <CustomColumnContext.Provider
@@ -166,6 +165,7 @@ function wrapCustomColumn(
       value={{
         setColumnFilter,
         headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
+        filterKey: key,
       }}
     >
       <GridColumnGroup
@@ -182,7 +182,7 @@ function wrapCustomColumn(
 function addCustomColumns(
   columns: JSX.Element[],
   options: ColumnConfigurationOptions,
-  setColumnFilter: (filter: FilterUnion) => void,
+  setColumnFilter: (filter: FilterUnion, filterKey: string) => void,
 ): JSX.Element[] {
   if (!options.customColumns) {
     return columns;
@@ -214,7 +214,7 @@ function addCustomColumns(
 
 function useColumns(
   properties: PropertyInfo[],
-  setColumnFilter: (filter: FilterUnion) => void,
+  setColumnFilter: (filter: FilterUnion, filterKey: string) => void,
   options: ColumnConfigurationOptions,
 ) {
   const sortableProperties = properties.filter(
@@ -232,11 +232,7 @@ function useColumns(
     if (!options.noHeaderFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
-          <GridColumn
-            path={propertyInfo.name}
-            headerRenderer={InternalHeaderFilterRenderer}
-            {...columnProps}
-          ></GridColumn>
+          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilterWrapper} {...columnProps}></GridColumn>
         </GridColumnGroup>
       );
     } else {
@@ -252,6 +248,7 @@ function useColumns(
           setSortState,
           customColumnOptions,
           headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
+          filterKey: propertyInfo.name,
         }}
       >
         {column}
@@ -306,7 +303,7 @@ function AutoGridInner<TItem>(
   }: AutoGridProps<TItem>,
   ref: ForwardedRef<AutoGridRef<TItem>>,
 ): JSX.Element {
-  const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [], key: 'root' });
+  const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
   const [itemCounts, setItemCounts] = useState<ItemCounts | undefined>();
   const gridRef = useRef<GridElement<TItem>>(null);
   const dataProviderRef = useRef<DataProvider<TItem>>();
@@ -324,20 +321,11 @@ function AutoGridInner<TItem>(
     [],
   );
 
-  function getFilterKey(filter: FilterUnion) {
-    if ('propertyId' in filter) {
-      return filter.propertyId;
-    } else if ('key' in filter) {
-      return filter.key;
-    }
-    return null;
-  }
-
-  const setHeaderFilter = (filter: FilterUnion) => {
+  const setHeaderFilter = (filter: FilterUnion, filterKey: string) => {
     let changed = false;
-    const filterKey = getFilterKey(filter);
+    filter.key = filterKey;
     const indexOfFilter = filterKey
-      ? internalFilter.children.findIndex((f) => getFilterKey(f as FilterUnion) === filterKey)
+      ? internalFilter.children.findIndex((f) => (f as FilterUnion).key === filterKey)
       : -1;
     const isEmptyFilter = isFilterEmpty(filter);
 
@@ -375,7 +363,7 @@ function AutoGridInner<TItem>(
   useEffect(() => {
     // Remove all filtering if header filters are removed
     if (noHeaderFilters) {
-      setInternalFilter({ '@type': 'and', children: [], key: 'root' });
+      setInternalFilter({ '@type': 'and', children: [] });
     }
   }, [noHeaderFilters]);
 

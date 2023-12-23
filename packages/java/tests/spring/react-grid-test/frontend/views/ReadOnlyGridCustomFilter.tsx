@@ -29,8 +29,7 @@ const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => {
 
         const filter: OrFilter = {
           '@type': 'or',
-          children: [firstNameFilter, lastNameFilter],
-          key: 'fullName'
+          children: [firstNameFilter, lastNameFilter]
         };
 
         setFilter(filter as FilterUnion);

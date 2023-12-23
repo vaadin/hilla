@@ -11,8 +11,6 @@ import java.util.List;
 public class AndFilter extends Filter {
     private List<Filter> children;
 
-    private String key;
-
     public List<Filter> getChildren() {
         return children;
     }
@@ -21,17 +19,9 @@ public class AndFilter extends Filter {
         this.children = children;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
     @Override
     public String toString() {
-        return "AndFilter [key=" + key + ", children=" + children + "]";
+        return "AndFilter [children=" + children + "]";
     }
 
 }
