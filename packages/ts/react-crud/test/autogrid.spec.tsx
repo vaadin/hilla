@@ -570,10 +570,11 @@ describe('@hilla/react-crud', () => {
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'firstName',
+            key: 'firstName',
             matcher: Matcher.CONTAINS,
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
@@ -591,10 +592,11 @@ describe('@hilla/react-crud', () => {
           await someNumberFilterField.type('123');
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: '123',
             propertyId: 'someInteger',
+            key: 'someInteger',
             matcher: Matcher.GREATER_THAN,
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
@@ -602,10 +604,11 @@ describe('@hilla/react-crud', () => {
 
           await someNumberFieldSelect.select(Matcher.EQUALS);
 
-          const expectedPropertyFilter2: PropertyStringFilter = {
+          const expectedPropertyFilter2: FilterUnion = {
             '@type': 'propertyString',
             filterValue: '123',
             propertyId: 'someInteger',
+            key: 'someInteger',
             matcher: Matcher.EQUALS,
           };
 
@@ -619,22 +622,24 @@ describe('@hilla/react-crud', () => {
           const controller = await SelectController.init(grid.getHeaderCellContent(1, 6), user);
           await controller.select('True');
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'True',
             propertyId: 'vip',
             matcher: Matcher.EQUALS,
+            key: 'vip',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
 
           await controller.select('False');
 
-          const expectedPropertyFilter2: PropertyStringFilter = {
+          const expectedPropertyFilter2: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'False',
             propertyId: 'vip',
             matcher: Matcher.EQUALS,
+            key: 'vip',
           };
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
@@ -646,22 +651,24 @@ describe('@hilla/react-crud', () => {
           const controller = await SelectController.init(grid.getHeaderCellContent(1, 2), user);
           await controller.select(Gender.MALE);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: Gender.MALE,
             propertyId: 'gender',
             matcher: Matcher.EQUALS,
+            key: 'gender',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
 
           await controller.select(Gender.FEMALE);
 
-          const expectedPropertyFilter2: PropertyStringFilter = {
+          const expectedPropertyFilter2: FilterUnion = {
             '@type': 'propertyString',
             filterValue: Gender.FEMALE,
             propertyId: 'gender',
             matcher: Matcher.EQUALS,
+            key: 'gender',
           };
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
@@ -679,11 +686,12 @@ describe('@hilla/react-crud', () => {
           departmentNameField.dispatchEvent(new CustomEvent('input'));
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'department.name',
             matcher: Matcher.CONTAINS,
+            key: 'department.name',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -726,17 +734,19 @@ describe('@hilla/react-crud', () => {
           await lastNameFilterField.type('filterLast');
           await clock.tickAsync(200);
 
-          const expectedFirstNameFilter: PropertyStringFilter = {
+          const expectedFirstNameFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filterFirst',
             propertyId: 'firstName',
             matcher: Matcher.CONTAINS,
+            key: 'firstName',
           };
-          const expectedLastNameFilter: PropertyStringFilter = {
+          const expectedLastNameFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filterLast',
             propertyId: 'lastName',
             matcher: Matcher.CONTAINS,
+            key: 'lastName',
           };
           const expectedFilter: AndFilter = {
             '@type': 'and',
@@ -754,11 +764,12 @@ describe('@hilla/react-crud', () => {
           await companyNameFilter.type('Joh');
           await clock.tickAsync(200);
 
-          const filter: PropertyStringFilter = {
+          const filter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'Joh',
             matcher: Matcher.CONTAINS,
             propertyId: 'firstName',
+            key: 'firstName',
           };
           const expectedFilter1: AndFilter = {
             '@type': 'and',
@@ -791,11 +802,12 @@ describe('@hilla/react-crud', () => {
 
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'vaad',
             propertyId: 'name',
             matcher: Matcher.CONTAINS,
+            key: 'name',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(_personService.lastFilter).to.deep.equal(expectedFilter);
@@ -842,11 +854,12 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
           await clock.tickAsync(500);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'firstName',
             matcher: Matcher.CONTAINS,
+            key: 'firstName',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -871,11 +884,12 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
           await clock.tickAsync(500);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: '123',
             propertyId: 'someInteger',
             matcher: Matcher.GREATER_THAN,
+            key: 'someInteger',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -900,11 +914,12 @@ describe('@hilla/react-crud', () => {
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'firstName',
             matcher: Matcher.CONTAINS,
+            key: 'firstName',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -977,9 +992,10 @@ describe('@hilla/react-crud', () => {
                 filterValue: value.toUpperCase(),
               };
 
-              const filter: OrFilter = {
+              const filter: FilterUnion = {
                 '@type': 'or',
                 children: [firstNameFilter, firstNameUpperCasedFilter],
+                key: 'firstName',
               };
 
               setFilter(filter as FilterUnion);
@@ -1022,9 +1038,10 @@ describe('@hilla/react-crud', () => {
             filterValue: 'FILTER-VALUE',
           };
 
-          const expectedOrFilter: OrFilter = {
+          const expectedOrFilter: FilterUnion = {
             '@type': 'or',
             children: [expectedFirstNameFilter, expectedFirstNameUpperCasedFilter],
+            key: 'firstName',
           };
 
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [expectedOrFilter] });
@@ -1168,9 +1185,10 @@ describe('@hilla/react-crud', () => {
               filterValue: value,
             };
 
-            const filter: OrFilter = {
+            const filter: FilterUnion = {
               '@type': 'or',
               children: [firstNameFilter, lastNameFilter],
+              key: 'fullName',
             };
 
             setFilter(filter as FilterUnion);
@@ -1406,9 +1424,10 @@ describe('@hilla/react-crud', () => {
             filterValue: 'filter-value',
           };
 
-          const filter: OrFilter = {
+          const filter: FilterUnion = {
             '@type': 'or',
             children: [firstNameFilter, lastNameFilter],
+            key: 'fullName',
           };
 
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [filter] });
@@ -1440,11 +1459,12 @@ describe('@hilla/react-crud', () => {
           await controller.select(Gender.MALE);
           await clock.runAllAsync();
 
-          const expectedGenderFilter: PropertyStringFilter = {
+          const expectedGenderFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: Gender.MALE,
             propertyId: 'gender',
             matcher: Matcher.EQUALS,
+            key: 'gender',
           };
 
           const rootFilter: AndFilter = { '@type': 'and', children: [expectedGenderFilter] };
@@ -1465,9 +1485,10 @@ describe('@hilla/react-crud', () => {
             filterValue: 'filter-value',
           };
 
-          const filter: OrFilter = {
+          const filter: FilterUnion = {
             '@type': 'or',
             children: [firstNameFilter, lastNameFilter],
+            key: 'fullName',
           };
 
           expect(service.lastFilter).to.deep.equal({
