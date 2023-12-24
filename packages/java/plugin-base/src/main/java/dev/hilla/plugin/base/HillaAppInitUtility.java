@@ -73,7 +73,8 @@ public class HillaAppInitUtility {
                     var item = entry.getName().split("/", 2)[1];
 
                     if (framework.getItems().contains(item)) {
-                        if (item.endsWith("Endpoint.java") || item.endsWith("package-info.java")) {
+                        if (item.endsWith("Endpoint.java")
+                                || item.endsWith("package-info.java")) {
                             var applicationPackage = findSpringBootApplicationPackage(
                                     projectDirectory);
                             var applicationPath = applicationPackage

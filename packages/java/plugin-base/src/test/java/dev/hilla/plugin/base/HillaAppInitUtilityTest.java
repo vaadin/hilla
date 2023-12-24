@@ -77,8 +77,8 @@ public class HillaAppInitUtilityTest {
                 .resolve("src/main/java/my/endpoints/HelloEndpoint.java")
                 .toFile().exists());
         Assertions.assertTrue(projectDirectory
-            .resolve("src/main/java/my/endpoints/package-info.java")
-            .toFile().exists());
+                .resolve("src/main/java/my/endpoints/package-info.java")
+                .toFile().exists());
         Assertions.assertTrue(
                 projectDirectory.resolve("package.json").toFile().exists());
         Assertions.assertTrue(projectDirectory.resolve("package-lock.json")
@@ -116,8 +116,8 @@ public class HillaAppInitUtilityTest {
                 .resolve("src/main/java/my/endpoints/HelloEndpoint.java")
                 .toFile().exists());
         Assertions.assertTrue(projectDirectory
-            .resolve("src/main/java/my/endpoints/package-info.java")
-            .toFile().exists());
+                .resolve("src/main/java/my/endpoints/package-info.java")
+                .toFile().exists());
         Assertions.assertTrue(
                 projectDirectory.resolve("package.json").toFile().exists());
         Assertions.assertTrue(projectDirectory.resolve("package-lock.json")
