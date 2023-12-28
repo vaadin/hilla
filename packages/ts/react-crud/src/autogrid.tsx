@@ -14,18 +14,18 @@ import {
   useRef,
   useState,
 } from 'react';
-import { ColumnContext, type SortState } from './autogrid-column-context.js';
+import { ColumnContext, CustomColumnContext, type SortState } from './autogrid-column-context.js';
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridFooterItemCountRenderer, AutoGridRowNumberRenderer, FooterContext } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
 import type { ListService } from './crud';
 import { createDataProvider, type DataProvider, isCountService, type ItemCounts } from './data-provider.js';
+import { type HeaderFilterRendererProps, NoHeaderFilter, HeaderFilterWrapper } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/dev/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
-import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import { registerStylesheet } from './util';
+import { isFilterEmpty, registerStylesheet } from './util';
 
 registerStylesheet(css);
 
@@ -146,7 +146,44 @@ interface ColumnConfigurationOptions {
   itemCounts?: ItemCounts;
 }
 
-function addCustomColumns(columns: JSX.Element[], options: ColumnConfigurationOptions): JSX.Element[] {
+function wrapCustomColumn(
+  column: JSX.Element,
+  setColumnFilter: (filter: FilterUnion, filterKey: string) => void,
+  options: ColumnConfigurationOptions,
+) {
+  const key = column.key ?? 'no-key';
+  const { header, headerRenderer } = column.props;
+  const customOptions = options.columnOptions?.[key];
+  const { header: customHeader, headerRenderer: customHeaderRenderer, headerFilterRenderer } = customOptions ?? {};
+  const columnWithoutHeader = cloneElement(column, {
+    header: null,
+    headerRenderer: HeaderFilterWrapper,
+  });
+  return (
+    <CustomColumnContext.Provider
+      key={key}
+      value={{
+        setColumnFilter,
+        headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
+        filterKey: key,
+      }}
+    >
+      <GridColumnGroup
+        key={key}
+        header={customHeader ?? header}
+        headerRenderer={customHeaderRenderer ?? headerRenderer}
+      >
+        {columnWithoutHeader}
+      </GridColumnGroup>
+    </CustomColumnContext.Provider>
+  );
+}
+
+function addCustomColumns(
+  columns: JSX.Element[],
+  options: ColumnConfigurationOptions,
+  setColumnFilter: (filter: FilterUnion, filterKey: string) => void,
+): JSX.Element[] {
   if (!options.customColumns) {
     return columns;
   }
@@ -155,16 +192,7 @@ function addCustomColumns(columns: JSX.Element[], options: ColumnConfigurationOp
   // move header text or renderer to group
   const customColumns = options.noHeaderFilters
     ? options.customColumns
-    : options.customColumns.map((column) => {
-        const { header, headerRenderer } = column.props;
-        const { key } = column;
-        const columnWithoutHeader = cloneElement(column, { header: undefined, headerRenderer: undefined });
-        return (
-          <GridColumnGroup key={key} header={header} headerRenderer={headerRenderer}>
-            {columnWithoutHeader}
-          </GridColumnGroup>
-        );
-      });
+    : options.customColumns.map((column) => wrapCustomColumn(column, setColumnFilter, options));
 
   // When using a custom column order, insert custom columns into auto-generated
   // ones using their `key`
@@ -186,7 +214,7 @@ function addCustomColumns(columns: JSX.Element[], options: ColumnConfigurationOp
 
 function useColumns(
   properties: PropertyInfo[],
-  setPropertyFilter: (propertyFilter: PropertyStringFilter) => void,
+  setColumnFilter: (filter: FilterUnion, filterKey: string) => void,
   options: ColumnConfigurationOptions,
 ) {
   const sortableProperties = properties.filter(
@@ -197,14 +225,14 @@ function useColumns(
   );
   let columns = properties.map((propertyInfo) => {
     let column;
-    const customColumnOptions = options.columnOptions ? options.columnOptions[propertyInfo.name] : undefined;
-    // Header renderer is effectively the header filter, which should only be
-    // applied when header filters are enabled
-    const { headerRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
+    const customColumnOptions = options.columnOptions?.[propertyInfo.name];
+
+    const { headerFilterRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
+
     if (!options.noHeaderFilters) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
-          <GridColumn path={propertyInfo.name} headerRenderer={headerRenderer} {...columnProps}></GridColumn>
+          <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilterWrapper} {...columnProps}></GridColumn>
         </GridColumnGroup>
       );
     } else {
@@ -215,10 +243,12 @@ function useColumns(
         key={propertyInfo.name}
         value={{
           propertyInfo,
-          setPropertyFilter,
+          setColumnFilter,
           sortState,
           setSortState,
           customColumnOptions,
+          headerFilterRenderer: headerFilterRenderer ?? NoHeaderFilter,
+          filterKey: propertyInfo.name,
         }}
       >
         {column}
@@ -226,7 +256,7 @@ function useColumns(
     );
   });
 
-  columns = addCustomColumns(columns, options);
+  columns = addCustomColumns(columns, options, setColumnFilter);
 
   if (options.rowNumbers) {
     columns = [
@@ -291,23 +321,25 @@ function AutoGridInner<TItem>(
     [],
   );
 
-  const setHeaderPropertyFilter = (propertyFilter: PropertyStringFilter) => {
-    const filterIndex = internalFilter.children.findIndex(
-      (f) => (f as PropertyStringFilter).propertyId === propertyFilter.propertyId,
-    );
+  const setHeaderFilter = (filter: FilterUnion, filterKey: string) => {
     let changed = false;
-    if (propertyFilter.filterValue === '') {
-      // Delete empty filter
-      if (filterIndex >= 0) {
-        internalFilter.children.splice(filterIndex, 1);
+    filter.key = filterKey;
+    const indexOfFilter = filterKey
+      ? internalFilter.children.findIndex((f) => (f as FilterUnion).key === filterKey)
+      : -1;
+    const isEmptyFilter = isFilterEmpty(filter);
+
+    if (indexOfFilter >= 0 && isEmptyFilter) {
+      internalFilter.children.splice(indexOfFilter, 1);
+      changed = true;
+    } else if (!isEmptyFilter) {
+      if (indexOfFilter >= 0) {
+        internalFilter.children[indexOfFilter] = filter;
+        changed = true;
+      } else {
+        internalFilter.children.push(filter);
         changed = true;
       }
-    } else if (filterIndex >= 0) {
-      internalFilter.children[filterIndex] = propertyFilter;
-      changed = true;
-    } else {
-      internalFilter.children.push(propertyFilter);
-      changed = true;
     }
     if (changed) {
       setInternalFilter({ ...internalFilter });
@@ -316,7 +348,7 @@ function AutoGridInner<TItem>(
 
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
-  const children = useColumns(properties, setHeaderPropertyFilter, {
+  const children = useColumns(properties, setHeaderFilter, {
     visibleColumns,
     noHeaderFilters,
     customColumns,
@@ -397,3 +429,5 @@ type AutoGrid = <TItem>(
  * ```
  */
 export const AutoGrid: AutoGrid = forwardRef(AutoGridInner) as AutoGrid;
+
+export type { ColumnOptions, HeaderFilterRendererProps };
