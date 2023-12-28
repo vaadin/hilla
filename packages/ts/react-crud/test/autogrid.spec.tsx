@@ -1,5 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
+import { TextField } from '@hilla/react-components/TextField.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
@@ -7,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { ListService } from '../crud';
+import type { HeaderFilterRendererProps } from '../header-filter';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
 import type { CountService, CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
@@ -15,6 +17,8 @@ import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Mat
 import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
+import type FilterUnion from '../types/dev/hilla/crud/filter/FilterUnion';
+import type OrFilter from '../types/dev/hilla/crud/filter/OrFilter';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
@@ -566,10 +570,11 @@ describe('@hilla/react-crud', () => {
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'firstName',
+            key: 'firstName',
             matcher: Matcher.CONTAINS,
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
@@ -587,10 +592,11 @@ describe('@hilla/react-crud', () => {
           await someNumberFilterField.type('123');
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: '123',
             propertyId: 'someInteger',
+            key: 'someInteger',
             matcher: Matcher.GREATER_THAN,
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
@@ -598,10 +604,11 @@ describe('@hilla/react-crud', () => {
 
           await someNumberFieldSelect.select(Matcher.EQUALS);
 
-          const expectedPropertyFilter2: PropertyStringFilter = {
+          const expectedPropertyFilter2: FilterUnion = {
             '@type': 'propertyString',
             filterValue: '123',
             propertyId: 'someInteger',
+            key: 'someInteger',
             matcher: Matcher.EQUALS,
           };
 
@@ -615,22 +622,24 @@ describe('@hilla/react-crud', () => {
           const controller = await SelectController.init(grid.getHeaderCellContent(1, 6), user);
           await controller.select('True');
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'True',
             propertyId: 'vip',
             matcher: Matcher.EQUALS,
+            key: 'vip',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
 
           await controller.select('False');
 
-          const expectedPropertyFilter2: PropertyStringFilter = {
+          const expectedPropertyFilter2: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'False',
             propertyId: 'vip',
             matcher: Matcher.EQUALS,
+            key: 'vip',
           };
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
@@ -642,22 +651,24 @@ describe('@hilla/react-crud', () => {
           const controller = await SelectController.init(grid.getHeaderCellContent(1, 2), user);
           await controller.select(Gender.MALE);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: Gender.MALE,
             propertyId: 'gender',
             matcher: Matcher.EQUALS,
+            key: 'gender',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
 
           await controller.select(Gender.FEMALE);
 
-          const expectedPropertyFilter2: PropertyStringFilter = {
+          const expectedPropertyFilter2: FilterUnion = {
             '@type': 'propertyString',
             filterValue: Gender.FEMALE,
             propertyId: 'gender',
             matcher: Matcher.EQUALS,
+            key: 'gender',
           };
           const expectedFilter2: AndFilter = { '@type': 'and', children: [expectedPropertyFilter2] };
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
@@ -675,11 +686,12 @@ describe('@hilla/react-crud', () => {
           departmentNameField.dispatchEvent(new CustomEvent('input'));
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'department.name',
             matcher: Matcher.CONTAINS,
+            key: 'department.name',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -722,17 +734,19 @@ describe('@hilla/react-crud', () => {
           await lastNameFilterField.type('filterLast');
           await clock.tickAsync(200);
 
-          const expectedFirstNameFilter: PropertyStringFilter = {
+          const expectedFirstNameFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filterFirst',
             propertyId: 'firstName',
             matcher: Matcher.CONTAINS,
+            key: 'firstName',
           };
-          const expectedLastNameFilter: PropertyStringFilter = {
+          const expectedLastNameFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filterLast',
             propertyId: 'lastName',
             matcher: Matcher.CONTAINS,
+            key: 'lastName',
           };
           const expectedFilter: AndFilter = {
             '@type': 'and',
@@ -750,11 +764,12 @@ describe('@hilla/react-crud', () => {
           await companyNameFilter.type('Joh');
           await clock.tickAsync(200);
 
-          const filter: PropertyStringFilter = {
+          const filter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'Joh',
             matcher: Matcher.CONTAINS,
             propertyId: 'firstName',
+            key: 'firstName',
           };
           const expectedFilter1: AndFilter = {
             '@type': 'and',
@@ -787,11 +802,12 @@ describe('@hilla/react-crud', () => {
 
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'vaad',
             propertyId: 'name',
             matcher: Matcher.CONTAINS,
+            key: 'name',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(_personService.lastFilter).to.deep.equal(expectedFilter);
@@ -838,11 +854,12 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
           await clock.tickAsync(500);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'firstName',
             matcher: Matcher.CONTAINS,
+            key: 'firstName',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -867,11 +884,12 @@ describe('@hilla/react-crud', () => {
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [] });
           await clock.tickAsync(500);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: '123',
             propertyId: 'someInteger',
             matcher: Matcher.GREATER_THAN,
+            key: 'someInteger',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -896,11 +914,12 @@ describe('@hilla/react-crud', () => {
           firstNameFilterField.dispatchEvent(new CustomEvent('input'));
           await clock.tickAsync(200);
 
-          const expectedPropertyFilter: PropertyStringFilter = {
+          const expectedPropertyFilter: FilterUnion = {
             '@type': 'propertyString',
             filterValue: 'filter-value',
             propertyId: 'firstName',
             matcher: Matcher.CONTAINS,
+            key: 'firstName',
           };
           const expectedFilter: AndFilter = { '@type': 'and', children: [expectedPropertyFilter] };
           expect(service.lastFilter).to.deep.equal(expectedFilter);
@@ -935,6 +954,97 @@ describe('@hilla/react-crud', () => {
           await lastNameFilter.type('[Delete]');
           await clock.tickAsync(200);
           expect(service.lastFilter).to.deep.equal(expectedFilter);
+        });
+
+        it('renders header filter with custom renderer', async () => {
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                columnOptions={{
+                  firstName: {
+                    headerFilterRenderer: () => <TextField placeholder="Custom filter"></TextField>,
+                  },
+                }}
+              />,
+            ),
+            user,
+          );
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          expect(firstNameFilterField.placeholder).to.deep.equal('Custom filter');
+        });
+
+        const CustomFirstNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
+          <TextField
+            id="firstNameFilter"
+            placeholder="Custom filter"
+            onValueChanged={({ detail: { value } }) => {
+              const firstNameFilter = {
+                '@type': 'propertyString',
+                propertyId: 'firstName',
+                matcher: 'CONTAINS',
+                filterValue: value,
+              };
+              const firstNameUpperCasedFilter = {
+                '@type': 'propertyString',
+                propertyId: 'firstName',
+                matcher: 'CONTAINS',
+                filterValue: value.toUpperCase(),
+              };
+
+              const filter: FilterUnion = {
+                '@type': 'or',
+                children: [firstNameFilter, firstNameUpperCasedFilter],
+                key: 'firstName',
+              };
+
+              setFilter(filter as FilterUnion);
+            }}
+          ></TextField>
+        );
+
+        it('renders header filter with custom renderer', async () => {
+          const service = personService();
+
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                service={service}
+                columnOptions={{
+                  firstName: {
+                    headerFilterRenderer: CustomFirstNameFilterRenderer,
+                  },
+                }}
+              />,
+            ),
+            user,
+          );
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          expect(firstNameFilterField.placeholder).to.deep.equal('Custom filter');
+
+          await grid.typeInHeaderFilter(1, 0, 'filter-value', clock);
+
+          const expectedFirstNameFilter = {
+            '@type': 'propertyString',
+            propertyId: 'firstName',
+            matcher: 'CONTAINS',
+            filterValue: 'filter-value',
+          };
+          const expectedFirstNameUpperCasedFilter = {
+            '@type': 'propertyString',
+            propertyId: 'firstName',
+            matcher: 'CONTAINS',
+            filterValue: 'FILTER-VALUE',
+          };
+
+          const expectedOrFilter: FilterUnion = {
+            '@type': 'or',
+            children: [expectedFirstNameFilter, expectedFirstNameUpperCasedFilter],
+            key: 'firstName',
+          };
+
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [expectedOrFilter] });
         });
       });
     });
@@ -1057,6 +1167,34 @@ describe('@hilla/react-crud', () => {
           {item.firstName}-{item.lastName}
         </span>
       );
+      const FullNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
+        <TextField
+          id="full-name-filter"
+          placeholder="Custom filter"
+          onValueChanged={({ detail: { value } }) => {
+            const firstNameFilter = {
+              '@type': 'propertyString',
+              propertyId: 'firstName',
+              matcher: 'CONTAINS',
+              filterValue: value,
+            };
+            const lastNameFilter = {
+              '@type': 'propertyString',
+              propertyId: 'lastName',
+              matcher: 'CONTAINS',
+              filterValue: value,
+            };
+
+            const filter: FilterUnion = {
+              '@type': 'or',
+              children: [firstNameFilter, lastNameFilter],
+              key: 'fullName',
+            };
+
+            setFilter(filter as FilterUnion);
+          }}
+        ></TextField>
+      );
 
       it('renders custom columns at the specified index by visibleColumns', async () => {
         const grid = await GridController.init(
@@ -1156,6 +1294,16 @@ describe('@hilla/react-crud', () => {
       });
 
       describe('with header filters', () => {
+        let clock: sinon.SinonFakeTimers;
+
+        beforeEach(() => {
+          clock = sinon.useFakeTimers({ shouldAdvanceTime: true });
+        });
+
+        afterEach(() => {
+          clock.restore();
+        });
+
         it('wraps custom columns in a column group and moves header text', async () => {
           const grid = await GridController.init(
             render(
@@ -1173,6 +1321,20 @@ describe('@hilla/react-crud', () => {
           // Column header row is empty
           expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.empty;
           expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.text('');
+        });
+
+        it('renders custom column with header without key property', async () => {
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                customColumns={[<GridColumn header="Full Name" autoWidth renderer={FullNameRenderer}></GridColumn>]}
+              />,
+            ),
+            user,
+          );
+
+          const firstNameFilterField = grid.getHeaderCellContent(0, 14);
+          expect(firstNameFilterField).to.have.rendered.text('Full Name');
         });
 
         it('wraps custom columns in a column group and moves header renderer', async () => {
@@ -1201,6 +1363,150 @@ describe('@hilla/react-crud', () => {
           // Column header row is empty
           expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.empty;
           expect(grid.getHeaderCellContent(1, 0)).to.be.rendered.text('');
+        });
+
+        it('renders custom column header filter with custom renderers', async () => {
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                visibleColumns={['fullName']}
+                customColumns={[<GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>]}
+                columnOptions={{
+                  fullName: {
+                    headerRenderer: () => <div>Custom Column</div>,
+                    headerFilterRenderer: FullNameFilterRenderer,
+                  },
+                }}
+              />,
+            ),
+            user,
+          );
+          const firstNameHeaderField = grid.getHeaderCellContent(0, 0).querySelector('div')!;
+          expect(firstNameHeaderField).to.have.rendered.text('Custom Column');
+
+          const firstNameFilterField = grid.getHeaderCellContent(1, 0).querySelector('vaadin-text-field')!;
+          expect(firstNameFilterField.placeholder).to.deep.equal('Custom filter');
+        });
+
+        it('filters custom column with custom header filter', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                service={service}
+                visibleColumns={['fullName']}
+                customColumns={[<GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>]}
+                columnOptions={{
+                  fullName: {
+                    headerFilterRenderer: FullNameFilterRenderer,
+                  },
+                }}
+              />,
+            ),
+            user,
+          );
+
+          const rootFilter: AndFilter = { '@type': 'and', children: [] };
+          expect(service.lastFilter).to.deep.equal(rootFilter);
+
+          await grid.typeInHeaderFilter(1, 0, 'filter-value', clock);
+
+          const firstNameFilter = {
+            '@type': 'propertyString',
+            propertyId: 'firstName',
+            matcher: 'CONTAINS',
+            filterValue: 'filter-value',
+          };
+          const lastNameFilter = {
+            '@type': 'propertyString',
+            propertyId: 'lastName',
+            matcher: 'CONTAINS',
+            filterValue: 'filter-value',
+          };
+
+          const filter: FilterUnion = {
+            '@type': 'or',
+            children: [firstNameFilter, lastNameFilter],
+            key: 'fullName',
+          };
+
+          expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [filter] });
+
+          await grid.typeInHeaderFilter(1, 0, '', clock);
+
+          expect(service.lastFilter).to.deep.equal(rootFilter);
+        });
+
+        it('filter chaining works with custom header filter', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(
+              <TestAutoGrid
+                service={service}
+                visibleColumns={['gender', 'fullName']}
+                customColumns={[<GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>]}
+                columnOptions={{
+                  fullName: {
+                    headerFilterRenderer: FullNameFilterRenderer,
+                  },
+                }}
+              />,
+            ),
+            user,
+          );
+
+          const controller = await SelectController.init(grid.getHeaderCellContent(1, 0), user);
+          await controller.select(Gender.MALE);
+          await clock.runAllAsync();
+
+          const expectedGenderFilter: FilterUnion = {
+            '@type': 'propertyString',
+            filterValue: Gender.MALE,
+            propertyId: 'gender',
+            matcher: Matcher.EQUALS,
+            key: 'gender',
+          };
+
+          const rootFilter: AndFilter = { '@type': 'and', children: [expectedGenderFilter] };
+          expect(service.lastFilter).to.deep.equal(rootFilter);
+
+          await grid.typeInHeaderFilter(1, 1, 'filter-value', clock);
+
+          const firstNameFilter = {
+            '@type': 'propertyString',
+            propertyId: 'firstName',
+            matcher: 'CONTAINS',
+            filterValue: 'filter-value',
+          };
+          const lastNameFilter = {
+            '@type': 'propertyString',
+            propertyId: 'lastName',
+            matcher: 'CONTAINS',
+            filterValue: 'filter-value',
+          };
+
+          const filter: FilterUnion = {
+            '@type': 'or',
+            children: [firstNameFilter, lastNameFilter],
+            key: 'fullName',
+          };
+
+          expect(service.lastFilter).to.deep.equal({
+            '@type': 'and',
+            children: [expectedGenderFilter, filter],
+          });
+
+          await grid.typeInHeaderFilter(1, 1, '', clock);
+
+          expect(service.lastFilter).to.deep.equal(rootFilter);
+        });
+
+        it('renders custom column without key', async () => {
+          const gridColumn = <GridColumn autoWidth header="Full name" renderer={FullNameRenderer}></GridColumn>;
+          const grid = await GridController.init(render(<TestAutoGrid customColumns={[gridColumn]} />), user);
+
+          const firstNameFilterField = grid.getHeaderCellContent(0, 14);
+          expect(firstNameFilterField).to.have.rendered.text('Full name');
         });
       });
     });

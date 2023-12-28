@@ -1,17 +1,43 @@
 import { _enum, type EnumModel } from '@hilla/form';
 import { DatePicker } from '@hilla/react-components/DatePicker.js';
+import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
 import { Item } from '@hilla/react-components/Item.js';
 import { ListBox } from '@hilla/react-components/ListBox.js';
 import { NumberField } from '@hilla/react-components/NumberField.js';
 import { Select, type SelectElement } from '@hilla/react-components/Select.js';
 import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import { type ReactElement, type RefObject, useContext, useEffect, useRef, useState } from 'react';
-import { ColumnContext } from './autogrid-column-context.js';
+import {
+  type ComponentType,
+  type JSX,
+  type ReactElement,
+  type RefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { ColumnContext, CustomColumnContext } from './autogrid-column-context.js';
 import { useDatePickerI18n } from './locale.js';
-import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion.js';
+import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
+import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
 import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { convertToTitleCase } from './util';
+
+type ExtractComponentTypeProps<T extends ComponentType<any>> = T extends ComponentType<infer U> ? U : never;
+
+export type HeaderRendererProps = ExtractComponentTypeProps<
+  NonNullable<Required<GridColumnProps<unknown>>['headerRenderer']>
+>;
+
+export type HeaderFilterRendererProps = HeaderRendererProps & {
+  /**
+   * Allows to set custom filters for the column.
+   * This is used by the header filter components.
+   * @param filter - The filter to set in the filter list.
+   */
+  setFilter(filter: FilterUnion): void;
+};
 
 export type HeaderFilterProps = Readonly<{
   /**
@@ -39,6 +65,11 @@ export type HeaderFilterProps = Readonly<{
    * Only applies to string value filters.
    */
   filterMinLength?: number;
+
+  /**
+   * Custom renderer for the filter in the header.
+   */
+  headerFilterRenderer?: ComponentType<HeaderFilterRendererProps>;
 }>;
 
 function useFilterState(initialMatcher: Matcher) {
@@ -50,13 +81,13 @@ function useFilterState(initialMatcher: Matcher) {
     setFilterValue(newFilterValue);
     setMatcher(newMatcher);
 
-    const filter: FilterUnion = {
-      '@type': 'propertyString',
+    const filter: PropertyStringFilter = {
       propertyId: context.propertyInfo.name,
       filterValue: newFilterValue,
       matcher: newMatcher,
+      '@type': 'propertyString',
     };
-    context.setPropertyFilter(filter);
+    context.setColumnFilter(filter, context.filterKey);
   }
 
   return { matcher, filterValue, updateFilter };
@@ -288,4 +319,16 @@ export function TimeHeaderFilter(): ReactElement {
 
 export function NoHeaderFilter(): ReactElement {
   return <></>;
+}
+
+export function HeaderFilterWrapper({ original }: HeaderRendererProps): JSX.Element | null {
+  const context = useContext(ColumnContext);
+  const customContext = useContext(CustomColumnContext);
+  const { setColumnFilter, headerFilterRenderer: HeaderFilterRenderer, filterKey } = (context ?? customContext)!;
+
+  function setFilter(filter: FilterUnion) {
+    setColumnFilter(filter, filterKey);
+  }
+
+  return <HeaderFilterRenderer original={original} setFilter={setFilter} />;
 }
