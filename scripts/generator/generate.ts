@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Script } from 'node:vm';
 import { remote, type Transformer, type Versions, type Writer } from '../config.js';
 
@@ -76,22 +77,44 @@ const [
 ].map((name) => fileURLToPath(new URL(`results/${name}`, import.meta.url)));
 
 export default function generate(version: string, versions: Versions): void {
+  console.log('Generating release files');
+
   const transformed = transformer.transformVersions(versions, version, false);
   transformed.platform = version;
 
-  writer.writeSeparateJson(versions.bundles, hillaJsonTemplateFileName, hillaJsonResultFileName, 'bundles');
-  writer.writeSeparateJson(versions.core, hillaJsonTemplateFileName, hillaJsonResultFileName, 'core');
-  writer.writeSeparateJson(versions.vaadin, hillaJsonTemplateFileName, hillaJsonResultFileName, 'vaadin');
-  writer.writeSeparateJson(versions.bundles, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, 'bundles');
-  writer.writeSeparateJson(versions.react, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, 'react');
+  writer.writeSeparateJson(transformed.bundles, hillaJsonTemplateFileName, hillaJsonResultFileName, 'bundles');
+  writer.writeSeparateJson(transformed.core, hillaJsonTemplateFileName, hillaJsonResultFileName, 'core');
+  writer.writeSeparateJson(transformed.vaadin, hillaJsonTemplateFileName, hillaJsonResultFileName, 'vaadin');
+  writer.writeSeparateJson(
+    transformed.bundles,
+    hillaReactJsonTemplateFileName,
+    hillaReactJsonResultFileName,
+    'bundles',
+  );
 
-  writer.writeReleaseNotes(versions, releaseNotesTemplateFileName, releaseNotesResultFileName);
-  writer.writeReleaseNotes(versions, releaseNotesMaintenanceTemplateFileName, releaseNotesMaintenanceResultFileName);
-  writer.writeReleaseNotes(versions, releaseNotesPrereleaseTemplateFileName, releaseNotesPrereleaseResultFileName);
+  console.log(`Generated ${pathToFileURL(hillaJsonResultFileName).toString()}.`);
+
+  writer.writeSeparateJson(transformed.react, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, 'react');
+
+  console.log(`Generated ${pathToFileURL(hillaReactJsonResultFileName).toString()}.`);
+
+  writer.writeReleaseNotes(transformed, releaseNotesTemplateFileName, releaseNotesResultFileName);
+
+  console.log(`Generated ${pathToFileURL(releaseNotesResultFileName).toString()}.`);
+
+  writer.writeReleaseNotes(transformed, releaseNotesMaintenanceTemplateFileName, releaseNotesMaintenanceResultFileName);
+
+  console.log(`Generated ${pathToFileURL(releaseNotesMaintenanceResultFileName).toString()}.`);
+
+  writer.writeReleaseNotes(transformed, releaseNotesPrereleaseTemplateFileName, releaseNotesPrereleaseResultFileName);
+
+  console.log(`Generated ${pathToFileURL(releaseNotesPrereleaseResultFileName).toString()}.`);
 
   transformed.core.hilla = { javaVersion: version };
 
   // write hilla version to hilla-react-versions.json as platform
   writer.writeSeparateJson(version, hillaJsonTemplateFileName, hillaJsonResultFileName, 'platform');
   writer.writeSeparateJson(version, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, 'platform');
+
+  console.log('"hilla-versions.json" and "hilla-react-versions.json" files are updated with the platform version');
 }

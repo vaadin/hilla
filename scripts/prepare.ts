@@ -9,7 +9,7 @@ const [{ version }, versions] = await Promise.all([
   // download needed files from vaadin/platform
   fetch(remote.versions)
     .then(async (res) => await res.text())
-    .then((str) => JSON.parse(str, (_, val) => (val === '{{value}}' ? undefined : val))) as Promise<Versions>,
+    .then((str) => JSON.parse(str, (_, val) => (val === '{{version}}' ? undefined : val))) as Promise<Versions>,
   mkdir(local.src, { recursive: true }),
   mkdir(local.results, { recursive: true }),
   mkdir(destination.lit.themeDir, { recursive: true }),
@@ -23,13 +23,16 @@ if (!version) {
 // run the generator
 generate(version, versions);
 
-// copy generated poms to the final place
-await Promise.all([
-  copyFile(new URL('hilla-versions.json', local.results), destination.lit.versions),
-  copyFile(new URL('hilla-react-versions.json', local.results), destination.react.versions),
-]);
+console.log('Moving the generated files to the final place.');
 
-console.log('Copied the theme file from flow-components to hilla and hilla-react');
+await Promise.all([
+  copyFile(new URL('hilla-versions.json', local.results), destination.lit.versions).then(() =>
+    console.log(`Moved ${destination.lit.versions.toString()}`),
+  ),
+  copyFile(new URL('hilla-react-versions.json', local.results), destination.react.versions).then(() =>
+    console.log(`Moved ${destination.react.versions.toString()}`),
+  ),
+]);
 
 const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;
 const themeFiles = new Map([
@@ -40,6 +43,8 @@ const themeFiles = new Map([
   ],
 ]);
 
+console.log('Copying the theme files from flow-components to the final place.');
+
 await Promise.all(
   Array.from(themeFiles.entries(), async ([url, dest]) => {
     const response = await fetch(url);
@@ -47,8 +52,8 @@ await Promise.all(
     code = code.replaceAll(themeAnnotationsPattern, '');
     await Promise.all(
       dest.map(async (file) => {
-        console.log(file.toString(), code);
         await writeFile(file, code);
+        console.log(`Copied ${file.toString()}`);
       }),
     );
   }),
