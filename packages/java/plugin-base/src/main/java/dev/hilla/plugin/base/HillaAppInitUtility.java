@@ -21,7 +21,8 @@ public class HillaAppInitUtility {
             "package-lock.json", "types.d.ts", "vite.config.ts",
             "frontend/App.tsx", "frontend/index.ts", "frontend/routes.tsx",
             "frontend/views/MainView.tsx",
-            "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java");
+            "src/main/java/org/vaadin/example/endpoints/HelloEndpoint.java",
+            "src/main/java/org/vaadin/example/endpoints/package-info.java");
 
     private static final String LIT_SKELETON = "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/refs/heads/v2.zip";
 
@@ -72,7 +73,8 @@ public class HillaAppInitUtility {
                     var item = entry.getName().split("/", 2)[1];
 
                     if (framework.getItems().contains(item)) {
-                        if (item.endsWith("Endpoint.java")) {
+                        if (item.endsWith("Endpoint.java")
+                                || item.endsWith("package-info.java")) {
                             var applicationPackage = findSpringBootApplicationPackage(
                                     projectDirectory);
                             var applicationPath = applicationPackage
@@ -94,7 +96,7 @@ public class HillaAppInitUtility {
                                 Files.createDirectories(parent);
                             }
 
-                            LOGGER.info("Adding endpoint {}", item);
+                            LOGGER.info("Adding endpoint source {}", item);
                             Files.writeString(path, content);
                         } else {
                             LOGGER.info("Extracting {}", item);
