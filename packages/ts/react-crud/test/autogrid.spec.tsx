@@ -17,8 +17,7 @@ import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFil
 import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
-import type FilterUnion from '../types/dev/hilla/crud/filter/FilterUnion';
-import type OrFilter from '../types/dev/hilla/crud/filter/OrFilter';
+import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
