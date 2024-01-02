@@ -1,0 +1,24 @@
+{
+  "baseDir": "base",
+  "classPath": ["target/test-classes"],
+  "generator": {
+    "plugins": {
+      "use": [],
+      "disable": [],
+      "disableAllDefaults": false
+    }
+  },
+  "parser": {
+    "endpointAnnotation": "com.vaadin.hilla.internal.Endpoint",
+    "endpointExposedAnnotation": "com.vaadin.hilla.internal.EndpointExposed",
+    "openAPIBasePath": null,
+    "plugins": {
+      "use": [],
+      "disable": [],
+      "disableAllDefaults": false
+    }
+  },
+  "buildDir": "build",
+  "classesDir": "build/classes",
+  "outputDir": "output"
+}

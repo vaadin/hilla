@@ -1,11 +1,11 @@
 import { TextField } from '@hilla/react-components/TextField.js';
 import { AutoGrid, HeaderFilterRendererProps } from '@hilla/react-crud';
-import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
-import Person from 'Frontend/generated/dev/hilla/test/reactgrid/Person';
+import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
+import Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person';
 import { PersonService } from 'Frontend/generated/endpoints.js';
 import { GridColumn } from '@hilla/react-components/GridColumn';
-import type FilterUnion from 'Frontend/generated/dev/hilla/crud/filter/FilterUnion.js';
-import type OrFilter from 'Frontend/generated/dev/hilla/crud/filter/OrFilter.js';
+import type FilterUnion from 'Frontend/generated/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import type OrFilter from 'Frontend/generated/com/vaadin/hilla/crud/filter/OrFilter.js';
 
 const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => {
   return (
@@ -29,7 +29,7 @@ const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => {
 
         const filter: OrFilter = {
           '@type': 'or',
-          children: [firstNameFilter, lastNameFilter]
+          children: [firstNameFilter, lastNameFilter],
         };
 
         setFilter(filter as FilterUnion);
@@ -40,14 +40,11 @@ const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => {
 
 const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
   <span>
-      {item.firstName} {item.lastName}
-    </span>
+    {item.firstName} {item.lastName}
+  </span>
 );
 
-const HeaderRenderer = () => (
-  <div>Full Name (currently: {new Date().toLocaleString()})</div>
-);
-
+const HeaderRenderer = () => <div>Full Name (currently: {new Date().toLocaleString()})</div>;
 
 export function ReadOnlyGridCustomFilter(): JSX.Element {
   return (
@@ -56,12 +53,10 @@ export function ReadOnlyGridCustomFilter(): JSX.Element {
         service={PersonService}
         model={PersonModel}
         visibleColumns={['firstName', 'lastName', 'gender', 'fullName']}
-        customColumns={[
-          <GridColumn key='fullName' autoWidth renderer={FullNameRenderer}></GridColumn>,
-        ]}
+        customColumns={[<GridColumn key="fullName" autoWidth renderer={FullNameRenderer}></GridColumn>]}
         columnOptions={{
           lastName: { filterPlaceholder: 'Search for last name' },
-          fullName: { headerRenderer: HeaderRenderer, headerFilterRenderer: HeaderFilterRenderer }
+          fullName: { headerRenderer: HeaderRenderer, headerFilterRenderer: HeaderFilterRenderer },
         }}
       />
     </div>

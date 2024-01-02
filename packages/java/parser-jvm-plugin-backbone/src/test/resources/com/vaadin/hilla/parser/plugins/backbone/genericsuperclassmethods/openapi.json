@@ -1,0 +1,100 @@
+{
+    "openapi" : "3.0.1",
+    "info" : {
+      "title" : "Hilla Application",
+      "version" : "1.0.0"
+    },
+    "servers" : [
+      {
+        "url" : "http://localhost:8080/connect",
+        "description" : "Hilla Backend"
+      }
+    ],
+    "tags" : [
+      {
+        "name" : "GenericSuperClassLong",
+        "x-class-name" : "com.vaadin.hilla.parser.plugins.backbone.genericsuperclassmethods.GenericSuperClassLong"
+      },
+      {
+        "name" : "GenericSuperClassString",
+        "x-class-name" : "com.vaadin.hilla.parser.plugins.backbone.genericsuperclassmethods.GenericSuperClassString"
+      }
+    ],
+    "paths" : {
+      "/GenericSuperClassLong/genericMethod" : {
+        "post" : {
+          "tags" : [
+  
+            "GenericSuperClassLong"
+          ],
+          "operationId" : "GenericSuperClassLong_genericMethod_POST",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "param" : {
+                      "type" : "integer",
+                      "format" : "int64",
+                      "nullable" : true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses" : {
+            "200" : {
+              "description" : "",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "integer",
+                    "format" : "int64",
+                    "nullable" : true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/GenericSuperClassString/genericMethod" : {
+        "post" : {
+          "tags" : [
+            "GenericSuperClassString"
+          ],
+          "operationId" : "GenericSuperClassString_genericMethod_POST",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "param" : {
+                      "type" : "string",
+                      "nullable" : true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses" : {
+            "200" : {
+              "description" : "",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "string",
+                    "nullable" : true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,101 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "BarePageableEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.transfertypes.pageable.bare.BarePageableEndpoint"
+    }
+  ],
+  "paths": {
+    "/BarePageableEndpoint/getSort": {
+      "post": {
+        "tags": ["BarePageableEndpoint"],
+        "operationId": "BarePageableEndpoint_getSort_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Sort"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.mappedtypes.Sort": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "nullable": true,
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Order"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "com.vaadin.hilla.mappedtypes.Order": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$Direction"
+              }
+            ]
+          },
+          "property": {
+            "type": "string",
+            "nullable": true
+          },
+          "ignoreCase": {
+            "type": "boolean"
+          },
+          "nullHandling": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$NullHandling"
+              }
+            ]
+          }
+        }
+      },
+      "org.springframework.data.domain.Sort$Direction": {
+        "type": "string",
+        "enum": ["ASC", "DESC"]
+      },
+      "org.springframework.data.domain.Sort$NullHandling": {
+        "type": "string",
+        "enum": ["NATIVE", "NULLS_FIRST", "NULLS_LAST"]
+      }
+    }
+  }
+}

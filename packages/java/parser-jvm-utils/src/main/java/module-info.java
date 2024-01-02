@@ -1,4 +1,4 @@
-module dev.hilla.parser.utils {
+module com.vaadin.hilla.parser.utils {
     requires jsr305;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
@@ -8,6 +8,6 @@ module dev.hilla.parser.utils {
     requires com.fasterxml.jackson.datatype.jdk8;
     requires com.fasterxml.jackson.module.paramnames;
 
-    exports dev.hilla.parser.utils;
-    exports dev.hilla.parser.jackson;
+    exports com.vaadin.hilla.parser.utils;
+    exports com.vaadin.hilla.parser.jackson;
 }

@@ -2,7 +2,7 @@ package com.example.application;
 
 import com.external2.ExternalEntity2;
 
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 public class ExampleEndpoint {

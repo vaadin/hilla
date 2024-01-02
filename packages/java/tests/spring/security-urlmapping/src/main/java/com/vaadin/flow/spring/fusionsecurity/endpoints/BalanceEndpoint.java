@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.spring.fusionsecurity.service.BankService;
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import reactor.core.publisher.Flux;
 
 @Endpoint

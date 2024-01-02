@@ -27,25 +27,29 @@ describe('SubTypesPlugin', () => {
       await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
 
-      const baseEventUnionFile = files.find((f) => f.name === 'dev/hilla/parser/plugins/subtypes/BaseEventUnion.ts')!;
+      const baseEventUnionFile = files.find(
+        (f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/BaseEventUnion.ts',
+      )!;
       expect(baseEventUnionFile).to.exist;
       await expect(await baseEventUnionFile.text()).toMatchSnapshot('BaseEventUnion', import.meta.url);
-      expect(baseEventUnionFile.name).to.equal('dev/hilla/parser/plugins/subtypes/BaseEventUnion.ts');
+      expect(baseEventUnionFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/BaseEventUnion.ts');
 
-      const baseEventFile = files.find((f) => f.name === 'dev/hilla/parser/plugins/subtypes/BaseEvent.ts')!;
+      const baseEventFile = files.find((f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/BaseEvent.ts')!;
       expect(baseEventFile).to.exist;
       await expect(await baseEventFile.text()).toMatchSnapshot('BaseEvent', import.meta.url);
-      expect(baseEventFile.name).to.equal('dev/hilla/parser/plugins/subtypes/BaseEvent.ts');
+      expect(baseEventFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/BaseEvent.ts');
 
-      const addEventFile = files.find((f) => f.name === 'dev/hilla/parser/plugins/subtypes/AddEvent.ts')!;
+      const addEventFile = files.find((f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/AddEvent.ts')!;
       expect(addEventFile).to.exist;
       await expect(await addEventFile.text()).toMatchSnapshot('AddEvent', import.meta.url);
-      expect(addEventFile.name).to.equal('dev/hilla/parser/plugins/subtypes/AddEvent.ts');
+      expect(addEventFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/AddEvent.ts');
 
-      const addEventModelFile = files.find((f) => f.name === 'dev/hilla/parser/plugins/subtypes/AddEventModel.ts')!;
+      const addEventModelFile = files.find(
+        (f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/AddEventModel.ts',
+      )!;
       expect(addEventModelFile).to.exist;
       await expect(await addEventModelFile.text()).toMatchSnapshot('AddEventModel', import.meta.url);
-      expect(addEventModelFile.name).to.equal('dev/hilla/parser/plugins/subtypes/AddEventModel.ts');
+      expect(addEventModelFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/AddEventModel.ts');
     });
   });
 });

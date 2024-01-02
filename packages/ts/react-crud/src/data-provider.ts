@@ -5,8 +5,8 @@ import type {
   GridElement,
 } from '@hilla/react-components/Grid';
 import type { CountService, ListService } from './crud';
-import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
-import type Sort from './types/dev/hilla/mappedtypes/Sort';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 
 type GridElementWithInternalAPI<TItem = GridDefaultItem> = GridElement<TItem> &

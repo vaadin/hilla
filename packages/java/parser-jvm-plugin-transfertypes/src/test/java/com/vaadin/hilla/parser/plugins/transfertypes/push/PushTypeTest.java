@@ -1,0 +1,34 @@
+package com.vaadin.hilla.parser.plugins.transfertypes.push;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import org.junit.jupiter.api.Test;
+
+import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.parser.core.Parser;
+import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
+import com.vaadin.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
+import reactor.core.publisher.Flux;
+
+public class PushTypeTest {
+    private final TestHelper helper = new TestHelper(getClass());
+
+    @Test
+    public void should_ReplacePushTypes()
+            throws IOException, URISyntaxException {
+        var classpath = helper.getExtendedClassPath(Flux.class,
+                EndpointSubscription.class);
+
+        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+                .classPath(classpath.split(File.pathSeparator))
+                .endpointAnnotation(Endpoint.class.getName())
+                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .addPlugin(new BackbonePlugin())
+                .addPlugin(new TransferTypesPlugin()).execute();
+
+        helper.executeParserWithConfig(openAPI);
+    }
+}

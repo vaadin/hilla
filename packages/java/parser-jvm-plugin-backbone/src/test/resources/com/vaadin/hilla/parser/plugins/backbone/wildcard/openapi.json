@@ -1,0 +1,91 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "WildcardTypeEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.wildcard.WildcardTypeEndpoint"
+    }
+  ],
+  "paths": {
+    "/WildcardTypeEndpoint/getDefaultWildcard": {
+      "post": {
+        "tags": ["WildcardTypeEndpoint"],
+        "operationId": "WildcardTypeEndpoint_getDefaultWildcard_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/WildcardTypeEndpoint/getExtendingWildcard": {
+      "post": {
+        "tags": ["WildcardTypeEndpoint"],
+        "operationId": "WildcardTypeEndpoint_getExtendingWildcard_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/WildcardTypeEndpoint/getSuperWildcard": {
+      "post": {
+        "tags": ["WildcardTypeEndpoint"],
+        "operationId": "WildcardTypeEndpoint_getSuperWildcard_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
