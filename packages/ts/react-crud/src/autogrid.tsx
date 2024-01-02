@@ -23,8 +23,8 @@ import { createDataProvider, type DataProvider, isCountService, type ItemCounts 
 import { type HeaderFilterRendererProps, NoHeaderFilter, HeaderFilterWrapper } from './header-filter';
 import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
-import type AndFilter from './types/com/vaadin/crud/filter/AndFilter.js';
-import type FilterUnion from './types/com/vaadin/crud/filter/FilterUnion.js';
+import type AndFilter from './types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import { isFilterEmpty, registerStylesheet } from './util';
 
 registerStylesheet(css);
