@@ -9,6 +9,7 @@ export interface ValueError<T = unknown> {
   message: string;
   value: T;
   validator: Validator<T>;
+  validatorMessage: string;
 }
 
 export interface ValidationResult {
@@ -98,7 +99,15 @@ export async function runValidator<M extends AbstractModel>(
     const result = await validator.validate(value, binderNode.binder);
 
     if (result === false) {
-      return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+      return [
+        {
+          message: interpolateMessage(validator.message),
+          property: binderNode.name,
+          validator,
+          value,
+          validatorMessage: interpolateMessage(validator.message),
+        },
+      ];
     }
 
     if (result === true || (Array.isArray(result) && result.length === 0)) {
@@ -111,6 +120,7 @@ export async function runValidator<M extends AbstractModel>(
         ...setPropertyAbsolutePath(binderNode.name, result2),
         validator,
         value,
+        validatorMessage: interpolateMessage(validator.message),
       }));
     }
 
@@ -120,10 +130,11 @@ export async function runValidator<M extends AbstractModel>(
         ...setPropertyAbsolutePath(binderNode.name, result as ValidationResult),
         validator,
         value,
+        validatorMessage: interpolateMessage(validator.message),
       },
     ];
   } catch (error: unknown) {
     console.error(`${binderNode.name} - Validator ${validator.constructor.name} threw an error:`, error);
-    return [{ message: 'Validator threw an error', property: binderNode.name, validator, value }];
+    return [{ message: 'Validator threw an error', property: binderNode.name, validator, value, validatorMessage: '' }];
   }
 }

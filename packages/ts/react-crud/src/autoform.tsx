@@ -286,6 +286,23 @@ export function AutoForm<M extends AbstractModel>({
     }
   }, [item]);
 
+  function handleSubmitError(error: unknown) {
+    if (error instanceof ValidationError) {
+      const nonPropertyError = error.errors.find((validationError) => !validationError.property);
+      if (nonPropertyError) {
+        setFormError(nonPropertyError.validatorMessage);
+      }
+    } else if (error instanceof EndpointError) {
+      if (onSubmitError) {
+        onSubmitError({ error, setMessage: setFormError });
+      } else {
+        setFormError(error.message);
+      }
+    } else {
+      throw error;
+    }
+  }
+
   async function handleSubmit(): Promise<void> {
     try {
       setFormError('');
@@ -304,19 +321,7 @@ export function AutoForm<M extends AbstractModel>({
         form.clear();
       }
     } catch (error) {
-      if (error instanceof ValidationError) {
-        // Handled automatically
-        return;
-      }
-      if (error instanceof EndpointError) {
-        if (onSubmitError) {
-          onSubmitError({ error, setMessage: setFormError });
-        } else {
-          setFormError(error.message);
-        }
-      } else {
-        throw error;
-      }
+      handleSubmitError(error);
     }
   }
 

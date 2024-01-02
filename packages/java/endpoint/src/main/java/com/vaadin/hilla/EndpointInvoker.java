@@ -247,7 +247,8 @@ public class EndpointInvoker {
                         constraintViolation.getPropertyPath().toString(),
                         constraintViolation.getInvalidValue(),
                         constraintViolation.getMessage()),
-                        constraintViolation.getPropertyPath().toString()))
+                        constraintViolation.getPropertyPath().toString(),
+                        constraintViolation.getMessage()))
                 .collect(Collectors.toList());
     }
 
@@ -261,7 +262,8 @@ public class EndpointInvoker {
                     parameterPath.split("\\.")[0],
                     constraintViolation.getRootBeanClass(), parameterPath,
                     constraintViolation.getInvalidValue(),
-                    constraintViolation.getMessage()), parameterPath);
+                    constraintViolation.getMessage()), parameterPath,
+                    constraintViolation.getMessage());
         }).collect(Collectors.toList());
     }
 
@@ -278,7 +280,7 @@ public class EndpointInvoker {
                     "Unable to deserialize an endpoint method parameter into type '%s'",
                     deserializationError.getValue());
             validationErrorData.add(new ValidationErrorData(message,
-                    deserializationError.getKey()));
+                    deserializationError.getKey(), null));
         }
 
         validationErrorData
