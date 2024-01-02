@@ -1,4 +1,4 @@
-package dev.hilla.test.reactgrid;
+package com.vaadin.hilla.test.reactgrid;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
