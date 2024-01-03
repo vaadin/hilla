@@ -12,10 +12,27 @@ import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
 registerStylesheet(css);
 
+type AutoCrudFormHeaderRenderer<TItem> = (
+  editedItem: TItem | null,
+  disabled: boolean,
+) => JSX.Element | null | undefined;
+
 export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
   Partial<AutoFormProps<TModel>>,
   'disabled' | 'item' | 'model' | 'onDeleteSuccess' | 'onSubmitSuccess' | 'service'
->;
+> &
+  Readonly<{
+    /**
+     * A custom renderer function to create the header for the form. The
+     * function receives the edited item as the first parameter, and a boolean
+     * indicating whether the form is disabled as the second parameter. The
+     * edited item is `null` when creating a new item.
+     *
+     * By default, the header shows "New item" when creating a new item, and
+     * "Edit item" when editing an existing item.
+     */
+    headerRenderer?: AutoCrudFormHeaderRenderer<Value<TModel>>;
+  }>;
 
 export type AutoCrudGridProps<TItem> = Omit<
   Partial<AutoGridProps<TItem>>,
@@ -69,6 +86,11 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
     gridProps?: AutoCrudGridProps<Value<TModel>>;
   }>;
 
+function defaultFormHeaderRenderer<TItem>(editedItem: TItem | null, disabled: boolean): JSX.Element | null | undefined {
+  const style = { color: disabled ? 'var(--lumo-disabled-text-color)' : 'var(--lumo-text-color)' };
+  return editedItem ? <h3 style={style}>Edit item</h3> : <h3 style={style}>New item</h3>;
+}
+
 /**
  * Auto CRUD is a component that provides CRUD (create, read, update, delete)
  * functionality based on a Java backend service. It automatically generates a
@@ -96,8 +118,10 @@ export function AutoCrud<TModel extends AbstractModel>({
 }: AutoCrudProps<TModel>): JSX.Element {
   const [item, setItem] = useState<Value<TModel> | typeof emptyItem | undefined>(undefined);
   const fullScreen = useMediaQuery('(max-width: 600px), (max-height: 600px)');
-
   const autoGridRef = useRef<AutoGridRef>(null);
+  const { headerRenderer: customFormHeaderRenderer, ...autoFormProps } = formProps ?? {};
+  const formHeaderRenderer: AutoCrudFormHeaderRenderer<Value<TModel>> =
+    customFormHeaderRenderer ?? defaultFormHeaderRenderer;
 
   function refreshGrid() {
     autoGridRef.current?.refresh();
@@ -106,6 +130,8 @@ export function AutoCrud<TModel extends AbstractModel>({
   function handleCancel() {
     setItem(undefined);
   }
+
+  const formHeader = item && item !== emptyItem ? formHeaderRenderer(item, !item) : formHeaderRenderer(null, !item);
 
   const mainSection = (
     <div className="auto-crud-main">
@@ -132,7 +158,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   const autoForm = (
     <AutoForm
       deleteButtonVisible={true}
-      {...formProps}
+      {...autoFormProps}
       disabled={!item}
       service={service}
       model={model}
@@ -158,14 +184,17 @@ export function AutoCrud<TModel extends AbstractModel>({
       {fullScreen ? (
         <>
           {mainSection}
-          <AutoCrudDialog opened={!!item} onClose={handleCancel}>
+          <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
             {autoForm}
           </AutoCrudDialog>
         </>
       ) : (
         <SplitLayout theme="small">
           {mainSection}
-          {autoForm}
+          <div className="auto-crud-form">
+            <div className="auto-crud-form-header">{formHeader}</div>
+            {autoForm}
+          </div>
         </SplitLayout>
       )}
     </div>
