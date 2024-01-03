@@ -35,21 +35,17 @@
   border-top: solid 1px var(--lumo-contrast-10pct);
 }
 
-.auto-crud .auto-form,
-.auto-crud-dialog .auto-form {
+.auto-crud-form {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-}
-
-.auto-crud .auto-form {
   width: 40%;
   min-width: 300px;
 }
 
 /* Move box shadow and required z-index modification into pseudo-element
    as it otherwise messes with the drag handle of the split layout */
-.auto-crud .auto-form::before {
+.auto-crud .auto-crud-form::before {
   content: "";
   pointer-events: none;
   position: absolute;
@@ -57,6 +53,18 @@
   height: 100%;
   z-index: 1;
   box-shadow: var(--lumo-box-shadow-s);
+}
+
+.auto-crud-form-header {
+  padding: var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.auto-crud .auto-form,
+.auto-crud-dialog .auto-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1 1 0;
 }
 
 .auto-crud .auto-form-fields,
@@ -90,6 +98,13 @@
 
 .auto-crud-dialog::part(content) {
   padding: 0;
+}
+
+.auto-crud-dialog .auto-crud-dialog-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .auto-crud-dialog .auto-form {

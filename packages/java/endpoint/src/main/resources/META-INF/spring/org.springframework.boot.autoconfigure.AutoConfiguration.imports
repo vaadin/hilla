@@ -1,5 +1,5 @@
-dev.hilla.EndpointController
-dev.hilla.push.PushConfigurer
-dev.hilla.ApplicationContextProvider
-dev.hilla.internal.hotswap.HotSwapConfiguration
-dev.hilla.crud.CrudConfiguration
+com.vaadin.hilla.EndpointController
+com.vaadin.hilla.push.PushConfigurer
+com.vaadin.hilla.ApplicationContextProvider
+com.vaadin.hilla.internal.hotswap.HotSwapConfiguration
+com.vaadin.hilla.crud.CrudConfiguration

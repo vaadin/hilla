@@ -3,6 +3,7 @@ import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
 import type { GridSorterDirection, GridSorterElement } from '@hilla/react-components/GridSorter.js';
 import { type RenderResult, waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import type { SinonFakeTimers } from 'sinon';
 import type Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
@@ -153,5 +154,14 @@ export default class GridController {
     // @ts-expect-error: getting internal property
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return getContainerCell(this.instance.$.footer, row, col);
+  }
+
+  async typeInHeaderFilter(row: number, col: number, filterValue: string, clock?: SinonFakeTimers): Promise<void> {
+    const firstNameFilterField = this.getHeaderCellContent(row, col).querySelector('vaadin-text-field')!;
+    firstNameFilterField.value = filterValue;
+    firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+    if (clock) {
+      await clock.tickAsync(500);
+    }
   }
 }

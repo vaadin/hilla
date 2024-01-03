@@ -54,7 +54,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel"
                     }
                   ]
                 }
@@ -96,7 +96,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel"
                     }
                   ]
                 }
@@ -138,7 +138,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel"
                     }
                   ]
                 }
@@ -151,7 +151,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel": {
+      "com.vaadin.hilla.parser.plugins.backbone.multiendpoints.MultiEndpointsSharedModel": {
         "type": "object",
         "properties": {
           "id": {

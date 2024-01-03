@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin.hilla</groupId>
         <artifactId>tests-spring</artifactId>
         <version>24.4-SNAPSHOT</version>
     </parent>
@@ -51,7 +51,7 @@
             <artifactId>byte-buddy</artifactId>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
+            <groupId>com.vaadin.hilla</groupId>
             <artifactId>engine-runtime</artifactId>
             <version>${project.version}</version>
             <!--
@@ -61,7 +61,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
+            <groupId>com.vaadin.hilla</groupId>
             <artifactId>engine-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -77,7 +77,7 @@
              -->
 
             <plugin>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
                 <executions>
                     <execution>

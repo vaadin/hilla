@@ -1,6 +1,6 @@
 package com.vaadin.flow.spring.fusionsecurityjwt.endpoints;
 
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.fusionsecurity.SecurityUtils;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;

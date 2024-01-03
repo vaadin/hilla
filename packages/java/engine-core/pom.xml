@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>dev.hilla</groupId>
+    <groupId>com.vaadin.hilla</groupId>
     <artifactId>hilla-project</artifactId>
     <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
@@ -45,7 +45,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-core</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -59,32 +59,32 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-plugin-backbone</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-plugin-nonnull</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-plugin-subtypes</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-plugin-model</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-plugin-transfertypes</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -99,7 +99,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

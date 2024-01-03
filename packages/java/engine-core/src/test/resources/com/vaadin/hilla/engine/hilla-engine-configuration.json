@@ -1,0 +1,43 @@
+{
+  "baseDir": "base",
+  "buildDir": "build",
+  "classesDir": null,
+  "classPath": ["build/classes", "dependency"],
+  "generator": {
+    "plugins": {
+      "disable": [
+        {
+          "path": "generator-jvm-plugin-disable"
+        }
+      ],
+      "disableAllDefaults": true,
+      "use": [
+        {
+          "path": "generator-jvm-plugin-use"
+        }
+      ]
+    }
+  },
+  "parser": {
+    "endpointAnnotation": "com.vaadin.hilla.test.Endpoint",
+    "endpointExposedAnnotation": "com.vaadin.hilla.test.EndpointExposed",
+    "openAPIBasePath": "test-openapi.json",
+    "plugins": {
+      "disable": [
+        {
+          "configuration": null,
+          "name": "parser-jvm-plugin-disable"
+        }
+      ],
+      "disableAllDefaults": true,
+      "use": [
+        {
+          "configuration": null,
+          "name": "parser-jvm-plugin-use"
+        }
+      ]
+    },
+    "packages": null
+  },
+  "outputDir": "src/frontend/typescript/generated"
+}

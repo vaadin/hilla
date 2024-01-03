@@ -1,0 +1,16 @@
+{
+  "tags": [
+    {
+      "name": "ApplicationEndpoint",
+      "x-class-name": "com.vaadin.hilla.packages.application.ApplicationEndpoint"
+    },
+    {
+      "name": "LibraryEndpoint",
+      "x-class-name": "com.vaadin.hilla.packages.library.LibraryEndpoint"
+    },
+    {
+      "name": "LibraryEndpointWithConstructor",
+      "x-class-name": "com.vaadin.hilla.packages.library.LibraryEndpointWithConstructor"
+    }
+  ]
+}

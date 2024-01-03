@@ -1,0 +1,364 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ValidationEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.model.validation.ValidationEndpoint"
+    }
+  ],
+  "paths": {
+    "/ValidationEndpoint/getValidationData": {
+      "post": {
+        "tags": ["ValidationEndpoint"],
+        "operationId": "ValidationEndpoint_getValidationData_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData": {
+        "type": "object",
+        "properties": {
+          "assertFalse": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertFalse"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "assertTrue": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "AssertTrue"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "decimalMax": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "inclusive": false,
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMax"
+              }
+            ],
+            "x-java-type": "double"
+          },
+          "decimalMin": {
+            "type": "number",
+            "format": "double",
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "value": "0.01"
+                },
+                "simpleName": "DecimalMin"
+              }
+            ],
+            "x-java-type": "double"
+          },
+          "digits": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "integer": 5,
+                  "fraction": 2
+                },
+                "simpleName": "Digits"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "message": "foo"
+                },
+                "simpleName": "Email"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "future": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Future"
+              }
+            ],
+            "x-java-type": "java.time.LocalDate"
+          },
+          "isNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Null"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "list": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true,
+              "x-java-type": "java.lang.String"
+            },
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotEmpty"
+              }
+            ],
+            "x-java-type": "java.util.List"
+          },
+          "max": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "value": 2
+                },
+                "simpleName": "Max"
+              }
+            ],
+            "x-java-type": "java.lang.Integer"
+          },
+          "min": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "message": "foo",
+                  "value": 1
+                },
+                "simpleName": "Min"
+              }
+            ],
+            "x-java-type": "java.lang.Integer"
+          },
+          "negative": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Negative"
+              }
+            ],
+            "x-java-type": "int"
+          },
+          "negativeOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "NegativeOrZero"
+              }
+            ],
+            "x-java-type": "int"
+          },
+          "notBlank": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "notEmpty": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              },
+              {
+                "simpleName": "NotEmpty"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "notNull": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "notNullEntity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.model.validation.ValidationEndpoint$ValidationData"
+              }
+            ],
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              }
+            ]
+          },
+          "past": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Past"
+              }
+            ],
+            "x-java-type": "java.time.LocalDate"
+          },
+          "pattern": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "regexp": "\\d+\\..+"
+                },
+                "simpleName": "Pattern"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "positive": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "Positive"
+              }
+            ],
+            "x-java-type": "int"
+          },
+          "positiveOrZero": {
+            "type": "integer",
+            "format": "int32",
+            "x-validation-constraints": [
+              {
+                "simpleName": "PositiveOrZero"
+              }
+            ],
+            "x-java-type": "int"
+          },
+          "size": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Size"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "size1": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "attributes": {
+                  "min": 1
+                },
+                "simpleName": "Size"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "withConstraintsOnSetter": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotNull"
+              },
+              {
+                "simpleName": "NotBlank"
+              },
+              {
+                "simpleName": "Email"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "withGetter": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "NotBlank"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          },
+          "withSetter": {
+            "type": "string",
+            "nullable": true,
+            "x-validation-constraints": [
+              {
+                "simpleName": "Email"
+              },
+              {
+                "simpleName": "NotBlank"
+              }
+            ],
+            "x-java-type": "java.lang.String"
+          }
+        }
+      }
+    }
+  }
+}

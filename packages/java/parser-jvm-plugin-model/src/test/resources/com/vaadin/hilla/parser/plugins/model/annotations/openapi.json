@@ -1,0 +1,171 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "AnnotationsEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint"
+    }
+  ],
+  "paths" : {
+    "/AnnotationsEndpoint/getTestEntity" : {
+      "post" : {
+        "tags" : [
+          "AnnotationsEndpoint"
+        ],
+        "operationId" : "AnnotationsEndpoint_getTestEntity_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$AnnotationTestEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$AnnotationTestEntity" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Long",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.Id"
+              }
+            ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-java-type" : "int",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.Version"
+              }
+            ]
+          },
+          "oneToOne" : {
+            "nullable" : true,
+            "anyOf" : [
+              {
+                "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+              }
+            ],
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.OneToOne"
+              }
+            ]
+          },
+          "oneToMany" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "nullable" : true,
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.OneToMany"
+              }
+            ]
+          },
+          "manyToOne" : {
+            "nullable" : true,
+            "anyOf" : [
+              {
+                "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+              }
+            ],
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.ManyToOne"
+              }
+            ]
+          },
+          "manyToMany" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "nullable" : true,
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.ManyToMany"
+              }
+            ]
+          },
+          "manyToManyWithFetchType" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "nullable" : true,
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.ManyToMany"
+              }
+            ]
+          },
+          "name" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.model.annotations.AnnotationsEndpoint$NestedEntity" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          }
+        }
+      }
+    }
+  }
+}

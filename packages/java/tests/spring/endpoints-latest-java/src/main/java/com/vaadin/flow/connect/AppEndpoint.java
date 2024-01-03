@@ -2,9 +2,9 @@ package com.vaadin.flow.connect;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import dev.hilla.Endpoint;
-import dev.hilla.Nonnull;
-import dev.hilla.Nullable;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.Nonnull;
+import com.vaadin.hilla.Nullable;
 
 /**
  * Simple Vaadin Connect Service definition.

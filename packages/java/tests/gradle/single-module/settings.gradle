@@ -5,7 +5,7 @@ buildscript {
         maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
     }
     dependencies {
-        classpath("dev.hilla:hilla-gradle-plugin:$hillaVersion")
+        classpath("com.vaadin.hilla:hilla-gradle-plugin:$hillaVersion")
     }
 }
 

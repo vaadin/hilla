@@ -8,6 +8,7 @@ import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter.js';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter.js';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter.js';
 import { CustomGrid } from './views/CustomGridView';
+import { ReadOnlyGridCustomFilter } from 'Frontend/views/ReadOnlyGridCustomFilter';
 
 export const routes = [
   {
@@ -29,6 +30,10 @@ export const routes = [
       {
         path: '/readonly-grid-with-headerfilters',
         element: <ReadOnlyGridWithHeaderFilters />,
+      },
+      {
+        path: '/readonly-grid-custom-filter',
+        element: <ReadOnlyGridCustomFilter />,
       },
       {
         path: '/grid-entityrefs',

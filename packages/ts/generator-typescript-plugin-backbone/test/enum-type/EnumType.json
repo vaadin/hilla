@@ -30,7 +30,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
                     ]
                   }
@@ -48,7 +48,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                     }
                   ]
                 }
@@ -75,7 +75,7 @@
                       "nullable": true,
                       "anyOf": [
                         {
-                          "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                          "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                         }
                       ]
                     }
@@ -97,7 +97,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
                     ]
                   }
@@ -121,7 +121,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                     }
                   ]
                 }
@@ -145,7 +145,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity"
                       }
                     ]
                   }
@@ -165,7 +165,7 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity": {
+      "com.vaadin.hilla.parser.plugins.backbone.enumtype.EnumTypeEndpoint$EnumEntity": {
         "type": "string",
         "enum": ["ENUM1", "ENUM2", "ENUM_2", "HELLO_WORLD", "_HELLO", "MANY_MANY_WORDS"]
       }

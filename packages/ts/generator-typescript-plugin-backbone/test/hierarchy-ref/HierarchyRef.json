@@ -52,7 +52,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRef"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRef"
                     }
                   ]
                 }
@@ -65,10 +65,10 @@
   },
   "components": {
     "schemas": {
-      "dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRef": {
+      "com.vaadin.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRef": {
         "anyOf": [
           {
-            "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass"
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass"
           },
           {
             "type": "object",
@@ -77,7 +77,7 @@
                 "nullable": true,
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass"
+                    "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass"
                   }
                 ]
               }
@@ -85,7 +85,7 @@
           }
         ]
       },
-      "dev.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass": {
+      "com.vaadin.hilla.parser.plugins.backbone.hierarchyref.HierarchyRefEndpoint$HierarchyRefSuperclass": {
         "type": "object",
         "properties": {
           "id": {

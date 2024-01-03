@@ -1,7 +1,7 @@
-module dev.hilla.parser.core {
+module com.vaadin.hilla.parser.core {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
-    requires dev.hilla.parser.utils;
+    requires com.vaadin.hilla.parser.utils;
     requires io.github.classgraph;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
@@ -9,8 +9,8 @@ module dev.hilla.parser.core {
     requires jakarta.annotation;
     requires org.slf4j;
 
-    opens dev.hilla.parser.core to com.fasterxml.jackson.databind;
-    exports dev.hilla.parser.core;
-    exports dev.hilla.parser.models;
-    exports dev.hilla.parser.models.jackson;
+    opens com.vaadin.hilla.parser.core to com.fasterxml.jackson.databind;
+    exports com.vaadin.hilla.parser.core;
+    exports com.vaadin.hilla.parser.models;
+    exports com.vaadin.hilla.parser.models.jackson;
 }
