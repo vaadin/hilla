@@ -76,7 +76,7 @@ public class EndpointValidationException extends EndpointException {
          *            blank)
          */
         public ValidationErrorData(String message, String parameterName) {
-                this(message, parameterName, null);
+            this(message, parameterName, null);
         }
 
         /**
