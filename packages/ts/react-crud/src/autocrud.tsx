@@ -12,7 +12,7 @@ import { type ComponentStyleProps, registerStylesheet } from './util.js';
 
 registerStylesheet(css);
 
-type AutoCrudFormHeaderRenderer<TItem> = (
+export type AutoCrudFormHeaderRenderer<TItem> = (
   editedItem: TItem | null,
   disabled: boolean,
 ) => JSX.Element | null | undefined;
