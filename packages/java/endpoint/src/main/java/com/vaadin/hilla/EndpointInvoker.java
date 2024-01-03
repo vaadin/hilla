@@ -280,7 +280,7 @@ public class EndpointInvoker {
                     "Unable to deserialize an endpoint method parameter into type '%s'",
                     deserializationError.getValue());
             validationErrorData.add(new ValidationErrorData(message,
-                    deserializationError.getKey(), null));
+                    deserializationError.getKey()));
         }
 
         validationErrorData

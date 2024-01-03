@@ -71,9 +71,23 @@ public class EndpointValidationException extends EndpointException {
          * @param message
          *            validation error message, mandatory (cannot be
          *            {@code null} or blank)
+         * @param parameterName
+         *            invalid parameter name, optional (can be {@code null} or
+         *            blank)
+         */
+        public ValidationErrorData(String message, String parameterName) {
+                this(message, parameterName, null);
+        }
+
+        /**
+         * Creates a validation error data object.
+         *
+         * @param message
+         *            validation error message, mandatory (cannot be
+         *            {@code null} or blank)
          */
         public ValidationErrorData(String message) {
-            this(message, null, null);
+            this(message, null);
         }
 
         /**
