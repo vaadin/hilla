@@ -691,6 +691,7 @@ describe('@hilla/form', () => {
           await orderView.updateComplete;
           expect(binder.for(binder.model.notes).invalid).to.be.true;
           expect(binder.for(binder.model.notes).ownErrors[0].message).to.equal('Invalid notes');
+          expect(binder.for(binder.model.notes).ownErrors[0].validatorMessage).to.equal('Invalid notes');
         }
       });
 
