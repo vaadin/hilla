@@ -288,9 +288,12 @@ export function AutoForm<M extends AbstractModel>({
 
   function handleSubmitError(error: unknown) {
     if (error instanceof ValidationError) {
-      const nonPropertyError = error.errors.find((validationError) => !validationError.property);
-      if (nonPropertyError?.validatorMessage) {
-        setFormError(nonPropertyError.validatorMessage);
+      const nonPropertyErrorMessages = error.errors
+        .filter((validationError) => !validationError.property && validationError.validatorMessage)
+        .map((validationError) => validationError.validatorMessage)
+        .join('; ');
+      if (nonPropertyErrorMessages) {
+        setFormError(nonPropertyErrorMessages);
       }
     } else if (error instanceof EndpointError) {
       if (onSubmitError) {
