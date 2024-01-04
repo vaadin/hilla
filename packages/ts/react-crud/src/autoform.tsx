@@ -289,7 +289,7 @@ export function AutoForm<M extends AbstractModel>({
   function handleSubmitError(error: unknown) {
     if (error instanceof ValidationError) {
       const nonPropertyError = error.errors.find((validationError) => !validationError.property);
-      if (nonPropertyError) {
+      if (nonPropertyError?.validatorMessage) {
         setFormError(nonPropertyError.validatorMessage);
       }
     } else if (error instanceof EndpointError) {
