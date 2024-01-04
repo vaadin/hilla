@@ -7,7 +7,7 @@ import { ReadOnlyGrid } from './views/ReadOnlyGrid.js';
 import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter.js';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter.js';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter.js';
-import { CustomGrid } from './views/CustomGridView';
+import { GridUseDataProviderHook } from './views/GridUseDataProviderHookView';
 import { ReadOnlyGridCustomFilter } from 'Frontend/views/ReadOnlyGridCustomFilter';
 
 export const routes = [
@@ -40,8 +40,8 @@ export const routes = [
         element: <GridWithEntityReferences />,
       },
       {
-        path: '/custom-grid',
-        element: <CustomGrid />,
+        path: '/grid-use-data-provider-hook',
+        element: <GridUseDataProviderHook />,
       },
       {
         path: '/auto-form',

@@ -369,14 +369,14 @@ function AutoGridInner<TItem>(
   }, [noHeaderFilters]);
 
   useEffect(() => {
-    // Sets the data provider, should be done only once
-    const grid = gridRef.current!;
     // Log an error if totalCount or filteredCount is enabled but the service doesn't implement CountService
     if ((!isCountService(service) && totalCount) ?? filteredCount) {
       console.error(
         '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
       );
     }
+    // Sets the data provider, should be done only once
+    const grid = gridRef.current!;
     // Wait for the sorting headers to be rendered so that the sorting state is correct for the first data provider call
     const timeoutId = setTimeout(() => {
       let firstUpdate = true;
