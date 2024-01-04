@@ -381,7 +381,7 @@ describe('@hilla/react-crud', () => {
           property: '',
           message: 'message',
           value: person,
-          validator: {},
+          validator: { message: 'message', validate: () => false },
           validatorMessage: 'foobar',
         };
         throw new ValidationError([valueError]);
