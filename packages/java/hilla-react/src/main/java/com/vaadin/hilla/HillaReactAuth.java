@@ -3,7 +3,8 @@ package com.vaadin.hilla;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Empty class that adds <code>@vaadin/hilla-react-auth</code> npm package dependency.
+ * Empty class that adds <code>@vaadin/hilla-react-auth</code> npm package
+ * dependency.
  */
 @NpmPackage(value = "@vaadin/hilla-react-auth", version = "2.5.2")
 public class HillaReactAuth {
