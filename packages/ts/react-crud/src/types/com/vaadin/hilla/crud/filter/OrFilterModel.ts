@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, StringModel as StringModel_1 } from "@hilla/form";
+import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
 import FilterModel_1 from "./FilterModel.js";
 import type OrFilter_1 from "./OrFilter.js";
 class OrFilterModel<T extends OrFilter_1 = OrFilter_1> extends FilterModel_1<T> {

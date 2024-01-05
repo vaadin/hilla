@@ -1,5 +1,5 @@
 import { TextField } from '@hilla/react-components/TextField.js';
-import { AutoGrid, HeaderFilterRendererProps } from '@hilla/react-crud';
+import { AutoGrid, HeaderFilterRendererProps } from '@vaadin/hilla-react-crud';
 import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person';
 import { PersonService } from 'Frontend/generated/endpoints.js';

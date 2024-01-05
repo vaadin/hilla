@@ -1,7 +1,7 @@
-import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
 import { Grid, type GridElement, type GridProps } from '@hilla/react-components/Grid.js';
 import { GridColumn } from '@hilla/react-components/GridColumn.js';
 import { GridColumnGroup } from '@hilla/react-components/GridColumnGroup.js';
+import type { AbstractModel, DetachedModelConstructor } from '@vaadin/hilla-lit-form';
 import {
   cloneElement,
   type ComponentType,

@@ -1,7 +1,7 @@
 import { html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { AnnotatedEndpoint } from 'Frontend/generated/endpoints';
-import { Binder } from '@hilla/form';
+import { Binder } from '@vaadin/hilla-lit-form';
 import AnnotatedEntityModel from 'Frontend/generated/com/vaadin/flow/connect/AnnotatedEndpoint/AnnotatedEntityModel';
 
 @customElement('test-type-script')

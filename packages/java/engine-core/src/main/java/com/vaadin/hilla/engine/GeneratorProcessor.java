@@ -17,15 +17,15 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
 
-@NpmPackage(value = "@hilla/generator-typescript-core", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-utils", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-cli", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-client", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-backbone", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-barrel", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-model", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-push", version = "2.5.2")
-@NpmPackage(value = "@hilla/generator-typescript-plugin-subtypes", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-core", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-utils", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-cli", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-client", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-backbone", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-barrel", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-model", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-push", version = "2.5.2")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-subtypes", version = "2.5.2")
 public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);

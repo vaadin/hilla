@@ -1,5 +1,5 @@
 import {Button} from "@hilla/react-components/Button.js";
-import {logout} from "@hilla/frontend";
+import {logout} from "@vaadin/hilla-core";
 import {MessageList} from "@hilla/react-components/MessageList.js";
 import {MessageInput} from "@hilla/react-components/MessageInput.js";
 import {useEffect, useState} from "react";

@@ -9,7 +9,7 @@ import {
   type ModelMetadata,
   EnumModel,
   ObjectModel,
-} from '@hilla/form';
+} from '@vaadin/hilla-lit-form';
 
 export type PropertyType =
   | 'boolean'

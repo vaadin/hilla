@@ -1,4 +1,3 @@
-import { _enum, type AbstractModel, type EnumModel, type Validator } from '@hilla/form';
 import { Checkbox } from '@hilla/react-components/Checkbox.js';
 import { DatePicker } from '@hilla/react-components/DatePicker.js';
 import { DateTimePicker } from '@hilla/react-components/DateTimePicker.js';
@@ -8,8 +7,9 @@ import { Select } from '@hilla/react-components/Select.js';
 import { TextArea } from '@hilla/react-components/TextArea.js';
 import { TextField } from '@hilla/react-components/TextField.js';
 import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
-import { useFormPart } from '@hilla/react-form';
+import { _enum, type AbstractModel, type EnumModel, type Validator } from '@vaadin/hilla-lit-form';
+import type { FieldDirectiveResult, UseFormResult } from '@vaadin/hilla-react-form';
+import { useFormPart } from '@vaadin/hilla-react-form';
 import {
   cloneElement,
   type ComponentType,

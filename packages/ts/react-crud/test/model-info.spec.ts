@@ -1,9 +1,9 @@
 import { expect } from '@esm-bundle/chai';
-import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@hilla/form';
+import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-lit-form';
 import { ModelInfo } from '../src/model-info.js';
 import { PersonModel } from './test-models-and-services.js';
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('ModelInfo', () => {
     interface TestItem {
       property: any;

@@ -2,14 +2,14 @@
 /// <reference types="karma-viewport" />
 
 import { expect, use } from '@esm-bundle/chai';
-import { ValidationError } from '@hilla/form';
-import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@hilla/react-components/TextArea.js';
 import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EndpointError } from '@vaadin/hilla-core';
+import { ValidationError } from '@vaadin/hilla-lit-form';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -35,7 +35,7 @@ import {
 use(sinonChai);
 use(chaiAsPromised);
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('Auto form', () => {
     const LABELS = [
       'First name',

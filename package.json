@@ -1,5 +1,5 @@
 {
-  "name": "@hilla/hilla",
+  "name": "@vaadin/hilla",
   "private": true,
   "description": "Hilla frontend & NodeJS code",
   "main": "index.js",

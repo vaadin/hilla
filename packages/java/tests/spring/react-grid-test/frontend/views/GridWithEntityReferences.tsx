@@ -1,4 +1,4 @@
-import { AutoGrid } from '@hilla/react-crud';
+import { AutoGrid } from '@vaadin/hilla-react-crud';
 import EmployeeModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/entityreferences/EmployeeModel.js';
 import { EmployeeService } from 'Frontend/generated/endpoints.js';
 

@@ -3,7 +3,7 @@ import type { DatePickerDate } from '@hilla/react-components/DatePicker.js';
 import { render } from '@testing-library/react';
 import { LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('LocaleFormatter', () => {
     const testCases = [
       { locale: 'en-US', input: '5/7/2020', output: '5/7/2020', iso: '2020-05-07' },
