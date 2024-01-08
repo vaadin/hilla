@@ -3,6 +3,7 @@
 
 import { expect, use } from '@esm-bundle/chai';
 import { ValidationError } from '@hilla/form';
+import type { ValueError } from '@hilla/form/Validation.js';
 import { EndpointError } from '@hilla/frontend';
 import type { SelectElement } from '@hilla/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@hilla/react-components/TextArea.js';
@@ -369,6 +370,58 @@ describe('@hilla/react-crud', () => {
         expect((error as Error).message).to.equal('foobar');
       }
       expect(errorSpy).to.have.not.been.called;
+    });
+
+    it('shows error for whole form when no property', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      const person = await getItem(service, 1);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        const valueError: ValueError = {
+          property: '',
+          message: 'message',
+          value: person,
+          validator: { message: 'message', validate: () => false },
+          validatorMessage: 'foobar',
+        };
+        throw new ValidationError([valueError]);
+      };
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(result.queryByText('message')).to.be.null;
+      expect(result.queryByText('foobar')).to.not.be.null;
+    });
+
+    it('shows multiple errors for whole form when no property', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      const person = await getItem(service, 1);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        const valueError: ValueError = {
+          property: '',
+          message: 'message',
+          value: person,
+          validator: { message: 'message', validate: () => false },
+          validatorMessage: 'foobar',
+        };
+
+        const valueError2: ValueError = {
+          ...valueError,
+          validatorMessage: 'just a message',
+        };
+        throw new ValidationError([valueError, valueError2]);
+      };
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(result.queryByText('message')).to.be.null;
+      expect(result.queryByText('foobar')).to.not.be.null;
+      expect(result.queryByText('just a message')).to.not.be.null;
     });
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
