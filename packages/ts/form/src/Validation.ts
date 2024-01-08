@@ -9,6 +9,7 @@ export interface ValueError<T = unknown> {
   message: string;
   value: T;
   validator: Validator<T>;
+  validatorMessage?: string;
 }
 
 export interface ValidationResult {
@@ -98,7 +99,14 @@ export async function runValidator<M extends AbstractModel>(
     const result = await validator.validate(value, binderNode.binder);
 
     if (result === false) {
-      return [{ message: interpolateMessage(validator.message), property: binderNode.name, validator, value }];
+      return [
+        {
+          message: interpolateMessage(validator.message),
+          property: binderNode.name,
+          validator,
+          value,
+        },
+      ];
     }
 
     if (result === true || (Array.isArray(result) && result.length === 0)) {

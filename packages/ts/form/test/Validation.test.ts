@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions, no-shadow */
 import { assert, expect, use } from '@esm-bundle/chai';
-import { EndpointValidationError } from '@hilla/frontend';
+import { EndpointValidationError, ValidationErrorData } from '@hilla/frontend';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -682,10 +682,7 @@ describe('@hilla/form', () => {
           await binder.submitTo(() => {
             requestUpdateSpy.resetHistory();
             throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
-              {
-                message: 'Invalid notes',
-                parameterName: 'notes',
-              },
+              new ValidationErrorData('Invalid notes', 'notes', 'Invalid notes'),
             ]);
           });
           expect.fail();
@@ -694,6 +691,7 @@ describe('@hilla/form', () => {
           await orderView.updateComplete;
           expect(binder.for(binder.model.notes).invalid).to.be.true;
           expect(binder.for(binder.model.notes).ownErrors[0].message).to.equal('Invalid notes');
+          expect(binder.for(binder.model.notes).ownErrors[0].validatorMessage).to.equal('Invalid notes');
         }
       });
 

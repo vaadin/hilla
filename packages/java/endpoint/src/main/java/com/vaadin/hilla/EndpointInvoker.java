@@ -240,15 +240,23 @@ public class EndpointInvoker {
 
     private List<ValidationErrorData> createBeanValidationErrors(
             Collection<ConstraintViolation<Object>> beanConstraintViolations) {
-        return beanConstraintViolations.stream().map(
-                constraintViolation -> new ValidationErrorData(String.format(
-                        "Object of type '%s' has invalid property '%s' with value '%s', validation error: '%s'",
-                        constraintViolation.getRootBeanClass(),
-                        constraintViolation.getPropertyPath().toString(),
-                        constraintViolation.getInvalidValue(),
-                        constraintViolation.getMessage()),
-                        constraintViolation.getPropertyPath().toString()))
-                .collect(Collectors.toList());
+        return beanConstraintViolations.stream().map(constraintViolation -> {
+            String parameterPath = constraintViolation.getPropertyPath()
+                    .toString();
+            StringBuilder builder = new StringBuilder();
+            builder.append("Object of type '")
+                    .append(constraintViolation.getRootBeanClass());
+            if (parameterPath != null && !parameterPath.isEmpty()) {
+                builder.append("' has invalid property '")
+                        .append(parameterPath);
+            }
+            builder.append("' with value '")
+                    .append(constraintViolation.getInvalidValue())
+                    .append("', validation error: '")
+                    .append(constraintViolation.getMessage()).append("'");
+            return new ValidationErrorData(builder.toString(), parameterPath,
+                    constraintViolation.getMessage());
+        }).collect(Collectors.toList());
     }
 
     private List<ValidationErrorData> createMethodValidationErrors(
@@ -261,7 +269,8 @@ public class EndpointInvoker {
                     parameterPath.split("\\.")[0],
                     constraintViolation.getRootBeanClass(), parameterPath,
                     constraintViolation.getInvalidValue(),
-                    constraintViolation.getMessage()), parameterPath);
+                    constraintViolation.getMessage()), parameterPath,
+                    constraintViolation.getMessage());
         }).collect(Collectors.toList());
     }
 
