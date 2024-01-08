@@ -239,24 +239,23 @@ public class EndpointInvoker {
     }
 
     private List<ValidationErrorData> createBeanValidationErrors(
-        Collection<ConstraintViolation<Object>> beanConstraintViolations) {
+            Collection<ConstraintViolation<Object>> beanConstraintViolations) {
         return beanConstraintViolations.stream().map(constraintViolation -> {
             String parameterPath = constraintViolation.getPropertyPath()
-                .toString();
+                    .toString();
             StringBuilder builder = new StringBuilder();
-            builder.append( "Object of type '" )
-                .append( constraintViolation.getRootBeanClass() );
+            builder.append("Object of type '")
+                    .append(constraintViolation.getRootBeanClass());
             if (parameterPath != null && !parameterPath.isEmpty()) {
                 builder.append("' has invalid property '")
-                    .append(parameterPath);
+                        .append(parameterPath);
             }
-            builder.append( "' with value '" )
-                .append( constraintViolation.getInvalidValue() )
-                .append( "', validation error: '" )
-                .append( constraintViolation.getMessage() )
-                .append( "'");
+            builder.append("' with value '")
+                    .append(constraintViolation.getInvalidValue())
+                    .append("', validation error: '")
+                    .append(constraintViolation.getMessage()).append("'");
             return new ValidationErrorData(builder.toString(), parameterPath,
-                constraintViolation.getMessage());
+                    constraintViolation.getMessage());
         }).collect(Collectors.toList());
     }
 
