@@ -577,7 +577,7 @@ describe('@hilla/react-crud', () => {
           await user.click(grid.getHeaderCellContent(1, 2).querySelector('vaadin-select-value-button')!);
           filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
-          expect(filterOptions[0]).to.have.rendered.text('After');
+          expect(filterOptions[0]).to.have.rendered.text('> After');
 
           await user.keyboard('{Escape}');
 
@@ -585,7 +585,7 @@ describe('@hilla/react-crud', () => {
           await user.click(grid.getHeaderCellContent(1, 3).querySelector('vaadin-select-value-button')!);
           filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
-          expect(filterOptions[0]).to.have.rendered.text('After');
+          expect(filterOptions[1]).to.have.rendered.text('< Before');
         });
 
         it('filter when you type in the field for a string column', async () => {
