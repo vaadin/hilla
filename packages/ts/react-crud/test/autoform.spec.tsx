@@ -420,7 +420,8 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('First name', 'J'); // to enable the submit button
       await form.submit();
       expect(result.queryByText('message')).to.be.null;
-      expect(result.queryByText('foobar; just a message')).to.not.be.null;
+      expect(result.queryByText('foobar')).to.not.be.null;
+      expect(result.queryByText('just a message')).to.not.be.null;
     });
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
