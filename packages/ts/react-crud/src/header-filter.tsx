@@ -134,7 +134,7 @@ function ComparationSelection({ onMatcherChanged, value, isDateTimeType }: Compa
             {isDateTimeType ? '< Before' : '< Less than'}
           </Item>
           <Item value={Matcher.EQUALS} {...{ label: '=' }}>
-            {isDateTimeType ? '= Equals ' : '= Equals'}
+            = Equals
           </Item>
         </ListBox>
       )}
