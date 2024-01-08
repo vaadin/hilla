@@ -40,6 +40,31 @@ public class EndpointValidationException extends EndpointException {
         private final String parameterName;
         private final String message;
 
+        private final String validatorMessage;
+
+        /**
+         * Creates a validation error data object.
+         *
+         * @param message
+         *            validation error message, mandatory (cannot be
+         *            {@code null} or blank)
+         * @param parameterName
+         *            invalid parameter name, optional (can be {@code null} or
+         *            blank)
+         * @param validatorMessage
+         *            validator message, optional (can be {@code null} or blank)
+         */
+        public ValidationErrorData(String message, String parameterName,
+                String validatorMessage) {
+            if (message == null || message.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Message cannot be null or empty");
+            }
+            this.parameterName = parameterName;
+            this.message = message;
+            this.validatorMessage = validatorMessage;
+        }
+
         /**
          * Creates a validation error data object.
          *
@@ -51,12 +76,7 @@ public class EndpointValidationException extends EndpointException {
          *            blank)
          */
         public ValidationErrorData(String message, String parameterName) {
-            if (message == null || message.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Message cannot be null or empty");
-            }
-            this.parameterName = parameterName;
-            this.message = message;
+            this(message, parameterName, null);
         }
 
         /**
@@ -86,6 +106,15 @@ public class EndpointValidationException extends EndpointException {
          */
         public String getMessage() {
             return message;
+        }
+
+        /**
+         * Gets th validator message.
+         *
+         * @return the validator message
+         */
+        public String getValidatorMessage() {
+            return validatorMessage;
         }
     }
 

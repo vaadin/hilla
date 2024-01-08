@@ -222,6 +222,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
             property,
             validator: new ServerValidator(message),
             value,
+            validatorMessage: data.validatorMessage,
           });
         });
         this[_setErrorsWithDescendants](valueErrors);
