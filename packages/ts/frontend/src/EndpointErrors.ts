@@ -108,11 +108,18 @@ export class ValidationErrorData {
   parameterName?: string;
 
   /**
+   * Validator original message
+   */
+  validatorMessage?: string;
+
+  /**
    * @param message - The `message` property value
    * @param parameterName - The `parameterName` property value
+   * @param validatorMessage - The `validatorMessage` property value
    */
-  constructor(message: string, parameterName?: string) {
+  constructor(message: string, parameterName?: string, validatorMessage?: string) {
     this.message = message;
     this.parameterName = parameterName;
+    this.validatorMessage = validatorMessage;
   }
 }

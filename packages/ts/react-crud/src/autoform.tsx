@@ -270,7 +270,7 @@ export function AutoForm<M extends AbstractModel>({
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
   });
-  const [formError, setFormError] = useState('');
+  const [formError, setFormError] = useState<JSX.Element | string>('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
 
@@ -285,6 +285,34 @@ export function AutoForm<M extends AbstractModel>({
       form.clear();
     }
   }, [item]);
+
+  function handleSubmitError(error: unknown) {
+    if (error instanceof ValidationError) {
+      const nonPropertyErrorMessages = error.errors
+        .filter((validationError) => !validationError.property)
+        .map((validationError) => validationError.validatorMessage ?? validationError.message);
+      if (nonPropertyErrorMessages.length > 0) {
+        setFormError(
+          <>
+            Validation errors:
+            <ul>
+              {nonPropertyErrorMessages.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          </>,
+        );
+      }
+    } else if (error instanceof EndpointError) {
+      if (onSubmitError) {
+        onSubmitError({ error, setMessage: setFormError });
+      } else {
+        setFormError(error.message);
+      }
+    } else {
+      throw error;
+    }
+  }
 
   async function handleSubmit(): Promise<void> {
     try {
@@ -304,19 +332,7 @@ export function AutoForm<M extends AbstractModel>({
         form.clear();
       }
     } catch (error) {
-      if (error instanceof ValidationError) {
-        // Handled automatically
-        return;
-      }
-      if (error instanceof EndpointError) {
-        if (onSubmitError) {
-          onSubmitError({ error, setMessage: setFormError });
-        } else {
-          setFormError(error.message);
-        }
-      } else {
-        throw error;
-      }
+      handleSubmitError(error);
     }
   }
 
