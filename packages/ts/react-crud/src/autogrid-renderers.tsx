@@ -1,6 +1,6 @@
-import type { GridItemModel } from '@hilla/react-components/Grid.js';
-import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
-import { Icon } from '@hilla/react-components/Icon.js';
+import type { GridItemModel } from '@vaadin/react-components/Grid.js';
+import type { GridColumnElement } from '@vaadin/react-components/GridColumn.js';
+import { Icon } from '@vaadin/react-components/Icon.js';
 import { type ComponentType, createContext, type CSSProperties, type JSX, useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
 import type { ItemCounts } from './data-provider';

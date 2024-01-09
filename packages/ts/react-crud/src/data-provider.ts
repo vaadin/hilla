@@ -3,7 +3,7 @@ import type {
   GridDataProviderParams,
   GridDefaultItem,
   GridElement,
-} from '@hilla/react-components/Grid';
+} from '@vaadin/react-components/Grid';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
 import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';

@@ -2,15 +2,15 @@
 /// <reference types="karma-viewport" />
 
 import { expect, use } from '@esm-bundle/chai';
-import type { SelectElement } from '@hilla/react-components/Select.js';
-import { TextArea, type TextAreaElement } from '@hilla/react-components/TextArea.js';
-import type { TextFieldElement } from '@hilla/react-components/TextField.js';
-import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointError } from '@vaadin/hilla-core';
 import { ValidationError } from '@vaadin/hilla-lit-form';
 import type { ValueError } from '@vaadin/hilla-lit-form/Validation.js';
+import type { SelectElement } from '@vaadin/react-components/Select.js';
+import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
+import type { TextFieldElement } from '@vaadin/react-components/TextField.js';
+import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';

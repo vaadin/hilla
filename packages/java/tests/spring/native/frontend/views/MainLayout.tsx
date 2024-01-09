@@ -1,7 +1,7 @@
-import { AppLayout } from '@hilla/react-components/AppLayout.js';
-import { Avatar } from '@hilla/react-components/Avatar.js';
-import { Button } from '@hilla/react-components/Button.js';
-import { DrawerToggle } from '@hilla/react-components/DrawerToggle.js';
+import { AppLayout } from '@vaadin/react-components/AppLayout.js';
+import { Avatar } from '@vaadin/react-components/Avatar.js';
+import { Button } from '@vaadin/react-components/Button.js';
+import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
 import { logout } from 'Frontend/auth.js';
 import Placeholder from 'Frontend/components/placeholder/Placeholder';
 import { AuthContext } from 'Frontend/useAuth.js';

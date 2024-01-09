@@ -1,8 +1,8 @@
 import { expect, use } from '@esm-bundle/chai';
-import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import { TextField } from '@hilla/react-components/TextField.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { GridColumn } from '@vaadin/react-components/GridColumn.js';
+import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiAsPromised from 'chai-as-promised';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
