@@ -146,6 +146,7 @@ export function AutoCrud<TModel extends AbstractModel>({
           setItem(activeItem ?? undefined);
         }}
         ref={autoGridRef}
+        aria-controls={`${id ?? 'auto'}-form`}
       ></AutoGrid>
       <div className="auto-crud-toolbar">
         <Button theme="primary" onClick={() => setItem(emptyItem)}>
@@ -157,6 +158,7 @@ export function AutoCrud<TModel extends AbstractModel>({
 
   const autoForm = (
     <AutoForm
+      id={`${id ?? 'auto'}-form`}
       deleteButtonVisible={true}
       {...autoFormProps}
       disabled={!item}
