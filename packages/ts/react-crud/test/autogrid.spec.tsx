@@ -560,6 +560,34 @@ describe('@hilla/react-crud', () => {
           expect(cell.querySelector('vaadin-select')).to.exist;
         });
 
+        it('filter comparison options changes based on type', async () => {
+          const grid = await GridController.init(
+            render(<TestAutoGrid visibleColumns={['someInteger', 'someDecimal', 'birthDate', 'shiftStart']} />),
+            user,
+          );
+          // Number type
+          await user.click(grid.getHeaderCellContent(1, 0).querySelector('vaadin-select-value-button')!);
+          let filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          expect(filterOptions).to.have.length(3);
+          expect(filterOptions[0]).to.have.rendered.text('> Greater than');
+
+          await user.keyboard('{Escape}');
+
+          // Date type
+          await user.click(grid.getHeaderCellContent(1, 2).querySelector('vaadin-select-value-button')!);
+          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          expect(filterOptions).to.have.length(3);
+          expect(filterOptions[0]).to.have.rendered.text('> After');
+
+          await user.keyboard('{Escape}');
+
+          // Time type
+          await user.click(grid.getHeaderCellContent(1, 3).querySelector('vaadin-select-value-button')!);
+          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          expect(filterOptions).to.have.length(3);
+          expect(filterOptions[1]).to.have.rendered.text('< Before');
+        });
+
         it('filter when you type in the field for a string column', async () => {
           const service = personService();
           const grid = await GridController.init(render(<TestAutoGrid service={service} />), user);
