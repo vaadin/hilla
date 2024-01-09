@@ -2,7 +2,7 @@
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { PackageJson } from 'type-fest';
 import { destination, local, remote, type Versions } from './config.js';
-import generate from './generator/generate.js';
+import generate from './generate.js';
 
 const [{ version }, versions] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,

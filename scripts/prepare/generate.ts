@@ -2,7 +2,7 @@
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Script } from 'node:vm';
-import { remote, type Transformer, type Versions, type Writer } from '../config.js';
+import { remote, type Transformer, type Versions, type Writer } from './config.js';
 
 const require = createRequire(import.meta.url);
 
