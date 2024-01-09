@@ -30,8 +30,8 @@ public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
 
-    private static final Path TSGEN_PATH = Paths.get("node_modules", "@hilla",
-            "generator-typescript-cli", "bin", "index.js");
+    private static final Path TSGEN_PATH = Paths.get("node_modules", "@vaadin",
+            "hilla-generator-cli", "bin", "index.js");
     private final Path baseDir;
     private final String nodeCommand;
     private final Path openAPIFile;
