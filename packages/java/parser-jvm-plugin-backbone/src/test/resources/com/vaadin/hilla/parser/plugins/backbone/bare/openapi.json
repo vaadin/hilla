@@ -1,0 +1,80 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "BareTypeEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.bare.BareTypeEndpoint"
+    }
+  ],
+  "paths": {
+    "/BareTypeEndpoint/getBareList": {
+      "post": {
+        "tags": ["BareTypeEndpoint"],
+        "operationId": "BareTypeEndpoint_getBareList_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BareTypeEndpoint/getBareMap": {
+      "post": {
+        "tags": ["BareTypeEndpoint"],
+        "operationId": "BareTypeEndpoint_getBareMap_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/BareTypeEndpoint/getBareOptional": {
+      "post": {
+        "tags": ["BareTypeEndpoint"],
+        "operationId": "BareTypeEndpoint_getBareOptional_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

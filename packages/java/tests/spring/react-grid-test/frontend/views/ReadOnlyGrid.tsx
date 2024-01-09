@@ -1,6 +1,6 @@
 import { AutoGrid } from '@hilla/react-crud';
-import type Person from 'Frontend/generated/dev/hilla/test/reactgrid/Person.js';
-import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
+import type Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person.js';
+import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import { PersonListOnlyService } from 'Frontend/generated/endpoints.js';
 
 type GridBodyReactRendererProps<TItem> = {

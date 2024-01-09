@@ -1,1 +1,1 @@
-dev.hilla.startup.CsrfServiceInitListener
+com.vaadin.hilla.startup.CsrfServiceInitListener

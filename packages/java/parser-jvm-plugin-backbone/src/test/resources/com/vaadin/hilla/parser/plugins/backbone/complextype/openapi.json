@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ComplexTypeEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.complextype.ComplexTypeEndpoint"
+    }
+  ],
+  "paths": {
+    "/ComplexTypeEndpoint/getComplexTypeModel": {
+      "post": {
+        "tags": ["ComplexTypeEndpoint"],
+        "operationId": "ComplexTypeEndpoint_getComplexTypeModel_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.complextype.ComplexTypeEndpoint$ComplexTypeModel": {
+        "type": "object",
+        "properties": {
+          "complexList": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "nullable": true
+            }
+          },
+          "complexMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

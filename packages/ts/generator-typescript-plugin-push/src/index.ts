@@ -8,8 +8,8 @@ type ExtendedMediaTypeSchema = Readonly<{ 'x-class-name': string }> &
   ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>;
 
 const classesToReplace: readonly string[] = [
-  'dev.hilla.runtime.transfertypes.Flux',
-  'dev.hilla.runtime.transfertypes.EndpointSubscription',
+  'com.vaadin.hilla.runtime.transfertypes.Flux',
+  'com.vaadin.hilla.runtime.transfertypes.EndpointSubscription',
 ];
 
 export default class PushPlugin extends Plugin {

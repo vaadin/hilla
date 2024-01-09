@@ -1,0 +1,142 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ShadowedNameEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint"
+    }
+  ],
+  "paths": {
+    "/ShadowedNameEndpoint/getJavaCollection": {
+      "post": {
+        "tags": ["ShadowedNameEndpoint"],
+        "operationId": "ShadowedNameEndpoint_getJavaCollection_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ShadowedNameEndpoint/getNestedUserDefinedCollection": {
+      "post": {
+        "tags": ["ShadowedNameEndpoint"],
+        "operationId": "ShadowedNameEndpoint_getNestedUserDefinedCollection_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ShadowedNameEndpoint/getSeparateUserDefinedCollection": {
+      "post": {
+        "tags": ["ShadowedNameEndpoint"],
+        "operationId": "ShadowedNameEndpoint_getSeparateUserDefinedCollection_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.shadowedname.subpackage.Collection"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.shadowedname.ShadowedNameEndpoint$Collection": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "string",
+            "nullable": true
+          },
+          "collectionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.shadowedname.subpackage.Collection": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object"
+            }
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

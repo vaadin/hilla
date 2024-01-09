@@ -19,9 +19,9 @@ import {
 } from 'react';
 import { ColumnContext, CustomColumnContext } from './autogrid-column-context.js';
 import { useDatePickerI18n } from './locale.js';
-import type FilterUnion from './types/dev/hilla/crud/filter/FilterUnion';
-import type PropertyStringFilter from './types/dev/hilla/crud/filter/PropertyStringFilter';
-import Matcher from './types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type PropertyStringFilter from './types/com/vaadin/hilla/crud/filter/PropertyStringFilter';
+import Matcher from './types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { convertToTitleCase } from './util';
 
 type ExtractComponentTypeProps<T extends ComponentType<any>> = T extends ComponentType<infer U> ? U : never;
@@ -105,12 +105,13 @@ function useSelectInitWorkaround(selectRef: RefObject<SelectElement>) {
 }
 
 // extracted component (and type) to avoid code duplication
-type ComparationSelectionProps = {
+type ComparationSelectionProps = Readonly<{
   value: Matcher;
   onMatcherChanged(matcher: Matcher): void;
-};
+  isDateTimeType?: boolean;
+}>;
 
-function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionProps): ReactElement {
+function ComparationSelection({ onMatcherChanged, value, isDateTimeType }: ComparationSelectionProps): ReactElement {
   const select = useRef<SelectElement>(null);
 
   useSelectInitWorkaround(select);
@@ -127,10 +128,10 @@ function ComparationSelection({ onMatcherChanged, value }: ComparationSelectionP
       renderer={() => (
         <ListBox>
           <Item value={Matcher.GREATER_THAN} {...{ label: '>' }}>
-            &gt; Greater than
+            {isDateTimeType ? '> After' : '> Greater than'}
           </Item>
           <Item value={Matcher.LESS_THAN} {...{ label: '<' }}>
-            &lt; Less than
+            {isDateTimeType ? '< Before' : '< Less than'}
           </Item>
           <Item value={Matcher.EQUALS} {...{ label: '=' }}>
             = Equals
@@ -273,7 +274,11 @@ export function DateHeaderFilter(): ReactElement {
 
   return (
     <div className="auto-grid-date-filter">
-      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
+      <ComparationSelection
+        value={matcher}
+        onMatcherChanged={(m) => updateFilter(m, filterValue)}
+        isDateTimeType={true}
+      />
       <DatePicker
         theme="small"
         value={filterValue}
@@ -299,7 +304,11 @@ export function TimeHeaderFilter(): ReactElement {
 
   return (
     <div className="auto-grid-time-filter">
-      <ComparationSelection value={matcher} onMatcherChanged={(m) => updateFilter(m, filterValue)} />
+      <ComparationSelection
+        value={matcher}
+        onMatcherChanged={(m) => updateFilter(m, filterValue)}
+        isDateTimeType={true}
+      />
       <TimePicker
         theme="small"
         value={filterValue}

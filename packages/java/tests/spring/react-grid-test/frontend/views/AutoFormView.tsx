@@ -1,7 +1,7 @@
 import { AutoForm, DeleteErrorEvent, DeleteEvent, SubmitErrorEvent, SubmitEvent } from '@hilla/react-crud';
 import { useState } from 'react';
-import type Appointment from 'Frontend/generated/dev/hilla/test/reactgrid/Appointment.js';
-import AppointmentModel from 'Frontend/generated/dev/hilla/test/reactgrid/AppointmentModel.js';
+import type Appointment from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Appointment.js';
+import AppointmentModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/AppointmentModel.js';
 import { AppointmentService } from 'Frontend/generated/endpoints.js';
 
 export function AutoFormView(): JSX.Element {

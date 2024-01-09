@@ -3,19 +3,19 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>dev.hilla</groupId>
+    <groupId>com.vaadin.hilla</groupId>
     <artifactId>hilla-project</artifactId>
     <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
 
-  <groupId>dev.hilla</groupId>
-  <artifactId>dev.hilla.gradle.plugin</artifactId>
+  <groupId>com.vaadin.hilla</groupId>
+  <artifactId>com.vaadin.hilla.gradle.plugin</artifactId>
   <packaging>pom</packaging>
   <dependencies>
     <dependency>
-      <groupId>dev.hilla</groupId>
+      <groupId>com.vaadin.hilla</groupId>
       <artifactId>hilla-gradle-plugin</artifactId>
       <version>${project.version}</version>
     </dependency>

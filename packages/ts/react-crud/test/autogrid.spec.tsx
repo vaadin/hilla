@@ -12,13 +12,12 @@ import type { HeaderFilterRendererProps } from '../header-filter';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
 import type { CountService, CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
-import type AndFilter from '../src/types/dev/hilla/crud/filter/AndFilter.js';
-import Matcher from '../src/types/dev/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../src/types/dev/hilla/crud/filter/PropertyStringFilter.js';
-import type Sort from '../src/types/dev/hilla/mappedtypes/Sort.js';
+import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
-import type FilterUnion from '../types/dev/hilla/crud/filter/FilterUnion';
-import type OrFilter from '../types/dev/hilla/crud/filter/OrFilter';
+import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
@@ -559,6 +558,34 @@ describe('@hilla/react-crud', () => {
           const grid = await GridController.init(render(<TestAutoGrid />), user);
           const cell = grid.getHeaderCellContent(1, 4);
           expect(cell.querySelector('vaadin-select')).to.exist;
+        });
+
+        it('filter comparison options changes based on type', async () => {
+          const grid = await GridController.init(
+            render(<TestAutoGrid visibleColumns={['someInteger', 'someDecimal', 'birthDate', 'shiftStart']} />),
+            user,
+          );
+          // Number type
+          await user.click(grid.getHeaderCellContent(1, 0).querySelector('vaadin-select-value-button')!);
+          let filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          expect(filterOptions).to.have.length(3);
+          expect(filterOptions[0]).to.have.rendered.text('> Greater than');
+
+          await user.keyboard('{Escape}');
+
+          // Date type
+          await user.click(grid.getHeaderCellContent(1, 2).querySelector('vaadin-select-value-button')!);
+          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          expect(filterOptions).to.have.length(3);
+          expect(filterOptions[0]).to.have.rendered.text('> After');
+
+          await user.keyboard('{Escape}');
+
+          // Time type
+          await user.click(grid.getHeaderCellContent(1, 3).querySelector('vaadin-select-value-button')!);
+          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          expect(filterOptions).to.have.length(3);
+          expect(filterOptions[1]).to.have.rendered.text('< Before');
         });
 
         it('filter when you type in the field for a string column', async () => {

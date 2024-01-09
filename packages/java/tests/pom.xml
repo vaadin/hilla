@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin.hilla</groupId>
         <artifactId>hilla-project</artifactId>
         <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
@@ -59,12 +59,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
+            <groupId>com.vaadin.hilla</groupId>
             <artifactId>endpoint</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
+            <groupId>com.vaadin.hilla</groupId>
             <artifactId>engine-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -145,7 +145,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>dev.hilla</groupId>
+                    <groupId>com.vaadin.hilla</groupId>
                     <artifactId>hilla-maven-plugin</artifactId>
                     <version>${project.version}</version>
                     <executions>
@@ -252,7 +252,7 @@
                 <pluginManagement>
                     <plugins>
                         <plugin>
-                            <groupId>dev.hilla</groupId>
+                            <groupId>com.vaadin.hilla</groupId>
                             <artifactId>hilla-maven-plugin</artifactId>
                             <version>${project.version}</version>
                             <executions>

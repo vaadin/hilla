@@ -1,0 +1,191 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "PageableEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.transfertypes.pageable.basic.PageableEndpoint"
+    }
+  ],
+  "paths": {
+    "/PageableEndpoint/getOrder": {
+      "post": {
+        "tags": ["PageableEndpoint"],
+        "operationId": "PageableEndpoint_getOrder_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Order"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PageableEndpoint/getPage": {
+      "post": {
+        "tags": ["PageableEndpoint"],
+        "operationId": "PageableEndpoint_getPage_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PageableEndpoint/getPageable": {
+      "post": {
+        "tags": ["PageableEndpoint"],
+        "operationId": "PageableEndpoint_getPageable_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Pageable"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PageableEndpoint/getSort": {
+      "post": {
+        "tags": ["PageableEndpoint"],
+        "operationId": "PageableEndpoint_getSort_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Sort"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.mappedtypes.Order": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$Direction"
+              }
+            ]
+          },
+          "property": {
+            "type": "string",
+            "nullable": true
+          },
+          "ignoreCase": {
+            "type": "boolean"
+          },
+          "nullHandling": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/org.springframework.data.domain.Sort$NullHandling"
+              }
+            ]
+          }
+        }
+      },
+      "com.vaadin.hilla.mappedtypes.Pageable": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Sort"
+              }
+            ]
+          }
+        }
+      },
+      "com.vaadin.hilla.mappedtypes.Sort": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "nullable": true,
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Order"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "org.springframework.data.domain.Sort$Direction": {
+        "type": "string",
+        "enum": ["ASC", "DESC"]
+      },
+      "org.springframework.data.domain.Sort$NullHandling": {
+        "type": "string",
+        "enum": ["NATIVE", "NULLS_FIRST", "NULLS_LAST"]
+      }
+    }
+  }
+}

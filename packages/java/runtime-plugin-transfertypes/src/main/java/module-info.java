@@ -1,9 +1,9 @@
-module dev.hilla.runtime.transfertypes {
+module com.vaadin.hilla.runtime.transfertypes {
     requires jsr305;
     requires spring.data.commons;
     requires jakarta.validation;
     requires jakarta.annotation;
 
-    exports dev.hilla.runtime.transfertypes;
-    exports dev.hilla.mappedtypes;
+    exports com.vaadin.hilla.runtime.transfertypes;
+    exports com.vaadin.hilla.mappedtypes;
 }

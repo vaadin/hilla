@@ -1,0 +1,42 @@
+{
+  "baseDir": "base",
+  "classPath": ["build/test-classes"],
+  "generator": {
+    "plugins": {
+      "use": [
+        {
+          "path": "generator-maven-test-use"
+        }
+      ],
+      "disable": [
+        {
+          "path": "generator-maven-test-disable"
+        }
+      ],
+      "disableAllDefaults": false
+    }
+  },
+  "parser": {
+    "endpointAnnotation": "com.vaadin.hilla.maven.Endpoint",
+    "endpointExposedAnnotation": "com.vaadin.hilla.maven.EndpointExposed",
+    "openAPIBasePath": "openapi-maven-test-base.json",
+    "plugins": {
+      "use": [
+        {
+          "configuration": null,
+          "name": "parser-maven-test-use"
+        }
+      ],
+      "disable": [
+        {
+          "configuration": null,
+          "name": "parser-maven-test-disable"
+        }
+      ],
+      "disableAllDefaults": false
+    }
+  },
+  "buildDir": "build",
+  "classesDir": "build/classes",
+  "outputDir": "frontend/maven-generated"
+}

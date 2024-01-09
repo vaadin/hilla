@@ -1,6 +1,6 @@
 package com.external;
 
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 public class ExternalEndpoint {
