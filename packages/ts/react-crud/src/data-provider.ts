@@ -138,6 +138,8 @@ export abstract class DataProvider<TItem> {
 }
 
 export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
+  // cannot be static, otherwise it does not implement superclass
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected fetchTotalCount(): undefined {
     return undefined;
   }

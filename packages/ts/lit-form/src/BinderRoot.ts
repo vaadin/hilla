@@ -282,6 +282,8 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    * @param elm - the bound element
    * @param model - the bound model
    */
+  // eslint ignored to allow overriding
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   getFieldStrategy<TField>(elm: HTMLElement, model?: AbstractModel<TField>): FieldStrategy {
     return getDefaultFieldStrategy(elm as FieldElement, model);
   }

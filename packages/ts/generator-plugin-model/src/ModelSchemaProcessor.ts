@@ -28,7 +28,7 @@ import ts, {
   type TypeNode,
   type TypeReferenceNode,
 } from 'typescript';
-import { MetadataProcessor } from './MetadataProcessor.js';
+import { process } from './MetadataProcessor.js';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 import { hasValidationConstraints, ValidationConstraintProcessor } from './ValidationConstraintProcessor.js';
 
@@ -225,14 +225,12 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
   readonly #validationConstraintProcessor: ValidationConstraintProcessor;
-  readonly #metadataProcessor: MetadataProcessor;
 
   constructor(schema: Schema, dependencies: DependencyManager) {
     super(schema, dependencies);
     this.#validationConstraintProcessor = new ValidationConstraintProcessor((name) =>
       importBuiltInFormModel(name, dependencies),
     );
-    this.#metadataProcessor = new MetadataProcessor();
   }
 
   override process(): readonly ts.Expression[] {
@@ -242,7 +240,7 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
 
     const modelOptionsProperties = [
       this.#createValidatorsProperty(originalSchema),
-      this.#createMetadataProperty(originalSchema),
+      ModelSchemaExpressionProcessor.#createMetadataProperty(originalSchema),
     ].filter(Boolean) as PropertyAssignment[];
 
     if (modelOptionsProperties.length > 0) {
@@ -300,8 +298,8 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
     return ts.factory.createPropertyAssignment('validators', ts.factory.createArrayLiteralExpression(constraints));
   }
 
-  #createMetadataProperty(schema: Schema): PropertyAssignment | null {
-    const metadata = this.#metadataProcessor.process(schema);
+  static #createMetadataProperty(schema: Schema): PropertyAssignment | null {
+    const metadata = process(schema);
     return metadata ? ts.factory.createPropertyAssignment('meta', metadata) : null;
   }
 }

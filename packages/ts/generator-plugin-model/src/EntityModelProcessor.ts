@@ -132,9 +132,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
       if (decomposed.length > 2) {
         logger.debug(
           this.#component,
-          `The schema for a class component ${
-            this.#fullyQualifiedName
-          } has more than two components. This plugin will ignore it.`,
+          `The schema for a class component ${this.#fullyQualifiedName} has more than two components. This plugin will ignore it.`,
         );
         return undefined;
       }

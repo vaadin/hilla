@@ -36,12 +36,12 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
   describe('Testing GeneratorIO.exists', () => {
     it('should detect that a file exists', async () => {
       const path = join(tmpDir, generatedFilenames[0]);
-      await expect(io.exists(path)).to.eventually.be.true;
+      await expect(GeneratorIO.exists(path)).to.eventually.be.true;
     });
 
     it("should detect that a file doesn't exist", async () => {
       const path = join(tmpDir, 'nobody-created-me');
-      await expect(io.exists(path)).to.eventually.be.false;
+      await expect(GeneratorIO.exists(path)).to.eventually.be.false;
     });
   });
 
@@ -49,7 +49,7 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
     it('should create file index with right content', async () => {
       await io.createFileIndex(generatedFilenames);
       const indexPath = join(tmpDir, GeneratorIO.INDEX_FILENAME);
-      await expect(io.exists(indexPath)).to.eventually.be.true;
+      await expect(GeneratorIO.exists(indexPath)).to.eventually.be.true;
       const content = await io.read(indexPath);
       generatedFilenames.forEach((name) => expect(content).to.contain(name));
     });
@@ -62,7 +62,7 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
       await Promise.all(
         generatedFilenames.map(async (name) => {
           const path = join(tmpDir, name);
-          await expect(io.exists(path)).to.eventually.be.true;
+          await expect(GeneratorIO.exists(path)).to.eventually.be.true;
         }),
       );
     });
@@ -84,7 +84,9 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
       await expect(
         io.cleanOutputDir([generatedFilenames[0], generatedFilenames[1]], new Set(generatedFilenames)),
       ).to.eventually.have.property('size', generatedFilenames.length - 2);
-      const existenceResults = await Promise.all(generatedFilenames.map(async (name) => io.exists(join(tmpDir, name))));
+      const existenceResults = await Promise.all(
+        generatedFilenames.map(async (name) => GeneratorIO.exists(join(tmpDir, name))),
+      );
       expect(existenceResults).to.be.deep.equal([true, true, false]);
     });
 
@@ -94,7 +96,9 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
         'size',
         generatedFilenames.length,
       );
-      const existenceResults = await Promise.all(generatedFilenames.map(async (name) => io.exists(join(tmpDir, name))));
+      const existenceResults = await Promise.all(
+        generatedFilenames.map(async (name) => GeneratorIO.exists(join(tmpDir, name))),
+      );
       expect(existenceResults).to.be.deep.equal([false, false, false]);
     });
 
@@ -106,7 +110,7 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
         'size',
         generatedFilenames.length,
       );
-      await expect(io.exists(join(tmpDir, name))).to.eventually.be.true;
+      await expect(GeneratorIO.exists(join(tmpDir, name))).to.eventually.be.true;
     });
   });
   describe('Testing GeneratorIO.writeChangedFiles', () => {

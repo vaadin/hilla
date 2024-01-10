@@ -68,7 +68,7 @@ export default class GeneratorIO {
       await Promise.all(
         [...filesToDelete].map(async (filename) => {
           const resolved = this.resolveGeneratedFile(filename);
-          if (await this.exists(resolved)) {
+          if (await GeneratorIO.exists(resolved)) {
             this.#logger.global.debug(`Deleting file ${filename}.`);
             await rm(resolved);
           }
@@ -112,7 +112,7 @@ export default class GeneratorIO {
    * @param path - the file path to check
    */
   // eslint-disable-next-line class-methods-use-this
-  async exists(path: string): Promise<boolean> {
+  static async exists(path: string): Promise<boolean> {
     try {
       await access(path, constants.F_OK);
       return true;
