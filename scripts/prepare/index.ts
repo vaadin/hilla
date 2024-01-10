@@ -17,7 +17,7 @@ const [{ version }, versions] = await Promise.all([
 ]);
 
 if (!version) {
-  throw new Error('No version found in package.json of Hilla "generator-typescript-core"');
+  throw new Error('No version found in package.json of Hilla "hilla-generator-core"');
 }
 
 // run the generator
