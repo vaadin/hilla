@@ -2,7 +2,6 @@
   "name": "no-name",
   "license": "UNLICENSED",
   "dependencies": {
-    "@vaadin/react-components": "^24.4.0-alpha3",
     "@polymer/polymer": "3.5.1",
     "@vaadin-component-factory/vcf-nav": "1.1.0",
     "@vaadin/bundles": "^24.4.0-alpha3",
@@ -21,6 +20,7 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/react-components": "^24.4.0-alpha3",
     "@vaadin/router": "1.7.5",
     "classnames": "^2.3.2",
     "construct-style-sheets-polyfill": "3.1.0",
@@ -76,7 +76,6 @@
   },
   "vaadin": {
     "dependencies": {
-      "@vaadin/react-components": "24.4.0",
       "@polymer/polymer": "3.5.1",
       "@vaadin/bundles": "24.4.0",
       "@vaadin/common-frontend": "0.0.19",
@@ -94,6 +93,7 @@
       "@vaadin/hilla-react-auth": "24.4.0",
       "@vaadin/hilla-react-crud": "24.4.0",
       "@vaadin/hilla-react-form": "24.4.0",
+      "@vaadin/react-components": "24.4.0",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.0"
@@ -116,6 +116,6 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "8cfd18de14d73f98a9103e7cad17ecf3ccf80d4f3eb6f1599c55919db3883372"
+    "hash": "be0c2f8d1d8c67aad3c104e4daf5d010311ea65ef2591014b455132ac0a91e63"
   }
 }
