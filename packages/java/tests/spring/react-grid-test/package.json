@@ -16,9 +16,9 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/hilla-react-auth": "file:../../../../ts/hilla-react-auth",
-    "@vaadin/hilla-react-crud": "file:../../../../ts/hilla-react-crud",
-    "@vaadin/hilla-react-form": "file:../../../../ts/hilla-react-form",
+    "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
+    "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
+    "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.1.0",
@@ -82,7 +82,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "163985087cec8c4275f93637af3dc2840a442b4da39e91e51bd24702ad4c4dd6"
+    "hash": "815ed19c709760e4b708f80ac01806112b7eb064dd78da1f207b79a051c85b94"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
