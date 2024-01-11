@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, BooleanModel as BooleanModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NotBlank as NotBlank_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@hilla/form";
+import { _getPropertyModel as _getPropertyModel_1, BooleanModel as BooleanModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, NotBlank as NotBlank_1, ObjectModel as ObjectModel_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
 import DirectionModel_1 from "../../../../org/springframework/data/domain/Sort/DirectionModel.js";
 import NullHandlingModel_1 from "../../../../org/springframework/data/domain/Sort/NullHandlingModel.js";
 import type Order_1 from "./Order.js";

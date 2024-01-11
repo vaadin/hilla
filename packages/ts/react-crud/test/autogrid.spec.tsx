@@ -1,8 +1,8 @@
 import { expect, use } from '@esm-bundle/chai';
-import { GridColumn } from '@hilla/react-components/GridColumn.js';
-import { TextField } from '@hilla/react-components/TextField.js';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { GridColumn } from '@vaadin/react-components/GridColumn.js';
+import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiAsPromised from 'chai-as-promised';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
@@ -53,7 +53,7 @@ export async function nextFrame(): Promise<void> {
 async function assertColumnsOrder(grid: GridController, ...ids: string[]) {
   const columns = await grid.getColumns();
   expect(columns).to.have.length(ids.length);
-  await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(grid.generateColumnHeaders(ids));
+  await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(GridController.generateColumnHeaders(ids));
 }
 
 async function assertColumns(grid: GridController, ...ids: string[]) {
@@ -68,7 +68,7 @@ async function assertColumns(grid: GridController, ...ids: string[]) {
   }
 }
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('Auto grid', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
       return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps} />;

@@ -1,4 +1,4 @@
-import type { GridSorterDirection } from '@hilla/react-components/GridSorter.js';
+import type { GridSorterDirection } from '@vaadin/react-components/GridSorter.js';
 import { type Dispatch, type SetStateAction, createContext, type ComponentType } from 'react';
 import type { ColumnOptions } from './autogrid-columns';
 import type { HeaderFilterRendererProps } from './header-filter';

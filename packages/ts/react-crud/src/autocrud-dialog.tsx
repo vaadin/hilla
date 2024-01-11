@@ -1,6 +1,6 @@
-import { Button } from '@hilla/react-components/Button';
-import { Dialog } from '@hilla/react-components/Dialog';
-import { Icon } from '@hilla/react-components/Icon';
+import { Button } from '@vaadin/react-components/Button';
+import { Dialog } from '@vaadin/react-components/Dialog';
+import { Icon } from '@vaadin/react-components/Icon';
 import type { JSX } from 'react';
 
 // eslint-disable-next-line

@@ -7,7 +7,7 @@ import {
   Required,
   Size,
   StringModel,
-} from '@hilla/form';
+} from '@vaadin/hilla-lit-form';
 
 export interface User {
   id: number;

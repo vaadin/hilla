@@ -1,8 +1,8 @@
-import type { GridElement } from '@hilla/react-components/Grid.js';
-import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
-import type { GridSorterDirection, GridSorterElement } from '@hilla/react-components/GridSorter.js';
 import { type RenderResult, waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import type { GridElement } from '@vaadin/react-components/Grid.js';
+import type { GridColumnElement } from '@vaadin/react-components/GridColumn.js';
+import type { GridSorterDirection, GridSorterElement } from '@vaadin/react-components/GridSorter.js';
 import type { SinonFakeTimers } from 'sinon';
 import type Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 // @ts-expect-error no types for the utils
@@ -83,7 +83,7 @@ export default class GridController {
     return cells.map((cell) => (getCellContent(cell) as HTMLElement).innerText);
   }
 
-  generateColumnHeaders(paths: readonly string[]): readonly string[] {
+  static generateColumnHeaders(paths: readonly string[]): readonly string[] {
     return paths.map((path) =>
       path
         .substring(path.lastIndexOf('.') + 1)

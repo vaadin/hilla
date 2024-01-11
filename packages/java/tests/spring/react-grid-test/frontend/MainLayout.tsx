@@ -1,6 +1,6 @@
-import { AppLayout } from '@hilla/react-components/AppLayout.js';
-import { DrawerToggle } from '@hilla/react-components/DrawerToggle.js';
-import { Scroller } from '@hilla/react-components/Scroller.js';
+import { AppLayout } from '@vaadin/react-components/AppLayout.js';
+import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
+import { Scroller } from '@vaadin/react-components/Scroller.js';
 import { routes } from 'Frontend/routes.js';
 import { NavLink, Outlet } from 'react-router-dom';
 

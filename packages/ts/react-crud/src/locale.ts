@@ -1,5 +1,5 @@
-import { DatePickerElement, type DatePickerDate, type DatePickerI18n } from '@hilla/react-components/DatePicker.js';
-import { DateTimePickerElement, type DateTimePickerI18n } from '@hilla/react-components/DateTimePicker.js';
+import { DatePickerElement, type DatePickerDate, type DatePickerI18n } from '@vaadin/react-components/DatePicker.js';
+import { DateTimePickerElement, type DateTimePickerI18n } from '@vaadin/react-components/DateTimePicker.js';
 import { createContext, useContext, useMemo } from 'react';
 
 export const LocaleContext = createContext(navigator.language);
