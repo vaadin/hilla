@@ -587,6 +587,14 @@ describe('@vaadin/hilla-react-crud', () => {
       expect(submitButton.disabled).to.be.true;
     });
 
+    it('renders with empty number fields', async () => {
+      const result = render(<AutoForm service={personService()} model={PersonModel} />);
+      const form = await FormController.init(user, result.container);
+
+      const someIntegerField = await form.getField('Some integer');
+      expect(someIntegerField).to.have.property('value', '');
+    });
+
     describe('keyboard shortcuts', () => {
       it('submits the form when enter key is pressed on field', async () => {
         const service = personService();
