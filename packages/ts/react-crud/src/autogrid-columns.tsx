@@ -1,4 +1,4 @@
-import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
+import type { GridColumnProps } from '@vaadin/react-components/GridColumn.js';
 import {
   AutoGridBooleanRenderer,
   AutoGridDateRenderer,

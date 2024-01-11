@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import type { GridDataProvider, GridElement, GridSorterDefinition } from '@hilla/react-components/Grid.js';
+import type { GridDataProvider, GridElement, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { CountService, ListService } from '../crud';

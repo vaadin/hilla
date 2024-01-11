@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, StringModel as StringModel_1 } from "@hilla/form";
+import { _getPropertyModel as _getPropertyModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, StringModel as StringModel_1 } from "@vaadin/hilla-lit-form";
 import FilterModel_1 from "./FilterModel.js";
 import type PropertyStringFilter_1 from "./PropertyStringFilter.js";
 import MatcherModel_1 from "./PropertyStringFilter/MatcherModel.js";

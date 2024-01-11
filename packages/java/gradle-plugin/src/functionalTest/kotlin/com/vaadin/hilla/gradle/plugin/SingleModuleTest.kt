@@ -313,20 +313,26 @@ class SingleModuleTest : AbstractGradleTest() {
             "install", "--no-save", "--install-links"
         )
 
-        val generatedFiles = Files
+        val hillaCoreAndFormPackages = Stream.of(
+            packagesDirectory.resolve("core").toString(),
+            packagesDirectory.resolve("lit-form").toString())
+
+        val generatorPackages = Files
             .list(packagesDirectory).filter { dirName: Path ->
                 dirName.fileName
                     .toString().startsWith("generator-")
             }
             .map { obj: Path -> obj.toString() }
 
-        val command = Stream.of(shellCmd, npmCmd, generatedFiles)
+        // executing the full command will install necessary npm packages without a package.json file:
+        val command = Stream.of(shellCmd, npmCmd, hillaCoreAndFormPackages, generatorPackages)
             .flatMap(Function.identity()).toList()
 
         val processBuilder = FrontendUtils.createProcessBuilder(command)
             .directory(testProject.dir)
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .redirectErrorStream(true)
         val exitCode = processBuilder.start().waitFor()
         if (exitCode != 0) {
             throw FrontendUtils.CommandExecutionException(exitCode)

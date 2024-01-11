@@ -35,7 +35,7 @@ export const root = new URL('../../', import.meta.url);
 
 export const local = {
   src: new URL(`scripts/prepare/src/`, root),
-  versionedPackageJson: new URL('packages/ts/generator-typescript-core/package.json', root),
+  versionedPackageJson: new URL('packages/ts/generator-core/package.json', root),
   results: new URL(`scripts/prepare/results/`, root),
 };
 

@@ -1,5 +1,5 @@
 {
-  "name": "@hilla/hilla",
+  "name": "@vaadin/hilla",
   "private": true,
   "description": "Hilla frontend & NodeJS code",
   "main": "index.js",
@@ -33,11 +33,11 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
-    "@hilla/react-components": "^2.3.0",
+    "@vaadin/react-components": "^24.4.0-alpha3",
     "@nx/js": "^16.10.0",
     "@types/karma": "^6.3.5",
     "@types/node": "^20.7.1",
-    "@vaadin/vaadin-lumo-styles": "^24.3.0",
+    "@vaadin/vaadin-lumo-styles": "^24.4.0-alpha3",
     "chai-dom": "^1.11.0",
     "compare-versions": "^6.1.0",
     "concurrently": "^8.2.1",

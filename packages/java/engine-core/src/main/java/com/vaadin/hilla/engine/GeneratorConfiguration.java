@@ -138,12 +138,12 @@ public final class GeneratorConfiguration {
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
         static private final List<Plugin> DEFAULTS = List.of(
-                new Plugin("@hilla/generator-typescript-plugin-backbone"),
-                new Plugin("@hilla/generator-typescript-plugin-client"),
-                new Plugin("@hilla/generator-typescript-plugin-barrel"),
-                new Plugin("@hilla/generator-typescript-plugin-model"),
-                new Plugin("@hilla/generator-typescript-plugin-push"),
-                new Plugin("@hilla/generator-typescript-plugin-subtypes"));
+                new Plugin("@vaadin/hilla-generator-plugin-backbone"),
+                new Plugin("@vaadin/hilla-generator-plugin-client"),
+                new Plugin("@vaadin/hilla-generator-plugin-barrel"),
+                new Plugin("@vaadin/hilla-generator-plugin-model"),
+                new Plugin("@vaadin/hilla-generator-plugin-push"),
+                new Plugin("@vaadin/hilla-generator-plugin-subtypes"));
 
         PluginsProcessor() {
             super(DEFAULTS);

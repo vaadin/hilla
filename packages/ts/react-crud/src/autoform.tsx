@@ -1,10 +1,10 @@
-import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@hilla/form';
-import { EndpointError } from '@hilla/frontend';
-import { Button } from '@hilla/react-components/Button.js';
-import { ConfirmDialog } from '@hilla/react-components/ConfirmDialog';
-import { FormLayout } from '@hilla/react-components/FormLayout';
-import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { useForm, type UseFormResult } from '@hilla/react-form';
+import { EndpointError } from '@vaadin/hilla-core';
+import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@vaadin/hilla-lit-form';
+import { useForm, type UseFormResult } from '@vaadin/hilla-react-form';
+import { Button } from '@vaadin/react-components/Button.js';
+import { ConfirmDialog } from '@vaadin/react-components/ConfirmDialog';
+import { FormLayout } from '@vaadin/react-components/FormLayout';
+import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
 import {
   type ComponentType,
   type JSX,

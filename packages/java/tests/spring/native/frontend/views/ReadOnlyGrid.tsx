@@ -1,4 +1,4 @@
-import { AutoGrid } from '@hilla/react-crud';
+import { AutoGrid } from '@vaadin/hilla-react-crud';
 import PersonModel from 'Frontend/generated/com/example/application/service/PersonModel';
 import { PersonService } from 'Frontend/generated/endpoints';
 

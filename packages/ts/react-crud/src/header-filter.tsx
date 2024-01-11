@@ -1,12 +1,12 @@
-import { _enum, type EnumModel } from '@hilla/form';
-import { DatePicker } from '@hilla/react-components/DatePicker.js';
-import type { GridColumnProps } from '@hilla/react-components/GridColumn.js';
-import { Item } from '@hilla/react-components/Item.js';
-import { ListBox } from '@hilla/react-components/ListBox.js';
-import { NumberField } from '@hilla/react-components/NumberField.js';
-import { Select, type SelectElement } from '@hilla/react-components/Select.js';
-import { TextField, type TextFieldElement } from '@hilla/react-components/TextField.js';
-import { TimePicker } from '@hilla/react-components/TimePicker.js';
+import { _enum, type EnumModel } from '@vaadin/hilla-lit-form';
+import { DatePicker } from '@vaadin/react-components/DatePicker.js';
+import type { GridColumnProps } from '@vaadin/react-components/GridColumn.js';
+import { Item } from '@vaadin/react-components/Item.js';
+import { ListBox } from '@vaadin/react-components/ListBox.js';
+import { NumberField } from '@vaadin/react-components/NumberField.js';
+import { Select, type SelectElement } from '@vaadin/react-components/Select.js';
+import { TextField, type TextFieldElement } from '@vaadin/react-components/TextField.js';
+import { TimePicker } from '@vaadin/react-components/TimePicker.js';
 import {
   type ComponentType,
   type JSX,

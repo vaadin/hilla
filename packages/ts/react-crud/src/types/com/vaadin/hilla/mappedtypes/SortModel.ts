@@ -1,4 +1,4 @@
-import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, ObjectModel as ObjectModel_1 } from "@hilla/form";
+import { _getPropertyModel as _getPropertyModel_1, ArrayModel as ArrayModel_1, makeObjectEmptyValueCreator as makeObjectEmptyValueCreator_1, ObjectModel as ObjectModel_1 } from "@vaadin/hilla-lit-form";
 import OrderModel_1 from "./OrderModel.js";
 import type Sort_1 from "./Sort.js";
 class SortModel<T extends Sort_1 = Sort_1> extends ObjectModel_1<T> {

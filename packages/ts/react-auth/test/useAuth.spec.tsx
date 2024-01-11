@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import { renderHook, waitFor } from '@testing-library/react';
 import { configureAuth } from '../src';
 
-describe('@hilla/react-auth', () => {
+describe('@vaadin/react-auth', () => {
   describe('useAuth', () => {
     it('should provide user in state', async () => {
       const user = { customRoles: ['admin'] };

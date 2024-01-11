@@ -1,4 +1,4 @@
-import { AutoForm, DeleteErrorEvent, DeleteEvent, SubmitErrorEvent, SubmitEvent } from '@hilla/react-crud';
+import { AutoForm, DeleteErrorEvent, DeleteEvent, SubmitErrorEvent, SubmitEvent } from '@vaadin/hilla-react-crud';
 import { useState } from 'react';
 import type Appointment from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Appointment.js';
 import AppointmentModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/AppointmentModel.js';

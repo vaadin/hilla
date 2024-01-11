@@ -3,7 +3,7 @@ import { isFilterEmpty } from '../src/util';
 import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('util', () => {
     describe('isFilterEmpty', () => {
       it('returns true when empty', () => {
