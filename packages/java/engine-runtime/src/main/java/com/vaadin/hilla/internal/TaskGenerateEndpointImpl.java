@@ -16,18 +16,13 @@
 package com.vaadin.hilla.internal;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
 /**
@@ -85,34 +80,6 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
             throw new ExecutionFailedException(
                     "Failed to run TypeScript endpoint generator");
         }
-        if (!productionMode) {
-            try {
-                addDevTools();
-            } catch (IOException e) {
-                throw new ExecutionFailedException("Failed to add devtools", e);
-            }
-        }
     }
 
-    private void addDevTools() throws IOException {
-        // This is a hack as Hilla does not have any other way to contribute to
-        // the generated vaadin.ts
-        File vaadinTs = new File(outputDirectory,
-                FrontendUtils.BOOTSTRAP_FILE_NAME);
-        if (vaadinTs.exists()) {
-            String current = FileUtils.readFileToString(vaadinTs,
-                    StandardCharsets.UTF_8);
-            current += """
-                    //@ts-ignore
-                    if (import.meta.env.DEV) {
-                        import("Frontend/generated/jar-resources/dev-tools-database.js");
-                    }
-                    """;
-            FileUtils.writeStringToFile(vaadinTs, current,
-                    StandardCharsets.UTF_8);
-        } else {
-            LOGGER.error("Unable to add dev tools plugin to vaadin.ts");
-        }
-
-    }
 }
