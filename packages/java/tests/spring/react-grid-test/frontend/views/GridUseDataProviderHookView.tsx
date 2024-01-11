@@ -1,10 +1,10 @@
-import { useDataProvider } from '@hilla/react-crud';
+import { useDataProvider } from '@vaadin/hilla-react-crud';
 import type Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person.js';
 import { PersonService } from 'Frontend/generated/endpoints.js';
-import { Grid } from '@hilla/react-components/Grid';
-import { GridSortColumn } from '@hilla/react-components/GridSortColumn';
-import { Button } from '@hilla/react-components/Button.js';
-import { TextField } from '@hilla/react-components/TextField.js';
+import { Grid } from '@vaadin/react-components/Grid';
+import { GridSortColumn } from '@vaadin/react-components/GridSortColumn';
+import { Button } from '@vaadin/react-components/Button.js';
+import { TextField } from '@vaadin/react-components/TextField.js';
 import PropertyStringFilter from 'Frontend/generated/com/vaadin/hilla/crud/filter/PropertyStringFilter';
 import { useState } from 'react';
 import Matcher from 'Frontend/generated/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
