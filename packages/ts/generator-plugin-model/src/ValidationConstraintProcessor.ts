@@ -47,11 +47,11 @@ export class ValidationConstraintProcessor {
     return ts.factory.createNewExpression(
       this.#importer(constraint.simpleName),
       undefined,
-      constraint.attributes ? [this.#processAttributes(constraint.attributes)] : [],
+      constraint.attributes ? [ValidationConstraintProcessor.#processAttributes(constraint.attributes)] : [],
     );
   }
 
-  #processAttributes(attributes: Record<string, unknown>): Expression {
+  static #processAttributes(attributes: Record<string, unknown>): Expression {
     const names = Object.keys(attributes);
     const tpl = JSON.stringify(names.includes('value') && names.length === 1 ? attributes.value : attributes);
 

@@ -55,7 +55,7 @@ export class PushProcessor {
       );
 
       if (importHillaCore) {
-        const updatedImportStatement = this.#removeInitImport(importHillaCore as ts.ImportDeclaration);
+        const updatedImportStatement = PushProcessor.#removeInitImport(importHillaCore as ts.ImportDeclaration);
 
         if (updatedImportStatement) {
           importStatements = importStatements.map((statement) => {
@@ -74,7 +74,7 @@ export class PushProcessor {
     return createSourceFile(updatedStatements, this.#source.fileName);
   }
 
-  #doesInitParameterExist(parameters: ts.NodeArray<ts.ParameterDeclaration>): boolean {
+  static #doesInitParameterExist(parameters: ts.NodeArray<ts.ParameterDeclaration>): boolean {
     const last = parameters[parameters.length - 1];
     const lastType = last.type as ts.TypeReferenceNode;
     const lastTypeName = lastType.typeName as ts.Identifier;
@@ -82,7 +82,7 @@ export class PushProcessor {
     return lastTypeName.text === initParameterTypeName;
   }
 
-  #removeInitImport(importStatement: ts.ImportDeclaration): ts.Statement | undefined {
+  static #removeInitImport(importStatement: ts.ImportDeclaration): ts.Statement | undefined {
     const namedImports = importStatement.importClause?.namedBindings;
     if (namedImports && ts.isNamedImports(namedImports)) {
       const updatedElements = namedImports.elements.filter((element) => element.name.text !== 'EndpointRequestInit');
@@ -119,7 +119,7 @@ export class PushProcessor {
 
   #updateFunction(declaration: ts.FunctionDeclaration): ts.FunctionDeclaration {
     const { parameters } = declaration;
-    const doesInitParameterExist = this.#doesInitParameterExist(parameters);
+    const doesInitParameterExist = PushProcessor.#doesInitParameterExist(parameters);
 
     return ts.factory.createFunctionDeclaration(
       undefined, // no async
@@ -129,11 +129,11 @@ export class PushProcessor {
       // Remove the `init` parameter
       doesInitParameterExist ? parameters.slice(0, -1) : parameters,
       this.#replacePromiseType(declaration),
-      this.#updateFunctionBody(declaration, doesInitParameterExist),
+      PushProcessor.#updateFunctionBody(declaration, doesInitParameterExist),
     );
   }
 
-  #updateFunctionBody(declaration: ts.FunctionDeclaration, doesInitParameterExist: boolean): ts.Block {
+  static #updateFunctionBody(declaration: ts.FunctionDeclaration, doesInitParameterExist: boolean): ts.Block {
     const returnStatement = declaration.body!.statements[0] as ts.ReturnStatement;
     const { arguments: args, expression, typeArguments } = returnStatement.expression! as ts.CallExpression;
     const call = expression as ts.PropertyAccessExpression;

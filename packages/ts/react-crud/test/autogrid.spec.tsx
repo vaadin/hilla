@@ -53,7 +53,7 @@ export async function nextFrame(): Promise<void> {
 async function assertColumnsOrder(grid: GridController, ...ids: string[]) {
   const columns = await grid.getColumns();
   expect(columns).to.have.length(ids.length);
-  await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(grid.generateColumnHeaders(ids));
+  await expect(grid.getHeaderCellContents()).to.eventually.deep.equal(GridController.generateColumnHeaders(ids));
 }
 
 async function assertColumns(grid: GridController, ...ids: string[]) {

@@ -83,7 +83,7 @@ export default class GridController {
     return cells.map((cell) => (getCellContent(cell) as HTMLElement).innerText);
   }
 
-  generateColumnHeaders(paths: readonly string[]): readonly string[] {
+  static generateColumnHeaders(paths: readonly string[]): readonly string[] {
     return paths.map((path) =>
       path
         .substring(path.lastIndexOf('.') + 1)
