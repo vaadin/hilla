@@ -1,6 +1,6 @@
-import { SelectElement } from '@hilla/react-components/Select.js';
 import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import { SelectElement } from '@vaadin/react-components/Select.js';
 
 export default class SelectController {
   readonly instance: SelectElement;

@@ -1,6 +1,6 @@
-import type { AbstractModel, DetachedModelConstructor, Value } from '@hilla/form';
-import { Button } from '@hilla/react-components/Button.js';
-import { SplitLayout } from '@hilla/react-components/SplitLayout.js';
+import type { AbstractModel, DetachedModelConstructor, Value } from '@vaadin/hilla-lit-form';
+import { Button } from '@vaadin/react-components/Button.js';
+import { SplitLayout } from '@vaadin/react-components/SplitLayout.js';
 import { type JSX, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';

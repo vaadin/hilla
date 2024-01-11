@@ -1,5 +1,5 @@
-import { TextField } from '@hilla/react-components/TextField.js';
-import { AutoGrid } from '@hilla/react-crud';
+import { TextField } from '@vaadin/react-components/TextField.js';
+import { AutoGrid } from '@vaadin/hilla-react-crud';
 import { useState } from 'react';
 import type FilterUnion from 'Frontend/generated/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from 'Frontend/generated/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';

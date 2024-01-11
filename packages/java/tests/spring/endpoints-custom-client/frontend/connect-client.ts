@@ -1,4 +1,4 @@
-import { ConnectClient, type MiddlewareContext, type MiddlewareNext } from '@hilla/frontend';
+import { ConnectClient, type MiddlewareContext, type MiddlewareNext } from '@vaadin/hilla-core';
 
 async function logger(context: MiddlewareContext, next?: MiddlewareNext): Promise<Response> {
   const start = new Date().getTime();

@@ -3,7 +3,7 @@ import type {
   GridDataProviderParams,
   GridDefaultItem,
   GridElement,
-} from '@hilla/react-components/Grid';
+} from '@vaadin/react-components/Grid';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
 import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
@@ -138,6 +138,8 @@ export abstract class DataProvider<TItem> {
 }
 
 export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
+  // cannot be static, otherwise it does not implement superclass
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected fetchTotalCount(): undefined {
     return undefined;
   }

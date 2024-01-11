@@ -1,7 +1,7 @@
-import {Button} from "@hilla/react-components/Button.js";
-import {logout} from "@hilla/frontend";
-import {MessageList} from "@hilla/react-components/MessageList.js";
-import {MessageInput} from "@hilla/react-components/MessageInput.js";
+import {Button} from "@vaadin/react-components/Button.js";
+import {logout} from "@vaadin/hilla-core";
+import {MessageList} from "@vaadin/react-components/MessageList.js";
+import {MessageInput} from "@vaadin/react-components/MessageInput.js";
 import {useEffect, useState} from "react";
 import Message from "Frontend/generated/com/example/application/endpoints/ChatService/Message";
 import {ChatService} from "Frontend/generated/endpoints.js";
