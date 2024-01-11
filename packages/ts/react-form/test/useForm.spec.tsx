@@ -13,7 +13,7 @@ use(sinonChai);
 use(chaiDom);
 use(chaiAsPromised);
 
-describe('@hilla/react-form', () => {
+describe('@vaadin/hilla-react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
   const useForm = sinon.spy(_useForm) as typeof _useForm;
 

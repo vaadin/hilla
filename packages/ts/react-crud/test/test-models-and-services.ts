@@ -8,7 +8,7 @@ import {
   _getPropertyModel,
   makeEnumEmptyValueCreator,
   makeObjectEmptyValueCreator,
-} from '@hilla/form';
+} from '@vaadin/hilla-lit-form';
 import type { CountService, CrudService, ListService } from '../src/crud.js';
 import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';

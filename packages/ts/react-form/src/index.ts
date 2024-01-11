@@ -16,7 +16,7 @@ import {
   type Validator,
   type Value,
   type ValueError,
-} from '@hilla/form';
+} from '@vaadin/hilla-lit-form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 

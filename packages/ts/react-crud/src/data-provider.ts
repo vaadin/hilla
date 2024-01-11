@@ -1,5 +1,5 @@
-import type { GridDataProviderCallback, GridDataProviderParams } from '@hilla/react-components/Grid';
-import type { GridDataProvider } from '@hilla/react-components/Grid.js';
+import type { GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
+import type { GridDataProvider } from '@vaadin/react-components/Grid';
 import { useMemo, useState } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
@@ -119,6 +119,8 @@ export abstract class DataProvider<TItem> {
 }
 
 export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
+  // cannot be static, otherwise it does not implement superclass
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected fetchTotalCount(): undefined {
     return undefined;
   }

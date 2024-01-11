@@ -1,7 +1,7 @@
-import { AppLayout } from '@hilla/react-components/AppLayout.js';
-import { DrawerToggle } from '@hilla/react-components/DrawerToggle.js';
-import { Item } from '@hilla/react-components/Item.js';
-import { Scroller } from '@hilla/react-components/Scroller.js';
+import { AppLayout } from '@vaadin/react-components/AppLayout.js';
+import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
+import { Item } from '@vaadin/react-components/Item.js';
+import { Scroller } from '@vaadin/react-components/Scroller.js';
 import Placeholder from 'Frontend/components/placeholder/Placeholder.js';
 import { MenuProps, routes, useViewMatches, ViewRouteObject } from 'Frontend/routes.js';
 import { Suspense } from 'react';

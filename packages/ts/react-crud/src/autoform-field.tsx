@@ -1,15 +1,15 @@
-import { _enum, type AbstractModel, type EnumModel, type Validator } from '@hilla/form';
-import { Checkbox } from '@hilla/react-components/Checkbox.js';
-import { DatePicker } from '@hilla/react-components/DatePicker.js';
-import { DateTimePicker } from '@hilla/react-components/DateTimePicker.js';
-import { IntegerField } from '@hilla/react-components/IntegerField.js';
-import { NumberField } from '@hilla/react-components/NumberField.js';
-import { Select } from '@hilla/react-components/Select.js';
-import { TextArea } from '@hilla/react-components/TextArea.js';
-import { TextField } from '@hilla/react-components/TextField.js';
-import { TimePicker } from '@hilla/react-components/TimePicker.js';
-import type { FieldDirectiveResult, UseFormResult } from '@hilla/react-form';
-import { useFormPart } from '@hilla/react-form';
+import { _enum, type AbstractModel, type EnumModel, type Validator } from '@vaadin/hilla-lit-form';
+import type { FieldDirectiveResult, UseFormResult } from '@vaadin/hilla-react-form';
+import { useFormPart } from '@vaadin/hilla-react-form';
+import { Checkbox } from '@vaadin/react-components/Checkbox.js';
+import { DatePicker } from '@vaadin/react-components/DatePicker.js';
+import { DateTimePicker } from '@vaadin/react-components/DateTimePicker.js';
+import { IntegerField } from '@vaadin/react-components/IntegerField.js';
+import { NumberField } from '@vaadin/react-components/NumberField.js';
+import { Select } from '@vaadin/react-components/Select.js';
+import { TextArea } from '@vaadin/react-components/TextArea.js';
+import { TextField } from '@vaadin/react-components/TextField.js';
+import { TimePicker } from '@vaadin/react-components/TimePicker.js';
 import {
   cloneElement,
   type ComponentType,
