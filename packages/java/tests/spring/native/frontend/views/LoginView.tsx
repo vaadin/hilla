@@ -1,4 +1,4 @@
-import {LoginForm} from "@hilla/react-components/LoginForm.js";
+import {LoginForm} from "@vaadin/react-components/LoginForm.js";
 
 export function LoginView() {
 

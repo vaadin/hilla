@@ -1,9 +1,9 @@
-import { TextField } from '@hilla/react-components/TextField.js';
-import { AutoGrid, HeaderFilterRendererProps } from '@hilla/react-crud';
+import { TextField } from '@vaadin/react-components/TextField.js';
+import { AutoGrid, HeaderFilterRendererProps } from '@vaadin/hilla-react-crud';
 import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person';
 import { PersonService } from 'Frontend/generated/endpoints.js';
-import { GridColumn } from '@hilla/react-components/GridColumn';
+import { GridColumn } from '@vaadin/react-components/GridColumn';
 import type FilterUnion from 'Frontend/generated/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import type OrFilter from 'Frontend/generated/com/vaadin/hilla/crud/filter/OrFilter.js';
 

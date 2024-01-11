@@ -1,6 +1,6 @@
-import type { FormLayoutElement } from '@hilla/react-components/FormLayout';
 import { waitFor, within } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import type { FormLayoutElement } from '@vaadin/react-components/FormLayout';
 
 export type FormElement = HTMLElement & {
   value: unknown;

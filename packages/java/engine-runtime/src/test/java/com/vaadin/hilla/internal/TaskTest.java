@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
-
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
 
@@ -74,12 +73,9 @@ public class TaskTest {
         var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
                 "install", "--no-save", "--install-links");
 
-        var generatedFiles = Files
-                .list(packagesDirectory).filter(dirName -> dirName.getFileName()
-                        .toString().startsWith("generator-"))
-                .map(Path::toString);
+        var generatorFiles = Files.list(packagesDirectory).map(Path::toString);
 
-        var command = Stream.of(shellCmd, npmCmd, generatedFiles)
+        var command = Stream.of(shellCmd, npmCmd, generatorFiles)
                 .flatMap(Function.identity()).toList();
 
         var processBuilder = FrontendUtils.createProcessBuilder(command)

@@ -1,4 +1,4 @@
-import { AutoCrud } from '@hilla/react-crud';
+import { AutoCrud } from '@vaadin/hilla-react-crud';
 import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import { PersonService } from 'Frontend/generated/endpoints.js';
 

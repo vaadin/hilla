@@ -40,7 +40,7 @@ packages/ts/*/.coverage
 packages/ts/*/.vite
 packages/ts/*/types/**
 !packages/ts/*/.lintstagedrc.js
-scripts/generator/results/
+scripts/prepare/results/
 packages/java/hilla/*.json
 packages/java/hilla-react/*.json
 packages/java/hilla/src/main/java/com/vaadin/hilla/theme/
@@ -50,7 +50,7 @@ packages/java/hilla-react/src/main/java/com/vaadin/hilla/theme/
 packages/ts/*/*.tgz
 
 # temporary scripts from platform for preparations
-scripts/generator/src/
+scripts/prepare/src/
 
 # backup files from some editors
 *~

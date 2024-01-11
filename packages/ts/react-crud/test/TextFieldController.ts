@@ -1,6 +1,6 @@
-import type { TextFieldElement } from '@hilla/react-components/TextField.js';
 import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import type { TextFieldElement } from '@vaadin/react-components/TextField.js';
 
 export default class TextFieldController {
   readonly instance: TextFieldElement;

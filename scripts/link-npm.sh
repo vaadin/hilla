@@ -12,7 +12,7 @@ hillaDir=`dirname $0`/..
 pkgs=""
 for tsPkg in $hillaDir/packages/ts/*
 do
-  pkgs+=" "@hilla/`basename $tsPkg`@$tsPkg
+  pkgs+=" "@vaadin/hilla-`basename $tsPkg`@$tsPkg
 done
 
 npm i $pkgs --offline
