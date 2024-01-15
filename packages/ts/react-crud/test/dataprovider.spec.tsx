@@ -1,24 +1,22 @@
 import { expect, use } from '@esm-bundle/chai';
-import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
-import { Grid } from '@vaadin/react-components/Grid.js';
-import { useEffect } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { CountService, ListService } from '../crud';
-import type { DataProvider } from '../src/data-provider';
+import type { CountService, ListService } from '../crud.js';
+import { DataProvider } from '../src/data-provider.js';
 import {
   createDataProvider,
   FixedSizeDataProvider,
   InfiniteDataProvider,
   useDataProvider,
   type ItemCounts,
-} from '../src/data-provider';
-import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
-import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
-import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable';
+} from '../src/data-provider.js';
+import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable.js';
 
 use(sinonChai);
 
@@ -28,32 +26,16 @@ class MockGrid {
 
   readonly dataProvider: GridDataProvider<any>;
 
-  constructor(dataProvider: DataProvider<any>) {
+  constructor(dataProvider: DataProvider<any> | GridDataProvider<any>) {
     this.dataProvider = (params, callback) => {
-      // eslint-disable-next-line no-void
-      void dataProvider.load(params, (items, size) => {
-        this.loadSpy(items, size);
-        callback(items, size);
-      });
+      (dataProvider instanceof DataProvider ? dataProvider.load.bind(dataProvider) : dataProvider)(
+        params,
+        (items, size) => {
+          this.loadSpy(items, size);
+          callback(items, size);
+        },
+      );
     };
-  }
-
-  async requestPage(page: number, sortOrders: GridSorterDefinition[] = []): Promise<void> {
-    return new Promise((resolve) => {
-      this.dataProvider({ page, pageSize: this.pageSize, sortOrders, filters: [] }, (_, size) => {
-        resolve();
-      });
-    });
-  }
-}
-
-class MockGridWithGridDataProvider {
-  pageSize = 10;
-
-  readonly dataProvider: GridDataProvider<any>;
-
-  constructor(gridDataProvider: GridDataProvider<any>) {
-    this.dataProvider = gridDataProvider;
   }
 
   async requestPage(page: number, sortOrders: GridSorterDefinition[] = []): Promise<void> {
@@ -130,7 +112,7 @@ async function testPageLoad(
 }
 
 async function testPageLoadForUseDataProvider(
-  grid: MockGridWithGridDataProvider,
+  grid: MockGrid,
   serviceSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>,
   pageNumber: number,
   filter?: FilterUnion | undefined,
@@ -146,41 +128,48 @@ async function testPageLoadForUseDataProvider(
   expect(pageable.pageSize).to.equal(grid.pageSize);
 }
 
+async function testDataProviderReset(dataProvider: DataProvider<any>): Promise<void>;
+async function testDataProviderReset(dataProvider: GridDataProvider<any>, refresh: () => void): Promise<void>;
+async function testDataProviderReset(dataProvider: DataProvider<any> | GridDataProvider<any>, refresh?: () => void) {
+  const grid = new MockGrid(dataProvider);
+
+  await grid.requestPage(0);
+  await grid.requestPage(1);
+  await grid.requestPage(2);
+  expect(grid.loadSpy.lastCall.lastArg).to.equal(25);
+
+  if (dataProvider instanceof DataProvider) {
+    dataProvider.reset();
+  } else {
+    refresh!();
+  }
+
+  await grid.requestPage(0);
+  expect(grid.loadSpy.lastCall.lastArg).to.equal(11);
+}
+
 describe('@hilla/react-crud', () => {
   describe('useDataProvider', () => {
     let listSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>;
-    let listAndCountSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>;
+    let countServiceListSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>;
+    let countServiceCountSpy: sinon.SinonSpy<[filter: FilterUnion | undefined], Promise<number>>;
 
     beforeEach(() => {
       listSpy = sinon.spy(listService, 'list');
-      listAndCountSpy = sinon.spy(listAndCountService, 'list');
+      countServiceListSpy = sinon.spy(listAndCountService, 'list');
+      countServiceCountSpy = sinon.spy(listAndCountService, 'count');
     });
 
     afterEach(() => {
       listSpy.restore();
-      listAndCountSpy.restore();
+      countServiceListSpy.restore();
+      countServiceCountSpy.restore();
     });
 
-    let dataProvider: GridDataProvider<any>;
-    const GridWithDataProviderByHook = ({
-      service,
-      filter,
-    }: {
-      service: ListService<any> | (CountService<any> & ListService<any>);
-      filter?: FilterUnion | undefined;
-    }) => {
-      const useDataProviderResult = useDataProvider(service, filter);
-      useEffect(() => {
-        // eslint-disable-next-line prefer-destructuring
-        dataProvider = useDataProviderResult.dataProvider;
-      }, []);
-      return <Grid dataProvider={dataProvider} />;
-    };
-
     it('load pages', async () => {
-      render(<GridWithDataProviderByHook service={listService} />);
+      const { result } = renderHook(() => useDataProvider(listService));
 
-      const grid = new MockGridWithGridDataProvider(dataProvider);
+      const grid = new MockGrid(result.current.dataProvider);
 
       // First page
       await testPageLoadForUseDataProvider(grid, listSpy, 0);
@@ -195,9 +184,9 @@ describe('@hilla/react-crud', () => {
     it('passes filter to service', async () => {
       const filter = createTestFilter();
 
-      render(<GridWithDataProviderByHook service={listService} filter={filter} />);
+      const { result } = renderHook(() => useDataProvider(listService, filter));
 
-      const grid = new MockGridWithGridDataProvider(dataProvider);
+      const grid = new MockGrid(result.current.dataProvider);
 
       // First page
       await testPageLoadForUseDataProvider(grid, listSpy, 0, filter);
@@ -208,8 +197,9 @@ describe('@hilla/react-crud', () => {
 
     it('passes sort to service', async () => {
       let pageable: Pageable;
-      render(<GridWithDataProviderByHook service={listService} />);
-      const grid = new MockGridWithGridDataProvider(dataProvider);
+      const { result } = renderHook(() => useDataProvider(listService));
+
+      const grid = new MockGrid(result.current.dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
       pageable = listSpy.lastCall.args[0];
@@ -220,24 +210,25 @@ describe('@hilla/react-crud', () => {
       expect(pageable.sort).to.eql({ orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false }] });
     });
 
-    it('works with a ListAndCountService', async () => {
+    it('utilizes count from listAndCountService and call it only once', async () => {
       const filter = createTestFilter();
-      render(<GridWithDataProviderByHook service={listAndCountService} filter={filter} />);
-      const grid = new MockGridWithGridDataProvider(dataProvider);
+      const { result } = renderHook(() => useDataProvider(listAndCountService, filter));
+
+      const grid = new MockGrid(result.current.dataProvider);
 
       // First page
-      await testPageLoadForUseDataProvider(grid, listAndCountSpy, 0, filter);
+      await testPageLoadForUseDataProvider(grid, countServiceListSpy, 0, filter);
+      expect(countServiceCountSpy).to.have.been.calledOnceWithExactly(filter);
 
       // Second page
-      await testPageLoadForUseDataProvider(grid, listAndCountSpy, 1, filter);
+      await testPageLoadForUseDataProvider(grid, countServiceListSpy, 1, filter);
+      expect(countServiceCountSpy).to.have.been.calledOnceWithExactly(filter);
+    });
 
-      await grid.requestPage(0);
-      const passedFilter = listAndCountSpy.lastCall.args[1];
-      expect(passedFilter).to.equal(filter);
+    it('resets dataProvider when refresh is called', async () => {
+      const { result } = renderHook(() => useDataProvider(listService));
 
-      await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      const pageable = listAndCountSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false }] });
+      await testDataProviderReset(result.current.dataProvider, result.current.refresh);
     });
   });
 
@@ -338,17 +329,7 @@ describe('@hilla/react-crud', () => {
 
     it('resets cached size when reset is called', async () => {
       const dataProvider = new InfiniteDataProvider(listService);
-      const grid = new MockGrid(dataProvider);
-
-      await grid.requestPage(0);
-      await grid.requestPage(1);
-      await grid.requestPage(2);
-      expect(grid.loadSpy.lastCall.lastArg).to.equal(25);
-
-      dataProvider.reset();
-
-      await grid.requestPage(0);
-      expect(grid.loadSpy.lastCall.lastArg).to.equal(11);
+      await testDataProviderReset(dataProvider);
     });
 
     it('refreshes when filter is changed', async () => {
