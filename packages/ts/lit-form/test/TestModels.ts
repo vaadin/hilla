@@ -147,7 +147,7 @@ export class TestModel<T extends TestEntity = TestEntity> extends ObjectModel<T>
   }
 
   get fieldNumber(): NumberModel {
-    return this[_getPropertyModel]('fieldNumber', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel]('fieldNumber', (parent, key) => new NumberModel(parent, key, true));
   }
 
   get fieldBoolean(): BooleanModel {

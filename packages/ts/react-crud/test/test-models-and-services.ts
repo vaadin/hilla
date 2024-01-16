@@ -114,7 +114,7 @@ export class DepartmentModel<T extends Department = Department> extends ObjectMo
     return this[_getPropertyModel](
       'id',
       (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
     );
   }
 
@@ -122,7 +122,7 @@ export class DepartmentModel<T extends Department = Department> extends ObjectMo
     return this[_getPropertyModel](
       'version',
       (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
     );
   }
 
@@ -138,7 +138,7 @@ export class PersonModel<T extends Person = Person> extends NamedModel<T> {
     return this[_getPropertyModel](
       'id',
       (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
     );
   }
 
@@ -146,7 +146,7 @@ export class PersonModel<T extends Person = Person> extends NamedModel<T> {
     return this[_getPropertyModel](
       'version',
       (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
     );
   }
 
@@ -350,8 +350,8 @@ export class ColumnRendererTestModel<
 }
 
 type HasIdVersion = {
-  id: number;
-  version: number;
+  id?: number;
+  version?: number;
 };
 
 export const createService = <T extends HasIdVersion>(
@@ -408,10 +408,10 @@ export const createService = <T extends HasIdVersion>(
       }
       const newValue = { ...value };
       if (currentValue) {
-        newValue.version = currentValue.version + 1;
+        newValue.version = currentValue.version ? currentValue.version + 1 : 0;
         data = data.map((item) => (item.id === newValue.id ? newValue : item));
       } else {
-        newValue.id = data.map((item) => item.id).reduce((prev, curr) => Math.max(prev, curr)) + 1;
+        newValue.id = data.map((item) => item.id ?? 0).reduce((prev, curr) => Math.max(prev, curr)) + 1;
         newValue.version = 1;
         data = [...data, newValue];
       }

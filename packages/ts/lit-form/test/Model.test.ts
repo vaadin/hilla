@@ -73,9 +73,9 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(validators[0]).to.be.instanceOf(IsNumber);
       });
 
-      it('should be NaN by the default', () => {
+      it('should be undefined by the default', () => {
         const { value } = binder.for(binder.model.fieldNumber);
-        expect(value).to.be.NaN;
+        expect(value).to.be.undefined;
       });
 
       describe('_fromString', () => {

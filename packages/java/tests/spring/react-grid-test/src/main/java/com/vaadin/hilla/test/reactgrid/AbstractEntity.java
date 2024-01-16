@@ -17,7 +17,7 @@ public class AbstractEntity {
 
     @Version
     @Nullable
-    private long version;
+    private Long version;
 
     public Long getId() {
         return id;
@@ -27,11 +27,11 @@ public class AbstractEntity {
         this.id = id;
     }
 
-    public long getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(long version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 }

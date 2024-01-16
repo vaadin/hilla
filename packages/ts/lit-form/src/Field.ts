@@ -422,8 +422,9 @@ export const field = directive(
       const { value } = binderNode;
       const valueFromField = convertFieldValue(model, fieldState.value);
       if (value !== valueFromField && !(Number.isNaN(value) && Number.isNaN(valueFromField))) {
-        fieldState.value = value;
-        fieldState.strategy.value = value;
+        const nonNanValue = Number.isNaN(value) ? '' : value;
+        fieldState.value = nonNanValue;
+        fieldState.strategy.value = nonNanValue;
       }
 
       const { required } = binderNode;
