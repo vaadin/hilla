@@ -183,10 +183,6 @@ describe('@vaadin/hilla-react-crud', () => {
         user,
         render(<AutoForm service={personService()} model={PersonModel} />).container,
       );
-      // let values;
-      // await form.getValues(...LABELS).then((results) => {
-      //   values = results;
-      // });
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
 
@@ -241,7 +237,6 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '0.12');
       await form.typeInField('Street', '123 Fake Street');
-      // TODO add other default fields
       await form.submit();
 
       expect(saveSpy).to.have.been.calledOnce;

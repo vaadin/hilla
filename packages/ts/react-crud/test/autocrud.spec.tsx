@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
-import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiDom from 'chai-dom';
@@ -147,9 +147,7 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.typeInField('Email', 'first.last@domain.com');
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '11--12');
-      // await form.typeInField('Department', '{{"id":0,"version":0,"name":""}}');
 
-      // TODO is correct?
       await form.submit();
       await form.typeInField('First name', 'Jerp');
       await form.submit();
