@@ -171,6 +171,7 @@ describe('@vaadin/hilla-lit-form', () => {
         'customer.fullName',
         'customer.fullName',
         'notes',
+        'priority',
         'products.0.description',
         'products.0.price',
         'products.0.price',
