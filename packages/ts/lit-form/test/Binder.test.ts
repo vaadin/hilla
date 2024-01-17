@@ -85,7 +85,7 @@ describe('@vaadin/hilla-lit-form', () => {
           nickName: '',
         },
         notes: '',
-        priority: NaN,
+        priority: undefined,
         products: [],
         total: undefined,
       };
@@ -126,12 +126,10 @@ describe('@vaadin/hilla-lit-form', () => {
 
       it('should have valueOf', () => {
         assert.equal(binder.model.notes.valueOf(), '');
-        assert.isNaN(binder.model.priority.valueOf());
       });
 
       it('should have toString', () => {
-        assert.equal(binder.model.notes.valueOf(), '');
-        assert.equal(binder.model.priority.toString(), NaN.toString());
+        assert.equal(binder.model.notes.toString(), '');
       });
 
       it('should have initial value', () => {

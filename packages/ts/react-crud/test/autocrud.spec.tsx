@@ -146,14 +146,14 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.typeInField('Last name', 'Lastname');
       await form.typeInField('Email', 'first.last@domain.com');
       await form.typeInField('Some integer', '12');
-      await form.typeInField('Some decimal', '11--12');
+      await form.typeInField('Some decimal', '12.345');
 
       await form.submit();
       await form.typeInField('First name', 'Jerp');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
       expect(grid.getRowCount()).to.equal(3);
-    }).timeout(5000);
+    });
 
     it('updates grid and form when creating a new item after selecting an existing item', async () => {
       const { grid, form, newButton } = await CrudController.init(render(<TestAutoCrud />), user);

@@ -84,8 +84,8 @@ export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<
 export interface Order extends IdEntity {
   customer: Customer;
   notes: string;
-  priority: number;
   products: Product[];
+  priority?: number;
   total?: number;
 }
 
@@ -107,7 +107,7 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
   }
 
   get priority(): NumberModel {
-    return this[_getPropertyModel]('priority', (parent, key) => new NumberModel(parent, key, false));
+    return this[_getPropertyModel]('priority', (parent, key) => new NumberModel(parent, key, true));
   }
 
   get products(): ArrayModel<ProductModel> {

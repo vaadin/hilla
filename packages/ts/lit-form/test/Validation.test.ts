@@ -93,9 +93,7 @@ class OrderView extends LitElement {
       products,
       customer: { fullName, nickName },
       total,
-      priority,
     } = this.binder.model;
-    this.binder.for(priority).value = 0;
 
     return html`
       <input id="notes" ...="${field(notes)}" />
@@ -158,7 +156,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
     it('should run all nested validations per model', async () => {
       const errors = await binder.validate();
-      expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes', 'priority']);
+      expect(errors.map((e) => e.property)).to.eql(['customer.fullName', 'customer.fullName', 'notes']);
     });
 
     it('should run all validations per array items', async () => {
@@ -171,7 +169,6 @@ describe('@vaadin/hilla-lit-form', () => {
         'customer.fullName',
         'customer.fullName',
         'notes',
-        'priority',
         'products.0.description',
         'products.0.price',
         'products.0.price',
@@ -241,7 +238,6 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should re-throw on server failure', async () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
-        binder.for(binder.model.priority).value = 0;
         try {
           await binder.submitTo(() => {
             throw new Error('whatever');
@@ -256,7 +252,6 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should wrap server validation error', async () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
-        binder.for(binder.model.priority).value = 0;
         try {
           await binder.submitTo(() => {
             throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
@@ -280,7 +275,6 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should wrap server validation error with any message', async () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
-        binder.for(binder.model.priority).value = 0;
         try {
           await binder.submitTo(() => {
             throw new EndpointValidationError("Validation error in endpoint 'MyEndpoint' method 'saveMyBean'", [
@@ -692,7 +686,6 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should display server validation error', async () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
-        binder.for(binder.model.priority).value = 0;
         const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
         try {
           await binder.submitTo(() => {
@@ -714,7 +707,6 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should display submitting state during submission', async () => {
         binder.for(binder.model.customer.fullName).value = 'Jane Doe';
         binder.for(binder.model.notes).value = 'foo';
-        binder.for(binder.model.priority).value = 0;
         await orderView.updateComplete;
         expect(binder.submitting).to.be.false;
         const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
