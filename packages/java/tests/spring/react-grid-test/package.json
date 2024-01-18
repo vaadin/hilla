@@ -23,7 +23,7 @@
     "@vaadin/react-components": "24.4.0-alpha3",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.0",
+    "lit": "3.1.1",
     "react-router-dom": "^6.15.0"
   },
   "devDependencies": {
@@ -66,7 +66,7 @@
       "@vaadin/react-components": "24.4.0",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.0"
+      "lit": "3.1.1"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.5",
@@ -86,7 +86,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "532a14a1bec4a8df464574d54244bf386aa1620f1edf9754097ee2445ba5e2ca"
+    "hash": "97b82f6793b330c7cfe93d8955aa2bddc34af63db065e15b733e12c413b04b49"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
