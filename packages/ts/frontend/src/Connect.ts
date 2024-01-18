@@ -103,6 +103,10 @@ export interface ConnectClientOptions {
    * The `prefix` property value.
    */
   prefix?: string;
+  /**
+   * The Atmosphere options for the FluxConnection.
+   */
+  atmosphereOptions?: Partial<Atmosphere.Request>;
 }
 
 export interface EndpointCallMetaInfo {
@@ -208,6 +212,10 @@ export class ConnectClient {
    * The Hilla endpoint prefix
    */
   prefix = '/connect';
+  /**
+   * The Atmosphere options for the FluxConnection.
+   */
+  atmosphereOptions: Partial<Atmosphere.Request> = {};
 
   #fluxConnection?: FluxConnection;
 
@@ -221,6 +229,10 @@ export class ConnectClient {
 
     if (options.middlewares) {
       this.middlewares = options.middlewares;
+    }
+
+    if (options.atmosphereOptions) {
+      this.atmosphereOptions = options.atmosphereOptions;
     }
 
     // add connection indicator to DOM
@@ -246,7 +258,7 @@ export class ConnectClient {
    */
   get fluxConnection(): FluxConnection {
     if (!this.#fluxConnection) {
-      this.#fluxConnection = new FluxConnection(this.prefix);
+      this.#fluxConnection = new FluxConnection(this.prefix, this.atmosphereOptions);
     }
     return this.#fluxConnection;
   }
