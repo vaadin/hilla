@@ -641,7 +641,10 @@ describe('@hilla/frontend', () => {
       let fluxConnection: FluxConnection;
 
       it('should pass custom configuration to flux connection', () => {
+        (window as any).Vaadin = { featureFlags: { hillaPush: true } }; // Remove when removing feature flag
         client = new ConnectClient({ atmosphereOptions: { fallbackMethod: 'fake' } });
+        (client as any)._fluxConnection = new FluxConnection('/connect');
+        expect((client as any)._fluxConnection).to.equal('abc');
         ({ fluxConnection } = client);
         expect(subscribeStub.lastCall.firstArg).to.have.property('fallbackMethod').which.equals('fake');
       });
