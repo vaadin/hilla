@@ -214,6 +214,11 @@ export interface ConnectClientOptions {
    * The `middlewares` property value.
    */
   middlewares?: Middleware[];
+
+  /**
+   * The Atmosphere options for the FluxConnection.
+   */
+  atmosphereOptions?: Partial<Atmosphere.Request>;
 }
 
 export interface EndpointCallMetaInfo {
@@ -315,6 +320,10 @@ export class ConnectClient {
    * The Hilla endpoint prefix
    */
   prefix = '/connect';
+  /**
+   * The Atmosphere options for the FluxConnection.
+   */
+  atmosphereOptions: Partial<Atmosphere.Request> = {};
 
   /**
    * The array of middlewares that are invoked during a call.
@@ -333,6 +342,10 @@ export class ConnectClient {
 
     if (options.middlewares) {
       this.middlewares = options.middlewares;
+    }
+
+    if (options.atmosphereOptions) {
+      this.atmosphereOptions = options.atmosphereOptions;
     }
 
     // add connection indicator to DOM
@@ -479,7 +492,7 @@ export class ConnectClient {
    */
   get fluxConnection(): FluxConnection {
     if (!this._fluxConnection) {
-      this._fluxConnection = new FluxConnection(this.prefix);
+      this._fluxConnection = new FluxConnection(this.prefix, this.atmosphereOptions);
     }
     return this._fluxConnection;
   }
