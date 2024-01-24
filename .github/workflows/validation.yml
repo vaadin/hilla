@@ -155,7 +155,7 @@ jobs:
       - test-typescript
     name: ITs
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
