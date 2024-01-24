@@ -39,9 +39,9 @@ export class FluxConnection extends EventTarget {
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
 
-  constructor(connectPrefix: string) {
+  constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
-    this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''));
+    this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
   /**
@@ -96,7 +96,7 @@ export class FluxConnection extends EventTarget {
     return hillaSubscription;
   }
 
-  #connectWebsocket(prefix: string) {
+  #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
     const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
@@ -141,6 +141,7 @@ export class FluxConnection extends EventTarget {
       trackMessageLength: true,
       transport: 'websocket',
       url,
+      ...atmosphereOptions,
     } satisfies Atmosphere.Request);
   }
 
