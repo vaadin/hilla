@@ -32,10 +32,10 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
-    ".": {
-      "default": "./index.js"
+    "./react.js": {
+      "default": "./react.js"
     },
-    "./vite-plugin-file-router": {
+    "./vite-plugin-file-router.js": {
       "default": "./vite-plugin-file-router.js"
     }
   },
@@ -56,9 +56,11 @@
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@types/chai-like": "^1.1.3",
     "@types/deep-equal-in-any-order": "^1.0.3",
     "@types/mocha": "^10.0.6",
     "@types/sinon": "^17.0.3",
+    "chai-like": "^1.1.1",
     "deep-equal-in-any-order": "^2.0.6",
     "mocha": "^10.2.0",
     "rimraf": "^5.0.5",
