@@ -1,7 +1,7 @@
-import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
-import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
+import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import ts, {
   type ImportDeclaration,
   type ObjectLiteralExpression,
@@ -23,24 +23,19 @@ function relativize(url: URL, outDir: URL): string {
   return result;
 }
 
-function createImport(component: string, meta: string, file: string): ImportDeclaration {
-  return template(
-    `import ${component}, {${meta}} from '${file}';\n`,
-    ([statement]) => statement as ts.ImportDeclaration,
-  );
+function createImport(component: string, file: string): ImportDeclaration {
+  return template(`import ${component} from '${file}';\n`, ([statement]) => statement as ts.ImportDeclaration);
 }
 
 function createRouteData(
   path: string,
   component: string | undefined,
-  meta: string,
   children: readonly ObjectLiteralExpression[],
 ): ObjectLiteralExpression {
   return template(
     `const route = {
   path: '${path}',
-  ${component ? `component: ${component},` : ''}
-  meta: ${meta},
+  ${component ? `component: ${component}` : ''}
   ${children.length > 0 ? `children: CHILDREN,` : ''}
 }`,
     ([statement]) =>
@@ -64,17 +59,16 @@ export default function generateRoutes(views: RouteMeta, outDir: URL): string {
       const currentId = id;
       id += 1;
 
-      const meta = `meta${currentId}`;
       let component: string | undefined;
       if (file) {
         component = `Page${currentId}`;
-        imports.push(createImport(component, meta, relativize(file, outDir)));
+        imports.push(createImport(component, relativize(file, outDir)));
       } else if (layout) {
         component = `Layout${currentId}`;
-        imports.push(createImport(component, meta, relativize(layout, outDir)));
+        imports.push(createImport(component, relativize(layout, outDir)));
       }
 
-      return createRouteData(processPattern(path), component, `meta${currentId}`, children);
+      return createRouteData(processPattern(path), component, children);
     },
   );
 

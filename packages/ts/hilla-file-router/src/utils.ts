@@ -1,15 +1,14 @@
-export type AgnosticRoute<T, M extends object = Record<string, unknown>> = Readonly<{
+export type AgnosticRoute<T> = Readonly<{
   path: string;
   component?: T;
-  meta?: M;
   children?: ReadonlyArray<AgnosticRoute<T>>;
 }>;
 
 export function processPattern(blank: string): string {
   return blank
-    .replaceAll(/\[\.{3}.+\]/gu, '*')
-    .replaceAll(/\[{2}(.+)\]{2}/gu, ':$1?')
-    .replaceAll(/\[(.+)\]/gu, ':$1');
+    .replaceAll(/\{\.{3}.+\}/gu, '*')
+    .replaceAll(/\{{2}(.+)\}{2}/gu, ':$1?')
+    .replaceAll(/\{(.+)\}/gu, ':$1');
 }
 
 export function transformRoute<T, U>(

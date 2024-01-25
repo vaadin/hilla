@@ -1,7 +1,7 @@
-import { expect } from '@esm-bundle/chai';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { expect } from '@esm-bundle/chai';
 import type { RouteMeta } from '../src/collectRoutes.js';
 import generateRoutes from '../src/generateRoutes.js';
 import { createTestingRouteMeta } from './utils.js';
@@ -19,54 +19,48 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a framework-agnostic tree of routes', () => {
       const generated = generateRoutes(meta, new URL('./out/', dir));
 
-      expect(generated).to.equal(`import Page0, { meta0 } from "../views/profile/friends/list.tsx";
-import Page1, { meta1 } from "../views/profile/friends/[user].tsx";
-import Layout2, { meta2 } from "../views/profile/friends/friends.layout.tsx";
-import Page3, { meta3 } from "../views/profile/account/security/password.tsx";
-import Page4, { meta4 } from "../views/profile/account/security/two-factor-auth.tsx";
-import Layout6, { meta6 } from "../views/account.layout.tsx";
-import Page8, { meta8 } from "../views/about.tsx";
+      expect(generated).to.equal(`import Page0 from "../views/about.tsx";
+import Page1 from "../views/profile/index.tsx";
+import Page2 from "../views/profile/account/security/password.jsx";
+import Page3 from "../views/profile/account/security/two-factor-auth.ts";
+import Layout5 from "../views/profile/account/account.layout.tsx";
+import Page6 from "../views/profile/friends/list.js";
+import Page7 from "../views/profile/friends/{user}.tsx";
+import Layout8 from "../views/profile/friends/friends.layout.tsx";
 const routes = {
     path: "",
-    meta: meta9,
     children: [{
+            path: "about",
+            component: Page0
+        }, {
             path: "profile",
-            meta: meta7,
             children: [{
-                    path: "friends",
-                    component: Layout2,
-                    meta: meta2,
-                    children: [{
-                            path: "list",
-                            component: Page0,
-                            meta: meta0,
-                        }, {
-                            path: ":user",
-                            component: Page1,
-                            meta: meta1,
-                        }],
+                    path: "",
+                    component: Page1
                 }, {
                     path: "account",
-                    component: Layout6,
-                    meta: meta6,
+                    component: Layout5,
                     children: [{
                             path: "security",
-                            meta: meta5,
                             children: [{
                                     path: "password",
-                                    component: Page3,
-                                    meta: meta3,
+                                    component: Page2
                                 }, {
                                     path: "two-factor-auth",
-                                    component: Page4,
-                                    meta: meta4,
+                                    component: Page3
                                 }],
                         }],
+                }, {
+                    path: "friends",
+                    component: Layout8,
+                    children: [{
+                            path: "list",
+                            component: Page6
+                        }, {
+                            path: ":user",
+                            component: Page7
+                        }],
                 }],
-        }, {
-            path: "about",
-            component: Page8,
-            meta: meta8,
         }],
 };
 export default routes;

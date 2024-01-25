@@ -38,7 +38,7 @@ describe('@vaadin/hilla-file-router', () => {
       // │   ├── friends
       // │   │   ├── layout.tsx
       // │   │   ├── list.tsx
-      // │   │   └── [user].tsx
+      // │   │   └── {user}.tsx
       // │   ├── index.tsx
       // │   └── layout.tsx
       // └── about.tsx
@@ -54,7 +54,7 @@ describe('@vaadin/hilla-file-router', () => {
         appendFile(new URL('profile/account/security/two-factor-auth.ts', tmp), ''),
         appendFile(new URL('profile/friends/friends.layout.tsx', tmp), ''),
         appendFile(new URL('profile/friends/list.js', tmp), ''),
-        appendFile(new URL('profile/friends/[user].tsx', tmp), ''),
+        appendFile(new URL('profile/friends/{user}.tsx', tmp), ''),
         appendFile(new URL('profile/index.tsx', tmp), ''),
         appendFile(new URL('profile/index.css', tmp), ''),
         appendFile(new URL('about.tsx', tmp), ''),
@@ -62,7 +62,7 @@ describe('@vaadin/hilla-file-router', () => {
 
       const result = await collectRoutes(tmp, { extensions });
 
-      expect(result).to.deep.equalInAnyOrder(createTestingRouteMeta(tmp));
+      expect(result).to.deep.equals(createTestingRouteMeta(tmp));
     });
   });
 });

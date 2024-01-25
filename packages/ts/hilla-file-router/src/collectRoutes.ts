@@ -14,6 +14,15 @@ export type CollectRoutesOptions = Readonly<{
   parent?: URL;
 }>;
 
+function cleanUp(blank: string) {
+  return blank
+    .replaceAll(/\{\.{3}(.+)\}/gu, '$1')
+    .replaceAll(/\{{2}(.+)\}{2}/gu, '$1')
+    .replaceAll(/\{(.+)\}/gu, '$1');
+}
+
+const collator = new Intl.Collator('en-US');
+
 export default async function collectRoutes(
   dir: URL,
   { extensions, parent = dir }: CollectRoutesOptions,
@@ -44,6 +53,6 @@ export default async function collectRoutes(
   return {
     path,
     layout,
-    children,
+    children: children.sort(({ path: a }, { path: b }) => collator.compare(cleanUp(a), cleanUp(b))),
   };
 }
