@@ -1,6 +1,5 @@
-import { opendir, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import type { Writable } from 'type-fest';
 import type { Plugin } from 'vite';
 import collectRoutes from './collectRoutes.js';
 import generateJson from './generateJson.js';
@@ -25,33 +24,8 @@ export type PluginOptions = Readonly<{
    *
    * @defaultValue `['.tsx', '.jsx', '.ts', '.js']`
    */
-  extensions: readonly string[];
+  extensions?: readonly string[];
 }>;
-
-type RouteData = Readonly<{
-  pattern: string;
-  file?: URL;
-}>;
-
-async function* walk(
-  dir: URL,
-  parents: readonly RouteData[],
-): AsyncGenerator<readonly RouteData[], undefined, undefined> {
-  for await (const d of await opendir(dir)) {
-    const entry = new URL(d.name, dir);
-    if (d.isDirectory()) {
-      yield* walk(entry, [...parents, { pattern: d.name }]);
-    } else if (d.isFile()) {
-      if (d.name.startsWith('layout')) {
-        if (parents.length > 0) {
-          (parents.at(-1)! as Writable<RouteData>).file = entry;
-        }
-      } else {
-        yield [...parents, { pattern: d.name, file: entry }];
-      }
-    }
-  }
-}
 
 type GeneratedUrls = Readonly<{
   json: URL;
@@ -85,7 +59,7 @@ export default function vitePluginFileSystemRouter({
   viewsDir = 'frontend/views/',
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
-}: PluginOptions): Plugin {
+}: PluginOptions = {}): Plugin {
   let _viewsDir: URL;
   let _generatedDir: URL;
   let _outDir: URL;
