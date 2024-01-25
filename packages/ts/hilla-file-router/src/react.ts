@@ -10,20 +10,34 @@ export type ViewConfig = Readonly<{
    */
   title?: string;
 
-  /** Same as in the explicit React Router configuration. */
+  /**
+   * Same as in the explicit React Router configuration.
+   */
   rolesAllowed?: string[];
 
-  /** Allows overriding the route path configuration. Uses the same syntax as the path property with React Router. This can be used to define a route that conflicts with the file name conventions, e.g. /foo/index */
+  /** Allows overriding the route path configuration. Uses the same syntax as
+   * the path property with React Router.This can be used to define a route
+   * that conflicts with the file name conventions, e.g. /foo/index
+   */
   route?: string;
 
-  /** Controls whether the view implementation will be lazy loaded the first time it's used or always included in the bundle. If set to undefined (which is the default), views mapped to / and /login will be eager and any other view will be lazy (this is in sync with defaults in Flow) */
+  /** Controls whether the view implementation will be lazy loaded the first time
+   * it's used or always included in the bundle. If set to undefined (which is
+   * the default), views mapped to / and /login will be eager and any other view
+   * will be lazy (this is in sync with defaults in Flow)
+   */
   lazy?: boolean;
 
-  /** If set to false, then the route will not be registered with React Router but it will still be included in the main menu and used to configure Spring Security */
+  /** If set to false, then the route will not be registered with React Router,
+   * but it will still be included in the main menu and used to configure
+   * Spring Security
+   */
   register?: boolean;
 
   menu?: Readonly<{
-    /** Title to use in the menu. Falls back the title property of the view itself if not defined. */
+    /** Title to use in the menu. Falls back the title property of the view
+     * itself if not defined.
+     */
     title?: string;
 
     /**
@@ -32,7 +46,9 @@ export type ViewConfig = Readonly<{
      * entries with an order.
      */
     priority?: number;
-    /** Set to true to explicitly exclude a view from the automatically populated menu. */
+    /** Set to true to explicitly exclude a view from the automatically
+     * populated menu.
+     */
     exclude?: boolean;
   }>;
 }>;
