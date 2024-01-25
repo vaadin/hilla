@@ -17,7 +17,7 @@
     "@vaadin/hilla-generator-utils": "../../../ts/generator-utils",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.0"
+    "lit": "3.1.1"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "5.0.5",
@@ -27,11 +27,11 @@
     "async": "3.2.5",
     "glob": "10.3.10",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "5.11.0",
+    "rollup-plugin-visualizer": "5.12.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.10",
+    "vite": "5.0.11",
     "vite-plugin-checker": "0.6.2",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
@@ -41,19 +41,19 @@
     "dependencies": {
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.19",
-      "@vaadin/hilla-core": "24.4.0",
-      "@vaadin/hilla-generator-cli": "24.4.0",
-      "@vaadin/hilla-generator-core": "24.4.0",
-      "@vaadin/hilla-generator-plugin-backbone": "24.4.0",
-      "@vaadin/hilla-generator-plugin-barrel": "24.4.0",
-      "@vaadin/hilla-generator-plugin-client": "24.4.0",
-      "@vaadin/hilla-generator-plugin-model": "24.4.0",
-      "@vaadin/hilla-generator-plugin-push": "24.4.0",
-      "@vaadin/hilla-generator-plugin-subtypes": "24.4.0",
-      "@vaadin/hilla-generator-utils": "24.4.0",
+      "@vaadin/hilla-core": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-cli": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-core": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-plugin-backbone": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-plugin-barrel": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-plugin-client": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-plugin-model": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-plugin-push": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-plugin-subtypes": "24.4.0-alpha2",
+      "@vaadin/hilla-generator-utils": "24.4.0-alpha2",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.0"
+      "lit": "3.1.1"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.5",
@@ -63,17 +63,17 @@
       "async": "3.2.5",
       "glob": "10.3.10",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "5.11.0",
+      "rollup-plugin-visualizer": "5.12.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.10",
+      "vite": "5.0.11",
       "vite-plugin-checker": "0.6.2",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "99b7065ab6c603e34f562a5b365f793080fbf9af6897ce3df14f3c20637647fb"
+    "hash": "831d8153beab0e6bf2ded7b89a33185521e939b88fb9b1bce44a7c489747e4e4"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
