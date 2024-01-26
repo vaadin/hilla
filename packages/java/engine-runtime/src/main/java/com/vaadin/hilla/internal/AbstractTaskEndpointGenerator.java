@@ -17,21 +17,19 @@ package com.vaadin.hilla.internal;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FallibleCommand;
+
 import com.vaadin.hilla.engine.ConfigurationException;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
 import com.vaadin.hilla.engine.commandrunner.GradleRunner;
 import com.vaadin.hilla.engine.commandrunner.MavenRunner;
+import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
 
 /**
  * Abstract class for endpoint related generators.
@@ -72,19 +70,9 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             logger.debug("Configure Hilla engine using build system plugin");
 
             try {
-            	String goal = "hilla:configure";
-            	File pom = new File("pom.xml");
-            	if (pom.exists()) {
-                    String content = new String(Files.readAllBytes(Paths.get(pom.toURI())));
-                    String regex = "<plugin>\\s*<groupId>\\s*com\\.vaadin\\s*</groupId>\\s*<artifactId>\\s*vaadin-maven-plugin\\s*</artifactId>";
-                    if (Pattern.compile(regex, Pattern.DOTALL).matcher(content).find()) {
-                    	goal = "vaadin:configure";
-                    };
-            	}
-            	
                 // Create a runner for Maven
                 MavenRunner
-                        .forProject(projectDirectory, "-q", goal)
+                        .forProject(projectDirectory, "-q", "vaadin:configure")
                         // Create a runner for Gradle. Even if Gradle is not
                         // supported yet, this is useful to emit an error
                         // message if pom.xml is not found and build.gradle is
@@ -98,7 +86,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                         // Run the first valid runner
                         .run(null);
                 firstRun = false;
-            } catch (CommandRunnerException | IOException e) {
+            } catch (CommandRunnerException e) {
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine", e);
             }
