@@ -29,7 +29,7 @@ export type ViewRouteMatch = Readonly<Override<RouteMatch, ViewMeta>>;
 
 export const useViewMatches = useMatches as () => readonly ViewRouteMatch[];
 
-export const routes: readonly ViewRouteObject[] = [
+export const routes: ViewRouteObject[] = [
   {
     element: <MainLayout />,
     handle: { icon: 'null', title: 'Main' },
