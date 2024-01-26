@@ -8,7 +8,6 @@ apply plugin: 'com.vaadin.hilla'
 
 hilla {
 	exposedPackagesToParser = ["com.vaadin.hilla.gradle.plugin.test"]
-    reactRouterEnabled = true
 }
 
 repositories {
