@@ -106,6 +106,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>3.8.2</version>
+          <configuration>
+            <goalPrefix>vaadin</goalPrefix>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

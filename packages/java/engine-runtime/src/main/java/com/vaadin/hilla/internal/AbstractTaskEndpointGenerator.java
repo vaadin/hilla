@@ -72,7 +72,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             try {
                 // Create a runner for Maven
                 MavenRunner
-                        .forProject(projectDirectory, "-q", "hilla:configure")
+                        .forProject(projectDirectory, "-q", "vaadin:configure")
                         // Create a runner for Gradle. Even if Gradle is not
                         // supported yet, this is useful to emit an error
                         // message if pom.xml is not found and build.gradle is
