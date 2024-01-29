@@ -22,7 +22,7 @@ test {
 }
 
 dependencies {
-	implementation 'com.vaadin.hilla:hilla-react-spring-boot-starter'
+	implementation "com.vaadin.hilla:hilla-react-spring-boot-starter:$hillaVersion"
 	implementation 'org.parttio:line-awesome:1.1.0'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
