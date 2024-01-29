@@ -8,7 +8,6 @@ import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter.js';
 import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter.js';
 import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter.js';
 import { ReadOnlyGridCustomFilter } from 'Frontend/views/ReadOnlyGridCustomFilter';
-import { serverSideRoutes } from "Frontend/generated/flow/Flow";
 
 export const routes = [
   {
@@ -46,9 +45,7 @@ export const routes = [
       {
         path: '/auto-crud',
         element: <AutoCrudView />,
-      },
-      // workaround for https://github.com/vaadin/flow/issues/18539
-      ...serverSideRoutes
+      }
     ],
   },
 ];

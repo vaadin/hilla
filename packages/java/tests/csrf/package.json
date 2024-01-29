@@ -20,10 +20,10 @@
     "lit": "3.1.1"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7",
     "@rollup/plugin-replace": "5.0.5",
     "@rollup/pluginutils": "5.1.0",
     "@vitejs/plugin-react": "4.2.1",
-    "@vitejs/plugin-react-swc": "3.5.0",
     "async": "3.2.5",
     "glob": "10.3.10",
     "rollup-plugin-brotli": "3.1.0",
@@ -31,7 +31,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.11",
+    "vite": "5.0.12",
     "vite-plugin-checker": "0.6.2",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
@@ -56,10 +56,10 @@
       "lit": "3.1.1"
     },
     "devDependencies": {
+      "@babel/preset-react": "^7",
       "@rollup/plugin-replace": "5.0.5",
       "@rollup/pluginutils": "5.1.0",
       "@vitejs/plugin-react": "4.2.1",
-      "@vitejs/plugin-react-swc": "3.5.0",
       "async": "3.2.5",
       "glob": "10.3.10",
       "rollup-plugin-brotli": "3.1.0",
@@ -67,13 +67,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.11",
+      "vite": "5.0.12",
       "vite-plugin-checker": "0.6.2",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "831d8153beab0e6bf2ded7b89a33185521e939b88fb9b1bce44a7c489747e4e4"
+    "hash": "9d2851f250d868deb8bcd4fd46d7f7958eacdef15c7ea79bac5195e1d2bc6485"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
