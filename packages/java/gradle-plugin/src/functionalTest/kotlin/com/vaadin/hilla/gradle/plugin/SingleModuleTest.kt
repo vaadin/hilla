@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2023 Vaadin Ltd
+ *    Copyright 2000-2024 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
-    fun `when hilla productionMode=true in build file then building the project executes vaadinBuildFrontend`() {
+    fun `when productionMode is true in build file then building the project executes vaadinBuildFrontend`() {
         createProject(withNpmInstall = true, productionMode = true, disableAllTasksToSimulateDryRun = true)
 
         addHelloReactEndpoint()
@@ -98,7 +98,7 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
-    fun `when hilla productionMode not set in build file then building the project with productionMode commandline arg executes vaadinBuildFrontend`() {
+    fun `when productionMode not set in build file then building the project with productionMode commandline arg executes vaadinBuildFrontend`() {
         createProject(withNpmInstall = true, productionMode = false, disableAllTasksToSimulateDryRun = true)
 
         addHelloReactEndpoint()
@@ -111,12 +111,12 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
-    fun `when hilla productionMode=true in build file then building the project with commandline arg productionMode=false does not execute vaadinBuildFrontend`() {
+    fun `when productionMode is true in build file then building the project with commandline arg productionMode false does not execute vaadinBuildFrontend`() {
         createProject(withNpmInstall = true, productionMode = true, disableAllTasksToSimulateDryRun = true)
 
         addHelloReactEndpoint()
 
-        val buildResult: BuildResult = testProject.build("-Philla.productionMode=false", "build", checkTasksSuccessful = false)
+        val buildResult: BuildResult = testProject.build("-Pvaadin.productionMode=false", "build", checkTasksSuccessful = false)
 
         expect(null, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
             buildResult.task(":vaadinBuildFrontend")
@@ -222,7 +222,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
         val productionBuild = if (productionMode) {
             """
-                hilla {
+                vaadin {
                     productionMode = true
                 }
             """.trimIndent()

@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2023 Vaadin Ltd
+ *    Copyright 2000-2024 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class HillaPlugin : Plugin<Project> {
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
         project.pluginManager.apply(VaadinPlugin::class.java)
 
-        project.tasks.replace("vaadinBuildFrontend", HillaBuildFrontendTask::class.java)
+        project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
 
         val extensionName = "hilla"
         project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
@@ -56,9 +56,8 @@ public class HillaPlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
-            val extension: EngineProjectExtension = EngineProjectExtension.get(it)
-            extension.autoconfigure(it)
-            if (extension.productionMode) {
+            val vaadinExtension = VaadinFlowPluginExtension.get(it)
+            if (vaadinExtension.productionMode.get()) {
                 // this will also catch the War task since it extends from Jar
                 project.tasks.withType(Jar::class.java) { task: Jar ->
                     task.dependsOn("vaadinBuildFrontend")

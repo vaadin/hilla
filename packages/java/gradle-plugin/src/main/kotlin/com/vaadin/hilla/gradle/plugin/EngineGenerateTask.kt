@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2023 Vaadin Ltd
+ *    Copyright 2000-2024 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.gradle.VaadinFlowPluginExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -32,7 +33,7 @@ import com.vaadin.hilla.engine.*
  */
 public open class EngineGenerateTask : DefaultTask() {
     init {
-        group = "Hilla"
+        group = "Vaadin"
         description = "Hilla Generate Task"
 
         // we need the build/hilla-engine-configuration.json and the compiled classes:
@@ -49,10 +50,12 @@ public open class EngineGenerateTask : DefaultTask() {
     @TaskAction
     public fun engineGenerate() {
         val extension: EngineProjectExtension = EngineProjectExtension.get(project)
-        logger.info("Running the engineGenerate task with effective configuration $extension")
+        logger.info("Running the engineGenerate task with effective Hilla configuration $extension")
+        val vaadinExtension = VaadinFlowPluginExtension.get(project)
+        logger.info("Running the engineGenerate task with effective Vaadin configuration $extension")
 
         val baseDir: Path = project.projectDir.toPath()
-        val buildDir: Path = baseDir.resolve(extension.projectBuildDir)
+        val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
         try {
             val conf: EngineConfiguration = Objects.requireNonNull(
