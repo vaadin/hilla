@@ -50,7 +50,7 @@ export const routes = [
       {
         path: '/auto-crud',
         element: <AutoCrudView />,
-      },
+      }
     ],
   },
 ];
