@@ -125,16 +125,6 @@
                 <artifactId>engine-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.vaadin.hilla</groupId>
-                <artifactId>hilla-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin.hilla</groupId>
-                <artifactId>hilla-react-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!-- SLF4J -->
             <dependency>

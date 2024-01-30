@@ -8,13 +8,13 @@
         <groupId>com.vaadin.hilla</groupId>
         <artifactId>hilla-project</artifactId>
         <version>24.4-SNAPSHOT</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <relativePath>../../../../../pom.xml</relativePath>
     </parent>
 
     <groupId>com.vaadin.hilla</groupId>
-    <artifactId>hilla-react-spring-boot-starter</artifactId>
-    <name>Hilla React Spring Boot Starter</name>
-    <description>Spring Boot Starter for Hilla applications using React.</description>
+    <artifactId>hilla-spring-boot-starter</artifactId>
+    <name>Hilla Spring Boot Starter</name>
+    <description>Spring Boot Starter for Hilla applications using Lit.</description>
     <version>24.4-SNAPSHOT</version>
 
     <properties>
@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin.hilla</groupId>
-            <artifactId>hilla-react</artifactId>
+            <artifactId>hilla</artifactId>
             <version>${project.version}</version>
         </dependency>
 
