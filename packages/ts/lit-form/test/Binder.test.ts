@@ -85,7 +85,7 @@ describe('@vaadin/hilla-lit-form', () => {
           nickName: '',
         },
         notes: '',
-        priority: 0,
+        priority: undefined,
         products: [],
         total: undefined,
       };
@@ -126,12 +126,10 @@ describe('@vaadin/hilla-lit-form', () => {
 
       it('should have valueOf', () => {
         assert.equal(binder.model.notes.valueOf(), '');
-        assert.equal(binder.model.priority.valueOf(), 0);
       });
 
       it('should have toString', () => {
-        assert.equal(binder.model.notes.valueOf(), '');
-        assert.equal(binder.model.priority.toString(), '0');
+        assert.equal(binder.model.notes.toString(), '');
       });
 
       it('should have initial value', () => {

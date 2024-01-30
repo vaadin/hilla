@@ -73,6 +73,11 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(validators[0]).to.be.instanceOf(IsNumber);
       });
 
+      it('should be undefined by the default', () => {
+        const { value } = binder.for(binder.model.fieldNumber);
+        expect(value).to.be.undefined;
+      });
+
       describe('_fromString', () => {
         let fromString: (str: string) => number | undefined;
 
