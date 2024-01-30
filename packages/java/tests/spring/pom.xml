@@ -29,6 +29,16 @@
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.vaadin.hilla</groupId>
+                <artifactId>hilla-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin.hilla</groupId>
+                <artifactId>hilla-react-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -152,6 +162,8 @@
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
                 <module>react-grid-test</module>
+                <module>hilla-spring-boot-starter</module>
+                <module>hilla-react-spring-boot-starter</module>
             </modules>
         </profile>
 
