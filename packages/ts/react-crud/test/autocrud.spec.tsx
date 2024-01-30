@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
-import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiDom from 'chai-dom';
@@ -57,7 +57,7 @@ describe('@vaadin/hilla-react-crud', () => {
       expect(firstName.disabled).to.be.true;
 
       const someInteger = await form.getField('Some integer');
-      expect(someInteger.value).to.equal('0');
+      expect(someInteger.value).to.equal('');
       expect(someInteger.disabled).to.be.true;
     });
 
@@ -113,8 +113,8 @@ describe('@vaadin/hilla-react-crud', () => {
 
       expect(firstNameField.value).to.equal('');
       expect(lastNameField.value).to.equal('');
-      expect(someIntegerField.value).to.equal('0');
-      expect(someDecimalField.value).to.equal('0');
+      expect(someIntegerField.value).to.equal('');
+      expect(someDecimalField.value).to.equal('');
       await form.typeInField('First name', 'Jeff');
       await form.typeInField('Last name', 'Lastname');
       await form.typeInField('Email', 'first.last@domain.com');
@@ -147,6 +147,7 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.typeInField('Email', 'first.last@domain.com');
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '12.345');
+
       await form.submit();
       await form.typeInField('First name', 'Jerp');
       await form.submit();
