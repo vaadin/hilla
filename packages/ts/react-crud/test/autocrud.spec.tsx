@@ -537,5 +537,27 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(deleteStub).to.have.been.calledWith(person.email);
       });
     });
+
+    describe('other', () => {
+      it('shows aria-control with form id', async () => {
+        const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+        await grid.toggleRowSelected(0);
+        const formId = form.instance.id;
+        expect(formId).to.exist;
+        expect(formId)
+          .to.be.a('string')
+          .and.satisfy((id: string) => id.startsWith('auto-form-'));
+        expect(grid.instance.getAttribute('aria-controls')).to.equal(formId);
+      });
+
+      it('shows aria-control with default id', async () => {
+        const { grid, form } = await CrudController.init(
+          render(<TestAutoCrud formProps={{ id: 'custom-form-id' }} />),
+          user,
+        );
+        await grid.toggleRowSelected(0);
+        expect(grid.instance.getAttribute('aria-controls')).to.equal(`custom-form-id`);
+      });
+    });
   });
 });
