@@ -1,4 +1,55 @@
+import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { RouteMeta } from '../src/collectRoutes.js';
+
+export async function createTmpDir(): Promise<URL> {
+  return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);
+}
+
+export async function createTestingRouteFiles(dir: URL): Promise<void> {
+  await Promise.all([
+    mkdir(new URL('profile/account/security/', dir), { recursive: true }),
+    mkdir(new URL('profile/friends/', dir), { recursive: true }),
+  ]);
+  await Promise.all([
+    appendFile(
+      new URL('profile/account/account.layout.tsx', dir),
+      "export const meta = { title: 'Account' };\nexport default function AccountLayout() {};",
+    ),
+    appendFile(
+      new URL('profile/account/security/password.jsx', dir),
+      "export const meta = { title: 'Password' };\nexport default function Password() {};",
+    ),
+    appendFile(new URL('profile/account/security/password.scss', dir), ''),
+    appendFile(
+      new URL('profile/account/security/two-factor-auth.ts', dir),
+      "export const meta = { title: 'Two-Factor Auth' };\nexport default function TwoFactorAuth() {};",
+    ),
+    appendFile(
+      new URL('profile/friends/friends.layout.tsx', dir),
+      "export const meta = { title: 'Friends Layout' };\nexport default function FriendsLayout() {};",
+    ),
+    appendFile(
+      new URL('profile/friends/list.js', dir),
+      "export const meta = { title: 'List' };\nexport default function List() {};",
+    ),
+    appendFile(
+      new URL('profile/friends/{user}.tsx', dir),
+      "export const meta = { title: 'User' };\nexport default function User() {};",
+    ),
+    appendFile(
+      new URL('profile/index.tsx', dir),
+      "export const meta = { title: 'Profile' };\nexport default function Profile() {};",
+    ),
+    appendFile(new URL('profile/index.css', dir), ''),
+    appendFile(
+      new URL('about.tsx', dir),
+      "export const meta = { title: 'About' };\nexport default function About() {};",
+    ),
+  ]);
+}
 
 export function createTestingRouteMeta(dir: URL): RouteMeta {
   return {

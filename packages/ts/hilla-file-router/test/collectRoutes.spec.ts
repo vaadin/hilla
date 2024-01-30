@@ -6,7 +6,7 @@ import { expect, use } from '@esm-bundle/chai';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { rimraf } from 'rimraf';
 import collectRoutes from '../src/collectRoutes.js';
-import { createTestingRouteMeta } from './utils.js';
+import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from './utils.js';
 
 use(deepEqualInAnyOrder);
 
@@ -16,7 +16,8 @@ describe('@vaadin/hilla-file-router', () => {
     let tmp: URL;
 
     before(async () => {
-      tmp = pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);
+      tmp = await createTmpDir();
+      await createTestingRouteFiles(tmp);
     });
 
     after(async () => {
@@ -42,24 +43,6 @@ describe('@vaadin/hilla-file-router', () => {
       // │   ├── index.tsx
       // │   └── layout.tsx
       // └── about.tsx
-
-      await Promise.all([
-        mkdir(new URL('profile/account/security/', tmp), { recursive: true }),
-        mkdir(new URL('profile/friends/', tmp), { recursive: true }),
-      ]);
-      await Promise.all([
-        appendFile(new URL('profile/account/account.layout.tsx', tmp), ''),
-        appendFile(new URL('profile/account/security/password.jsx', tmp), ''),
-        appendFile(new URL('profile/account/security/password.scss', tmp), ''),
-        appendFile(new URL('profile/account/security/two-factor-auth.ts', tmp), ''),
-        appendFile(new URL('profile/friends/friends.layout.tsx', tmp), ''),
-        appendFile(new URL('profile/friends/list.js', tmp), ''),
-        appendFile(new URL('profile/friends/{user}.tsx', tmp), ''),
-        appendFile(new URL('profile/index.tsx', tmp), ''),
-        appendFile(new URL('profile/index.css', tmp), ''),
-        appendFile(new URL('about.tsx', tmp), ''),
-      ]);
-
       const result = await collectRoutes(tmp, { extensions });
 
       expect(result).to.deep.equals(createTestingRouteMeta(tmp));

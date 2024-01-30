@@ -1,4 +1,4 @@
-import { relative } from 'node:path';
+import { extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
@@ -13,8 +13,8 @@ import { processPattern, transformRoute } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-function relativize(url: URL, outDir: URL): string {
-  const result = relative(fileURLToPath(outDir), fileURLToPath(url));
+function relativize(url: URL, generatedDir: URL): string {
+  const result = relative(fileURLToPath(generatedDir), fileURLToPath(url));
 
   if (!result.startsWith('.')) {
     return `./${result}`;
@@ -23,19 +23,20 @@ function relativize(url: URL, outDir: URL): string {
   return result;
 }
 
-function createImport(component: string, file: string): ImportDeclaration {
-  return template(`import ${component} from '${file}';\n`, ([statement]) => statement as ts.ImportDeclaration);
+function createImport(mod: string, file: string): ImportDeclaration {
+  const path = `${file.substring(0, file.lastIndexOf('.'))}.js`;
+  return template(`import * as ${mod} from '${path}';\n`, ([statement]) => statement as ts.ImportDeclaration);
 }
 
 function createRouteData(
   path: string,
-  component: string | undefined,
+  mod: string | undefined,
   children: readonly ObjectLiteralExpression[],
 ): ObjectLiteralExpression {
   return template(
     `const route = {
   path: '${path}',
-  ${component ? `component: ${component}` : ''}
+  ${mod ? `module: ${mod}` : ''}
   ${children.length > 0 ? `children: CHILDREN,` : ''}
 }`,
     ([statement]) =>
@@ -48,7 +49,7 @@ function createRouteData(
   );
 }
 
-export default function generateRoutes(views: RouteMeta, outDir: URL): string {
+export default function generateRoutes(views: RouteMeta, generatedDir: URL): string {
   const imports: ImportDeclaration[] = [];
   let id = 0;
 
@@ -59,16 +60,16 @@ export default function generateRoutes(views: RouteMeta, outDir: URL): string {
       const currentId = id;
       id += 1;
 
-      let component: string | undefined;
+      let mod: string | undefined;
       if (file) {
-        component = `Page${currentId}`;
-        imports.push(createImport(component, relativize(file, outDir)));
+        mod = `Page${currentId}`;
+        imports.push(createImport(mod, relativize(file, generatedDir)));
       } else if (layout) {
-        component = `Layout${currentId}`;
-        imports.push(createImport(component, relativize(layout, outDir)));
+        mod = `Layout${currentId}`;
+        imports.push(createImport(mod, relativize(layout, generatedDir)));
       }
 
-      return createRouteData(processPattern(path), component, children);
+      return createRouteData(processPattern(path), mod, children);
     },
   );
 

@@ -59,25 +59,26 @@ export type ViewConfig = Readonly<{
   }>;
 }>;
 
-export type RouteComponent<P = object> = ComponentType<P> & {
+export type RouteModule<P = object> = Readonly<{
+  default: ComponentType<P>;
   meta?: ViewConfig;
-};
+}>;
 
 /**
  * Transforms generated routes into a format that can be used by React Router.
  *
  * @param routes - Generated routes
  */
-export function toReactRouter(routes: AgnosticRoute<RouteComponent>): RouteObject {
+export function toReactRouter(routes: AgnosticRoute<RouteModule>): RouteObject {
   return transformRoute(
     routes,
     (route) => route.children?.values(),
-    ({ path, component }, children) =>
+    ({ path, module }, children) =>
       ({
         path,
-        element: component ? createElement(component) : undefined,
+        element: module?.default ? createElement(module.default) : undefined,
         children: children.length > 0 ? (children as RouteObject[]) : undefined,
-        handle: component ? component.meta : undefined,
+        handle: module?.meta,
       }) satisfies RouteObject,
   );
 }

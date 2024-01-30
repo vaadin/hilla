@@ -1,6 +1,6 @@
 export type AgnosticRoute<T> = Readonly<{
   path: string;
-  component?: T;
+  module?: T;
   children?: ReadonlyArray<AgnosticRoute<T>>;
 }>;
 

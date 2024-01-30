@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Plugin } from 'vite';
 import collectRoutes from './collectRoutes.js';
 import generateJson from './generateJson.js';
@@ -44,7 +44,7 @@ async function build(
 ): Promise<void> {
   const routeMeta = await collectRoutes(viewsDir, { extensions });
   const code = generateRoutes(routeMeta, outDir);
-  const json = generateJson(routeMeta);
+  const json = await generateJson(routeMeta);
 
   await generate(code, json, generatedUrls);
 }
@@ -68,17 +68,17 @@ export default function vitePluginFileSystemRouter({
   return {
     name: 'vite-plugin-file-router',
     configResolved({ root, build: { outDir } }) {
-      const _root = new URL(root);
+      const _root = pathToFileURL(root);
       _viewsDir = new URL(viewsDir, _root);
       _generatedDir = new URL(generatedDir, _root);
-      _outDir = new URL(outDir, _root);
+      _outDir = pathToFileURL(outDir);
       generatedUrls = {
         json: new URL('views.json', _outDir),
         code: new URL('views.ts', _generatedDir),
       };
     },
     async buildStart() {
-      await build(_viewsDir, _outDir, generatedUrls, extensions);
+      await build(_viewsDir, _generatedDir, generatedUrls, extensions);
     },
     configureServer(server) {
       const dir = fileURLToPath(_viewsDir);

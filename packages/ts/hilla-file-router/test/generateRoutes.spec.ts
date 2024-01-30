@@ -19,14 +19,14 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a framework-agnostic tree of routes', () => {
       const generated = generateRoutes(meta, new URL('./out/', dir));
 
-      expect(generated).to.equal(`import Page0 from "../views/about.tsx";
-import Page1 from "../views/profile/index.tsx";
-import Page2 from "../views/profile/account/security/password.jsx";
-import Page3 from "../views/profile/account/security/two-factor-auth.ts";
-import Layout5 from "../views/profile/account/account.layout.tsx";
+      expect(generated).to.equal(`import Page0 from "../views/about.js";
+import Page1 from "../views/profile/index.js";
+import Page2 from "../views/profile/account/security/password.js";
+import Page3 from "../views/profile/account/security/two-factor-auth.js";
+import Layout5 from "../views/profile/account/account.layout.js";
 import Page6 from "../views/profile/friends/list.js";
-import Page7 from "../views/profile/friends/{user}.tsx";
-import Layout8 from "../views/profile/friends/friends.layout.tsx";
+import Page7 from "../views/profile/friends/{user}.js";
+import Layout8 from "../views/profile/friends/friends.layout.js";
 const routes = {
     path: "",
     children: [{

@@ -1,7 +1,7 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { JSX } from 'react';
-import { type RouteComponent, toReactRouter } from '../src/react.js';
+import { type RouteModule, toReactRouter } from '../src/react.js';
 import type { AgnosticRoute } from '../utils.js';
 
 use(chaiLike);
@@ -60,7 +60,7 @@ describe('@vaadin/hilla-file-router', () => {
             ],
           },
         ],
-      } satisfies AgnosticRoute<RouteComponent>;
+      } satisfies AgnosticRoute<RouteModule>;
 
       const result = toReactRouter(routes);
 

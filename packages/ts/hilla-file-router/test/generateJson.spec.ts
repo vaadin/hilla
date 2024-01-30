@@ -1,31 +1,43 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { expect } from '@esm-bundle/chai';
+import { rimraf } from 'rimraf';
 import type { RouteMeta } from '../src/collectRoutes.js';
 import generateJson from '../src/generateJson.js';
-import { createTestingRouteMeta } from './utils.js';
+import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from './utils.js';
 
 describe('@vaadin/hilla-file-router', () => {
   describe('generateJson', () => {
+    let tmp: URL;
     let meta: RouteMeta;
 
-    beforeEach(() => {
-      const dir = pathToFileURL(join(tmpdir(), 'hilla-file-router/'));
-      meta = createTestingRouteMeta(new URL('./views/', dir));
+    before(async () => {
+      tmp = await createTmpDir();
+      await createTestingRouteFiles(tmp);
     });
 
-    it('should generate a JSON representation of the route tree', () => {
-      const generated = generateJson(meta);
+    after(async () => {
+      await rimraf(fileURLToPath(tmp));
+    });
 
-      expect(generated).to.equal(`[
-  "/profile/",
-  "/profile/friends/list",
-  "/profile/friends/{user}",
-  "/profile/account/security/password",
-  "/profile/account/security/two-factor-auth",
-  "/about"
-]`);
+    beforeEach(() => {
+      meta = createTestingRouteMeta(tmp);
+    });
+
+    it('should generate a JSON representation of the route tree', async () => {
+      const generated = await generateJson(meta);
+
+      expect(generated).to.equal(
+        JSON.stringify({
+          '/about': { title: 'About' },
+          '/profile/': { title: 'Profile' },
+          '/profile/account/security/password': { title: 'Password' },
+          '/profile/account/security/two-factor-auth': { title: 'Two-Factor Auth' },
+          '/profile/friends/list': { title: 'List' },
+          '/profile/friends/:user': { title: 'User' },
+        }),
+      );
     });
   });
 });
