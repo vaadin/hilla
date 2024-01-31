@@ -23,6 +23,11 @@
             <artifactId>hilla</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-core-internal</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.vaadin.hilla</groupId>
             <artifactId>hilla-spring-boot-starter</artifactId>
         </dependency>

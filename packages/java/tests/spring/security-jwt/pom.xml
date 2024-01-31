@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-core-internal</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.vaadin.hilla</groupId>
             <artifactId>hilla</artifactId>
         </dependency>
