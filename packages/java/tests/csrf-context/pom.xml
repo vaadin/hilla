@@ -38,6 +38,9 @@
       <plugin>
         <groupId>com.vaadin.hilla</groupId>
         <artifactId>hilla-maven-plugin</artifactId>
+        <configuration>
+          <reactRouterEnabled>false</reactRouterEnabled>
+        </configuration>        
       </plugin>
 
       <!-- This module is mapped to default web context -->
