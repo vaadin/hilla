@@ -16,14 +16,4 @@ import org.apache.maven.plugins.annotations.Mojo;
 public class ConvertPolymerMojo
         extends com.vaadin.flow.plugin.maven.ConvertPolymerMojo {
 
-    @Override
-    public void execute() throws MojoFailureException {
-        getLog().warn(
-                """
-                        The 'convert-polymer' goal is not meant to be used in Hilla projects as polymer templates are not supported.
-                        Note: The 'convert-polymer' goal is deprecated and would be removed in future releases.
-                        """
-                        .stripIndent());
-        super.execute();
-    }
 }

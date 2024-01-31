@@ -105,7 +105,9 @@ export class BooleanModel extends PrimitiveModel<boolean> implements HasFromStri
 }
 
 export class NumberModel extends PrimitiveModel<number> implements HasFromString<number | undefined> {
-  static override createEmptyValue = Number;
+  static override createEmptyValue(): number {
+    return NaN;
+  }
 
   constructor(parent: ModelParent, key: keyof any, optional: boolean, options?: ModelOptions<number>) {
     // Prepend a built-in validator to indicate NaN input
