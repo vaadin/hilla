@@ -1,7 +1,7 @@
 import type { AbstractModel, DetachedModelConstructor, Value } from '@vaadin/hilla-lit-form';
 import { Button } from '@vaadin/react-components/Button.js';
 import { SplitLayout } from '@vaadin/react-components/SplitLayout.js';
-import { type JSX, useRef, useState } from 'react';
+import { type JSX, useId, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
@@ -123,6 +123,8 @@ export function AutoCrud<TModel extends AbstractModel>({
   const formHeaderRenderer: AutoCrudFormHeaderRenderer<Value<TModel>> =
     customFormHeaderRenderer ?? defaultFormHeaderRenderer;
 
+  const autoCrudId = useId();
+
   function refreshGrid() {
     autoGridRef.current?.refresh();
   }
@@ -146,6 +148,7 @@ export function AutoCrud<TModel extends AbstractModel>({
           setItem(activeItem ?? undefined);
         }}
         ref={autoGridRef}
+        aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
       <div className="auto-crud-toolbar">
         <Button theme="primary" onClick={() => setItem(emptyItem)}>
@@ -157,6 +160,7 @@ export function AutoCrud<TModel extends AbstractModel>({
 
   const autoForm = (
     <AutoForm
+      id={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       deleteButtonVisible={true}
       {...autoFormProps}
       disabled={!item}

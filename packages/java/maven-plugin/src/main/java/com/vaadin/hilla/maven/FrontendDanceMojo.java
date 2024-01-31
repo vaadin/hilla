@@ -17,14 +17,4 @@ import org.apache.maven.plugins.annotations.Mojo;
 public class FrontendDanceMojo
         extends com.vaadin.flow.plugin.maven.FrontendDanceMojo {
 
-    @Override
-    public void execute() throws MojoFailureException {
-        getLog().warn(
-                """
-                        The 'dance' goal is not meant to be used in Hilla projects as it delete 'package-lock.json' and also clearing out the content of 'package.json'.
-                        Note: The 'dance' goal is deprecated and would be removed in future releases.
-                        """
-                        .stripIndent());
-        super.execute();
-    }
 }
