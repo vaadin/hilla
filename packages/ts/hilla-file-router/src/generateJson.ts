@@ -1,6 +1,5 @@
 import type { RouteMeta } from './collectRoutes.js';
-import type { ViewConfig } from './react.js';
-import { processPattern } from './utils.js';
+import { processPattern, prepareConfig, type ViewConfig } from './utils.js';
 
 function* traverse(
   views: RouteMeta,
@@ -19,7 +18,7 @@ function* traverse(
 
 type RouteModule = Readonly<{
   default: unknown;
-  meta?: ViewConfig;
+  config?: ViewConfig;
 }>;
 
 export default async function generateJson(views: RouteMeta): Promise<string> {
@@ -30,8 +29,8 @@ export default async function generateJson(views: RouteMeta): Promise<string> {
           .filter(({ file, layout }) => !!file || !!layout)
           .map(({ file, layout }) => (file ? file : layout!).toString())
           .map(async (path) => {
-            const { meta }: RouteModule = await import(`${path.substring(0, path.lastIndexOf('.'))}.js`);
-            return meta;
+            const { config, default: fn }: RouteModule = await import(`${path.substring(0, path.lastIndexOf('.'))}.js`);
+            return prepareConfig(config, fn);
           }),
       );
 
