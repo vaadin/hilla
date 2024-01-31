@@ -46,6 +46,8 @@ packages/java/hilla-react/*.json
 packages/java/hilla/src/main/java/com/vaadin/hilla/theme/
 packages/java/hilla-react/src/main/java/com/vaadin/hilla/theme/
 
+packages/**/resources/vaadin-core-versions.json
+
 # npm pack
 packages/ts/*/*.tgz
 
