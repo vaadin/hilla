@@ -148,9 +148,6 @@
                     <groupId>com.vaadin.hilla</groupId>
                     <artifactId>hilla-maven-plugin</artifactId>
                     <version>${project.version}</version>
-                    <configuration>
-                        <reactRouterEnabled>false</reactRouterEnabled>
-                    </configuration>
                     <executions>
                         <execution>
                             <goals>
@@ -258,9 +255,6 @@
                             <groupId>com.vaadin.hilla</groupId>
                             <artifactId>hilla-maven-plugin</artifactId>
                             <version>${project.version}</version>
-                            <configuration>
-                                <reactRouterEnabled>false</reactRouterEnabled>
-                            </configuration>
                             <executions>
                                 <execution>
                                     <goals>
