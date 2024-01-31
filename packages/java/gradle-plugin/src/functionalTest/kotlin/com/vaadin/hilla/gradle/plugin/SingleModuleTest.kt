@@ -279,7 +279,9 @@ class SingleModuleTest : AbstractGradleTest() {
 
             dependencies {
                 implementation 'com.vaadin.hilla:hilla-react'
-                implementation 'com.vaadin.hilla:hilla-spring-boot-starter'
+                implementation 'com.vaadin:vaadin-spring'
+                implementation 'com.vaadin.hilla:hilla'
+                implementation 'org.springframework.boot:spring-boot-starter-web'
             }
 
             dependencyManagement {

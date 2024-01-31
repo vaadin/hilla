@@ -171,7 +171,9 @@ describe('@vaadin/hilla-lit-form', () => {
         'notes',
         'products.0.description',
         'products.0.price',
+        'products.0.price',
         'products.1.description',
+        'products.1.price',
         'products.1.price',
       ]);
     });
@@ -198,6 +200,7 @@ describe('@vaadin/hilla-lit-form', () => {
             // do nothing
           },
         });
+        testBinder.for(testBinder.model.fieldNumber).value = 0;
         const binderSubmitToSpy = sinon.spy(testBinder, 'submitTo');
         await testBinder.submit();
         sinon.assert.calledOnce(binderSubmitToSpy);
@@ -206,6 +209,7 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should return the result of the endpoint call when calling submit()', async () => {
         // eslint-disable-next-line @typescript-eslint/require-await
         const testBinder = new Binder(view, TestModel, { onSubmit: async (testEntity) => testEntity });
+        testBinder.for(testBinder.model.fieldNumber).value = 0;
         const result = await testBinder.submit();
         assert.deepEqual(result, testBinder.value);
       });
@@ -214,6 +218,7 @@ describe('@vaadin/hilla-lit-form', () => {
         const testEndpoint: (entity: TestEntity) => Promise<TestEntity | undefined> = async (_) =>
           Promise.resolve(undefined);
         const testBinder = new Binder(view, TestModel, { onSubmit: testEndpoint });
+        testBinder.for(testBinder.model.fieldNumber).value = 0;
         const result = await testBinder.submit();
         expect(result).to.be.undefined;
       });
@@ -602,14 +607,16 @@ describe('@vaadin/hilla-lit-form', () => {
             'notes',
             'products.0.description',
             'products.0.price',
+            'products.0.price',
             'products.1.description',
+            'products.1.price',
             'products.1.price',
           ]);
         }
 
         expect(orderView.description).to.have.attribute('invalid');
         expect(orderView.price).to.have.attribute('invalid');
-        expect(String(orderView.priceError.textContent).trim()).to.equal('must be greater than 0');
+        expect(String(orderView.priceError.textContent).trim()).to.equal('must be a number\nmust be greater than 0');
       });
 
       it(`should validate fields of arrays on submit`, async () => {
@@ -664,6 +671,8 @@ describe('@vaadin/hilla-lit-form', () => {
         await fireEvent(orderView.description, 'change');
         orderView.price.value = '10';
         await fireEvent(orderView.price, 'change');
+        orderView.total.value = '10';
+        await fireEvent(orderView.total, 'change');
 
         // eslint-disable-next-line @typescript-eslint/require-await
         const item = await orderView.binder.submitTo(async (order) => order);
@@ -752,6 +761,7 @@ describe('@vaadin/hilla-lit-form', () => {
         value.customer.fullName = 'Jane Doe';
         value.notes = '42';
         value.total = 1;
+        value.priority = 0;
         binder.value = value;
         await orderView.updateComplete;
 
