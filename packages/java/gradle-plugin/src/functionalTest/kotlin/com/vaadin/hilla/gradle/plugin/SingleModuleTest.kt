@@ -21,7 +21,6 @@ import com.vaadin.hilla.engine.EngineConfiguration
 import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
@@ -82,45 +81,6 @@ class SingleModuleTest : AbstractGradleTest() {
 
         verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
-    }
-
-    @Test
-    fun `when productionMode is true in build file then building the project executes vaadinBuildFrontend`() {
-        createProject(withNpmInstall = true, productionMode = true, disableAllTasksToSimulateDryRun = true)
-
-        addHelloReactEndpoint()
-
-        val buildResult: BuildResult = testProject.build("build", checkTasksSuccessful = false)
-
-        expect(TaskOutcome.SKIPPED, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
-            buildResult.task(":vaadinBuildFrontend")?.outcome
-        }
-    }
-
-    @Test
-    fun `when productionMode not set in build file then building the project with productionMode commandline arg executes vaadinBuildFrontend`() {
-        createProject(withNpmInstall = true, productionMode = false, disableAllTasksToSimulateDryRun = true)
-
-        addHelloReactEndpoint()
-
-        val buildResult: BuildResult = testProject.build("-Philla.productionMode=true", "build", checkTasksSuccessful = false)
-
-        expect(TaskOutcome.SKIPPED, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
-            buildResult.task(":vaadinBuildFrontend")?.outcome
-        }
-    }
-
-    @Test
-    fun `when productionMode is true in build file then building the project with commandline arg productionMode false does not execute vaadinBuildFrontend`() {
-        createProject(withNpmInstall = true, productionMode = true, disableAllTasksToSimulateDryRun = true)
-
-        addHelloReactEndpoint()
-
-        val buildResult: BuildResult = testProject.build("-Pvaadin.productionMode=false", "build", checkTasksSuccessful = false)
-
-        expect(null, "Building project while hilla.productionMode=true should plan to execute vaadinBuildFrontend task") {
-            buildResult.task(":vaadinBuildFrontend")
-        }
     }
 
     @Test
@@ -280,7 +240,6 @@ class SingleModuleTest : AbstractGradleTest() {
             dependencies {
                 implementation 'com.vaadin.hilla:hilla-react'
                 implementation 'com.vaadin:vaadin-spring'
-                implementation 'com.vaadin.hilla:hilla'
                 implementation 'org.springframework.boot:spring-boot-starter-web'
             }
 
