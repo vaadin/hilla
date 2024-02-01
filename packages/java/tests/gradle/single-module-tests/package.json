@@ -79,7 +79,6 @@
   },
   "vaadin": {
     "dependencies": {
-      "@vaadin/react-components": "24.4.0",
       "@polymer/polymer": "3.5.1",
       "@vaadin/bundles": "24.4.0",
       "@vaadin/common-frontend": "0.0.19",
