@@ -437,7 +437,7 @@ export const createService = <T extends HasIdVersion>(
 };
 
 export const createListService = <T extends HasIdVersion>(initialData: T[]): HasTestInfo & ListService<T> => {
-  const service = createService(initialData)!;
+  const service = createService(initialData);
   return {
     callCount: service.callCount,
     lastFilter: service.lastFilter,

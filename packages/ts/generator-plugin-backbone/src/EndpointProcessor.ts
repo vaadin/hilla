@@ -74,16 +74,15 @@ export default class EndpointProcessor {
       await Promise.all(
         Object.values(OpenAPIV3.HttpMethods)
           .filter((httpMethod) => pathItem[httpMethod])
-          .map(
-            async (httpMethod) =>
-              EndpointMethodOperationProcessor.createProcessor(
-                httpMethod,
-                this.#name,
-                method,
-                pathItem[httpMethod]!,
-                this.#dependencies,
-                this.#owner,
-              )?.process(this.#outputDir),
+          .map(async (httpMethod) =>
+            EndpointMethodOperationProcessor.createProcessor(
+              httpMethod,
+              this.#name,
+              method,
+              pathItem[httpMethod]!,
+              this.#dependencies,
+              this.#owner,
+            )?.process(this.#outputDir),
           ),
       )
     ).filter(Boolean) as readonly Statement[];
