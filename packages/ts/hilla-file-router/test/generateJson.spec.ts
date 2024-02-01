@@ -33,7 +33,7 @@ describe('@vaadin/hilla-file-router', () => {
           '/about': { title: 'About' },
           '/profile/': { title: 'Profile' },
           '/profile/account/security/password': { title: 'Password' },
-          '/profile/account/security/two-factor-auth': { title: 'Two-Factor Auth' },
+          '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
           '/profile/friends/list': { title: 'List' },
           '/profile/friends/:user': { title: 'User' },
         }),

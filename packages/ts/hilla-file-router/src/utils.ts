@@ -81,16 +81,22 @@ export function transformRoute<T, U>(
 }
 
 const viewPattern = /view/giu;
+const upperCaseSplitPattern = /(?=[A-Z])/gu;
 
 export function prepareConfig(config?: ViewConfig, component?: unknown): ViewConfig | undefined {
   if (config?.title) {
     return config;
   }
 
-  if (component && typeof component === 'object' && 'name' in component && typeof component.name === 'string') {
+  if (
+    component &&
+    (typeof component === 'object' || typeof component === 'function') &&
+    'name' in component &&
+    typeof component.name === 'string'
+  ) {
     return {
       ...config,
-      title: component.name.replace(viewPattern, ''),
+      title: component.name.replace(viewPattern, '').split(upperCaseSplitPattern).join(' '),
     };
   }
 

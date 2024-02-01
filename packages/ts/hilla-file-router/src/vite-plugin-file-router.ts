@@ -83,13 +83,17 @@ export default function vitePluginFileSystemRouter({
     configureServer(server) {
       const dir = fileURLToPath(_viewsDir);
 
-      server.watcher.on('unlink', (file) => {
+      const changeListener = (file: string): void => {
         if (!file.startsWith(dir)) {
           return;
         }
 
         build(_viewsDir, _outDir, generatedUrls, extensions).catch((error) => console.error(error));
-      });
+      };
+
+      server.watcher.on('add', changeListener);
+      server.watcher.on('change', changeListener);
+      server.watcher.on('unlink', changeListener);
     },
   };
 }

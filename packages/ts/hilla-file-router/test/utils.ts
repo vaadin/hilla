@@ -16,37 +16,31 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   await Promise.all([
     appendFile(
       new URL('profile/account/account.layout.tsx', dir),
-      "export const meta = { title: 'Account' };\nexport default function AccountLayout() {};",
+      "export const config = { title: 'Account' };\nexport default function AccountLayout() {};",
     ),
-    appendFile(
-      new URL('profile/account/security/password.jsx', dir),
-      "export const meta = { title: 'Password' };\nexport default function Password() {};",
-    ),
+    appendFile(new URL('profile/account/security/password.jsx', dir), 'export default function Password() {};'),
     appendFile(new URL('profile/account/security/password.scss', dir), ''),
     appendFile(
       new URL('profile/account/security/two-factor-auth.ts', dir),
-      "export const meta = { title: 'Two-Factor Auth' };\nexport default function TwoFactorAuth() {};",
+      'export default function TwoFactorAuth() {};',
     ),
-    appendFile(
-      new URL('profile/friends/friends.layout.tsx', dir),
-      "export const meta = { title: 'Friends Layout' };\nexport default function FriendsLayout() {};",
-    ),
+    appendFile(new URL('profile/friends/friends.layout.tsx', dir), 'export default function FriendsLayout() {};'),
     appendFile(
       new URL('profile/friends/list.js', dir),
-      "export const meta = { title: 'List' };\nexport default function List() {};",
+      "export const config = { title: 'List' };\nexport default function List() {};",
     ),
     appendFile(
       new URL('profile/friends/{user}.tsx', dir),
-      "export const meta = { title: 'User' };\nexport default function User() {};",
+      "export const config = { title: 'User' };\nexport default function User() {};",
     ),
     appendFile(
       new URL('profile/index.tsx', dir),
-      "export const meta = { title: 'Profile' };\nexport default function Profile() {};",
+      "export const config = { title: 'Profile' };\nexport default function Profile() {};",
     ),
     appendFile(new URL('profile/index.css', dir), ''),
     appendFile(
       new URL('about.tsx', dir),
-      "export const meta = { title: 'About' };\nexport default function About() {};",
+      "export const config = { title: 'About' };\nexport default function About() {};",
     ),
   ]);
 }
