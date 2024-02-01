@@ -79,7 +79,6 @@
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "lit": "$lit",
-    "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/hilla-core": "$@vaadin/hilla-core",
     "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
@@ -89,6 +88,7 @@
     "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
     "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
     "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
-    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils"
+    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
+    "@vaadin/router": "$@vaadin/router"
   }
 }
