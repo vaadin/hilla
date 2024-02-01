@@ -61,9 +61,6 @@
             <plugin>
                 <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
-                <configuration>
-                    <reactRouterEnabled>true</reactRouterEnabled>
-                </configuration>
             </plugin>
 
             <plugin>
