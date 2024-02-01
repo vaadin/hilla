@@ -9,7 +9,7 @@ import java.io.IOException
 public open class EngineInitAppTask : DefaultTask() {
 
     init {
-        group = "Hilla"
+        group = "Vaadin"
         description = "Task for scaffolding and initializing a Hilla application"
     }
 
