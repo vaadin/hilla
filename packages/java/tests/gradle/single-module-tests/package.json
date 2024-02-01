@@ -24,10 +24,12 @@
     "@vaadin/router": "1.7.5",
     "classnames": "^2.3.2",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.0",
+    "lit": "3.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.2"
+    "react-router-dom": "6.21.2",
+    "@types/react-dom": "18.2.18",
+    "@types/react": "18.2.48"
   },
   "devDependencies": {
     "@lit-labs/react": "^1.1.0",
@@ -40,15 +42,16 @@
     "async": "3.2.5",
     "glob": "10.3.10",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "5.11.0",
+    "rollup-plugin-visualizer": "5.12.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.10",
+    "vite": "5.0.12",
     "vite-plugin-checker": "0.6.2",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
-    "workbox-precaching": "7.0.0"
+    "workbox-precaching": "7.0.0",
+    "@babel/preset-react": "^7"
   },
   "overrides": {
     "@vaadin/router": "$@vaadin/router",
@@ -96,7 +99,12 @@
       "@vaadin/hilla-react-form": "24.4.0",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.0"
+      "lit": "3.1.1",
+      "react-dom": "18.2.0",
+      "@types/react-dom": "18.2.18",
+      "react-router-dom": "6.21.2",
+      "@types/react": "18.2.48",
+      "react": "18.2.0"
     },
     "devDependencies": {
       "@rollup/plugin-replace": "5.0.5",
@@ -106,15 +114,16 @@
       "async": "3.2.5",
       "glob": "10.3.10",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "5.11.0",
+      "rollup-plugin-visualizer": "5.12.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.10",
+      "vite": "5.0.12",
       "vite-plugin-checker": "0.6.2",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
-      "workbox-precaching": "7.0.0"
+      "workbox-precaching": "7.0.0",
+      "@babel/preset-react": "^7"
     },
     "hash": "8cfd18de14d73f98a9103e7cad17ecf3ccf80d4f3eb6f1599c55919db3883372"
   }

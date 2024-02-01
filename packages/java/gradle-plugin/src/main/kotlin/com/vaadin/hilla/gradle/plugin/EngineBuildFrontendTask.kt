@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2023 Vaadin Ltd
+ *    Copyright 2000-2024 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,5 +18,5 @@ package com.vaadin.hilla.gradle.plugin
 /**
  * Extend the VaadinBuildFrontendTask so that frontend files are not cleaned after build.
  */
-public open class HillaBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
+public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
 }
