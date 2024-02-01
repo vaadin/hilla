@@ -19,46 +19,46 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a framework-agnostic tree of routes', () => {
       const generated = generateRoutes(meta, new URL('./out/', dir));
 
-      expect(generated).to.equal(`import Page0 from "../views/about.js";
-import Page1 from "../views/profile/index.js";
-import Page2 from "../views/profile/account/security/password.js";
-import Page3 from "../views/profile/account/security/two-factor-auth.js";
-import Layout5 from "../views/profile/account/account.layout.js";
-import Page6 from "../views/profile/friends/list.js";
-import Page7 from "../views/profile/friends/{user}.js";
-import Layout8 from "../views/profile/friends/friends.layout.js";
+      expect(generated).to.equal(`import * as Page0 from "../views/about.js";
+import * as Page1 from "../views/profile/index.js";
+import * as Page2 from "../views/profile/account/security/password.js";
+import * as Page3 from "../views/profile/account/security/two-factor-auth.js";
+import * as Layout5 from "../views/profile/account/account.layout.js";
+import * as Page6 from "../views/profile/friends/list.js";
+import * as Page7 from "../views/profile/friends/{user}.js";
+import * as Layout8 from "../views/profile/friends/friends.layout.js";
 const routes = {
     path: "",
     children: [{
             path: "about",
-            component: Page0
+            module: Page0
         }, {
             path: "profile",
             children: [{
                     path: "",
-                    component: Page1
+                    module: Page1
                 }, {
                     path: "account",
-                    component: Layout5,
+                    module: Layout5,
                     children: [{
                             path: "security",
                             children: [{
                                     path: "password",
-                                    component: Page2
+                                    module: Page2
                                 }, {
                                     path: "two-factor-auth",
-                                    component: Page3
+                                    module: Page3
                                 }],
                         }],
                 }, {
                     path: "friends",
-                    component: Layout8,
+                    module: Layout8,
                     children: [{
                             path: "list",
-                            component: Page6
+                            module: Page6
                         }, {
                             path: ":user",
-                            component: Page7
+                            module: Page7
                         }],
                 }],
         }],

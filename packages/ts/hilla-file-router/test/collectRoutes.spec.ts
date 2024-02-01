@@ -1,7 +1,4 @@
-import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { rimraf } from 'rimraf';
@@ -22,10 +19,6 @@ describe('@vaadin/hilla-file-router', () => {
 
     after(async () => {
       await rimraf(fileURLToPath(tmp));
-    });
-
-    beforeEach(async () => {
-      await rimraf(fileURLToPath(new URL('*', tmp)), { glob: true });
     });
 
     it('should build a route tree', async () => {

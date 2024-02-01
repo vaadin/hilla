@@ -26,9 +26,8 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9878",
-    "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
