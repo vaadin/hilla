@@ -124,7 +124,7 @@ export default class GridController {
   }
 
   async getSortOrder(): Promise<SortOrder | undefined> {
-    const sorters = Array.from(await waitFor(() => this.instance.querySelectorAll('vaadin-grid-sorter')!));
+    const sorters = Array.from(await waitFor(() => this.instance.querySelectorAll('vaadin-grid-sorter')));
     const activeSorters = sorters
       .filter((gridSorter) => !!gridSorter.direction)
       // @ts-expect-error: accessing internal property
