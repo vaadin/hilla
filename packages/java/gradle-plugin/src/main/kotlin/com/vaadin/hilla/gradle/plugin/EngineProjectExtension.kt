@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2023 Vaadin Ltd
+ *    Copyright 2000-2024 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import com.vaadin.gradle.getBooleanProperty
 import org.gradle.api.Project
-import java.io.File
 
 public open class EngineProjectExtension(project: Project) {
 
@@ -34,30 +32,6 @@ public open class EngineProjectExtension(project: Project) {
     public var exposedPackagesToParser: List<String> = mutableListOf()
 
     /**
-     * Indicates whether the application should run in production mode, defaults to false.
-     * Responds to the `-Philla.productionMode` property.
-     */
-    public var productionMode: Boolean = false
-
-    /**
-     * The folder where flow will put TS API files for client projects.
-     */
-    public var generatedTsFolder: File = File(project.projectDir, "frontend/generated")
-
-    /**
-     * Defines the output folder used by the project.
-     *
-     * Default value is the `project.buildDir` and should not need to be changed.
-     */
-    public var projectBuildDir: String = project.buildDir.toString()
-
-    /**
-     * The name of the SourceSet to scan for Vaadin components - i.e. the classes that are annotated with
-     * Vaadin annotations.
-     */
-    public var sourceSetName : String = "main"
-
-    /**
      * The node command to execute
      */
     public var nodeCommand : String = "node"
@@ -68,18 +42,8 @@ public open class EngineProjectExtension(project: Project) {
           project.extensions.getByType(EngineProjectExtension::class.java)
     }
 
-    internal fun autoconfigure(project: Project) {
-        val productionModeProperty: Boolean? = project.getBooleanProperty("hilla.productionMode")
-        if (productionModeProperty != null) {
-            productionMode = productionModeProperty
-        }
-    }
-
     override fun toString(): String = "HillaPluginExtension(" +
             "exposedPackagesToParser=$exposedPackagesToParser, " +
-            "productionMode=$productionMode, " +
-            "generatedTsFolder=$generatedTsFolder, " +
-            "sourceSetName=$sourceSetName, " +
-            "nodeCommand=$nodeCommand, " +
+            "nodeCommand=$nodeCommand" +
             ")"
 }

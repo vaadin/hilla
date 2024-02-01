@@ -264,8 +264,8 @@ describe('@vaadin/hilla-lit-form', () => {
           priorityField = view.priorityField!;
         });
 
-        it('should set initial zero', () => {
-          expect(priorityField.value).to.equal('0');
+        it('should set initial empty', () => {
+          expect(priorityField.value).to.equal('');
         });
 
         it('should set number value from binder', async () => {
@@ -416,8 +416,8 @@ describe('@vaadin/hilla-lit-form', () => {
           priorityField = view.priorityField!;
         });
 
-        it('should set initial zero', () => {
-          expect(priorityField.value).to.equal('0');
+        it('should set initial empty', () => {
+          expect(priorityField.value).to.equal('');
         });
 
         it('should set number value from binder', async () => {

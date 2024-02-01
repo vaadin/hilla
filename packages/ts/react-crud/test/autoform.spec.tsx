@@ -59,8 +59,8 @@ describe('@vaadin/hilla-react-crud', () => {
       lastName: '',
       gender: Gender.MALE,
       email: '',
-      someInteger: 0,
-      someDecimal: 0,
+      someInteger: NaN,
+      someDecimal: NaN,
       id: -1,
       version: -1,
       vip: false,
@@ -73,8 +73,6 @@ describe('@vaadin/hilla-react-crud', () => {
         country: '',
       },
       department: {
-        id: 0,
-        version: 0,
         name: '',
       },
     };
@@ -86,8 +84,8 @@ describe('@vaadin/hilla-react-crud', () => {
         person.lastName,
         person.gender,
         person.email,
-        person.someInteger.toString(),
-        person.someDecimal.toString(),
+        Number.isNaN(person.someInteger) ? '' : person.someInteger.toString(),
+        Number.isNaN(person.someDecimal) ? '' : person.someDecimal.toString(),
         person.vip.toString(),
         person.birthDate,
         person.shiftStart,
@@ -284,19 +282,26 @@ describe('@vaadin/hilla-react-crud', () => {
       // Item is undefined
       const result = render(<AutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(user, result.container);
-      await form.typeInField('First name', 'foo');
+
+      const typeMinInFields = async () => {
+        await form.typeInField('First name', 'foo');
+        await form.typeInField('Some integer', '0');
+        await form.typeInField('Some decimal', '0');
+      };
+      await typeMinInFields();
       await form.submit();
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
 
       // Item is null
       result.rerender(<AutoForm service={service} model={PersonModel} item={null} />);
-      await form.typeInField('First name', 'foo');
+      await typeMinInFields();
       await form.submit();
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
 
       // Item is emptyItem
       result.rerender(<AutoForm service={service} model={PersonModel} item={emptyItem} />);
-      await form.typeInField('First name', 'foo');
+      await typeMinInFields();
+
       await form.submit();
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
@@ -585,6 +590,14 @@ describe('@vaadin/hilla-react-crud', () => {
 
       await form.discard();
       expect(submitButton.disabled).to.be.true;
+    });
+
+    it('renders with empty number fields', async () => {
+      const result = render(<AutoForm service={personService()} model={PersonModel} />);
+      const form = await FormController.init(user, result.container);
+
+      const someIntegerField = await form.getField('Some integer');
+      expect(someIntegerField).to.have.property('value', '');
     });
 
     describe('keyboard shortcuts', () => {
@@ -1037,6 +1050,18 @@ describe('@vaadin/hilla-react-crud', () => {
         const departmentJson = JSON.stringify(person.department);
         expect(addressField.value).to.equal(addressJson);
         expect(departmentField.value).to.equal(departmentJson);
+      });
+
+      it('renders JSON string with default values when creating new item', async () => {
+        const service = personService();
+        const result = render(
+          <AutoForm service={service} model={PersonModel} visibleFields={['address', 'department']} />,
+        );
+        const form = await FormController.init(user, result.container);
+        const [addressField, departmentField] = await form.getFields('Address', 'Department');
+
+        expect(addressField.value).to.equal(JSON.stringify(DEFAULT_PERSON.address));
+        expect(departmentField.value).to.equal(JSON.stringify(DEFAULT_PERSON.department));
       });
 
       it('renders JSON string with default values when creating new item', async () => {

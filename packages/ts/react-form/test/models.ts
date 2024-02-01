@@ -9,19 +9,18 @@ import {
   StringModel,
 } from '@vaadin/hilla-lit-form';
 
-export interface User {
-  id: number;
+export interface FormUser {
   name: string;
   password: string;
   passwordHint?: string;
 }
 
-export class UserModel<T extends User = User> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(UserModel);
+export interface User extends FormUser {
+  id: number;
+}
 
-  get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
-  }
+export class FormUserModel<T extends FormUser = FormUser> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(FormUserModel);
 
   get name(): StringModel {
     return this[_getPropertyModel](
@@ -46,6 +45,14 @@ export class UserModel<T extends User = User> extends ObjectModel<T> {
   }
 }
 
+export class UserModel<T extends User = User> extends FormUserModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(UserModel);
+
+  get id(): NumberModel {
+    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
+  }
+}
+
 export interface Login {
   user: User;
   rememberMe: boolean;
@@ -54,8 +61,8 @@ export interface Login {
 export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
   static override createEmptyValue = makeObjectEmptyValueCreator(LoginModel);
 
-  get user(): UserModel {
-    return this[_getPropertyModel]('user', (parent, key) => new UserModel(parent, key, false));
+  get user(): FormUserModel {
+    return this[_getPropertyModel]('user', (parent, key) => new FormUserModel(parent, key, false));
   }
 
   get rememberMe(): BooleanModel {

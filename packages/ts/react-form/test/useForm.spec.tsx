@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Contract, EntityModel, type Login, LoginModel, type Project, type UserModel } from './models.js';
+import { type Contract, EntityModel, type FormUserModel, type Login, LoginModel, type Project } from './models.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -21,7 +21,7 @@ describe('@vaadin/hilla-react-form', () => {
   let onChange: (value: Login) => void;
 
   type UserFormProps = Readonly<{
-    model: UserModel;
+    model: FormUserModel;
   }>;
 
   function UserForm({ model: user }: UserFormProps) {
