@@ -2,7 +2,7 @@ import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { JSX } from 'react';
 import { type RouteModule, toReactRouter } from '../src/react.js';
-import type { AgnosticRoute } from '../utils.js';
+import type { AgnosticRoute } from '../src/utils.js';
 
 use(chaiLike);
 
@@ -12,55 +12,67 @@ describe('@vaadin/hilla-file-router', () => {
       return <></>;
     }
 
-    About.meta = { title: 'About' };
+    About.config = { title: 'About' };
 
     function Friends(): JSX.Element {
       return <></>;
     }
 
-    Friends.meta = { title: 'Friends' };
+    Friends.config = { title: 'Friends' };
 
     function FriendsList(): JSX.Element {
       return <></>;
     }
 
-    FriendsList.meta = { title: 'Friends List' };
+    FriendsList.config = { title: 'Friends List' };
 
     function Friend(): JSX.Element {
       return <></>;
     }
 
-    Friend.meta = { title: 'Friend' };
+    Friend.config = { title: 'Friend' };
 
     it('should be able to convert an agnostic routes to React Router routes', () => {
-      const routes = {
+      const routes: AgnosticRoute<RouteModule> = {
         path: '',
         children: [
           {
             path: 'about',
-            component: About,
+            module: {
+              default: About,
+              config: About.config,
+            },
           },
           {
             path: 'profile',
             children: [
               {
                 path: 'friends',
-                component: Friends,
+                module: {
+                  default: Friends,
+                  config: Friends.config,
+                },
                 children: [
                   {
                     path: 'list',
-                    component: FriendsList,
+                    module: {
+                      default: FriendsList,
+                      config: FriendsList.config,
+                    },
                   },
                   {
                     path: '{user}',
-                    component: Friend,
+                    module: {
+                      default: Friend,
+                      config: Friend.config,
+                    },
                   },
                 ],
               },
             ],
           },
         ],
-      } satisfies AgnosticRoute<RouteModule>;
+      };
 
       const result = toReactRouter(routes);
 
@@ -70,7 +82,7 @@ describe('@vaadin/hilla-file-router', () => {
           {
             path: 'about',
             element: <About />,
-            handle: About.meta,
+            handle: About.config,
           },
           {
             path: 'profile',
@@ -78,17 +90,17 @@ describe('@vaadin/hilla-file-router', () => {
               {
                 path: 'friends',
                 element: <Friends />,
-                handle: Friends.meta,
+                handle: Friends.config,
                 children: [
                   {
                     path: 'list',
                     element: <FriendsList />,
-                    handle: FriendsList.meta,
+                    handle: FriendsList.config,
                   },
                   {
                     path: '{user}',
                     element: <Friend />,
-                    handle: Friend.meta,
+                    handle: Friend.config,
                   },
                 ],
               },
