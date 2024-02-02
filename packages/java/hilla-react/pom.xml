@@ -92,28 +92,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Copy versions file to classpath, so that Flow can use
-                    it to pin versions for pnpm. -->
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-and-rename-file</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <sourceFile>${basedir}/hilla-react-versions.json</sourceFile>
-                            <!-- use vaadin-core-versions.json here, as flow check this file firstly.
-                                 later we should consider to split this file for core and pro components. -->
-                            <destinationFile>${basedir}/target/classes/vaadin-core-versions.json</destinationFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
                     <execution>
@@ -131,5 +109,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

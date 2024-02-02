@@ -17,7 +17,7 @@
     "@vaadin/hilla-generator-utils": "../../../ts/generator-utils",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.1"
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@babel/preset-react": "^7",
@@ -32,7 +32,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
     "vite": "5.0.12",
-    "vite-plugin-checker": "0.6.2",
+    "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
@@ -53,7 +53,7 @@
       "@vaadin/hilla-generator-utils": "24.4.0-alpha2",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.1"
+      "lit": "3.1.2"
     },
     "devDependencies": {
       "@babel/preset-react": "^7",
@@ -68,12 +68,12 @@
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
       "vite": "5.0.12",
-      "vite-plugin-checker": "0.6.2",
+      "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "9d2851f250d868deb8bcd4fd46d7f7958eacdef15c7ea79bac5195e1d2bc6485"
+    "hash": "6a9fc251c02ee615a6942612684119ddaf239cd5026dde8d93e7bd7b54576ff3"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
