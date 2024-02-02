@@ -281,10 +281,12 @@
             </modules>
         </profile>
 
+        <!-- the spring module constains submodules to run with different profiles -->
         <profile>
             <id>it-modules-group-1</id>
             <modules>
                 <module>csrf</module>
+                <module>spring</module>
             </modules>
         </profile>
 
@@ -292,6 +294,7 @@
             <id>it-modules-group-2</id>
             <modules>
                 <module>csrf-context</module>
+                <module>spring</module>
             </modules>
         </profile>
 
