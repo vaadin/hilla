@@ -21,7 +21,7 @@
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.1"
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@babel/preset-react": "^7",
@@ -36,7 +36,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
     "vite": "5.0.12",
-    "vite-plugin-checker": "0.6.2",
+    "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
@@ -58,7 +58,7 @@
       "@vaadin/hilla-lit-form": "24.4.0-alpha2",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.1"
+      "lit": "3.1.2"
     },
     "devDependencies": {
       "@babel/preset-react": "^7",
@@ -73,12 +73,12 @@
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
       "vite": "5.0.12",
-      "vite-plugin-checker": "0.6.2",
+      "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "56dfc5264667431ec231b7b40edbc1061c6c000192baede4145a2e9ab55acae3"
+    "hash": "70597fa9951acda9226392e3b8ad7e713f47c7c111d9592e2aa9eeffe6168773"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

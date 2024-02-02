@@ -94,7 +94,7 @@
     "@vaadin/vertical-layout": "24.4.0-alpha10",
     "@vaadin/virtual-list": "24.4.0-alpha10",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.1",
+    "lit": "3.1.2",
     "mobx": "6.3.3"
   },
   "devDependencies": {
@@ -110,7 +110,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
     "vite": "5.0.12",
-    "vite-plugin-checker": "0.6.2",
+    "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
@@ -200,7 +200,7 @@
       "@vaadin/vertical-layout": "24.4.0-alpha10",
       "@vaadin/virtual-list": "24.4.0-alpha10",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.1",
+      "lit": "3.1.2",
       "mobx": "6.3.3"
     },
     "devDependencies": {
@@ -216,12 +216,12 @@
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
       "vite": "5.0.12",
-      "vite-plugin-checker": "0.6.2",
+      "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "c945c8711411f79a028cfb0a85fe41c88d440b4b137d17439b5d2321280a6a3d"
+    "hash": "3b123749921f9811defaef7fbd80911041cc28565451ed229a9ee898dd5992f2"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
