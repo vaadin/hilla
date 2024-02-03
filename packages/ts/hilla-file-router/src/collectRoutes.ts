@@ -38,11 +38,21 @@ export default async function collectRoutes(
       const file = new URL(d.name, dir);
       const name = basename(d.name, extname(d.name));
 
-      if (name.includes('.layout')) {
-        layout = file;
+      if (name.startsWith('$')) {
+        if (name === '$layout') {
+          layout = file;
+        } else if (name === '$index') {
+          children.push({
+            path: '',
+            file,
+            children: [],
+          });
+        } else {
+          throw new Error('Symbol "$" is reserved for special files; only "$layout" and "$index" are allowed');
+        }
       } else if (!name.startsWith('_')) {
         children.push({
-          path: name === 'index' ? '' : name,
+          path: name,
           file,
           children: [],
         });

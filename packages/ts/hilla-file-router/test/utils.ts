@@ -15,7 +15,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   ]);
   await Promise.all([
     appendFile(
-      new URL('profile/account/account.layout.tsx', dir),
+      new URL('profile/account/$layout.tsx', dir),
       "export const config = { title: 'Account' };\nexport default function AccountLayout() {};",
     ),
     appendFile(new URL('profile/account/security/password.jsx', dir), 'export default function Password() {};'),
@@ -24,7 +24,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       new URL('profile/account/security/two-factor-auth.ts', dir),
       'export default function TwoFactorAuth() {};',
     ),
-    appendFile(new URL('profile/friends/friends.layout.tsx', dir), 'export default function FriendsLayout() {};'),
+    appendFile(new URL('profile/friends/$layout.tsx', dir), 'export default function FriendsLayout() {};'),
     appendFile(
       new URL('profile/friends/list.js', dir),
       "export const config = { title: 'List' };\nexport default function List() {};",
@@ -34,7 +34,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       "export const config = { title: 'User' };\nexport default function User() {};",
     ),
     appendFile(
-      new URL('profile/index.tsx', dir),
+      new URL('profile/$index.tsx', dir),
       "export const config = { title: 'Profile' };\nexport default function Profile() {};",
     ),
     appendFile(new URL('profile/index.css', dir), ''),
@@ -59,10 +59,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
         path: 'profile',
         layout: undefined,
         children: [
-          { path: '', file: new URL('profile/index.tsx', dir), children: [] },
+          { path: '', file: new URL('profile/$index.tsx', dir), children: [] },
           {
             path: 'account',
-            layout: new URL('profile/account/account.layout.tsx', dir),
+            layout: new URL('profile/account/$layout.tsx', dir),
             children: [
               {
                 path: 'security',
@@ -84,7 +84,7 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           },
           {
             path: 'friends',
-            layout: new URL('profile/friends/friends.layout.tsx', dir),
+            layout: new URL('profile/friends/$layout.tsx', dir),
             children: [
               {
                 path: 'list',

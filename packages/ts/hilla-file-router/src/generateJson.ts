@@ -1,5 +1,8 @@
+import { readFile } from 'node:fs/promises';
+import { Script } from 'node:vm';
+import ts, { type Node } from 'typescript';
 import type { RouteMeta } from './collectRoutes.js';
-import { processPattern, prepareConfig, type ViewConfig } from './utils.js';
+import { prepareConfig, processPattern, type ViewConfig } from './utils.js';
 
 function* traverse(
   views: RouteMeta,
@@ -21,16 +24,42 @@ type RouteModule = Readonly<{
   config?: ViewConfig;
 }>;
 
-export default async function generateJson(views: RouteMeta): Promise<string> {
+function* walkAST(node: Node): Generator<Node> {
+  yield node;
+
+  for (const child of node.getChildren()) {
+    yield* walkAST(child);
+  }
+}
+
+export default async function generateJson(views: RouteMeta, exportName: string): Promise<string> {
   const res = await Promise.all(
     Array.from(traverse(views), async (branch) => {
       const configs = await Promise.all(
         branch
           .filter(({ file, layout }) => !!file || !!layout)
-          .map(({ file, layout }) => (file ? file : layout!).toString())
+          .map(({ file, layout }) => file ?? layout!)
           .map(async (path) => {
-            const { config, default: fn }: RouteModule = await import(`${path.substring(0, path.lastIndexOf('.'))}.js`);
-            return prepareConfig(config, fn);
+            const file = ts.createSourceFile('f.ts', await readFile(path, 'utf8'), ts.ScriptTarget.ESNext, true);
+            let config: ViewConfig | undefined;
+            let waitingForIdentifier = false;
+            let componentName: string | undefined;
+
+            for (const node of walkAST(file)) {
+              if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === exportName) {
+                if (node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
+                  const code = node.initializer.getText(file);
+                  const script = new Script(`(${code})`);
+                  config = script.runInThisContext() as ViewConfig;
+                }
+              } else if (node.getText(file).includes('export default')) {
+                waitingForIdentifier = true;
+              } else if (waitingForIdentifier && ts.isIdentifier(node)) {
+                componentName = node.text;
+              }
+            }
+
+            return prepareConfig(config, componentName);
           }),
       );
 

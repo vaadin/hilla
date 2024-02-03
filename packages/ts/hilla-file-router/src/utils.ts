@@ -1,3 +1,5 @@
+import { Script } from 'node:vm';
+
 export type ViewConfig = Readonly<{
   /**
    * View title used in the main layout header, as <title> and as the default
@@ -80,23 +82,31 @@ export function transformRoute<T, U>(
   );
 }
 
-const viewPattern = /view/giu;
-const upperCaseSplitPattern = /(?=[A-Z])/gu;
-
-export function prepareConfig(config?: ViewConfig, component?: unknown): ViewConfig | undefined {
-  if (config?.title) {
-    return config;
-  }
-
+export function extractComponentName(component?: unknown): string | undefined {
   if (
     component &&
     (typeof component === 'object' || typeof component === 'function') &&
     'name' in component &&
     typeof component.name === 'string'
   ) {
+    return component.name;
+  }
+
+  return undefined;
+}
+
+const viewPattern = /view/giu;
+const upperCaseSplitPattern = /(?=[A-Z])/gu;
+
+export function prepareConfig(config?: ViewConfig, componentName?: string): ViewConfig | undefined {
+  if (config?.title) {
+    return config;
+  }
+
+  if (componentName) {
     return {
       ...config,
-      title: component.name.replace(viewPattern, '').split(upperCaseSplitPattern).join(' '),
+      title: componentName.replace(viewPattern, '').split(upperCaseSplitPattern).join(' '),
     };
   }
 

@@ -20,13 +20,13 @@ describe('@vaadin/hilla-file-router', () => {
       const generated = generateRoutes(meta, new URL('./out/', dir));
 
       expect(generated).to.equal(`import * as Page0 from "../views/about.js";
-import * as Page1 from "../views/profile/index.js";
+import * as Page1 from "../views/profile/$index.js";
 import * as Page2 from "../views/profile/account/security/password.js";
 import * as Page3 from "../views/profile/account/security/two-factor-auth.js";
-import * as Layout5 from "../views/profile/account/account.layout.js";
+import * as Layout5 from "../views/profile/account/$layout.js";
 import * as Page6 from "../views/profile/friends/list.js";
 import * as Page7 from "../views/profile/friends/{user}.js";
-import * as Layout8 from "../views/profile/friends/friends.layout.js";
+import * as Layout8 from "../views/profile/friends/$layout.js";
 const routes = {
     path: "",
     children: [{

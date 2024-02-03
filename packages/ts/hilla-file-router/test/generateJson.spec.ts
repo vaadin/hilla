@@ -26,7 +26,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate a JSON representation of the route tree', async () => {
-      const generated = await generateJson(meta);
+      const generated = await generateJson(meta, 'config');
 
       expect(generated).to.equal(
         JSON.stringify({
