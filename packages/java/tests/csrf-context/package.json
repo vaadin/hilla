@@ -17,13 +17,13 @@
     "@vaadin/hilla-generator-utils": "../../../ts/generator-utils",
     "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.1"
+    "lit": "3.1.2"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7",
     "@rollup/plugin-replace": "5.0.5",
     "@rollup/pluginutils": "5.1.0",
     "@vitejs/plugin-react": "4.2.1",
-    "@vitejs/plugin-react-swc": "3.5.0",
     "async": "3.2.5",
     "glob": "10.3.10",
     "rollup-plugin-brotli": "3.1.0",
@@ -31,8 +31,8 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.11",
-    "vite-plugin-checker": "0.6.2",
+    "vite": "5.0.12",
+    "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
     "workbox-precaching": "7.0.0"
@@ -53,13 +53,13 @@
       "@vaadin/hilla-generator-utils": "24.4.0-alpha2",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.1"
+      "lit": "3.1.2"
     },
     "devDependencies": {
+      "@babel/preset-react": "^7",
       "@rollup/plugin-replace": "5.0.5",
       "@rollup/pluginutils": "5.1.0",
       "@vitejs/plugin-react": "4.2.1",
-      "@vitejs/plugin-react-swc": "3.5.0",
       "async": "3.2.5",
       "glob": "10.3.10",
       "rollup-plugin-brotli": "3.1.0",
@@ -67,19 +67,18 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.11",
-      "vite-plugin-checker": "0.6.2",
+      "vite": "5.0.12",
+      "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "831d8153beab0e6bf2ded7b89a33185521e939b88fb9b1bce44a7c489747e4e4"
+    "hash": "6a9fc251c02ee615a6942612684119ddaf239cd5026dde8d93e7bd7b54576ff3"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "lit": "$lit",
-    "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/hilla-core": "$@vaadin/hilla-core",
     "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
@@ -89,6 +88,7 @@
     "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
     "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
     "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
-    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils"
+    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
+    "@vaadin/router": "$@vaadin/router"
   }
 }

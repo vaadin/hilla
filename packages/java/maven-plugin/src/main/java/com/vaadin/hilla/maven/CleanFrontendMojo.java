@@ -16,15 +16,4 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "clean-frontend", defaultPhase = LifecyclePhase.PRE_CLEAN)
 public class CleanFrontendMojo
         extends com.vaadin.flow.plugin.maven.CleanFrontendMojo {
-
-    @Override
-    public void execute() throws MojoFailureException {
-        getLog().warn(
-                """
-                        The 'clean-frontend' goal is not meant to be used in Hilla projects as it delete 'package-lock.json' and also clearing out the content of 'package.json'.
-                        Note: The 'clean-frontend' goal is deprecated and would be removed in future releases.
-                        """
-                        .stripIndent());
-        super.execute();
-    }
 }

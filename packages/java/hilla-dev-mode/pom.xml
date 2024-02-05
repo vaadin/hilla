@@ -33,10 +33,6 @@
             <version>${flow.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hotswapagent</groupId>
             <artifactId>hotswap-agent</artifactId>
             <version>1.4.1</version>

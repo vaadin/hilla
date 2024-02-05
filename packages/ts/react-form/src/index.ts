@@ -175,7 +175,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
       if (fieldState.strategy) {
         const valueFromField = convertFieldValue(model, fieldState.strategy.value);
         if (valueFromField !== n.value && !(Number.isNaN(n.value) && Number.isNaN(valueFromField))) {
-          fieldState.strategy.value = n.value;
+          fieldState.strategy.value = Number.isNaN(n.value) ? '' : n.value;
         }
 
         if (fieldState.required !== n.required) {

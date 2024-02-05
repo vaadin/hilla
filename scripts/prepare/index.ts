@@ -26,12 +26,11 @@ generate(version, versions);
 console.log('Moving the generated files to the final place.');
 
 await Promise.all([
-  copyFile(new URL('hilla-versions.json', local.results), destination.lit.versions).then(() =>
-    console.log(`Moved ${destination.lit.versions.toString()}`),
-  ),
-  copyFile(new URL('hilla-react-versions.json', local.results), destination.react.versions).then(() =>
-    console.log(`Moved ${destination.react.versions.toString()}`),
-  ),
+  destination.lit.versions.forEach(
+    file => copyFile(new URL('hilla-versions.json', local.results), file)
+      .then(() => console.log(`Copied ${file.toString()}`))),
+  destination.react.versions.forEach(file => copyFile(new URL('hilla-react-versions.json', local.results), file)
+    .then(() => console.log(`Copied ${file.toString()}`))),
 ]);
 
 const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;

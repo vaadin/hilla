@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2023 Vaadin Ltd
+ *    Copyright 2000-2024 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.gradle.VaadinFlowPluginExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
@@ -35,14 +36,16 @@ public open class EngineConfigureTask : DefaultTask() {
     }
 
     init {
-        group = "Hilla"
+        group = "Vaadin"
         description = "Hilla Configure Task"
     }
 
     @TaskAction
     public fun engineConfigure() {
         val extension: EngineProjectExtension = EngineProjectExtension.get(project)
-        logger.info("Running the engineConfigure task with effective configuration $extension")
+        logger.info("Running the engineConfigure task with effective Hilla configuration $extension")
+        val vaadinExtension = VaadinFlowPluginExtension.get(project)
+        logger.info("Running the engineConfigure task with effective Vaadin configuration $extension")
 
         val generator = GeneratorConfiguration()
         val parser = ParserConfiguration()
@@ -52,15 +55,15 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val projectBuildDir = project.buildDir.toPath()
         val projectClassesDir = projectBuildDir.resolve("classes")
-        val classPathElements = (sourceSets.getByName(extension.sourceSetName) as SourceSet)
+        val classPathElements = (sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet)
             .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
 
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())
             .classPath(classPathElements)
-            .outputDir(extension.generatedTsFolder.toPath())
+            .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
             .generator(generator)
             .parser(parser)
-            .buildDir(extension.projectBuildDir)
+            .buildDir(vaadinExtension.projectBuildDir.get())
             .classesDir(projectClassesDir)
             .create()
 
