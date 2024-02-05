@@ -32,7 +32,7 @@ function* walkAST(node: Node): Generator<Node> {
   }
 }
 
-export default async function generateJson(views: RouteMeta, exportName: string): Promise<string> {
+export default async function generateJson(views: RouteMeta, configExportName: string): Promise<string> {
   const res = await Promise.all(
     Array.from(traverse(views), async (branch) => {
       const configs = await Promise.all(
@@ -46,7 +46,7 @@ export default async function generateJson(views: RouteMeta, exportName: string)
             let componentName: string | undefined;
 
             for (const node of walkAST(file)) {
-              if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === exportName) {
+              if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === configExportName) {
                 if (node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
                   const code = node.initializer.getText(file);
                   const script = new Script(`(${code})`);

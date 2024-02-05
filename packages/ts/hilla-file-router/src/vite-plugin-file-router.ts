@@ -20,11 +20,19 @@ export type PluginOptions = Readonly<{
    */
   generatedDir?: URL | string;
   /**
-   * The list of extensions that will be collected as routes of the file-based router.
+   * The list of extensions that will be collected as routes of the file-based
+   * router.
    *
    * @defaultValue `['.tsx', '.jsx', '.ts', '.js']`
    */
   extensions?: readonly string[];
+  /**
+   * The name of the export that will be used for the {@link ViewConfig} in the
+   * route file.
+   *
+   * @defaultValue `config`
+   */
+  configExportName?: string;
 }>;
 
 type GeneratedUrls = Readonly<{
@@ -41,10 +49,11 @@ async function build(
   outDir: URL,
   generatedUrls: GeneratedUrls,
   extensions: readonly string[],
+  configExportName: string,
 ): Promise<void> {
   const routeMeta = await collectRoutes(viewsDir, { extensions });
   const code = generateRoutes(routeMeta, outDir);
-  const json = await generateJson(routeMeta);
+  const json = await generateJson(routeMeta, configExportName);
 
   await generate(code, json, generatedUrls);
 }
@@ -59,6 +68,7 @@ export default function vitePluginFileSystemRouter({
   viewsDir = 'frontend/views/',
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
+  configExportName = 'config',
 }: PluginOptions = {}): Plugin {
   let _viewsDir: URL;
   let _generatedDir: URL;
@@ -78,7 +88,7 @@ export default function vitePluginFileSystemRouter({
       };
     },
     async buildStart() {
-      await build(_viewsDir, _generatedDir, generatedUrls, extensions);
+      await build(_viewsDir, _generatedDir, generatedUrls, extensions, configExportName);
     },
     configureServer(server) {
       const dir = fileURLToPath(_viewsDir);
@@ -88,7 +98,7 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        build(_viewsDir, _outDir, generatedUrls, extensions).catch((error) => console.error(error));
+        build(_viewsDir, _outDir, generatedUrls, extensions, configExportName).catch((error) => console.error(error));
       };
 
       server.watcher.on('add', changeListener);
