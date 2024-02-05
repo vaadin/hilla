@@ -17,12 +17,16 @@ package com.vaadin.hilla.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.Platform;
 import com.vaadin.flow.server.frontend.FallibleCommand;
 
 import com.vaadin.hilla.engine.ConfigurationException;
@@ -69,26 +73,45 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         if (firstRun) {
             logger.debug("Configure Hilla engine using build system plugin");
 
-            try {
-                // Create a runner for Maven
-                MavenRunner
-                        .forProject(projectDirectory, "-q", "vaadin:configure")
-                        // Create a runner for Gradle. Even if Gradle is not
-                        // supported yet, this is useful to emit an error
-                        // message if pom.xml is not found and build.gradle is
-                        .or(() -> GradleRunner.forProject(projectDirectory,
-                                "-q", "hillaConfigure"))
-                        // If no runner is found, throw an exception.
-                        .orElseThrow(() -> new IllegalStateException(String
-                                .format("Failed to determine project directory for dev mode. "
-                                        + "Directory '%s' does not look like a Maven or "
-                                        + "Gradle project.", projectDirectory)))
-                        // Run the first valid runner
-                        .run(null);
-                firstRun = false;
-            } catch (CommandRunnerException e) {
+            var mavenConfigure = MavenRunner.forProject(projectDirectory, "-q",
+                    "vaadin:configure");
+            var mavenConfigureVersion = Platform.getVaadinVersion()
+                    .flatMap(version -> MavenRunner.forProject(projectDirectory,
+                            "-q", "com.vaadin:vaadin-maven-plugin:" + version));
+            var gradleConfigure = GradleRunner.forProject(projectDirectory,
+                    "-q", "hillaConfigure");
+
+            var runners = Stream
+                    .of(mavenConfigure, mavenConfigureVersion, gradleConfigure)
+                    .flatMap(Optional::stream).toList();
+
+            if (runners.isEmpty()) {
+                throw new ExecutionFailedException(String.format(
+                        "Failed to determine project directory for dev mode. "
+                                + "Directory '%s' does not look like a Maven or "
+                                + "Gradle project.",
+                        projectDirectory));
+            } else {
+                for (var runner : runners) {
+                    try {
+                        runner.run(null);
+                        firstRun = false;
+                        break;
+                    } catch (CommandRunnerException e) {
+                        logger.debug(
+                                "Failed to configure Hilla engine using "
+                                        + runner.getClass().getSimpleName()
+                                        + " with arguments "
+                                        + Arrays.toString(runner.arguments()),
+                                e);
+                    }
+                }
+            }
+
+            if (firstRun) {
                 throw new ExecutionFailedException(
-                        "Failed to configure Hilla engine", e);
+                        "Failed to configure Hilla engine: no runner succeeded. "
+                                + "Set log level to debug to see more details.");
             }
         }
 
