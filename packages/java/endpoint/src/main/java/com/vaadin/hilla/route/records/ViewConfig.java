@@ -86,4 +86,3 @@ public record ViewConfig(String title, String[] rolesAllowed, String route, Bool
         return result;
     }
 }
-

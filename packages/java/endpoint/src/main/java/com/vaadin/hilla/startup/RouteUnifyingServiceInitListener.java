@@ -22,27 +22,31 @@ import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
- * Service init listener to add the {@link RouteUnifyingIndexHtmlRequestListener} to the
- * service.
+ * Service init listener to add the
+ * {@link RouteUnifyingIndexHtmlRequestListener} to the service.
  */
 @Component
-public class RouteUnifyingServiceInitListener implements VaadinServiceInitListener {
+public class RouteUnifyingServiceInitListener
+        implements VaadinServiceInitListener {
 
     private final RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener;
 
     /**
      * Creates a new instance of the listener.
-     * @param routeUnifyingIndexHtmlRequestListener the listener to add
+     *
+     * @param routeUnifyingIndexHtmlRequestListener
+     *            the listener to add
      */
     @Autowired
-    public RouteUnifyingServiceInitListener(RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener) {
+    public RouteUnifyingServiceInitListener(
+            RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener) {
         this.routeUnifyingIndexHtmlRequestListener = routeUnifyingIndexHtmlRequestListener;
     }
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
-        event.addIndexHtmlRequestListener(routeUnifyingIndexHtmlRequestListener);
+        event.addIndexHtmlRequestListener(
+                routeUnifyingIndexHtmlRequestListener);
     }
 }

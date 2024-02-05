@@ -1,6 +1,5 @@
 package com.vaadin.hilla.route;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.router.PageTitle;
@@ -21,12 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Index HTML request listener for extracting server-side
- * and client-side views and in dev mode adding them to unified index.html.
+ * Index HTML request listener for extracting server-side and client-side views
+ * and in dev mode adding them to unified index.html.
  */
 @Component
-public class RouteUnifyingIndexHtmlRequestListener implements IndexHtmlRequestListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RouteUnifyingIndexHtmlRequestListener.class);
+public class RouteUnifyingIndexHtmlRequestListener
+        implements IndexHtmlRequestListener {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -41,20 +42,26 @@ public class RouteUnifyingIndexHtmlRequestListener implements IndexHtmlRequestLi
             }
 
             try {
-                final String viewsJson = mapper.writeValueAsString(availableViews);
-                response.getDocument().head().appendElement("script").text("window.Vaadin.views = " + viewsJson);
+                final String viewsJson = mapper
+                        .writeValueAsString(availableViews);
+                response.getDocument().head().appendElement("script")
+                        .text("window.Vaadin.views = " + viewsJson);
             } catch (IOException e) {
                 LOGGER.warn("Failed to write views to dev mode", e);
             }
         }
     }
 
-    protected void extractServerViews(final List<AvailableView> availableViews) {
-        final RouteRegistry registry = VaadinService.getCurrent().getRouter().getRegistry();
+    protected void extractServerViews(
+            final List<AvailableView> availableViews) {
+        final RouteRegistry registry = VaadinService.getCurrent().getRouter()
+                .getRegistry();
         registry.getRegisteredRoutes().forEach(serverView -> {
-            final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView.getNavigationTarget();
+            final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
+                    .getNavigationTarget();
             final String url = "/" + registry.getTargetUrl(viewClass)
-                .orElseThrow(() -> new RuntimeException("Only supporting views without parameters"));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Only supporting views without parameters"));
 
             final String title;
             PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
@@ -68,12 +75,15 @@ public class RouteUnifyingIndexHtmlRequestListener implements IndexHtmlRequestLi
         });
     }
 
-    protected void extractClientViews(final List<AvailableView> availableViews) {
+    protected void extractClientViews(
+            final List<AvailableView> availableViews) {
         try {
-            final URL source = getClass().getResource("/META-INF/VAADIN/views.json");
+            final URL source = getClass()
+                    .getResource("/META-INF/VAADIN/views.json");
             Map<String, ViewConfig> clientViews = new HashMap<>();
             if (source != null) {
-                clientViews = mapper.readValue(source, new TypeReference<>() {});
+                clientViews = mapper.readValue(source, new TypeReference<>() {
+                });
             }
 
             clientViews.forEach((route, clientView) -> {
@@ -82,7 +92,8 @@ public class RouteUnifyingIndexHtmlRequestListener implements IndexHtmlRequestLi
                     title = clientView.route();
                 }
 
-                availableViews.add(new AvailableView(route, true, title, clientView.other()));
+                availableViews.add(new AvailableView(route, true, title,
+                        clientView.other()));
             });
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
@@ -92,9 +103,8 @@ public class RouteUnifyingIndexHtmlRequestListener implements IndexHtmlRequestLi
     private boolean isDevMode() {
         VaadinService vaadinService = VaadinService.getCurrent();
         return (vaadinService != null && !vaadinService
-            .getDeploymentConfiguration().isProductionMode());
+                .getDeploymentConfiguration().isProductionMode());
     }
-
 
     protected record AvailableView(String route, boolean clientSide, String title,
                                    Map<String, Object> other) {

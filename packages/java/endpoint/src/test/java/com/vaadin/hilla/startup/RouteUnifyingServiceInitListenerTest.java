@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-
 public class RouteUnifyingServiceInitListenerTest {
 
     private RouteUnifyingServiceInitListener routeUnifyingServiceInitListener;
@@ -17,23 +16,23 @@ public class RouteUnifyingServiceInitListenerTest {
     @Before
     public void setup() {
         routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(
-            Mockito.mock(RouteUnifyingIndexHtmlRequestListener.class));
+                Mockito.mock(RouteUnifyingIndexHtmlRequestListener.class));
         event = new ServiceInitEvent(Mockito.mock(VaadinService.class));
     }
 
     @Test
     public void should_addRouteIndexHtmlRequestListener() {
         Assert.assertFalse("Unexpected RouteIndexHtmlRequestListener added",
-            eventHasAddedRouteIndexHtmlRequestListener(event));
+                eventHasAddedRouteIndexHtmlRequestListener(event));
         routeUnifyingServiceInitListener.serviceInit(event);
         Assert.assertTrue(
-            "Expected event to have RouteIndexHtmlRequestListener added",
-            eventHasAddedRouteIndexHtmlRequestListener(event));
+                "Expected event to have RouteIndexHtmlRequestListener added",
+                eventHasAddedRouteIndexHtmlRequestListener(event));
     }
 
     private boolean eventHasAddedRouteIndexHtmlRequestListener(
-        ServiceInitEvent event) {
+            ServiceInitEvent event) {
         return event.getAddedIndexHtmlRequestListeners().anyMatch(
-            indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteUnifyingIndexHtmlRequestListener);
+                indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteUnifyingIndexHtmlRequestListener);
     }
 }

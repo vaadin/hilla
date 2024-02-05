@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-
 public class RouteUnifyingIndexHtmlRequestListenerTest {
 
     private RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener;
@@ -44,80 +43,109 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Mockito.when(indexHtmlResponse.getDocument()).thenReturn(document);
 
         final List<RouteData> flowRegisteredRoutes = new ArrayList<>();
-        final RouteData bar = new RouteData(Collections.emptyList(), "bar", Collections.emptyList(), Component.class, Collections.emptyList());
+        final RouteData bar = new RouteData(Collections.emptyList(), "bar",
+                Collections.emptyList(), Component.class,
+                Collections.emptyList());
         flowRegisteredRoutes.add(bar);
-        final RouteData foo = new RouteData(Collections.emptyList(), "foo", Collections.emptyList(), RouteTarget.class, Collections.emptyList());
+        final RouteData foo = new RouteData(Collections.emptyList(), "foo",
+                Collections.emptyList(), RouteTarget.class,
+                Collections.emptyList());
         flowRegisteredRoutes.add(foo);
 
         final RouteRegistry registry = Mockito.mock(RouteRegistry.class);
-        Mockito.when(registry.getRegisteredRoutes()).thenReturn(flowRegisteredRoutes);
-        Mockito.when(registry.getTargetUrl(Mockito.any())).thenReturn(Optional.of("foo"));
+        Mockito.when(registry.getRegisteredRoutes())
+                .thenReturn(flowRegisteredRoutes);
+        Mockito.when(registry.getTargetUrl(Mockito.any()))
+                .thenReturn(Optional.of("foo"));
 
         vaadinService = Mockito.mock(VaadinService.class);
         final Router router = Mockito.mock(Router.class);
         Mockito.when(vaadinService.getRouter()).thenReturn(router);
         Mockito.when(router.getRegistry()).thenReturn(registry);
 
-        //Mock developer mode
-        final DeploymentConfiguration deploymentConfiguration = Mockito.mock(DeploymentConfiguration.class);
-        Mockito.when(vaadinService.getDeploymentConfiguration()).thenReturn(deploymentConfiguration);
-        Mockito.when(deploymentConfiguration.isProductionMode()).thenReturn(false);
+        // Mock developer mode
+        final DeploymentConfiguration deploymentConfiguration = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(vaadinService.getDeploymentConfiguration())
+                .thenReturn(deploymentConfiguration);
+        Mockito.when(deploymentConfiguration.isProductionMode())
+                .thenReturn(false);
     }
 
     @Test
     public void modifyIndexHtmlResponse() {
 
-        try (MockedStatic<VaadinService> mocked = Mockito.mockStatic(VaadinService.class)) {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            routeUnifyingIndexHtmlRequestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+            routeUnifyingIndexHtmlRequestListener
+                    .modifyIndexHtmlResponse(indexHtmlResponse);
         }
         Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
-        MatcherAssert.assertThat(indexHtmlResponse.getDocument().head().select("script"), Matchers.notNullValue());
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
 
-        final String scriptText = indexHtmlResponse.getDocument().head().select("script").text();
-        MatcherAssert.assertThat(scriptText, Matchers.startsWith("window.Vaadin.views = "));
+        final String scriptText = indexHtmlResponse.getDocument().head()
+                .select("script").text();
+        MatcherAssert.assertThat(scriptText,
+                Matchers.startsWith("window.Vaadin.views = "));
 
-        final String views = scriptText.substring("window.Vaadin.views = ".length());
+        final String views = scriptText
+                .substring("window.Vaadin.views = ".length());
         List<RouteUnifyingIndexHtmlRequestListener.AvailableView> viewsList;
         try {
-            viewsList = new ObjectMapper().readValue(views, new TypeReference<>() {
-            });
+            viewsList = new ObjectMapper().readValue(views,
+                    new TypeReference<>() {
+                    });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
         MatcherAssert.assertThat(viewsList, Matchers.hasSize(8));
-        MatcherAssert.assertThat(viewsList.get(0).title(), Matchers.is("About"));
-        MatcherAssert.assertThat(viewsList.get(0).clientSide(), Matchers.is(true));
-        MatcherAssert.assertThat(viewsList.get(7).title(), Matchers.is("RouteTarget"));
-        MatcherAssert.assertThat(viewsList.get(7).clientSide(), Matchers.is(false));
+        MatcherAssert.assertThat(viewsList.get(0).title(),
+                Matchers.is("About"));
+        MatcherAssert.assertThat(viewsList.get(0).clientSide(),
+                Matchers.is(true));
+        MatcherAssert.assertThat(viewsList.get(7).title(),
+                Matchers.is("RouteTarget"));
+        MatcherAssert.assertThat(viewsList.get(7).clientSide(),
+                Matchers.is(false));
     }
 
     @Test
     public void extractServerViews() {
         final List<RouteUnifyingIndexHtmlRequestListener.AvailableView> availableViews = new ArrayList<>();
 
-        try (MockedStatic<VaadinService> mocked = Mockito.mockStatic(VaadinService.class)) {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            routeUnifyingIndexHtmlRequestListener.extractServerViews(availableViews);
+            routeUnifyingIndexHtmlRequestListener
+                    .extractServerViews(availableViews);
         }
         MatcherAssert.assertThat(availableViews, Matchers.hasSize(2));
-        MatcherAssert.assertThat(availableViews.get(0).title(), Matchers.is("Component"));
-        MatcherAssert.assertThat(availableViews.get(1).title(), Matchers.is("RouteTarget"));
-        MatcherAssert.assertThat(availableViews.get(0).route(), Matchers.is("/foo"));
+        MatcherAssert.assertThat(availableViews.get(0).title(),
+                Matchers.is("Component"));
+        MatcherAssert.assertThat(availableViews.get(1).title(),
+                Matchers.is("RouteTarget"));
+        MatcherAssert.assertThat(availableViews.get(0).route(),
+                Matchers.is("/foo"));
 
     }
 
     @Test
     public void extractClientViews() {
         final List<RouteUnifyingIndexHtmlRequestListener.AvailableView> availableViews = new ArrayList<>();
-        routeUnifyingIndexHtmlRequestListener.extractClientViews(availableViews);
+        routeUnifyingIndexHtmlRequestListener
+                .extractClientViews(availableViews);
 
         MatcherAssert.assertThat(availableViews, Matchers.hasSize(6));
-        MatcherAssert.assertThat(availableViews.get(0).title(), Matchers.is("About"));
-        MatcherAssert.assertThat(availableViews.get(5).other().get("unknown"), Matchers.notNullValue());
+        MatcherAssert.assertThat(availableViews.get(0).title(),
+                Matchers.is("About"));
+        MatcherAssert.assertThat(availableViews.get(5).other().get("unknown"),
+                Matchers.notNullValue());
     }
 
     @PageTitle("RouteTarget")
