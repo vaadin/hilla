@@ -61,7 +61,7 @@ public class RouteUnifyingIndexHtmlRequestListener
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
             final Optional<String> targetUrl = registry.getTargetUrl(viewClass);
-            if(targetUrl.isPresent()) {
+            if (targetUrl.isPresent()) {
                 final String url = "/" + targetUrl.get();
 
                 final String title;
@@ -72,7 +72,8 @@ public class RouteUnifyingIndexHtmlRequestListener
                     title = serverView.getNavigationTarget().getSimpleName();
                 }
 
-                availableViews.add(new AvailableView(url, false, title, Map.of()));
+                availableViews
+                        .add(new AvailableView(url, false, title, Map.of()));
             } else {
                 LOGGER.debug("Only supporting views without parameters");
             }
