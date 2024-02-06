@@ -84,7 +84,7 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
                     .thenReturn(Optional.of(mockConfigureNotFound));
             staticMock
                     .when(() -> MavenRunner.forProject(any(), eq("-q"),
-                            eq("com.vaadin:vaadin-maven-plugin:1.0.0")))
+                            eq("com.vaadin:vaadin-maven-plugin:1.0.0:configure")))
                     .thenReturn(Optional.of(mockConfigureFound));
             platformMock.when(Platform::getVaadinVersion)
                     .thenReturn(Optional.of("1.0.0"));
