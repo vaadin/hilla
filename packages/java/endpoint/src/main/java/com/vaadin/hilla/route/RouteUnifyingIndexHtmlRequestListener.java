@@ -26,9 +26,9 @@ import java.util.Optional;
  */
 @Component
 public class RouteUnifyingIndexHtmlRequestListener
-    implements IndexHtmlRequestListener {
+        implements IndexHtmlRequestListener {
     private static final Logger LOGGER = LoggerFactory
-        .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
+            .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -44,9 +44,9 @@ public class RouteUnifyingIndexHtmlRequestListener
 
             try {
                 final String viewsJson = mapper
-                    .writeValueAsString(availableViews);
+                        .writeValueAsString(availableViews);
                 response.getDocument().head().appendElement("script")
-                    .text("window.Vaadin.views = " + viewsJson);
+                        .text("window.Vaadin.views = " + viewsJson);
             } catch (IOException e) {
                 LOGGER.warn("Failed to write views to dev mode", e);
             }
@@ -54,39 +54,43 @@ public class RouteUnifyingIndexHtmlRequestListener
     }
 
     protected void extractServerViews(
-        final List<AvailableView> availableViews) {
+            final List<AvailableView> availableViews) {
         final RouteRegistry registry = VaadinService.getCurrent().getRouter()
-            .getRegistry();
+                .getRegistry();
         registry.getRegisteredRoutes().forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
-                .getNavigationTarget();
+                    .getNavigationTarget();
             try {
-                final Optional<String> targetUrl = registry.getTargetUrl(viewClass);
+                final Optional<String> targetUrl = registry
+                        .getTargetUrl(viewClass);
                 if (targetUrl.isPresent()) {
                     final String url = "/" + targetUrl.get();
 
                     final String title;
-                    PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
+                    PageTitle pageTitle = viewClass
+                            .getAnnotation(PageTitle.class);
                     if (pageTitle != null) {
                         title = pageTitle.value();
                     } else {
-                        title = serverView.getNavigationTarget().getSimpleName();
+                        title = serverView.getNavigationTarget()
+                                .getSimpleName();
                     }
 
-                    availableViews
-                        .add(new AvailableView(url, false, title, Map.of()));
+                    availableViews.add(
+                            new AvailableView(url, false, title, Map.of()));
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.debug("Only supporting Flow views without parameters", e);
+                LOGGER.debug("Only supporting Flow views without parameters",
+                        e);
             }
         });
     }
 
     protected void extractClientViews(
-        final List<AvailableView> availableViews) {
+            final List<AvailableView> availableViews) {
         try {
             final URL source = getClass()
-                .getResource("/META-INF/VAADIN/views.json");
+                    .getResource("/META-INF/VAADIN/views.json");
             Map<String, ViewConfig> clientViews = new HashMap<>();
             if (source != null) {
                 clientViews = mapper.readValue(source, new TypeReference<>() {
@@ -100,7 +104,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                 }
 
                 availableViews.add(new AvailableView(route, true, title,
-                    clientView.other()));
+                        clientView.other()));
             });
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
@@ -110,7 +114,7 @@ public class RouteUnifyingIndexHtmlRequestListener
     private boolean isDevMode() {
         VaadinService vaadinService = VaadinService.getCurrent();
         return (vaadinService != null && !vaadinService
-            .getDeploymentConfiguration().isProductionMode());
+                .getDeploymentConfiguration().isProductionMode());
     }
 
     protected record AvailableView(String route, boolean clientSide, String title,
