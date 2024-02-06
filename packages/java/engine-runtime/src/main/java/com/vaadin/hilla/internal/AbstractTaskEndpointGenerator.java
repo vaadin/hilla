@@ -77,7 +77,8 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                     "vaadin:configure");
             var mavenConfigureVersion = Platform.getVaadinVersion()
                     .flatMap(version -> MavenRunner.forProject(projectDirectory,
-                            "-q", "com.vaadin:vaadin-maven-plugin:" + version+":configure"));
+                            "-q", "com.vaadin:vaadin-maven-plugin:" + version
+                                    + ":configure"));
             var gradleConfigure = GradleRunner.forProject(projectDirectory,
                     "-q", "hillaConfigure");
 
