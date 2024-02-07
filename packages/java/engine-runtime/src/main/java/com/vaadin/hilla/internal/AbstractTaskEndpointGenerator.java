@@ -16,17 +16,20 @@
 package com.vaadin.hilla.internal;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.Platform;
 import com.vaadin.flow.server.frontend.FallibleCommand;
 
 import com.vaadin.hilla.engine.ConfigurationException;
@@ -39,22 +42,28 @@ import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(AbstractTaskEndpointGenerator.class);
     private static boolean firstRun = true;
 
     private final String buildDirectoryName;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     protected final File outputDirectory;
     private final File projectDirectory;
+    private final Function<String, URL> resourceFinder;
     private EngineConfiguration engineConfiguration;
 
     AbstractTaskEndpointGenerator(File projectDirectory,
-            String buildDirectoryName, File outputDirectory) {
+            String buildDirectoryName, File outputDirectory,
+            Function<String, URL> resourceFinder) {
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
                 "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
                 "Build directory name cannot be null");
         this.outputDirectory = Objects.requireNonNull(outputDirectory,
                 "Output direrctory name cannot be null");
+        this.resourceFinder = Objects.requireNonNull(resourceFinder,
+                "Class finder cannot be null");
     }
 
     protected EngineConfiguration getEngineConfiguration()
@@ -75,7 +84,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
 
             var mavenConfigure = MavenRunner.forProject(projectDirectory, "-q",
                     "vaadin:configure");
-            var mavenConfigureVersion = Platform.getVaadinVersion()
+            var mavenConfigureVersion = getVaadinVersion()
                     .flatMap(version -> MavenRunner.forProject(projectDirectory,
                             "-q", "com.vaadin:vaadin-maven-plugin:" + version
                                     + ":configure"));
@@ -131,5 +140,28 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                     "Failed to read Hilla engine configuration", e);
         }
 
+    }
+
+    private Optional<String> getVaadinVersion() {
+        String vaadinVersion;
+        try (final InputStream vaadinPomProperties = resourceFinder
+                .apply("META-INF/maven/com.vaadin/vaadin-core/pom.properties")
+                .openStream()) {
+            if (vaadinPomProperties != null) {
+                final Properties properties = new Properties();
+                properties.load(vaadinPomProperties);
+                vaadinVersion = properties.getProperty("version", "");
+            } else {
+                LOGGER.info("Unable to determine Vaadin version. "
+                        + "No META-INF/maven/com.vaadin/vaadin-core/pom.properties found");
+                vaadinVersion = "";
+            }
+        } catch (Exception e) {
+            LOGGER.error("Unable to determine Vaadin version", e);
+            vaadinVersion = "";
+        }
+
+        return vaadinVersion.isEmpty() ? Optional.empty()
+                : Optional.of(vaadinVersion);
     }
 }

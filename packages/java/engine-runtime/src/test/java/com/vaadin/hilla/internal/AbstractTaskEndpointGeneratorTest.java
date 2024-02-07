@@ -1,14 +1,15 @@
 package com.vaadin.hilla.internal;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
 import com.vaadin.hilla.engine.commandrunner.MavenRunner;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.server.Platform;
 import com.vaadin.flow.server.ExecutionFailedException;
 
 import static org.mockito.Mockito.*;
@@ -41,11 +42,15 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         }, "Output directory cannot be null");
     }
 
-    static private class TestTaskEndpointGenerator
+    private static final Function<String, URL> resourceFinder = Thread
+            .currentThread().getContextClassLoader()::getResource;
+
+    private static class TestTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
         TestTaskEndpointGenerator(File projectDirectory,
                 String buildDirectoryName, File outputDirectory) {
-            super(projectDirectory, buildDirectoryName, outputDirectory);
+            super(projectDirectory, buildDirectoryName, outputDirectory,
+                    resourceFinder);
         }
 
         @Override
@@ -54,11 +59,12 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         }
     }
 
-    static private class MockedTaskEndpointGenerator
+    private static class MockedTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
         MockedTaskEndpointGenerator(File projectDirectory,
                 String buildDirectoryName, File outputDirectory) {
-            super(projectDirectory, buildDirectoryName, outputDirectory);
+            super(projectDirectory, buildDirectoryName, outputDirectory,
+                    resourceFinder);
         }
 
         @Override
@@ -76,8 +82,7 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
                 rootException)).when(mockConfigureNotFound).run(null);
         var mockConfigureFound = mock(MavenRunner.class);
 
-        try (var staticMock = mockStatic(MavenRunner.class);
-                var platformMock = mockStatic(Platform.class)) {
+        try (var staticMock = mockStatic(MavenRunner.class)) {
             staticMock
                     .when(() -> MavenRunner.forProject(any(), eq("-q"),
                             eq("vaadin:configure")))
@@ -86,8 +91,6 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
                     .when(() -> MavenRunner.forProject(any(), eq("-q"), eq(
                             "com.vaadin:vaadin-maven-plugin:1.0.0:configure")))
                     .thenReturn(Optional.of(mockConfigureFound));
-            platformMock.when(Platform::getVaadinVersion)
-                    .thenReturn(Optional.of("1.0.0"));
             var task = new MockedTaskEndpointGenerator(
                     getTemporaryDirectory().toFile(), getBuildDirectory(),
                     getTemporaryDirectory().resolve(getOutputDirectory())
@@ -99,6 +102,7 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
             Files.createFile(getTemporaryDirectory().resolve("pom.xml"));
             task.execute();
             verify(mockConfigureNotFound).run(null);
+            verify(mockConfigureFound).run(null);
         }
     }
 }
