@@ -16,7 +16,7 @@
 
     <properties>
         <testbench.element.version>24.4-SNAPSHOT</testbench.element.version>
-        <jetty.version>11.0.7</jetty.version>
+        <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
         <license.skipDownloadLicenses>true</license.skipDownloadLicenses>

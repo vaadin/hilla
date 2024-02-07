@@ -34,11 +34,6 @@
             <artifactId>engine-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin.hilla</groupId>
-            <artifactId>hilla-dev</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
