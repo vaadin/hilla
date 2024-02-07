@@ -162,6 +162,7 @@
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
                 <module>react-grid-test</module>
+                <module>react-signals</module>
                 <module>hilla-spring-boot-starter</module>
                 <module>hilla-react-spring-boot-starter</module>
             </modules>
@@ -189,6 +190,7 @@
                 <module>security-contextpath</module>
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
+                <module>react-signals</module>
             </modules>
         </profile>
 
