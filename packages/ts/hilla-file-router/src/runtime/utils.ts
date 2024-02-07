@@ -45,7 +45,7 @@ export type ViewConfig = Readonly<{
      * used title. Entries without explicitly defined ordering are put below
      * entries with an order.
      */
-    priority?: number;
+    order?: number;
     /**
      * Set to true to explicitly exclude a view from the automatically
      * populated menu.
