@@ -1,6 +1,7 @@
 import { opendir } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cleanUp } from './utils.js';
 
 export type RouteMeta = Readonly<{
   path: string;
@@ -13,13 +14,6 @@ export type CollectRoutesOptions = Readonly<{
   extensions: readonly string[];
   parent?: URL;
 }>;
-
-function cleanUp(blank: string) {
-  return blank
-    .replaceAll(/\{\.{3}(.+)\}/gu, '$1')
-    .replaceAll(/\{{2}(.+)\}{2}/gu, '$1')
-    .replaceAll(/\{(.+)\}/gu, '$1');
-}
 
 const collator = new Intl.Collator('en-US');
 

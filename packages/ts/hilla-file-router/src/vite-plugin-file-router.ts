@@ -2,7 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Plugin } from 'vite';
 import collectRoutesFromFS from './vite-plugin/collectRoutesFromFS.js';
-import createRoutesFromFS from './vite-plugin/createRoutesFromFS.js';
+import createRoutesFromMeta from './vite-plugin/createRoutesFromMeta.js';
 import createViewConfigJson from './vite-plugin/createViewConfigJson.js';
 
 export type PluginOptions = Readonly<{
@@ -52,7 +52,7 @@ async function build(
   configExportName: string,
 ): Promise<void> {
   const routeMeta = await collectRoutesFromFS(viewsDir, { extensions });
-  const runtimeRoutesCode = createRoutesFromFS(routeMeta, outDir);
+  const runtimeRoutesCode = createRoutesFromMeta(routeMeta, outDir);
   const viewConfigJson = await createViewConfigJson(routeMeta, configExportName);
 
   await generateRuntimeFiles(runtimeRoutesCode, viewConfigJson, generatedUrls);

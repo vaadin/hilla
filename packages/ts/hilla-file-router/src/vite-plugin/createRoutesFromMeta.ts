@@ -50,7 +50,7 @@ function createRouteData(
   );
 }
 
-export default function createRoutesFromFS(views: RouteMeta, generatedDir: URL): string {
+export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL): string {
   const imports: ImportDeclaration[] = [];
   let id = 0;
 
