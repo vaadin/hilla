@@ -1,8 +1,4 @@
-import {
-  isNonComposedRegularSchema,
-  type NonComposedRegularSchema,
-  type Schema,
-} from '@vaadin/hilla-generator-core/Schema.js';
+import type { NonComposedRegularSchema, Schema } from '@vaadin/hilla-generator-core/Schema.js';
 import { template, transform } from '@vaadin/hilla-generator-utils/ast.js';
 import ts, {
   type Expression,
@@ -17,7 +13,6 @@ export type ValidationConstrainedSchema = NonComposedRegularSchema &
 
 export function hasValidationConstraints(schema: Schema): schema is ValidationConstrainedSchema {
   return (
-    isNonComposedRegularSchema(schema) &&
     'x-validation-constraints' in schema &&
     (schema as ValidationConstrainedSchema)['x-validation-constraints'].length > 0
   );
