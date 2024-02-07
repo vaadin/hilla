@@ -1,9 +1,9 @@
 import { writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Plugin } from 'vite';
-import collectRoutes from './collectRoutes.js';
-import generateJson from './generateJson.js';
-import generateRoutes from './generateRoutes.js';
+import collectRoutesFromFS from './vite-plugin/collectRoutesFromFS.js';
+import createRoutesFromFS from './vite-plugin/createRoutesFromFS.js';
+import createViewConfigJson from './vite-plugin/createViewConfigJson.js';
 
 export type PluginOptions = Readonly<{
   /**
@@ -35,27 +35,27 @@ export type PluginOptions = Readonly<{
   configExportName?: string;
 }>;
 
-type GeneratedUrls = Readonly<{
+type RuntimeFileUrls = Readonly<{
   json: URL;
   code: URL;
 }>;
 
-async function generate(code: string, json: string, urls: GeneratedUrls) {
+async function generateRuntimeFiles(code: string, json: string, urls: RuntimeFileUrls) {
   await Promise.all([writeFile(urls.json, json, 'utf-8'), writeFile(urls.code, code, 'utf-8')]);
 }
 
 async function build(
   viewsDir: URL,
   outDir: URL,
-  generatedUrls: GeneratedUrls,
+  generatedUrls: RuntimeFileUrls,
   extensions: readonly string[],
   configExportName: string,
 ): Promise<void> {
-  const routeMeta = await collectRoutes(viewsDir, { extensions });
-  const code = generateRoutes(routeMeta, outDir);
-  const json = await generateJson(routeMeta, configExportName);
+  const routeMeta = await collectRoutesFromFS(viewsDir, { extensions });
+  const runtimeRoutesCode = createRoutesFromFS(routeMeta, outDir);
+  const viewConfigJson = await createViewConfigJson(routeMeta, configExportName);
 
-  await generate(code, json, generatedUrls);
+  await generateRuntimeFiles(runtimeRoutesCode, viewConfigJson, generatedUrls);
 }
 
 /**
@@ -73,7 +73,7 @@ export default function vitePluginFileSystemRouter({
   let _viewsDir: URL;
   let _generatedDir: URL;
   let _outDir: URL;
-  let generatedUrls: GeneratedUrls;
+  let generatedUrls: RuntimeFileUrls;
 
   return {
     name: 'vite-plugin-file-router',

@@ -2,7 +2,7 @@ import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { RouteMeta } from '../src/collectRoutes.js';
+import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
   return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);

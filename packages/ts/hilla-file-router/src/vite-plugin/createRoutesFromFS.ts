@@ -8,8 +8,9 @@ import ts, {
   type StringLiteral,
   type VariableStatement,
 } from 'typescript';
-import type { RouteMeta } from './collectRoutes.js';
-import { processPattern, transformRoute } from './utils.js';
+import { transformRoute } from '../runtime/utils.js';
+import type { RouteMeta } from './collectRoutesFromFS.js';
+import { convertFSPatternToURLPatternString } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
@@ -49,7 +50,7 @@ function createRouteData(
   );
 }
 
-export default function generateRoutes(views: RouteMeta, generatedDir: URL): string {
+export default function createRoutesFromFS(views: RouteMeta, generatedDir: URL): string {
   const imports: ImportDeclaration[] = [];
   let id = 0;
 
@@ -69,7 +70,7 @@ export default function generateRoutes(views: RouteMeta, generatedDir: URL): str
         imports.push(createImport(mod, relativize(layout, generatedDir)));
       }
 
-      return createRouteData(processPattern(path), mod, children);
+      return createRouteData(convertFSPatternToURLPatternString(path), mod, children);
     },
   );
 

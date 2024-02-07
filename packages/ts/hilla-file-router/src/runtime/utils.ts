@@ -1,5 +1,3 @@
-import { Script } from 'node:vm';
-
 export type ViewConfig = Readonly<{
   /**
    * View title used in the main layout header, as <title> and as the default
@@ -15,7 +13,7 @@ export type ViewConfig = Readonly<{
 
   /**
    * Allows overriding the route path configuration. Uses the same syntax as
-   * the path property with React Router.This can be used to define a route
+   * the path property with React Router. This can be used to define a route
    * that conflicts with the file name conventions, e.g. /foo/index
    */
   route?: string;
@@ -62,13 +60,6 @@ export type AgnosticRoute<T> = Readonly<{
   children?: ReadonlyArray<AgnosticRoute<T>>;
 }>;
 
-export function processPattern(blank: string): string {
-  return blank
-    .replaceAll(/\{\.{3}.+\}/gu, '*')
-    .replaceAll(/\{{2}(.+)\}{2}/gu, ':$1?')
-    .replaceAll(/\{(.+)\}/gu, ':$1');
-}
-
 export function transformRoute<T, U>(
   route: T,
   getChildren: (route: T) => IterableIterator<T> | null | undefined,
@@ -98,7 +89,7 @@ export function extractComponentName(component?: unknown): string | undefined {
 const viewPattern = /view/giu;
 const upperCaseSplitPattern = /(?=[A-Z])/gu;
 
-export function prepareConfig(config?: ViewConfig, componentName?: string): ViewConfig | undefined {
+export function adjustViewTitle(config?: ViewConfig, componentName?: string): ViewConfig | undefined {
   if (config?.title) {
     return config;
   }

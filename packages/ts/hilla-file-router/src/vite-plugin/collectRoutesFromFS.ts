@@ -23,7 +23,7 @@ function cleanUp(blank: string) {
 
 const collator = new Intl.Collator('en-US');
 
-export default async function collectRoutes(
+export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, parent = dir }: CollectRoutesOptions,
 ): Promise<RouteMeta> {
@@ -33,7 +33,7 @@ export default async function collectRoutes(
 
   for await (const d of await opendir(dir)) {
     if (d.isDirectory()) {
-      children.push(await collectRoutes(new URL(`${d.name}/`, dir), { extensions, parent: dir }));
+      children.push(await collectRoutesFromFS(new URL(`${d.name}/`, dir), { extensions, parent: dir }));
     } else if (d.isFile() && extensions.includes(extname(d.name))) {
       const file = new URL(d.name, dir);
       const name = basename(d.name, extname(d.name));

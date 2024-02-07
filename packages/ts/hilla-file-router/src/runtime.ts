@@ -1,7 +1,13 @@
 import type { UIMatch } from '@remix-run/router';
 import { type ComponentType, createElement } from 'react';
 import { type RouteObject, useMatches } from 'react-router';
-import { type AgnosticRoute, transformRoute, prepareConfig, type ViewConfig, extractComponentName } from './utils.js';
+import {
+  type AgnosticRoute,
+  transformRoute,
+  adjustViewTitle,
+  type ViewConfig,
+  extractComponentName,
+} from './runtime/utils.js';
 
 export type RouteModule<P = object> = Readonly<{
   default: ComponentType<P>;
@@ -22,7 +28,7 @@ export function toReactRouter(routes: AgnosticRoute<RouteModule>): RouteObject {
         path,
         element: module?.default ? createElement(module.default) : undefined,
         children: children.length > 0 ? (children as RouteObject[]) : undefined,
-        handle: prepareConfig(module?.config, extractComponentName(module?.default)),
+        handle: adjustViewTitle(module?.config, extractComponentName(module?.default)),
       }) satisfies RouteObject,
   );
 }

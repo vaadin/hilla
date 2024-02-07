@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { rimraf } from 'rimraf';
-import collectRoutes from '../src/collectRoutes.js';
+import collectRoutesFromFS from '../src/vite-plugin/collectRoutesFromFS.js';
 import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from './utils.js';
 
 use(deepEqualInAnyOrder);
@@ -36,7 +36,7 @@ describe('@vaadin/hilla-file-router', () => {
       // │   ├── index.tsx
       // │   └── layout.tsx
       // └── about.tsx
-      const result = await collectRoutes(tmp, { extensions });
+      const result = await collectRoutesFromFS(tmp, { extensions });
 
       expect(result).to.deep.equals(createTestingRouteMeta(tmp));
     });

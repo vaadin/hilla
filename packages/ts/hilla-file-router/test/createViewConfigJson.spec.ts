@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { expect } from '@esm-bundle/chai';
 import { rimraf } from 'rimraf';
-import type { RouteMeta } from '../src/collectRoutes.js';
-import generateJson from '../src/generateJson.js';
+import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
+import createViewConfigJson from '../src/vite-plugin/createViewConfigJson.js';
 import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from './utils.js';
 
 describe('@vaadin/hilla-file-router', () => {
@@ -26,7 +26,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate a JSON representation of the route tree', async () => {
-      const generated = await generateJson(meta, 'config');
+      const generated = await createViewConfigJson(meta, 'config');
 
       expect(generated).to.equal(
         JSON.stringify({

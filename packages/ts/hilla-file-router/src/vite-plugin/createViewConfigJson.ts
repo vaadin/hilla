@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 import ts, { type Node } from 'typescript';
-import type { RouteMeta } from './collectRoutes.js';
-import { prepareConfig, processPattern, type ViewConfig } from './utils.js';
+import { adjustViewTitle, type ViewConfig } from '../runtime/utils.js';
+import type { RouteMeta } from './collectRoutesFromFS.js';
+import { convertFSPatternToURLPatternString } from './utils.js';
 
 function* traverse(
   views: RouteMeta,
@@ -19,11 +20,6 @@ function* traverse(
   }
 }
 
-type RouteModule = Readonly<{
-  default: unknown;
-  config?: ViewConfig;
-}>;
-
 function* walkAST(node: Node): Generator<Node> {
   yield node;
 
@@ -32,7 +28,7 @@ function* walkAST(node: Node): Generator<Node> {
   }
 }
 
-export default async function generateJson(views: RouteMeta, configExportName: string): Promise<string> {
+export default async function createViewConfigJson(views: RouteMeta, configExportName: string): Promise<string> {
   const res = await Promise.all(
     Array.from(traverse(views), async (branch) => {
       const configs = await Promise.all(
@@ -59,11 +55,11 @@ export default async function generateJson(views: RouteMeta, configExportName: s
               }
             }
 
-            return prepareConfig(config, componentName);
+            return adjustViewTitle(config, componentName);
           }),
       );
 
-      const key = branch.map(({ path }) => processPattern(path)).join('/');
+      const key = branch.map(({ path }) => convertFSPatternToURLPatternString(path)).join('/');
       const value = configs[configs.length - 1];
 
       return [key, value] satisfies readonly [string, ViewConfig | undefined];

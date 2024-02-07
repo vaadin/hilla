@@ -2,8 +2,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect } from '@esm-bundle/chai';
-import type { RouteMeta } from '../src/collectRoutes.js';
-import generateRoutes from '../src/generateRoutes.js';
+import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
+import createRoutesFromFS from '../src/vite-plugin/createRoutesFromFS.js';
 import { createTestingRouteMeta } from './utils.js';
 
 describe('@vaadin/hilla-file-router', () => {
@@ -17,7 +17,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate a framework-agnostic tree of routes', () => {
-      const generated = generateRoutes(meta, new URL('./out/', dir));
+      const generated = createRoutesFromFS(meta, new URL('./out/', dir));
 
       expect(generated).to.equal(`import * as Page0 from "../views/about.js";
 import * as Page1 from "../views/profile/$index.js";

@@ -31,8 +31,8 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
-    "./react.js": {
-      "default": "./react.js"
+    "./runtime.js": {
+      "default": "./runtime.js"
     },
     "./vite-plugin-file-router.js": {
       "default": "./vite-plugin-file-router.js"
