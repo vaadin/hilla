@@ -20,7 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
+// TEST
 /**
  * Annotation to mark either field, method, parameter or type parameter as
  * non-nullable. It is used by Typescript Generator as a source of type
