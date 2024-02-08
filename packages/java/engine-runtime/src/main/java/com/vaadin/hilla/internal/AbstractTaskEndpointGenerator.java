@@ -143,7 +143,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     }
 
     private Optional<String> getVaadinVersion() {
-        String vaadinVersion;
+        String vaadinVersion = null;
         try (final InputStream vaadinPomProperties = resourceFinder
                 .apply("META-INF/maven/com.vaadin/vaadin-core/pom.properties")
                 .openStream()) {
@@ -152,16 +152,13 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                 properties.load(vaadinPomProperties);
                 vaadinVersion = properties.getProperty("version", "");
             } else {
-                LOGGER.info("Unable to determine Vaadin version. "
+                LOGGER.debug("Unable to determine Vaadin version. "
                         + "No META-INF/maven/com.vaadin/vaadin-core/pom.properties found");
-                vaadinVersion = "";
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to determine Vaadin version", e);
-            vaadinVersion = "";
+            LOGGER.debug("Unable to determine Vaadin version", e);
         }
 
-        return vaadinVersion.isEmpty() ? Optional.empty()
-                : Optional.of(vaadinVersion);
+        return Optional.ofNullable(vaadinVersion);
     }
 }

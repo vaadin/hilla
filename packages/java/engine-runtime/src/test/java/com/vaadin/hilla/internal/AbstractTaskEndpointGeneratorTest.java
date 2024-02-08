@@ -42,10 +42,10 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         }, "Output directory cannot be null");
     }
 
-    private static final Function<String, URL> resourceFinder = Thread
-            .currentThread().getContextClassLoader()::getResource;
+    private final Function<String, URL> resourceFinder = Thread.currentThread()
+            .getContextClassLoader()::getResource;
 
-    private static class TestTaskEndpointGenerator
+    private class TestTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
         TestTaskEndpointGenerator(File projectDirectory,
                 String buildDirectoryName, File outputDirectory) {
@@ -59,7 +59,7 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         }
     }
 
-    private static class MockedTaskEndpointGenerator
+    private class MockedTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
         MockedTaskEndpointGenerator(File projectDirectory,
                 String buildDirectoryName, File outputDirectory) {
