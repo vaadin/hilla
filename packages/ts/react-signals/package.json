@@ -43,9 +43,9 @@
     "access": "public"
   },
   "dependencies": {
+    "@preact/signals-react": "^2.0.0"
   },
   "peerDependencies": {
-    "@preact/signals-react": "^2.0.0",
     "react": "^18",
     "react-router-dom": "^6"
   },
