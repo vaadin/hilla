@@ -33,6 +33,11 @@ describe('ValidationConstraintProcessor', () => {
   let importer: sinon.SinonSpy;
   let processor: ValidationConstraintProcessor;
 
+  type SchemaWithValidators = Schema & {
+    'x-validation-constraints': ValidationConstraint[];
+    'x-annotations': Array<{ name: string }>;
+  };
+
   beforeEach(() => {
     importer = sinon.fake((name: string) => ts.factory.createIdentifier(name));
     processor = new ValidationConstraintProcessor(importer);
@@ -150,7 +155,7 @@ describe('ValidationConstraintProcessor', () => {
   });
 
   it('should detect validations in composed schemas', () => {
-    const cityComposedSchema: Schema = {
+    const cityComposedSchema: SchemaWithValidators = {
       nullable: true,
       anyOf: [{ $ref: '#/components/schemas/com.github.example.domain.City' }],
       'x-validation-constraints': [{ simpleName: 'NotNull' }],
