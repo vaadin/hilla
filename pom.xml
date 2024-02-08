@@ -80,7 +80,7 @@
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.4-SNAPSHOT</flow.version>
-    <copilot.version>24.3.10</copilot.version>
+    <copilot.version>24.3.11</copilot.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>3.2.2</spring.boot.version>
     <testbench.version>9.2.2</testbench.version>
