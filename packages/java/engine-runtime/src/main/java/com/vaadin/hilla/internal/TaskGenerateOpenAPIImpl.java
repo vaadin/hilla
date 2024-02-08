@@ -17,7 +17,9 @@ package com.vaadin.hilla.internal;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.net.URL;
 import java.util.Objects;
+import java.util.function.Function;
 
 import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
@@ -52,12 +54,17 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      * @param outputDirectory
      *            the output directory for generated TypeScript code.
      *
+     * @param resourceFinder
+     *            used internally to find resources.
+     *
      * @param classLoader
      *            the Java Class Loader for the parser.
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, @Nonnull ClassLoader classLoader) {
-        super(projectDirectory, buildDirectoryName, outputDirectory);
+            File outputDirectory, Function<String, URL> resourceFinder,
+            @Nonnull ClassLoader classLoader) {
+        super(projectDirectory, buildDirectoryName, outputDirectory,
+                resourceFinder);
         this.classLoader = Objects.requireNonNull(classLoader,
                 "ClassLoader should not be null");
     }
