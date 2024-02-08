@@ -63,6 +63,7 @@ public class EndpointGeneratorTaskFactoryImpl
         return new TaskGenerateEndpointImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
                 options.getFrontendGeneratedFolder(),
+                options.getClassFinder()::getResource,
                 options.isProductionMode(), nodeExecutable);
     }
 
@@ -77,6 +78,7 @@ public class EndpointGeneratorTaskFactoryImpl
         return new TaskGenerateOpenAPIImpl(options.getNpmFolder(),
                 options.getBuildDirectoryName(),
                 options.getFrontendGeneratedFolder(),
+                options.getClassFinder()::getResource,
                 options.getClassFinder().getClassLoader());
     }
 

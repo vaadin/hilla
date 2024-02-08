@@ -48,7 +48,8 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile(), false, "node");
+                outputDirectory.toFile(), getClass()::getResource, false,
+                "node");
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -82,7 +83,8 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile(), false, "node");
+                outputDirectory.toFile(), getClass()::getResource, false,
+                "node");
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
