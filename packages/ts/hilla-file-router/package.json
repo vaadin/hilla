@@ -1,0 +1,74 @@
+{
+  "name": "@vaadin/hilla-file-router",
+  "version": "24.4.0-alpha2",
+  "description": "Hilla file-based router",
+  "main": "index.js",
+  "module": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/hilla.git",
+    "directory": "packages/ts/hilla-file-router"
+  },
+  "keywords": [
+    "Hilla",
+    "Vite",
+    "Plugin",
+    "File",
+    "Router",
+    "Routing"
+  ],
+  "scripts": {
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
+    "build": "concurrently npm:build:*",
+    "build:esbuild": "tsx ../../../scripts/build.ts",
+    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
+    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./runtime.js": {
+      "default": "./runtime.js"
+    },
+    "./vite-plugin-file-router.js": {
+      "default": "./vite-plugin-file-router.js"
+    }
+  },
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/hilla/issues"
+  },
+  "homepage": "https://vaadin.com",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react-router": "^6.21.1"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@types/chai-like": "^1.1.3",
+    "@types/deep-equal-in-any-order": "^1.0.3",
+    "@types/mocha": "^10.0.6",
+    "@types/sinon": "^17.0.3",
+    "chai-like": "^1.1.1",
+    "deep-equal-in-any-order": "^2.0.6",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.5",
+    "sinon": "^17.0.1",
+    "type-fest": "^4.9.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@vaadin/hilla-generator-utils": "^24.4.0-alpha1",
+    "react": "^18.2.0"
+  }
+}

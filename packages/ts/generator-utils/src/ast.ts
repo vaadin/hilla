@@ -1,5 +1,6 @@
 import ts, {
   type Node,
+  type VisitResult,
   type SourceFile,
   type Statement,
   type TransformationContext,
@@ -43,9 +44,19 @@ export function template<T>(
   return selector?.(sourceFile.statements) ?? sourceFile.statements;
 }
 
-export function transform<T extends Node>(transformer: (node: Node) => Node): TransformerFactory<T> {
+export function transform<T extends Node>(
+  transformer: (node: Node) => VisitResult<Node | undefined>,
+): TransformerFactory<T> {
   return (context: TransformationContext) => (root: T) => {
-    const visitor = (node: Node): Node => ts.visitEachChild(transformer(node), visitor, context);
+    const visitor = (node: Node): VisitResult<Node | undefined> => {
+      const transformed = transformer(node);
+
+      if (transformed !== node) {
+        return transformed;
+      }
+
+      return ts.visitEachChild(transformed, visitor, context);
+    };
     return ts.visitEachChild(root, visitor, context);
   };
 }

@@ -17,15 +17,15 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
 
-@NpmPackage(value = "@vaadin/hilla-generator-core", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-utils", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-cli", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-plugin-client", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-plugin-backbone", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-plugin-barrel", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-plugin-model", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-plugin-push", version = "24.4.0-alpha2")
-@NpmPackage(value = "@vaadin/hilla-generator-plugin-subtypes", version = "24.4.0-alpha2")
+@NpmPackage(value = "@vaadin/hilla-generator-core", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-utils", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-cli", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-client", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-backbone", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-barrel", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-model", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-push", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/hilla-generator-plugin-subtypes", version = "24.4.0-alpha3")
 public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
