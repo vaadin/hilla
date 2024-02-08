@@ -16,13 +16,13 @@ import java.util.Objects;
  *
  * @param other - a map of unknown values
  */
-public record ViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
-                         ViewMenuConfig menu, Map<String, Object> other) {
+public record ClientViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
+                               ClientViewMenuConfig menu, Map<String, Object> other) {
     /**
      * Default constructor
      * with initialization of unknown values.
      */
-    public ViewConfig {
+    public ClientViewConfig {
         if (other == null) {
             other = new HashMap<>();
         }
@@ -69,7 +69,7 @@ public record ViewConfig(String title, String[] rolesAllowed, String route, Bool
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ViewConfig that = (ViewConfig) o;
+        ClientViewConfig that = (ClientViewConfig) o;
         return Objects.equals(title, that.title)
             && Arrays.equals(rolesAllowed, that.rolesAllowed)
             && Objects.equals(route, that.route)

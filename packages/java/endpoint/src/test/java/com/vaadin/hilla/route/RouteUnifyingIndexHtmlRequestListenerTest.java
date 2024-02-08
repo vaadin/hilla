@@ -34,7 +34,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
     @Before
     public void setUp() {
-        routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener();
+        final ClientRouteRegistry registry = Mockito.mock(ClientRouteRegistry.class);
+        routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(registry);
 
         final Document document = Mockito.mock(Document.class);
         final Element element = new Element("head");

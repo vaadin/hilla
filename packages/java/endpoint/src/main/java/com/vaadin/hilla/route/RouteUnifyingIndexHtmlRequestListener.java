@@ -3,13 +3,17 @@ package com.vaadin.hilla.route;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.RouteParameterData;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
-import com.vaadin.hilla.route.records.ViewConfig;
+import com.vaadin.hilla.route.records.ClientViewConfig;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -18,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Index HTML request listener for extracting server-side and client-side views
@@ -27,9 +30,24 @@ import java.util.Optional;
 @Component
 public class RouteUnifyingIndexHtmlRequestListener
         implements IndexHtmlRequestListener {
+    static final String SCRIPT_STRING = """
+            window.Vaadin = window.Vaadin || {};
+            window.Vaadin.views = %s;
+            """;
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
     private final ObjectMapper mapper = new ObjectMapper();
+    private final ClientRouteRegistry clientRouteRegistry;
+
+    /**
+     * Default constructor for autowiring the client route registry.
+     *
+     * @param clientRouteRegistry - registry of client side routes
+     */
+    @Autowired
+    public RouteUnifyingIndexHtmlRequestListener(ClientRouteRegistry clientRouteRegistry) {
+        this.clientRouteRegistry = clientRouteRegistry;
+    }
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
@@ -45,8 +63,9 @@ public class RouteUnifyingIndexHtmlRequestListener
             try {
                 final String viewsJson = mapper
                         .writeValueAsString(availableViews);
+                final String script = SCRIPT_STRING.formatted(viewsJson);
                 response.getDocument().head().appendElement("script")
-                        .text("window.Vaadin.views = " + viewsJson);
+                        .appendChild(new DataNode(script));
             } catch (IOException e) {
                 LOGGER.warn("Failed to write views to dev mode", e);
             }
@@ -60,28 +79,22 @@ public class RouteUnifyingIndexHtmlRequestListener
         registry.getRegisteredRoutes().forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
-            try {
-                final Optional<String> targetUrl = registry
-                        .getTargetUrl(viewClass);
-                if (targetUrl.isPresent()) {
-                    final String url = "/" + targetUrl.get();
+            boolean hasMandatoryParam = !isParametersOptional(serverView.getRouteParameters());
+            final String targetUrl = serverView.getTemplate();
+            if (targetUrl != null) {
+                final String url = "/" + targetUrl;
 
-                    final String title;
-                    PageTitle pageTitle = viewClass
-                            .getAnnotation(PageTitle.class);
-                    if (pageTitle != null) {
-                        title = pageTitle.value();
-                    } else {
-                        title = serverView.getNavigationTarget()
-                                .getSimpleName();
-                    }
-
-                    availableViews.add(
-                            new AvailableView(url, false, title, Map.of()));
+                final String title;
+                PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
+                if (pageTitle != null) {
+                    title = pageTitle.value();
+                } else {
+                    title = serverView.getNavigationTarget()
+                            .getSimpleName();
                 }
-            } catch (IllegalArgumentException e) {
-                LOGGER.debug("Only supporting Flow views without parameters",
-                        e);
+
+                availableViews.add(
+                        new AvailableView(url, false, title, hasMandatoryParam, Map.of()));
             }
         });
     }
@@ -91,24 +104,42 @@ public class RouteUnifyingIndexHtmlRequestListener
         try {
             final URL source = getClass()
                     .getResource("/META-INF/VAADIN/views.json");
-            Map<String, ViewConfig> clientViews = new HashMap<>();
+            Map<String, ClientViewConfig> clientViews = new HashMap<>();
             if (source != null) {
                 clientViews = mapper.readValue(source, new TypeReference<>() {
                 });
             }
 
+
+
+            final Map<String, ClientViewConfig> finalClientViews = new HashMap<>();
             clientViews.forEach((route, clientView) -> {
                 String title = clientView.title();
                 if (title.isBlank()) {
                     title = clientView.route();
                 }
 
-                availableViews.add(new AvailableView(route, true, title,
+                boolean hasMandatoryParam = route.contains(":") && containsOnlyOptionalParams(route);
+
+                finalClientViews.put(route, clientView);
+                availableViews.add(new AvailableView(route, true,  title, hasMandatoryParam,
                         clientView.other()));
             });
+            clientRouteRegistry.replaceRoutes(finalClientViews);
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
         }
+    }
+
+    private boolean containsOnlyOptionalParams(String route) {
+        return StringUtils.countMatches(route, ":") == StringUtils.countMatches(route, "?");
+    }
+
+    private boolean isParametersOptional(Map<String, RouteParameterData> routeParameters) {
+        if (routeParameters == null || routeParameters.isEmpty()) {
+            return true;
+        }
+        return routeParameters.values().stream().allMatch(params -> params.getTemplate().endsWith("?") || params.getTemplate().endsWith("*"));
     }
 
     private boolean isDevMode() {
@@ -117,7 +148,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                 .getDeploymentConfiguration().isProductionMode());
     }
 
-    protected record AvailableView(String route, boolean clientSide, String title,
+    protected record AvailableView(String route, boolean clientSide, String title, boolean hasMandatoryParam,
                                    Map<String, Object> other) {
         public AvailableView {
             if (other == null) {
