@@ -16,6 +16,8 @@
 package com.vaadin.hilla.internal;
 
 import java.io.File;
+import java.net.URL;
+import java.util.function.Function;
 
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
@@ -49,6 +51,8 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      *
      * @param outputDirectory
      *            the output directory for generated TypeScript code.
+     * @param resourceFinder
+     *            used internally to find resources
      * @param productionMode
      *            {@code true} if building for production
      * @param nodeCommand
@@ -56,8 +60,10 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      *            executable or PATH-related command
      */
     TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, boolean productionMode, String nodeCommand) {
-        super(projectDirectory, buildDirectoryName, outputDirectory);
+            File outputDirectory, Function<String, URL> resourceFinder,
+            boolean productionMode, String nodeCommand) {
+        super(projectDirectory, buildDirectoryName, outputDirectory,
+                resourceFinder);
         this.productionMode = productionMode;
         this.nodeCommand = nodeCommand;
     }
