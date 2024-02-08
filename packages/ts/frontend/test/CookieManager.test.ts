@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import { calculatePath } from '../src/CookieManager.js';
 
-describe('@vaadin/hilla-core', () => {
+describe('@vaadin/hilla-frontend', () => {
   describe('CookieManager', () => {
     describe('calculatePath', () => {
       let base: URL;

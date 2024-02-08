@@ -1,4 +1,4 @@
-import { EndpointError } from '@vaadin/hilla-core';
+import { EndpointError } from '@vaadin/hilla-frontend';
 import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@vaadin/hilla-lit-form';
 import { useForm, type UseFormResult } from '@vaadin/hilla-react-form';
 import { Button } from '@vaadin/react-components/Button.js';

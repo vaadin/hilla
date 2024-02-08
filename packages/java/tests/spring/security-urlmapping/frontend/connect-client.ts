@@ -1,4 +1,4 @@
-import { ConnectClient, InvalidSessionMiddleware } from '@vaadin/hilla-core';
+import { ConnectClient, InvalidSessionMiddleware } from '@vaadin/hilla-frontend';
 
 const client = new ConnectClient({
   prefix: '../connect',

@@ -4,7 +4,7 @@
 import { expect, use } from '@esm-bundle/chai';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EndpointError } from '@vaadin/hilla-core';
+import { EndpointError } from '@vaadin/hilla-frontend';
 import { ValidationError } from '@vaadin/hilla-lit-form';
 import type { ValueError } from '@vaadin/hilla-lit-form/Validation.js';
 import type { SelectElement } from '@vaadin/react-components/Select.js';
