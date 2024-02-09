@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
@@ -13,7 +14,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.flow.internal.hilla.EndpointRequestUtil;
+import com.vaadin.flow.plugin.base.BuildFrontendUtil;
+import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorConfiguration;
 import com.vaadin.hilla.engine.ParserConfiguration;
@@ -42,9 +44,17 @@ public final class EngineConfigureMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
+    // temporary method. Will be replaced with FlowModeAbstractMojo.isHillaAvailable(MavenProject)
+    private boolean isHillaAvailable() {
+        List<String> classpathElements = FlowModeAbstractMojo.getClasspathElements(project);
+        var resource = BuildFrontendUtil.getClassFinder(classpathElements).getResource("com/vaadin/hilla/EndpointController.class");
+        return resource != null;
+    }
+
     @Override
     public void execute() throws EngineConfigureMojoException {
-        if (!EndpointRequestUtil.isHillaAvailable()) {
+
+        if (!isHillaAvailable()) {
             getLog().warn(
                 """
                     The 'configure' goal is only meant to be used in Hilla projects with endpoints.
