@@ -9,9 +9,11 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@vaadin/hilla-react-auth": "24.4.0-alpha2",
-    "@vaadin/hilla-react-crud": "24.4.0-alpha2",
-    "@vaadin/hilla-react-form": "24.4.0-alpha2",
-    "@vaadin/hilla-lit-form": "24.4.0-alpha2"
+    "@vaadin/hilla-react-auth": "24.4.0-alpha3",
+    "@vaadin/hilla-react-crud": "24.4.0-alpha3",
+    "@vaadin/hilla-react-form": "24.4.0-alpha3",
+    "@vaadin/hilla-lit-form": "24.4.0-alpha3"
+  },
+  "devDependencies": {
   }
 }
