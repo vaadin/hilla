@@ -13,6 +13,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+import com.vaadin.flow.internal.hilla.EndpointRequestUtil;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorConfiguration;
 import com.vaadin.hilla.engine.ParserConfiguration;
@@ -43,6 +44,14 @@ public final class EngineConfigureMojo extends AbstractMojo {
 
     @Override
     public void execute() throws EngineConfigureMojoException {
+        if (!EndpointRequestUtil.isHillaAvailable()) {
+            getLog().warn(
+                """
+                    The 'configure' goal is only meant to be used in Hilla projects with endpoints.
+                    """
+                    .stripIndent());
+            return;
+        }
         try {
             var buildDir = project.getBuild().getDirectory();
             var conf = new EngineConfiguration.Builder(

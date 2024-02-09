@@ -14,6 +14,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+import com.vaadin.flow.internal.hilla.EndpointRequestUtil;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
@@ -35,6 +36,14 @@ public final class EngineGenerateMojo extends AbstractMojo {
 
     @Override
     public void execute() throws EngineGenerateMojoException {
+        if (!EndpointRequestUtil.isHillaAvailable()) {
+            getLog().warn(
+                """
+                    The 'generate' goal is only meant to be used in Hilla projects with endpoints.
+                    """
+                    .stripIndent());
+            return;
+        }
         try {
             var baseDir = project.getBasedir().toPath();
             var buildDir = baseDir.resolve(project.getBuild().getDirectory());
