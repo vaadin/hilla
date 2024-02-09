@@ -45,7 +45,9 @@
   },
   "homepage": "https://vaadin.com",
   "files": [
-    "*.{d.ts.map,d.ts,js.map,js}"
+    "*.{d.ts.map,d.ts,js.map,js}",
+    "runtime",
+    "vite-plugin"
   ],
   "publishConfig": {
     "access": "public"
