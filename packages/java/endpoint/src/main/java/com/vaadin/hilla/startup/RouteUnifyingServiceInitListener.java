@@ -16,11 +16,23 @@
 
 package com.vaadin.hilla.startup;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.records.ClientViewConfig;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Service init listener to add the
@@ -29,8 +41,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class RouteUnifyingServiceInitListener
         implements VaadinServiceInitListener {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(RouteUnifyingServiceInitListener.class);
 
     private final RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener;
+    private final ClientRouteRegistry clientRouteRegistry;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Creates a new instance of the listener.
@@ -40,13 +56,51 @@ public class RouteUnifyingServiceInitListener
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
-            RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener) {
+            RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener,
+            ClientRouteRegistry clientRouteRegistry) {
         this.routeUnifyingIndexHtmlRequestListener = routeUnifyingIndexHtmlRequestListener;
+        this.clientRouteRegistry = clientRouteRegistry;
     }
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
+        registerClientRoutes();
         event.addIndexHtmlRequestListener(
                 routeUnifyingIndexHtmlRequestListener);
+    }
+
+    protected void registerClientRoutes() {
+        try {
+            final URL source = getClass()
+                    .getResource("/META-INF/VAADIN/views.json");
+            Map<String, ClientViewConfig> clientViews = new HashMap<>();
+            if (source != null) {
+                clientViews = mapper.readValue(source, new TypeReference<>() {
+                });
+            }
+
+            clientRouteRegistry.clearRoutes();
+            clientViews.forEach((route, clientView) -> {
+                String title = clientView.title();
+                if (title.isBlank()) {
+                    title = clientView.route();
+                }
+
+                boolean hasMandatoryParam = route.contains(":")
+                        && containsOnlyOptionalParams(route);
+                new ClientViewConfig(title, clientView.rolesAllowed(), route,
+                        clientView.lazy(), clientView.register(),
+                        clientView.menu(), hasMandatoryParam,
+                        clientView.other());
+                clientRouteRegistry.addRoute(route, clientView);
+            });
+        } catch (IOException e) {
+            LOGGER.warn("Failed extract client views from views.json", e);
+        }
+    }
+
+    private boolean containsOnlyOptionalParams(String route) {
+        return StringUtils.countMatches(route, ":") == StringUtils
+                .countMatches(route, "?");
     }
 }

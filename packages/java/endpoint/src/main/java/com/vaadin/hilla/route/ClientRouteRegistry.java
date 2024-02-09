@@ -15,11 +15,12 @@
  */
 package com.vaadin.hilla.route;
 
-
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -27,12 +28,8 @@ import java.util.Map;
  * Keeps track of registered client side routes.
  */
 @Component
-public class ClientRouteRegistry {
-    private Map<String, ClientViewConfig> vaadinRoutes = new HashMap<>();
-
-    void replaceRoutes(Map<String, ClientViewConfig> routes) {
-        vaadinRoutes = new HashMap<>(routes);
-    }
+public class ClientRouteRegistry implements Serializable {
+    private final Map<String, ClientViewConfig> vaadinRoutes = new HashMap<>();
 
     ClientViewConfig get(String route) {
         return vaadinRoutes.get(route.toLowerCase(Locale.ENGLISH));
@@ -40,5 +37,17 @@ public class ClientRouteRegistry {
 
     boolean isEmpty() {
         return vaadinRoutes.isEmpty();
+    }
+
+    public List<ClientViewConfig> getAllRoutes() {
+        return List.copyOf(vaadinRoutes.values());
+    }
+
+    public void clearRoutes() {
+        vaadinRoutes.clear();
+    }
+
+    public void addRoute(String route, ClientViewConfig clientView) {
+        vaadinRoutes.put(route, clientView);
     }
 }

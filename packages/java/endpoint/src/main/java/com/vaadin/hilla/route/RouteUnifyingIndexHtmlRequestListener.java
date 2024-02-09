@@ -1,6 +1,5 @@
 package com.vaadin.hilla.route;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteParameterData;
@@ -9,7 +8,6 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.ClientViewConfig;
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,17 +39,19 @@ public class RouteUnifyingIndexHtmlRequestListener
     /**
      * Default constructor for autowiring the client route registry.
      *
-     * @param clientRouteRegistry - registry of client side routes
+     * @param clientRouteRegistry
+     *            - registry of client side routes
      */
     @Autowired
-    public RouteUnifyingIndexHtmlRequestListener(ClientRouteRegistry clientRouteRegistry) {
+    public RouteUnifyingIndexHtmlRequestListener(
+            ClientRouteRegistry clientRouteRegistry) {
         this.clientRouteRegistry = clientRouteRegistry;
     }
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
         final List<AvailableView> availableViews = new ArrayList<>();
-        extractClientViews(availableViews);
+        getClientViews(availableViews);
         extractServerViews(availableViews);
 
         if (isDevMode()) {
@@ -72,6 +71,14 @@ public class RouteUnifyingIndexHtmlRequestListener
         }
     }
 
+    private void getClientViews(List<AvailableView> availableViews) {
+        final List<ClientViewConfig> allRoutes = clientRouteRegistry
+                .getAllRoutes();
+        allRoutes.forEach(route -> availableViews
+                .add(new AvailableView(route.route(), true, route.title(),
+                        route.hasMandatoryParams(), route.getOther())));
+    }
+
     protected void extractServerViews(
             final List<AvailableView> availableViews) {
         final RouteRegistry registry = VaadinService.getCurrent().getRouter()
@@ -79,7 +86,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         registry.getRegisteredRoutes().forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
-            boolean hasMandatoryParam = !isParametersOptional(serverView.getRouteParameters());
+            boolean hasMandatoryParam = !isParametersOptional(
+                    serverView.getRouteParameters());
             final String targetUrl = serverView.getTemplate();
             if (targetUrl != null) {
                 final String url = "/" + targetUrl;
@@ -89,57 +97,23 @@ public class RouteUnifyingIndexHtmlRequestListener
                 if (pageTitle != null) {
                     title = pageTitle.value();
                 } else {
-                    title = serverView.getNavigationTarget()
-                            .getSimpleName();
+                    title = serverView.getNavigationTarget().getSimpleName();
                 }
 
-                availableViews.add(
-                        new AvailableView(url, false, title, hasMandatoryParam, Map.of()));
+                availableViews.add(new AvailableView(url, false, title,
+                        hasMandatoryParam, Map.of()));
             }
         });
     }
 
-    protected void extractClientViews(
-            final List<AvailableView> availableViews) {
-        try {
-            final URL source = getClass()
-                    .getResource("/META-INF/VAADIN/views.json");
-            Map<String, ClientViewConfig> clientViews = new HashMap<>();
-            if (source != null) {
-                clientViews = mapper.readValue(source, new TypeReference<>() {
-                });
-            }
-
-
-
-            final Map<String, ClientViewConfig> finalClientViews = new HashMap<>();
-            clientViews.forEach((route, clientView) -> {
-                String title = clientView.title();
-                if (title.isBlank()) {
-                    title = clientView.route();
-                }
-
-                boolean hasMandatoryParam = route.contains(":") && containsOnlyOptionalParams(route);
-
-                finalClientViews.put(route, clientView);
-                availableViews.add(new AvailableView(route, true,  title, hasMandatoryParam,
-                        clientView.other()));
-            });
-            clientRouteRegistry.replaceRoutes(finalClientViews);
-        } catch (IOException e) {
-            LOGGER.warn("Failed extract client views from views.json", e);
-        }
-    }
-
-    private boolean containsOnlyOptionalParams(String route) {
-        return StringUtils.countMatches(route, ":") == StringUtils.countMatches(route, "?");
-    }
-
-    private boolean isParametersOptional(Map<String, RouteParameterData> routeParameters) {
+    private boolean isParametersOptional(
+            Map<String, RouteParameterData> routeParameters) {
         if (routeParameters == null || routeParameters.isEmpty()) {
             return true;
         }
-        return routeParameters.values().stream().allMatch(params -> params.getTemplate().endsWith("?") || params.getTemplate().endsWith("*"));
+        return routeParameters.values().stream()
+                .allMatch(params -> params.getTemplate().endsWith("?")
+                        || params.getTemplate().endsWith("*"));
     }
 
     private boolean isDevMode() {

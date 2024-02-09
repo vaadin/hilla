@@ -34,8 +34,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
     @Before
     public void setUp() {
-        final ClientRouteRegistry registry = Mockito.mock(ClientRouteRegistry.class);
-        routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(registry);
+        final ClientRouteRegistry clientRouteRegistry = Mockito
+                .mock(ClientRouteRegistry.class);
+        routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+                clientRouteRegistry);
 
         final Document document = Mockito.mock(Document.class);
         final Element element = new Element("head");
@@ -134,19 +136,6 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat(availableViews.get(0).route(),
                 Matchers.is("/foo"));
 
-    }
-
-    @Test
-    public void extractClientViews() {
-        final List<RouteUnifyingIndexHtmlRequestListener.AvailableView> availableViews = new ArrayList<>();
-        routeUnifyingIndexHtmlRequestListener
-                .extractClientViews(availableViews);
-
-        MatcherAssert.assertThat(availableViews, Matchers.hasSize(6));
-        MatcherAssert.assertThat(availableViews.get(0).title(),
-                Matchers.is("About"));
-        MatcherAssert.assertThat(availableViews.get(5).other().get("unknown"),
-                Matchers.notNullValue());
     }
 
     @PageTitle("RouteTarget")
