@@ -36,21 +36,23 @@ public final class EngineGenerateMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
-    // temporary method. Will be replaced with FlowModeAbstractMojo.isHillaAvailable(MavenProject)
+    // temporary method. Will be replaced with
+    // FlowModeAbstractMojo.isHillaAvailable(MavenProject)
     private boolean isHillaAvailable() {
-        List<String> classpathElements = FlowModeAbstractMojo.getClasspathElements(project);
-        var resource = BuildFrontendUtil.getClassFinder(classpathElements).getResource("com/vaadin/hilla/EndpointController.class");
-        return resource != null;
+        List<String> classpathElements = FlowModeAbstractMojo
+                .getClasspathElements(project);
+        return BuildFrontendUtil.getClassFinder(classpathElements).getResource(
+                "com/vaadin/hilla/EndpointController.class") != null;
     }
 
     @Override
     public void execute() throws EngineGenerateMojoException {
         if (!isHillaAvailable()) {
             getLog().warn(
-                """
-                    The 'generate' goal is only meant to be used in Hilla projects with endpoints.
                     """
-                    .stripIndent());
+                            The 'generate' goal is only meant to be used in Hilla projects with endpoints.
+                            """
+                            .stripIndent());
             return;
         }
         try {

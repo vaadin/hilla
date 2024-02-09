@@ -44,10 +44,13 @@ public final class EngineConfigureMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
-    // temporary method. Will be replaced with FlowModeAbstractMojo.isHillaAvailable(MavenProject)
+    // temporary method. Will be replaced with
+    // FlowModeAbstractMojo.isHillaAvailable(MavenProject)
     private boolean isHillaAvailable() {
-        List<String> classpathElements = FlowModeAbstractMojo.getClasspathElements(project);
-        var resource = BuildFrontendUtil.getClassFinder(classpathElements).getResource("com/vaadin/hilla/EndpointController.class");
+        List<String> classpathElements = FlowModeAbstractMojo
+                .getClasspathElements(project);
+        var resource = BuildFrontendUtil.getClassFinder(classpathElements)
+                .getResource("com/vaadin/hilla/EndpointController.class");
         return resource != null;
     }
 
@@ -56,10 +59,10 @@ public final class EngineConfigureMojo extends AbstractMojo {
 
         if (!isHillaAvailable()) {
             getLog().warn(
-                """
-                    The 'configure' goal is only meant to be used in Hilla projects with endpoints.
                     """
-                    .stripIndent());
+                            The 'configure' goal is only meant to be used in Hilla projects with endpoints.
+                            """
+                            .stripIndent());
             return;
         }
         try {
