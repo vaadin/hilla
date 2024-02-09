@@ -44,14 +44,15 @@ public class AbstractMojoTest {
         Files.createDirectories(outputDirectory);
         // Add fake com.vaadin.hilla.EndpointController class to make project
         // detected as Hilla project with endpoints.
-        Files.createDirectories(buildDirectory.resolve("test-classes/com/vaadin/hilla"));
-        Files.createFile(buildDirectory
-            .resolve("test-classes/com/vaadin/hilla/EndpointController.class"));
+        Files.createDirectories(
+                buildDirectory.resolve("test-classes/com/vaadin/hilla"));
+        Files.createFile(buildDirectory.resolve(
+                "test-classes/com/vaadin/hilla/EndpointController.class"));
         // Maven project is not initialized on the mojo, setup a mock manually
         project = Mockito.mock(MavenProject.class);
         // Using Path.of here to have correct separators at Windows & Unix
         var classPathElements = List
-            .of(buildDirectory.resolve("test-classes").toString());
+                .of(buildDirectory.resolve("test-classes").toString());
         Mockito.doReturn(classPathElements).when(project)
                 .getCompileClasspathElements();
         Mockito.doReturn(classPathElements).when(project)
