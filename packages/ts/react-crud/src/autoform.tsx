@@ -235,7 +235,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
  *
  * Example usage:
  * ```tsx
- * import { AutoForm } from '@hilla/react-crud';
+ * import { AutoForm } from '@vaadin/hilla-react-crud';
  * import PersonService from 'Frontend/generated/endpoints';
  * import PersonModel from 'Frontend/generated/com/example/application/Person';
  *
