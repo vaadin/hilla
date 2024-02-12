@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -15,7 +14,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.flow.plugin.base.BuildFrontendUtil;
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorException;
@@ -36,18 +34,9 @@ public final class EngineGenerateMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
-    // temporary method. Will be replaced with
-    // FlowModeAbstractMojo.isHillaAvailable(MavenProject)
-    private boolean isHillaAvailable() {
-        List<String> classpathElements = FlowModeAbstractMojo
-                .getClasspathElements(project);
-        return BuildFrontendUtil.getClassFinder(classpathElements).getResource(
-                "com/vaadin/hilla/EndpointController.class") != null;
-    }
-
     @Override
     public void execute() throws EngineGenerateMojoException {
-        if (!isHillaAvailable()) {
+        if (!FlowModeAbstractMojo.isHillaAvailable(project)) {
             getLog().warn(
                     """
                             The 'generate' goal is only meant to be used in Hilla projects with endpoints.
