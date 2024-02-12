@@ -30,8 +30,8 @@ import java.util.Map;
 public class ClientRouteRegistry implements Serializable {
 
     /**
-     * A map of registered routes and their corresponding client view configurations
-     * with ordered insertion.
+     * A map of registered routes and their corresponding client view
+     * configurations with ordered insertion.
      */
     private final Map<String, ClientViewConfig> vaadinRoutes = new LinkedHashMap<>();
 
@@ -54,8 +54,10 @@ public class ClientRouteRegistry implements Serializable {
     /**
      * Adds a new route to the registry.
      *
-     * @param route       the route to add
-     * @param clientView the client view to add
+     * @param route
+     *            the route to add
+     * @param clientView
+     *            the client view to add
      */
     public void addRoute(String route, ClientViewConfig clientView) {
         vaadinRoutes.put(route, clientView);

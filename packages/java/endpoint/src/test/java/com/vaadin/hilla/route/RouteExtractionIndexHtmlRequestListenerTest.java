@@ -25,10 +25,10 @@ import java.util.*;
 
 public class RouteExtractionIndexHtmlRequestListenerTest {
 
-    protected static final String SCRIPT_STRING = RouteExtractionIndexHtmlRequestListener.SCRIPT_STRING.replace("%s;", "");
+    protected static final String SCRIPT_STRING = RouteExtractionIndexHtmlRequestListener.SCRIPT_STRING
+            .replace("%s;", "");
 
-    private final RouteExtractionIndexHtmlRequestListener requestListener
-            = new RouteExtractionIndexHtmlRequestListener();
+    private final RouteExtractionIndexHtmlRequestListener requestListener = new RouteExtractionIndexHtmlRequestListener();
     private IndexHtmlResponse indexHtmlResponse;
 
     private VaadinService vaadinService;
@@ -81,8 +81,7 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat(scriptText,
                 Matchers.startsWith(SCRIPT_STRING));
 
-        final String views = scriptText
-                .substring(SCRIPT_STRING.length());
+        final String views = scriptText.substring(SCRIPT_STRING.length());
         final List<ServerViewInfo> viewsList;
         try {
             viewsList = new ObjectMapper().readValue(views,
@@ -97,8 +96,7 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 Matchers.is("Component"));
         MatcherAssert.assertThat(viewsList.get(1).title(),
                 Matchers.is("RouteTarget"));
-        MatcherAssert.assertThat(viewsList.get(0).route(),
-                Matchers.is("/bar"));
+        MatcherAssert.assertThat(viewsList.get(0).route(), Matchers.is("/bar"));
     }
 
     @Test
@@ -109,16 +107,14 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            requestListener
-                    .extractServerViews(viewsList);
+            requestListener.extractServerViews(viewsList);
         }
         MatcherAssert.assertThat(viewsList, Matchers.hasSize(2));
         MatcherAssert.assertThat(viewsList.get(0).title(),
                 Matchers.is("Component"));
         MatcherAssert.assertThat(viewsList.get(1).title(),
                 Matchers.is("RouteTarget"));
-        MatcherAssert.assertThat(viewsList.get(0).route(),
-                Matchers.is("/bar"));
+        MatcherAssert.assertThat(viewsList.get(0).route(), Matchers.is("/bar"));
 
     }
 

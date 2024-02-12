@@ -19,16 +19,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Index HTML request listener for extracting server-side views
- * and adding them to index.html response.
+ * Index HTML request listener for extracting server-side views and adding them
+ * to index.html response.
  */
 @Component
 public class RouteExtractionIndexHtmlRequestListener
         implements IndexHtmlRequestListener {
-    protected static final String SCRIPT_STRING =
-            "window.Vaadin = window.Vaadin ?? {}; " +
-            " window.Vaadin.server = window.Vaadin.server ?? {}; " +
-            " window.Vaadin.server.views = %s;" ;
+    protected static final String SCRIPT_STRING = "window.Vaadin = window.Vaadin ?? {}; "
+            + " window.Vaadin.server = window.Vaadin.server ?? {}; "
+            + " window.Vaadin.server.views = %s;";
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteExtractionIndexHtmlRequestListener.class);
     private final ObjectMapper mapper = new ObjectMapper();
@@ -42,8 +41,7 @@ public class RouteExtractionIndexHtmlRequestListener
             return;
         }
         try {
-            final String viewsJson = mapper
-                    .writeValueAsString(serverViews);
+            final String viewsJson = mapper.writeValueAsString(serverViews);
             final String script = SCRIPT_STRING.formatted(viewsJson);
             response.getDocument().head().appendElement("script")
                     .appendChild(new DataNode(script));
@@ -73,7 +71,8 @@ public class RouteExtractionIndexHtmlRequestListener
                     title = serverView.getNavigationTarget().getSimpleName();
                 }
 
-                final ServerViewInfo serverViewInfo = new ServerViewInfo(url, title, hasMandatoryParam);
+                final ServerViewInfo serverViewInfo = new ServerViewInfo(url,
+                        title, hasMandatoryParam);
                 serverViews.add(serverViewInfo);
             }
         });

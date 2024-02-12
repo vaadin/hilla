@@ -35,8 +35,8 @@ import java.util.Map;
 
 /**
  * Service init listener to add the
- * {@link RouteExtractionIndexHtmlRequestListener} to the service
- * and to register client routes to {@link ClientRouteRegistry}.
+ * {@link RouteExtractionIndexHtmlRequestListener} to the service and to
+ * register client routes to {@link ClientRouteRegistry}.
  */
 @Component
 public class RouteUnifyingServiceInitListener
@@ -54,7 +54,7 @@ public class RouteUnifyingServiceInitListener
      * @param routeExtractionIndexHtmlRequestListener
      *            the listener to add
      * @param clientRouteRegistry
-     *          the registry to add the client routes to
+     *            the registry to add the client routes to
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
@@ -68,7 +68,7 @@ public class RouteUnifyingServiceInitListener
     public void serviceInit(ServiceInitEvent event) {
         registerClientRoutes();
         event.addIndexHtmlRequestListener(
-            routeExtractionIndexHtmlRequestListener);
+                routeExtractionIndexHtmlRequestListener);
     }
 
     protected void registerClientRoutes() {
