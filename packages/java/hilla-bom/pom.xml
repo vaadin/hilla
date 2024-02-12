@@ -114,11 +114,6 @@
                 <artifactId>endpoint</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.vaadin.hilla</groupId>
-                <artifactId>hilla-react</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.vaadin.hilla</groupId>
