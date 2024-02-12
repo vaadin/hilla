@@ -17,7 +17,7 @@ import java.util.Objects;
  * @param other - a map of unknown values
  */
 public record ClientViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
-                               ClientViewMenuConfig menu, boolean hasMandatoryParams, Map<String, Object> other) {
+                               ClientViewMenuConfig menu, Map<String, Object> other) {
     /**
      * Default constructor
      * with initialization of unknown values.
@@ -57,18 +57,20 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
             ", lazy=" + lazy +
             ", register=" + register +
             ", menu=" + menu +
-            ", hasMandatoryParams=" + hasMandatoryParams +
             ", other=" + other +
             '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ClientViewConfig that = (ClientViewConfig) o;
-        return hasMandatoryParams == that.hasMandatoryParams
-            && Objects.equals(title, that.title)
+        return Objects.equals(title, that.title)
             && Arrays.equals(rolesAllowed, that.rolesAllowed)
             && Objects.equals(route, that.route)
             && Objects.equals(lazy, that.lazy)
@@ -79,7 +81,7 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(title, route, lazy, register, menu, hasMandatoryParams, other);
+        int result = Objects.hash(title, route, lazy, register, menu, other);
         result = 31 * result + Arrays.hashCode(rolesAllowed);
         return result;
     }

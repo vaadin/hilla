@@ -21,9 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.route.ClientRouteRegistry;
-import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.RouteExtractionIndexHtmlRequestListener;
 import com.vaadin.hilla.route.records.ClientViewConfig;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,8 @@ import java.util.Map;
 
 /**
  * Service init listener to add the
- * {@link RouteUnifyingIndexHtmlRequestListener} to the service.
+ * {@link RouteExtractionIndexHtmlRequestListener} to the service
+ * and to register client routes to {@link ClientRouteRegistry}.
  */
 @Component
 public class RouteUnifyingServiceInitListener
@@ -44,21 +44,23 @@ public class RouteUnifyingServiceInitListener
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingServiceInitListener.class);
 
-    private final RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener;
+    private final RouteExtractionIndexHtmlRequestListener routeExtractionIndexHtmlRequestListener;
     private final ClientRouteRegistry clientRouteRegistry;
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Creates a new instance of the listener.
      *
-     * @param routeUnifyingIndexHtmlRequestListener
+     * @param routeExtractionIndexHtmlRequestListener
      *            the listener to add
+     * @param clientRouteRegistry
+     *          the registry to add the client routes to
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
-            RouteUnifyingIndexHtmlRequestListener routeUnifyingIndexHtmlRequestListener,
+            RouteExtractionIndexHtmlRequestListener routeExtractionIndexHtmlRequestListener,
             ClientRouteRegistry clientRouteRegistry) {
-        this.routeUnifyingIndexHtmlRequestListener = routeUnifyingIndexHtmlRequestListener;
+        this.routeExtractionIndexHtmlRequestListener = routeExtractionIndexHtmlRequestListener;
         this.clientRouteRegistry = clientRouteRegistry;
     }
 
@@ -66,7 +68,7 @@ public class RouteUnifyingServiceInitListener
     public void serviceInit(ServiceInitEvent event) {
         registerClientRoutes();
         event.addIndexHtmlRequestListener(
-                routeUnifyingIndexHtmlRequestListener);
+            routeExtractionIndexHtmlRequestListener);
     }
 
     protected void registerClientRoutes() {
@@ -80,27 +82,9 @@ public class RouteUnifyingServiceInitListener
             }
 
             clientRouteRegistry.clearRoutes();
-            clientViews.forEach((route, clientView) -> {
-                String title = clientView.title();
-                if (title.isBlank()) {
-                    title = clientView.route();
-                }
-
-                boolean hasMandatoryParam = route.contains(":")
-                        && containsOnlyOptionalParams(route);
-                new ClientViewConfig(title, clientView.rolesAllowed(), route,
-                        clientView.lazy(), clientView.register(),
-                        clientView.menu(), hasMandatoryParam,
-                        clientView.other());
-                clientRouteRegistry.addRoute(route, clientView);
-            });
+            clientViews.forEach(clientRouteRegistry::addRoute);
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
         }
-    }
-
-    private boolean containsOnlyOptionalParams(String route) {
-        return StringUtils.countMatches(route, ":") == StringUtils
-                .countMatches(route, "?");
     }
 }

@@ -4,5 +4,7 @@
   "/profile/account/security/password": { "title": "Password" },
   "/profile/account/security/two-factor-auth": { "title": "Two Factor Auth" },
   "/profile/friends/list": { "title": "List" },
-  "/profile/friends/:user": { "title": "User", "unknown": {"anotherProp" :  "prop"} }
+  "/profile/friends/:user?/edit": { "title": "List" },
+  "/profile/friends/:user": { "title": "User", "unknown": {"anotherProp" :  "prop"} },
+  "/profile/messages/*": { "title": "Messages" }
 }

@@ -19,9 +19,8 @@ import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -29,24 +28,35 @@ import java.util.Map;
  */
 @Component
 public class ClientRouteRegistry implements Serializable {
-    private final Map<String, ClientViewConfig> vaadinRoutes = new HashMap<>();
 
-    ClientViewConfig get(String route) {
-        return vaadinRoutes.get(route.toLowerCase(Locale.ENGLISH));
-    }
+    /**
+     * A map of registered routes and their corresponding client view configurations
+     * with ordered insertion.
+     */
+    private final Map<String, ClientViewConfig> vaadinRoutes = new LinkedHashMap<>();
 
-    boolean isEmpty() {
-        return vaadinRoutes.isEmpty();
-    }
-
+    /**
+     * Returns all registered routes.
+     *
+     * @return a list of all registered routes
+     */
     public List<ClientViewConfig> getAllRoutes() {
         return List.copyOf(vaadinRoutes.values());
     }
 
+    /**
+     * Clears all registered routes.
+     */
     public void clearRoutes() {
         vaadinRoutes.clear();
     }
 
+    /**
+     * Adds a new route to the registry.
+     *
+     * @param route       the route to add
+     * @param clientView the client view to add
+     */
     public void addRoute(String route, ClientViewConfig clientView) {
         vaadinRoutes.put(route, clientView);
     }
