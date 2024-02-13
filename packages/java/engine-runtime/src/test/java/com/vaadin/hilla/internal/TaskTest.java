@@ -38,6 +38,10 @@ public class TaskTest {
         var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
         Files.createDirectories(buildDir);
 
+        var frontendDir = getTemporaryDirectory()
+                .resolve(getFrontendDirectory());
+        Files.createDirectories(frontendDir);
+
         // Create hilla-engine-configuration.json from template
         var configPath = buildDir
                 .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
@@ -104,6 +108,10 @@ public class TaskTest {
     protected Path getOpenAPIFile() {
         return getTemporaryDirectory().resolve(getClassesDirectory())
                 .resolve(EngineConfiguration.OPEN_API_PATH);
+    }
+
+    protected String getFrontendDirectory() {
+        return "frontend";
     }
 
     protected String getOutputDirectory() {
