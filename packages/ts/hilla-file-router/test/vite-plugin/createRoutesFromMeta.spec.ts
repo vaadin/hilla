@@ -2,9 +2,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect } from '@esm-bundle/chai';
-import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
-import createRoutesFromMeta from '../src/vite-plugin/createRoutesFromMeta.js';
-import { createTestingRouteMeta } from './utils.js';
+import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
+import createRoutesFromMeta from '../../src/vite-plugin/createRoutesFromMeta.js';
+import { createTestingRouteMeta } from '../utils.js';
 
 describe('@vaadin/hilla-file-router', () => {
   describe('generateRoutes', () => {

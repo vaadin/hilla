@@ -20,39 +20,17 @@
     "typecheck": "tsc --noEmit"
   },
   "exports": {
-    "./dependencies/DependencyManager.js": {
-      "default": "./dependencies/DependencyManager.js"
-    },
-    "./dependencies/ExportManager.js": {
-      "default": "./dependencies/ExportManager.js"
-    },
-    "./dependencies/ImportManager.js": {
-      "default": "./dependencies/ImportManager.js"
-    },
-    "./dependencies/PathManager.js": {
-      "default": "./dependencies/PathManager.js"
-    },
-    "./testing/snapshotMatcher.js": {
-      "default": "./testing/snapshotMatcher.js"
-    },
-    "./ast.js": {
-      "default": "./ast.js"
-    },
-    "./createFullyUniqueIdentifier.js": {
-      "default": "./createFullyUniqueIdentifier.js"
-    },
-    "./createSourceFile.js": {
-      "default": "./createSourceFile.js"
-    },
-    "./memoize.js": {
-      "default": "./memoize.js"
-    },
-    "./LoggerFactory.js": {
-      "default": "./LoggerFactory.js"
-    },
-    "./PluginError.js": {
-      "default": "./PluginError.js"
-    }
+    "./dependencies/DependencyManager.js": "./dependencies/DependencyManager.js",
+    "./dependencies/ExportManager.js": "./dependencies/ExportManager.js",
+    "./dependencies/ImportManager.js": "./dependencies/ImportManager.js",
+    "./dependencies/PathManager.js": "./dependencies/PathManager.js",
+    "./testing/snapshotMatcher.js": "./testing/snapshotMatcher.js",
+    "./ast.js": "./ast.js",
+    "./createFullyUniqueIdentifier.js": "./createFullyUniqueIdentifier.js",
+    "./createSourceFile.js": "./createSourceFile.js",
+    "./memoize.js": "./memoize.js",
+    "./LoggerFactory.js": "./LoggerFactory.js",
+    "./PluginError.js": "./PluginError.js"
   },
   "repository": {
     "type": "git",

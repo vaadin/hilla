@@ -51,7 +51,9 @@
     "access": "public"
   },
   "peerDependencies": {
-    "react-router": "^6.21.1"
+    "react": "^18.2.0",
+    "react-router": "^6.21.1",
+    "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
@@ -68,7 +70,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "^24.4.0-alpha1",
-    "react": "^18.2.0"
+    "@vaadin/hilla-generator-utils": "^24.4.0-alpha1"
   }
 }

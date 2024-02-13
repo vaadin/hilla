@@ -2,6 +2,9 @@ import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import type { JSX } from 'react';
+import type { AgnosticRoute, ViewConfig } from '../runtime/utils.js';
+import type { RouteModule } from '../runtime.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
@@ -39,8 +42,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     ),
     appendFile(new URL('profile/index.css', dir), ''),
     appendFile(
-      new URL('about.tsx', dir),
-      "export const config = { title: 'About' };\nexport default function About() {};",
+      new URL('nameToReplace.tsx', dir),
+      "export const config = { route: 'about', title: 'About' };\nexport default function About() {};",
     ),
   ]);
 }
@@ -51,8 +54,8 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
     layout: undefined,
     children: [
       {
-        path: 'about',
-        file: new URL('about.tsx', dir),
+        path: 'nameToReplace',
+        file: new URL('nameToReplace.tsx', dir),
         children: [],
       },
       {
@@ -95,6 +98,75 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
                 path: '{user}',
                 file: new URL('profile/friends/{user}.tsx', dir),
                 children: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+export const components = {
+  about: {
+    // eslint-disable-next-line func-name-matching
+    default: function About(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'About' },
+  },
+  friends: {
+    // eslint-disable-next-line func-name-matching
+    default: function Friends(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Friends' },
+  },
+  friendsList: {
+    // eslint-disable-next-line func-name-matching
+    default: function FriendsList(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Friends List', route: 'friends-list' },
+  },
+  friend: {
+    // eslint-disable-next-line func-name-matching
+    default: function Friend(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Friend' },
+  },
+  server: {
+    // eslint-disable-next-line func-name-matching
+    default: function Server(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Server' },
+  },
+} satisfies Record<string, RouteModule>;
+
+export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule> {
+  return {
+    path: '',
+    children: [
+      {
+        path: 'about',
+        module: components.about,
+      },
+      {
+        path: 'profile',
+        children: [
+          {
+            path: 'friends',
+            module: components.friends,
+            children: [
+              {
+                path: 'list',
+                module: components.friendsList,
+              },
+              {
+                path: ':user',
+                module: components.friend,
               },
             ],
           },

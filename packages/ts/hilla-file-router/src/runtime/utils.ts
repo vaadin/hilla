@@ -1,10 +1,17 @@
+import type { ComponentType } from 'react';
+
 export type ViewConfig = Readonly<{
   /**
    * View title used in the main layout header, as <title> and as the default
-   * for the menu entry. If not defined, then the view function name is converted
-   * from CamelCase after removing any "View" postfix.
+   * for the menu entry. If not defined, the component name will be taken,
+   * transformed from camelCase.
    */
   title?: string;
+
+  /**
+   *
+   */
+  hasMandatoryParams?: boolean;
 
   /**
    * Same as in the explicit React Router configuration.
@@ -14,7 +21,7 @@ export type ViewConfig = Readonly<{
   /**
    * Allows overriding the route path configuration. Uses the same syntax as
    * the path property with React Router. This can be used to define a route
-   * that conflicts with the file name conventions, e.g. /foo/index
+   * that conflicts with the file name conventions, e.g. /foo/index.
    */
   route?: string;
 
@@ -51,15 +58,39 @@ export type ViewConfig = Readonly<{
      * populated menu.
      */
     exclude?: boolean;
+    /**
+     * Icon to use in the menu.
+     */
+    icon?: string;
   }>;
 }>;
 
+/**
+ * A module that exports a React component and an optional view configuration.
+ */
+export type RouteModule<P = object> = Readonly<{
+  default: ComponentType<P>;
+  config?: ViewConfig;
+}>;
+
+/**
+ * A framework-agnostic object generated from the file-based route.
+ */
 export type AgnosticRoute<T> = Readonly<{
   path: string;
   module?: T;
   children?: ReadonlyArray<AgnosticRoute<T>>;
 }>;
 
+/**
+ * Transforms the whole route tree into a new format.
+ *
+ * @param route - The route to transform.
+ * @param getChildren - A function that returns the children of the route.
+ * @param transformer - A function that transforms the route and its children.
+ *
+ * @returns The transformed route.
+ */
 export function transformRoute<T, U>(
   route: T,
   getChildren: (route: T) => IterableIterator<T> | null | undefined,
@@ -73,6 +104,13 @@ export function transformRoute<T, U>(
   );
 }
 
+/**
+ * Extracts the name of a component.
+ *
+ * @param component - The component to extract the name from.
+ *
+ * @returns The name of the component.
+ */
 export function extractComponentName(component?: unknown): string | undefined {
   if (
     component &&
@@ -89,7 +127,16 @@ export function extractComponentName(component?: unknown): string | undefined {
 const viewPattern = /view/giu;
 const upperCaseSplitPattern = /(?=[A-Z])/gu;
 
-export function adjustViewTitle(config?: ViewConfig, componentName?: string): ViewConfig | undefined {
+/**
+ * Processes the route configuration to ensure that the title is set.
+ *
+ * @param config - The route configuration to process.
+ * @param componentName - The name of the component. Could be extracted from the component using
+ * {@link extractComponentName}.
+ *
+ * @returns The processed route configuration.
+ */
+export function adjustRouteConfig(config?: ViewConfig, componentName?: string): ViewConfig | undefined {
   if (config?.title) {
     return config;
   }

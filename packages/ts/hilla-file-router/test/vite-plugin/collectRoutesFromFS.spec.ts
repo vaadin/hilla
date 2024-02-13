@@ -2,8 +2,8 @@ import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { rimraf } from 'rimraf';
-import collectRoutesFromFS from '../src/vite-plugin/collectRoutesFromFS.js';
-import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from './utils.js';
+import collectRoutesFromFS from '../../src/vite-plugin/collectRoutesFromFS.js';
+import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
 use(deepEqualInAnyOrder);
 

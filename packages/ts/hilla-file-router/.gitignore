@@ -1,2 +1,6 @@
 runtime
 vite-plugin
+!src/runtime
+!src/vite-plugin
+!test/runtime
+!test/vite-plugin
