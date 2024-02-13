@@ -429,7 +429,7 @@ type AutoGrid = <TItem>(
  *
  * Example usage:
  * ```tsx
- * import { AutoGrid } from '@hilla/react-crud';
+ * import { AutoGrid } from '@vaadin/hilla-react-crud';
  * import PersonService from 'Frontend/generated/endpoints';
  * import PersonModel from 'Frontend/generated/com/example/application/Person';
  *

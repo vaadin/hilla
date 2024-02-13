@@ -1,13 +1,14 @@
 package com.vaadin.hilla.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,6 +45,8 @@ public class NodeTasksEndpointTest extends TaskTest {
                         getTemporaryDirectory().resolve("api").toFile())
                 .withJarFrontendResourcesFolder(getTemporaryDirectory()
                         .resolve("jar-resources").toFile());
+
+        createIndexFile();
     }
 
     @Test
@@ -85,5 +88,17 @@ public class NodeTasksEndpointTest extends TaskTest {
                                 .exists(),
                         name + " should " + (shouldExist ? "" : "not ")
                                 + "be created"));
+    }
+
+    private void createIndexFile() throws IOException {
+        String indexContent = """
+                import { Router } from '@vaadin/router';
+                const router = new Router(document.querySelector('#outlet'));
+                router.setRoutes([ { path: '', component: 'hilla-view' } ]);
+                """;
+        File indexFile = new File(options.getFrontendDirectory(), "index.ts");
+        FileUtils.forceMkdirParent(indexFile);
+        FileUtils.writeStringToFile(indexFile, indexContent,
+                StandardCharsets.UTF_8);
     }
 }

@@ -16,8 +16,15 @@
 package com.vaadin.hilla.internal;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,22 +42,28 @@ import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(AbstractTaskEndpointGenerator.class);
     private static boolean firstRun = true;
 
     private final String buildDirectoryName;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     protected final File outputDirectory;
     private final File projectDirectory;
+    private final Function<String, URL> resourceFinder;
     private EngineConfiguration engineConfiguration;
 
     AbstractTaskEndpointGenerator(File projectDirectory,
-            String buildDirectoryName, File outputDirectory) {
+            String buildDirectoryName, File outputDirectory,
+            Function<String, URL> resourceFinder) {
         this.projectDirectory = Objects.requireNonNull(projectDirectory,
                 "Project directory cannot be null");
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
                 "Build directory name cannot be null");
         this.outputDirectory = Objects.requireNonNull(outputDirectory,
                 "Output direrctory name cannot be null");
+        this.resourceFinder = Objects.requireNonNull(resourceFinder,
+                "Class finder cannot be null");
     }
 
     protected EngineConfiguration getEngineConfiguration()
@@ -69,26 +82,46 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         if (firstRun) {
             logger.debug("Configure Hilla engine using build system plugin");
 
-            try {
-                // Create a runner for Maven
-                MavenRunner
-                        .forProject(projectDirectory, "-q", "vaadin:configure")
-                        // Create a runner for Gradle. Even if Gradle is not
-                        // supported yet, this is useful to emit an error
-                        // message if pom.xml is not found and build.gradle is
-                        .or(() -> GradleRunner.forProject(projectDirectory,
-                                "-q", "hillaConfigure"))
-                        // If no runner is found, throw an exception.
-                        .orElseThrow(() -> new IllegalStateException(String
-                                .format("Failed to determine project directory for dev mode. "
-                                        + "Directory '%s' does not look like a Maven or "
-                                        + "Gradle project.", projectDirectory)))
-                        // Run the first valid runner
-                        .run(null);
-                firstRun = false;
-            } catch (CommandRunnerException e) {
+            var mavenConfigure = MavenRunner.forProject(projectDirectory, "-q",
+                    "vaadin:configure");
+            var mavenConfigureVersion = getVaadinVersion()
+                    .flatMap(version -> MavenRunner.forProject(projectDirectory,
+                            "-q", "com.vaadin:vaadin-maven-plugin:" + version
+                                    + ":configure"));
+            var gradleConfigure = GradleRunner.forProject(projectDirectory,
+                    "-q", "hillaConfigure");
+
+            var runners = Stream
+                    .of(mavenConfigure, mavenConfigureVersion, gradleConfigure)
+                    .flatMap(Optional::stream).toList();
+
+            if (runners.isEmpty()) {
+                throw new ExecutionFailedException(String.format(
+                        "Failed to determine project directory for dev mode. "
+                                + "Directory '%s' does not look like a Maven or "
+                                + "Gradle project.",
+                        projectDirectory));
+            } else {
+                for (var runner : runners) {
+                    try {
+                        runner.run(null);
+                        firstRun = false;
+                        break;
+                    } catch (CommandRunnerException e) {
+                        logger.debug(
+                                "Failed to configure Hilla engine using "
+                                        + runner.getClass().getSimpleName()
+                                        + " with arguments "
+                                        + Arrays.toString(runner.arguments()),
+                                e);
+                    }
+                }
+            }
+
+            if (firstRun) {
                 throw new ExecutionFailedException(
-                        "Failed to configure Hilla engine", e);
+                        "Failed to configure Hilla engine: no runner succeeded. "
+                                + "Set log level to debug to see more details.");
             }
         }
 
@@ -107,5 +140,25 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                     "Failed to read Hilla engine configuration", e);
         }
 
+    }
+
+    private Optional<String> getVaadinVersion() {
+        String vaadinVersion = null;
+        try (final InputStream vaadinPomProperties = resourceFinder
+                .apply("META-INF/maven/com.vaadin/vaadin-core/pom.properties")
+                .openStream()) {
+            if (vaadinPomProperties != null) {
+                final Properties properties = new Properties();
+                properties.load(vaadinPomProperties);
+                vaadinVersion = properties.getProperty("version", "");
+            } else {
+                LOGGER.debug("Unable to determine Vaadin version. "
+                        + "No META-INF/maven/com.vaadin/vaadin-core/pom.properties found");
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Unable to determine Vaadin version", e);
+        }
+
+        return Optional.ofNullable(vaadinVersion);
     }
 }
