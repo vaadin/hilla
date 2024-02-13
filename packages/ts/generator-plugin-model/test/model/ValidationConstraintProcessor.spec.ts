@@ -1,7 +1,12 @@
+import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import ts, { type NewExpression } from 'typescript';
-import { ValidationConstraintProcessor, type ValidationConstraint } from '../../src/ValidationConstraintProcessor.js';
+import {
+  ValidationConstraintProcessor,
+  type ValidationConstraint,
+  hasValidationConstraints,
+} from '../../src/ValidationConstraintProcessor.js';
 
 type AnnotationPack = Readonly<{
   expected?: string;
@@ -27,6 +32,11 @@ function assertValidationConstraint(actual: NewExpression, expected: string): vo
 describe('ValidationConstraintProcessor', () => {
   let importer: sinon.SinonSpy;
   let processor: ValidationConstraintProcessor;
+
+  type SchemaWithValidators = Schema & {
+    'x-validation-constraints': ValidationConstraint[];
+    'x-annotations': Array<{ name: string }>;
+  };
 
   beforeEach(() => {
     importer = sinon.fake((name: string) => ts.factory.createIdentifier(name));
@@ -142,5 +152,16 @@ describe('ValidationConstraintProcessor', () => {
     assertValidationConstraint(processor.process(digits.obj), digits.expected ?? digits.str);
     assertValidationConstraint(processor.process(email.obj), email.expected ?? email.str);
     assertValidationConstraint(processor.process(pattern.obj), pattern.expected ?? pattern.str);
+  });
+
+  it('should detect validations in composed schemas', () => {
+    const cityComposedSchema: SchemaWithValidators = {
+      nullable: true,
+      anyOf: [{ $ref: '#/components/schemas/com.github.example.domain.City' }],
+      'x-validation-constraints': [{ simpleName: 'NotNull' }],
+      'x-annotations': [{ name: 'jakarta.persistence.ManyToOne' }],
+    };
+
+    expect(hasValidationConstraints(cityComposedSchema)).to.be.true;
   });
 });
