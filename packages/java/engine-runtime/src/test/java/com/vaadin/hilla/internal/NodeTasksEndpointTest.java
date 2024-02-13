@@ -96,9 +96,9 @@ public class NodeTasksEndpointTest extends TaskTest {
                 const router = new Router(document.querySelector('#outlet'));
                 router.setRoutes([ { path: '', component: 'hilla-view' } ]);
                 """;
-        File frontendDirectory = options.getFrontendDirectory();
-        FileUtils.forceMkdirParent(frontendDirectory);
-        FileUtils.writeStringToFile(frontendDirectory, indexContent,
+        File indexFile = new File(options.getFrontendDirectory(), "index.ts");
+        FileUtils.forceMkdirParent(indexFile);
+        FileUtils.writeStringToFile(indexFile, indexContent,
                 StandardCharsets.UTF_8);
     }
 }
