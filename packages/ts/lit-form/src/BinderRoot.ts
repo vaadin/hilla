@@ -1,4 +1,4 @@
-import { EndpointValidationError, type ValidationErrorData } from '@vaadin/hilla-core/EndpointErrors.js';
+import { EndpointValidationError, type ValidationErrorData } from '@vaadin/hilla-frontend/EndpointErrors.js';
 import {
   _clearValidation,
   _setErrorsWithDescendants,
