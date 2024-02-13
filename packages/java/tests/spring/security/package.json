@@ -48,6 +48,7 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "@vaadin/horizontal-layout": "24.4.0-alpha10",
     "@vaadin/icon": "24.4.0-alpha10",
     "@vaadin/icons": "24.4.0-alpha10",
