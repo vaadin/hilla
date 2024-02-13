@@ -33,18 +33,16 @@ public class NodeTasksEndpointTest extends TaskTest {
         Lookup mockLookup = Mockito.mock(Lookup.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
                 .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
-        Mockito.doReturn(new DefaultClassFinder(
-            Set.of(
+        Mockito.doReturn(new DefaultClassFinder(Set.of(
                 // Required to bypass Hilla check in
                 // com.vaadin.flow.internal.hilla.EndpointRequestUtil
                 // .isHillaAvailable(com.vaadin.flow.server.frontend.scanner.ClassFinder)
-                EndpointController.class,
-                ConnectEndpointsForTesting.class
-            )))
+                EndpointController.class, ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
 
         options = new Options(mockLookup, getTemporaryDirectory().toFile())
-            .withFrontendDirectory(getTemporaryDirectory().resolve(getFrontendDirectory()).toFile())
+                .withFrontendDirectory(getTemporaryDirectory()
+                        .resolve(getFrontendDirectory()).toFile())
                 .withProductionMode(false)
                 .withBuildDirectory(getBuildDirectory())
                 .enablePackagesUpdate(false).enableImportsUpdate(false)

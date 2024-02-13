@@ -20,6 +20,7 @@ import com.vaadin.hilla.internal.NodeTasksEndpointTest;
 /**
  * Stub EndpointController class used to trigger Hilla detection in Flow for
  * testing.
+ *
  * @see NodeTasksEndpointTest
  */
 public class EndpointController {

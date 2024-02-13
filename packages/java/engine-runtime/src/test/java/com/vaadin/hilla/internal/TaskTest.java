@@ -38,8 +38,8 @@ public class TaskTest {
         var buildDir = getTemporaryDirectory().resolve(getBuildDirectory());
         Files.createDirectories(buildDir);
 
-        var frontendDir =
-            getTemporaryDirectory().resolve(getFrontendDirectory());
+        var frontendDir = getTemporaryDirectory()
+                .resolve(getFrontendDirectory());
         Files.createDirectories(frontendDir);
 
         // Create hilla-engine-configuration.json from template
