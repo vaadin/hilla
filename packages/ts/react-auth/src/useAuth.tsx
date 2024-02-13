@@ -1,4 +1,4 @@
-import { login as _login, type LoginResult, logout as _logout } from '@vaadin/hilla-core';
+import { login as _login, type LoginResult, logout as _logout } from '@vaadin/hilla-frontend';
 import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string) => Promise<LoginResult>;

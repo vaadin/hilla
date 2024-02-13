@@ -12,7 +12,7 @@ import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.j
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
 export const INIT_TYPE_NAME = 'EndpointRequestInit';
-export const HILLA_FRONTEND_NAME = '@vaadin/hilla-core';
+export const HILLA_FRONTEND_NAME = '@vaadin/hilla-frontend';
 
 export default abstract class EndpointMethodOperationProcessor {
   static createProcessor(

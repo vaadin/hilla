@@ -1,4 +1,4 @@
-import { Subscription } from '@vaadin/hilla-core';
+import { Subscription } from '@vaadin/hilla-frontend';
 import { LitElement, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { FluxEndpoint } from '../generated/endpoints';

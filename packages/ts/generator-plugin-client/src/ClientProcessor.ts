@@ -18,7 +18,10 @@ export default class ClientProcessor {
     this.#owner.logger.debug(`Generating ${this.#outputPath}`);
 
     const { exports, imports, paths } = new DependencyManager(new PathManager({ extension: '.js' }));
-    const clientClassId = imports.named.add(paths.createBareModulePath('@vaadin/hilla-core', false), 'ConnectClient');
+    const clientClassId = imports.named.add(
+      paths.createBareModulePath('@vaadin/hilla-frontend', false),
+      'ConnectClient',
+    );
 
     const clientVarId = createFullyUniqueIdentifier('client');
     exports.default.set(clientVarId);
