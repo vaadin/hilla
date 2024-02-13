@@ -4,8 +4,6 @@
   "type": "module",
   "dependencies": {
     "@polymer/polymer": "3.5.1",
-    "@types/react": "18.2.50",
-    "@types/react-dom": "18.2.18",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -25,12 +23,14 @@
     "lit": "3.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "6.21.3"
+    "react-router-dom": "6.22.0"
   },
   "devDependencies": {
     "@babel/preset-react": "^7",
     "@rollup/plugin-replace": "5.0.5",
     "@rollup/pluginutils": "5.1.0",
+    "@types/react": "18.2.55",
+    "@types/react-dom": "18.2.19",
     "@vitejs/plugin-react": "4.2.1",
     "async": "3.2.5",
     "glob": "10.3.10",
@@ -39,7 +39,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.12",
+    "vite": "5.1.1",
     "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
@@ -48,8 +48,6 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.1",
-      "@types/react": "18.2.50",
-      "@types/react-dom": "18.2.18",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.4.0-alpha3",
       "@vaadin/hilla-generator-cli": "24.4.0-alpha3",
@@ -66,12 +64,14 @@
       "lit": "3.1.2",
       "react": "18.2.0",
       "react-dom": "18.2.0",
-      "react-router-dom": "6.21.3"
+      "react-router-dom": "6.22.0"
     },
     "devDependencies": {
       "@babel/preset-react": "^7",
       "@rollup/plugin-replace": "5.0.5",
       "@rollup/pluginutils": "5.1.0",
+      "@types/react": "18.2.55",
+      "@types/react-dom": "18.2.19",
       "@vitejs/plugin-react": "4.2.1",
       "async": "3.2.5",
       "glob": "10.3.10",
@@ -80,13 +80,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.12",
+      "vite": "5.1.1",
       "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "9691bc82cafa62ebc24e5b0f270c17a48561f0532e484735dd7739892d567b12"
+    "hash": "fef1b04ce9a9d9b6ef952bd3788747f8ff93d02157f6e228d6bc66dc10e6f12a"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

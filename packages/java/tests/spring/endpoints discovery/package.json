@@ -4,8 +4,6 @@
   "type": "module",
   "dependencies": {
     "@polymer/polymer": "3.5.1",
-    "@types/react": "18.2.50",
-    "@types/react-dom": "18.2.18",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -21,11 +19,9 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/router": "1.7.5",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.1.2",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-router-dom": "6.21.3"
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@babel/preset-react": "^7",
@@ -39,7 +35,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.12",
+    "vite": "5.1.1",
     "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
@@ -48,8 +44,6 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.1",
-      "@types/react": "18.2.50",
-      "@types/react-dom": "18.2.18",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.4.0-alpha3",
       "@vaadin/hilla-generator-cli": "24.4.0-alpha3",
@@ -62,11 +56,9 @@
       "@vaadin/hilla-generator-plugin-subtypes": "24.4.0-alpha3",
       "@vaadin/hilla-generator-utils": "24.4.0-alpha3",
       "@vaadin/hilla-lit-form": "24.4.0-alpha3",
+      "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.1.2",
-      "react": "18.2.0",
-      "react-dom": "18.2.0",
-      "react-router-dom": "6.21.3"
+      "lit": "3.1.2"
     },
     "devDependencies": {
       "@babel/preset-react": "^7",
@@ -80,13 +72,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.12",
+      "vite": "5.1.1",
       "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "9691bc82cafa62ebc24e5b0f270c17a48561f0532e484735dd7739892d567b12"
+    "hash": "7ba4c41fab8e7020afa5b5d688ef1112357f7e9cf9532a6cd410c80bddaf6418"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -103,10 +95,6 @@
     "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
     "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
-    "react-dom": "$react-dom",
-    "@types/react-dom": "$@types/react-dom",
-    "react-router-dom": "$react-router-dom",
-    "@types/react": "$@types/react",
-    "react": "$react"
+    "@vaadin/router": "$@vaadin/router"
   }
 }

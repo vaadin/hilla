@@ -4,9 +4,7 @@
   "type": "module",
   "dependencies": {
     "@polymer/polymer": "3.5.1",
-    "@types/react": "18.2.50",
-    "@types/react-dom": "18.2.18",
-    "@vaadin/bundles": "24.4.0-alpha10",
+    "@vaadin/bundles": "24.4.0-alpha13",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -22,17 +20,19 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
-    "@vaadin/react-components": "24.4.0-alpha10",
+    "@vaadin/react-components": "24.4.0-alpha13",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "6.21.3"
+    "react-router-dom": "6.22.0"
   },
   "devDependencies": {
     "@babel/preset-react": "^7",
     "@rollup/plugin-replace": "5.0.5",
     "@rollup/pluginutils": "5.1.0",
+    "@types/react": "18.2.55",
+    "@types/react-dom": "18.2.19",
     "@vitejs/plugin-react": "4.2.1",
     "async": "3.2.5",
     "glob": "10.3.10",
@@ -41,7 +41,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.3.3",
-    "vite": "5.0.12",
+    "vite": "5.1.1",
     "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.0.0",
     "workbox-core": "7.0.0",
@@ -50,9 +50,7 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.1",
-      "@types/react": "18.2.50",
-      "@types/react-dom": "18.2.18",
-      "@vaadin/bundles": "24.4.0-alpha10",
+      "@vaadin/bundles": "24.4.0-alpha13",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.4.0-alpha3",
       "@vaadin/hilla-generator-cli": "24.4.0-alpha3",
@@ -68,16 +66,19 @@
       "@vaadin/hilla-react-auth": "24.4.0-alpha3",
       "@vaadin/hilla-react-crud": "24.4.0-alpha3",
       "@vaadin/hilla-react-form": "24.4.0-alpha3",
+      "@vaadin/react-components": "24.4.0-alpha13",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.2",
       "react": "18.2.0",
       "react-dom": "18.2.0",
-      "react-router-dom": "6.21.3"
+      "react-router-dom": "6.22.0"
     },
     "devDependencies": {
       "@babel/preset-react": "^7",
       "@rollup/plugin-replace": "5.0.5",
       "@rollup/pluginutils": "5.1.0",
+      "@types/react": "18.2.55",
+      "@types/react-dom": "18.2.19",
       "@vitejs/plugin-react": "4.2.1",
       "async": "3.2.5",
       "glob": "10.3.10",
@@ -86,13 +87,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.3.3",
-      "vite": "5.0.12",
+      "vite": "5.1.1",
       "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "c0705713db9bcb2adcbec1f123ff2bfbb04be40dc59644f6ab68f8cbc121c8b4"
+    "hash": "eeb9afbb572a4276793ca4ce7ee12f16e02223c545e23aec0d43c40d57fac08b"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
