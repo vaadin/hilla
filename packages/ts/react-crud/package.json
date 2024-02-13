@@ -56,7 +56,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-core": "24.4.0-alpha3",
+    "@vaadin/hilla-frontend": "24.4.0-alpha3",
     "@vaadin/hilla-lit-form": "24.4.0-alpha3",
     "@vaadin/hilla-react-form": "24.4.0-alpha3",
     "@vaadin/react-components": "24.4.0-alpha10"

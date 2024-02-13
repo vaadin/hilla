@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-core": "24.4.0-alpha3"
+    "@vaadin/hilla-frontend": "24.4.0-alpha3"
   },
   "peerDependencies": {
     "react": "^18",

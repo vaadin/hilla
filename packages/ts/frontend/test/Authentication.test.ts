@@ -31,7 +31,7 @@ const base = window.location.origin;
 
 const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
 
-describe('@vaadin/hilla-core', () => {
+describe('@vaadin/hilla-frontend', () => {
   describe('Authentication', () => {
     const requestHeaders: Record<string, string> = {};
     const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
