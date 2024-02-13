@@ -69,6 +69,7 @@
       "@vaadin/hilla-react-auth": "24.4.0-alpha3",
       "@vaadin/hilla-react-crud": "24.4.0-alpha3",
       "@vaadin/hilla-react-form": "24.4.0-alpha3",
+      "@vaadin/hilla-react-signals": "24.4.0-alpha3",
       "@vaadin/react-components": "24.4.0-alpha12",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.2",
@@ -120,6 +121,7 @@
     "@types/react": "$@types/react",
     "react": "$react",
     "@vaadin/react-components": "$@vaadin/react-components",
-    "@vaadin/bundles": "$@vaadin/bundles"
+    "@vaadin/bundles": "$@vaadin/bundles",
+    "@vaadin/hilla-react-signals": "$@vaadin/hilla-react-signals"
   }
 }
