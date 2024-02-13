@@ -25,7 +25,6 @@
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
     <module>packages/java/hilla-dev</module>
-    <module>packages/java/hilla-dev-mode</module>
     <module>packages/java/hilla-react</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
