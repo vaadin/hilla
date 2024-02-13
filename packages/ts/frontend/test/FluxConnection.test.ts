@@ -10,7 +10,7 @@ import type {
 } from '../src/FluxMessages.js';
 import { getSubscriptionEventSpies, subscribeStub } from './mocks/atmosphere.js';
 
-describe('@vaadin/hilla-core', () => {
+describe('@vaadin/hilla-frontend', () => {
   describe('FluxConnection', () => {
     function emitMessage(msg: AbstractMessage) {
       getSubscriptionEventSpies()?.onMessage?.({ responseBody: JSON.stringify(msg) });

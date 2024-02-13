@@ -40,7 +40,7 @@ interface TestVaadinWindow extends Window {
 
 const $wnd = window as TestVaadinWindow;
 
-describe('@vaadin/hilla-core', () => {
+describe('@vaadin/hilla-frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
 
