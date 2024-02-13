@@ -106,11 +106,6 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin.hilla</groupId>
-                <artifactId>hilla-dev-mode</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>endpoint</artifactId>
                 <version>${project.version}</version>
             </dependency>
