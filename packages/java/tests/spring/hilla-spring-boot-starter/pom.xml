@@ -38,6 +38,10 @@
             <artifactId>hilla</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+        </dependency>
 
         <!-- Spring -->
         <dependency>

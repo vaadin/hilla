@@ -186,12 +186,6 @@ publishing {
  * Misc.
  *
  **********************************************************************************************************************/
-wrapper {
-    gradleVersion = '8.3'
-    distributionType = Wrapper.DistributionType.ALL
-}
-
-
 // This will print ongoing tests, taken from https://stackoverflow.com/a/4292739/377320
 // This will come in handy on the CI during long-running tests to prevent the CI killing
 //     the process due to a false indication of inactivity:
