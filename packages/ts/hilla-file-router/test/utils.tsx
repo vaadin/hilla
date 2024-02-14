@@ -113,7 +113,7 @@ export const components = {
     default: function About(): JSX.Element {
       return <></>;
     },
-    config: { title: 'About' },
+    config: { title: 'About', menu: { order: 1 } },
   },
   friends: {
     // eslint-disable-next-line func-name-matching
@@ -136,6 +136,13 @@ export const components = {
     },
     config: { title: 'Friend' },
   },
+  hidden: {
+    // eslint-disable-next-line func-name-matching
+    default: function Hidden(): JSX.Element {
+      return <></>;
+    },
+    config: { menu: { exclude: true } },
+  },
   server: {
     // eslint-disable-next-line func-name-matching
     default: function Server(): JSX.Element {
@@ -152,6 +159,10 @@ export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule> {
       {
         path: 'about',
         module: components.about,
+      },
+      {
+        path: 'hidden',
+        module: components.hidden,
       },
       {
         path: 'profile',

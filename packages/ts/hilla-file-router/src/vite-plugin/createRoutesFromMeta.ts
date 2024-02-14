@@ -10,7 +10,7 @@ import ts, {
 } from 'typescript';
 import { transformRoute } from '../runtime/utils.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
-import { convertFSPatternToURLPatternString } from './utils.js';
+import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
@@ -70,7 +70,7 @@ export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL
         imports.push(createImport(mod, relativize(layout, generatedDir)));
       }
 
-      return createRouteData(convertFSPatternToURLPatternString(path), mod, children);
+      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, children);
     },
   );
 

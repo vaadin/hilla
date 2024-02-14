@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 import ts, { type Node } from 'typescript';
-import { adjustRouteConfig, type ViewConfig } from '../runtime/utils.js';
+import { convertComponentNameToTitle, type ViewConfig } from '../runtime/utils.js';
 import traverse from '../shared/traverse.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
-import { convertFSPatternToURLPatternString } from './utils.js';
+import { convertFSRouteSegmentToURLPatternFormat, extractParameterFromRouteSegment } from './utils.js';
 
 function* walkAST(node: Node): Generator<Node> {
   yield node;
@@ -18,9 +18,12 @@ export default async function createViewConfigJson(views: RouteMeta, configExpor
   const res = await Promise.all(
     Array.from(traverse(views), async (branch) => {
       const configs = await Promise.all(
-        branch.map(async ({ path, file, layout }) => {
+        branch.map(async ({ path, file, layout }): Promise<[string, ViewConfig]> => {
           if (!file && !layout) {
-            return [path, undefined] as const;
+            return [
+              convertFSRouteSegmentToURLPatternFormat(path),
+              { params: extractParameterFromRouteSegment(path) },
+            ] as const;
           }
 
           const sourceFile = ts.createSourceFile(
@@ -46,15 +49,25 @@ export default async function createViewConfigJson(views: RouteMeta, configExpor
               componentName = node.text;
             }
           }
+          const _path = config?.route ?? path;
+          const pattern = convertFSRouteSegmentToURLPatternFormat(_path);
 
-          return [path, adjustRouteConfig(config, componentName)] as const;
+          return [
+            pattern,
+            {
+              ...config,
+              params: extractParameterFromRouteSegment(_path),
+              title: convertComponentNameToTitle(componentName),
+            },
+          ] as const;
         }),
       );
 
-      const key = configs.map(([path, config]) => convertFSPatternToURLPatternString(config?.route ?? path)).join('/');
+      const key = configs.map(([path]) => path).join('/');
+      const params = configs.reduce((acc, [, { params: p }]) => Object.assign(acc, p), {});
       const [, value] = configs[configs.length - 1];
 
-      return [key, value] as const;
+      return [key, { ...value, params }] as const;
     }),
   );
 

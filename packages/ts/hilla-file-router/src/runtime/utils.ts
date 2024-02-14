@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import type { RouteParamType } from '../vite-plugin/utils.js';
 
 export type ViewConfig = Readonly<{
   /**
@@ -9,9 +10,9 @@ export type ViewConfig = Readonly<{
   title?: string;
 
   /**
-   *
+   * A map of route parameters and their types.
    */
-  hasMandatoryParams?: boolean;
+  params?: Readonly<Record<string, RouteParamType>>;
 
   /**
    * Same as in the explicit React Router configuration.
@@ -104,6 +105,9 @@ export function transformRoute<T, U>(
   );
 }
 
+const viewPattern = /view/giu;
+const upperCaseSplitPattern = /(?=[A-Z])/gu;
+
 /**
  * Extracts the name of a component.
  *
@@ -111,28 +115,25 @@ export function transformRoute<T, U>(
  *
  * @returns The name of the component.
  */
-export function extractComponentName(component?: unknown): string | undefined {
+export function convertComponentNameToTitle(component?: unknown): string | undefined {
   if (
     component &&
     (typeof component === 'object' || typeof component === 'function') &&
     'name' in component &&
     typeof component.name === 'string'
   ) {
-    return component.name;
+    return component.name.replace(viewPattern, '').split(upperCaseSplitPattern).join(' ');
   }
 
   return undefined;
 }
-
-const viewPattern = /view/giu;
-const upperCaseSplitPattern = /(?=[A-Z])/gu;
 
 /**
  * Processes the route configuration to ensure that the title is set.
  *
  * @param config - The route configuration to process.
  * @param componentName - The name of the component. Could be extracted from the component using
- * {@link extractComponentName}.
+ * {@link convertComponentNameToTitle}.
  *
  * @returns The processed route configuration.
  */

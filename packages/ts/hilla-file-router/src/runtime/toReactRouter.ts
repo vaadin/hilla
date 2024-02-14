@@ -1,12 +1,6 @@
 import { createElement } from 'react';
 import type { RouteObject } from 'react-router';
-import {
-  adjustRouteConfig,
-  type AgnosticRoute,
-  extractComponentName,
-  type RouteModule,
-  transformRoute,
-} from './utils.js';
+import { type AgnosticRoute, convertComponentNameToTitle, type RouteModule, transformRoute } from './utils.js';
 
 /**
  * Transforms generated routes into a format that can be used by React Router.
@@ -17,12 +11,18 @@ export function toReactRouter(routes: AgnosticRoute<RouteModule>): RouteObject {
   return transformRoute(
     routes,
     (route) => route.children?.values(),
-    ({ path, module }, children) =>
-      ({
+    ({ path, module }, children) => {
+      const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
+
+      return {
         path: module?.config?.route ?? path,
         element: module?.default ? createElement(module.default) : undefined,
         children: children.length > 0 ? (children as RouteObject[]) : undefined,
-        handle: adjustRouteConfig(module?.config, extractComponentName(module?.default)),
-      }) satisfies RouteObject,
+        handle: {
+          ...module?.config,
+          title,
+        },
+      } satisfies RouteObject;
+    },
   );
 }
