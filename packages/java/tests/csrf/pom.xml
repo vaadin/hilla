@@ -22,7 +22,7 @@
     <!-- Project dependencies -->
     <dependency>
       <groupId>com.vaadin.hilla</groupId>
-      <artifactId>hilla-dev</artifactId>
+      <artifactId>hilla</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
