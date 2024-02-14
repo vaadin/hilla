@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
-import type { AgnosticRoute, ViewConfig } from '../runtime/utils.js';
-import type { RouteModule } from '../runtime.js';
+import type { AgnosticRoute } from '../src/runtime/utils.js';
+import type { RouteModule } from '../src/runtime.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
