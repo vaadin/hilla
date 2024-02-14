@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.vaadin.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
     <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
@@ -21,8 +21,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>plugin-base</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-plugin-base</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -59,8 +59,8 @@
       <artifactId>jsr305</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>engine-core</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-engine-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -92,8 +92,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-test-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

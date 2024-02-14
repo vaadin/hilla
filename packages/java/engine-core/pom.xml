@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.vaadin.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
     <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>engine-core</artifactId>
+  <artifactId>hilla-engine-core</artifactId>
   <packaging>jar</packaging>
   <name>Hilla Engine Core</name>
 
@@ -45,8 +45,8 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-core</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -59,33 +59,33 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-plugin-backbone</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-backbone</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-plugin-nonnull</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-nonnull</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-plugin-subtypes</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-subtypes</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-plugin-model</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-model</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-plugin-transfertypes</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-transfertypes</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -99,8 +99,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-test-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

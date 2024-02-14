@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.vaadin.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>tests</artifactId>
         <version>24.4-SNAPSHOT</version>
     </parent>
@@ -30,12 +30,12 @@
                 <version>${spring.boot.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.vaadin.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.vaadin.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-react-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -48,7 +48,7 @@
                 <version>${testbench.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.vaadin.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-bom</artifactId>
                 <type>pom</type>
                 <scope>import</scope>
