@@ -25,7 +25,7 @@ export class PushProcessor {
 
     this.#dependencies.imports.fromCode(source);
     this.#subscriptionId = memoize(() =>
-      imports.named.add(paths.createBareModulePath('@vaadin/hilla-core', false), 'Subscription'),
+      imports.named.add(paths.createBareModulePath('@vaadin/hilla-frontend', false), 'Subscription'),
     );
   }
 
@@ -51,7 +51,7 @@ export class PushProcessor {
       const importHillaCore = importStatements.find(
         (statement) =>
           ts.isImportDeclaration(statement) &&
-          (statement.moduleSpecifier as ts.StringLiteral).text === '@vaadin/hilla-core',
+          (statement.moduleSpecifier as ts.StringLiteral).text === '@vaadin/hilla-frontend',
       );
 
       if (importHillaCore) {
