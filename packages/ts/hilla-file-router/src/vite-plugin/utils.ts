@@ -1,7 +1,3 @@
-const wildcardParamPattern = /\{\.{3}(.+)\}/gu;
-const optionalParamPattern = /\{{2}(.+)\}{2}/gu;
-const paramPattern = /\{(.+)\}/gu;
-
 /**
  * The type of route parameter.
  */
@@ -11,11 +7,24 @@ export enum RouteParamType {
   Wildcard = '*',
 }
 
-const routeParamTypeMap: ReadonlyMap<RegExp, RouteParamType> = new Map([
-  [wildcardParamPattern, RouteParamType.Wildcard],
-  [optionalParamPattern, RouteParamType.Optional],
-  [paramPattern, RouteParamType.Required],
+const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
+  [RouteParamType.Wildcard, /\{\.{3}(.+)\}/gu],
+  [RouteParamType.Optional, /\{{2}(.+)\}{2}/gu],
+  [RouteParamType.Required, /\{(.+)\}/gu],
 ]);
+
+// eslint-disable-next-line consistent-return
+function getReplacer(type: RouteParamType): string {
+  // eslint-disable-next-line default-case
+  switch (type) {
+    case RouteParamType.Wildcard:
+      return '*';
+    case RouteParamType.Optional:
+      return ':$1?';
+    case RouteParamType.Required:
+      return ':$1';
+  }
+}
 
 /**
  * Converts a file system pattern to a URL pattern string.
@@ -31,15 +40,13 @@ const routeParamTypeMap: ReadonlyMap<RegExp, RouteParamType> = new Map([
  * - `*`.
  */
 export function convertFSRouteSegmentToURLPatternFormat(segment: string): string {
-  return (
-    segment
-      // /url/{...wildcard}/page -> /url/*/page
-      .replaceAll(wildcardParamPattern, '*')
-      // /url/{{param}}/page -> /url/:param?/page
-      .replaceAll(optionalParamPattern, ':$1?')
-      // /url/{param}/page -> /url/:param/page
-      .replaceAll(paramPattern, ':$1')
-  );
+  let res = segment;
+
+  routeParamTypeMap.forEach((pattern, type) => {
+    res = res.replaceAll(pattern, getReplacer(type));
+  });
+
+  return res;
 }
 
 /**
@@ -49,14 +56,17 @@ export function convertFSRouteSegmentToURLPatternFormat(segment: string): string
  * @returns A map of parameter names and their types.
  */
 export function extractParameterFromRouteSegment(segment: string): Readonly<Record<string, RouteParamType>> {
+  let _segment = segment;
   const params: Record<string, RouteParamType> = {};
 
-  routeParamTypeMap.forEach((type, pattern) => {
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(segment)) != null) {
-      params[match[1]] = type;
-    }
-  });
+  for (const [type, pattern] of routeParamTypeMap) {
+    const _pattern = new RegExp(pattern.source, pattern.flags);
+    _segment = _segment.replaceAll(_pattern, (match) => {
+      const key = match.replaceAll(pattern, getReplacer(type));
+      params[key] = type;
+      return '';
+    });
+  }
 
   return params;
 }
@@ -66,8 +76,11 @@ export function extractParameterFromRouteSegment(segment: string): Readonly<Reco
  * order to sort the routes alphabetically.
  */
 export function cleanUp(path: string): string {
-  return path
-    .replaceAll(wildcardParamPattern, '$1')
-    .replaceAll(optionalParamPattern, '$1')
-    .replaceAll(paramPattern, '$1');
+  let res = path;
+
+  for (const pattern of routeParamTypeMap.values()) {
+    res = res.replaceAll(pattern, '$1');
+  }
+
+  return res;
 }

@@ -19,7 +19,7 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a framework-agnostic tree of routes', () => {
       const generated = createRoutesFromMeta(meta, new URL('./out/', dir));
 
-      expect(generated).to.equal(`import * as Page0 from "../views/about.js";
+      expect(generated).to.equal(`import * as Page0 from "../views/nameToReplace.js";
 import * as Page1 from "../views/profile/$index.js";
 import * as Page2 from "../views/profile/account/security/password.js";
 import * as Page3 from "../views/profile/account/security/two-factor-auth.js";
@@ -30,36 +30,43 @@ import * as Layout8 from "../views/profile/friends/$layout.js";
 const routes = {
     path: "",
     children: [{
-            path: "about",
+            path: Page0.config?.route ?? "nameToReplace",
             module: Page0
         }, {
             path: "profile",
             children: [{
-                    path: "",
+                    path: Page1.config?.route ?? "",
                     module: Page1
                 }, {
-                    path: "account",
+                    path: Layout5.config?.route ?? "account",
                     module: Layout5,
                     children: [{
                             path: "security",
                             children: [{
-                                    path: "password",
+                                    path: Page2.config?.route ?? "password",
                                     module: Page2
                                 }, {
-                                    path: "two-factor-auth",
+                                    path: Page3.config?.route ?? "two-factor-auth",
                                     module: Page3
                                 }],
                         }],
                 }, {
-                    path: "friends",
+                    path: Layout8.config?.route ?? "friends",
                     module: Layout8,
                     children: [{
-                            path: "list",
+                            path: Page6.config?.route ?? "list",
                             module: Page6
                         }, {
-                            path: ":user",
+                            path: Page7.config?.route ?? ":user",
                             module: Page7
                         }],
+                }],
+        }, {
+            path: "test",
+            children: [{
+                    path: "*",
+                }, {
+                    path: ":optional?",
                 }],
         }],
 };

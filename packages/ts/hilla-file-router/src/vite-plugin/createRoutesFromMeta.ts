@@ -1,4 +1,4 @@
-import { extname, relative } from 'node:path';
+import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
@@ -36,7 +36,7 @@ function createRouteData(
 ): ObjectLiteralExpression {
   return template(
     `const route = {
-  path: '${path}',
+  path: ${mod ? `${mod}.config?.route ?? '${path}'` : `'${path}'`},
   ${mod ? `module: ${mod}` : ''}
   ${children.length > 0 ? `children: CHILDREN,` : ''}
 }`,

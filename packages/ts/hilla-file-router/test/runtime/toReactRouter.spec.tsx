@@ -2,7 +2,7 @@ import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import { toReactRouter } from '../../src/runtime/toReactRouter.js';
-import type { AgnosticRoute, RouteModule } from '../../src/runtime/utils.js';
+import type { AgnosticRoute, RouteModule } from '../../src/types.js';
 import { components, createTestingAgnosticRoutes } from '../utils.js';
 
 use(chaiLike);

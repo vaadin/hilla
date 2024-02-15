@@ -26,13 +26,6 @@ export type PluginOptions = Readonly<{
    * @defaultValue `['.tsx', '.jsx', '.ts', '.js']`
    */
   extensions?: readonly string[];
-  /**
-   * The name of the export that will be used for the {@link ViewConfig} in the
-   * route file.
-   *
-   * @defaultValue `config`
-   */
-  configExportName?: string;
 }>;
 
 type RuntimeFileUrls = Readonly<{
@@ -49,11 +42,10 @@ async function build(
   outDir: URL,
   generatedUrls: RuntimeFileUrls,
   extensions: readonly string[],
-  configExportName: string,
 ): Promise<void> {
   const routeMeta = await collectRoutesFromFS(viewsDir, { extensions });
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, outDir);
-  const viewConfigJson = await createViewConfigJson(routeMeta, configExportName);
+  const viewConfigJson = await createViewConfigJson(routeMeta);
 
   await generateRuntimeFiles(runtimeRoutesCode, viewConfigJson, generatedUrls);
 }
@@ -68,7 +60,6 @@ export default function vitePluginFileSystemRouter({
   viewsDir = 'frontend/views/',
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
-  configExportName = 'config',
 }: PluginOptions = {}): Plugin {
   let _viewsDir: URL;
   let _generatedDir: URL;
@@ -88,7 +79,7 @@ export default function vitePluginFileSystemRouter({
       };
     },
     async buildStart() {
-      await build(_viewsDir, _generatedDir, generatedUrls, extensions, configExportName);
+      await build(_viewsDir, _generatedDir, generatedUrls, extensions);
     },
     configureServer(server) {
       const dir = fileURLToPath(_viewsDir);
@@ -98,7 +89,7 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        build(_viewsDir, _outDir, generatedUrls, extensions, configExportName).catch((error) => console.error(error));
+        build(_viewsDir, _outDir, generatedUrls, extensions).catch((error) => console.error(error));
       };
 
       server.watcher.on('add', changeListener);

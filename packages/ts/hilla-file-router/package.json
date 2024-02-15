@@ -34,6 +34,9 @@
     "./runtime.js": {
       "default": "./runtime.js"
     },
+    "./types.js": {
+      "types": "./types.d.ts"
+    },
     "./vite-plugin-file-router.js": {
       "default": "./vite-plugin-file-router.js"
     }

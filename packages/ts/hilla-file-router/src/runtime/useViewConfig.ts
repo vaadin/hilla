@@ -1,6 +1,6 @@
 import type { UIMatch } from '@remix-run/router';
 import { useMatches } from 'react-router';
-import type { ViewConfig } from './utils.js';
+import type { ViewConfig } from '../types.js';
 
 /**
  * Hook to return the {@link ViewConfig} for the current route.

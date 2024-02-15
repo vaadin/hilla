@@ -3,9 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
-import type { AgnosticRoute } from '../src/runtime/utils.js';
-import type { RouteModule } from '../src/runtime.js';
-import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
+import type { AgnosticRoute, RouteModule } from '../src/types.js';
+import type { RouteMeta } from '../vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
   return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);
@@ -15,6 +14,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   await Promise.all([
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
+    mkdir(new URL('test/', dir), { recursive: true }),
   ]);
   await Promise.all([
     appendFile(
@@ -44,6 +44,14 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(
       new URL('nameToReplace.tsx', dir),
       "export const config = { route: 'about', title: 'About' };\nexport default function About() {};",
+    ),
+    appendFile(
+      new URL('test/{...wildcard}.tsx', dir),
+      "export const config = { title: 'Wildcard' };\nexport default function Wildcard() {};",
+    ),
+    appendFile(
+      new URL('test/{{optional}}.tsx', dir),
+      "export const config = { title: 'Optional' };\nexport default function Optional() {};",
     ),
   ]);
 }
@@ -103,6 +111,22 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           },
         ],
       },
+      {
+        path: 'test',
+        layout: undefined,
+        children: [
+          {
+            path: '{{optional}}',
+            file: new URL('test/{{optional}}.tsx', dir),
+            children: [],
+          },
+          {
+            path: '{...wildcard}',
+            file: new URL('test/{...wildcard}.tsx', dir),
+            children: [],
+          },
+        ],
+      },
     ],
   };
 }
@@ -143,6 +167,20 @@ export const components = {
     },
     config: { menu: { exclude: true } },
   },
+  wildcard: {
+    // eslint-disable-next-line func-name-matching
+    default: function Wildcard(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Rest' },
+  },
+  optional: {
+    // eslint-disable-next-line func-name-matching
+    default: function Optional(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Optional' },
+  },
   server: {
     // eslint-disable-next-line func-name-matching
     default: function Server(): JSX.Element {
@@ -180,6 +218,19 @@ export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule> {
                 module: components.friend,
               },
             ],
+          },
+        ],
+      },
+      {
+        path: 'test',
+        children: [
+          {
+            path: '*',
+            module: components.wildcard,
+          },
+          {
+            path: ':optional?',
+            module: components.optional,
           },
         ],
       },

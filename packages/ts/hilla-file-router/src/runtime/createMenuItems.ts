@@ -1,4 +1,4 @@
-import type { ViewConfig } from './utils.js';
+import type { ViewConfig } from '../types.js';
 
 export type VaadinServer = Readonly<{
   views: Record<string, ViewConfig>;
