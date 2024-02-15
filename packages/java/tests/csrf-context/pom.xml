@@ -44,7 +44,7 @@
         <groupId>com.vaadin.hilla</groupId>
         <artifactId>hilla-maven-plugin</artifactId>
         <configuration>
-          <reactRouterEnabled>false</reactRouterEnabled>
+          <reactEnable>false</reactEnable>
         </configuration>
       </plugin>
 
