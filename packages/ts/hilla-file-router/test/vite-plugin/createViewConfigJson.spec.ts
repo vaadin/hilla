@@ -1,10 +1,12 @@
 import { fileURLToPath } from 'node:url';
-import { expect } from '@esm-bundle/chai';
+import { expect, use } from '@esm-bundle/chai';
+import chaiAsPromised from 'chai-as-promised';
 import { rimraf } from 'rimraf';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import createViewConfigJson from '../../src/vite-plugin/createViewConfigJson.js';
-import { RouteParamType } from '../../src/vite-plugin/utils.js';
-import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
+import { createTestingRouteFiles, createTestingRouteMeta, createTestingViewMap, createTmpDir } from '../utils.js';
+
+use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('generateJson', () => {
@@ -25,20 +27,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate a JSON representation of the route tree', async () => {
-      const generated = await createViewConfigJson(meta);
-
-      expect(generated).to.equal(
-        JSON.stringify({
-          '/about': { route: 'about', title: 'About' },
-          '/profile/': { title: 'Profile' },
-          '/profile/account/security/password': { title: 'Password' },
-          '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
-          '/profile/friends/list': { title: 'List' },
-          '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
-          '/test/*': { params: { '*': RouteParamType.Wildcard } },
-          '/test/:optional?': { params: { ':optional?': RouteParamType.Optional } },
-        }),
-      );
+      await expect(createViewConfigJson(meta)).to.eventually.equal(JSON.stringify(createTestingViewMap()));
     });
   });
 });

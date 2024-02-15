@@ -1,28 +1,57 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
-import { components, createTestingAgnosticRoutes } from '../utils.js';
+import { RouteParamType } from '../../src/shared/routeParamType.js';
+import { components, createTestingAgnosticRoutes, createTestingViewMap } from '../utils.js';
 
 use(chaiLike);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('getMenuItems', () => {
     it('should generate a set of menu items', () => {
-      const routes = createTestingAgnosticRoutes();
-      const items = createMenuItems(routes, {
+      const items = createMenuItems({
         server: {
-          views: {
-            '/server': components.server.config,
-          },
+          views: createTestingViewMap(),
         },
       });
 
-      expect(items).to.be.like({
-        '/about': components.about.config,
-        '/profile/friends/friends-list': components.friendsList.config,
-        '/profile/friends/:user': components.friend.config,
-        '/server': components.server.config,
-      });
+      expect(items).to.be.like([
+        {
+          icon: undefined,
+          title: 'About',
+          to: '/about',
+        },
+        {
+          icon: undefined,
+          title: 'Profile',
+          to: '/profile/',
+        },
+        {
+          icon: undefined,
+          title: 'Password',
+          to: '/profile/account/security/password',
+        },
+        {
+          icon: undefined,
+          title: 'Two Factor Auth',
+          to: '/profile/account/security/two-factor-auth',
+        },
+        {
+          icon: undefined,
+          title: 'List',
+          to: '/profile/friends/list',
+        },
+        {
+          icon: undefined,
+          title: 'Optional',
+          to: '/test/',
+        },
+        {
+          icon: undefined,
+          title: 'Wildcard',
+          to: '/test/',
+        },
+      ]);
     });
   });
 });

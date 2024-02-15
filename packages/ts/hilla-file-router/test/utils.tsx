@@ -3,7 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
-import type { AgnosticRoute, RouteModule } from '../src/types.js';
+import { RouteParamType } from '../src/shared/routeParamType.js';
+import type { AgnosticRoute, RouteModule, ViewConfig } from '../src/types.js';
 import type { RouteMeta } from '../vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
@@ -235,5 +236,18 @@ export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule> {
         ],
       },
     ],
+  };
+}
+
+export function createTestingViewMap(): Record<string, ViewConfig> {
+  return {
+    '/about': { route: 'about', title: 'About' },
+    '/profile/': { title: 'Profile' },
+    '/profile/account/security/password': { title: 'Password' },
+    '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
+    '/profile/friends/list': { title: 'List' },
+    '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
+    '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
+    '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
   };
 }

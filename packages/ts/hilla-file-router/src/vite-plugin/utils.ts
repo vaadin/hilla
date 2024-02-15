@@ -1,11 +1,4 @@
-/**
- * The type of route parameter.
- */
-export enum RouteParamType {
-  Required = 'req',
-  Optional = 'opt',
-  Wildcard = '*',
-}
+import { RouteParamType } from '../shared/routeParamType.js';
 
 const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
   [RouteParamType.Wildcard, /\{\.{3}(.+)\}/gu],

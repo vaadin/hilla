@@ -1,5 +1,4 @@
-import type { ComponentType } from 'react';
-import type { RouteParamType } from './vite-plugin/utils.js';
+import type { RouteParamType } from './shared/routeParamType.js';
 
 export type ViewConfig = Readonly<{
   /**
