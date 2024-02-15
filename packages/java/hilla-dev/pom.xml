@@ -34,11 +34,6 @@
             <artifactId>hilla-dev-mode</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>copilot</artifactId>
-            <version>${copilot.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
