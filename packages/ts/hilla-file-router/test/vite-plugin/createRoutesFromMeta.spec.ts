@@ -27,6 +27,8 @@ import * as Layout5 from "../views/profile/account/$layout.js";
 import * as Page6 from "../views/profile/friends/list.js";
 import * as Page7 from "../views/profile/friends/{user}.js";
 import * as Layout8 from "../views/profile/friends/$layout.js";
+import * as Page10 from "../views/test/{{optional}}.js";
+import * as Page11 from "../views/test/{...wildcard}.js";
 const routes = {
     path: "",
     children: [{
@@ -64,9 +66,11 @@ const routes = {
         }, {
             path: "test",
             children: [{
-                    path: "*",
+                    path: Page10.config?.route ?? ":optional?",
+                    module: Page10
                 }, {
-                    path: ":optional?",
+                    path: Page11.config?.route ?? "*",
+                    module: Page11
                 }],
         }],
 };
