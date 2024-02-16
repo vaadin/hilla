@@ -252,6 +252,7 @@ jobs:
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs
+          overwrite: true
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
