@@ -2,7 +2,7 @@ import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { JSX } from 'react';
+import type { ComponentType, JSX } from 'react';
 import { RouteParamType } from '../src/shared/routeParamType.js';
 import type { AgnosticRoute, RouteModule, ViewConfig } from '../src/types.js';
 import type { RouteMeta } from '../vite-plugin/collectRoutesFromFS.js';
@@ -191,7 +191,7 @@ export const components = {
   },
 } satisfies Record<string, RouteModule>;
 
-export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule> {
+export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule<ComponentType>> {
   return {
     path: '',
     children: [
