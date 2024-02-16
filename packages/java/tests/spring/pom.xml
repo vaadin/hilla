@@ -23,23 +23,6 @@
 
     <dependencyManagement>
         <dependencies>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin.hilla</groupId>
-                <artifactId>hilla-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin.hilla</groupId>
-                <artifactId>hilla-react-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-testbench-bom</artifactId>
@@ -64,6 +47,43 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+            <version>${flow.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.javassist</groupId>
+                    <artifactId>javassist</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin.hilla</groupId>
+            <artifactId>hilla</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin.hilla</groupId>
+            <artifactId>endpoint</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin.hilla</groupId>
+            <artifactId>engine-runtime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+
         <!-- Project dependencies -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
@@ -162,8 +182,6 @@
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
                 <module>react-grid-test</module>
-                <module>hilla-spring-boot-starter</module>
-                <module>hilla-react-spring-boot-starter</module>
             </modules>
         </profile>
 

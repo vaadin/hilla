@@ -101,7 +101,6 @@
                         <configuration>
                             <nodeAutoUpdate>false</nodeAutoUpdate>
                             <runNpmInstall>false</runNpmInstall>
-                            <productionMode>true</productionMode>
                         </configuration>
                     </execution>
                 </executions>
