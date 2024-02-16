@@ -19,7 +19,7 @@ class FormValidationConstraintsModel<T extends FormValidationConstraints_1 = For
         return this[_getPropertyModel_1]("notEmpty", (parent, key) => new StringModel_1(parent, key, false, { validators: [new NotEmpty_1(), new NotNull_1()] }));
     }
     get notNullEntity(): FormEntityModel_1 {
-        return this[_getPropertyModel_1]("notNullEntity", (parent, key) => new FormEntityModel_1(parent, key, false));
+        return this[_getPropertyModel_1]("notNullEntity", (parent, key) => new FormEntityModel_1(parent, key, false, { validators: [new NotNull_1()] }));
     }
     get notBlank(): StringModel_1 {
         return this[_getPropertyModel_1]("notBlank", (parent, key) => new StringModel_1(parent, key, false, { validators: [new NotBlank_1()] }));

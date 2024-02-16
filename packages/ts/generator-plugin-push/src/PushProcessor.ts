@@ -25,7 +25,7 @@ export class PushProcessor {
 
     this.#dependencies.imports.fromCode(source);
     this.#subscriptionId = memoize(() =>
-      imports.named.add(paths.createBareModulePath('@vaadin/hilla-core', false), 'Subscription'),
+      imports.named.add(paths.createBareModulePath('@vaadin/hilla-frontend', false), 'Subscription'),
     );
   }
 
@@ -48,18 +48,18 @@ export class PushProcessor {
     let importStatements = this.#dependencies.imports.toCode();
 
     if (this.#operations.removeInitImport) {
-      const importHillaCore = importStatements.find(
+      const importHillaFrontend = importStatements.find(
         (statement) =>
           ts.isImportDeclaration(statement) &&
-          (statement.moduleSpecifier as ts.StringLiteral).text === '@vaadin/hilla-core',
+          (statement.moduleSpecifier as ts.StringLiteral).text === '@vaadin/hilla-frontend',
       );
 
-      if (importHillaCore) {
-        const updatedImportStatement = PushProcessor.#removeInitImport(importHillaCore as ts.ImportDeclaration);
+      if (importHillaFrontend) {
+        const updatedImportStatement = PushProcessor.#removeInitImport(importHillaFrontend as ts.ImportDeclaration);
 
         if (updatedImportStatement) {
           importStatements = importStatements.map((statement) => {
-            if (statement === importHillaCore) {
+            if (statement === importHillaFrontend) {
               return updatedImportStatement;
             }
 

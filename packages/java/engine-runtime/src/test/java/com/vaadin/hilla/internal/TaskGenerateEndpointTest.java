@@ -48,7 +48,8 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile(), false, "node");
+                outputDirectory.toFile(), getClass()::getResource, false,
+                "node");
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -57,7 +58,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         String output = FileUtils.readFileToString(client, "UTF-8");
         assertThat(output, containsString(
-                "import { ConnectClient as ConnectClient_1 } from \"@vaadin/hilla-core\";"));
+                "import { ConnectClient as ConnectClient_1 } from \"@vaadin/hilla-frontend\";"));
         assertThat(output, containsString(
                 "const client_1 = new ConnectClient_1({ prefix: \"connect\" });"));
         assertThat(output, containsString("export default client_1;"));
@@ -82,7 +83,8 @@ public class TaskGenerateEndpointTest extends TaskTest {
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile(), false, "node");
+                outputDirectory.toFile(), getClass()::getResource, false,
+                "node");
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());

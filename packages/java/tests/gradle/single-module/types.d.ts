@@ -60,7 +60,7 @@ declare module '*.webp' {
   export default ref;
 }
 declare module '*.css?inline' {
-  import { CSSResultGroup } from 'lit';
+  import type { CSSResultGroup } from 'lit';
   const content: CSSResultGroup;
   export default content;
 }

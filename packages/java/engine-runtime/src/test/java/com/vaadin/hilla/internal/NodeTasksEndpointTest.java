@@ -1,13 +1,14 @@
 package com.vaadin.hilla.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,6 +19,7 @@ import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
+import com.vaadin.hilla.EndpointController;
 
 public class NodeTasksEndpointTest extends TaskTest {
     private Options options;
@@ -31,11 +33,16 @@ public class NodeTasksEndpointTest extends TaskTest {
         Lookup mockLookup = Mockito.mock(Lookup.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
                 .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
-        Mockito.doReturn(new DefaultClassFinder(
-                Collections.singleton(ConnectEndpointsForTesting.class)))
+        Mockito.doReturn(new DefaultClassFinder(Set.of(
+                // Required to bypass Hilla check in
+                // com.vaadin.flow.internal.hilla.EndpointRequestUtil
+                // .isHillaAvailable(com.vaadin.flow.server.frontend.scanner.ClassFinder)
+                EndpointController.class, ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
 
         options = new Options(mockLookup, getTemporaryDirectory().toFile())
+                .withFrontendDirectory(getTemporaryDirectory()
+                        .resolve(getFrontendDirectory()).toFile())
                 .withProductionMode(false)
                 .withBuildDirectory(getBuildDirectory())
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
@@ -44,6 +51,8 @@ public class NodeTasksEndpointTest extends TaskTest {
                         getTemporaryDirectory().resolve("api").toFile())
                 .withJarFrontendResourcesFolder(getTemporaryDirectory()
                         .resolve("jar-resources").toFile());
+
+        createIndexFile();
     }
 
     @Test
@@ -85,5 +94,17 @@ public class NodeTasksEndpointTest extends TaskTest {
                                 .exists(),
                         name + " should " + (shouldExist ? "" : "not ")
                                 + "be created"));
+    }
+
+    private void createIndexFile() throws IOException {
+        String indexContent = """
+                import { Router } from '@vaadin/router';
+                const router = new Router(document.querySelector('#outlet'));
+                router.setRoutes([ { path: '', component: 'hilla-view' } ]);
+                """;
+        File indexFile = new File(options.getFrontendDirectory(), "index.ts");
+        FileUtils.forceMkdirParent(indexFile);
+        FileUtils.writeStringToFile(indexFile, indexContent,
+                StandardCharsets.UTF_8);
     }
 }
