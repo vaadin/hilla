@@ -52,11 +52,11 @@ public class RouteUnifyingServiceInitListenerTest {
         MatcherAssert.assertThat(allRoutes.get(4).other().get("unknown"),
                 Matchers.notNullValue());
         MatcherAssert.assertThat(allRoutes.get(5).routeParameters(),
-            Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
+                Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
         MatcherAssert.assertThat(allRoutes.get(6).routeParameters(),
-            Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
+                Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
         MatcherAssert.assertThat(allRoutes.get(7).routeParameters(),
-           Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
+                Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
 
     }
 

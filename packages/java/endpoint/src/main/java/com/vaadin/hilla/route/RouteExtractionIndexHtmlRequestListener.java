@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Index HTML request listener for collecting
- * the client side and the server side views
- * and adding them to index.html response.
+ * Index HTML request listener for collecting the client side and the server
+ * side views and adding them to index.html response.
  */
 @Component
 public class RouteExtractionIndexHtmlRequestListener
@@ -40,11 +39,13 @@ public class RouteExtractionIndexHtmlRequestListener
 
     /**
      * Creates a new listener instance with the given route registry.
-     * @param clientRouteRegistry the client route registry
-     *                            for getting the client side views
+     *
+     * @param clientRouteRegistry
+     *            the client route registry for getting the client side views
      */
     @Autowired
-    public RouteExtractionIndexHtmlRequestListener(ClientRouteRegistry clientRouteRegistry) {
+    public RouteExtractionIndexHtmlRequestListener(
+            ClientRouteRegistry clientRouteRegistry) {
         this.clientRouteRegistry = clientRouteRegistry;
     }
 
@@ -70,17 +71,19 @@ public class RouteExtractionIndexHtmlRequestListener
 
     protected void collectClientViews(List<AvailableViewInfo> availableViews) {
         clientRouteRegistry.getAllRoutes().forEach(route -> {
-            final AvailableViewInfo availableViewInfo = new AvailableViewInfo(route.title(),
-                route.rolesAllowed(), route.route(), route.lazy(),
-                route.register(), route.menu(), route.routeParameters());
+            final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
+                    route.title(), route.rolesAllowed(), route.route(),
+                    route.lazy(), route.register(), route.menu(),
+                    route.routeParameters());
             availableViews.add(availableViewInfo);
         });
 
     }
 
-    protected void collectServerViews(final List<AvailableViewInfo> serverViews) {
-        final RouteRegistry serverRouteRegistry = VaadinService.getCurrent().getRouter()
-                .getRegistry();
+    protected void collectServerViews(
+            final List<AvailableViewInfo> serverViews) {
+        final RouteRegistry serverRouteRegistry = VaadinService.getCurrent()
+                .getRouter().getRegistry();
         serverRouteRegistry.getRegisteredRoutes().forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
@@ -96,24 +99,29 @@ public class RouteExtractionIndexHtmlRequestListener
                     title = serverView.getNavigationTarget().getSimpleName();
                 }
 
-                final Map<String, RouteParamType> routeParameters = getRouteParameters(serverView);
+                final Map<String, RouteParamType> routeParameters = getRouteParameters(
+                        serverView);
 
-                final AvailableViewInfo availableViewInfo = new AvailableViewInfo(title,
-                    null, url, false, false, null, routeParameters) ;
+                final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
+                        title, null, url, false, false, null, routeParameters);
                 serverViews.add(availableViewInfo);
             }
         });
     }
 
-    private Map<String, RouteParamType> getRouteParameters(RouteData serverView) {
+    private Map<String, RouteParamType> getRouteParameters(
+            RouteData serverView) {
         final Map<String, RouteParamType> routeParameters = new HashMap<>();
         serverView.getRouteParameters().forEach((route, params) -> {
-            if(params.getTemplate().contains("*")) {
-                routeParameters.put(params.getTemplate(), RouteParamType.WILDCARD);
-            } else if(params.getTemplate().contains("?")) {
-                routeParameters.put(params.getTemplate(), RouteParamType.OPTIONAL);
+            if (params.getTemplate().contains("*")) {
+                routeParameters.put(params.getTemplate(),
+                        RouteParamType.WILDCARD);
+            } else if (params.getTemplate().contains("?")) {
+                routeParameters.put(params.getTemplate(),
+                        RouteParamType.OPTIONAL);
             } else {
-                routeParameters.put(params.getTemplate(), RouteParamType.REQUIRED);
+                routeParameters.put(params.getTemplate(),
+                        RouteParamType.REQUIRED);
             }
         });
         return routeParameters;

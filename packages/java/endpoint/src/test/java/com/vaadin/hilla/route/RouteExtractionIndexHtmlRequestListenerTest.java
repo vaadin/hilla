@@ -35,7 +35,8 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
 
     private final ClientRouteRegistry clientRouteRegistry = Mockito
             .mock(ClientRouteRegistry.class);
-    private final RouteExtractionIndexHtmlRequestListener requestListener = new RouteExtractionIndexHtmlRequestListener(clientRouteRegistry);
+    private final RouteExtractionIndexHtmlRequestListener requestListener = new RouteExtractionIndexHtmlRequestListener(
+            clientRouteRegistry);
     private IndexHtmlResponse indexHtmlResponse;
 
     private VaadinService vaadinService;
@@ -50,7 +51,8 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         Mockito.when(document.head()).thenReturn(element);
         Mockito.when(indexHtmlResponse.getDocument()).thenReturn(document);
 
-        final RouteRegistry serverRouteRegistry = Mockito.mock(RouteRegistry.class);
+        final RouteRegistry serverRouteRegistry = Mockito
+                .mock(RouteRegistry.class);
         final List<RouteData> flowRegisteredRoutes = prepareServerRoutes();
         Mockito.when(serverRouteRegistry.getRegisteredRoutes())
                 .thenReturn(flowRegisteredRoutes);
@@ -60,14 +62,21 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         Mockito.when(router.getRegistry()).thenReturn(serverRouteRegistry);
 
         final List<ClientViewConfig> clientRoutes = prepareClientRoutes();
-        Mockito.when(clientRouteRegistry.getAllRoutes()).thenReturn(clientRoutes);
+        Mockito.when(clientRouteRegistry.getAllRoutes())
+                .thenReturn(clientRoutes);
     }
 
     private List<ClientViewConfig> prepareClientRoutes() {
         final List<ClientViewConfig> routes = new ArrayList<>();
-        routes.add(new ClientViewConfig("Home", null, "/home", false, false, null, Collections.emptyMap(), Collections.emptyMap()));
-        routes.add(new ClientViewConfig("Profile", new String[]{"ROLE_USER"}, "/profile", false, false, null, Collections.emptyMap(), Collections.emptyMap()));
-        routes.add(new ClientViewConfig("User Profile", new String[]{"ROLE_ADMIN"}, "/user/:userId", false, false, null, Map.of(":userId", RouteParamType.REQUIRED), Collections.emptyMap()));
+        routes.add(new ClientViewConfig("Home", null, "/home", false, false,
+                null, Collections.emptyMap(), Collections.emptyMap()));
+        routes.add(new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
+                "/profile", false, false, null, Collections.emptyMap(),
+                Collections.emptyMap()));
+        routes.add(new ClientViewConfig("User Profile",
+                new String[] { "ROLE_ADMIN" }, "/user/:userId", false, false,
+                null, Map.of(":userId", RouteParamType.REQUIRED),
+                Collections.emptyMap()));
         return routes;
     }
 
@@ -83,25 +92,31 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 Collections.emptyList());
         flowRegisteredRoutes.add(foo);
 
-        final RouteData wildcard = new RouteData(Collections.emptyList(), "wildcard/:___wildcard*",
-            Map.of("___wildcard", new RouteParameterData(":___wildcard*", null)), RouteTarget.class,
-            Collections.emptyList());
+        final RouteData wildcard = new RouteData(Collections.emptyList(),
+                "wildcard/:___wildcard*",
+                Map.of("___wildcard",
+                        new RouteParameterData(":___wildcard*", null)),
+                RouteTarget.class, Collections.emptyList());
         flowRegisteredRoutes.add(wildcard);
 
-        final RouteData editUser = new RouteData(Collections.emptyList(), "/:___userId/edit",
-            Map.of("___userId", new RouteParameterData(":___userId", null)), RouteTarget.class,
-            Collections.emptyList());
+        final RouteData editUser = new RouteData(Collections.emptyList(),
+                "/:___userId/edit",
+                Map.of("___userId", new RouteParameterData(":___userId", null)),
+                RouteTarget.class, Collections.emptyList());
         flowRegisteredRoutes.add(editUser);
 
-        final RouteData comments = new RouteData(Collections.emptyList(), "comments/:___commentId?",
-            Map.of("___commentId", new RouteParameterData(":___commentId?", null)), RouteTarget.class,
-            Collections.emptyList());
+        final RouteData comments = new RouteData(Collections.emptyList(),
+                "comments/:___commentId?",
+                Map.of("___commentId",
+                        new RouteParameterData(":___commentId?", null)),
+                RouteTarget.class, Collections.emptyList());
         flowRegisteredRoutes.add(comments);
         return flowRegisteredRoutes;
     }
 
     @Test
-    public void should_modifyIndexHtmlResponse() throws JsonProcessingException, IOException {
+    public void should_modifyIndexHtmlResponse()
+            throws JsonProcessingException, IOException {
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
@@ -125,7 +140,8 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass().getResource("/META-INF/VAADIN/available-views.json"));
+        var expected = mapper.readTree(getClass()
+                .getResource("/META-INF/VAADIN/available-views.json"));
 
         MatcherAssert.assertThat(actual, Matchers.is(expected));
 
@@ -148,11 +164,11 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 Matchers.is("RouteTarget"));
         MatcherAssert.assertThat(viewsList.get(0).route(), Matchers.is("/bar"));
         MatcherAssert.assertThat(viewsList.get(2).routeParameters(),
-            Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
+                Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
         MatcherAssert.assertThat(viewsList.get(3).routeParameters(),
-            Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
+                Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
         MatcherAssert.assertThat(viewsList.get(4).routeParameters(),
-            Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
+                Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
 
     }
 
