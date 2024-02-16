@@ -28,7 +28,7 @@
     <!-- Project dependencies -->
     <dependency>
       <groupId>com.vaadin.hilla</groupId>
-      <artifactId>hilla-dev</artifactId>
+      <artifactId>hilla</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -44,8 +44,8 @@
         <groupId>com.vaadin.hilla</groupId>
         <artifactId>hilla-maven-plugin</artifactId>
         <configuration>
-          <reactRouterEnabled>false</reactRouterEnabled>
-        </configuration>        
+          <reactEnable>false</reactEnable>
+        </configuration>
       </plugin>
 
       <!-- This module is mapped to default web context -->
