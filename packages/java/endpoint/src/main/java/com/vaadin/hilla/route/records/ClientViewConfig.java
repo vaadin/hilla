@@ -2,6 +2,7 @@ package com.vaadin.hilla.route.records;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +18,8 @@ import java.util.Objects;
  * @param other - a map of unknown values
  */
 public record ClientViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
-                               ClientViewMenuConfig menu, Map<String, Object> other) {
+                               ClientViewMenuConfig menu, @JsonProperty("params") Map<String, RouteParamType> routeParameters,
+                               Map<String, Object> other) {
     /**
      * Default constructor
      * with initialization of unknown values.
