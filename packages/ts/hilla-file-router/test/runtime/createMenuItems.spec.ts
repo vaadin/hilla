@@ -1,8 +1,7 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
-import { RouteParamType } from '../../src/shared/routeParamType.js';
-import { components, createTestingAgnosticRoutes, createTestingViewMap } from '../utils.js';
+import { createTestingViewMap } from '../utils.js';
 
 use(chaiLike);
 
