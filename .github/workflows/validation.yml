@@ -251,8 +251,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs
-          overwrite: true
+          name: saved-outputs-it-${{ matrix.current }}
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
@@ -314,6 +313,11 @@ jobs:
       - test-it
       - test-gradle
     steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: saved-outputs
+          pattern: saved-outputs-*
       - name: Fail if test jobs did not succeed
         if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' }}
         run: exit 1
