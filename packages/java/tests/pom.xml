@@ -73,6 +73,11 @@
             <artifactId>hilla-dev</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>

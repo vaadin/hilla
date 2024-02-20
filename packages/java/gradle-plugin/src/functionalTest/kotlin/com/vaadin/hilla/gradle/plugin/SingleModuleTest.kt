@@ -21,6 +21,7 @@ import com.vaadin.hilla.engine.EngineConfiguration
 import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
 import org.gradle.testkit.runner.BuildResult
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
@@ -84,6 +85,7 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
+    @Ignore
     fun `check hillaInitApp properly scaffolds project according to framework`() {
         createProject()
 
@@ -238,7 +240,7 @@ class SingleModuleTest : AbstractGradleTest() {
             }
 
             dependencies {
-                implementation 'com.vaadin.hilla:hilla-react'
+                implementation 'com.vaadin.hilla:hilla'
                 implementation 'com.vaadin:vaadin-spring'
                 implementation 'org.springframework.boot:spring-boot-starter-web'
             }

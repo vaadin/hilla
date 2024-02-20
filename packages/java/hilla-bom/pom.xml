@@ -110,12 +110,6 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>hilla-react</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-engine-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
