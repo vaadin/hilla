@@ -23,7 +23,7 @@ test {
 
 dependencies {
     implementation 'com.vaadin:vaadin-spring'
-    implementation 'com.vaadin.hilla:hilla'
+    implementation 'com.vaadin:hilla'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.parttio:line-awesome:1.1.0'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -34,6 +34,6 @@ dependencies {
 
 dependencyManagement {
 	imports {
-		mavenBom "com.vaadin.hilla:hilla-bom:$hillaVersion"
+		mavenBom "com.vaadin:hilla-bom:$hillaVersion"
 	}
 }

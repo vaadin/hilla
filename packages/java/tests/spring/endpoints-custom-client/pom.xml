@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.vaadin.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>tests-spring</artifactId>
         <version>24.4-SNAPSHOT</version>
     </parent>
@@ -18,7 +18,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin.hilla</groupId>
+            <groupId>com.vaadin</groupId>
             <artifactId>hilla</artifactId>
         </dependency>
         <dependency>
@@ -30,7 +30,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.vaadin.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
 
