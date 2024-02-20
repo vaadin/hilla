@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.vaadin.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
     <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>parser-jvm-plugin-subtypes</artifactId>
+  <artifactId>hilla-parser-jvm-plugin-subtypes</artifactId>
   <name>Hilla JVM Parser SubTypes Plugin</name>
   <packaging>jar</packaging>
 
@@ -21,8 +21,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-core</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -39,18 +39,18 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-plugin-backbone</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-backbone</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-test-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@polymer/polymer": "3.5.1",
-    "@vaadin/bundles": "24.4.0-alpha13",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
@@ -50,7 +49,6 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.1",
-      "@vaadin/bundles": "24.4.0-alpha13",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.4.0-alpha4",
       "@vaadin/hilla-lit-form": "24.4.0-alpha4",
@@ -92,7 +90,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "5f0d4a77128f2a7e0fb02a64ddff56a209374d920e38552fc4363769b87047a9"
+    "hash": "a490338e86db8e11ddfad16591a0a7827d1c773cd2cff77c3d9b2bd319162caa"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -117,7 +115,6 @@
     "@types/react-dom": "$@types/react-dom",
     "@types/react": "$@types/react",
     "react": "$react",
-    "@vaadin/react-components": "$@vaadin/react-components",
-    "@vaadin/bundles": "$@vaadin/bundles"
+    "@vaadin/react-components": "$@vaadin/react-components"
   }
 }
