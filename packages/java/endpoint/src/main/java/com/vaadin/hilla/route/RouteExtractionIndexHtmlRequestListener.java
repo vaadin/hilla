@@ -44,9 +44,9 @@ import java.util.Map;
 public class RouteExtractionIndexHtmlRequestListener
         implements IndexHtmlRequestListener {
     protected static final String SCRIPT_STRING = """
-             window.Vaadin = window.Vaadin ?? {};
-             window.Vaadin.server = window.Vaadin.server ?? {};
-             window.Vaadin.server.views = %s;""";
+            window.Vaadin = window.Vaadin ?? {};
+            window.Vaadin.server = window.Vaadin.server ?? {};
+            window.Vaadin.server.views = %s;""";
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteExtractionIndexHtmlRequestListener.class);
     private final ObjectMapper mapper = new ObjectMapper();
@@ -98,11 +98,13 @@ public class RouteExtractionIndexHtmlRequestListener
     protected void collectServerViews(
             final List<AvailableViewInfo> serverViews) {
         final VaadinService vaadinService = VaadinService.getCurrent();
-        if(vaadinService == null) {
-            LOGGER.debug("No VaadinService found, skipping server view collection");
+        if (vaadinService == null) {
+            LOGGER.debug(
+                    "No VaadinService found, skipping server view collection");
             return;
         }
-        final RouteRegistry serverRouteRegistry = vaadinService.getRouter().getRegistry();
+        final RouteRegistry serverRouteRegistry = vaadinService.getRouter()
+                .getRegistry();
         serverRouteRegistry.getRegisteredRoutes().forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
