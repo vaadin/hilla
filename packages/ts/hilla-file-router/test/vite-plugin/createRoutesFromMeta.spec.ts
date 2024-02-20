@@ -19,7 +19,8 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a framework-agnostic tree of routes', () => {
       const generated = createRoutesFromMeta(meta, new URL('./out/', dir));
 
-      expect(generated).to.equal(`import * as Page0 from "../views/nameToReplace.js";
+      expect(generated).to.equal(`import { r } from "@vaadin/hilla-file-router";
+import * as Page0 from "../views/nameToReplace.js";
 import * as Page1 from "../views/profile/$index.js";
 import * as Page2 from "../views/profile/account/security/password.js";
 import * as Page3 from "../views/profile/account/security/two-factor-auth.js";
@@ -29,51 +30,7 @@ import * as Page7 from "../views/profile/friends/{user}.js";
 import * as Layout8 from "../views/profile/friends/$layout.js";
 import * as Page10 from "../views/test/{{optional}}.js";
 import * as Page11 from "../views/test/{...wildcard}.js";
-const routes = {
-    path: "",
-    children: [{
-            path: Page0.config?.route ?? "nameToReplace",
-            module: Page0
-        }, {
-            path: "profile",
-            children: [{
-                    path: Page1.config?.route ?? "",
-                    module: Page1
-                }, {
-                    path: Layout5.config?.route ?? "account",
-                    module: Layout5,
-                    children: [{
-                            path: "security",
-                            children: [{
-                                    path: Page2.config?.route ?? "password",
-                                    module: Page2
-                                }, {
-                                    path: Page3.config?.route ?? "two-factor-auth",
-                                    module: Page3
-                                }],
-                        }],
-                }, {
-                    path: Layout8.config?.route ?? "friends",
-                    module: Layout8,
-                    children: [{
-                            path: Page6.config?.route ?? "list",
-                            module: Page6
-                        }, {
-                            path: Page7.config?.route ?? ":user",
-                            module: Page7
-                        }],
-                }],
-        }, {
-            path: "test",
-            children: [{
-                    path: Page10.config?.route ?? ":optional?",
-                    module: Page10
-                }, {
-                    path: Page11.config?.route ?? "*",
-                    module: Page11
-                }],
-        }],
-};
+const routes = r("", [r("nameToReplace", Page0), r("profile", [r("", Page1), r("account", Layout5, [r("security", [r("password", Page2), r("two-factor-auth", Page3)])]), r("friends", Layout8, [r("list", Page6), r(":user", Page7)])]), r("test", [r(":optional?", Page10), r("*", Page11)])]);
 export default routes;
 `);
     });

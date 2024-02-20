@@ -50,6 +50,7 @@
   "files": [
     "*.{d.ts.map,d.ts,js.map,js}",
     "runtime",
+    "shared",
     "vite-plugin"
   ],
   "publishConfig": {

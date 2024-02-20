@@ -1,7 +1,7 @@
 import { type ComponentType, createElement } from 'react';
 import type { RouteObject } from 'react-router';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
-import type { AgnosticRoute, RouteModule } from '../types.js';
+import type { AgnosticRoute } from '../types.js';
 import { transformRoute } from './utils.js';
 
 /**
@@ -9,7 +9,7 @@ import { transformRoute } from './utils.js';
  *
  * @param routes - Generated routes
  */
-export function toReactRouter(routes: AgnosticRoute<RouteModule<ComponentType>>): RouteObject {
+export function toReactRouter(routes: AgnosticRoute<ComponentType>): RouteObject {
   return transformRoute(
     routes,
     (route) => route.children?.values(),
@@ -17,7 +17,7 @@ export function toReactRouter(routes: AgnosticRoute<RouteModule<ComponentType>>)
       const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
 
       return {
-        path: module?.config?.route ?? path,
+        path,
         element: module?.default ? createElement(module.default) : undefined,
         children: children.length > 0 ? (children as RouteObject[]) : undefined,
         handle: {

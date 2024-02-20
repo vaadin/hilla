@@ -44,10 +44,11 @@ export default async function createViewConfigJson(views: RouteMeta): Promise<st
                 const script = new Script(`(${code})`);
                 config = script.runInThisContext() as ViewConfig;
               }
-            } else if (node.getText(sourceFile).includes('export default')) {
+            } else if (node.getText(sourceFile).startsWith('export default')) {
               waitingForIdentifier = true;
             } else if (waitingForIdentifier && ts.isIdentifier(node)) {
               componentName = node.text;
+              break;
             }
           }
           const _path = config?.route ?? path;

@@ -66,7 +66,7 @@ export type ViewConfig = Readonly<{
 }>;
 
 /**
- * A module that exports a React component and an optional view configuration.
+ * A module that exports a component and an optional view configuration.
  */
 export type RouteModule<C = unknown> = Readonly<{
   default: C;
@@ -76,8 +76,8 @@ export type RouteModule<C = unknown> = Readonly<{
 /**
  * A framework-agnostic object generated from the file-based route.
  */
-export type AgnosticRoute<T> = Readonly<{
+export type AgnosticRoute<C = unknown> = Readonly<{
   path: string;
-  module?: T;
+  module?: RouteModule<C>;
   children?: ReadonlyArray<AgnosticRoute<T>>;
 }>;

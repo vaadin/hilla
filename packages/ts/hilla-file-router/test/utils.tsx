@@ -191,7 +191,7 @@ export const components = {
   },
 } satisfies Record<string, RouteModule>;
 
-export function createTestingAgnosticRoutes(): AgnosticRoute<RouteModule<ComponentType>> {
+export function createTestingAgnosticRoutes(): AgnosticRoute<ComponentType> {
   return {
     path: '',
     children: [
