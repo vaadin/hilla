@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,7 +33,7 @@ public class ClientRouteRegistry implements Serializable {
      * A map of registered routes and their corresponding client view
      * configurations with ordered insertion.
      */
-    private final Map<String, ClientViewConfig> vaadinRoutes = new LinkedHashMap<>();
+    private final Map<String, ClientViewConfig> registeredRoutes = new LinkedHashMap<>();
 
     /**
      * Returns all registered routes.
@@ -41,14 +41,14 @@ public class ClientRouteRegistry implements Serializable {
      * @return a list of all registered routes
      */
     public List<ClientViewConfig> getAllRoutes() {
-        return List.copyOf(vaadinRoutes.values());
+        return List.copyOf(registeredRoutes.values());
     }
 
     /**
      * Clears all registered routes.
      */
     public void clearRoutes() {
-        vaadinRoutes.clear();
+        registeredRoutes.clear();
     }
 
     /**
@@ -60,6 +60,16 @@ public class ClientRouteRegistry implements Serializable {
      *            the client view to add
      */
     public void addRoute(String route, ClientViewConfig clientView) {
-        vaadinRoutes.put(route, clientView);
+        registeredRoutes.put(route, clientView);
+    }
+
+    /**
+     * Removes a route from the registry.
+     *
+     * @param route
+     *            the route to remove
+     */
+    public void removeRoute(String route) {
+        registeredRoutes.remove(route);
     }
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.route;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,9 +43,10 @@ import java.util.Map;
 @Component
 public class RouteExtractionIndexHtmlRequestListener
         implements IndexHtmlRequestListener {
-    protected static final String SCRIPT_STRING = "window.Vaadin = window.Vaadin ?? {}; "
-            + " window.Vaadin.server = window.Vaadin.server ?? {}; "
-            + " window.Vaadin.server.views = %s;";
+    protected static final String SCRIPT_STRING = """
+             window.Vaadin = window.Vaadin ?? {};
+             window.Vaadin.server = window.Vaadin.server ?? {};
+             window.Vaadin.server.views = %s;""";
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteExtractionIndexHtmlRequestListener.class);
     private final ObjectMapper mapper = new ObjectMapper();
@@ -64,9 +80,8 @@ public class RouteExtractionIndexHtmlRequestListener
             response.getDocument().head().appendElement("script")
                     .appendChild(new DataNode(script));
         } catch (IOException e) {
-            LOGGER.warn("Failed to write server views to index response", e);
+            LOGGER.error("Failed to write server views to index response", e);
         }
-
     }
 
     protected void collectClientViews(List<AvailableViewInfo> availableViews) {
@@ -82,8 +97,12 @@ public class RouteExtractionIndexHtmlRequestListener
 
     protected void collectServerViews(
             final List<AvailableViewInfo> serverViews) {
-        final RouteRegistry serverRouteRegistry = VaadinService.getCurrent()
-                .getRouter().getRegistry();
+        final VaadinService vaadinService = VaadinService.getCurrent();
+        if(vaadinService == null) {
+            LOGGER.debug("No VaadinService found, skipping server view collection");
+            return;
+        }
+        final RouteRegistry serverRouteRegistry = vaadinService.getRouter().getRegistry();
         serverRouteRegistry.getRegisteredRoutes().forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
@@ -126,5 +145,4 @@ public class RouteExtractionIndexHtmlRequestListener
         });
         return routeParameters;
     }
-
 }
