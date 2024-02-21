@@ -5,13 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.vaadin.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
         <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.vaadin.hilla</groupId>
     <artifactId>hilla</artifactId>
     <packaging>jar</packaging>
     <name>Hilla Platform</name>
@@ -25,13 +24,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin.hilla</groupId>
-            <artifactId>endpoint</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-endpoint</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.hilla</groupId>
-            <artifactId>engine-runtime</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-engine-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.vaadin.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
         <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
@@ -23,8 +23,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin.hilla</groupId>
-            <artifactId>endpoint</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-endpoint</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -67,7 +67,7 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.vaadin.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
         </plugins>
