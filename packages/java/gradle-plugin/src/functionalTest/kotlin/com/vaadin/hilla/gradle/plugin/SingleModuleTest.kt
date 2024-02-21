@@ -213,7 +213,7 @@ class SingleModuleTest : AbstractGradleTest() {
                     maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
                 }
                 dependencies {
-                    classpath("com.vaadin.hilla:hilla-gradle-plugin:$hillaVersion")
+                    classpath("com.vaadin:hilla-gradle-plugin:$hillaVersion")
                 }
             }
             plugins {

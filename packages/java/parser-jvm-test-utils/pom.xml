@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.vaadin.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
     <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>parser-jvm-test-utils</artifactId>
+  <artifactId>hilla-parser-jvm-test-utils</artifactId>
   <name>Hilla JVM Parser Test Utils</name>
   <packaging>jar</packaging>
 
@@ -33,8 +33,8 @@
       <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.vaadin.hilla</groupId>
-      <artifactId>parser-jvm-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
