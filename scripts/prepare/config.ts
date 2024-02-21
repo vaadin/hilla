@@ -64,11 +64,4 @@ export const destination = {
     ],
     themeDir: new URL('packages/java/hilla/src/main/java/com/vaadin/hilla/theme/', root),
   },
-  react: {
-    versions: [
-      new URL('packages/java/hilla-react/hilla-react-versions.json', root),
-      new URL('packages/java/tests/spring/react-grid-test/src/main/resources/vaadin-core-versions.json', root),
-    ],
-    themeDir: new URL('packages/java/hilla-react/src/main/java/com/vaadin/hilla/theme/', root),
-  },
 };
