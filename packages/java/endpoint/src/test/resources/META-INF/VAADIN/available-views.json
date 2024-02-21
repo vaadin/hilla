@@ -1,5 +1,5 @@
-[
-  {
+{
+  "/home": {
     "title": "Home",
     "rolesAllowed": null,
     "route": "/home",
@@ -8,22 +8,18 @@
     "menu": null,
     "params": {}
   },
-  {
+  "/profile": {
     "title": "Profile",
-    "rolesAllowed": [
-      "ROLE_USER"
-    ],
+    "rolesAllowed": ["ROLE_USER"],
     "route": "/profile",
     "lazy": false,
     "register": false,
     "menu": null,
     "params": {}
   },
-  {
+  "/user/:userId": {
     "title": "User Profile",
-    "rolesAllowed": [
-      "ROLE_ADMIN"
-    ],
+    "rolesAllowed": ["ROLE_ADMIN"],
     "route": "/user/:userId",
     "lazy": false,
     "register": false,
@@ -32,7 +28,7 @@
       ":userId": "req"
     }
   },
-  {
+  "/bar": {
     "title": "Component",
     "rolesAllowed": null,
     "route": "/bar",
@@ -41,7 +37,7 @@
     "menu": null,
     "params": {}
   },
-  {
+  "/foo": {
     "title": "RouteTarget",
     "rolesAllowed": null,
     "route": "/foo",
@@ -50,7 +46,7 @@
     "menu": null,
     "params": {}
   },
-  {
+  "/wildcard/:___wildcard*": {
     "title": "RouteTarget",
     "rolesAllowed": null,
     "route": "/wildcard/:___wildcard*",
@@ -61,7 +57,7 @@
       ":___wildcard*": "*"
     }
   },
-  {
+  "//:___userId/edit": {
     "title": "RouteTarget",
     "rolesAllowed": null,
     "route": "//:___userId/edit",
@@ -72,7 +68,7 @@
       ":___userId": "req"
     }
   },
-  {
+  "/comments/:___commentId?": {
     "title": "RouteTarget",
     "rolesAllowed": null,
     "route": "/comments/:___commentId?",
@@ -83,4 +79,4 @@
       ":___commentId?": "opt"
     }
   }
-]
+}

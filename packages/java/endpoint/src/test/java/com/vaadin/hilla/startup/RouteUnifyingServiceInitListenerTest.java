@@ -44,18 +44,18 @@ public class RouteUnifyingServiceInitListenerTest {
     @Test
     public void should_extractClientViews() {
         routeUnifyingServiceInitListener.registerClientRoutes();
-        List<ClientViewConfig> allRoutes = clientRouteRegistry.getAllRoutes();
+        List<Map.Entry<String, ClientViewConfig>> allRoutes = clientRouteRegistry.getAllRoutes();
 
         MatcherAssert.assertThat(allRoutes, Matchers.hasSize(8));
-        MatcherAssert.assertThat(allRoutes.get(0).title(),
+        MatcherAssert.assertThat(allRoutes.get(0).getValue().title(),
                 Matchers.is("About"));
-        MatcherAssert.assertThat(allRoutes.get(4).other().get("unknown"),
+        MatcherAssert.assertThat(allRoutes.get(4).getValue().other().get("unknown"),
                 Matchers.notNullValue());
-        MatcherAssert.assertThat(allRoutes.get(5).routeParameters(),
+        MatcherAssert.assertThat(allRoutes.get(5).getValue().routeParameters(),
                 Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
-        MatcherAssert.assertThat(allRoutes.get(6).routeParameters(),
+        MatcherAssert.assertThat(allRoutes.get(6).getValue().routeParameters(),
                 Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(allRoutes.get(7).routeParameters(),
+        MatcherAssert.assertThat(allRoutes.get(7).getValue().routeParameters(),
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
 
     }
