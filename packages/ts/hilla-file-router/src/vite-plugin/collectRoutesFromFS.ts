@@ -1,6 +1,7 @@
 import { opendir } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { Logger } from 'vite';
 import { cleanUp } from './utils.js';
 
 export type RouteMeta = Readonly<{
