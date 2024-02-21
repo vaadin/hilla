@@ -3,6 +3,8 @@
   "/profile/": { "title": "Profile" },
   "/profile/account/security/password": { "title": "Password" },
   "/profile/account/security/two-factor-auth": { "title": "Two Factor Auth" },
-  "/profile/friends/list": { "title": "List" },
-  "/profile/friends/:user": { "title": "User", "unknown": {"anotherProp" :  "prop"} }
+  "/profile/friends/list": { "title": "List", "unknown": {"anotherProp" :  "prop"} },
+  "/profile/friends/:user?/edit": { "title": "Friend Edit", "params": { ":user?":  "opt"} },
+  "/profile/friends/:user": { "title": "Friend Profile", "params" : { ":user":  "req"} },
+  "/profile/messages/*": { "title": "Messages", "params" : { "wildcard":  "*"} }
 }

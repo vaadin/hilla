@@ -2,6 +2,7 @@ package com.vaadin.hilla.route.records;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,13 +17,14 @@ import java.util.Objects;
  *
  * @param other - a map of unknown values
  */
-public record ViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
-                         ViewMenuConfig menu, Map<String, Object> other) {
+public record ClientViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
+                               ClientViewMenuConfig menu, @JsonProperty("params") Map<String, RouteParamType> routeParameters,
+                               Map<String, Object> other) {
     /**
      * Default constructor
      * with initialization of unknown values.
      */
-    public ViewConfig {
+    public ClientViewConfig {
         if (other == null) {
             other = new HashMap<>();
         }
@@ -50,7 +52,7 @@ public record ViewConfig(String title, String[] rolesAllowed, String route, Bool
 
     @Override
     public String toString() {
-        return "ViewConfig{" +
+        return "ClientViewConfig{" +
             "title='" + title + '\'' +
             ", rolesAllowed=" + Arrays.toString(rolesAllowed) +
             ", route='" + route + '\'' +
@@ -69,7 +71,7 @@ public record ViewConfig(String title, String[] rolesAllowed, String route, Bool
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ViewConfig that = (ViewConfig) o;
+        ClientViewConfig that = (ClientViewConfig) o;
         return Objects.equals(title, that.title)
             && Arrays.equals(rolesAllowed, that.rolesAllowed)
             && Objects.equals(route, that.route)
