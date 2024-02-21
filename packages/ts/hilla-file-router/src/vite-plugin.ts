@@ -87,8 +87,8 @@ export default function vitePluginFileSystemRouter({
       _outDir = pathToFileURL(outDir);
       _logger = logger;
 
-      _logger.info(`The directory of route files: ${String(_outDir)}`);
-      _logger.info(`The directory of generated files: ${String(_outDir)}`);
+      _logger.info(`The directory of route files: ${String(_viewsDir)}`);
+      _logger.info(`The directory of generated files: ${String(_generatedDir)}`);
       _logger.info(`The output directory: ${String(_outDir)}`);
 
       generatedUrls = {
@@ -111,7 +111,9 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        build(_viewsDir, _outDir, generatedUrls, extensions, _logger).catch((e: unknown) => _logger.error(String(e)));
+        build(_viewsDir, _generatedDir, generatedUrls, extensions, _logger).catch((e: unknown) =>
+          _logger.error(String(e)),
+        );
       };
 
       server.watcher.on('add', changeListener);
