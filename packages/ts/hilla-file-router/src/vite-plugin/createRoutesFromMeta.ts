@@ -1,16 +1,16 @@
-import { extname, relative } from 'node:path';
+import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import ts, {
+  type CallExpression,
   type ImportDeclaration,
-  type ObjectLiteralExpression,
   type StringLiteral,
   type VariableStatement,
 } from 'typescript';
 import { transformRoute } from '../runtime/utils.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
-import { convertFSPatternToURLPatternString } from './utils.js';
+import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
@@ -29,19 +29,10 @@ function createImport(mod: string, file: string): ImportDeclaration {
   return template(`import * as ${mod} from '${path}';\n`, ([statement]) => statement as ts.ImportDeclaration);
 }
 
-function createRouteData(
-  path: string,
-  mod: string | undefined,
-  children: readonly ObjectLiteralExpression[],
-): ObjectLiteralExpression {
+function createRouteData(path: string, mod: string | undefined, children: readonly CallExpression[]): CallExpression {
   return template(
-    `const route = {
-  path: '${path}',
-  ${mod ? `module: ${mod}` : ''}
-  ${children.length > 0 ? `children: CHILDREN,` : ''}
-}`,
-    ([statement]) =>
-      (statement as VariableStatement).declarationList.declarations[0].initializer as ObjectLiteralExpression,
+    `const route = r("${path}"${mod ? `, ${mod}` : ''}${children.length > 0 ? `, CHILDREN` : ''})`,
+    ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
     [
       transformer((node) =>
         ts.isIdentifier(node) && node.text === 'CHILDREN' ? ts.factory.createArrayLiteralExpression(children) : node,
@@ -51,10 +42,15 @@ function createRouteData(
 }
 
 export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL): string {
-  const imports: ImportDeclaration[] = [];
+  const imports: ImportDeclaration[] = [
+    template(
+      'import { r } from "@vaadin/hilla-file-router/runtime.js";',
+      ([statement]) => statement as ts.ImportDeclaration,
+    ),
+  ];
   let id = 0;
 
-  const routes = transformRoute<RouteMeta, ObjectLiteralExpression>(
+  const routes = transformRoute<RouteMeta, CallExpression>(
     views,
     (view) => view.children.values(),
     ({ file, layout, path }, children) => {
@@ -70,7 +66,7 @@ export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL
         imports.push(createImport(mod, relativize(layout, generatedDir)));
       }
 
-      return createRouteData(convertFSPatternToURLPatternString(path), mod, children);
+      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, children);
     },
   );
 
