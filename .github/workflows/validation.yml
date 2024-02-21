@@ -52,7 +52,7 @@ jobs:
             && echo "🚫 **TB_LICENSE** is not defined, check that **${{github.repository}}** repo has a valid secret" \
             | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0
       - name: Checkout Project Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
@@ -76,7 +76,7 @@ jobs:
           )
           find packages/java -type d -name target -print0 | xargs -0 tar rf workspace.tar
           tar rf workspace.tar $(find packages/ts -name node_modules -prune -o -print | git check-ignore --stdin)
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: saved-workspace
           path: workspace.tar
@@ -93,13 +93,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -122,13 +122,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -164,13 +164,13 @@ jobs:
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -187,7 +187,7 @@ jobs:
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -214,13 +214,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -248,10 +248,10 @@ jobs:
               -Pproduction \
               verify
           )
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs
+          name: saved-outputs-it-${{ matrix.current }}
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
@@ -271,13 +271,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -294,7 +294,7 @@ jobs:
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
         run: ./packages/java/tests/gradle/single-module-tests/gradlew --info -p packages/java/tests/gradle/single-module-tests test
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs-gradle
@@ -313,6 +313,11 @@ jobs:
       - test-it
       - test-gradle
     steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: saved-outputs
+          pattern: saved-outputs-*
       - name: Fail if test jobs did not succeed
         if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' }}
         run: exit 1

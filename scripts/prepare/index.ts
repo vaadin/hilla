@@ -13,7 +13,6 @@ const [{ version }, versions] = await Promise.all([
   mkdir(local.src, { recursive: true }),
   mkdir(local.results, { recursive: true }),
   mkdir(destination.lit.themeDir, { recursive: true }),
-  mkdir(destination.react.themeDir, { recursive: true }),
 ]);
 
 if (!version) {
@@ -25,21 +24,16 @@ generate(version, versions);
 
 console.log('Moving the generated files to the final place.');
 
-await Promise.all([
-  destination.lit.versions.forEach(
-    file => copyFile(new URL('hilla-versions.json', local.results), file)
-      .then(() => console.log(`Copied ${file.toString()}`))),
-  destination.react.versions.forEach(file => copyFile(new URL('hilla-react-versions.json', local.results), file)
-    .then(() => console.log(`Copied ${file.toString()}`))),
-]);
+await Promise.all(
+  destination.lit.versions.map(async (file) =>
+    copyFile(new URL('hilla-versions.json', local.results), file).then(() => console.log(`Copied ${file.toString()}`)),
+  ),
+);
 
 const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;
 const themeFiles = new Map([
-  [remote.lumo, [new URL('Lumo.java', destination.lit.themeDir), new URL('Lumo.java', destination.react.themeDir)]],
-  [
-    remote.material,
-    [new URL('Material.java', destination.lit.themeDir), new URL('Material.java', destination.react.themeDir)],
-  ],
+  [remote.lumo, [new URL('Lumo.java', destination.lit.themeDir)]],
+  [remote.material, [new URL('Material.java', destination.lit.themeDir)]],
 ]);
 
 console.log('Copying the theme files from flow-components to the final place.');
