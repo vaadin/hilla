@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.List;
 import java.util.Map;
 
 public class RouteUnifyingServiceInitListenerTest {
@@ -44,18 +43,18 @@ public class RouteUnifyingServiceInitListenerTest {
     @Test
     public void should_extractClientViews() {
         routeUnifyingServiceInitListener.registerClientRoutes();
-        List<Map.Entry<String, ClientViewConfig>> allRoutes = clientRouteRegistry.getAllRoutes();
+        Map<String, ClientViewConfig> allRoutes = clientRouteRegistry.getAllRoutes();
 
-        MatcherAssert.assertThat(allRoutes, Matchers.hasSize(8));
-        MatcherAssert.assertThat(allRoutes.get(0).getValue().title(),
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(8));
+        MatcherAssert.assertThat(allRoutes.get("/about").title(),
                 Matchers.is("About"));
-        MatcherAssert.assertThat(allRoutes.get(4).getValue().other().get("unknown"),
+        MatcherAssert.assertThat(allRoutes.get("/profile/friends/list").other().get("unknown"),
                 Matchers.notNullValue());
-        MatcherAssert.assertThat(allRoutes.get(5).getValue().routeParameters(),
+        MatcherAssert.assertThat(allRoutes.get("/profile/friends/:user?/edit").routeParameters(),
                 Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
-        MatcherAssert.assertThat(allRoutes.get(6).getValue().routeParameters(),
+        MatcherAssert.assertThat(allRoutes.get("/profile/friends/:user").routeParameters(),
                 Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(allRoutes.get(7).getValue().routeParameters(),
+        MatcherAssert.assertThat(allRoutes.get("/profile/messages/*").routeParameters(),
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
 
     }

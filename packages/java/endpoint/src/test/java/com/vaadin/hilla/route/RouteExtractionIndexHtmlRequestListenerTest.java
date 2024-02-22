@@ -60,12 +60,12 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         Mockito.when(vaadinService.getRouter()).thenReturn(router);
         Mockito.when(router.getRegistry()).thenReturn(serverRouteRegistry);
 
-        final List<Map.Entry<String, ClientViewConfig>> clientRoutes = prepareClientRoutes();
+        final Map<String, ClientViewConfig> clientRoutes = prepareClientRoutes();
         Mockito.when(clientRouteRegistry.getAllRoutes())
                 .thenReturn(clientRoutes);
     }
 
-    private List<Map.Entry<String, ClientViewConfig>> prepareClientRoutes() {
+    private Map<String, ClientViewConfig> prepareClientRoutes() {
         final Map<String, ClientViewConfig> routes = new LinkedHashMap<>();
         routes.put("/home", new ClientViewConfig("Home", null, "/home", false, false,
                 null, Collections.emptyMap(), Collections.emptyMap()));
@@ -76,7 +76,7 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 new String[] { "ROLE_ADMIN" }, "/user/:userId", false, false,
                 null, Map.of(":userId", RouteParamType.REQUIRED),
                 Collections.emptyMap()));
-        return List.copyOf(routes.entrySet());
+        return routes;
     }
 
     private static List<RouteData> prepareServerRoutes() {
