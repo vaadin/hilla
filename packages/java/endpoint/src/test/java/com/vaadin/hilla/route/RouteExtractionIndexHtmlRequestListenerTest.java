@@ -1,8 +1,25 @@
 package com.vaadin.hilla.route;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
@@ -14,18 +31,6 @@ import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.jsoup.nodes.DataNode;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.util.*;
 
 public class RouteExtractionIndexHtmlRequestListenerTest {
 
@@ -67,15 +72,17 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
 
     private Map<String, ClientViewConfig> prepareClientRoutes() {
         final Map<String, ClientViewConfig> routes = new LinkedHashMap<>();
-        routes.put("/home", new ClientViewConfig("Home", null, "/home", false, false,
-                null, Collections.emptyMap(), Collections.emptyMap()));
-        routes.put("/profile", new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
-                "/profile", false, false, null, Collections.emptyMap(),
-                Collections.emptyMap()));
-        routes.put("/user/:userId", new ClientViewConfig("User Profile",
-                new String[] { "ROLE_ADMIN" }, "/user/:userId", false, false,
-                null, Map.of(":userId", RouteParamType.REQUIRED),
-                Collections.emptyMap()));
+        routes.put("/home", new ClientViewConfig("Home", null, "/home", false,
+                false, null, Collections.emptyMap(), Collections.emptyMap()));
+        routes.put("/profile",
+                new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
+                        "/profile", false, false, null, Collections.emptyMap(),
+                        Collections.emptyMap()));
+        routes.put("/user/:userId",
+                new ClientViewConfig("User Profile",
+                        new String[] { "ROLE_ADMIN" }, "/user/:userId", false,
+                        false, null, Map.of(":userId", RouteParamType.REQUIRED),
+                        Collections.emptyMap()));
         return routes;
     }
 
@@ -161,12 +168,16 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 Matchers.is("Component"));
         MatcherAssert.assertThat(views.get("/foo").title(),
                 Matchers.is("RouteTarget"));
-        MatcherAssert.assertThat(views.get("/bar").route(), Matchers.is("/bar"));
-        MatcherAssert.assertThat(views.get("/wildcard/:___wildcard*").routeParameters(),
+        MatcherAssert.assertThat(views.get("/bar").route(),
+                Matchers.is("/bar"));
+        MatcherAssert.assertThat(
+                views.get("/wildcard/:___wildcard*").routeParameters(),
                 Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
-        MatcherAssert.assertThat(views.get("//:___userId/edit").routeParameters(),
+        MatcherAssert.assertThat(
+                views.get("//:___userId/edit").routeParameters(),
                 Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(views.get("/comments/:___commentId?").routeParameters(),
+        MatcherAssert.assertThat(
+                views.get("/comments/:___commentId?").routeParameters(),
                 Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
 
     }
