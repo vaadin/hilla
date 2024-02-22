@@ -1,13 +1,22 @@
 /* eslint-disable no-param-reassign */
 import type { AgnosticRoute, RouteModule } from '../types.js';
 
-function createRoute<C = unknown>(path: string, children?: ReadonlyArray<AgnosticRoute<C>>): AgnosticRoute<C>;
-function createRoute<C = unknown>(
+/**
+ * Create a single framework-agnostic route object. Later, it can be transformed into a framework-specific route object,
+ * e.g., the one used by React Router.
+ *
+ * @param path - A route path segment.
+ * @param children - An array of child routes.
+ *
+ * @returns A framework-agnostic route object.
+ */
+export function createRoute<C = unknown>(path: string, children?: ReadonlyArray<AgnosticRoute<C>>): AgnosticRoute<C>;
+export function createRoute<C = unknown>(
   path: string,
   module: RouteModule<C>,
   children?: ReadonlyArray<AgnosticRoute<C>>,
 ): AgnosticRoute<C>;
-function createRoute<C = unknown>(
+export function createRoute<C = unknown>(
   path: string,
   moduleOrChildren?: ReadonlyArray<AgnosticRoute<C>> | RouteModule<C>,
   children?: ReadonlyArray<AgnosticRoute<C>>,
@@ -25,5 +34,3 @@ function createRoute<C = unknown>(
     children,
   };
 }
-
-export { createRoute as r };

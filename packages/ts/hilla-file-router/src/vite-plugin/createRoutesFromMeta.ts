@@ -14,6 +14,12 @@ import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
+/**
+ * Convert a file URL to a relative path from the generated directory.
+ *
+ * @param url - The file URL to convert.
+ * @param generatedDir - The directory where the generated view file will be stored.
+ */
 function relativize(url: URL, generatedDir: URL): string {
   const result = relative(fileURLToPath(generatedDir), fileURLToPath(url)).replaceAll(sep, '/');
 
@@ -24,14 +30,27 @@ function relativize(url: URL, generatedDir: URL): string {
   return result;
 }
 
+/**
+ * Create an import declaration for a `views` module.
+ *
+ * @param mod - The name of the route module to import.
+ * @param file - The file path of the module.
+ */
 function createImport(mod: string, file: string): ImportDeclaration {
   const path = `${file.substring(0, file.lastIndexOf('.'))}.js`;
   return template(`import * as ${mod} from '${path}';\n`, ([statement]) => statement as ts.ImportDeclaration);
 }
 
+/**
+ * Create an abstract route creation function call. The nested function calls create a route tree.
+ *
+ * @param path - The path of the route.
+ * @param mod - The name of the route module imported as a namespace.
+ * @param children - The list of child route call expressions.
+ */
 function createRouteData(path: string, mod: string | undefined, children: readonly CallExpression[]): CallExpression {
   return template(
-    `const route = r("${path}"${mod ? `, ${mod}` : ''}${children.length > 0 ? `, CHILDREN` : ''})`,
+    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children.length > 0 ? `, CHILDREN` : ''})`,
     ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
     [
       transformer((node) =>
@@ -41,10 +60,16 @@ function createRouteData(path: string, mod: string | undefined, children: readon
   );
 }
 
+/**
+ * Loads all the files from the received metadata and creates a framework-agnostic route tree.
+ *
+ * @param views - The abstract route tree.
+ * @param generatedDir - The directory where the generated view file will be stored.
+ */
 export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL): string {
   const imports: ImportDeclaration[] = [
     template(
-      'import { r } from "@vaadin/hilla-file-router/runtime.js";',
+      'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
       ([statement]) => statement as ts.ImportDeclaration,
     ),
   ];

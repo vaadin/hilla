@@ -5,9 +5,11 @@ import type { AgnosticRoute } from '../types.js';
 import { transformRoute } from './utils.js';
 
 /**
- * Transforms generated routes into a format that can be used by React Router.
+ * Transforms framework-agnostic route tree into a format that can be used by React Router.
  *
  * @param routes - Generated routes
+ *
+ * @returns The React Router tree.
  */
 export function toReactRouter(routes: AgnosticRoute<ComponentType>): RouteObject {
   return transformRoute(

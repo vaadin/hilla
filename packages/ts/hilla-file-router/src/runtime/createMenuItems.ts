@@ -22,7 +22,8 @@ export type MenuItem = Readonly<{
 }>;
 
 /**
- * Creates menu items from the views provided by the server.
+ * Creates menu items from the views provided by the server. The views are sorted according to the
+ * {@link ViewConfig.menu.order} and filtered out if they are explicitly excluded via {@link ViewConfig.menu.exclude}.
  *
  * @param vaadinObject - The Vaadin object containing the server views.
  * @returns A list of menu items.
@@ -30,14 +31,14 @@ export type MenuItem = Readonly<{
 export function createMenuItems(vaadinObject = window.Vaadin): readonly MenuItem[] {
   return vaadinObject?.server?.views
     ? Object.entries(vaadinObject.server.views)
-        // Sort views according to the order specified in the view configuration.
-        .sort(([_a, a], [_b, b]) => (a.menu?.order ?? 0) - (b.menu?.order ?? 0))
         // Filter out the views that are explicitly excluded from the menu.
         .filter(
           ([_key, value]) =>
             !value.menu?.exclude &&
             !(value.params && Object.values(value.params).some((p) => p === RouteParamType.Required)),
         )
+        // Sort views according to the order specified in the view configuration.
+        .sort(([_a, a], [_b, b]) => (a.menu?.order ?? 0) - (b.menu?.order ?? 0))
         // Map the views to menu items.
         .map(([path, config]) => {
           const _path = config.params

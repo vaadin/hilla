@@ -7,6 +7,11 @@ import type { ViewConfig } from '../types.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import { convertFSRouteSegmentToURLPatternFormat, extractParameterFromRouteSegment } from './utils.js';
 
+/**
+ * Walks the TypeScript AST using the deep-first search algorithm.
+ *
+ * @param node - The node to walk.
+ */
 function* walkAST(node: Node): Generator<Node> {
   yield node;
 
@@ -15,6 +20,12 @@ function* walkAST(node: Node): Generator<Node> {
   }
 }
 
+/**
+ * Creates a map of all leaf routes to their configuration. This file is used by the server to provide server-side
+ * routes along with managing the client-side routes.
+ *
+ * @param views - The route metadata tree.
+ */
 export default async function createViewConfigJson(views: RouteMeta): Promise<string> {
   const res = await Promise.all(
     Array.from(traverse(views), async (branch) => {
