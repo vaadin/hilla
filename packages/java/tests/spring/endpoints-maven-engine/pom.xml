@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.vaadin.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>tests-spring</artifactId>
         <version>24.4-SNAPSHOT</version>
     </parent>
@@ -51,8 +51,8 @@
             <artifactId>byte-buddy</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.hilla</groupId>
-            <artifactId>engine-runtime</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-engine-runtime</artifactId>
             <version>${project.version}</version>
             <!--
              Overriding engine-runtime to test scope effectively removes its
@@ -61,8 +61,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.hilla</groupId>
-            <artifactId>engine-core</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-engine-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -77,7 +77,7 @@
              -->
 
             <plugin>
-                <groupId>com.vaadin.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
                 <executions>
                     <execution>
