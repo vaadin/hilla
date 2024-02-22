@@ -1,4 +1,4 @@
-import { posix } from 'node:path';
+import { sep, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
@@ -15,7 +15,7 @@ import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
 function relativize(url: URL, generatedDir: URL): string {
-  const result = posix.relative(fileURLToPath(generatedDir), fileURLToPath(url));
+  const result = relative(fileURLToPath(generatedDir), fileURLToPath(url)).replaceAll(sep, '/');
 
   if (!result.startsWith('.')) {
     return `./${result}`;

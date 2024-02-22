@@ -6,7 +6,7 @@ const karmaMochaConfig = {
 
 module.exports = {
   extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'],
-  loader: 'tsx',
+  import: 'tsx',
   exit: true,
   karmaMochaConfig,
   ...karmaMochaConfig,
