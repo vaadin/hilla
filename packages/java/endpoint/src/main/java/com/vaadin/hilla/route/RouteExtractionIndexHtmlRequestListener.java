@@ -23,6 +23,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
+import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
@@ -31,9 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,7 +66,7 @@ public class RouteExtractionIndexHtmlRequestListener
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
-        final List<AvailableViewInfo> availableViews = new ArrayList<>();
+        final Map<String, AvailableViewInfo> availableViews = new HashMap<>();
         collectClientViews(availableViews);
         collectServerViews(availableViews);
 
@@ -84,19 +83,22 @@ public class RouteExtractionIndexHtmlRequestListener
         }
     }
 
-    protected void collectClientViews(List<AvailableViewInfo> availableViews) {
-        clientRouteRegistry.getAllRoutes().forEach(route -> {
+    protected void collectClientViews(Map<String, AvailableViewInfo> availableViews) {
+        clientRouteRegistry.getAllRoutes().forEach(entry -> {
+            final String route = entry.getKey();
+            final ClientViewConfig config = entry.getValue();
+
             final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                    route.title(), route.rolesAllowed(), route.route(),
-                    route.lazy(), route.register(), route.menu(),
-                    route.routeParameters());
-            availableViews.add(availableViewInfo);
+                    config.title(), config.rolesAllowed(), config.route(),
+                    config.lazy(), config.register(), config.menu(),
+                    config.routeParameters());
+            availableViews.put(route, availableViewInfo);
         });
 
     }
 
     protected void collectServerViews(
-            final List<AvailableViewInfo> serverViews) {
+            final Map<String, AvailableViewInfo> serverViews) {
         final VaadinService vaadinService = VaadinService.getCurrent();
         if (vaadinService == null) {
             LOGGER.debug(
@@ -125,7 +127,7 @@ public class RouteExtractionIndexHtmlRequestListener
 
                 final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
                         title, null, url, false, false, null, routeParameters);
-                serverViews.add(availableViewInfo);
+                serverViews.put(url, availableViewInfo);
             }
         });
     }

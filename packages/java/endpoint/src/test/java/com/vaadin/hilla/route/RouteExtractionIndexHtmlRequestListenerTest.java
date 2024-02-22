@@ -25,7 +25,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 
 public class RouteExtractionIndexHtmlRequestListenerTest {
@@ -61,23 +60,23 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         Mockito.when(vaadinService.getRouter()).thenReturn(router);
         Mockito.when(router.getRegistry()).thenReturn(serverRouteRegistry);
 
-        final List<ClientViewConfig> clientRoutes = prepareClientRoutes();
+        final List<Map.Entry<String, ClientViewConfig>> clientRoutes = prepareClientRoutes();
         Mockito.when(clientRouteRegistry.getAllRoutes())
                 .thenReturn(clientRoutes);
     }
 
-    private List<ClientViewConfig> prepareClientRoutes() {
-        final List<ClientViewConfig> routes = new ArrayList<>();
-        routes.add(new ClientViewConfig("Home", null, "/home", false, false,
+    private List<Map.Entry<String, ClientViewConfig>> prepareClientRoutes() {
+        final Map<String, ClientViewConfig> routes = new LinkedHashMap<>();
+        routes.put("/home", new ClientViewConfig("Home", null, "/home", false, false,
                 null, Collections.emptyMap(), Collections.emptyMap()));
-        routes.add(new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
+        routes.put("/profile", new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
                 "/profile", false, false, null, Collections.emptyMap(),
                 Collections.emptyMap()));
-        routes.add(new ClientViewConfig("User Profile",
+        routes.put("/user/:userId", new ClientViewConfig("User Profile",
                 new String[] { "ROLE_ADMIN" }, "/user/:userId", false, false,
                 null, Map.of(":userId", RouteParamType.REQUIRED),
                 Collections.emptyMap()));
-        return routes;
+        return List.copyOf(routes.entrySet());
     }
 
     private static List<RouteData> prepareServerRoutes() {
@@ -149,34 +148,34 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
 
     @Test
     public void should_collectServerViews() {
-        final List<AvailableViewInfo> viewsList = new ArrayList<>();
+        final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
 
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            requestListener.collectServerViews(viewsList);
+            requestListener.collectServerViews(views);
         }
-        MatcherAssert.assertThat(viewsList, Matchers.hasSize(5));
-        MatcherAssert.assertThat(viewsList.get(0).title(),
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(5));
+        MatcherAssert.assertThat(views.get("/bar").title(),
                 Matchers.is("Component"));
-        MatcherAssert.assertThat(viewsList.get(1).title(),
+        MatcherAssert.assertThat(views.get("/foo").title(),
                 Matchers.is("RouteTarget"));
-        MatcherAssert.assertThat(viewsList.get(0).route(), Matchers.is("/bar"));
-        MatcherAssert.assertThat(viewsList.get(2).routeParameters(),
+        MatcherAssert.assertThat(views.get("/bar").route(), Matchers.is("/bar"));
+        MatcherAssert.assertThat(views.get("/wildcard/:___wildcard*").routeParameters(),
                 Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
-        MatcherAssert.assertThat(viewsList.get(3).routeParameters(),
+        MatcherAssert.assertThat(views.get("//:___userId/edit").routeParameters(),
                 Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(viewsList.get(4).routeParameters(),
+        MatcherAssert.assertThat(views.get("/comments/:___commentId?").routeParameters(),
                 Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
 
     }
 
     @Test
     public void should_collectClientViews() {
-        final List<AvailableViewInfo> viewsList = new ArrayList<>();
-        requestListener.collectClientViews(viewsList);
-        MatcherAssert.assertThat(viewsList, Matchers.hasSize(3));
+        final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
+        requestListener.collectClientViews(views);
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
     }
 
     @PageTitle("RouteTarget")
