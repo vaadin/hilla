@@ -54,14 +54,14 @@ export const remote = {
 };
 
 export const destination = {
-  lit: {
-    versions: [
-      new URL('packages/java/hilla/hilla-versions.json', root),
-      new URL('packages/java/tests/spring/security/src/main/resources/vaadin-core-versions.json', root),
-      new URL('packages/java/tests/spring/security-contextpath/src/main/resources/vaadin-core-versions.json', root),
-      new URL('packages/java/tests/spring/security-jwt/src/main/resources/vaadin-core-versions.json', root),
-      new URL('packages/java/tests/spring/security-urlmapping/src/main/resources/vaadin-core-versions.json', root),
-    ],
-    themeDir: new URL('packages/java/hilla/src/main/java/com/vaadin/hilla/theme/', root),
-  },
+  versions: [
+    new URL('packages/java/hilla/hilla-versions.json', root),
+    new URL('packages/java/tests/spring/security/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/spring/security-contextpath/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/spring/security-jwt/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/spring/security-urlmapping/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/spring/react-grid-test/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/spring/react-signals/src/main/resources/vaadin-core-versions.json', root),
+  ],
+  themeDir: new URL('packages/java/hilla/src/main/java/com/vaadin/hilla/theme/', root),
 };
