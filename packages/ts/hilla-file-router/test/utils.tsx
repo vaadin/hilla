@@ -173,7 +173,7 @@ export const components = {
     default: function Wildcard(): JSX.Element {
       return <></>;
     },
-    config: { title: 'Rest' },
+    config: { title: 'Wildcard' },
   },
   optional: {
     // eslint-disable-next-line func-name-matching

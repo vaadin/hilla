@@ -22,6 +22,11 @@ describe('@vaadin/hilla-file-router', () => {
             handle: components.about.config,
           },
           {
+            path: 'hidden',
+            element: createElement(components.hidden.default),
+            handle: components.hidden.config,
+          },
+          {
             path: 'profile',
             children: [
               {
@@ -30,16 +35,31 @@ describe('@vaadin/hilla-file-router', () => {
                 handle: components.friends.config,
                 children: [
                   {
-                    path: 'friends-list',
+                    path: 'list',
                     element: createElement(components.friendsList.default),
                     handle: components.friendsList.config,
                   },
                   {
-                    path: '{user}',
+                    path: ':user',
                     element: createElement(components.friend.default),
                     handle: components.friend.config,
                   },
                 ],
+              },
+            ],
+          },
+          {
+            path: 'test',
+            children: [
+              {
+                path: '*',
+                element: createElement(components.wildcard.default),
+                handle: components.wildcard.config,
+              },
+              {
+                path: ':optional?',
+                element: createElement(components.optional.default),
+                handle: components.optional.config,
               },
             ],
           },

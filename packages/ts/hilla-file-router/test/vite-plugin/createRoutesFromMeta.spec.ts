@@ -19,7 +19,7 @@ describe('@vaadin/hilla-file-router', () => {
     it('should generate a framework-agnostic tree of routes', () => {
       const generated = createRoutesFromMeta(meta, new URL('./out/', dir));
 
-      expect(generated).to.equal(`import { r } from "@vaadin/hilla-file-router";
+      expect(generated).to.equal(`import { createRoute } from "@vaadin/hilla-file-router/runtime.js";
 import * as Page0 from "../views/nameToReplace.js";
 import * as Page1 from "../views/profile/$index.js";
 import * as Page2 from "../views/profile/account/security/password.js";
@@ -30,7 +30,7 @@ import * as Page7 from "../views/profile/friends/{user}.js";
 import * as Layout8 from "../views/profile/friends/$layout.js";
 import * as Page10 from "../views/test/{{optional}}.js";
 import * as Page11 from "../views/test/{...wildcard}.js";
-const routes = r("", [r("nameToReplace", Page0), r("profile", [r("", Page1), r("account", Layout5, [r("security", [r("password", Page2), r("two-factor-auth", Page3)])]), r("friends", Layout8, [r("list", Page6), r(":user", Page7)])]), r("test", [r(":optional?", Page10), r("*", Page11)])]);
+const routes = createRoute("", [createRoute("nameToReplace", Page0), createRoute("profile", [createRoute("", Page1), createRoute("account", Layout5, [createRoute("security", [createRoute("password", Page2), createRoute("two-factor-auth", Page3)])]), createRoute("friends", Layout8, [createRoute("list", Page6), createRoute(":user", Page7)])]), createRoute("test", [createRoute(":optional?", Page10), createRoute("*", Page11)])]);
 export default routes;
 `);
     });
