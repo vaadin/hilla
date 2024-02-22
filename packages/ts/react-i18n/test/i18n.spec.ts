@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { I18n } from '../index';
+import { I18n } from '../src/index.js';
 
 describe('i18n', () => {
   let i18n: I18n;

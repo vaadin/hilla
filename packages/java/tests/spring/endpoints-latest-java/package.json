@@ -10,6 +10,7 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.1.2",
     "react": "18.2.0",
