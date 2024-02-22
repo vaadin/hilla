@@ -16,6 +16,7 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "@polymer/polymer": "3.5.1",
     "@vaadin/common-frontend": "0.0.18",
     "@vaadin/router": "1.7.5",
