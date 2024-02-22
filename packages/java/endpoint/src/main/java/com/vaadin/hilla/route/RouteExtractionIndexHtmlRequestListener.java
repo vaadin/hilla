@@ -84,10 +84,7 @@ public class RouteExtractionIndexHtmlRequestListener
     }
 
     protected void collectClientViews(Map<String, AvailableViewInfo> availableViews) {
-        clientRouteRegistry.getAllRoutes().forEach(entry -> {
-            final String route = entry.getKey();
-            final ClientViewConfig config = entry.getValue();
-
+        clientRouteRegistry.getAllRoutes().forEach((route, config) -> {
             final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
                     config.title(), config.rolesAllowed(), config.route(),
                     config.lazy(), config.register(), config.menu(),
