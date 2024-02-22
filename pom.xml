@@ -15,6 +15,7 @@
     <version>2.2.1</version>
   </parent>
 
+  <!-- test PR -->
   <modules>
     <module>packages/java/endpoint</module>
     <module>packages/java/engine-core</module>
