@@ -7,4 +7,4 @@
 
 ---
 
-Please refer to the [Using Gradle in Hilla Applications](https://hilla.dev/docs/react/start/gradle) article for more information about Hilla Gradle Plugin.
+Please refer to the [Using Gradle in Hilla Applications](https://hilla.dev/docs/react/reference/gradle) article for more information about Hilla Gradle Plugin.
