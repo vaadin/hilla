@@ -38,10 +38,10 @@ public class ClientRouteRegistry implements Serializable {
     /**
      * Returns all registered routes.
      *
-     * @return a list of all registered routes
+     * @return a map of all registered routes
      */
-    public List<ClientViewConfig> getAllRoutes() {
-        return List.copyOf(registeredRoutes.values());
+    public Map<String, ClientViewConfig> getAllRoutes() {
+        return Map.copyOf(registeredRoutes);
     }
 
     /**

@@ -1,2 +1,9 @@
 runtime
+shared
 vite-plugin
+!src/runtime
+!src/shared
+!src/vite-plugin
+!test/runtime
+!test/shared
+!test/vite-plugin

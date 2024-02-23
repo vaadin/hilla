@@ -1,6 +1,7 @@
 import { opendir } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { Logger } from 'vite';
 import { cleanUp } from './utils.js';
 
 export type RouteMeta = Readonly<{
@@ -17,6 +18,22 @@ export type CollectRoutesOptions = Readonly<{
 
 const collator = new Intl.Collator('en-US');
 
+/**
+ * Collect route metadata from the file system and build a route tree.
+ *
+ * It accepts files that start with `$` as special files.
+ * - `$layout` contains a component that wraps the child components.
+ * - `$index` contains a component that will be used as the index page of the directory.
+ *
+ * It accepts files that start with `_` as private files. They will be ignored.
+ *
+ * @param dir - The directory to collect routes from.
+ * @param extensions - The list of extensions that will be collected as routes.
+ * @param parent - The parent directory of the current directory. This is a nested parameter used inside the function
+ * only.
+ *
+ * @returns The route metadata tree.
+ */
 export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, parent = dir }: CollectRoutesOptions,

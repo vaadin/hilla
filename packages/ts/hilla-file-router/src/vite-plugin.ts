@@ -1,6 +1,6 @@
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import type { Plugin } from 'vite';
+import type { Logger, Plugin } from 'vite';
 import collectRoutesFromFS from './vite-plugin/collectRoutesFromFS.js';
 import createRoutesFromMeta from './vite-plugin/createRoutesFromMeta.js';
 import createViewConfigJson from './vite-plugin/createViewConfigJson.js';
@@ -26,13 +26,6 @@ export type PluginOptions = Readonly<{
    * @defaultValue `['.tsx', '.jsx', '.ts', '.js']`
    */
   extensions?: readonly string[];
-  /**
-   * The name of the export that will be used for the {@link ViewConfig} in the
-   * route file.
-   *
-   * @defaultValue `config`
-   */
-  configExportName?: string;
 }>;
 
 type RuntimeFileUrls = Readonly<{
@@ -40,8 +33,17 @@ type RuntimeFileUrls = Readonly<{
   code: URL;
 }>;
 
-async function generateRuntimeFiles(code: string, json: string, urls: RuntimeFileUrls) {
-  await Promise.all([writeFile(urls.json, json, 'utf-8'), writeFile(urls.code, code, 'utf-8')]);
+async function generateRuntimeFiles(code: string, json: string, urls: RuntimeFileUrls, logger: Logger) {
+  await Promise.all([
+    mkdir(new URL('./', urls.code), { recursive: true }),
+    mkdir(new URL('./', urls.json), { recursive: true }),
+  ]);
+  await Promise.all([
+    writeFile(urls.json, json, 'utf-8').then(() =>
+      logger.info(`Frontend route list is generated: ${String(urls.json)}`),
+    ),
+    writeFile(urls.code, code, 'utf-8').then(() => logger.info(`Views module is generated: ${String(urls.code)}`)),
+  ]);
 }
 
 async function build(
@@ -49,13 +51,14 @@ async function build(
   outDir: URL,
   generatedUrls: RuntimeFileUrls,
   extensions: readonly string[],
-  configExportName: string,
+  logger: Logger,
 ): Promise<void> {
   const routeMeta = await collectRoutesFromFS(viewsDir, { extensions });
+  logger.info('Collected file-based routes');
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, outDir);
-  const viewConfigJson = await createViewConfigJson(routeMeta, configExportName);
+  const viewConfigJson = await createViewConfigJson(routeMeta);
 
-  await generateRuntimeFiles(runtimeRoutesCode, viewConfigJson, generatedUrls);
+  await generateRuntimeFiles(runtimeRoutesCode, viewConfigJson, generatedUrls, logger);
 }
 
 /**
@@ -68,27 +71,37 @@ export default function vitePluginFileSystemRouter({
   viewsDir = 'frontend/views/',
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
-  configExportName = 'config',
 }: PluginOptions = {}): Plugin {
   let _viewsDir: URL;
   let _generatedDir: URL;
   let _outDir: URL;
+  let _logger: Logger;
   let generatedUrls: RuntimeFileUrls;
 
   return {
     name: 'vite-plugin-file-router',
-    configResolved({ root, build: { outDir } }) {
+    configResolved({ logger, root, build: { outDir } }) {
       const _root = pathToFileURL(root);
       _viewsDir = new URL(viewsDir, _root);
       _generatedDir = new URL(generatedDir, _root);
       _outDir = pathToFileURL(outDir);
+      _logger = logger;
+
+      _logger.info(`The directory of route files: ${String(_viewsDir)}`);
+      _logger.info(`The directory of generated files: ${String(_generatedDir)}`);
+      _logger.info(`The output directory: ${String(_outDir)}`);
+
       generatedUrls = {
         json: new URL('views.json', _outDir),
         code: new URL('views.ts', _generatedDir),
       };
     },
     async buildStart() {
-      await build(_viewsDir, _generatedDir, generatedUrls, extensions, configExportName);
+      try {
+        await build(_viewsDir, _generatedDir, generatedUrls, extensions, _logger);
+      } catch (e: unknown) {
+        _logger.error(String(e));
+      }
     },
     configureServer(server) {
       const dir = fileURLToPath(_viewsDir);
@@ -98,7 +111,9 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        build(_viewsDir, _outDir, generatedUrls, extensions, configExportName).catch((error) => console.error(error));
+        build(_viewsDir, _generatedDir, generatedUrls, extensions, _logger).catch((e: unknown) =>
+          _logger.error(String(e)),
+        );
       };
 
       server.watcher.on('add', changeListener);

@@ -50,9 +50,13 @@ packages/**/resources/vaadin-core-versions.json
 
 # npm pack
 packages/ts/*/*.tgz
+*.tgz
 
 # temporary scripts from platform for preparations
 scripts/prepare/src/
 
 # backup files from some editors
 *~
+
+# nx cache
+.nx
