@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-signals",
-  "version": "24.4.0-alpha2",
+  "version": "24.4.0-alpha5",
   "description": "Signals for Hilla React",
   "main": "index.js",
   "module": "index.js",
