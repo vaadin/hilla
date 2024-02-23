@@ -10,10 +10,11 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@vaadin/hilla-frontend": "24.4.0-alpha4",
+    "@vaadin/hilla-lit-form": "24.4.0-alpha4",
     "@vaadin/hilla-react-auth": "24.4.0-alpha4",
     "@vaadin/hilla-react-crud": "24.4.0-alpha4",
     "@vaadin/hilla-react-form": "24.4.0-alpha4",
-    "@vaadin/hilla-lit-form": "24.4.0-alpha4"
+    "@vaadin/hilla-react-signals": "24.4.0-alpha4"
   },
   "devDependencies": {
     "@vaadin/hilla-generator-core": "24.4.0-alpha4",
