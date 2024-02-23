@@ -36,7 +36,7 @@
     "@nx/js": "^16.10.0",
     "@types/karma": "^6.3.5",
     "@types/node": "^20.7.1",
-    "@vaadin/react-components": "24.4.0-alpha10",
+    "@vaadin/react-components": "24.4.0-alpha13",
     "chai-dom": "^1.11.0",
     "compare-versions": "^6.1.0",
     "concurrently": "^8.2.1",
