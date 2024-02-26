@@ -1,10 +1,20 @@
 import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
+import { getLanguageSettings, updateLanguageSettings } from './settings.js';
 import type { I18nOptions, Translations } from './types.js';
 
 function determineInitialLanguage(options?: I18nOptions): string {
-  // Use explicitly configured language or browser language
-  return options?.language ?? navigator.language;
+  // Use explicitly configured language if defined
+  if (options?.language) {
+    return options.language;
+  }
+  // Use last used language as fallback
+  const settings = getLanguageSettings();
+  if (settings?.language) {
+    return settings.language;
+  }
+  // Otherwise use browser language
+  return navigator.language;
 }
 
 export class I18n {
@@ -19,10 +29,14 @@ export class I18n {
 
   async configure(options?: I18nOptions): Promise<void> {
     const initialLanguage = determineInitialLanguage(options);
-    await this.setLanguage(initialLanguage);
+    await this.updateLanguage(initialLanguage);
   }
 
   async setLanguage(newLanguage: string): Promise<void> {
+    await this.updateLanguage(newLanguage, true);
+  }
+
+  private async updateLanguage(newLanguage: string, updateSettings = false) {
     if (this._language.value === newLanguage) {
       return;
     }
@@ -32,6 +46,12 @@ export class I18n {
     batch(() => {
       this._translations.value = newTranslations;
       this._language.value = newLanguage;
+
+      if (updateSettings) {
+        updateLanguageSettings({
+          language: newLanguage,
+        });
+      }
     });
   }
 

@@ -1,9 +1,11 @@
 import { expect, use } from '@esm-bundle/chai';
+import CookieManager from '@vaadin/hilla-frontend/CookieManager.js';
 import { effect } from '@vaadin/hilla-react-signals';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { I18nBackend } from '../src/backend.js';
 import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
+import type { LanguageSettings } from '../src/settings.js';
 
 use(sinonChai);
 
@@ -27,7 +29,24 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
     }
 
+    function getSettingsCookie(): LanguageSettings | undefined {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const cookie = CookieManager.get('vaadinLanguageSettings');
+      return cookie && JSON.parse(cookie);
+    }
+
+    function setSettingsCookie(settings: LanguageSettings) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      CookieManager.set('vaadinLanguageSettings', JSON.stringify(settings));
+    }
+
+    function clearSettingsCookie() {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      CookieManager.remove('vaadinLanguageSettings');
+    }
+
     beforeEach(() => {
+      clearSettingsCookie();
       i18n = new I18n();
       mockBackend(i18n);
     });
@@ -40,11 +59,33 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(loadStub).to.have.been.calledOnceWith(navigator.language);
       });
 
-      it('should use explicitly configured language', async () => {
+      it('should use last used language if defined', async () => {
+        setSettingsCookie({ language: 'zh-Hant' });
+        await i18n.configure();
+
+        expect(i18n.language.value).to.equal('zh-Hant');
+        expect(loadStub).to.have.been.calledOnceWith('zh-Hant');
+      });
+
+      it('should use explicitly configured language if specified', async () => {
         await i18n.configure({ language: 'zh-Hant' });
 
         expect(i18n.language.value).to.equal('zh-Hant');
         expect(loadStub).to.have.been.calledOnceWith('zh-Hant');
+      });
+
+      it('should prefer explicitly configured language over last used language', async () => {
+        setSettingsCookie({ language: 'de-DE' });
+        await i18n.configure({ language: 'zh-Hant' });
+
+        expect(i18n.language.value).to.equal('zh-Hant');
+        expect(loadStub).to.have.been.calledOnceWith('zh-Hant');
+      });
+
+      it('should not store last used language when initializing', async () => {
+        await i18n.configure();
+
+        expect(getSettingsCookie()?.language).to.not.exist;
       });
 
       it('should not throw when loading translations fails', async () => {
@@ -73,6 +114,12 @@ describe('@vaadin/hilla-react-i18n', () => {
 
         expect(i18n.language.value).to.equal('de-DE');
         expect(loadStub).to.have.been.calledOnceWith('de-DE');
+      });
+
+      it('should store last used language', async () => {
+        await i18n.setLanguage('de-DE');
+
+        expect(getSettingsCookie()?.language).to.equal('de-DE');
       });
 
       it('should not load translations if language is unchanged', async () => {

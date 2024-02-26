@@ -46,6 +46,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@vaadin/hilla-frontend": "24.4.0-alpha5",
     "@vaadin/hilla-react-signals": "24.4.0-alpha5"
   },
   "peerDependencies": {
