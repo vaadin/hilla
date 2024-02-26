@@ -1,7 +1,10 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Logger, Plugin } from 'vite';
-import { buildFiles, type RuntimeFileUrls } from './vite-plugin/buildFiles.js';
+import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
+/**
+ * The options for the Vite file-based router plugin.
+ */
 export type PluginOptions = Readonly<{
   /**
    * The base directory for the router. The folders and files in this directory
@@ -37,17 +40,17 @@ export default function vitePluginFileSystemRouter({
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
 }: PluginOptions = {}): Plugin {
   let _viewsDir: URL;
-  let _generatedDir: URL;
   let _outDir: URL;
   let _logger: Logger;
-  let generatedUrls: RuntimeFileUrls;
+  let runtimeUrls: RuntimeFileUrls;
 
   return {
     name: 'vite-plugin-file-router',
     configResolved({ logger, root, build: { outDir } }) {
       const _root = pathToFileURL(root);
+      const _generatedDir = new URL(generatedDir, _root);
+
       _viewsDir = new URL(viewsDir, _root);
-      _generatedDir = new URL(generatedDir, _root);
       _outDir = pathToFileURL(outDir);
       _logger = logger;
 
@@ -55,14 +58,14 @@ export default function vitePluginFileSystemRouter({
       _logger.info(`The directory of generated files: ${String(_generatedDir)}`);
       _logger.info(`The output directory: ${String(_outDir)}`);
 
-      generatedUrls = {
+      runtimeUrls = {
         json: new URL('views.json', _outDir),
         code: new URL('views.ts', _generatedDir),
       };
     },
     async buildStart() {
       try {
-        await buildFiles(_viewsDir, _generatedDir, generatedUrls, extensions, _logger);
+        await generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger);
       } catch (e: unknown) {
         _logger.error(String(e));
       }
@@ -75,7 +78,7 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        buildFiles(_viewsDir, _generatedDir, generatedUrls, extensions, _logger).catch((e: unknown) =>
+        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger).catch((e: unknown) =>
           _logger.error(String(e)),
         );
       };
