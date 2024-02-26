@@ -1,4 +1,4 @@
-import { signal, type Signal } from '@vaadin/hilla-react-signals';
+import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
 import type { I18nOptions, Translations } from './types.js';
 
@@ -27,8 +27,12 @@ export class I18n {
       return;
     }
 
-    this._translations.value = await this.loadTranslations(newLanguage);
-    this._language.value = newLanguage;
+    const newTranslations = await this.loadTranslations(newLanguage);
+    // Update all signals together to avoid triggering side effects multiple times
+    batch(() => {
+      this._translations.value = newTranslations;
+      this._language.value = newLanguage;
+    });
   }
 
   private async loadTranslations(newLanguage: string) {
