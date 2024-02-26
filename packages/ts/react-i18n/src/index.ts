@@ -49,3 +49,5 @@ export class I18n {
     return this._translations.value[key] || key;
   }
 }
+
+export const i18n = new I18n();

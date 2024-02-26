@@ -3,7 +3,7 @@ import { effect } from '@vaadin/hilla-react-signals';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { I18nBackend } from '../src/backend.js';
-import { I18n } from '../src/index.js';
+import { i18n as globalI18n, I18n } from '../src/index.js';
 
 use(sinonChai);
 
@@ -25,6 +25,13 @@ describe('@vaadin/hilla-react-i18n', () => {
       loadStub.withArgs('de-DE').resolves({
         'addresses.form.city.label': 'Stadt',
         'addresses.form.street.label': 'Strasse',
+      });
+    });
+
+    describe('global instance', () => {
+      it('should expose a global I18n instance', () => {
+        expect(globalI18n).to.exist;
+        expect(globalI18n).to.be.instanceof(I18n);
       });
     });
 
