@@ -1,3 +1,4 @@
+import { signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
 import type { I18nOptions, Translations } from './types.js';
 
@@ -9,10 +10,10 @@ function determineInitialLanguage(options?: I18nOptions): string {
 export class I18n {
   private readonly _backend: I18nBackend = new DefaultBackend();
 
-  private _language: string | undefined;
-  private _translations: Translations = {};
+  private readonly _language: Signal<string | undefined> = signal(undefined);
+  private readonly _translations: Signal<Translations> = signal({});
 
-  get language(): string | undefined {
+  get language(): Signal<string | undefined> {
     return this._language;
   }
 
@@ -22,12 +23,12 @@ export class I18n {
   }
 
   async setLanguage(newLanguage: string): Promise<void> {
-    if (this._language === newLanguage) {
+    if (this._language.value === newLanguage) {
       return;
     }
 
-    this._translations = await this.loadTranslations(newLanguage);
-    this._language = newLanguage;
+    this._translations.value = await this.loadTranslations(newLanguage);
+    this._language.value = newLanguage;
   }
 
   private async loadTranslations(newLanguage: string) {
@@ -41,6 +42,6 @@ export class I18n {
   }
 
   translate(key: string): string {
-    return this._translations[key] || key;
+    return this._translations.value[key] || key;
   }
 }
