@@ -51,3 +51,7 @@ export class I18n {
 }
 
 export const i18n = new I18n();
+
+export function translate(key: string): string {
+  return i18n.translate(key);
+}

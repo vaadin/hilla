@@ -3,7 +3,7 @@ import { effect } from '@vaadin/hilla-react-signals';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { I18nBackend } from '../src/backend.js';
-import { i18n as globalI18n, I18n } from '../src/index.js';
+import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
 
 use(sinonChai);
 
@@ -13,10 +13,9 @@ describe('@vaadin/hilla-react-i18n', () => {
     let backend: I18nBackend;
     let loadStub: sinon.SinonStub;
 
-    beforeEach(() => {
-      i18n = new I18n();
+    function mockBackend(instance: I18n) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      backend = (i18n as any)._backend;
+      backend = (instance as any)._backend;
       loadStub = sinon.stub(backend, 'loadTranslations');
       loadStub.resolves({
         'addresses.form.city.label': 'City',
@@ -26,13 +25,11 @@ describe('@vaadin/hilla-react-i18n', () => {
         'addresses.form.city.label': 'Stadt',
         'addresses.form.street.label': 'Strasse',
       });
-    });
+    }
 
-    describe('global instance', () => {
-      it('should expose a global I18n instance', () => {
-        expect(globalI18n).to.exist;
-        expect(globalI18n).to.be.instanceof(I18n);
-      });
+    beforeEach(() => {
+      i18n = new I18n();
+      mockBackend(i18n);
     });
 
     describe('configure', () => {
@@ -121,6 +118,23 @@ describe('@vaadin/hilla-react-i18n', () => {
         // Change language
         await i18n.setLanguage('de-DE');
         expect(effectSpy.calledOnceWith('de-DE', 'Stadt')).to.be.true;
+      });
+    });
+
+    describe('global instance', () => {
+      it('should expose a global I18n instance', () => {
+        expect(globalI18n).to.exist;
+        expect(globalI18n).to.be.instanceof(I18n);
+      });
+
+      it('should expose a global translate function that delegates to global I18n instance', async () => {
+        mockBackend(globalI18n);
+
+        await globalI18n.configure({ language: 'en-US' });
+        expect(globalTranslate('addresses.form.city.label')).to.equal('City');
+
+        await globalI18n.setLanguage('de-DE');
+        expect(globalTranslate('addresses.form.city.label')).to.equal('Stadt');
       });
     });
   });
