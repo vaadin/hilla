@@ -1,9 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Logger, Plugin } from 'vite';
-import collectRoutesFromFS from './vite-plugin/collectRoutesFromFS.js';
-import createRoutesFromMeta from './vite-plugin/createRoutesFromMeta.js';
-import createViewConfigJson from './vite-plugin/createViewConfigJson.js';
+import { buildFiles, type RuntimeFileUrls } from './vite-plugin/buildFiles.js';
 
 export type PluginOptions = Readonly<{
   /**
@@ -27,39 +24,6 @@ export type PluginOptions = Readonly<{
    */
   extensions?: readonly string[];
 }>;
-
-type RuntimeFileUrls = Readonly<{
-  json: URL;
-  code: URL;
-}>;
-
-async function generateRuntimeFiles(code: string, json: string, urls: RuntimeFileUrls, logger: Logger) {
-  await Promise.all([
-    mkdir(new URL('./', urls.code), { recursive: true }),
-    mkdir(new URL('./', urls.json), { recursive: true }),
-  ]);
-  await Promise.all([
-    writeFile(urls.json, json, 'utf-8').then(() =>
-      logger.info(`Frontend route list is generated: ${String(urls.json)}`),
-    ),
-    writeFile(urls.code, code, 'utf-8').then(() => logger.info(`Views module is generated: ${String(urls.code)}`)),
-  ]);
-}
-
-async function build(
-  viewsDir: URL,
-  outDir: URL,
-  generatedUrls: RuntimeFileUrls,
-  extensions: readonly string[],
-  logger: Logger,
-): Promise<void> {
-  const routeMeta = await collectRoutesFromFS(viewsDir, { extensions });
-  logger.info('Collected file-based routes');
-  const runtimeRoutesCode = createRoutesFromMeta(routeMeta, outDir);
-  const viewConfigJson = await createViewConfigJson(routeMeta);
-
-  await generateRuntimeFiles(runtimeRoutesCode, viewConfigJson, generatedUrls, logger);
-}
 
 /**
  * A Vite plugin that generates a router from the files in the specific directory.
@@ -98,7 +62,7 @@ export default function vitePluginFileSystemRouter({
     },
     async buildStart() {
       try {
-        await build(_viewsDir, _generatedDir, generatedUrls, extensions, _logger);
+        await buildFiles(_viewsDir, _generatedDir, generatedUrls, extensions, _logger);
       } catch (e: unknown) {
         _logger.error(String(e));
       }
@@ -111,7 +75,7 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        build(_viewsDir, _generatedDir, generatedUrls, extensions, _logger).catch((e: unknown) =>
+        buildFiles(_viewsDir, _generatedDir, generatedUrls, extensions, _logger).catch((e: unknown) =>
           _logger.error(String(e)),
         );
       };
