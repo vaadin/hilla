@@ -1,4 +1,5 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { TransformResult } from 'rollup';
 import type { Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
@@ -27,6 +28,8 @@ export type PluginOptions = Readonly<{
    */
   extensions?: readonly string[];
 }>;
+
+const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
 
 /**
  * A Vite plugin that generates a router from the files in the specific directory.
@@ -86,6 +89,21 @@ export default function vitePluginFileSystemRouter({
       server.watcher.on('add', changeListener);
       server.watcher.on('change', changeListener);
       server.watcher.on('unlink', changeListener);
+    },
+    transform(code, id): Promise<TransformResult> | TransformResult {
+      if (id.startsWith(fileURLToPath(_viewsDir))) {
+        return {
+          code: code.replace(
+            hmrInjectionPattern,
+            `if (!nextExports) return;
+      if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {
+        nextExports = { ...nextExports, config: currentExports.config };
+      }`,
+          ),
+        };
+      }
+
+      return undefined;
     },
   };
 }
