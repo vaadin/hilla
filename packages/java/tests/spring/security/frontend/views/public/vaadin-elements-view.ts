@@ -18,7 +18,7 @@ import '@vaadin/text-field';
 import '@vaadin/integer-field';
 import '@vaadin/number-field';
 import '@vaadin/email-field';
-// import '@vaadin/rich-text-editor';
+import '@vaadin/rich-text-editor';
 import '@vaadin/login';
 import '@vaadin/custom-field';
 import '@vaadin/button';
