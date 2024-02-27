@@ -4,20 +4,26 @@ import { pathToFileURL } from 'node:url';
 import { expect } from '@esm-bundle/chai';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import createRoutesFromMeta from '../../src/vite-plugin/createRoutesFromMeta.js';
+import type { RuntimeFileUrls } from '../../src/vite-plugin/generateRuntimeFiles.js';
 import { createTestingRouteMeta } from '../utils.js';
 
 describe('@vaadin/hilla-file-router', () => {
   describe('generateRoutes', () => {
     let dir: URL;
     let meta: RouteMeta;
+    let runtimeUrls: RuntimeFileUrls;
 
     beforeEach(() => {
       dir = pathToFileURL(join(tmpdir(), 'hilla-file-router/'));
       meta = createTestingRouteMeta(new URL('./views/', dir));
+      runtimeUrls = {
+        json: new URL('server/views.json', dir),
+        code: new URL('generated/views.ts', dir),
+      };
     });
 
     it('should generate a framework-agnostic tree of routes', () => {
-      const generated = createRoutesFromMeta(meta, new URL('./out/', dir));
+      const generated = createRoutesFromMeta(meta, runtimeUrls);
 
       expect(generated).to.equal(`import { createRoute } from "@vaadin/hilla-file-router/runtime.js";
 import * as Page0 from "../views/nameToReplace.js";
