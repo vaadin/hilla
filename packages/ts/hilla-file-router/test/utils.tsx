@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ComponentType, JSX } from 'react';
+import sinon from 'sinon';
+import type { Logger } from 'vite';
 import { RouteParamType } from '../src/shared/routeParamType.js';
 import type { AgnosticRoute, RouteModule, ViewConfig } from '../src/types.js';
 import type { RouteMeta } from '../vite-plugin/collectRoutesFromFS.js';
@@ -12,6 +14,26 @@ export async function createTmpDir(): Promise<URL> {
 }
 
 export async function createTestingRouteFiles(dir: URL): Promise<void> {
+  // Generates the following directory structure:
+  // root
+  // ├── profile
+  // │   ├── account
+  // │   │   ├── layout.tsx
+  // │   │   └── security
+  // │   │       ├── password.jsx
+  // │   │       └── two-factor-auth.ts
+  // │   ├── friends
+  // │   │   ├── layout.tsx
+  // │   │   ├── list.js
+  // │   │   └── {user}.tsx
+  // │   ├── index.tsx
+  // │   └── index.css
+  // ├── test
+  // │  ├── {{optional}}.tsx
+  // │  ├── {...wildcard}.tsx
+  // │  └── empty.tsx
+  // └── nameToReplace.tsx
+
   await Promise.all([
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
@@ -54,13 +76,13 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       new URL('test/{{optional}}.tsx', dir),
       "export const config = { title: 'Optional' };\nexport default function Optional() {};",
     ),
+    appendFile(new URL('test/empty.tsx', dir), ''),
   ]);
 }
 
 export function createTestingRouteMeta(dir: URL): RouteMeta {
   return {
     path: '',
-    layout: undefined,
     children: [
       {
         path: 'nameToReplace',
@@ -69,7 +91,6 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
       },
       {
         path: 'profile',
-        layout: undefined,
         children: [
           { path: '', file: new URL('profile/$index.tsx', dir), children: [] },
           {
@@ -78,7 +99,6 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
             children: [
               {
                 path: 'security',
-                layout: undefined,
                 children: [
                   {
                     path: 'password',
@@ -114,8 +134,11 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
       },
       {
         path: 'test',
-        layout: undefined,
         children: [
+          {
+            path: 'empty',
+            children: [],
+          },
           {
             path: '{{optional}}',
             file: new URL('test/{{optional}}.tsx', dir),
@@ -249,5 +272,17 @@ export function createTestingViewMap(): Record<string, ViewConfig> {
     '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
     '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
     '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+  };
+}
+
+export function createLogger(): Logger {
+  return {
+    info: sinon.stub(),
+    warn: sinon.stub(),
+    warnOnce: sinon.stub(),
+    error: sinon.stub(),
+    clearScreen: sinon.stub(),
+    hasErrorLogged: sinon.stub(),
+    hasWarned: false,
   };
 }

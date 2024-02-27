@@ -1,16 +1,20 @@
 import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
+import chaiAsPromised from 'chai-as-promised';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 import { rimraf } from 'rimraf';
+import type { Logger } from 'vite';
 import collectRoutesFromFS from '../../src/vite-plugin/collectRoutesFromFS.js';
-import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
+import { createLogger, createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
 use(deepEqualInAnyOrder);
+use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('collectFileRoutes', () => {
     const extensions = ['.tsx', '.jsx', '.ts', '.js'];
     let tmp: URL;
+    let logger: Logger;
 
     before(async () => {
       tmp = await createTmpDir();
@@ -21,24 +25,14 @@ describe('@vaadin/hilla-file-router', () => {
       await rimraf(fileURLToPath(tmp));
     });
 
-    it('should build a route tree', async () => {
-      // root
-      // ├── profile
-      // │   ├── account
-      // │   │   ├── layout.tsx
-      // │   │   └── security
-      // │   │       ├── password.tsx
-      // │   │       └── two-factor-auth.tsx
-      // │   ├── friends
-      // │   │   ├── layout.tsx
-      // │   │   ├── list.tsx
-      // │   │   └── {user}.tsx
-      // │   ├── index.tsx
-      // │   └── layout.tsx
-      // └── about.tsx
-      const result = await collectRoutesFromFS(tmp, { extensions });
+    beforeEach(() => {
+      logger = createLogger();
+    });
 
-      expect(result).to.deep.equals(createTestingRouteMeta(tmp));
+    it('should build a route tree', async () => {
+      const routes = await collectRoutesFromFS(tmp, { extensions, logger });
+      const expected = createTestingRouteMeta(tmp);
+      expect(routes).to.deep.equalInAnyOrder(expected);
     });
   });
 });
