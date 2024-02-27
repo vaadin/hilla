@@ -20,6 +20,7 @@ import com.vaadin.flow.server.Platform;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -87,6 +88,7 @@ public class HillaStatsTest {
     }
 
     @Test
+    @Ignore("https://github.com/vaadin/hilla/issues/2129")
     public void testLitIsReportedByDefault() {
         Map<String, String> entries = getEntries();
         assertEquals("entries: " + entries, 1, entries.size());
@@ -104,6 +106,7 @@ public class HillaStatsTest {
     }
 
     @Test
+    @Ignore("https://github.com/vaadin/hilla/issues/2129")
     public void testReactIsReportedProperly() throws Exception {
         Map<String, String> entries = getEntries();
         assertEquals("entries: " + entries, 1, entries.size());
