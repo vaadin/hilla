@@ -56,6 +56,10 @@ public interface CommandRunner {
 
     /**
      * Run the command.
+     * <p>
+     * </p>
+     * Output and errors destination for the sub-process are the same as the
+     * parent process.
      *
      * @param stdIn
      *            a Consumer that can be used to write to the command's standard
@@ -66,6 +70,24 @@ public interface CommandRunner {
      */
     default void run(Consumer<OutputStream> stdIn)
             throws CommandRunnerException {
+        run(stdIn, true);
+    }
+
+    /**
+     * Run the command.
+     *
+     * @param stdIn
+     *            a Consumer that can be used to write to the command's standard
+     *            input, can be {@code null} if there's no need to write to it.
+     * @param stdOut
+     *            whether output and errors destination for the sub-process be
+     *            the same as the parent process or not
+     *
+     * @throws CommandRunnerException
+     *             if the command fails
+     */
+    default void run(Consumer<OutputStream> stdIn, boolean stdOut)
+            throws CommandRunnerException {
         var execs = executables();
         // Find the first executable that works
         var executable = execs.stream().filter(this::executeWithTestArguments)
@@ -73,7 +95,7 @@ public interface CommandRunner {
                         "No valid executable found between " + execs));
         getLogger().debug("Running command {}", executable);
         // Execute the command with the given arguments
-        executeCommand(executable, arguments(), stdIn, true);
+        executeCommand(executable, arguments(), stdIn, stdOut);
     }
 
     private boolean executeWithTestArguments(String command) {
