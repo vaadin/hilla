@@ -9,7 +9,8 @@ public class EngineConfigureMojoException extends MojoFailureException {
     /**
      * Constructs a new exception with the specified detail message.
      *
-     * @param message Message for the exception.
+     * @param message
+     *            Message for the exception.
      */
     public EngineConfigureMojoException(String message) {
         super(message);
@@ -18,8 +19,10 @@ public class EngineConfigureMojoException extends MojoFailureException {
     /**
      * Constructs a new exception with the specified detail message and cause.
      *
-     * @param message Message for the exception.
-     * @param cause   Cause of the exception.
+     * @param message
+     *            Message for the exception.
+     * @param cause
+     *            Cause of the exception.
      */
     public EngineConfigureMojoException(String message, Throwable cause) {
         super(message, cause);

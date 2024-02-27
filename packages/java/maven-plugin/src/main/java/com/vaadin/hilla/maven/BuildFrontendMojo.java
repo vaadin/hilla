@@ -12,7 +12,6 @@ import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.theme.Theme;
 
-
 /**
  * Goal that builds the frontend bundle.
  *
