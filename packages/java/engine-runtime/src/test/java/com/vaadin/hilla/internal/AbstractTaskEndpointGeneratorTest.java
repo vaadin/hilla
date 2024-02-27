@@ -79,7 +79,7 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         var rootException = new RuntimeException(
                 "MOCK: Could not find goal 'configure' in plugin");
         doThrow(new CommandRunnerException("MOCK: Failed to execute command",
-                rootException)).when(mockConfigureNotFound).run(null);
+                rootException)).when(mockConfigureNotFound).run(null, false);
         var mockConfigureFound = mock(MavenRunner.class);
 
         try (var staticMock = mockStatic(MavenRunner.class)) {
@@ -101,8 +101,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
             firstRun.set(null, true);
             Files.createFile(getTemporaryDirectory().resolve("pom.xml"));
             task.execute();
-            verify(mockConfigureNotFound).run(null);
-            verify(mockConfigureFound).run(null);
+            verify(mockConfigureNotFound).run(null, false);
+            verify(mockConfigureFound).run(null, false);
         }
     }
 }
