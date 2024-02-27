@@ -1,6 +1,8 @@
 import { expect, use } from '@esm-bundle/chai';
+import { render } from '@testing-library/react';
 import CookieManager from '@vaadin/hilla-frontend/CookieManager.js';
-import { effect } from '@vaadin/hilla-react-signals';
+import { effect, useComputed, useSignalEffect } from '@vaadin/hilla-react-signals';
+import { useEffect, useMemo } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { I18nBackend } from '../src/backend.js';
@@ -182,6 +184,120 @@ describe('@vaadin/hilla-react-i18n', () => {
 
         await globalI18n.setLanguage('de-DE');
         expect(globalTranslate('addresses.form.city.label')).to.equal('Stadt');
+      });
+    });
+
+    describe('react integration', () => {
+      it('should re-render when language changes', async () => {
+        function TestTranslateComponent() {
+          return <div>{i18n.translate('addresses.form.city.label')}</div>;
+        }
+
+        const { getByText } = render(<TestTranslateComponent />);
+
+        // No language
+        expect(getByText('addresses.form.city.label')).to.exist;
+
+        // Configure initial language
+        await i18n.configure({ language: 'en-US' });
+        expect(getByText('City')).to.exist;
+
+        // Change language
+        await i18n.setLanguage('de-DE');
+        expect(getByText('Stadt')).to.exist;
+      });
+
+      it('should run signal effects when language changes', async () => {
+        let signalEffectResult = '';
+
+        function TestUseSignalEffectComponent() {
+          useSignalEffect(() => {
+            signalEffectResult = i18n.translate('addresses.form.city.label');
+          });
+          return <div></div>;
+        }
+
+        render(<TestUseSignalEffectComponent />);
+
+        // No language
+        expect(signalEffectResult).to.equal('addresses.form.city.label');
+
+        // Configure initial language
+        await i18n.configure({ language: 'en-US' });
+        expect(signalEffectResult).to.equal('City');
+
+        // Change language
+        await i18n.setLanguage('de-DE');
+        expect(signalEffectResult).to.equal('Stadt');
+      });
+
+      it('should update computed signals when language changes', async () => {
+        function TestUseComputedComponent() {
+          const computedTranslation = useComputed(
+            () => `Computed translation: ${i18n.translate('addresses.form.city.label')}`,
+          );
+          return <div>{computedTranslation.value}</div>;
+        }
+
+        const { getByText } = render(<TestUseComputedComponent />);
+
+        // No language
+        expect(getByText('Computed translation: addresses.form.city.label')).to.exist;
+
+        // Configure initial language
+        await i18n.configure({ language: 'en-US' });
+        expect(getByText('Computed translation: City')).to.exist;
+
+        // Change language
+        await i18n.setLanguage('de-DE');
+        expect(getByText('Computed translation: Stadt')).to.exist;
+      });
+
+      it('should run default effects when language changes', async () => {
+        let defaultEffectResult = '';
+
+        function TestUseEffectComponent() {
+          useEffect(() => {
+            defaultEffectResult = i18n.translate('addresses.form.city.label');
+          }, [i18n.language.value]);
+          return <div></div>;
+        }
+
+        render(<TestUseEffectComponent />);
+
+        // No language
+        expect(defaultEffectResult).to.equal('addresses.form.city.label');
+
+        // Configure initial language
+        await i18n.configure({ language: 'en-US' });
+        expect(defaultEffectResult).to.equal('City');
+
+        // Change language
+        await i18n.setLanguage('de-DE');
+        expect(defaultEffectResult).to.equal('Stadt');
+      });
+
+      it('should update memoizations when language changes', async () => {
+        function TestUseMemoComponent() {
+          const memoizedTranslation = useMemo(
+            () => `Memoized translation: ${i18n.translate('addresses.form.city.label')}`,
+            [i18n.language.value],
+          );
+          return <div>{memoizedTranslation}</div>;
+        }
+
+        const { getByText } = render(<TestUseMemoComponent />);
+
+        // No language
+        expect(getByText('Memoized translation: addresses.form.city.label')).to.exist;
+
+        // Configure initial language
+        await i18n.configure({ language: 'en-US' });
+        expect(getByText('Memoized translation: City')).to.exist;
+
+        // Change language
+        await i18n.setLanguage('de-DE');
+        expect(getByText('Memoized translation: Stadt')).to.exist;
       });
     });
   });
