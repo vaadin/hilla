@@ -20,7 +20,6 @@
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
-    <module>packages/java/plugin-base</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
     <module>packages/java/hilla-dev</module>
