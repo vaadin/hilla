@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class EngineConfiguration {
     public static final String DEFAULT_CONFIG_FILE_NAME = "hilla-engine-configuration.json";
-    public static final String OPEN_API_PATH = "com/vaadin/hilla/openapi.json";
+    public static final String OPEN_API_PATH = "hilla-openapi.json";
     static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD,
@@ -138,7 +138,7 @@ public class EngineConfiguration {
 
     @JsonIgnore
     public Path getOpenAPIFile() {
-        return classesDir.resolve(OPEN_API_PATH);
+        return buildDir.resolve(OPEN_API_PATH);
     }
 
     public static final class Builder {

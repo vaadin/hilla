@@ -87,7 +87,7 @@ public class NodeTasksEndpointTest extends TaskTest {
     }
 
     private void assertEndpointFiles(boolean shouldExist) {
-        Arrays.asList("build/classes/com/vaadin/hilla/openapi.json",
+        Arrays.asList("build/hilla-openapi.json",
                 "api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertEquals(shouldExist,
                         new File(getTemporaryDirectory().toFile(), name)
