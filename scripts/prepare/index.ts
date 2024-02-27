@@ -12,7 +12,6 @@ const [{ version }, versions] = await Promise.all([
     .then((str) => JSON.parse(str, (_, val) => (val === '{{version}}' ? undefined : val))) as Promise<Versions>,
   mkdir(local.src, { recursive: true }),
   mkdir(local.results, { recursive: true }),
-  mkdir(destination.themeDir, { recursive: true }),
 ]);
 
 if (!version) {
@@ -28,26 +27,4 @@ await Promise.all(
   destination.versions.map(async (file) =>
     copyFile(new URL('hilla-versions.json', local.results), file).then(() => console.log(`Copied ${file.toString()}`)),
   ),
-);
-
-const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;
-const themeFiles = new Map([
-  [remote.lumo, [new URL('Lumo.java', destination.themeDir)]],
-  [remote.material, [new URL('Material.java', destination.themeDir)]],
-]);
-
-console.log('Copying the theme files from flow-components to the final place.');
-
-await Promise.all(
-  Array.from(themeFiles.entries(), async ([url, dest]) => {
-    const response = await fetch(url);
-    let code = await response.text();
-    code = code.replaceAll(themeAnnotationsPattern, '');
-    await Promise.all(
-      dest.map(async (file) => {
-        await writeFile(file, code);
-        console.log(`Copied ${file.toString()}`);
-      }),
-    );
-  }),
 );
