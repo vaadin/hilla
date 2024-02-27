@@ -84,31 +84,6 @@ class SingleModuleTest : AbstractGradleTest() {
         verifyEndpointsTsFileGeneratedProperly()
     }
 
-    @Test
-    @Ignore
-    fun `check hillaInitApp properly scaffolds project according to framework`() {
-        createProject()
-
-        testProject.newFile("src/main/java/com/example/Application.java", """
-            package com.example;
-
-            import org.springframework.boot.SpringApplication;
-            import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-            @SpringBootApplication
-            public class Application {
-                public static void main(String[] args) {
-                    SpringApplication.run(Application.class, args);
-                }
-            }
-            """.trimIndent())
-
-        testProject.build("hillaInitApp", checkTasksSuccessful = false)
-
-        expect(true, "test") {
-            testProject.folder("frontend").resolve("routes.tsx").exists()
-        }
-    }
 
     private fun verifyOpenApiJsonFileGeneratedProperly() {
         val openApiJsonFile = testProject.folder("build").resolve("classes/com/vaadin/hilla/openapi.json")
