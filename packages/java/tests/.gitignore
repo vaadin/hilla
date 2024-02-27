@@ -6,3 +6,4 @@ vite.generated.ts
 types.d.ts
 **/frontend/generated/*
 **/error-screenshots/*
+prod.bundle
