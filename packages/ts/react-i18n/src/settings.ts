@@ -7,7 +7,6 @@ export interface LanguageSettings {
 }
 
 export function getLanguageSettings(): LanguageSettings | undefined {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const cookie = CookieManager.get(VAADIN_LANGUAGE_SETTINGS_COOKIE_NAME);
   if (!cookie) return undefined;
 
@@ -26,6 +25,5 @@ export function updateLanguageSettings(updates: Partial<LanguageSettings>): void
     ...updates,
   };
   const json = JSON.stringify(newSettings);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   CookieManager.set(VAADIN_LANGUAGE_SETTINGS_COOKIE_NAME, json);
 }

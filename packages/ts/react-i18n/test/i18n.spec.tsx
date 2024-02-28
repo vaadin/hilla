@@ -32,18 +32,15 @@ describe('@vaadin/hilla-react-i18n', () => {
     }
 
     function getSettingsCookie(): LanguageSettings | undefined {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const cookie = CookieManager.get('vaadinLanguageSettings');
       return cookie && JSON.parse(cookie);
     }
 
     function setSettingsCookie(settings: LanguageSettings) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       CookieManager.set('vaadinLanguageSettings', JSON.stringify(settings));
     }
 
     function clearSettingsCookie() {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       CookieManager.remove('vaadinLanguageSettings');
     }
 
