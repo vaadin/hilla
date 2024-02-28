@@ -33,6 +33,8 @@ export const branch = 'main';
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
 
+export const componentOptions = ['lit', 'react'];
+
 export const local = {
   src: new URL(`scripts/prepare/src/`, root),
   versionedPackageJson: new URL('packages/ts/generator-core/package.json', root),

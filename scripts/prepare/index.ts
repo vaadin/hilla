@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import type { PackageJson } from 'type-fest';
-import { destination, local, remote, type Versions } from './config.js';
+import { componentOptions, destination, local, remote, type Versions } from './config.js';
 import generate from './generate.js';
 
 const [{ version }, versions] = await Promise.all([
@@ -32,16 +32,16 @@ await Promise.all(
 
 console.log('Generating components list package.json resources.');
 
-const components = await readdir(local.components);
 await Promise.all(
-  components.map(async (component) => {
-    let code = (await readFile(new URL(`./${component}/package.json`, local.components), 'utf-8'))
+  componentOptions.map(async (componentOption) => {
+    let code = await readFile(new URL(`./${componentOption}/package.json`, local.components), 'utf-8');
     code = code.replaceAll('{{version}}', version);
-    await mkdir(new URL(component, destination.components), {recursive: true});
-    const file = new URL(`./${component}/package.json`, destination.components);
-    await writeFile(new URL(`./${component}/package.json`, destination.components), code);
-    console.log(`Generated ${file}`);
-}));
+    await mkdir(new URL(componentOption, destination.components), { recursive: true });
+    const file = new URL(`./${componentOption}/package.json`, destination.components);
+    await writeFile(file, code);
+    console.log(`Generated ${file.toString()}`);
+  }),
+);
 
 const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;
 const themeFiles = new Map([
