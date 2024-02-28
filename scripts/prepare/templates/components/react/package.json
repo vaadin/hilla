@@ -1,0 +1,31 @@
+{
+  "name": "hilla-components-dependencies",
+  "version": "1.0.0",
+  "description": "A list of Hilla React components that are added by Flow automatically to package.json",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@vaadin/hilla-frontend": "{{version}}",
+    "@vaadin/hilla-lit-form": "{{version}}",
+    "@vaadin/hilla-react-auth": "{{version}}",
+    "@vaadin/hilla-react-crud": "{{version}}",
+    "@vaadin/hilla-react-form": "{{version}}",
+    "@vaadin/hilla-react-signals": "{{version}}"
+  },
+  "devDependencies": {
+    "@vaadin/hilla-generator-core": "{{version}}",
+    "@vaadin/hilla-generator-utils": "{{version}}",
+    "@vaadin/hilla-generator-cli": "{{version}}",
+    "@vaadin/hilla-generator-plugin-client": "{{version}}",
+    "@vaadin/hilla-generator-plugin-backbone": "{{version}}",
+    "@vaadin/hilla-generator-plugin-barrel": "{{version}}",
+    "@vaadin/hilla-generator-plugin-model": "{{version}}",
+    "@vaadin/hilla-generator-plugin-push": "{{version}}",
+    "@vaadin/hilla-generator-plugin-subtypes": "{{version}}",
+    "@vaadin/hilla-file-router": "{{version}}"
+  }
+}
