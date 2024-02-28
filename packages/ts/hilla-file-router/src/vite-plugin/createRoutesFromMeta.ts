@@ -10,6 +10,7 @@ import ts, {
 } from 'typescript';
 import { transformRoute } from '../runtime/utils.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
+import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
 import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
@@ -66,7 +67,8 @@ function createRouteData(path: string, mod: string | undefined, children: readon
  * @param views - The abstract route tree.
  * @param generatedDir - The directory where the generated view file will be stored.
  */
-export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL): string {
+export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile }: RuntimeFileUrls): string {
+  const codeDir = new URL('./', codeFile);
   const imports: ImportDeclaration[] = [
     template(
       'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
@@ -85,10 +87,10 @@ export default function createRoutesFromMeta(views: RouteMeta, generatedDir: URL
       let mod: string | undefined;
       if (file) {
         mod = `Page${currentId}`;
-        imports.push(createImport(mod, relativize(file, generatedDir)));
+        imports.push(createImport(mod, relativize(file, codeDir)));
       } else if (layout) {
         mod = `Layout${currentId}`;
-        imports.push(createImport(mod, relativize(layout, generatedDir)));
+        imports.push(createImport(mod, relativize(layout, codeDir)));
       }
 
       return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, children);
