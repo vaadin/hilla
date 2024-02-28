@@ -4,14 +4,18 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * This is the `hilla:clean-frontend` goal which exists just for backward
- * compatibility purposes, and to warn the user about the incompatibility of its
- * functionality within Hilla applications.
+ * Goal that cleans the frontend files to a clean state.
  * <p>
- * NOTE: This goal is deprecated and will be removed in the future major
- * release.
+ * Deletes Vaadin dependencies from package.json, the generated frontend folder
+ * and the npm/pnpm-related files and folders:
+ * <ul>
+ * <li>node_modules
+ * <li>pnpm-lock.yaml
+ * <li>package-lock.json
+ * </ul>
+ *
+ * @since Flow 9.0
  */
-@Deprecated
 @Mojo(name = "clean-frontend", defaultPhase = LifecyclePhase.PRE_CLEAN)
 public class CleanFrontendMojo
         extends com.vaadin.flow.plugin.maven.CleanFrontendMojo {

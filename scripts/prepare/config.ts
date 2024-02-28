@@ -33,10 +33,13 @@ export const branch = 'main';
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
 
+export const componentOptions = ['lit', 'react'];
+
 export const local = {
   src: new URL(`scripts/prepare/src/`, root),
   versionedPackageJson: new URL('packages/ts/generator-core/package.json', root),
   results: new URL(`scripts/prepare/results/`, root),
+  components: new URL(`scripts/prepare/templates/components/`, root),
 };
 
 export const remote = {
@@ -64,4 +67,8 @@ export const destination = {
     new URL('packages/java/tests/spring/react-signals/src/main/resources/vaadin-core-versions.json', root),
   ],
   themeDir: new URL('packages/java/hilla/src/main/java/com/vaadin/hilla/theme/', root),
+  components: new URL(
+    'packages/java/hilla/src/main/resources/com/vaadin/flow/server/frontend/dependencies/hilla/components/',
+    root,
+  ),
 };
