@@ -92,7 +92,7 @@ export default function vitePluginFileSystemRouter({
       server.watcher.on('unlink', changeListener);
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
-      if (id.startsWith(fileURLToPath(_viewsDir)) || basename(id).startsWith('_')) {
+      if (id.startsWith(fileURLToPath(_viewsDir)) && !basename(id).startsWith('_')) {
         return {
           code: code.replace(
             hmrInjectionPattern,
