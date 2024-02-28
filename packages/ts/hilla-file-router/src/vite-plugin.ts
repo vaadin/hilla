@@ -1,3 +1,4 @@
+import { basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { TransformResult } from 'rollup';
 import type { Logger, Plugin } from 'vite';
@@ -29,8 +30,6 @@ export type PluginOptions = Readonly<{
   extensions?: readonly string[];
 }>;
 
-const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
-
 /**
  * A Vite plugin that generates a router from the files in the specific directory.
  *
@@ -42,6 +41,8 @@ export default function vitePluginFileSystemRouter({
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
 }: PluginOptions = {}): Plugin {
+  const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
+
   let _viewsDir: URL;
   let _outDir: URL;
   let _logger: Logger;
@@ -91,7 +92,7 @@ export default function vitePluginFileSystemRouter({
       server.watcher.on('unlink', changeListener);
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
-      if (id.startsWith(fileURLToPath(_viewsDir))) {
+      if (id.startsWith(fileURLToPath(_viewsDir)) || basename(id).startsWith('_')) {
         return {
           code: code.replace(
             hmrInjectionPattern,
