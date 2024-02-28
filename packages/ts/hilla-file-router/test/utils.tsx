@@ -78,6 +78,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     ),
     appendFile(new URL('test/empty.tsx', dir), ''),
     appendFile(new URL('test/_ignored.tsx', dir), 'export default function Ignored() {};'),
+    appendFile(new URL('test/no-default-export.tsx', dir), 'export const config = { title: "No Default Export" };'),
   ]);
 }
 
@@ -151,6 +152,11 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           {
             path: '{...wildcard}',
             file: new URL('test/{...wildcard}.tsx', dir),
+            children: [],
+          },
+          {
+            path: 'no-default-export',
+            file: new URL('test/no-default-export.tsx', dir),
             children: [],
           },
         ],
@@ -277,6 +283,7 @@ export function createTestingViewMap(): Record<string, ViewConfig> {
     '/test/empty': {},
     '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
     '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+    '/test/no-default-export': { title: 'No Default Export' },
   };
 }
 

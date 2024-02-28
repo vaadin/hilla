@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
 import { rimraf } from 'rimraf';
+import sinonChai from 'sinon-chai';
 import type { Writable } from 'type-fest';
 import type { Logger } from 'vite';
 import collectRoutesFromFS from '../../src/vite-plugin/collectRoutesFromFS.js';
@@ -9,6 +10,7 @@ import type { RouteMeta } from '../../vite-plugin/collectRoutesFromFS.js';
 import { createLogger, createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
 use(chaiAsPromised);
+use(sinonChai);
 
 const collator = new Intl.Collator('en-US');
 
@@ -51,6 +53,10 @@ describe('@vaadin/hilla-file-router', () => {
       cleanupRouteMeta(expected);
 
       expect(routes).to.deep.equal(expected);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(logger.error).to.be.calledOnceWithExactly(
+        `The file "${new URL('./test/no-default-export.tsx', tmp).toString()}" should contain a default export of a component`,
+      );
     });
   });
 });

@@ -36,7 +36,7 @@ async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | un
     if (contents === '') {
       return undefined;
     } else if (!contents.includes('export default')) {
-      logger.warn(`The file "${String(url)}" does not contain a component export`);
+      logger.error(`The file "${String(url)}" should contain a default export of a component`);
     }
   }
 
