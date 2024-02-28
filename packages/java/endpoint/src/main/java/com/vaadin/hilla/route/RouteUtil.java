@@ -15,6 +15,8 @@ import java.util.Optional;
  * For internal use only. May be renamed or removed in a future release.
  */
 @Component
+// TODO: move implenets to Flow
+// com.vaadin.flow.internal.hilla.RouteRequestUtil
 public class RouteUtil implements RouteRequestUtil {
 
     private final ClientRouteRegistry registry;
@@ -62,6 +64,26 @@ public class RouteUtil implements RouteRequestUtil {
         final String[] rolesAllowed = viewConfig.get().rolesAllowed();
 
         return isAnonymousAllowed(rolesAllowed);
+    }
+
+    /**
+     * Checks if the given request goes to an authorized route.
+     * (user needs specific role for access)
+     *
+     * @param request
+     *            the HTTP request to check
+     * @return <code>true</code> if the request goes to an authorized route,
+     *         <code>false</code> otherwise
+     */
+    @Override
+    public boolean isAuthenticatedRoute(HttpServletRequest request) {
+        var viewConfig = getRouteData(request);
+        if (viewConfig.isEmpty()) {
+            return false;
+        }
+        final String[] rolesAllowed = viewConfig.get().rolesAllowed();
+
+        return !isAnonymousAllowed(rolesAllowed);
     }
 
     /**
