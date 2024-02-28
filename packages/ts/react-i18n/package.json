@@ -45,6 +45,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {
+    "@vaadin/hilla-frontend": "24.4.0-alpha7",
+    "@vaadin/hilla-react-signals": "24.4.0-alpha7"
+  },
   "peerDependencies": {
     "react": "^18"
   },
