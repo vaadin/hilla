@@ -77,6 +77,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       "export const config = { title: 'Optional' };\nexport default function Optional() {};",
     ),
     appendFile(new URL('test/empty.tsx', dir), ''),
+    appendFile(new URL('test/_ignored.tsx', dir), 'export default function Ignored() {};'),
   ]);
 }
 
@@ -135,7 +136,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
       {
         path: 'test',
         children: [
+          // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
           {
+            // Empty route doesn't have any `file` or `layout` property because the file itself is empty.
+            // We keep the path though.
             path: 'empty',
             children: [],
           },
@@ -270,6 +274,7 @@ export function createTestingViewMap(): Record<string, ViewConfig> {
     '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
     '/profile/friends/list': { title: 'List' },
     '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
+    '/test/empty': {},
     '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
     '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
   };
