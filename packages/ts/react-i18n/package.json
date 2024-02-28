@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-i18n",
-  "version": "24.4.0-alpha5",
+  "version": "24.4.0-alpha6",
   "description": "Hilla I18n utils for React",
   "main": "index.js",
   "module": "index.js",
