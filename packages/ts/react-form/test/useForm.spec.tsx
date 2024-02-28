@@ -350,7 +350,8 @@ describe('@vaadin/hilla-react-form', () => {
       await user.type(projectInput, '123');
       // Mimic change that happens without blur
       fireEvent.change(projectInput);
-      await expect(findByTestId('count')).to.eventually.have.property('textContent', '1');
+      const count = await findByTestId('count');
+      expect(count).to.have.text('1');
     });
   });
 });
