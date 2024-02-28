@@ -60,7 +60,7 @@
     "@vaadin/polymer-legacy-adapter": "24.4.0-alpha14",
     "@vaadin/progress-bar": "24.4.0-alpha14",
     "@vaadin/radio-group": "24.4.0-alpha14",
-    "@vaadin/react-components": "24.4.0-alpha12",
+    "@vaadin/react-components": "24.4.0-alpha14",
     "@vaadin/rich-text-editor": "24.4.0-alpha14",
     "@vaadin/router": "1.7.5",
     "@vaadin/scroller": "24.4.0-alpha14",
@@ -228,7 +228,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "8fb9ef680ce55d6d37e2eba7193f75f056c79026282b1d764ce031d12a38d783"
+    "hash": "4e60148f29430e6cac5df41b56cbe5b52160306c6013983a141440a9fbf8678c"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
