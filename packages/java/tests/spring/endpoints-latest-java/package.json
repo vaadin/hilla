@@ -23,6 +23,7 @@
     "@rollup/pluginutils": "5.1.0",
     "@types/react": "18.2.57",
     "@types/react-dom": "18.2.19",
+    "@vaadin/hilla-file-router": "24.4.0-alpha5",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -55,6 +56,7 @@
       "@vaadin/hilla-react-auth": "24.4.0-alpha5",
       "@vaadin/hilla-react-crud": "24.4.0-alpha5",
       "@vaadin/hilla-react-form": "24.4.0-alpha5",
+      "@vaadin/hilla-react-signals": "24.4.0-alpha5",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.2",
       "react": "18.2.0",
@@ -67,6 +69,7 @@
       "@rollup/pluginutils": "5.1.0",
       "@types/react": "18.2.57",
       "@types/react-dom": "18.2.19",
+      "@vaadin/hilla-file-router": "24.4.0-alpha5",
       "@vaadin/hilla-generator-cli": "24.4.0-alpha5",
       "@vaadin/hilla-generator-core": "24.4.0-alpha5",
       "@vaadin/hilla-generator-plugin-backbone": "24.4.0-alpha5",
@@ -90,7 +93,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "31b064aef95e1a6e77635d5800432491b2d91a89fead63a8528cc86c040471b4"
+    "hash": "ebbb0ef0079f0b2792d9b39533a9cfd6265e459054fc2a6643009ce18d7e02c9"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
