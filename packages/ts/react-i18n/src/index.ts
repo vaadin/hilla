@@ -18,13 +18,13 @@ function determineInitialLanguage(options?: I18nOptions): string {
 }
 
 export class I18n {
-  private readonly _backend: I18nBackend = new DefaultBackend();
+  readonly #backend: I18nBackend = new DefaultBackend();
 
-  private readonly _language: Signal<string | undefined> = signal(undefined);
-  private readonly _translations: Signal<Translations> = signal({});
+  readonly #language: Signal<string | undefined> = signal(undefined);
+  readonly #translations: Signal<Translations> = signal({});
 
   get language(): Signal<string | undefined> {
-    return this._language;
+    return this.#language;
   }
 
   async configure(options?: I18nOptions): Promise<void> {
@@ -37,15 +37,15 @@ export class I18n {
   }
 
   private async updateLanguage(newLanguage: string, updateSettings = false) {
-    if (this._language.value === newLanguage) {
+    if (this.#language.value === newLanguage) {
       return;
     }
 
     const newTranslations = await this.loadTranslations(newLanguage);
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this._translations.value = newTranslations;
-      this._language.value = newLanguage;
+      this.#translations.value = newTranslations;
+      this.#language.value = newLanguage;
 
       if (updateSettings) {
         updateLanguageSettings({
@@ -57,7 +57,7 @@ export class I18n {
 
   private async loadTranslations(newLanguage: string) {
     try {
-      return await this._backend.loadTranslations(newLanguage);
+      return await this.#backend.loadTranslations(newLanguage);
     } catch (e) {
       // TODO proper error handling, maybe allow developer to hook into this
       console.error(`Failed to load translations for language: ${newLanguage}`, e);
@@ -66,7 +66,7 @@ export class I18n {
   }
 
   translate(key: string): string {
-    return this._translations.value[key] || key;
+    return this.#translations.value[key] || key;
   }
 }
 
