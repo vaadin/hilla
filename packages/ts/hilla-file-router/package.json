@@ -58,7 +58,6 @@
   },
   "peerDependencies": {
     "react": "^18.2.0",
-    "react-router": "^6.21.1",
     "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
