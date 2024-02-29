@@ -24,6 +24,10 @@ describe('@vaadin/hilla-react-i18n', () => {
       CookieManager.set('vaadinLanguageSettings', JSON.stringify(settings));
     }
 
+    function setInvalidSettingsCookie() {
+      CookieManager.set('vaadinLanguageSettings', 'foo');
+    }
+
     function clearSettingsCookie() {
       CookieManager.remove('vaadinLanguageSettings');
     }
@@ -65,6 +69,14 @@ describe('@vaadin/hilla-react-i18n', () => {
 
         expect(i18n.language.value).to.equal('zh-Hant');
         verifyLoadTranslations('zh-Hant');
+      });
+
+      it('should use browser language if settings cookie is invalid', async () => {
+        setInvalidSettingsCookie();
+        await i18n.configure();
+
+        expect(i18n.language.value).to.equal(navigator.language);
+        verifyLoadTranslations(navigator.language);
       });
 
       it('should use explicitly configured language if specified', async () => {
