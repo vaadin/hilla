@@ -14,7 +14,8 @@
     "@vaadin/hilla-react-auth": "{{version}}",
     "@vaadin/hilla-react-crud": "{{version}}",
     "@vaadin/hilla-react-form": "{{version}}",
-    "@vaadin/hilla-react-signals": "{{version}}"
+    "@vaadin/hilla-react-signals": "{{version}}",
+    "@vaadin/hilla-file-router": "{{version}}"
   },
   "devDependencies": {
     "@vaadin/hilla-generator-core": "{{version}}",
@@ -25,7 +26,6 @@
     "@vaadin/hilla-generator-plugin-barrel": "{{version}}",
     "@vaadin/hilla-generator-plugin-model": "{{version}}",
     "@vaadin/hilla-generator-plugin-push": "{{version}}",
-    "@vaadin/hilla-generator-plugin-subtypes": "{{version}}",
-    "@vaadin/hilla-file-router": "{{version}}"
+    "@vaadin/hilla-generator-plugin-subtypes": "{{version}}"
   }
 }
