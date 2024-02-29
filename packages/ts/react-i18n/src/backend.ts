@@ -5,8 +5,13 @@ export interface I18nBackend {
 }
 
 export class DefaultBackend implements I18nBackend {
-  // eslint-disable-next-line @typescript-eslint/require-await
   async loadTranslations(language: string): Promise<Translations> {
-    return {};
+    const url = `./?v-r=i18n&langtag=${language}`;
+    return fetch(url).then(async (response) => {
+      if (response.status === 200) {
+        return response.json();
+      }
+      return Promise.reject(new Error(`Failed to load translations for language: ${language}`));
+    });
   }
 }

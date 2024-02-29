@@ -2,10 +2,10 @@ import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
 import CookieManager from '@vaadin/hilla-frontend/CookieManager.js';
 import { effect, useComputed, useSignalEffect } from '@vaadin/hilla-react-signals';
+import fetchMock from 'fetch-mock';
 import { useEffect, useMemo } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { I18nBackend } from '../src/backend.js';
 import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
 import type { LanguageSettings } from '../src/settings.js';
 
@@ -14,22 +14,6 @@ use(sinonChai);
 describe('@vaadin/hilla-react-i18n', () => {
   describe('i18n', () => {
     let i18n: I18n;
-    let backend: I18nBackend;
-    let loadStub: sinon.SinonStub;
-
-    function mockBackend(instance: I18n) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      backend = (instance as any)._backend;
-      loadStub = sinon.stub(backend, 'loadTranslations');
-      loadStub.resolves({
-        'addresses.form.city.label': 'City',
-        'addresses.form.street.label': 'Street',
-      });
-      loadStub.withArgs('de-DE').resolves({
-        'addresses.form.city.label': 'Stadt',
-        'addresses.form.street.label': 'Strasse',
-      });
-    }
 
     function getSettingsCookie(): LanguageSettings | undefined {
       const cookie = CookieManager.get('vaadinLanguageSettings');
@@ -44,10 +28,27 @@ describe('@vaadin/hilla-react-i18n', () => {
       CookieManager.remove('vaadinLanguageSettings');
     }
 
+    function verifyLoadTranslations(language: string) {
+      expect(fetchMock.called(`./?v-r=i18n&langtag=${language}`)).to.be.true;
+    }
+
     beforeEach(() => {
       clearSettingsCookie();
       i18n = new I18n();
-      mockBackend(i18n);
+      fetchMock
+        .get('./?v-r=i18n&langtag=de-DE', {
+          'addresses.form.city.label': 'Stadt',
+          'addresses.form.street.label': 'Strasse',
+        })
+        .get('./?v-r=i18n&langtag=not-found', 404)
+        .get('*', {
+          'addresses.form.city.label': 'City',
+          'addresses.form.street.label': 'Street',
+        });
+    });
+
+    afterEach(() => {
+      fetchMock.restore();
     });
 
     describe('configure', () => {
@@ -55,7 +56,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure();
 
         expect(i18n.language.value).to.equal(navigator.language);
-        expect(loadStub).to.have.been.calledOnceWith(navigator.language);
+        verifyLoadTranslations(navigator.language);
       });
 
       it('should use last used language if defined', async () => {
@@ -63,14 +64,14 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure();
 
         expect(i18n.language.value).to.equal('zh-Hant');
-        expect(loadStub).to.have.been.calledOnceWith('zh-Hant');
+        verifyLoadTranslations('zh-Hant');
       });
 
       it('should use explicitly configured language if specified', async () => {
         await i18n.configure({ language: 'zh-Hant' });
 
         expect(i18n.language.value).to.equal('zh-Hant');
-        expect(loadStub).to.have.been.calledOnceWith('zh-Hant');
+        verifyLoadTranslations('zh-Hant');
       });
 
       it('should prefer explicitly configured language over last used language', async () => {
@@ -78,7 +79,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure({ language: 'zh-Hant' });
 
         expect(i18n.language.value).to.equal('zh-Hant');
-        expect(loadStub).to.have.been.calledOnceWith('zh-Hant');
+        verifyLoadTranslations('zh-Hant');
       });
 
       it('should not store last used language when initializing', async () => {
@@ -88,11 +89,9 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
 
       it('should not throw when loading translations fails', async () => {
-        loadStub.rejects(new Error('Failed to load translations'));
+        await i18n.configure({ language: 'not-found' });
 
-        await i18n.configure();
-
-        expect(i18n.language.value).to.equal(navigator.language);
+        expect(i18n.language.value).to.equal('not-found');
       });
     });
 
@@ -101,7 +100,7 @@ describe('@vaadin/hilla-react-i18n', () => {
 
       beforeEach(async () => {
         await i18n.configure({ language: initialLanguage });
-        loadStub.resetHistory();
+        fetchMock.resetHistory();
       });
 
       it('should return current language', () => {
@@ -112,7 +111,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.setLanguage('de-DE');
 
         expect(i18n.language.value).to.equal('de-DE');
-        expect(loadStub).to.have.been.calledOnceWith('de-DE');
+        verifyLoadTranslations('de-DE');
       });
 
       it('should store last used language', async () => {
@@ -125,7 +124,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.setLanguage(initialLanguage);
 
         expect(i18n.language.value).to.equal(initialLanguage);
-        expect(loadStub).not.to.have.been.called;
+        expect(fetchMock.called()).to.be.false;
       });
     });
 
@@ -174,8 +173,6 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
 
       it('should expose a global translate function that delegates to global I18n instance', async () => {
-        mockBackend(globalI18n);
-
         await globalI18n.configure({ language: 'en-US' });
         expect(globalTranslate('addresses.form.city.label')).to.equal('City');
 
