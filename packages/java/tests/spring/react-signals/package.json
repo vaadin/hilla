@@ -33,6 +33,7 @@
     "@vaadin/form-layout": "24.4.0-alpha14",
     "@vaadin/grid": "24.4.0-alpha14",
     "@vaadin/grid-pro": "24.4.0-alpha14",
+    "@vaadin/hilla-file-router": "file:../../../../ts/hilla-file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
