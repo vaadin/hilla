@@ -78,6 +78,7 @@ type FieldState<T = unknown> = {
   errorMessage: string;
   strategy?: FieldStrategy<T>;
   element?: HTMLElement;
+  changeBlurHandler(): void;
   updateValue(): void;
   markVisited(): void;
   ref(element: HTMLElement | null): void;
@@ -128,14 +129,18 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
           element: undefined,
           errorMessage: '',
           invalid: false,
+          changeBlurHandler() {
+            fieldState!.updateValue();
+            fieldState!.markVisited();
+          },
           markVisited() {
             n.visited = true;
           },
           ref(element: HTMLElement | null) {
             if (!element) {
-              fieldState!.element?.removeEventListener('change', fieldState!.updateValue);
+              fieldState!.element?.removeEventListener('change', fieldState!.changeBlurHandler);
               fieldState!.element?.removeEventListener('input', fieldState!.updateValue);
-              fieldState!.element?.removeEventListener('blur', fieldState!.markVisited);
+              fieldState!.element?.removeEventListener('blur', fieldState!.changeBlurHandler);
               fieldState!.strategy?.removeEventListeners();
               fieldState!.element = undefined;
               fieldState!.strategy = undefined;
@@ -148,9 +153,9 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 
             if (fieldState!.element !== element) {
               fieldState!.element = element;
-              fieldState!.element.addEventListener('change', fieldState!.updateValue);
+              fieldState!.element.addEventListener('change', fieldState!.changeBlurHandler);
               fieldState!.element.addEventListener('input', fieldState!.updateValue);
-              fieldState!.element.addEventListener('blur', fieldState!.markVisited);
+              fieldState!.element.addEventListener('blur', fieldState!.changeBlurHandler);
               fieldState!.strategy = getDefaultFieldStrategy(element, model);
             }
           },

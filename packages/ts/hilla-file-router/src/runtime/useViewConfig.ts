@@ -1,5 +1,5 @@
 import type { UIMatch } from '@remix-run/router';
-import { useMatches } from 'react-router';
+import { useMatches } from 'react-router-dom';
 import type { ViewConfig } from '../types.js';
 
 /**
