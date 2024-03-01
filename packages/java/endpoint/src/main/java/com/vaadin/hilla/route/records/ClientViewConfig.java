@@ -1,28 +1,30 @@
 package com.vaadin.hilla.route.records;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
- * Implementation of TypeScript's Hilla ConfigView.
- * Represents a view configuration
- * from Hilla file-system-routing module.
- * @see <a href="https://github.com/vaadin/hilla/tree/main/packages/ts/hilla-file-router/src/utils.ts#L3">ConfigView</a>
+ * Implementation of TypeScript's Hilla ViewConfig. Represents a view
+ * configuration from Hilla file-system-routing module.
  *
- * @param other - a map of unknown values
+ * @see <a href=
+ *      "https://github.com/vaadin/hilla/blob/main/packages/ts/hilla-file-router/src/types.d.ts#L3">ViewConfig</a>
+ *
+ * @param other
+ *            - a map of unknown values
  */
-public record ClientViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
-                               ClientViewMenuConfig menu, @JsonProperty("params") Map<String, RouteParamType> routeParameters,
-                               Map<String, Object> other) {
+public record ClientViewConfig(String title, String[] rolesAllowed,
+        String route, Boolean lazy, Boolean register, ClientViewMenuConfig menu,
+        @JsonProperty("params") Map<String, RouteParamType> routeParameters,
+        Map<String, Object> other) {
     /**
-     * Default constructor
-     * with initialization of unknown values.
+     * Default constructor with initialization of unknown values.
      */
     public ClientViewConfig {
         if (other == null) {
@@ -32,8 +34,11 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
 
     /**
      * Add a key-value pair for all unknown fields.
-     * @param key - the key
-     * @param value - the value
+     *
+     * @param key
+     *            - the key
+     * @param value
+     *            - the value
      */
     @JsonAnySetter
     public void add(String key, Object value) {
@@ -42,6 +47,7 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
 
     /**
      * Get all unknown values.
+     *
      * @return a map of unknown values
      */
     @JsonAnyGetter
@@ -49,18 +55,12 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
         return other;
     }
 
-
     @Override
     public String toString() {
-        return "ClientViewConfig{" +
-            "title='" + title + '\'' +
-            ", rolesAllowed=" + Arrays.toString(rolesAllowed) +
-            ", route='" + route + '\'' +
-            ", lazy=" + lazy +
-            ", register=" + register +
-            ", menu=" + menu +
-            ", other=" + other +
-            '}';
+        return "ClientViewConfig{" + "title='" + title + '\''
+                + ", rolesAllowed=" + Arrays.toString(rolesAllowed)
+                + ", route='" + route + '\'' + ", lazy=" + lazy + ", register="
+                + register + ", menu=" + menu + ", other=" + other + '}';
     }
 
     @Override
@@ -73,12 +73,12 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
         }
         ClientViewConfig that = (ClientViewConfig) o;
         return Objects.equals(title, that.title)
-            && Arrays.equals(rolesAllowed, that.rolesAllowed)
-            && Objects.equals(route, that.route)
-            && Objects.equals(lazy, that.lazy)
-            && Objects.equals(register, that.register)
-            && Objects.equals(menu, that.menu)
-            && Objects.equals(other, that.other);
+                && Arrays.equals(rolesAllowed, that.rolesAllowed)
+                && Objects.equals(route, that.route)
+                && Objects.equals(lazy, that.lazy)
+                && Objects.equals(register, that.register)
+                && Objects.equals(menu, that.menu)
+                && Objects.equals(other, that.other);
     }
 
     @Override
