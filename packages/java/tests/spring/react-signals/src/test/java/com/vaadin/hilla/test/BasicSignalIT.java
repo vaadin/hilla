@@ -6,7 +6,7 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
 public class BasicSignalIT extends ChromeBrowserTest {
     @Override
@@ -19,6 +19,7 @@ public class BasicSignalIT extends ChromeBrowserTest {
     @Test
     public void shouldEchoInput() {
         $(TextFieldElement.class).waitForFirst().setValue("John Doe");
-        assertTrue($("span").first().getText().contains("Echo: John Doe"));
+        waitUntil(
+                textToBePresentInElement($("span").first(), "Echo: John Doe"));
     }
 }
