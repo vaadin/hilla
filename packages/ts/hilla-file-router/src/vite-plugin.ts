@@ -93,6 +93,17 @@ export default function vitePluginFileSystemRouter({
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
       if (id.startsWith(fileURLToPath(_viewsDir)) && !basename(id).startsWith('_')) {
+        // To enable HMR for route files with exported configurations, we need
+        // to address a limitation in `react-refresh`. This library requires
+        // strict equality (`===`) for non-component exports. However, the
+        // dynamic nature of HMR makes maintaining this equality between object
+        // literals challenging.
+        //
+        // To work around this, we implement a strategy that preserves the
+        // reference to the original configuration object (`currentExports.config`),
+        // replacing any newly created configuration objects (`nextExports.config`)
+        // with it. This ensures that the HMR mechanism perceives the
+        // configuration as unchanged.
         return {
           code: code.replace(
             hmrInjectionPattern,
