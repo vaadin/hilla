@@ -101,6 +101,7 @@
                         <configuration>
                             <nodeAutoUpdate>false</nodeAutoUpdate>
                             <runNpmInstall>false</runNpmInstall>
+                            <reactEnable>false</reactEnable>
                         </configuration>
                     </execution>
                 </executions>
