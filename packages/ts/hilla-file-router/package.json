@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.4.0-alpha7",
+  "version": "24.4.0-alpha8",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -58,7 +58,6 @@
   },
   "peerDependencies": {
     "react": "^18.2.0",
-    "react-router": "^6.21.1",
     "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
@@ -81,7 +80,7 @@
     "type-fest": "^4.9.0"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "24.4.0-alpha7",
+    "@vaadin/hilla-generator-utils": "24.4.0-alpha8",
     "react": "^18.2.0",
     "typescript": "5.3.2"
   }

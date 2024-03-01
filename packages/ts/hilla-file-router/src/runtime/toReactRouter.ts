@@ -1,5 +1,5 @@
 import { type ComponentType, createElement } from 'react';
-import type { RouteObject } from 'react-router';
+import type { RouteObject } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import type { AgnosticRoute } from '../types.js';
 import { transformRoute } from './utils.js';
