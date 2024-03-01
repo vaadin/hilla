@@ -20,12 +20,12 @@ export type CollectRoutesOptions = Readonly<{
    */
   extensions: readonly string[];
   /**
-   * The Vite logger instance.
+   * The parent directory of the current directory. This is a
+   * nested parameter used inside the function only.
    */
   parent?: URL;
   /**
-   * The parent directory of the current directory. This is a
-   * nested parameter used inside the function only.
+   * The Vite logger instance.
    */
   logger: Logger;
 }>;
