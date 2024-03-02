@@ -55,6 +55,9 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
+                <configuration>
+                    <reactEnable>false</reactEnable>
+                </configuration>
             </plugin>
 
             <plugin>

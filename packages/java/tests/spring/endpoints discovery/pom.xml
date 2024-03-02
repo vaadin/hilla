@@ -39,6 +39,7 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
                 <configuration>
+                    <reactEnable>false</reactEnable>
                     <parser>
                         <packages>
                             <package>com.example.application</package>
