@@ -64,6 +64,7 @@ export const destination = {
     new URL('packages/java/tests/spring/security-jwt/src/main/resources/vaadin-core-versions.json', root),
     new URL('packages/java/tests/spring/security-urlmapping/src/main/resources/vaadin-core-versions.json', root),
     new URL('packages/java/tests/spring/react-grid-test/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/spring/react-i18n/src/main/resources/vaadin-core-versions.json', root),
     new URL('packages/java/tests/spring/react-signals/src/main/resources/vaadin-core-versions.json', root),
   ],
   themeDir: new URL('packages/java/hilla/src/main/java/com/vaadin/hilla/theme/', root),
