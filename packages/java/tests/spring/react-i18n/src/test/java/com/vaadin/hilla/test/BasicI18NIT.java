@@ -27,38 +27,45 @@ public class BasicI18NIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void initialLanguageConfigured_shouldUseCorrectLanguage() {
+    public void shouldInitiallyUseDefaultLanguage() {
         String name = nameField.getLabel();
-        Assert.assertEquals("Nimi", name);
-        Assert.assertEquals("Osoite", addressField.getLabel());
+        Assert.assertEquals("Name", name);
+        Assert.assertEquals("Address", addressField.getLabel());
     }
 
     @Test
     public void setLangWithoutCountry_onlyLangWithCountryAvailable_shouldUseLangWithCountry() {
         languageField.setValue("es");
         Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Dirección", addressField.getLabel());
+        Assert.assertEquals("Direccion", addressField.getLabel());
     }
 
     @Test
     public void setLangWithCountry_langWithCountryAvailable_shouldUseLangWithCountry() {
         languageField.setValue("es_ES");
         Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Dirección", addressField.getLabel());
+        Assert.assertEquals("Direccion", addressField.getLabel());
     }
 
     @Test
     public void setLangWithCountry_langWithDifferentCountryAvailable_shouldUseLangWithDifferentCountry() {
         languageField.setValue("es_AR");
         Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Dirección", addressField.getLabel());
+        Assert.assertEquals("Direccion", addressField.getLabel());
     }
 
     @Test
     public void setLangWithCountryUsingDash_langWithCountryAvailable_shouldUseLangWithCountry() {
         languageField.setValue("es-ES");
         Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Dirección", addressField.getLabel());
+        Assert.assertEquals("Direccion", addressField.getLabel());
+    }
+
+    @Test
+    public void setLangWithoutCountry_langWithoutCountryAvailable_shouldUseLangWithoutCountry() {
+        languageField.setValue("fi");
+        Assert.assertEquals("Nimi", nameField.getLabel());
+        Assert.assertEquals("Osoite", addressField.getLabel());
     }
 
     @Test
