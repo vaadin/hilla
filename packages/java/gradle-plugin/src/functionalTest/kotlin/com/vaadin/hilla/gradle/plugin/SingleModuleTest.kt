@@ -99,7 +99,7 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     private fun verifyEndpointsTsFileGeneratedProperly() {
-        val endpointsTsFile = testProject.dir.resolve("frontend/generated/endpoints.ts")
+        val endpointsTsFile = testProject.dir.resolve("src/main/frontend/generated/endpoints.ts")
         expect(true, "Generated endpoints.ts file should exist!") {
             endpointsTsFile.exists()
         }
