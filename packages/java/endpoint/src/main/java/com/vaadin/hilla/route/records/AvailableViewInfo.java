@@ -27,12 +27,14 @@ import java.util.Objects;
  * @param route
  * @param title
  * @param rolesAllowed
+ * @param requiresLogin
  * @param lazy
  * @param register
  * @param menu
  * @param routeParameters
  */
 public record AvailableViewInfo(String title, String[] rolesAllowed,
+                                Boolean requiresLogin,
                                 String route, Boolean lazy,
                                 Boolean register,
                                 ClientViewMenuConfig menu,
@@ -48,6 +50,7 @@ public record AvailableViewInfo(String title, String[] rolesAllowed,
         final AvailableViewInfo that = (AvailableViewInfo) o;
         return Objects.equals(title, that.title)
             && Arrays.equals(rolesAllowed, that.rolesAllowed)
+            && Objects.equals(requiresLogin, that.requiresLogin)
             && Objects.equals(route, that.route)
             && Objects.equals(lazy, that.lazy)
             && Objects.equals(register, that.register)
@@ -66,6 +69,7 @@ public record AvailableViewInfo(String title, String[] rolesAllowed,
     public String toString() {
         return "AvailableViewInfo{" + "title='" + title
             + '\'' + ", rolesAllowed=" + Arrays.toString(rolesAllowed)
+            + ", requiresLogin=" + requiresLogin
             + ", route='" + route + '\''
             + ", lazy=" + lazy
             + ", register=" + register

@@ -1,16 +1,36 @@
 import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
-import deepEqualInAnyOrder from 'deep-equal-in-any-order';
+import chaiAsPromised from 'chai-as-promised';
 import { rimraf } from 'rimraf';
+import sinonChai from 'sinon-chai';
+import type { Writable } from 'type-fest';
+import type { Logger } from 'vite';
 import collectRoutesFromFS from '../../src/vite-plugin/collectRoutesFromFS.js';
-import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
+import type { RouteMeta } from '../../vite-plugin/collectRoutesFromFS.js';
+import { createLogger, createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
-use(deepEqualInAnyOrder);
+use(chaiAsPromised);
+use(sinonChai);
+
+const collator = new Intl.Collator('en-US');
+
+function cleanupRouteMeta(route: Writable<RouteMeta>): void {
+  if (!route.file) {
+    delete route.file;
+  }
+
+  if (!route.layout) {
+    delete route.layout;
+  }
+
+  route.children.sort(({ path: a }, { path: b }) => collator.compare(a, b)).forEach(cleanupRouteMeta);
+}
 
 describe('@vaadin/hilla-file-router', () => {
   describe('collectFileRoutes', () => {
     const extensions = ['.tsx', '.jsx', '.ts', '.js'];
     let tmp: URL;
+    let logger: Logger;
 
     before(async () => {
       tmp = await createTmpDir();
@@ -21,24 +41,22 @@ describe('@vaadin/hilla-file-router', () => {
       await rimraf(fileURLToPath(tmp));
     });
 
-    it('should build a route tree', async () => {
-      // root
-      // ├── profile
-      // │   ├── account
-      // │   │   ├── layout.tsx
-      // │   │   └── security
-      // │   │       ├── password.tsx
-      // │   │       └── two-factor-auth.tsx
-      // │   ├── friends
-      // │   │   ├── layout.tsx
-      // │   │   ├── list.tsx
-      // │   │   └── {user}.tsx
-      // │   ├── index.tsx
-      // │   └── layout.tsx
-      // └── about.tsx
-      const result = await collectRoutesFromFS(tmp, { extensions });
+    beforeEach(() => {
+      logger = createLogger();
+    });
 
-      expect(result).to.deep.equals(createTestingRouteMeta(tmp));
+    it('should build a route tree', async () => {
+      const routes = await collectRoutesFromFS(tmp, { extensions, logger });
+      cleanupRouteMeta(routes);
+
+      const expected = createTestingRouteMeta(tmp);
+      cleanupRouteMeta(expected);
+
+      expect(routes).to.deep.equal(expected);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(logger.error).to.be.calledOnceWithExactly(
+        `The file "${new URL('./test/no-default-export.tsx', tmp).toString()}" should contain a default export of a component`,
+      );
     });
   });
 });

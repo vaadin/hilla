@@ -87,9 +87,9 @@ public class RouteExtractionIndexHtmlRequestListener
             Map<String, AvailableViewInfo> availableViews) {
         clientRouteRegistry.getAllRoutes().forEach((route, config) -> {
             final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                    config.title(), config.rolesAllowed(), config.route(),
-                    config.lazy(), config.register(), config.menu(),
-                    config.routeParameters());
+                    config.title(), config.rolesAllowed(),
+                    config.requiresLogin(), config.route(), config.lazy(),
+                    config.register(), config.menu(), config.routeParameters());
             availableViews.put(route, availableViewInfo);
         });
 
@@ -124,7 +124,8 @@ public class RouteExtractionIndexHtmlRequestListener
                         serverView);
 
                 final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                        title, null, url, false, false, null, routeParameters);
+                        title, null, false, url, false, false, null,
+                        routeParameters);
                 serverViews.put(url, availableViewInfo);
             }
         });
