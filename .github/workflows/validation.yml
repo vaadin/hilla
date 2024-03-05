@@ -14,7 +14,7 @@ on:
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
   pull_request_target:
-    types: [opened, synchronize, reopened, edited]
+    types: [opened, synchronize, reopened]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -301,6 +301,8 @@ jobs:
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
+            packages/java/gradle-plugin/build/test-results/*
+            packages/java/gradle-plugin/build/reports/*
 
   test-all:
     name: Tests Summary
