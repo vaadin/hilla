@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './MainLayout.js';
-import BasicSignalView from './views/BasicSignalView.js';
+import BasicSignalView from './_views/BasicSignalView.js';
 export const routes = [
   {
     path: '',
