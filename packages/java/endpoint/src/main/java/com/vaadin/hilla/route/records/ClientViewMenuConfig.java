@@ -9,5 +9,5 @@ package com.vaadin.hilla.route.records;
  * @see <a href="https://github.com/vaadin/hilla/tree/main/packages/ts/hilla-file-router/src/utils.ts#L38">ConfigView menu</a>
  *
  */
-public record ClientViewMenuConfig(String title, Long priority, Boolean exclude) {
+public record ClientViewMenuConfig(String title, Long order, String icon, Boolean exclude) {
 }
