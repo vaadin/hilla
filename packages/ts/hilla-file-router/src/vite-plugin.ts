@@ -1,4 +1,6 @@
+import { basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { TransformResult } from 'rollup';
 import type { Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
@@ -39,6 +41,8 @@ export default function vitePluginFileSystemRouter({
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx', '.ts', '.js'],
 }: PluginOptions = {}): Plugin {
+  const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
+
   let _viewsDir: URL;
   let _outDir: URL;
   let _logger: Logger;
@@ -86,6 +90,32 @@ export default function vitePluginFileSystemRouter({
       server.watcher.on('add', changeListener);
       server.watcher.on('change', changeListener);
       server.watcher.on('unlink', changeListener);
+    },
+    transform(code, id): Promise<TransformResult> | TransformResult {
+      if (id.startsWith(fileURLToPath(_viewsDir)) && !basename(id).startsWith('_')) {
+        // To enable HMR for route files with exported configurations, we need
+        // to address a limitation in `react-refresh`. This library requires
+        // strict equality (`===`) for non-component exports. However, the
+        // dynamic nature of HMR makes maintaining this equality between object
+        // literals challenging.
+        //
+        // To work around this, we implement a strategy that preserves the
+        // reference to the original configuration object (`currentExports.config`),
+        // replacing any newly created configuration objects (`nextExports.config`)
+        // with it. This ensures that the HMR mechanism perceives the
+        // configuration as unchanged.
+        return {
+          code: code.replace(
+            hmrInjectionPattern,
+            `if (!nextExports) return;
+      if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {
+        nextExports = { ...nextExports, config: currentExports.config };
+      }`,
+          ),
+        };
+      }
+
+      return undefined;
     },
   };
 }

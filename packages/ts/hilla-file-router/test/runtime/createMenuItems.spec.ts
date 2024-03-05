@@ -1,9 +1,27 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
+import type { Writable } from 'type-fest';
+import type { MenuItem } from '../../src/runtime/createMenuItems.js';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
 import { createTestingViewMap } from '../utils.js';
 
 use(chaiLike);
+
+const collator = new Intl.Collator('en-US');
+
+function cleanup(items: Array<Writable<MenuItem>>) {
+  items
+    .sort(({ to: a }, { to: b }) => collator.compare(a, b))
+    .forEach((item) => {
+      if (!item.title) {
+        delete item.title;
+      }
+
+      if (!item.to) {
+        delete item.icon;
+      }
+    });
+}
 
 describe('@vaadin/hilla-file-router', () => {
   describe('getMenuItems', () => {
@@ -13,44 +31,48 @@ describe('@vaadin/hilla-file-router', () => {
           views: createTestingViewMap(),
         },
       });
+      cleanup(items as Array<Writable<MenuItem>>);
 
-      expect(items).to.be.like([
+      const expected = [
         {
-          icon: undefined,
           title: 'About',
           to: '/about',
         },
         {
-          icon: undefined,
           title: 'Profile',
           to: '/profile/',
         },
         {
-          icon: undefined,
           title: 'Password',
           to: '/profile/account/security/password',
         },
         {
-          icon: undefined,
           title: 'Two Factor Auth',
           to: '/profile/account/security/two-factor-auth',
         },
         {
-          icon: undefined,
           title: 'List',
           to: '/profile/friends/list',
         },
         {
-          icon: undefined,
           title: 'Optional',
           to: '/test/',
         },
         {
-          icon: undefined,
+          to: '/test/empty',
+        },
+        {
           title: 'Wildcard',
           to: '/test/',
         },
-      ]);
+        {
+          title: 'No Default Export',
+          to: '/test/no-default-export',
+        },
+      ];
+      cleanup(expected);
+
+      expect(items).to.be.like(expected);
     });
   });
 });
