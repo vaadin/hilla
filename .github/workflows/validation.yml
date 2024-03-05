@@ -297,7 +297,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs-gradle
+          name: saved-outputs-gradle-${{ matrix.os }}
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
