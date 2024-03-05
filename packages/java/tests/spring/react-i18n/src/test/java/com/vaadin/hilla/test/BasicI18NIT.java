@@ -20,7 +20,6 @@ public class BasicI18NIT extends ChromeBrowserTest {
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getRootURL() + "/basic-i18n");
-        $(TextFieldElement.class).waitForFirst();
         nameField = $(TextFieldElement.class).id("name");
         addressField = $(TextFieldElement.class).id("address");
         languageField = $(TextFieldElement.class).id("language");
@@ -28,64 +27,67 @@ public class BasicI18NIT extends ChromeBrowserTest {
 
     @Test
     public void shouldInitiallyUseDefaultLanguage() {
-        String name = nameField.getLabel();
-        Assert.assertEquals("Name", name);
-        Assert.assertEquals("Address", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangWithoutCountry_onlyLangWithCountryAvailable_shouldUseLangWithCountry() {
-        languageField.setValue("es");
-        Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Direccion", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangWithCountry_langWithCountryAvailable_shouldUseLangWithCountry() {
-        languageField.setValue("es_ES");
-        Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Direccion", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangWithCountry_langWithDifferentCountryAvailable_shouldUseLangWithDifferentCountry() {
-        languageField.setValue("es_AR");
-        Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Direccion", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangWithCountryUsingDash_langWithCountryAvailable_shouldUseLangWithCountry() {
-        languageField.setValue("es-ES");
-        Assert.assertEquals("Nombre", nameField.getLabel());
-        Assert.assertEquals("Direccion", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangWithoutCountry_langWithoutCountryAvailable_shouldUseLangWithoutCountry() {
-        languageField.setValue("fi");
-        Assert.assertEquals("Nimi", nameField.getLabel());
-        Assert.assertEquals("Osoite", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangWithCountry_onlyLangWithoutCountryAvailable_shouldUseLangWithoutCountry() {
-        languageField.setValue("fi_FI");
-        Assert.assertEquals("Nimi", nameField.getLabel());
-        Assert.assertEquals("Osoite", addressField.getLabel());
-    }
-
-    @Test
-    public void setLangEmpty_defaultTranslationAvailable_shouldUseDefaultTranslation() {
-        languageField.setValue("");
         Assert.assertEquals("Name", nameField.getLabel());
         Assert.assertEquals("Address", addressField.getLabel());
     }
 
     @Test
-    public void setInvalidLang_defaultTranslationAvailable_shouldUseDefaultTranslation() {
-        languageField.setValue("KLINGON");
-        Assert.assertEquals("Name", nameField.getLabel());
-        Assert.assertEquals("Address", addressField.getLabel());
+    public void setLangWithoutCountry_onlyLangWithCountryAvailable_shouldUseLangWithCountry()
+            throws InterruptedException {
+        assertTranslations("es", "Nombre", "Direccion");
+    }
+
+    @Test
+    public void setLangWithCountry_langWithCountryAvailable_shouldUseLangWithCountry()
+            throws InterruptedException {
+        assertTranslations("es_ES", "Nombre", "Direccion");
+    }
+
+    @Test
+    public void setLangWithCountry_langWithDifferentCountryAvailable_shouldUseLangWithDifferentCountry()
+            throws InterruptedException {
+        assertTranslations("es_AR", "Nombre", "Direccion");
+    }
+
+    @Test
+    public void setLangWithCountryUsingDash_langWithCountryAvailable_shouldUseLangWithCountry()
+            throws InterruptedException {
+        assertTranslations("es-ES", "Nombre", "Direccion");
+    }
+
+    @Test
+    public void setLangWithoutCountry_langWithoutCountryAvailable_shouldUseLangWithoutCountry()
+            throws InterruptedException {
+        assertTranslations("fi", "Nimi", "Osoite");
+    }
+
+    @Test
+    public void setLangWithCountry_onlyLangWithoutCountryAvailable_shouldUseLangWithoutCountry()
+            throws InterruptedException {
+        assertTranslations("fi_FI", "Nimi", "Osoite");
+    }
+
+    @Test
+    public void setLangEmpty_defaultTranslationAvailable_shouldUseDefaultTranslation()
+            throws InterruptedException {
+        assertTranslations("", "Name", "Address");
+    }
+
+    @Test
+    public void setInvalidLang_defaultTranslationAvailable_shouldUseDefaultTranslation()
+            throws InterruptedException {
+        assertTranslations("KLINGON", "Name", "Address");
+    }
+
+    private void assertTranslations(String languageTag, String nameLabel,
+            String addressLabel) throws InterruptedException {
+        setLanguage(languageTag);
+        Assert.assertEquals(nameLabel, nameField.getLabel());
+        Assert.assertEquals(addressLabel, addressField.getLabel());
+    }
+
+    private void setLanguage(String languageTag) throws InterruptedException {
+        languageField.setValue(languageTag);
+        Thread.sleep(50);
     }
 }
