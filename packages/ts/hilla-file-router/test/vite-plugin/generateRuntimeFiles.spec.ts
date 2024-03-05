@@ -3,10 +3,9 @@ import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
 import { rimraf } from 'rimraf';
-import sinon from 'sinon';
 import type { Logger } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from '../../src/vite-plugin/generateRuntimeFiles.js';
-import { createTestingRouteFiles, createTmpDir } from '../utils.js';
+import { createLogger, createTestingRouteFiles, createTmpDir } from '../utils.js';
 
 use(chaiAsPromised);
 
@@ -34,15 +33,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     beforeEach(() => {
-      logger = {
-        info: sinon.stub(),
-        warn: sinon.stub(),
-        warnOnce: sinon.stub(),
-        error: sinon.stub(),
-        clearScreen: sinon.stub(),
-        hasErrorLogged: sinon.stub(),
-        hasWarned: false,
-      };
+      logger = createLogger();
     });
 
     it('should generate the runtime files', async () => {

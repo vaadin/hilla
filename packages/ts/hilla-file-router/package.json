@@ -68,6 +68,7 @@
     "@types/deep-equal-in-any-order": "^1.0.3",
     "@types/mocha": "^10.0.6",
     "@types/sinon": "^10.0.17",
+    "@types/sinon-chai": "^3.2.12",
     "chai-as-promised": "^7.1.1",
     "chai-fs": "^2.0.0",
     "chai-like": "^1.1.1",
@@ -75,6 +76,7 @@
     "mocha": "^10.2.0",
     "rimraf": "^5.0.5",
     "sinon": "^16.0.0",
+    "sinon-chai": "^3.7.0",
     "type-fest": "^4.9.0"
   },
   "dependencies": {
