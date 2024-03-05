@@ -22,13 +22,16 @@
     "noUnusedParameters": false,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "baseUrl": "frontend",
+    "baseUrl": "src/main/frontend",
     "paths": {
       "@vaadin/flow-frontend": ["generated/jar-resources"],
       "@vaadin/flow-frontend/*": ["generated/jar-resources/*"],
       "Frontend/*": ["*"]
     }
   },
-  "include": ["frontend/**/*", "types.d.ts"],
-  "exclude": ["frontend/generated/jar-resources/**"]
+  "include": [
+    "src/main/frontend/**/*", "types.d.ts"],
+  "exclude": [
+    "src/main/frontend/generated/jar-resources/**"
+  ]
 }
