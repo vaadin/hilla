@@ -104,7 +104,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             } else {
                 for (var runner : runners) {
                     try {
-                        runner.run(null);
+                        runner.run(null, false);
                         firstRun = false;
                         break;
                     } catch (CommandRunnerException e) {
