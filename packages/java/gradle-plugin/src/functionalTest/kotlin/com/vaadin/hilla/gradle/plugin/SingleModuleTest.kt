@@ -99,11 +99,11 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     private fun verifyEndpointsTsFileGeneratedProperly() {
-        val endpointsTsFile = testProject.dir.resolve("frontend/generated/endpoints.ts")
+        val endpointsTsFile = testProject.dir.resolve(FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR + "endpoints.ts")
         expect(true, "Generated endpoints.ts file should exist!") {
             endpointsTsFile.exists()
         }
-        expect(true, "Generated endpoints.ts file should exist!") {
+        expect(true, "Generated endpoints.ts file should contain correct endpoint import!") {
             endpointsTsFile.readText().contains("import * as HelloReactEndpoint")
         }
     }
