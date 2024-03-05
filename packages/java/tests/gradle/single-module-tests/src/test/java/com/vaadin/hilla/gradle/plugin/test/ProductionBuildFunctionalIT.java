@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import org.apache.commons.io.FileUtils;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -112,6 +113,6 @@ public class ProductionBuildFunctionalIT {
     }
 
     private Path getFrontendGeneratedPath() {
-        return getProjectRootPath().resolve("frontend/generated");
+        return getProjectRootPath().resolve(FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR);
     }
 }
