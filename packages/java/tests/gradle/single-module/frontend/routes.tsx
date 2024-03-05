@@ -1,9 +1,9 @@
-import HelloReactView from 'Frontend/views/helloreact/HelloReactView.js';
-import MainLayout from 'Frontend/views/MainLayout.js';
+import HelloReactView from 'Frontend/_views/helloreact/HelloReactView.js';
+import MainLayout from 'Frontend/_views/MainLayout.js';
 import { lazy } from 'react';
 import { createBrowserRouter, IndexRouteObject, NonIndexRouteObject, useMatches } from 'react-router-dom';
 
-const AboutView = lazy(async () => import('Frontend/views/about/AboutView.js'));
+const AboutView = lazy(async () => import('Frontend/_views/about/AboutView.js'));
 export type MenuProps = Readonly<{
   icon?: string;
   title?: string;
