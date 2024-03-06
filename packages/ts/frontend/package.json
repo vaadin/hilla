@@ -38,6 +38,10 @@
       "types": "./Connect.d.ts",
       "default": "./Connect.js"
     },
+    "./CookieManager.js": {
+      "types": "./CookieManager.d.ts",
+      "default": "./CookieManager.js"
+    },
     "./EndpointErrors.js": {
       "types": "./EndpointErrors.d.ts",
       "default": "./EndpointErrors.js"

@@ -71,4 +71,10 @@ export const destination = {
     'packages/java/hilla/src/main/resources/com/vaadin/flow/server/frontend/dependencies/hilla/components/',
     root,
   ),
+  reactComponentsInstall: [
+    {
+      workspace: '@vaadin/hilla-react-crud',
+      installFlags: ['--save-prod', '--save-exact'],
+    },
+  ],
 };

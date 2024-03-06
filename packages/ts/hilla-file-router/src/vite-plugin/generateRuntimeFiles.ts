@@ -56,7 +56,7 @@ export async function generateRuntimeFiles(
   extensions: readonly string[],
   logger: Logger,
 ): Promise<void> {
-  const routeMeta = await collectRoutesFromFS(viewsDir, { extensions });
+  const routeMeta = await collectRoutesFromFS(viewsDir, { extensions, logger });
   logger.info('Collected file-based routes');
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);

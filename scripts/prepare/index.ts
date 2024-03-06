@@ -1,8 +1,27 @@
 /* eslint-disable no-console */
+import { spawn, type SpawnOptions } from 'node:child_process';
 import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import type { PackageJson } from 'type-fest';
 import { componentOptions, destination, local, remote, type Versions } from './config.js';
 import generate from './generate.js';
+
+async function run(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.log(`> ${command} ${args.join(' ')}`);
+    const childProcess = spawn(command, args, {
+      shell: true,
+      stdio: 'inherit',
+      ...options,
+    });
+    childProcess.on('exit', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Child process exited with non-zero exit code ${code}`));
+      }
+    });
+  });
+}
 
 const [{ version }, versions] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
@@ -42,6 +61,17 @@ await Promise.all(
     console.log(`Generated ${file.toString()}`);
   }),
 );
+
+const reactComponentsPackageName = '@vaadin/react-components';
+const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
+const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
+console.log(`Installing "${reactComponentsSpec}".`);
+// The root hoisted version should be updated first, before the workspaces
+await run('npm', ['install', reactComponentsSpec, '--save-dev', '--save-exact']);
+const workspaceArg = `--workspace=@vaadin/hilla-react-crud`;
+// Workaround: doing "npm uninstall" first, the package.json in the workspace is not updated otherwise
+await run('npm', ['uninstall', reactComponentsPackageName, workspaceArg, '--save']);
+await run('npm', ['install', reactComponentsSpec, workspaceArg, '--save', '--save-exact']);
 
 const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;
 const themeFiles = new Map([
