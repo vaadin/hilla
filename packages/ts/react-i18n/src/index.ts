@@ -28,6 +28,10 @@ export class I18n {
     return this.#language;
   }
 
+  get resolvedLanguage(): Signal<string | undefined> {
+    return this.#resolvedLanguage;
+  }
+
   async configure(options?: I18nOptions): Promise<void> {
     const initialLanguage = determineInitialLanguage(options);
     await this.updateLanguage(initialLanguage);
