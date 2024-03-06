@@ -1,7 +1,8 @@
 import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
+import { Messages } from './messages';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
-import type { I18nOptions, Translations } from './types.js';
+import type { I18nOptions } from './types.js';
 
 function determineInitialLanguage(options?: I18nOptions): string {
   // Use explicitly configured language if defined
@@ -21,7 +22,7 @@ export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
   readonly #language: Signal<string | undefined> = signal(undefined);
-  readonly #translations: Signal<Translations> = signal({});
+  readonly #messages: Signal<Messages> = signal(new Messages({}, ''));
 
   get language(): Signal<string | undefined> {
     return this.#language;
@@ -44,7 +45,7 @@ export class I18n {
     const newTranslations = await this.loadTranslations(newLanguage);
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this.#translations.value = newTranslations;
+      this.#messages.value = new Messages(newTranslations, newLanguage);
       this.#language.value = newLanguage;
 
       if (updateSettings) {
@@ -65,13 +66,13 @@ export class I18n {
     }
   }
 
-  translate(key: string): string {
-    return this.#translations.value[key] || key;
+  translate(key: string, params?: Record<any, unknown>): string {
+    return this.#messages.value.format(key, params);
   }
 }
 
 export const i18n = new I18n();
 
-export function translate(key: string): string {
-  return i18n.translate(key);
+export function translate(key: string, params?: Record<any, unknown>): string {
+  return i18n.translate(key, params);
 }
