@@ -38,7 +38,8 @@ public final class EngineConfigureMojo extends AbstractMojo {
     /**
      * The folder where TypeScript endpoints are generated.
      */
-    @Parameter(defaultValue = "${project.basedir}/" + FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
+    @Parameter(defaultValue = "${project.basedir}/"
+            + FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
     private File generatedTsFolder;
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
