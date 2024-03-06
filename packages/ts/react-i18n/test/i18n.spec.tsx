@@ -355,8 +355,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 10:33:44 PM');
         expect(i18n.translate('param.time.short', { value: sampleDate })).to.equal('Value: 10:33 PM');
         expect(i18n.translate('param.time.medium', { value: sampleDate })).to.equal('Value: 10:33:44 PM');
-        expect(i18n.translate('param.time.long', { value: sampleDate })).to.match(/Value: 10:33:44 PM GMT/u);
-        expect(i18n.translate('param.time.full', { value: sampleDate })).to.match(/Value: 10:33:44 PM GMT/u);
+        expect(i18n.translate('param.time.long', { value: sampleDate })).to.match(/Value: 10:33:44 PM (GMT|UTC)/u);
+        expect(i18n.translate('param.time.full', { value: sampleDate })).to.match(/Value: 10:33:44 PM (GMT|UTC)/u);
 
         expect(i18n.translate('param.plural', { value: 0 })).to.equal('You have no new messages');
         expect(i18n.translate('param.plural', { value: 1 })).to.equal('You have one new message');
