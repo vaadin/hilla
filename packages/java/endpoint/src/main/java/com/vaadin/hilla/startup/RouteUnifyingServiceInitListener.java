@@ -75,12 +75,13 @@ public class RouteUnifyingServiceInitListener
     protected void registerClientRoutes() {
         try {
             final URL source = getClass()
-                .getResource("/META-INF/VAADIN/views.json");
+                    .getResource("/META-INF/VAADIN/views.json");
             if (source != null) {
                 final File file = new File(source.toURI());
                 if (file.exists()) {
-                    final Map<String, ClientViewConfig> clientViews =
-                        mapper.readValue(source, new TypeReference<>() {});
+                    final Map<String, ClientViewConfig> clientViews = mapper
+                            .readValue(source, new TypeReference<>() {
+                            });
 
                     clientRouteRegistry.clearRoutes();
                     clientViews.forEach(clientRouteRegistry::addRoute);

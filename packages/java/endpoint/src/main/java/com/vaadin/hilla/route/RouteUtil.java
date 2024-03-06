@@ -15,75 +15,20 @@ import java.util.Optional;
  * For internal use only. May be renamed or removed in a future release.
  */
 @Component
-// TODO: move implenets to Flow
-// com.vaadin.flow.internal.hilla.RouteRequestUtil
-public class RouteUtil implements RouteRequestUtil {
+public class RouteUtil {
 
     private final ClientRouteRegistry registry;
 
     /**
-     * Initializes a new instance of the RouteUtil class with
-     * the given registry.
+     * Initializes a new instance of the RouteUtil class with the given
+     * registry.
      *
-     * @param registry      - the registry to use
+     * @param registry
+     *            - the registry to use
      */
     @Autowired
     public RouteUtil(final ClientRouteRegistry registry) {
         this.registry = registry;
-    }
-
-    /**
-     * Checks if the request is for a client side route.
-     * <p>
-     * Note even if this method returns <code>true</code>, there is no guarantee
-     * that an endpoint method will actually be called, e.g. access might be
-     * denied.
-     *
-     * @param request the HTTP request
-     * @return <code>true</code> if the request is a client side route,
-     * <code>false</code> otherwise
-     */
-    @Override
-    public boolean isRouteRequest(HttpServletRequest request) {
-        return getRouteData(request).isPresent();
-    }
-
-    /**
-     * Checks if the given request goes to an anonymous (public) routes.
-     *
-     * @param request the HTTP request to check
-     * @return <code>true</code> if the request goes to an anonymous routes,
-     * <code>false</code> otherwise
-     */
-    @Override
-    public boolean isAnonymousRoute(HttpServletRequest request) {
-        var viewConfig = getRouteData(request);
-        if (viewConfig.isEmpty()) {
-            return false;
-        }
-        final String[] rolesAllowed = viewConfig.get().rolesAllowed();
-
-        return isAnonymousAllowed(rolesAllowed);
-    }
-
-    /**
-     * Checks if the given request goes to an authorized route.
-     * (user needs specific role for access)
-     *
-     * @param request
-     *            the HTTP request to check
-     * @return <code>true</code> if the request goes to an authorized route,
-     *         <code>false</code> otherwise
-     */
-    @Override
-    public boolean isAuthenticatedRoute(HttpServletRequest request) {
-        var viewConfig = getRouteData(request);
-        if (viewConfig.isEmpty()) {
-            return false;
-        }
-        final String[] rolesAllowed = viewConfig.get().rolesAllowed();
-
-        return !isAnonymousAllowed(rolesAllowed);
     }
 
     /**
@@ -94,7 +39,6 @@ public class RouteUtil implements RouteRequestUtil {
      * @return <code>true</code> if the request goes allowed route,
      *         <code>false</code> otherwise
      */
-    @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
         var viewConfig = getRouteData(request);
         if (viewConfig.isEmpty()) {
@@ -115,12 +59,15 @@ public class RouteUtil implements RouteRequestUtil {
 
     private static boolean isAnonymousAllowed(final String[] rolesAllowed) {
         return rolesAllowed == null || rolesAllowed.length == 0
-            || Arrays.stream(rolesAllowed)
-            .anyMatch(role -> role.equalsIgnoreCase("anonymous"));
+                || Arrays.stream(rolesAllowed)
+                        .anyMatch(role -> role.equalsIgnoreCase("anonymous"));
     }
 
-    private Optional<ClientViewConfig> getRouteData(HttpServletRequest request) {
-        var requestPath = RequestPath.parse(request.getRequestURI(), request.getContextPath());
-        return Optional.ofNullable(registry.getRouteByPath(requestPath.pathWithinApplication().value()));
+    private Optional<ClientViewConfig> getRouteData(
+            HttpServletRequest request) {
+        var requestPath = RequestPath.parse(request.getRequestURI(),
+                request.getContextPath());
+        return Optional.ofNullable(registry
+                .getRouteByPath(requestPath.pathWithinApplication().value()));
     }
 }

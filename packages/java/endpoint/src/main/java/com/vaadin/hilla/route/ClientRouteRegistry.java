@@ -77,7 +77,8 @@ public class ClientRouteRegistry implements Serializable {
     /**
      * Gets the client view configuration for the given route.
      *
-     * @param path the URL path to get the client view configuration for
+     * @param path
+     *            the URL path to get the client view configuration for
      * @return - the client view configuration for the given route
      */
     public ClientViewConfig getRouteByPath(String path) {
