@@ -5,8 +5,7 @@ import { rimraf } from 'rimraf';
 import sinonChai from 'sinon-chai';
 import type { Writable } from 'type-fest';
 import type { Logger } from 'vite';
-import collectRoutesFromFS from '../../src/vite-plugin/collectRoutesFromFS.js';
-import type { RouteMeta } from '../../vite-plugin/collectRoutesFromFS.js';
+import collectRoutesFromFS, { type RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import { createLogger, createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
 use(chaiAsPromised);
