@@ -14,7 +14,6 @@
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla</artifactId>
@@ -42,5 +41,22 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.23.0</version>
+                <configuration>
+                    <configFile>https://raw.githubusercontent.com/vaadin/hilla/main/.config/VaadinJavaConventions.xml</configFile>
+                    <!-- Provide a dummy JS config file to avoid errors -->
+                    <configJsFile>https://raw.githubusercontent.com/vaadin/hilla/main/.config/VaadinJavaConventions.xml</configJsFile>
+                    <lineEnding>LF</lineEnding>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
