@@ -41,6 +41,7 @@ dependencies {
 
 dependencyManagement {
 	imports {
-		mavenBom "com.vaadin:hilla-bom:$hillaVersion"
+        mavenBom "com.vaadin:hilla-bom:$hillaVersion"
+        mavenBom "com.vaadin:flow-bom:$flowVersion"
 	}
 }
