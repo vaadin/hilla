@@ -1,8 +1,8 @@
 import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
-import { Messages } from './messages';
+import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
-import type { I18nOptions } from './types.js';
+import type { I18nOptions, Translations } from './types.js';
 
 function determineInitialLanguage(options?: I18nOptions): string {
   // Use explicitly configured language if defined
@@ -22,7 +22,8 @@ export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
   readonly #language: Signal<string | undefined> = signal(undefined);
-  readonly #messages: Signal<Messages> = signal(new Messages({}, ''));
+  readonly #translations: Signal<Translations> = signal({});
+  #formatCache: FormatCache = new FormatCache(navigator.language);
 
   get language(): Signal<string | undefined> {
     return this.#language;
@@ -45,7 +46,8 @@ export class I18n {
     const newTranslations = await this.loadTranslations(newLanguage);
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this.#messages.value = new Messages(newTranslations, newLanguage);
+      this.#translations.value = newTranslations;
+      this.#formatCache = new FormatCache(newLanguage);
       this.#language.value = newLanguage;
 
       if (updateSettings) {
@@ -66,13 +68,18 @@ export class I18n {
     }
   }
 
-  translate(key: string, params?: Record<any, unknown>): string {
-    return this.#messages.value.format(key, params);
+  translate(key: string, params?: Record<string, unknown>): string {
+    const translation = this.#translations.value[key];
+    if (!translation) {
+      return key;
+    }
+    const format = this.#formatCache.getFormat(translation);
+    return format.format(params) as string;
   }
 }
 
 export const i18n = new I18n();
 
-export function translate(key: string, params?: Record<any, unknown>): string {
+export function translate(key: string, params?: Record<string, unknown>): string {
   return i18n.translate(key, params);
 }
