@@ -56,6 +56,13 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip> <!-- Skips the enforcer plugin's execution -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

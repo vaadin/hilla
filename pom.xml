@@ -440,6 +440,22 @@
               <goal>enforce</goal>
             </goals>
           </execution>
+            <execution>
+              <id>enforce-plugin-versions</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <requirePluginVersions>
+                     <message>Some plugin versions are missing. Failing the build!</message>
+                     <banLatest>true</banLatest>
+                     <banRelease>true</banRelease>
+                  </requirePluginVersions>
+                </rules>
+                <fail>true</fail>
+              </configuration>
+            </execution>
         </executions>
       </plugin>
     </plugins>
