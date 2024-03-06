@@ -1,25 +1,5 @@
 import { RouteParamType } from '../shared/routeParamType.js';
-import type { ViewConfig } from '../types.js';
-
-export type VaadinServer = Readonly<{
-  views: Record<string, ViewConfig>;
-}>;
-
-export type VaadinObject = Readonly<{
-  server?: VaadinServer;
-}>;
-
-declare global {
-  interface Window {
-    Vaadin?: VaadinObject;
-  }
-}
-
-export type MenuItem = Readonly<{
-  to: string;
-  icon?: string;
-  title?: string;
-}>;
+import type { MenuItem, ViewConfig } from '../types.js';
 
 /**
  * Creates menu items from the views provided by the server. The views are sorted according to the
