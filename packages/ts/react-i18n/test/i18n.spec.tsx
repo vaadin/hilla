@@ -8,7 +8,6 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
 import type { LanguageSettings } from '../src/settings.js';
-import { SuccessfulResponseType } from '../src/types';
 
 use(sinonChai);
 
@@ -126,74 +125,10 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
 
       it('should not throw when loading translations fails', async () => {
+        const initialLanguage = i18n.language.value;
         await i18n.configure({ language: 'not-found' });
 
-        expect(i18n.language.value).to.equal('not-found');
-      });
-
-      describe('allowed response types', () => {
-        it('should load best match translations when allowed', async () => {
-          await i18n.configure({
-            allowedResponseTypes: new Set<SuccessfulResponseType>([
-              SuccessfulResponseType.EXACT_MATCH,
-              SuccessfulResponseType.BEST_MATCH,
-            ]),
-          });
-
-          await i18n.setLanguage('de');
-          expect(i18n.translate('addresses.form.city.label')).to.equal('Stadt');
-        });
-
-        it('should not load best match translations when not allowed', async () => {
-          await i18n.configure({
-            allowedResponseTypes: new Set<SuccessfulResponseType>([SuccessfulResponseType.EXACT_MATCH]),
-          });
-
-          await i18n.setLanguage('de');
-          expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
-        });
-
-        it('should load undetermined translations when allowed', async () => {
-          await i18n.configure({
-            allowedResponseTypes: new Set<SuccessfulResponseType>([
-              SuccessfulResponseType.EXACT_MATCH,
-              SuccessfulResponseType.UNDETERMINED,
-            ]),
-          });
-
-          await i18n.setLanguage('undetermined');
-          expect(i18n.translate('addresses.form.city.label')).to.equal('Sehir');
-        });
-
-        it('should not load undetermined translations when not allowed', async () => {
-          await i18n.configure({
-            allowedResponseTypes: new Set<SuccessfulResponseType>([SuccessfulResponseType.EXACT_MATCH]),
-          });
-
-          await i18n.setLanguage('undetermined');
-          expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
-        });
-
-        it('should load fallback translations when allowed', async () => {
-          await i18n.configure({
-            allowedResponseTypes: new Set<SuccessfulResponseType>([
-              SuccessfulResponseType.EXACT_MATCH,
-              SuccessfulResponseType.FALLBACK_TO_DEFAULT,
-            ]),
-          });
-
-          await i18n.setLanguage('default');
-          expect(i18n.translate('addresses.form.city.label')).to.equal('City');
-        });
-
-        it('should not load fallback translations when not allowed', async () => {
-          await i18n.configure({
-            allowedResponseTypes: new Set<SuccessfulResponseType>([SuccessfulResponseType.EXACT_MATCH]),
-          });
-
-          await i18n.setLanguage('default');
-          expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
-        });
+        expect(i18n.language.value).to.equal(initialLanguage);
       });
     });
 

@@ -20,6 +20,7 @@ public class BasicI18NIT extends ChromeBrowserTest {
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getRootURL() + "/basic-i18n");
+        waitUntil(driver -> $(TextFieldElement.class).all().size() == 3);
         nameField = $(TextFieldElement.class).id("name");
         addressField = $(TextFieldElement.class).id("address");
         languageField = $(TextFieldElement.class).id("language");
