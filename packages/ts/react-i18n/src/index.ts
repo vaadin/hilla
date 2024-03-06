@@ -28,6 +28,9 @@ export class I18n {
   }
 
   async configure(options?: I18nOptions): Promise<void> {
+    if (options?.allowedResponseTypes) {
+      this.#backend.allowedResponseTypes = options.allowedResponseTypes;
+    }
     const initialLanguage = determineInitialLanguage(options);
     await this.updateLanguage(initialLanguage);
   }
