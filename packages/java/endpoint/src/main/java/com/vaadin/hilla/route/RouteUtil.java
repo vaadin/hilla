@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Optional;
+import org.springframework.http.server.RequestPath;
 
 /**
  * A container for utility methods related with Routes.
@@ -44,23 +46,21 @@ public class RouteUtil {
         if (viewConfig.isEmpty()) {
             return false;
         }
-        final String[] rolesAllowed = viewConfig.get().rolesAllowed();
-        if (isAnonymousAllowed(rolesAllowed)) {
-            return true;
-        } else {
-            for (String role : rolesAllowed) {
+        if (viewConfig.get().requiresLogin()
+                && request.getUserPrincipal() == null) {
+            return false;
+        }
+        // current roles logic means that an empty array denies access to all
+        var rolesAllowed = viewConfig.get().rolesAllowed();
+        if (rolesAllowed != null) {
+            for (var role : rolesAllowed) {
                 if (request.isUserInRole(role)) {
                     return true;
                 }
             }
+            return false;
         }
-        return false;
-    }
-
-    private static boolean isAnonymousAllowed(final String[] rolesAllowed) {
-        return rolesAllowed == null || rolesAllowed.length == 0
-                || Arrays.stream(rolesAllowed)
-                        .anyMatch(role -> role.equalsIgnoreCase("anonymous"));
+        return true;
     }
 
     private Optional<ClientViewConfig> getRouteData(

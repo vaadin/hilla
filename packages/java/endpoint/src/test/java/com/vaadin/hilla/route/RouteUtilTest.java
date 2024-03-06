@@ -1,9 +1,12 @@
 package com.vaadin.hilla.route;
 
+import java.security.Principal;
+
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public class RouteUtilTest {
@@ -22,7 +25,7 @@ public class RouteUtilTest {
     }
 
     @Test
-    public void test_isRouteAllowed() {
+    public void test_role_allowed() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRequestURI("/context/test");
         request.setContextPath("/context");
@@ -30,14 +33,14 @@ public class RouteUtilTest {
 
         registry.addRoute("/test",
                 new ClientViewConfig("Test", new String[] { "ROLE_ADMIN" },
-                        "/test", false, false, null, null, null));
+                        false, "/test", false, false, null, null, null));
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
     }
 
     @Test
-    public void test_isRouteAllowed_false() {
+    public void test_role_not_allowed() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRequestURI("/context/test");
         request.setContextPath("/context");
@@ -45,7 +48,35 @@ public class RouteUtilTest {
 
         registry.addRoute("/test",
                 new ClientViewConfig("Test", new String[] { "ROLE_ADMIN" },
-                        "/test", false, false, null, null, null));
+                        false, "/test", false, false, null, null, null));
+
+        boolean actual = endpointUtil.isRouteAllowed(request);
+        Assert.assertFalse(actual);
+    }
+
+    @Test
+    public void test_login_required() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        request.setUserPrincipal(Mockito.mock(Principal.class));
+
+        registry.addRoute("/test", new ClientViewConfig("Test", null, true,
+                "/test", false, false, null, null, null));
+
+        boolean actual = endpointUtil.isRouteAllowed(request);
+        Assert.assertTrue(actual);
+    }
+
+    @Test
+    public void test_login_required_failed() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        request.setUserPrincipal(null);
+
+        registry.addRoute("/test", new ClientViewConfig("Test", null, true,
+                "/test", false, false, null, null, null));
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
