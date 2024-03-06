@@ -1,3 +1,4 @@
+import type { VaadinWindow } from '../shared/internal.js';
 import { RouteParamType } from '../shared/routeParamType.js';
 import type { MenuItem, ViewConfig } from '../types.js';
 
@@ -8,7 +9,7 @@ import type { MenuItem, ViewConfig } from '../types.js';
  * @param vaadinObject - The Vaadin object containing the server views.
  * @returns A list of menu items.
  */
-export function createMenuItems(vaadinObject = window.Vaadin): readonly MenuItem[] {
+export function createMenuItems(vaadinObject = (window as VaadinWindow).Vaadin): readonly MenuItem[] {
   return vaadinObject?.server?.views
     ? Object.entries(vaadinObject.server.views)
         // Filter out the views that are explicitly excluded from the menu.

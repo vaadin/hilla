@@ -63,34 +63,6 @@ export type AgnosticRoute<C = unknown> = Readonly<{
 }>;
 
 /**
- * Internal type used for server communication and menu building. It extends the
- * view configuration with the route parameters.
- *
- * @internal
- */
-export type ServerViewConfig = Readonly<{
-  /**
-   * A map of route parameters and their types.
-   */
-  params?: Readonly<Record<string, RouteParamType>>;
-}> &
-  ViewConfig;
-
-export type VaadinServer = Readonly<{
-  views: Readonly<Record<string, ServerViewConfig>>;
-}>;
-
-export type VaadinObject = Readonly<{
-  server?: VaadinServer;
-}>;
-
-declare global {
-  interface Window {
-    Vaadin?: VaadinObject;
-  }
-}
-
-/**
  * A menu item used in for building the navigation menu.
  */
 export type MenuItem = Readonly<{

@@ -5,8 +5,9 @@ import { pathToFileURL } from 'node:url';
 import type { ComponentType, JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
+import type { ServerViewConfig } from '../src/shared/internal.js';
 import { RouteParamType } from '../src/shared/routeParamType.js';
-import type { AgnosticRoute, RouteModule, ServerViewConfig } from '../src/types.js';
+import type { AgnosticRoute, RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
