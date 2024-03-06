@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './MainLayout.js';
-import BasicI18NView from './views/BasicI18NView';
+import BasicI18NView from './_views/BasicI18NView';
 export const routes = [
   {
     path: '',
