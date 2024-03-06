@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -51,6 +52,7 @@ public class CommandRunnerTest {
 
     @Test
     void shouldBeAbleToListFilesInProjectDir() {
+        List<Boolean> stdOutRequested = new ArrayList<>();
         var runner = new TestRunner() {
 
             @Override
@@ -186,6 +188,54 @@ public class CommandRunnerTest {
         var ProcessBuilder = runner.createProcessBuilder(List.of(), false);
         assertEquals(expectedJavaHome,
                 ProcessBuilder.environment().get("JAVA_HOME"));
+    }
+
+    @Test
+    void run_redirectOutputsToMainProcess() {
+        List<Boolean> stdOutRequested = new ArrayList<>();
+        var runner = new TestRunner() {
+
+            @Override
+            public List<String> executables() {
+                return List.of(DIR_LS);
+            }
+
+            @Override
+            public ProcessBuilder createProcessBuilder(
+                    List<String> commandWithArgs, boolean stdOut) {
+                stdOutRequested.add(stdOut);
+                return super.createProcessBuilder(commandWithArgs, stdOut);
+            }
+        };
+
+        assertDoesNotThrow(() -> runner.run(null));
+        assertEquals(2, stdOutRequested.size());
+        assertEquals(false, stdOutRequested.get(0));
+        assertEquals(true, stdOutRequested.get(1));
+    }
+
+    @Test
+    void run_silent_doesNotRedirectOutputsToMainProcess() {
+        List<Boolean> stdOutRequested = new ArrayList<>();
+        var runner = new TestRunner() {
+
+            @Override
+            public List<String> executables() {
+                return List.of(DIR_LS);
+            }
+
+            @Override
+            public ProcessBuilder createProcessBuilder(
+                    List<String> commandWithArgs, boolean stdOut) {
+                stdOutRequested.add(stdOut);
+                return super.createProcessBuilder(commandWithArgs, stdOut);
+            }
+        };
+
+        assertDoesNotThrow(() -> runner.run(null, false));
+        assertEquals(2, stdOutRequested.size());
+        assertEquals(false, stdOutRequested.get(0));
+        assertEquals(false, stdOutRequested.get(1));
     }
 
 }

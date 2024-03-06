@@ -17,9 +17,9 @@ import java.util.Objects;
  *
  * @param other - a map of unknown values
  */
-public record ClientViewConfig(String title, String[] rolesAllowed, String route, Boolean lazy, Boolean register,
-                               ClientViewMenuConfig menu, @JsonProperty("params") Map<String, RouteParamType> routeParameters,
-                               Map<String, Object> other) {
+public record ClientViewConfig(String title, String[] rolesAllowed, Boolean requiresLogin, String route, Boolean lazy,
+                               Boolean register, ClientViewMenuConfig menu,
+                               @JsonProperty("params") Map<String, RouteParamType> routeParameters, Map<String, Object> other) {
     /**
      * Default constructor
      * with initialization of unknown values.
@@ -49,12 +49,12 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
         return other;
     }
 
-
     @Override
     public String toString() {
         return "ClientViewConfig{" +
             "title='" + title + '\'' +
             ", rolesAllowed=" + Arrays.toString(rolesAllowed) +
+            ", requiresLogin=" + requiresLogin +
             ", route='" + route + '\'' +
             ", lazy=" + lazy +
             ", register=" + register +
@@ -74,6 +74,7 @@ public record ClientViewConfig(String title, String[] rolesAllowed, String route
         ClientViewConfig that = (ClientViewConfig) o;
         return Objects.equals(title, that.title)
             && Arrays.equals(rolesAllowed, that.rolesAllowed)
+            && Objects.equals(requiresLogin, that.requiresLogin)
             && Objects.equals(route, that.route)
             && Objects.equals(lazy, that.lazy)
             && Objects.equals(register, that.register)

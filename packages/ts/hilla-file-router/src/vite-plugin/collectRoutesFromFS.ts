@@ -1,4 +1,4 @@
-import { opendir } from 'node:fs/promises';
+import { opendir, readFile } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Logger } from 'vite';
@@ -11,10 +11,37 @@ export type RouteMeta = Readonly<{
   children: RouteMeta[];
 }>;
 
+/**
+ * Routes collector options.
+ */
 export type CollectRoutesOptions = Readonly<{
+  /**
+   * The list of extensions for files that will be collected as routes.
+   */
   extensions: readonly string[];
+  /**
+   * The parent directory of the current directory. This is a
+   * nested parameter used inside the function only.
+   */
   parent?: URL;
+  /**
+   * The Vite logger instance.
+   */
+  logger: Logger;
 }>;
+
+async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | undefined> {
+  if (url) {
+    const contents = await readFile(url, 'utf-8');
+    if (contents === '') {
+      return undefined;
+    } else if (!contents.includes('export default')) {
+      logger.error(`The file "${String(url)}" should contain a default export of a component`);
+    }
+  }
+
+  return url;
+}
 
 const collator = new Intl.Collator('en-US');
 
@@ -28,23 +55,21 @@ const collator = new Intl.Collator('en-US');
  * It accepts files that start with `_` as private files. They will be ignored.
  *
  * @param dir - The directory to collect routes from.
- * @param extensions - The list of extensions that will be collected as routes.
- * @param parent - The parent directory of the current directory. This is a nested parameter used inside the function
- * only.
+ * @param options - The options object.
  *
  * @returns The route metadata tree.
  */
 export default async function collectRoutesFromFS(
   dir: URL,
-  { extensions, parent = dir }: CollectRoutesOptions,
+  { extensions, logger, parent = dir }: CollectRoutesOptions,
 ): Promise<RouteMeta> {
   const path = relative(fileURLToPath(parent), fileURLToPath(dir));
-  const children: RouteMeta[] = [];
+  let children: RouteMeta[] = [];
   let layout: URL | undefined;
 
   for await (const d of await opendir(dir)) {
     if (d.isDirectory()) {
-      children.push(await collectRoutesFromFS(new URL(`${d.name}/`, dir), { extensions, parent: dir }));
+      children.push(await collectRoutesFromFS(new URL(`${d.name}/`, dir), { extensions, logger, parent: dir }));
     } else if (d.isFile() && extensions.includes(extname(d.name))) {
       const file = new URL(d.name, dir);
       const name = basename(d.name, extname(d.name));
@@ -70,6 +95,22 @@ export default async function collectRoutesFromFS(
       }
     }
   }
+
+  [children, layout] = await Promise.all([
+    Promise.all(
+      children.map(async (child) => {
+        let { file: f, layout: l } = child;
+        [f, l] = await Promise.all([checkFile(f, logger), checkFile(l, logger)]);
+
+        return {
+          ...child,
+          file: f,
+          layout: l,
+        };
+      }),
+    ),
+    checkFile(layout, logger),
+  ]);
 
   return {
     path,

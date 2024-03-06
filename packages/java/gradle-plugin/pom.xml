@@ -26,11 +26,6 @@
     <dependencies>
       <dependency>
         <groupId>com.vaadin</groupId>
-        <artifactId>hilla-plugin-base</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.vaadin</groupId>
         <artifactId>hilla-engine-core</artifactId>
         <version>${project.parent.version}</version>
       </dependency>

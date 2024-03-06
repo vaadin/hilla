@@ -110,7 +110,8 @@ export default function generate(version: string, versions: Versions): void {
 
   console.log(`Generated ${pathToFileURL(releaseNotesPrereleaseResultFileName).toString()}.`);
 
-  transformed.core.hilla = { javaVersion: version };
+  const javaVersion = version.replace('-', '.');
+  transformed.core.hilla = { javaVersion };
 
   // write hilla version to hilla-react-versions.json as platform
   writer.writeSeparateJson(version, hillaJsonTemplateFileName, hillaJsonResultFileName, 'platform');

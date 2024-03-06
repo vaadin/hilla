@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 import ts, { type Node } from 'typescript';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
+import type { ServerViewConfig } from '../shared/internal.js';
 import traverse from '../shared/traverse.js';
 import type { ViewConfig } from '../types.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
@@ -30,7 +31,7 @@ export default async function createViewConfigJson(views: RouteMeta): Promise<st
   const res = await Promise.all(
     Array.from(traverse(views), async (branch) => {
       const configs = await Promise.all(
-        branch.map(async ({ path, file, layout }): Promise<[string, ViewConfig]> => {
+        branch.map(async ({ path, file, layout }): Promise<[string, ServerViewConfig]> => {
           if (!file && !layout) {
             return [
               convertFSRouteSegmentToURLPatternFormat(path),
