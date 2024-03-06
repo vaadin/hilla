@@ -78,6 +78,11 @@
             <artifactId>vaadin-dev-server</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-react</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -158,6 +163,9 @@
                     <groupId>com.vaadin</groupId>
                     <artifactId>hilla-maven-plugin</artifactId>
                     <version>${project.version}</version>
+                    <configuration>
+                        <generateBundle>false</generateBundle>
+                    </configuration>
                     <executions>
                         <execution>
                             <goals>
@@ -265,6 +273,9 @@
                             <groupId>com.vaadin</groupId>
                             <artifactId>hilla-maven-plugin</artifactId>
                             <version>${project.version}</version>
+                            <configuration>
+                                <generateBundle>false</generateBundle>
+                            </configuration>
                             <executions>
                                 <execution>
                                     <goals>
