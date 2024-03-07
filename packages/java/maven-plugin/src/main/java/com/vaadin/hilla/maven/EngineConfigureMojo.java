@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.LinkedHashSet;
 
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -37,7 +38,8 @@ public final class EngineConfigureMojo extends AbstractMojo {
     /**
      * The folder where TypeScript endpoints are generated.
      */
-    @Parameter(defaultValue = "${project.basedir}/frontend/generated")
+    @Parameter(defaultValue = "${project.basedir}/"
+            + FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
     private File generatedTsFolder;
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
