@@ -5,9 +5,10 @@ import { pathToFileURL } from 'node:url';
 import type { ComponentType, JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
+import type { ServerViewConfig } from '../src/shared/internal.js';
 import { RouteParamType } from '../src/shared/routeParamType.js';
-import type { AgnosticRoute, RouteModule, ViewConfig } from '../src/types.js';
-import type { RouteMeta } from '../vite-plugin/collectRoutesFromFS.js';
+import type { AgnosticRoute, RouteModule } from '../src/types.js';
+import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
   return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);
@@ -272,7 +273,7 @@ export function createTestingAgnosticRoutes(): AgnosticRoute<ComponentType> {
   };
 }
 
-export function createTestingViewMap(): Record<string, ViewConfig> {
+export function createTestingViewMap(): Record<string, ServerViewConfig> {
   return {
     '/about': { route: 'about', title: 'About' },
     '/profile/': { title: 'Profile' },
