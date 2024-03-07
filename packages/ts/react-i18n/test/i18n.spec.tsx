@@ -48,15 +48,14 @@ describe('@vaadin/hilla-react-i18n', () => {
           status: 200,
           headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
         })
-        .get('./?v-r=i18n&langtag=de', {
+        .get('./?v-r=i18n&langtag=not-found', 404)
+        .get('./?v-r=i18n&langtag=unknown', {
           body: {
-            'addresses.form.city.label': 'Stadt',
-            'addresses.form.street.label': 'Strasse',
+            'addresses.form.city.label': 'Sehir',
+            'addresses.form.street.label': 'Sokak',
           },
           status: 200,
-          headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
         })
-        .get('./?v-r=i18n&langtag=not-found', 404)
         .get('*', {
           body: {
             'addresses.form.city.label': 'City',
@@ -162,6 +161,14 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.language.value).to.equal(initialLanguage);
         expect(i18n.resolvedLanguage.value).to.equal(initialResolvedLanguage);
         expect(fetchMock.called()).to.be.false;
+      });
+
+      it('should still load translations if resolved language is empty', async () => {
+        await i18n.setLanguage('unknown');
+
+        expect(i18n.language.value).to.equal('unknown');
+        expect(i18n.resolvedLanguage.value).to.equal(undefined);
+        verifyLoadTranslations('unknown');
       });
     });
 
