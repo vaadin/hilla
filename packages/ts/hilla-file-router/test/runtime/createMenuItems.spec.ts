@@ -1,8 +1,8 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
-import type { MenuItem } from '../../src/runtime/createMenuItems.js';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
+import type { MenuItem } from '../../src/types.js';
 import { createTestingViewMap } from '../utils.js';
 
 use(chaiLike);
