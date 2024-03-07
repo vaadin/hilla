@@ -13,12 +13,12 @@ import type { AgnosticRoute, RouteModule } from '../types.js';
 export function createRoute<C = unknown>(path: string, children?: ReadonlyArray<AgnosticRoute<C>>): AgnosticRoute<C>;
 export function createRoute<C = unknown>(
   path: string,
-  module: RouteModule<C>,
+  module: Readonly<Record<string, unknown>>,
   children?: ReadonlyArray<AgnosticRoute<C>>,
 ): AgnosticRoute<C>;
 export function createRoute<C = unknown>(
   path: string,
-  moduleOrChildren?: ReadonlyArray<AgnosticRoute<C>> | RouteModule<C>,
+  moduleOrChildren?: Readonly<Record<string, unknown>> | ReadonlyArray<AgnosticRoute<C>>,
   children?: ReadonlyArray<AgnosticRoute<C>>,
 ): AgnosticRoute<C> {
   let module: RouteModule<C> | undefined;
