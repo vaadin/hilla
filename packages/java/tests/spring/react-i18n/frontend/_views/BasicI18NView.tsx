@@ -15,9 +15,9 @@ export default function BasicI18NView() {
           }}
         />
         <span id="out">
-          <>Language: {i18n.language.value}</>
-          <p></p>
-          <>Resolved Language: {i18n.resolvedLanguage.value}</>
+          Language: {i18n.language.value}
+          <br/>
+          Resolved Language: {i18n.resolvedLanguage.value}
         </span>
       </section>
     </>
