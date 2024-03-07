@@ -14,6 +14,11 @@ export default function BasicI18NView() {
             await i18n.setLanguage(e.detail.value);
           }}
         />
+        <span id="out">
+          <>Language: {i18n.language.value}</>
+          <p></p>
+          <>Resolved Language: {i18n.resolvedLanguage.value}</>
+        </span>
       </section>
     </>
   );

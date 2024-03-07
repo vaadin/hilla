@@ -3,9 +3,11 @@ package com.vaadin.hilla.test;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class BasicI18NIT extends ChromeBrowserTest {
 
@@ -35,60 +37,66 @@ public class BasicI18NIT extends ChromeBrowserTest {
     @Test
     public void setLangWithoutCountry_onlyLangWithCountryAvailable_shouldUseLangWithCountry()
             throws InterruptedException {
-        assertTranslations("es", "Nombre", "Direccion");
+        assertTranslations("es", "es-ES", "Nombre", "Direccion");
     }
 
     @Test
     public void setLangWithCountry_langWithCountryAvailable_shouldUseLangWithCountry()
             throws InterruptedException {
-        assertTranslations("es_ES", "Nombre", "Direccion");
+        assertTranslations("es_ES", "es-ES", "Nombre", "Direccion");
     }
 
     @Test
     public void setLangWithCountry_langWithDifferentCountryAvailable_shouldUseLangWithDifferentCountry()
             throws InterruptedException {
-        assertTranslations("es_AR", "Nombre", "Direccion");
+        assertTranslations("es_AR", "es-ES", "Nombre", "Direccion");
     }
 
     @Test
     public void setLangWithCountryUsingDash_langWithCountryAvailable_shouldUseLangWithCountry()
             throws InterruptedException {
-        assertTranslations("es-ES", "Nombre", "Direccion");
+        assertTranslations("es-ES", "es-ES", "Nombre", "Direccion");
     }
 
     @Test
     public void setLangWithoutCountry_langWithoutCountryAvailable_shouldUseLangWithoutCountry()
             throws InterruptedException {
-        assertTranslations("fi", "Nimi", "Osoite");
+        assertTranslations("fi", "fi", "Nimi", "Osoite");
     }
 
     @Test
     public void setLangWithCountry_onlyLangWithoutCountryAvailable_shouldUseLangWithoutCountry()
             throws InterruptedException {
-        assertTranslations("fi_FI", "Nimi", "Osoite");
+        assertTranslations("fi_FI", "fi", "Nimi", "Osoite");
     }
 
     @Test
     public void setLangEmpty_defaultTranslationAvailable_shouldUseDefaultTranslation()
             throws InterruptedException {
-        assertTranslations("", "Name", "Address");
+        assertTranslations("", "und", "Name", "Address");
     }
 
     @Test
     public void setInvalidLang_defaultTranslationAvailable_shouldUseDefaultTranslation()
             throws InterruptedException {
-        assertTranslations("KLINGON", "Name", "Address");
+        assertTranslations("KLINGON", "und", "Name", "Address");
     }
 
-    private void assertTranslations(String languageTag, String nameLabel,
+    private void assertTranslations(String languageTag,
+            String expectedResolvedLanguage, String nameLabel,
             String addressLabel) throws InterruptedException {
-        setLanguage(languageTag);
+        setLanguage(languageTag, expectedResolvedLanguage);
         Assert.assertEquals(nameLabel, nameField.getLabel());
         Assert.assertEquals(addressLabel, addressField.getLabel());
     }
 
-    private void setLanguage(String languageTag) throws InterruptedException {
+    private void setLanguage(String languageTag,
+            String expectedResolvedLanguage) throws InterruptedException {
         languageField.setValue(languageTag);
-        Thread.sleep(50);
+        TestBenchElement outputSpan = $("span").first();
+        waitUntil(ExpectedConditions.textToBePresentInElement(outputSpan,
+                "Language: " + languageTag));
+        waitUntil(ExpectedConditions.textToBePresentInElement(outputSpan,
+                "Resolved Language: " + expectedResolvedLanguage));
     }
 }
