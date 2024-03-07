@@ -1,4 +1,4 @@
-import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
+import { batch, type ReadonlySignal, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
 import type { I18nOptions, Translations } from './types.js';
@@ -20,10 +20,15 @@ function determineInitialLanguage(options?: I18nOptions): string {
 export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
+  readonly #initialized: Signal<boolean> = signal(false);
   readonly #language: Signal<string | undefined> = signal(undefined);
   readonly #translations: Signal<Translations> = signal({});
 
-  get language(): Signal<string | undefined> {
+  get initialized(): ReadonlySignal<boolean> {
+    return this.#initialized;
+  }
+
+  get language(): ReadonlySignal<string | undefined> {
     return this.#language;
   }
 
@@ -46,6 +51,7 @@ export class I18n {
     batch(() => {
       this.#translations.value = newTranslations;
       this.#language.value = newLanguage;
+      this.#initialized.value = true;
 
       if (updateSettings) {
         updateLanguageSettings({
