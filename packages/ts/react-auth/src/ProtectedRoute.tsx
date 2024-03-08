@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { type IndexRouteObject, Navigate, type NonIndexRouteObject, useLocation } from 'react-router-dom';
 import { type AccessProps, AuthContext } from './useAuth.js';
@@ -43,16 +43,14 @@ function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps):
   return element;
 }
 
-const collectRoutes = <T,>(routes: T[]): T[] => {
-  const allRoutes: T[] = [];
-  routes.forEach((route) => {
-    allRoutes.push(route);
-    if ((route as RouteObject).children !== undefined) {
-      allRoutes.push(...collectRoutes((route as RouteObject).children as T[]));
+function* traverse<T extends RouteObject>(routes: T[]): Generator<T, undefined, undefined> {
+  for (const route of routes) {
+    yield route;
+    if (route.children) {
+      yield* traverse(route.children as T[]);
     }
-  });
-  return allRoutes;
-};
+  }
+}
 
 /**
  * Adds protection to routes that require authentication.
@@ -64,13 +62,8 @@ const collectRoutes = <T,>(routes: T[]): T[] => {
  * protected and the user is not authenticated.
  * @returns the routes extended with protection if needed
  */
-export const protectRoutes = (
-  routes: RouteObjectWithAuth[],
-  redirectPath: string = '/login',
-): RouteObjectWithAuth[] => {
-  const allRoutes: RouteObjectWithAuth[] = collectRoutes(routes);
-
-  allRoutes.forEach((route) => {
+export function protectRoutes(routes: RouteObjectWithAuth[], redirectPath: string = '/login'): RouteObjectWithAuth[] {
+  for (const route of traverse(routes)) {
     const { handle } = route;
     const requiresAuth = handle?.requiresLogin ?? handle?.rolesAllowed?.length;
 
@@ -83,7 +76,7 @@ export const protectRoutes = (
         />
       );
     }
-  });
+  }
 
   return routes;
-};
+}
