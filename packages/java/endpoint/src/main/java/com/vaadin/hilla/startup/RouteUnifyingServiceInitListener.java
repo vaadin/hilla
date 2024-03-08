@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -75,16 +76,21 @@ public class RouteUnifyingServiceInitListener
         try {
             final URL source = getClass()
                     .getResource("/META-INF/VAADIN/views.json");
-            Map<String, ClientViewConfig> clientViews = new HashMap<>();
             if (source != null) {
-                clientViews = mapper.readValue(source, new TypeReference<>() {
-                });
-            }
+                final File file = new File(source.toURI());
+                if (file.exists()) {
+                    final Map<String, ClientViewConfig> clientViews = mapper
+                            .readValue(source, new TypeReference<>() {
+                            });
 
-            clientRouteRegistry.clearRoutes();
-            clientViews.forEach(clientRouteRegistry::addRoute);
+                    clientRouteRegistry.clearRoutes();
+                    clientViews.forEach(clientRouteRegistry::addRoute);
+                }
+            }
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
+        } catch (URISyntaxException e) {
+            LOGGER.warn("Incorrect URL syntax format", e);
         }
     }
 }
