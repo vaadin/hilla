@@ -28,11 +28,12 @@ public class OpenAPIUtil {
      * @throws IOException
      *             if something went wrong
      */
-    public static String getCurrentOpenAPI(Path buildDirectory, boolean isProductionMode)
-            throws IOException {
+    public static String getCurrentOpenAPI(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
-        return Files.readString(engineConfiguration.getOpenAPIFile(isProductionMode));
+        return Files.readString(
+                engineConfiguration.getOpenAPIFile(isProductionMode));
     }
 
     /**
@@ -45,12 +46,13 @@ public class OpenAPIUtil {
      * @throws IOException
      *             if something went wrong
      */
-    public static String generateOpenAPI(Path buildDirectory, boolean isProductionMode)
-            throws IOException {
+    public static String generateOpenAPI(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
         ParserProcessor parserProcessor = new ParserProcessor(
-                engineConfiguration, OpenAPIUtil.class.getClassLoader(), isProductionMode);
+                engineConfiguration, OpenAPIUtil.class.getClassLoader(),
+                isProductionMode);
         return parserProcessor.createOpenAPI();
     }
 

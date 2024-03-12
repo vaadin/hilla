@@ -140,7 +140,8 @@ public class EngineConfiguration {
 
     @JsonIgnore
     public Path getOpenAPIFile(boolean isProductionMode) {
-        return isProductionMode ? classesDir.resolve(OPEN_API_PATH) : buildDir.resolve(OPEN_API_PATH);
+        return isProductionMode ? classesDir.resolve(OPEN_API_PATH)
+                : buildDir.resolve(OPEN_API_PATH);
     }
 
     public static final class Builder {

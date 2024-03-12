@@ -104,11 +104,12 @@ public class EndpointCodeGenerator {
         }
     }
 
-    public Set<String> getClassesUsedInOpenApi(boolean isProductionMode) throws IOException {
+    public Set<String> getClassesUsedInOpenApi(boolean isProductionMode)
+            throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(
-                    OpenAPIUtil.getCurrentOpenAPI(buildDirectory, isProductionMode));
+            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(OpenAPIUtil
+                    .getCurrentOpenAPI(buildDirectory, isProductionMode));
         }
         return classesUsedInOpenApi;
     }

@@ -57,10 +57,12 @@ public final class EngineGenerateMojo extends AbstractMojo {
             }
             var classLoader = new URLClassLoader(urls.toArray(URL[]::new),
                     getClass().getClassLoader());
-            var isProduction = project.getActiveProfiles().stream().map(Profile::getId)
-                .anyMatch("production"::equals);
-            var parserProcessor = new ParserProcessor(conf, classLoader, isProduction);
-            var generatorProcessor = new GeneratorProcessor(conf, nodeCommand, isProduction);
+            var isProduction = project.getActiveProfiles().stream()
+                    .map(Profile::getId).anyMatch("production"::equals);
+            var parserProcessor = new ParserProcessor(conf, classLoader,
+                    isProduction);
+            var generatorProcessor = new GeneratorProcessor(conf, nodeCommand,
+                    isProduction);
 
             parserProcessor.process();
             generatorProcessor.process();
