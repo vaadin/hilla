@@ -1255,7 +1255,7 @@ public class EndpointControllerTest {
             EndpointNameChecker endpointNameChecker,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             CsrfChecker csrfChecker) {
-        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
+        try (MockedStatic<ApplicationConfiguration> appConfigMockedStatic = Mockito
                 .mockStatic(ApplicationConfiguration.class)) {
             try {
                 projectFolder.newFolder("build");
@@ -1263,12 +1263,12 @@ public class EndpointControllerTest {
                 throw new AssertionError(
                         "Failed to initialize project build folder", e);
             }
-            appConfig = Mockito.mock(ApplicationConfiguration.class);
             Mockito.when(appConfig.isProductionMode()).thenReturn(false);
             Mockito.when(appConfig.getProjectFolder())
                     .thenReturn(projectFolder.getRoot());
             Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
-            applicationConfigurationMockedStatic
+            Mockito.when(appConfig.isXsrfProtectionEnabled()).thenReturn(true);
+            appConfigMockedStatic
                     .when(() -> ApplicationConfiguration.get(Mockito.any()))
                     .thenReturn(appConfig);
 
@@ -1385,7 +1385,6 @@ public class EndpointControllerTest {
         Class<?> endpointClass = endpoint.getClass();
         WebApplicationContext contextMock = Mockito
                 .mock(WebApplicationContext.class);
-        // ApplicationContext contextMock = mock(ApplicationContext.class);
         when(contextMock.getBeansWithAnnotation(Endpoint.class)).thenReturn(
                 Collections.singletonMap(endpointClass.getName(), endpoint));
         return contextMock;

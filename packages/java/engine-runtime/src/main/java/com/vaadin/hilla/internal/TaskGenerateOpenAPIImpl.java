@@ -60,6 +60,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      *
      * @param classLoader
      *            the Java Class Loader for the parser.
+     *
+     * @param isProductionMode
+     *            {@code true} if building for production.
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
             File outputDirectory, Function<String, URL> resourceFinder,

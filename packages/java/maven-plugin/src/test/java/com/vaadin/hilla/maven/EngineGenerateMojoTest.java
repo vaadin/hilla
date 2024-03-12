@@ -25,7 +25,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 (mock, context) -> {
                     // Verify ParserProcessor constructor arguments
                     assertEquals(3, context.arguments().size(),
-                            "expected 2 ParserProcessor arguments");
+                            "expected 3 ParserProcessor arguments");
 
                     // Verify configuration argument
                     var conf = (EngineConfiguration) context.arguments().get(0);
@@ -46,7 +46,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                         ((mock, context) -> {
                             // Verify GeneratorProcessor arguments
                             assertEquals(3, context.arguments().size(),
-                                    "expected 2 GeneratorProcessor arguments");
+                                    "expected 3 GeneratorProcessor arguments");
 
                             // Verify configuration argument
                             var conf = (EngineConfiguration) context.arguments()
