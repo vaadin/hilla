@@ -37,7 +37,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
             .getLogger(TaskGenerateEndpointImpl.class);
 
     private final String nodeCommand;
-    private boolean productionMode;
+    private final boolean productionMode;
 
     /**
      * Create a task for generating OpenAPI spec.
@@ -78,7 +78,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         try {
             var engineConfiguration = getEngineConfiguration();
             var processor = new GeneratorProcessor(engineConfiguration,
-                    nodeCommand);
+                    nodeCommand, productionMode);
             processor.process();
         } catch (GeneratorException e) {
             // Make sure the exception is printed in the logs

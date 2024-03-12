@@ -2,6 +2,7 @@ package com.vaadin.hilla.engine;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class EngineConfiguration {
     public static final String DEFAULT_CONFIG_FILE_NAME = "hilla-engine-configuration.json";
@@ -137,8 +139,8 @@ public class EngineConfiguration {
     }
 
     @JsonIgnore
-    public Path getOpenAPIFile() {
-        return buildDir.resolve(OPEN_API_PATH);
+    public Path getOpenAPIFile(boolean isProductionMode) {
+        return isProductionMode ? classesDir.resolve(OPEN_API_PATH) : buildDir.resolve(OPEN_API_PATH);
     }
 
     public static final class Builder {
@@ -146,7 +148,14 @@ public class EngineConfiguration {
 
         public Builder(Path baseDir) {
             configuration.baseDir = baseDir;
-            configuration.outputDir = baseDir.resolve("frontend/generated");
+            var legacyFrontendGeneratedDir = baseDir
+                    .resolve("frontend/generated");
+            if (Files.exists(legacyFrontendGeneratedDir)) {
+                configuration.outputDir = legacyFrontendGeneratedDir;
+            } else {
+                configuration.outputDir = baseDir.resolve(
+                        FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR);
+            }
         }
 
         public Builder(EngineConfiguration configuration) {

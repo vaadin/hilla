@@ -40,6 +40,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             .getLogger(TaskGenerateOpenAPIImpl.class);
 
     private final ClassLoader classLoader;
+    private final boolean isProductionMode;
 
     /**
      * Create a task for generating OpenAPI spec.
@@ -62,11 +63,12 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
             File outputDirectory, Function<String, URL> resourceFinder,
-            @Nonnull ClassLoader classLoader) {
+            @Nonnull ClassLoader classLoader, boolean isProductionMode) {
         super(projectDirectory, buildDirectoryName, outputDirectory,
                 resourceFinder);
         this.classLoader = Objects.requireNonNull(classLoader,
                 "ClassLoader should not be null");
+        this.isProductionMode = isProductionMode;
     }
 
     /**
@@ -79,7 +81,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         try {
             var engineConfiguration = getEngineConfiguration();
             var processor = new ParserProcessor(engineConfiguration,
-                    classLoader);
+                    classLoader, isProductionMode);
             processor.process();
         } catch (ParserException e) {
             // Make sure the exception is printed in the logs

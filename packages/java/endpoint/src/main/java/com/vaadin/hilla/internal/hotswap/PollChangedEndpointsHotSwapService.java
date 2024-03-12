@@ -80,7 +80,7 @@ class PollChangedEndpointsHotSwapService implements EndpointHotSwapService {
             try {
                 ParserProcessor parserProcessor = new ParserProcessor(
                         status.engineConfiguration,
-                        this.getClass().getClassLoader());
+                        this.getClass().getClassLoader(), false);
                 var newOpenAPI = parserProcessor.createOpenAPI();
                 if (status.openAPI == null) {
                     status.openAPI = newOpenAPI;
