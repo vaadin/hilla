@@ -24,6 +24,8 @@ public class OpenAPIUtil {
      *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong
@@ -42,6 +44,8 @@ public class OpenAPIUtil {
      *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong

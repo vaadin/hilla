@@ -44,6 +44,7 @@ public class ProductionBuildFunctionalIT {
         var openApiJson = Json.mapper().readValue(openApiJsonPath, OpenAPI.class);
         assertTrue(openApiJson.getPaths().containsKey("/HelloReactEndpoint/sayHello"),
             "After production build openApi.json should contain '/HelloReactEndpoint/sayHello' path.");
+
     }
 
     private void afterProductionBuild_endpointsTs_hasCorrectEndpoints() throws IOException {
