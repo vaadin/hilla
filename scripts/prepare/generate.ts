@@ -64,13 +64,11 @@ const [
 
 const [
   hillaJsonResultFileName,
-  hillaReactJsonResultFileName,
   releaseNotesResultFileName,
   releaseNotesMaintenanceResultFileName,
   releaseNotesPrereleaseResultFileName,
 ] = [
   'hilla-versions.json',
-  'hilla-react-versions.json',
   'release-note.md',
   'release-note-maintenance.md',
   'release-note-prerelease.md',
@@ -85,18 +83,9 @@ export default function generate(version: string, versions: Versions): void {
   writer.writeSeparateJson(transformed.bundles, hillaJsonTemplateFileName, hillaJsonResultFileName, 'bundles');
   writer.writeSeparateJson(transformed.core, hillaJsonTemplateFileName, hillaJsonResultFileName, 'core');
   writer.writeSeparateJson(transformed.vaadin, hillaJsonTemplateFileName, hillaJsonResultFileName, 'vaadin');
-  writer.writeSeparateJson(
-    transformed.bundles,
-    hillaReactJsonTemplateFileName,
-    hillaReactJsonResultFileName,
-    'bundles',
-  );
+  writer.writeSeparateJson(transformed.react, hillaJsonTemplateFileName, hillaJsonResultFileName, 'react');
 
   console.log(`Generated ${pathToFileURL(hillaJsonResultFileName).toString()}.`);
-
-  writer.writeSeparateJson(transformed.react, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, 'react');
-
-  console.log(`Generated ${pathToFileURL(hillaReactJsonResultFileName).toString()}.`);
 
   writer.writeReleaseNotes(transformed, releaseNotesTemplateFileName, releaseNotesResultFileName);
 
@@ -113,9 +102,8 @@ export default function generate(version: string, versions: Versions): void {
   const javaVersion = version.replace('-', '.');
   transformed.core.hilla = { javaVersion };
 
-  // write hilla version to hilla-react-versions.json as platform
+  // write hilla version to hilla-versions.json as platform
   writer.writeSeparateJson(version, hillaJsonTemplateFileName, hillaJsonResultFileName, 'platform');
-  writer.writeSeparateJson(version, hillaReactJsonTemplateFileName, hillaReactJsonResultFileName, 'platform');
 
   console.log('"hilla-versions.json" and "hilla-react-versions.json" files are updated with the platform version');
 }
