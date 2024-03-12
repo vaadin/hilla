@@ -6,3 +6,4 @@ com.vaadin.hilla.crud.CrudConfiguration
 com.vaadin.hilla.startup.RouteUnifyingServiceInitListener
 com.vaadin.hilla.route.RouteExtractionIndexHtmlRequestListener
 com.vaadin.hilla.route.ClientRouteRegistry
+com.vaadin.hilla.route.RouteUtil
