@@ -45,6 +45,7 @@ packages/java/hilla/*.json
 packages/java/hilla-react/*.json
 packages/java/hilla/src/main/java/com/vaadin/hilla/theme/
 packages/java/hilla/src/main/resources/
+packages/java/tests/**/src/main/bundles/
 
 packages/**/resources/vaadin-core-versions.json
 

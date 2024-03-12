@@ -17,10 +17,12 @@ package com.vaadin.hilla.route;
 
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Keeps track of registered client side routes.
@@ -70,5 +72,23 @@ public class ClientRouteRegistry implements Serializable {
      */
     public void removeRoute(String route) {
         registeredRoutes.remove(route);
+    }
+
+    /**
+     * Gets the client view configuration for the given route.
+     *
+     * @param path
+     *            the URL path to get the client view configuration for
+     * @return - the client view configuration for the given route
+     */
+    public ClientViewConfig getRouteByPath(String path) {
+        final Set<String> routes = registeredRoutes.keySet();
+        final AntPathMatcher pathMatcher = new AntPathMatcher();
+        for (String route : routes) {
+            if (pathMatcher.match(route, path)) {
+                return registeredRoutes.get(route);
+            }
+        }
+        return null;
     }
 }

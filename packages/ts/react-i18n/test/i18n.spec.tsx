@@ -41,13 +41,28 @@ describe('@vaadin/hilla-react-i18n', () => {
       i18n = new I18n();
       fetchMock
         .get('./?v-r=i18n&langtag=de-DE', {
-          'addresses.form.city.label': 'Stadt',
-          'addresses.form.street.label': 'Strasse',
+          body: {
+            'addresses.form.city.label': 'Stadt',
+            'addresses.form.street.label': 'Strasse',
+          },
+          status: 200,
+          headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
         })
         .get('./?v-r=i18n&langtag=not-found', 404)
+        .get('./?v-r=i18n&langtag=unknown', {
+          body: {
+            'addresses.form.city.label': 'Sehir',
+            'addresses.form.street.label': 'Sokak',
+          },
+          status: 200,
+        })
         .get('*', {
-          'addresses.form.city.label': 'City',
-          'addresses.form.street.label': 'Street',
+          body: {
+            'addresses.form.city.label': 'City',
+            'addresses.form.street.label': 'Street',
+          },
+          status: 200,
+          headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
         });
     });
 
@@ -68,6 +83,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure();
 
         expect(i18n.language.value).to.equal('zh-Hant');
+        expect(i18n.resolvedLanguage.value).to.equal('und');
         verifyLoadTranslations('zh-Hant');
       });
 
@@ -83,6 +99,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure({ language: 'zh-Hant' });
 
         expect(i18n.language.value).to.equal('zh-Hant');
+        expect(i18n.resolvedLanguage.value).to.equal('und');
         verifyLoadTranslations('zh-Hant');
       });
 
@@ -91,6 +108,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure({ language: 'zh-Hant' });
 
         expect(i18n.language.value).to.equal('zh-Hant');
+        expect(i18n.resolvedLanguage.value).to.equal('und');
         verifyLoadTranslations('zh-Hant');
       });
 
@@ -101,14 +119,17 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
 
       it('should not throw when loading translations fails', async () => {
+        const initialLanguage = i18n.language.value;
         await i18n.configure({ language: 'not-found' });
 
-        expect(i18n.language.value).to.equal('not-found');
+        expect(i18n.language.value).to.equal(initialLanguage);
+        expect(i18n.resolvedLanguage.value).to.equal(initialLanguage);
       });
     });
 
     describe('language', () => {
       const initialLanguage = 'en-US';
+      const initialResolvedLanguage = 'und';
 
       beforeEach(async () => {
         await i18n.configure({ language: initialLanguage });
@@ -117,12 +138,14 @@ describe('@vaadin/hilla-react-i18n', () => {
 
       it('should return current language', () => {
         expect(i18n.language.value).to.equal(initialLanguage);
+        expect(i18n.resolvedLanguage.value).to.equal(initialResolvedLanguage);
       });
 
       it('should set language and load translations', async () => {
         await i18n.setLanguage('de-DE');
 
         expect(i18n.language.value).to.equal('de-DE');
+        expect(i18n.resolvedLanguage.value).to.equal('de-DE');
         verifyLoadTranslations('de-DE');
       });
 
@@ -136,7 +159,16 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.setLanguage(initialLanguage);
 
         expect(i18n.language.value).to.equal(initialLanguage);
+        expect(i18n.resolvedLanguage.value).to.equal(initialResolvedLanguage);
         expect(fetchMock.called()).to.be.false;
+      });
+
+      it('should still load translations if resolved language is empty', async () => {
+        await i18n.setLanguage('unknown');
+
+        expect(i18n.language.value).to.equal('unknown');
+        expect(i18n.resolvedLanguage.value).to.equal(undefined);
+        verifyLoadTranslations('unknown');
       });
     });
 

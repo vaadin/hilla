@@ -175,6 +175,7 @@
                 <module>security-urlmapping</module>
                 <module>react-grid-test</module>
                 <module>react-signals</module>
+                <module>react-i18n</module>
             </modules>
         </profile>
 
@@ -201,6 +202,7 @@
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
                 <module>react-signals</module>
+                <module>react-i18n</module>
             </modules>
         </profile>
 
