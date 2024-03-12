@@ -12,6 +12,7 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "classnames": "^2.3.2",
     "construct-style-sheets-polyfill": "3.1.0",
