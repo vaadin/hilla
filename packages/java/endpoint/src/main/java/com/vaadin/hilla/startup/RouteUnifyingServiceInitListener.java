@@ -82,6 +82,8 @@ public class RouteUnifyingServiceInitListener
 
                 clientRouteRegistry.clearRoutes();
                 clientViews.forEach(clientRouteRegistry::addRoute);
+            } else {
+                LOGGER.warn("Failed to find views.json");
             }
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
