@@ -38,7 +38,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   await Promise.all([
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
-    mkdir(new URL('test/', dir), { recursive: true }),
+    mkdir(new URL('test', dir), { recursive: true }),
   ]);
   await Promise.all([
     appendFile(
@@ -273,18 +273,54 @@ export function createTestingAgnosticRoutes(): AgnosticRoute<ComponentType> {
   };
 }
 
-export function createTestingViewMap(): Record<string, ServerViewConfig> {
+export function createTestingViewMap(): ServerViewConfig {
   return {
-    '/about': { route: 'about', title: 'About' },
-    '/profile/': { title: 'Profile' },
-    '/profile/account/security/password': { title: 'Password' },
-    '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
-    '/profile/friends/list': { title: 'List' },
-    '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
-    '/test/empty': {},
-    '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
-    '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
-    '/test/no-default-export': { title: 'No Default Export' },
+    path: '',
+    params: {},
+    children: [
+      { path: 'about', route: 'about', title: 'About', params: {}, children: [] },
+      {
+        path: 'profile',
+        params: {},
+        children: [
+          { path: '', title: 'Profile', params: {}, children: [] },
+          {
+            path: 'account',
+            title: 'Account',
+            params: {},
+            children: [
+              {
+                path: 'security',
+                params: {},
+                children: [
+                  { path: 'password', params: {}, title: 'Password', children: [] },
+                  { path: 'two-factor-auth', params: {}, title: 'Two Factor Auth', children: [] },
+                ],
+              },
+            ],
+          },
+          {
+            path: 'friends',
+            params: {},
+            title: 'Friends Layout',
+            children: [
+              { path: 'list', title: 'List', params: {}, children: [] },
+              { path: ':user', title: 'User', params: { ':user': RouteParamType.Required }, children: [] },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'test',
+        params: {},
+        children: [
+          { path: 'empty', params: {}, children: [] },
+          { path: ':optional?', title: 'Optional', params: { ':optional?': RouteParamType.Optional }, children: [] },
+          { path: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard }, children: [] },
+          { path: 'no-default-export', title: 'No Default Export', params: {}, children: [] },
+        ],
+      },
+    ],
   };
 }
 

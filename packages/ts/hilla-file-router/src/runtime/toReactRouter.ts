@@ -1,8 +1,8 @@
 import { type ComponentType, createElement } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
+import { transformTreeSync } from '../shared/transformTree.js';
 import type { AgnosticRoute } from '../types.js';
-import { transformRoute } from './utils.js';
 
 /**
  * Transforms framework-agnostic route tree into a format that can be used by React Router.
@@ -12,7 +12,7 @@ import { transformRoute } from './utils.js';
  * @returns The React Router tree.
  */
 export function toReactRouter(routes: AgnosticRoute<ComponentType>): RouteObject {
-  return transformRoute(
+  return transformTreeSync(
     routes,
     (route) => route.children?.values(),
     ({ path, module }, children) => {
