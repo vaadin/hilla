@@ -1,11 +1,17 @@
 package com.vaadin.hilla.crud;
 
 import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.push.PushConfigurer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +40,8 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
 @ContextConfiguration(classes = { CrudConfiguration.class })
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = { EndpointController.class,
+        PushConfigurer.class })
 public class CrudRepositoryServiceTest {
 
     @Repository

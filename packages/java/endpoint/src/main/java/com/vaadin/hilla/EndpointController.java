@@ -257,7 +257,9 @@ public class EndpointController {
         var vaadinContext = new VaadinServletContext(
                 ((WebApplicationContext) context).getServletContext());
         var appConfiguration = ApplicationConfiguration.get(vaadinContext);
-        if (appConfiguration.isProductionMode()) {
+        if (appConfiguration.isProductionMode()
+                || !("/" + EngineConfiguration.OPEN_API_PATH)
+                        .equals(openApiResourceName)) {
             return getClass().getResource(openApiResourceName);
         }
         var openApiPathInDevMode = appConfiguration.getProjectFolder().toPath()

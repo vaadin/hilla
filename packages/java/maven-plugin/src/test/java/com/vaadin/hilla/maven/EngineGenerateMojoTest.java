@@ -24,7 +24,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 Mockito.withSettings().defaultAnswer(Answers.RETURNS_SELF),
                 (mock, context) -> {
                     // Verify ParserProcessor constructor arguments
-                    assertEquals(2, context.arguments().size(),
+                    assertEquals(3, context.arguments().size(),
                             "expected 2 ParserProcessor arguments");
 
                     // Verify configuration argument
@@ -45,7 +45,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                                 .defaultAnswer(Answers.RETURNS_SELF),
                         ((mock, context) -> {
                             // Verify GeneratorProcessor arguments
-                            assertEquals(2, context.arguments().size(),
+                            assertEquals(3, context.arguments().size(),
                                     "expected 2 GeneratorProcessor arguments");
 
                             // Verify configuration argument
