@@ -6,6 +6,7 @@ import fetchMock from 'fetch-mock';
 import { useEffect, useMemo } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { FormatCache } from '../src/FormatCache.js';
 import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
 import type { LanguageSettings } from '../src/settings.js';
 
@@ -421,6 +422,29 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.translate('param.number', { value: 123.456 })).to.equal('Value: 123,456');
         expect(i18n.translate('param.date.medium', { value: sampleDate })).to.equal('Value: 12. Nov. 2024');
         expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 22:33:44');
+      });
+    });
+  });
+
+  describe('FormatCache', () => {
+    it('should cache formats', () => {
+      const cache = new FormatCache('en-US');
+      expect(cache.getFormat('foo')).to.equal(cache.getFormat('foo'));
+      expect(cache.getFormat('foo')).to.not.equal(cache.getFormat('bar'));
+    });
+
+    it('should use formats for specified locale', () => {
+      const cache = new FormatCache('de-DE');
+      expect(cache.getFormat('Value: {value, number}').format({ value: 123.456 })).to.equal('Value: 123,456');
+    });
+
+    it('should fall back to browser language formats when using unknown or invalid locale strings', () => {
+      const browserFormatCache = new FormatCache(navigator.language);
+      const expectedMessage = browserFormatCache.getFormat('Value: {value, number}').format({ value: 123.456 });
+      ['', 'a', 'aa', 'aaa', 'aaaa', 'aaaaaaaa'].forEach((language) => {
+        const cache = new FormatCache(language);
+        const message = cache.getFormat('Value: {value, number}').format({ value: 123.456 });
+        expect(message).to.equal(expectedMessage);
       });
     });
   });

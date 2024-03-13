@@ -5,7 +5,13 @@ export class FormatCache {
   readonly #formats = new Map<string, IntlMessageFormat>();
 
   constructor(language: string) {
-    this.#language = language;
+    // Ensure that the language is supported by Intl.NumberFormat, which IntlMessageFormat uses internally
+    // Fall back to navigator.language if the given language is not supported
+    let supportedLocales: string[] = [];
+    try {
+      supportedLocales = Intl.NumberFormat.supportedLocalesOf(language);
+    } catch (e) {}
+    this.#language = supportedLocales.length > 0 ? supportedLocales[0] : navigator.language;
   }
 
   getFormat(translation: string): IntlMessageFormat {
