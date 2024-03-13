@@ -20,6 +20,8 @@ import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
 import com.vaadin.hilla.parser.utils.JsonPrinter;
 
+import static com.vaadin.hilla.engine.EngineConfiguration.OPEN_API_PATH;
+
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
@@ -33,9 +35,10 @@ public final class ParserProcessor {
     private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
-    public ParserProcessor(EngineConfiguration conf, ClassLoader classLoader) {
+    public ParserProcessor(EngineConfiguration conf, ClassLoader classLoader,
+            boolean isProductionMode) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile();
+        this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
         this.classLoader = classLoader;
         this.classPath = conf.getClassPath();
         applyConfiguration(conf.getParser());

@@ -40,10 +40,11 @@ public class ProductionBuildFunctionalIT {
     }
 
     private void afterProductionBuild_openApiJson_hasCorrectEndpoints() throws IOException {
-        var openApiJsonPath = getBuildDirPath().resolve("classes/com/vaadin/hilla/openapi.json").toFile();
+        var openApiJsonPath = getBuildDirPath().resolve("classes/hilla-openapi.json").toFile();
         var openApiJson = Json.mapper().readValue(openApiJsonPath, OpenAPI.class);
         assertTrue(openApiJson.getPaths().containsKey("/HelloReactEndpoint/sayHello"),
             "After production build openApi.json should contain '/HelloReactEndpoint/sayHello' path.");
+
     }
 
     private void afterProductionBuild_endpointsTs_hasCorrectEndpoints() throws IOException {
