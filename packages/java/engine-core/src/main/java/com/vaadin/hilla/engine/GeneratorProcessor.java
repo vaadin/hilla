@@ -27,9 +27,10 @@ public final class GeneratorProcessor {
     private final Path outputDirectory;
     private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
 
-    public GeneratorProcessor(EngineConfiguration conf, String nodeCommand) {
+    public GeneratorProcessor(EngineConfiguration conf, String nodeCommand,
+            boolean isProductionMode) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile();
+        this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
         this.outputDirectory = conf.getOutputDir();
         this.nodeCommand = nodeCommand;
         applyConfiguration(conf.getGenerator());

@@ -1,6 +1,8 @@
 package com.vaadin.hilla.crud;
 
 import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.push.PushConfigurer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,8 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
 @ContextConfiguration(classes = { CrudConfiguration.class })
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = { EndpointController.class,
+        PushConfigurer.class })
 public class CrudRepositoryServiceTest {
 
     @Repository
