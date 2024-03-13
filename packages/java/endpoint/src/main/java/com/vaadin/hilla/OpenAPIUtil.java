@@ -24,15 +24,18 @@ public class OpenAPIUtil {
      *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong
      */
-    public static String getCurrentOpenAPI(Path buildDirectory)
-            throws IOException {
+    public static String getCurrentOpenAPI(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
-        return Files.readString(engineConfiguration.getOpenAPIFile());
+        return Files.readString(
+                engineConfiguration.getOpenAPIFile(isProductionMode));
     }
 
     /**
@@ -41,16 +44,19 @@ public class OpenAPIUtil {
      *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong
      */
-    public static String generateOpenAPI(Path buildDirectory)
-            throws IOException {
+    public static String generateOpenAPI(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
         ParserProcessor parserProcessor = new ParserProcessor(
-                engineConfiguration, OpenAPIUtil.class.getClassLoader());
+                engineConfiguration, OpenAPIUtil.class.getClassLoader(),
+                isProductionMode);
         return parserProcessor.createOpenAPI();
     }
 

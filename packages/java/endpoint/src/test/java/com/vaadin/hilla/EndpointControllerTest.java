@@ -31,7 +31,9 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.cglib.proxy.Enhancer;
@@ -74,6 +76,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.context.WebApplicationContext;
 
 public class EndpointControllerTest {
     private static final TestClass TEST_ENDPOINT = new TestClass();
@@ -84,6 +87,9 @@ public class EndpointControllerTest {
     private HttpServletRequest requestMock;
     private Principal principal;
     private ApplicationConfiguration appConfig;
+
+    @Rule
+    public TemporaryFolder projectFolder = new TemporaryFolder();
 
     static {
         TEST_METHOD = Stream.of(TEST_ENDPOINT.getClass().getDeclaredMethods())
@@ -651,7 +657,7 @@ public class EndpointControllerTest {
     @Test
     public void should_ReturnCorrectResponse_When_EndpointClassIsProxied() {
 
-        ApplicationContext contextMock = mock(ApplicationContext.class);
+        var contextMock = mock(WebApplicationContext.class);
         TestClass endpoint = new TestClass();
 
         // CGLib proxies are supported as entry-point classes
@@ -734,7 +740,7 @@ public class EndpointControllerTest {
                 .testMethod(input);
         String beanName = TestClassWithCustomEndpointName.class.getSimpleName();
 
-        ApplicationContext contextMock = mock(ApplicationContext.class);
+        var contextMock = mock(WebApplicationContext.class);
         when(contextMock.getBeansWithAnnotation(Endpoint.class))
                 .thenReturn(Collections.singletonMap(beanName,
                         new TestClassWithCustomEndpointName()));
@@ -755,7 +761,7 @@ public class EndpointControllerTest {
     @Test
     public void should_UseCustomEndpointName_When_EndpointClassIsProxied() {
 
-        ApplicationContext contextMock = mock(ApplicationContext.class);
+        var contextMock = mock(WebApplicationContext.class);
         TestClassWithCustomEndpointName endpoint = new TestClassWithCustomEndpointName();
         TestClassWithCustomEndpointName proxy = mock(
                 TestClassWithCustomEndpointName.class, CALLS_REAL_METHODS);
@@ -781,35 +787,56 @@ public class EndpointControllerTest {
 
     @Test
     public void should_Never_UseSpringObjectMapper() {
-        ApplicationContext contextMock = mock(ApplicationContext.class);
-        ObjectMapper mockSpringObjectMapper = mock(ObjectMapper.class);
-        ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
-        Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
-                Jackson2ObjectMapperBuilder.class);
-        JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
-        when(contextMock.getBean(ObjectMapper.class))
-                .thenReturn(mockSpringObjectMapper);
-        when(contextMock.getBean(JacksonProperties.class))
-                .thenReturn(mockJacksonProperties);
-        when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.createXmlMapper(false))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
-        when(mockJacksonProperties.getVisibility())
-                .thenReturn(Collections.emptyMap());
-        EndpointRegistry registry = new EndpointRegistry(
-                mock(EndpointNameChecker.class));
+        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
+                .mockStatic(ApplicationConfiguration.class)) {
+            try {
+                projectFolder.newFolder("build");
+            } catch (IOException e) {
+                throw new AssertionError(
+                        "Failed to initialize project build folder", e);
+            }
+            appConfig = Mockito.mock(ApplicationConfiguration.class);
+            Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+            Mockito.when(appConfig.getProjectFolder())
+                    .thenReturn(projectFolder.getRoot());
+            Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
+            applicationConfigurationMockedStatic
+                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                    .thenReturn(appConfig);
 
-        EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
-                mock(ExplicitNullableTypeChecker.class),
-                mock(ServletContext.class), registry);
-        new EndpointController(contextMock, registry, invoker, null)
-                .registerEndpoints();
+            var contextMock = mock(WebApplicationContext.class);
+            ObjectMapper mockSpringObjectMapper = mock(ObjectMapper.class);
+            ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
+            Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
+                    Jackson2ObjectMapperBuilder.class);
+            JacksonProperties mockJacksonProperties = mock(
+                    JacksonProperties.class);
+            when(contextMock.getBean(ObjectMapper.class))
+                    .thenReturn(mockSpringObjectMapper);
+            when(contextMock.getBean(JacksonProperties.class))
+                    .thenReturn(mockJacksonProperties);
+            when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
+                    .thenReturn(mockObjectMapperBuilder);
+            when(mockObjectMapperBuilder.createXmlMapper(false))
+                    .thenReturn(mockObjectMapperBuilder);
+            when(mockObjectMapperBuilder.build())
+                    .thenReturn(mockOwnObjectMapper);
+            when(mockJacksonProperties.getVisibility())
+                    .thenReturn(Collections.emptyMap());
+            EndpointRegistry registry = new EndpointRegistry(
+                    mock(EndpointNameChecker.class));
 
-        verify(contextMock, never()).getBean(ObjectMapper.class);
-        verify(contextMock, times(1))
-                .getBean(Jackson2ObjectMapperBuilder.class);
+            EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
+                    mock(ExplicitNullableTypeChecker.class),
+                    mock(ServletContext.class), registry);
+
+            new EndpointController(contextMock, registry, invoker, null)
+                    .registerEndpoints();
+
+            verify(contextMock, never()).getBean(ObjectMapper.class);
+            verify(contextMock, times(1))
+                    .getBean(Jackson2ObjectMapperBuilder.class);
+        }
     }
 
     @Test
@@ -1131,7 +1158,7 @@ public class EndpointControllerTest {
     }
 
     private EndpointRegistry registerEndpoints(String openApiFilename) {
-        var context = Mockito.mock(ApplicationContext.class);
+        var context = Mockito.mock(WebApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
         Mockito.doReturn(Map.of("regularEndpoint",
                 new ApplicationEndpoint(applicationComponent))).when(context)
@@ -1139,7 +1166,14 @@ public class EndpointControllerTest {
         var controller = createVaadinControllerWithApplicationContext(context);
         controller.setOpenApiResourceName(
                 "/com/vaadin/hilla/packages/" + openApiFilename);
-        controller.registerEndpoints();
+        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
+                .mockStatic(ApplicationConfiguration.class)) {
+            applicationConfigurationMockedStatic
+                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                    .thenReturn(appConfig);
+
+            controller.registerEndpoints();
+        }
         return controller.endpointRegistry;
     }
 
@@ -1221,53 +1255,72 @@ public class EndpointControllerTest {
             EndpointNameChecker endpointNameChecker,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             CsrfChecker csrfChecker) {
-        ServletContext servletContext = Mockito.mock(ServletContext.class);
-        Lookup lookup = Mockito.mock(Lookup.class);
-        Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
-                .thenReturn(lookup);
+        try (MockedStatic<ApplicationConfiguration> appConfigMockedStatic = Mockito
+                .mockStatic(ApplicationConfiguration.class)) {
+            try {
+                projectFolder.newFolder("build");
+            } catch (IOException e) {
+                throw new AssertionError(
+                        "Failed to initialize project build folder", e);
+            }
+            Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+            Mockito.when(appConfig.getProjectFolder())
+                    .thenReturn(projectFolder.getRoot());
+            Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
+            Mockito.when(appConfig.isXsrfProtectionEnabled()).thenReturn(true);
+            appConfigMockedStatic
+                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                    .thenReturn(appConfig);
 
-        if (endpointMapperFactory == null) {
-            endpointMapperFactory = new JacksonObjectMapperFactory.Json();
+            ServletContext servletContext = Mockito.mock(ServletContext.class);
+            Lookup lookup = Mockito.mock(Lookup.class);
+            Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
+                    .thenReturn(lookup);
+
+            if (endpointMapperFactory == null) {
+                endpointMapperFactory = new JacksonObjectMapperFactory.Json();
+            }
+
+            if (accessChecker == null) {
+                accessChecker = mock(EndpointAccessChecker.class);
+                when(accessChecker.check(TEST_METHOD, requestMock))
+                        .thenReturn(null);
+            }
+            if (csrfChecker == null) {
+                csrfChecker = new CsrfChecker(servletContext);
+            }
+
+            if (endpointNameChecker == null) {
+                endpointNameChecker = mock(EndpointNameChecker.class);
+                when(endpointNameChecker.check(TEST_ENDPOINT_NAME))
+                        .thenReturn(null);
+            }
+
+            if (explicitNullableTypeChecker == null) {
+                explicitNullableTypeChecker = mock(
+                        ExplicitNullableTypeChecker.class);
+                when(explicitNullableTypeChecker.checkValueForType(any(), any(),
+                        ArgumentMatchers.anyBoolean())).thenReturn(null);
+            }
+
+            ApplicationContext mockApplicationContext = mockApplicationContext(
+                    endpoint);
+            EndpointRegistry registry = new EndpointRegistry(
+                    endpointNameChecker);
+
+            EndpointInvoker invoker = Mockito
+                    .spy(new EndpointInvoker(mockApplicationContext,
+                            endpointMapperFactory, explicitNullableTypeChecker,
+                            mock(ServletContext.class), registry));
+
+            Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
+
+            EndpointController connectController = Mockito
+                    .spy(new EndpointController(mockApplicationContext,
+                            registry, invoker, csrfChecker));
+            connectController.registerEndpoints();
+            return connectController;
         }
-
-        if (accessChecker == null) {
-            accessChecker = mock(EndpointAccessChecker.class);
-            when(accessChecker.check(TEST_METHOD, requestMock))
-                    .thenReturn(null);
-        }
-        if (csrfChecker == null) {
-            csrfChecker = new CsrfChecker(servletContext);
-        }
-
-        if (endpointNameChecker == null) {
-            endpointNameChecker = mock(EndpointNameChecker.class);
-            when(endpointNameChecker.check(TEST_ENDPOINT_NAME))
-                    .thenReturn(null);
-        }
-
-        if (explicitNullableTypeChecker == null) {
-            explicitNullableTypeChecker = mock(
-                    ExplicitNullableTypeChecker.class);
-            when(explicitNullableTypeChecker.checkValueForType(any(), any(),
-                    ArgumentMatchers.anyBoolean())).thenReturn(null);
-        }
-
-        ApplicationContext mockApplicationContext = mockApplicationContext(
-                endpoint);
-        EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
-
-        EndpointInvoker invoker = Mockito
-                .spy(new EndpointInvoker(mockApplicationContext,
-                        endpointMapperFactory, explicitNullableTypeChecker,
-                        mock(ServletContext.class), registry));
-
-        Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
-
-        EndpointController connectController = Mockito
-                .spy(new EndpointController(mockApplicationContext, registry,
-                        invoker, csrfChecker));
-        connectController.registerEndpoints();
-        return connectController;
     }
 
     private EndpointController createVaadinControllerWithoutPrincipal() {
@@ -1278,12 +1331,31 @@ public class EndpointControllerTest {
 
     private EndpointController createVaadinControllerWithApplicationContext(
             ApplicationContext applicationContext) {
-        EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
-        EndpointController hillaController = controllerMockBuilder
-                .withObjectMapperFactory(new JacksonObjectMapperFactory.Json())
-                .withApplicationContext(applicationContext).build();
-        hillaController.registerEndpoints();
-        return hillaController;
+        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
+                .mockStatic(ApplicationConfiguration.class)) {
+            try {
+                projectFolder.newFolder("build");
+            } catch (IOException e) {
+                throw new AssertionError(
+                        "Failed to initialize project build folder", e);
+            }
+            appConfig = Mockito.mock(ApplicationConfiguration.class);
+            Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+            Mockito.when(appConfig.getProjectFolder())
+                    .thenReturn(projectFolder.getRoot());
+            Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
+            applicationConfigurationMockedStatic
+                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                    .thenReturn(appConfig);
+
+            EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
+            EndpointController hillaController = controllerMockBuilder
+                    .withObjectMapperFactory(
+                            new JacksonObjectMapperFactory.Json())
+                    .withApplicationContext(applicationContext).build();
+            hillaController.registerEndpoints();
+            return hillaController;
+        }
     }
 
     private Method createEndpointMethodMockThatThrows(Object argument,
@@ -1311,8 +1383,8 @@ public class EndpointControllerTest {
 
     private <T> ApplicationContext mockApplicationContext(T endpoint) {
         Class<?> endpointClass = endpoint.getClass();
-
-        ApplicationContext contextMock = mock(ApplicationContext.class);
+        WebApplicationContext contextMock = Mockito
+                .mock(WebApplicationContext.class);
         when(contextMock.getBeansWithAnnotation(Endpoint.class)).thenReturn(
                 Collections.singletonMap(endpointClass.getName(), endpoint));
         return contextMock;

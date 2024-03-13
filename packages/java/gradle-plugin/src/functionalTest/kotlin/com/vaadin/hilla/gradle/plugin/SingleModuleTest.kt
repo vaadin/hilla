@@ -70,7 +70,7 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
-    fun `endpoints ts and openapi json are generated after hillaGenerate task executed`() {
+    fun `endpoints ts and openapi json are generated after hillaGenerate task executed in dev mode`() {
         createProject(withNpmInstall = true)
 
         addHelloReactEndpoint()
@@ -80,20 +80,36 @@ class SingleModuleTest : AbstractGradleTest() {
         buildResult.expectTaskSucceded("hillaConfigure")
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly()
+        verifyOpenApiJsonFileGeneratedProperly(false)
+        verifyEndpointsTsFileGeneratedProperly()
+    }
+
+    @Test
+    fun `endpoints ts and openapi json are generated after hillaGenerate task executed in prod mode`() {
+        createProject(withNpmInstall = true, productionMode = true)
+
+        addHelloReactEndpoint()
+
+        val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
+
+        buildResult.expectTaskSucceded("hillaConfigure")
+        buildResult.expectTaskSucceded("hillaGenerate")
+
+        verifyOpenApiJsonFileGeneratedProperly(true)
         verifyEndpointsTsFileGeneratedProperly()
     }
 
 
-    private fun verifyOpenApiJsonFileGeneratedProperly() {
-        val openApiJsonFile = testProject.folder("build").resolve("classes/com/vaadin/hilla/openapi.json")
+    private fun verifyOpenApiJsonFileGeneratedProperly(productionMode: Boolean) {
+        val openApiJsonFileName = (if (productionMode) "classes/" else "") + "hilla-openapi.json"
+        val openApiJsonFile = testProject.folder("build").resolve(openApiJsonFileName)
 
-        expect(true, "openapi.json should be created after executing hillaGenerate task!") {
+        expect(true, "hilla-openapi.json should be created after executing hillaGenerate task!") {
             openApiJsonFile.exists()
         }
 
         val openApi = Json.mapper().readValue(openApiJsonFile, OpenAPI::class.java)
-        expect(true, "Generated openapi.json file should contain paths for existing endpoints!") {
+        expect(true, "Generated hilla-openapi.json file should contain paths for existing endpoints!") {
             openApi.paths.contains("/HelloReactEndpoint/sayHello")
         }
     }

@@ -79,7 +79,8 @@ public class EndpointGeneratorTaskFactoryImpl
                 options.getBuildDirectoryName(),
                 options.getFrontendGeneratedFolder(),
                 options.getClassFinder()::getResource,
-                options.getClassFinder().getClassLoader());
+                options.getClassFinder().getClassLoader(),
+                options.isProductionMode());
     }
 
     private static class SkipTaskGenerateEndpoint

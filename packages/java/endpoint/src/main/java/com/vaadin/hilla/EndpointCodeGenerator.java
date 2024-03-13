@@ -81,10 +81,10 @@ public class EndpointCodeGenerator {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
         ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                getClass().getClassLoader());
+                getClass().getClassLoader(), false);
         parser.process();
         GeneratorProcessor generator = new GeneratorProcessor(
-                engineConfiguration, nodeExecutable);
+                engineConfiguration, nodeExecutable, false);
         generator.process();
 
         this.endpointController.registerEndpoints();
@@ -104,11 +104,12 @@ public class EndpointCodeGenerator {
         }
     }
 
-    public Set<String> getClassesUsedInOpenApi() throws IOException {
+    public Set<String> getClassesUsedInOpenApi(boolean isProductionMode)
+            throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(
-                    OpenAPIUtil.getCurrentOpenAPI(buildDirectory));
+            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(OpenAPIUtil
+                    .getCurrentOpenAPI(buildDirectory, isProductionMode));
         }
         return classesUsedInOpenApi;
     }
