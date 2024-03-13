@@ -225,7 +225,7 @@ export const components = {
   },
 } satisfies Record<string, RouteModule>;
 
-export function createTestingAgnosticRoutes(): AgnosticRoute<ComponentType> {
+export function createTestingAgnosticRoutes(): AgnosticRoute {
   return {
     path: '',
     children: [
