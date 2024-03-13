@@ -12,6 +12,7 @@
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
+    "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "@vaadin/polymer-legacy-adapter": "24.4.0-alpha16",
     "@vaadin/react-components": "24.4.0-alpha16",
@@ -64,6 +65,7 @@
       "@vaadin/hilla-react-auth": "24.4.0-alpha13",
       "@vaadin/hilla-react-crud": "24.4.0-alpha13",
       "@vaadin/hilla-react-form": "24.4.0-alpha13",
+      "@vaadin/hilla-react-i18n": "24.4.0-alpha13",
       "@vaadin/hilla-react-signals": "24.4.0-alpha13",
       "@vaadin/polymer-legacy-adapter": "24.4.0-alpha16",
       "@vaadin/react-components": "24.4.0-alpha16",
@@ -105,7 +107,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "95cd97d9bb8c4348078c88692589340e8daed58f12633605a37519983c044261"
+    "hash": "b6967421f94f781a8e778d0a377a6bb8725ee9d9d58d49b2116adf1e197da1c5"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -135,6 +137,7 @@
     "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
     "@vaadin/vaadin-development-mode-detector": "$@vaadin/vaadin-development-mode-detector",
     "@vaadin/router": "$@vaadin/router",
-    "@vaadin/vaadin-usage-statistics": "$@vaadin/vaadin-usage-statistics"
+    "@vaadin/vaadin-usage-statistics": "$@vaadin/vaadin-usage-statistics",
+    "@vaadin/hilla-react-i18n": "$@vaadin/hilla-react-i18n"
   }
 }
