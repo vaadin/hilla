@@ -5,7 +5,7 @@ import type { AgnosticRoute, Module, RouteModule } from '../types.js';
 import { transformRoute } from './utils.js';
 
 function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
-  return module ? !('default' in module) || typeof module.default !== 'function' : true;
+  return module ? 'default' in module && typeof module.default === 'function' : true;
 }
 
 /**
@@ -27,7 +27,7 @@ export function toReactRouter(routes: AgnosticRoute): ReactRouteObject {
       const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
 
       return {
-        path,
+        path: module?.config?.route ?? path,
         element: module?.default ? createElement(module.default) : undefined,
         children: children.length > 0 ? (children as ReactRouteObject[]) : undefined,
         handle: {

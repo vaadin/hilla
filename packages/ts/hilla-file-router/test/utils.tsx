@@ -172,7 +172,7 @@ export const components = {
     default: function About(): JSX.Element {
       return <></>;
     },
-    config: { title: 'About', menu: { order: 1 } },
+    config: { title: 'About', route: 'about', menu: { order: 1 } },
   },
   friends: {
     // eslint-disable-next-line func-name-matching
@@ -230,7 +230,7 @@ export function createTestingAgnosticRoutes(): AgnosticRoute {
     path: '',
     children: [
       {
-        path: 'about',
+        path: 'nameToReplace',
         module: components.about,
       },
       {
