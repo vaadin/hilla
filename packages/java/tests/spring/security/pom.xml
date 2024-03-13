@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.hilla</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-security</artifactId>
     <name>ITs for Vaadin Spring Security and Hilla</name>
