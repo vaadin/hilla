@@ -73,24 +73,20 @@ public class RouteUnifyingServiceInitListener
     }
 
     protected void registerClientRoutes() {
-        try {
-            final URL source = getClass()
-                    .getResource("/META-INF/VAADIN/views.json");
+        try (var source = getClass()
+                .getResourceAsStream("/META-INF/VAADIN/views.json")) {
             if (source != null) {
-                final File file = new File(source.toURI());
-                if (file.exists()) {
-                    final Map<String, ClientViewConfig> clientViews = mapper
-                            .readValue(source, new TypeReference<>() {
-                            });
+                final Map<String, ClientViewConfig> clientViews = mapper
+                        .readValue(source, new TypeReference<>() {
+                        });
 
-                    clientRouteRegistry.clearRoutes();
-                    clientViews.forEach(clientRouteRegistry::addRoute);
-                }
+                clientRouteRegistry.clearRoutes();
+                clientViews.forEach(clientRouteRegistry::addRoute);
+            } else {
+                LOGGER.warn("Failed to find views.json");
             }
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
-        } catch (URISyntaxException e) {
-            LOGGER.warn("Incorrect URL syntax format", e);
         }
     }
 }
