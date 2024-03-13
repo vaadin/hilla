@@ -19,7 +19,10 @@ import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -35,6 +38,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
+import java.io.IOException;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest
 @Import(TestTypeConversionEndpoints.class)
@@ -47,16 +52,31 @@ public abstract class BaseTypeConversionTest {
 
     private ApplicationConfiguration appConfig;
 
-    @Before
-    public void setUp() {
-        appConfig = Mockito.mock(ApplicationConfiguration.class);
+    @Rule
+    public TemporaryFolder projectFolder = new TemporaryFolder();
 
-        EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
-        EndpointController controller = controllerMockBuilder
-                .withApplicationContext(applicationContext).build();
-        controller.registerEndpoints();
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        Assert.assertNotEquals(null, applicationContext);
+    @Before
+    public void setUp() throws IOException {
+        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
+                .mockStatic(ApplicationConfiguration.class)) {
+            projectFolder.newFolder("build");
+
+            appConfig = Mockito.mock(ApplicationConfiguration.class);
+            Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+            Mockito.when(appConfig.getProjectFolder())
+                    .thenReturn(projectFolder.getRoot());
+            Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
+            applicationConfigurationMockedStatic
+                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                    .thenReturn(appConfig);
+
+            EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
+            EndpointController controller = controllerMockBuilder
+                    .withApplicationContext(applicationContext).build();
+            controller.registerEndpoints();
+            mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+            Assert.assertNotEquals(null, applicationContext);
+        }
     }
 
     protected void assertEqualExpectedValueWhenCallingMethod(String methodName,

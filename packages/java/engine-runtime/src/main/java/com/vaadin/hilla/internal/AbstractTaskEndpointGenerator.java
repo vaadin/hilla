@@ -61,7 +61,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
         this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
                 "Build directory name cannot be null");
         this.outputDirectory = Objects.requireNonNull(outputDirectory,
-                "Output direrctory name cannot be null");
+                "Output directory name cannot be null");
         this.resourceFinder = Objects.requireNonNull(resourceFinder,
                 "Class finder cannot be null");
     }
