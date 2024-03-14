@@ -1,5 +1,6 @@
 import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
+import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
 import type { I18nOptions, Translations, TranslationsResult } from './types.js';
 
@@ -23,6 +24,7 @@ export class I18n {
   readonly #language: Signal<string | undefined> = signal(undefined);
   readonly #translations: Signal<Translations> = signal({});
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
+  #formatCache: FormatCache = new FormatCache(navigator.language);
 
   get language(): Signal<string | undefined> {
     return this.#language;
@@ -59,6 +61,7 @@ export class I18n {
       this.#translations.value = translationsResult.translations;
       this.#language.value = newLanguage;
       this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
+      this.#formatCache = new FormatCache(newLanguage);
 
       if (updateSettings) {
         updateLanguageSettings({
@@ -68,13 +71,18 @@ export class I18n {
     });
   }
 
-  translate(key: string): string {
-    return this.#translations.value[key] || key;
+  translate(key: string, params?: Record<string, unknown>): string {
+    const translation = this.#translations.value[key];
+    if (!translation) {
+      return key;
+    }
+    const format = this.#formatCache.getFormat(translation);
+    return format.format(params) as string;
   }
 }
 
 export const i18n = new I18n();
 
-export function translate(key: string): string {
-  return i18n.translate(key);
+export function translate(key: string, params?: Record<string, unknown>): string {
+  return i18n.translate(key, params);
 }

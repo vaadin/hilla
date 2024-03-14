@@ -47,7 +47,8 @@
   },
   "dependencies": {
     "@vaadin/hilla-frontend": "24.4.0-alpha14",
-    "@vaadin/hilla-react-signals": "24.4.0-alpha14"
+    "@vaadin/hilla-react-signals": "24.4.0-alpha14",
+    "intl-messageformat": "^10.5.11"
   },
   "peerDependencies": {
     "react": "^18"
