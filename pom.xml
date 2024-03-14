@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.5-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
@@ -59,7 +59,7 @@
     <jackson.databind.version>2.14.2</jackson.databind.version>
     <junit.version>5.8.0</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>23.3-SNAPSHOT</flow.version>
+    <flow.version>23.5-SNAPSHOT</flow.version>
     <slf4j.version>1.7.36</slf4j.version>
     <spring.version>5.3.27</spring.version>
     <spring.boot.version>2.7.13</spring.boot.version>
