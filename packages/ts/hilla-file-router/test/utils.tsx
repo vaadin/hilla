@@ -275,49 +275,49 @@ export function createTestingAgnosticRoutes(): AgnosticRoute<ComponentType> {
 
 export function createTestingViewMap(): ServerViewConfig {
   return {
-    path: '',
+    route: '',
     params: {},
     children: [
-      { path: 'about', route: 'about', title: 'About', params: {}, children: [] },
+      { route: 'about', title: 'About', params: {}, children: [] },
       {
-        path: 'profile',
+        route: 'profile',
         params: {},
         children: [
-          { path: '', title: 'Profile', params: {}, children: [] },
+          { route: '', title: 'Profile', params: {}, children: [] },
           {
-            path: 'account',
+            route: 'account',
             title: 'Account',
             params: {},
             children: [
               {
-                path: 'security',
+                route: 'security',
                 params: {},
                 children: [
-                  { path: 'password', params: {}, title: 'Password', children: [] },
-                  { path: 'two-factor-auth', params: {}, title: 'Two Factor Auth', children: [] },
+                  { route: 'password', params: {}, title: 'Password', children: [] },
+                  { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth', children: [] },
                 ],
               },
             ],
           },
           {
-            path: 'friends',
+            route: 'friends',
             params: {},
             title: 'Friends Layout',
             children: [
-              { path: 'list', title: 'List', params: {}, children: [] },
-              { path: ':user', title: 'User', params: { ':user': RouteParamType.Required }, children: [] },
+              { route: 'list', title: 'List', params: {}, children: [] },
+              { route: ':user', title: 'User', params: { ':user': RouteParamType.Required }, children: [] },
             ],
           },
         ],
       },
       {
-        path: 'test',
+        route: 'test',
         params: {},
         children: [
-          { path: 'empty', params: {}, children: [] },
-          { path: ':optional?', title: 'Optional', params: { ':optional?': RouteParamType.Optional }, children: [] },
-          { path: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard }, children: [] },
-          { path: 'no-default-export', title: 'No Default Export', params: {}, children: [] },
+          { route: 'empty', params: {}, children: [] },
+          { route: ':optional?', title: 'Optional', params: { ':optional?': RouteParamType.Optional }, children: [] },
+          { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard }, children: [] },
+          { route: 'no-default-export', title: 'No Default Export', params: {}, children: [] },
         ],
       },
     ],

@@ -7,13 +7,17 @@ import type { RouteParamType } from './routeParamType.js';
  */
 export type ServerViewConfig = Readonly<{
   children: readonly ServerViewConfig[];
-  path: string;
+  params?: Readonly<Record<string, RouteParamType>>;
+}> &
+  ViewConfig;
+
+export type ServerViewMapItem = Readonly<{
   params?: Readonly<Record<string, RouteParamType>>;
 }> &
   ViewConfig;
 
 export type VaadinServer = Readonly<{
-  views: Readonly<Record<string, ServerViewConfig>>;
+  views: Readonly<Record<string, ServerViewMapItem>>;
 }>;
 
 export type VaadinObject = Readonly<{

@@ -24,7 +24,7 @@ function cleanup(items: Array<Writable<MenuItem>>) {
 }
 
 describe('@vaadin/hilla-file-router', () => {
-  describe('getMenuItems', () => {
+  describe('createMenuItems', () => {
     it('should generate a set of menu items', () => {
       const items = createMenuItems({
         server: {

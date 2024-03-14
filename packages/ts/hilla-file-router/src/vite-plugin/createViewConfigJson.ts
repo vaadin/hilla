@@ -34,7 +34,7 @@ export default async function createViewConfigJson(views: RouteMeta): Promise<st
     async ({ path, file, layout }, children) => {
       if (!file && !layout) {
         return {
-          path,
+          route: path,
           params: extractParameterFromRouteSegment(path),
           children,
         } as const;
@@ -64,12 +64,11 @@ export default async function createViewConfigJson(views: RouteMeta): Promise<st
           break;
         }
       }
-      const _path = config?.route ?? path;
 
       return {
-        path: convertFSRouteSegmentToURLPatternFormat(_path),
+        route: convertFSRouteSegmentToURLPatternFormat(path),
         ...config,
-        params: extractParameterFromRouteSegment(_path),
+        params: extractParameterFromRouteSegment(config?.route ?? path),
         title: config?.title ?? convertComponentNameToTitle(componentName),
         children,
       } as const;

@@ -1,5 +1,3 @@
-import type { RouteParamType } from './shared/routeParamType.js';
-
 export type ViewConfig = Readonly<{
   /**
    * View title used in the main layout header, as <title> and as the default
