@@ -33,7 +33,7 @@ public class RouteUtilTest {
 
         registry.addRoute("/test",
                 new ClientViewConfig("Test", new String[] { "ROLE_ADMIN" },
-                        false, "/test", false, false, null, null, null));
+                        false, "/test", false, false, null, null, null, null));
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
@@ -48,7 +48,7 @@ public class RouteUtilTest {
 
         registry.addRoute("/test",
                 new ClientViewConfig("Test", new String[] { "ROLE_ADMIN" },
-                        false, "/test", false, false, null, null, null));
+                        false, "/test", false, false, null, null, null, null));
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
@@ -62,7 +62,7 @@ public class RouteUtilTest {
         request.setUserPrincipal(Mockito.mock(Principal.class));
 
         registry.addRoute("/test", new ClientViewConfig("Test", null, true,
-                "/test", false, false, null, null, null));
+                "/test", false, false, null, null, null, null));
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
@@ -76,7 +76,7 @@ public class RouteUtilTest {
         request.setUserPrincipal(null);
 
         registry.addRoute("/test", new ClientViewConfig("Test", null, true,
-                "/test", false, false, null, null, null));
+                "/test", false, false, null, null, null, null));
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);

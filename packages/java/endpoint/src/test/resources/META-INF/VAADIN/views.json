@@ -1,10 +1,131 @@
 {
-  "/about": { "title": "About" },
-  "/profile/": { "title": "Profile" },
-  "/profile/account/security/password": { "title": "Password" },
-  "/profile/account/security/two-factor-auth": { "title": "Two Factor Auth" },
-  "/profile/friends/list": { "title": "List", "unknown": {"anotherProp" :  "prop"} },
-  "/profile/friends/:user?/edit": { "title": "Friend Edit", "params": { ":user?":  "opt"} },
-  "/profile/friends/:user": { "title": "Friend Profile", "params" : { ":user":  "req"} },
-  "/profile/messages/*": { "title": "Messages", "params" : { "wildcard":  "*"} }
+  "path": "",
+  "params": {},
+  "children": [
+    {
+      "path": "about",
+      "route": "about",
+      "title": "About",
+      "params": {},
+      "children": []
+    },
+    {
+      "path": "profile",
+      "params": {},
+      "children": [
+        {
+          "path": "",
+          "title": "Profile",
+          "params": {},
+          "children": []
+        },
+        {
+          "path": "account",
+          "title": "Account",
+          "params": {},
+          "children": [
+            {
+              "path": "security",
+              "params": {},
+              "children": [
+                {
+                  "path": "password",
+                  "params": {},
+                  "title": "Password",
+                  "children": []
+                },
+                {
+                  "path": "two-factor-auth",
+                  "params": {},
+                  "title": "Two Factor Auth",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "friends",
+          "params": {},
+          "title": "Friends Layout",
+          "children": [
+            {
+              "path": "list",
+              "title": "List",
+              "params": {},
+              "unknown": {
+                "anotherProp": "prop"
+              },
+              "children": []
+            },
+            {
+              "path": "user?",
+              "children": [
+                {
+                  "path": "edit",
+                  "title": "Friend Edit",
+                  "params": {
+                    ":user?": "opt"
+                  }
+                }
+              ]
+            },
+            {
+              "path": ":user",
+              "title": "Friend Profile",
+              "params": {
+                ":user": "req"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "path": "messages",
+          "children": [
+            {
+              "path": "*",
+              "title": "Messages",
+              "params": {
+                "wildcard": "*"
+              }
+            }
+          ]
+        }   
+      ]
+    },
+    {
+      "path": "test",
+      "params": {},
+      "children": [
+        {
+          "path": "empty",
+          "params": {},
+          "children": []
+        },
+        {
+          "path": ":optional?",
+          "title": "Optional",
+          "params": {
+            ":optional?": "opt"
+          },
+          "children": []
+        },
+        {
+          "path": "*",
+          "title": "Wildcard",
+          "params": {
+            "*": "*"
+          },
+          "children": []
+        },
+        {
+          "path": "no-default-export",
+          "title": "No Default Export",
+          "params": {},
+          "children": []
+        }
+      ]
+    }
+  ]
 }
