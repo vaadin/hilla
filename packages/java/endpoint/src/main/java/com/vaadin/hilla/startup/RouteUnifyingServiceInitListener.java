@@ -73,7 +73,7 @@ public class RouteUnifyingServiceInitListener
                 .getResourceAsStream("/META-INF/VAADIN/views.json")) {
             if (source != null) {
                 clientRouteRegistry.clearRoutes();
-                registerAndRecurseChildren(
+                registerAndRecurseChildren("",
                         mapper.readValue(source, new TypeReference<>() {
                         }));
             } else {
@@ -84,11 +84,17 @@ public class RouteUnifyingServiceInitListener
         }
     }
 
-    private void registerAndRecurseChildren(ClientViewConfig view) {
-        clientRouteRegistry.addRoute(view.path(), view);
-        view.children().forEach(child -> {
-            child.setParent(view);
-            registerAndRecurseChildren(child);
-        });
+    private void registerAndRecurseChildren(String basePath,
+            ClientViewConfig view) {
+        var path = view.route().isEmpty() ? basePath
+                : basePath + '/' + view.route();
+        if (view.children() == null || view.children().isEmpty()) {
+            clientRouteRegistry.addRoute(path, view);
+        } else {
+            view.children().forEach(child -> {
+                child.setParent(view);
+                registerAndRecurseChildren(path, child);
+            });
+        }
     }
 }

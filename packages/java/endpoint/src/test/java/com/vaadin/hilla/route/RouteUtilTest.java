@@ -1,6 +1,7 @@
 package com.vaadin.hilla.route;
 
 import java.security.Principal;
+import java.util.List;
 
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.junit.Assert;
@@ -77,6 +78,46 @@ public class RouteUtilTest {
 
         registry.addRoute("/test", new ClientViewConfig("Test", null, true,
                 "/test", false, false, null, null, null, null));
+
+        boolean actual = endpointUtil.isRouteAllowed(request);
+        Assert.assertFalse(actual);
+    }
+
+    @Test
+    public void test_login_required_on_layout() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        request.setUserPrincipal(null);
+
+        var pageWithoutLogin = new ClientViewConfig("Test Page", null, false,
+                "", false, false, null, null, null, null);
+        var layoutWithLogin = new ClientViewConfig("Test Layout", null, true,
+                "/test", false, false, null, List.of(pageWithoutLogin), null,
+                null);
+        pageWithoutLogin.setParent(layoutWithLogin);
+
+        registry.addRoute("/test", pageWithoutLogin);
+
+        boolean actual = endpointUtil.isRouteAllowed(request);
+        Assert.assertFalse(actual);
+    }
+
+    @Test
+    public void test_login_required_on_page() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        request.setUserPrincipal(null);
+
+        var pageWithLogin = new ClientViewConfig("Test Page", null, true, "",
+                false, false, null, null, null, null);
+        var layoutWithoutLogin = new ClientViewConfig("Test Layout", null,
+                false, "/test", false, false, null, List.of(pageWithLogin),
+                null, null);
+        pageWithLogin.setParent(layoutWithoutLogin);
+
+        registry.addRoute("/test", pageWithLogin);
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);

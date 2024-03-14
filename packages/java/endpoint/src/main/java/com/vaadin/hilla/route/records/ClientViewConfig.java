@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Implementation of TypeScript's Hilla ConfigView. Represents a view
@@ -18,7 +16,6 @@ import java.util.Objects;
  *      "https://github.com/vaadin/hilla/tree/main/packages/ts/hilla-file-router/src/utils.ts#L3">ConfigView</a>
  */
 public final class ClientViewConfig {
-    private final String path;
     private final String title;
     private final String[] rolesAllowed;
     private final Boolean requiresLogin;
@@ -35,7 +32,7 @@ public final class ClientViewConfig {
     /**
      * Default constructor with initialization of unknown values.
      */
-    public ClientViewConfig(String path, String title, String[] rolesAllowed,
+    public ClientViewConfig(String title, String[] rolesAllowed,
             Boolean requiresLogin, String route, Boolean lazy, Boolean register,
             ClientViewMenuConfig menu, List<ClientViewConfig> children,
             @JsonProperty("params") Map<String, RouteParamType> routeParameters,
@@ -43,7 +40,6 @@ public final class ClientViewConfig {
         if (other == null) {
             other = new HashMap<>();
         }
-        this.path = path;
         this.title = title;
         this.rolesAllowed = rolesAllowed;
         this.requiresLogin = requiresLogin;
@@ -77,10 +73,6 @@ public final class ClientViewConfig {
     @JsonAnyGetter
     public Map<String, Object> getOther() {
         return other;
-    }
-
-    public String path() {
-        return path;
     }
 
     public String title() {

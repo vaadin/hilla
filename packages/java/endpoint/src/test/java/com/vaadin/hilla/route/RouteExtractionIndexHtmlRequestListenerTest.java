@@ -74,14 +74,15 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         final Map<String, ClientViewConfig> routes = new LinkedHashMap<>();
         routes.put("/home",
                 new ClientViewConfig("Home", null, false, "/home", false, false,
-                        null, Collections.emptyMap(), Collections.emptyMap()));
+                        null, null, Collections.emptyMap(),
+                        Collections.emptyMap()));
         routes.put("/profile",
                 new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
-                        true, "/profile", false, false, null,
+                        true, "/profile", false, false, null, null,
                         Collections.emptyMap(), Collections.emptyMap()));
         routes.put("/user/:userId", new ClientViewConfig("User Profile",
                 new String[] { "ROLE_ADMIN" }, true, "/user/:userId", false,
-                false, null, Map.of(":userId", RouteParamType.REQUIRED),
+                false, null, null, Map.of(":userId", RouteParamType.REQUIRED),
                 Collections.emptyMap()));
         return routes;
     }
