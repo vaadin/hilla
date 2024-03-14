@@ -805,8 +805,7 @@ public class EndpointControllerTest {
         ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
         Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
                 Jackson2ObjectMapperBuilder.class);
-        JacksonProperties mockJacksonProperties = mock(
-                JacksonProperties.class);
+        JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
         when(contextMock.getBean(ObjectMapper.class))
                 .thenReturn(mockSpringObjectMapper);
         when(contextMock.getBean(JacksonProperties.class))
@@ -815,8 +814,7 @@ public class EndpointControllerTest {
                 .thenReturn(mockObjectMapperBuilder);
         when(mockObjectMapperBuilder.createXmlMapper(false))
                 .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build())
-                .thenReturn(mockOwnObjectMapper);
+        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
         when(mockJacksonProperties.getVisibility())
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
@@ -1154,7 +1152,8 @@ public class EndpointControllerTest {
 
     private URL getDefaultOpenApiResourcePathInDevMode() {
         try {
-            return projectFolder.getRoot().toPath().resolve(appConfig.getBuildFolder())
+            return projectFolder.getRoot().toPath()
+                    .resolve(appConfig.getBuildFolder())
                     .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
@@ -1168,7 +1167,8 @@ public class EndpointControllerTest {
                 new ApplicationEndpoint(applicationComponent))).when(context)
                 .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
-        controller.registerEndpoints(getClass().getResource("/com/vaadin/hilla/packages/" + openApiFilename));
+        controller.registerEndpoints(getClass()
+                .getResource("/com/vaadin/hilla/packages/" + openApiFilename));
         return controller.endpointRegistry;
     }
 
@@ -1295,8 +1295,7 @@ public class EndpointControllerTest {
 
         ApplicationContext mockApplicationContext = mockApplicationContext(
                 endpoint);
-        EndpointRegistry registry = new EndpointRegistry(
-                endpointNameChecker);
+        EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
 
         EndpointInvoker invoker = Mockito
                 .spy(new EndpointInvoker(mockApplicationContext,
@@ -1306,9 +1305,10 @@ public class EndpointControllerTest {
         Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
 
         EndpointController connectController = Mockito
-                .spy(new EndpointController(mockApplicationContext,
-                        registry, invoker, csrfChecker));
-        connectController.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+                .spy(new EndpointController(mockApplicationContext, registry,
+                        invoker, csrfChecker));
+        connectController
+                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
         return connectController;
     }
 
@@ -1319,7 +1319,7 @@ public class EndpointControllerTest {
     }
 
     private EndpointController createVaadinControllerWithApplicationContext(
-        ApplicationContext applicationContext) {
+            ApplicationContext applicationContext) {
         try {
             projectFolder.newFolder("build");
         } catch (IOException e) {
@@ -1334,10 +1334,10 @@ public class EndpointControllerTest {
 
         EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
         EndpointController hillaController = controllerMockBuilder
-                .withObjectMapperFactory(
-                        new JacksonObjectMapperFactory.Json())
+                .withObjectMapperFactory(new JacksonObjectMapperFactory.Json())
                 .withApplicationContext(applicationContext).build();
-        hillaController.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+        hillaController
+                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
         return hillaController;
     }
 
@@ -1366,8 +1366,7 @@ public class EndpointControllerTest {
 
     private <T> ApplicationContext mockApplicationContext(T endpoint) {
         Class<?> endpointClass = endpoint.getClass();
-        ApplicationContext contextMock = Mockito
-                .mock(ApplicationContext.class);
+        ApplicationContext contextMock = Mockito.mock(ApplicationContext.class);
         when(contextMock.getBeansWithAnnotation(Endpoint.class)).thenReturn(
                 Collections.singletonMap(endpointClass.getName(), endpoint));
         return contextMock;

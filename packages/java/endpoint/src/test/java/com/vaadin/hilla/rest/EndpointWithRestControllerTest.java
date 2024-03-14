@@ -183,8 +183,9 @@ public class EndpointWithRestControllerTest {
 
     private URL getDefaultOpenApiResourcePathInDevMode() {
         try {
-            return projectFolder.getRoot().toPath().resolve(appConfig.getBuildFolder())
-                .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+            return projectFolder.getRoot().toPath()
+                    .resolve(appConfig.getBuildFolder())
+                    .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

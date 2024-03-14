@@ -16,10 +16,10 @@ import java.net.URL;
 public class EndpointRegistryInitializer implements VaadinServiceInitListener {
 
     private static final Logger LOGGER = LoggerFactory
-        .getLogger(EndpointRegistryInitializer.class);
+            .getLogger(EndpointRegistryInitializer.class);
 
-    public static String openApiResourceName = '/'
-        + EngineConfiguration.OPEN_API_PATH;
+    private static final String OPEN_API_PROD_RESOURCE_PATH = '/'
+            + EngineConfiguration.OPEN_API_PATH;
 
     private final EndpointController endpointController;
 
@@ -36,20 +36,20 @@ public class EndpointRegistryInitializer implements VaadinServiceInitListener {
 
     private URL getOpenApiAsResource(DeploymentConfiguration deploymentConfig) {
         if (deploymentConfig.isProductionMode()) {
-            return getClass().getResource(openApiResourceName);
+            return getClass().getResource(OPEN_API_PROD_RESOURCE_PATH);
         }
         var openApiPathInDevMode = deploymentConfig.getProjectFolder().toPath()
-            .resolve(deploymentConfig.getBuildFolder())
-            .resolve(EngineConfiguration.OPEN_API_PATH);
+                .resolve(deploymentConfig.getBuildFolder())
+                .resolve(EngineConfiguration.OPEN_API_PATH);
         try {
             return openApiPathInDevMode.toFile().exists()
-                ? openApiPathInDevMode.toUri().toURL()
-                : null;
+                    ? openApiPathInDevMode.toUri().toURL()
+                    : null;
         } catch (MalformedURLException e) {
             LOGGER.debug(String.format(
-                "%s Mode: Path %s to resource %s seems to be malformed/could not be parsed. ",
-                deploymentConfig.getMode(), openApiPathInDevMode.toUri(),
-                openApiResourceName), e);
+                    "%s Mode: Path %s to resource %s seems to be malformed/could not be parsed. ",
+                    deploymentConfig.getMode(), openApiPathInDevMode.toUri(),
+                    OPEN_API_PROD_RESOURCE_PATH), e);
             return null;
         }
     }

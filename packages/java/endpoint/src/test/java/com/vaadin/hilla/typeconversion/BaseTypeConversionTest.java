@@ -69,7 +69,9 @@ public abstract class BaseTypeConversionTest {
         EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
         EndpointController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
-        var openApiResource = projectFolder.getRoot().toPath().resolve(appConfig.getBuildFolder()).resolve(EngineConfiguration.OPEN_API_PATH);
+        var openApiResource = projectFolder.getRoot().toPath()
+                .resolve(appConfig.getBuildFolder())
+                .resolve(EngineConfiguration.OPEN_API_PATH);
         controller.registerEndpoints(openApiResource.toUri().toURL());
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }

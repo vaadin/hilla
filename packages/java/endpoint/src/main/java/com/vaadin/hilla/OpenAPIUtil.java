@@ -32,8 +32,8 @@ public class OpenAPIUtil {
      */
     public static String getCurrentOpenAPI(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        return Files.readString(getCurrentOpenAPIPath(buildDirectory,
-                isProductionMode));
+        return Files.readString(
+                getCurrentOpenAPIPath(buildDirectory, isProductionMode));
     }
 
     /**
@@ -48,9 +48,9 @@ public class OpenAPIUtil {
      *             if something went wrong
      */
     public static Path getCurrentOpenAPIPath(Path buildDirectory,
-                                           boolean isProductionMode) throws IOException {
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
-            .loadDirectory(buildDirectory);
+                .loadDirectory(buildDirectory);
         return engineConfiguration.getOpenAPIFile(isProductionMode);
     }
 
