@@ -1,5 +1,4 @@
-/* eslint-disable no-param-reassign */
-import type { AgnosticRoute, RouteModule } from '../types.js';
+import type { AgnosticRoute, Module } from '../types.js';
 
 /**
  * Create a single framework-agnostic route object. Later, it can be transformed into a framework-specific route object,
@@ -10,26 +9,23 @@ import type { AgnosticRoute, RouteModule } from '../types.js';
  *
  * @returns A framework-agnostic route object.
  */
-export function createRoute<C = unknown>(path: string, children?: ReadonlyArray<AgnosticRoute<C>>): AgnosticRoute<C>;
-export function createRoute<C = unknown>(
+export function createRoute(path: string, children?: readonly AgnosticRoute[]): AgnosticRoute;
+export function createRoute(path: string, module: Module, children?: readonly AgnosticRoute[]): AgnosticRoute;
+export function createRoute(
   path: string,
-  module: Readonly<Record<string, unknown>>,
-  children?: ReadonlyArray<AgnosticRoute<C>>,
-): AgnosticRoute<C>;
-export function createRoute<C = unknown>(
-  path: string,
-  moduleOrChildren?: Readonly<Record<string, unknown>> | ReadonlyArray<AgnosticRoute<C>>,
-  children?: ReadonlyArray<AgnosticRoute<C>>,
-): AgnosticRoute<C> {
-  let module: RouteModule<C> | undefined;
+  moduleOrChildren?: Module | readonly AgnosticRoute[],
+  children?: readonly AgnosticRoute[],
+): AgnosticRoute {
+  let module: Module | undefined;
   if (Array.isArray(moduleOrChildren)) {
+    // eslint-disable-next-line no-param-reassign
     children = moduleOrChildren;
   } else {
-    module = moduleOrChildren as RouteModule<C> | undefined;
+    module = moduleOrChildren as Module | undefined;
   }
 
   return {
-    path: module?.config?.route ?? path,
+    path,
     module,
     children,
   };
