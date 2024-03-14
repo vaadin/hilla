@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -72,17 +73,18 @@ public class RouteUnifyingServiceInitListener
     }
 
     protected void registerClientRoutes() {
-        try {
-            final URL source = getClass()
-                    .getResource("/META-INF/VAADIN/views.json");
-            Map<String, ClientViewConfig> clientViews = new HashMap<>();
+        try (var source = getClass()
+                .getResourceAsStream("/META-INF/VAADIN/views.json")) {
             if (source != null) {
-                clientViews = mapper.readValue(source, new TypeReference<>() {
-                });
-            }
+                final Map<String, ClientViewConfig> clientViews = mapper
+                        .readValue(source, new TypeReference<>() {
+                        });
 
-            clientRouteRegistry.clearRoutes();
-            clientViews.forEach(clientRouteRegistry::addRoute);
+                clientRouteRegistry.clearRoutes();
+                clientViews.forEach(clientRouteRegistry::addRoute);
+            } else {
+                LOGGER.warn("Failed to find views.json");
+            }
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
         }

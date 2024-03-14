@@ -1,16 +1,15 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
-import { type ComponentType, createElement } from 'react';
+import { createElement } from 'react';
 import { toReactRouter } from '../../src/runtime/toReactRouter.js';
-import type { AgnosticRoute } from '../../src/types.js';
 import { components, createTestingAgnosticRoutes } from '../utils.js';
 
 use(chaiLike);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('toReactRouter', () => {
-    it('should be able to convert an agnostic routes to React Router routes', () => {
-      const routes: AgnosticRoute<ComponentType> = createTestingAgnosticRoutes();
+    it('should be able to convert agnostic routes to React Router routes', () => {
+      const routes = createTestingAgnosticRoutes();
       const result = toReactRouter(routes);
 
       expect(result).to.be.like({
@@ -35,7 +34,7 @@ describe('@vaadin/hilla-file-router', () => {
                 handle: components.friends.config,
                 children: [
                   {
-                    path: 'list',
+                    path: 'friends-list',
                     element: createElement(components.friendsList.default),
                     handle: components.friendsList.config,
                   },

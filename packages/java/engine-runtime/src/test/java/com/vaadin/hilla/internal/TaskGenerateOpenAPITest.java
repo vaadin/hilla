@@ -42,7 +42,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
-                getClass()::getResource, getClass().getClassLoader());
+                getClass()::getResource, getClass().getClassLoader(), false);
 
         taskGenerateOpenApi.execute();
 
@@ -64,7 +64,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
-                getClass()::getResource, getClass().getClassLoader());
+                getClass()::getResource, getClass().getClassLoader(), false);
 
         taskGenerateOpenApi.execute();
 
@@ -86,7 +86,7 @@ public class TaskGenerateOpenAPITest extends TaskTest {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
                 getTemporaryDirectory().toFile(), getBuildDirectory(),
                 getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
-                getClass()::getResource, getClass().getClassLoader());
+                getClass()::getResource, getClass().getClassLoader(), false);
 
         taskGenerateOpenApi.execute();
 

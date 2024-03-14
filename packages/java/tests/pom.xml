@@ -78,6 +78,17 @@
             <artifactId>vaadin-dev-server</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <!--
+          Due to flow-react opt-out support feature
+          `FrontendUtils.isReactModuleAvailable()` checks, for instance,
+          `TaskUpdatePackages`, React components aren't installed
+          if the flow-react dependency is missing.
+        -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-react</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>

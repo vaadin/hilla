@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +16,14 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import com.vaadin.flow.server.VaadinServletContext;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -38,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
@@ -56,6 +59,7 @@ import com.vaadin.hilla.exception.EndpointException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
@@ -228,8 +232,7 @@ public class EndpointController {
                 return ResponseEntity.badRequest().body(endpointInvoker
                         .createResponseErrorObject(e.getSerializationData()));
             } catch (JsonProcessingException ee) {
-                String errorMessage = String.format(
-                        "Failed to serialize error object for endpoint exception. ");
+                String errorMessage = "Failed to serialize error object for endpoint exception. ";
                 LOGGER.error(errorMessage, e);
                 return ResponseEntity.internalServerError().body(errorMessage);
             }
@@ -250,6 +253,31 @@ public class EndpointController {
 
     }
 
+    private URL getOpenApiAsResource() {
+        var vaadinContext = new VaadinServletContext(
+                ((WebApplicationContext) context).getServletContext());
+        var appConfiguration = ApplicationConfiguration.get(vaadinContext);
+        if (appConfiguration.isProductionMode()
+                || !("/" + EngineConfiguration.OPEN_API_PATH)
+                        .equals(openApiResourceName)) {
+            return getClass().getResource(openApiResourceName);
+        }
+        var openApiPathInDevMode = appConfiguration.getProjectFolder().toPath()
+                .resolve(appConfiguration.getBuildFolder())
+                .resolve(EngineConfiguration.OPEN_API_PATH);
+        try {
+            return openApiPathInDevMode.toFile().exists()
+                    ? openApiPathInDevMode.toUri().toURL()
+                    : null;
+        } catch (MalformedURLException e) {
+            LOGGER.debug(String.format(
+                    "%s Mode: Path %s to resource %s seems to be malformed/could not be parsed. ",
+                    appConfiguration.getMode(), openApiPathInDevMode.toUri(),
+                    openApiResourceName), e);
+            return null;
+        }
+    }
+
     /**
      * Parses the <code>openapi.json</code> file to discover defined endpoints.
      *
@@ -258,7 +286,7 @@ public class EndpointController {
      */
     private void registerEndpointsFromApiDefinition(
             Map<String, Object> knownEndpointBeans) {
-        var resource = getClass().getResource(openApiResourceName);
+        var resource = getOpenApiAsResource();
 
         if (resource == null) {
             LOGGER.debug(

@@ -25,8 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -46,6 +49,8 @@ import com.vaadin.hilla.EndpointControllerMockBuilder;
 
 import jakarta.servlet.ServletContext;
 
+import java.io.IOException;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest
 @Import({ TestEndpoints.class, MyRestController.class })
@@ -61,17 +66,38 @@ public class EndpointWithRestControllerTest {
 
     private ApplicationConfiguration appConfig;
 
+    @Rule
+    public TemporaryFolder projectFolder = new TemporaryFolder();
+
     @Before
     public void setUp() {
-        appConfig = Mockito.mock(ApplicationConfiguration.class);
+        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
+                .mockStatic(ApplicationConfiguration.class)) {
+            try {
+                projectFolder.newFolder("build");
+            } catch (IOException e) {
+                throw new AssertionError(
+                        "Failed to initialize project build folder", e);
+            }
+            appConfig = Mockito.mock(ApplicationConfiguration.class);
+            Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+            Mockito.when(appConfig.getProjectFolder())
+                    .thenReturn(projectFolder.getRoot());
+            Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
+            applicationConfigurationMockedStatic
+                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
+                    .thenReturn(appConfig);
 
-        EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
-        EndpointController controller = controllerMockBuilder
-                .withApplicationContext(applicationContext).build();
-        controller.registerEndpoints();
-        mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
-                .build();
-        Assert.assertNotEquals(null, applicationContext);
+            appConfig = Mockito.mock(ApplicationConfiguration.class);
+
+            EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
+            EndpointController controller = controllerMockBuilder
+                    .withApplicationContext(applicationContext).build();
+            controller.registerEndpoints();
+            mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
+                    .build();
+            Assert.assertNotEquals(null, applicationContext);
+        }
     }
 
     @Test
