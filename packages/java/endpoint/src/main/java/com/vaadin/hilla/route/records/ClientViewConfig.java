@@ -16,40 +16,21 @@ import java.util.Map;
  *      "https://github.com/vaadin/hilla/tree/main/packages/ts/hilla-file-router/src/utils.ts#L3">ConfigView</a>
  */
 public final class ClientViewConfig {
-    private final String title;
-    private final String[] rolesAllowed;
-    private final Boolean requiresLogin;
-    private final String route;
-    private final Boolean lazy;
-    private final Boolean register;
-    private final ClientViewMenuConfig menu;
-    private final List<ClientViewConfig> children;
+    private String title;
+    private String[] rolesAllowed;
+    private Boolean requiresLogin;
+    private String route;
+    private Boolean lazy;
+    private Boolean register;
+    private ClientViewMenuConfig menu;
+    private List<ClientViewConfig> children;
     @JsonProperty("params")
-    private final Map<String, RouteParamType> routeParameters;
+    private Map<String, RouteParamType> routeParameters;
     private final Map<String, Object> other;
     private ClientViewConfig parent;
 
-    /**
-     * Default constructor with initialization of unknown values.
-     */
-    public ClientViewConfig(String title, String[] rolesAllowed,
-            Boolean requiresLogin, String route, Boolean lazy, Boolean register,
-            ClientViewMenuConfig menu, List<ClientViewConfig> children,
-            @JsonProperty("params") Map<String, RouteParamType> routeParameters,
-            Map<String, Object> other) {
-        if (other == null) {
-            other = new HashMap<>();
-        }
-        this.title = title;
-        this.rolesAllowed = rolesAllowed;
-        this.requiresLogin = requiresLogin;
-        this.route = route;
-        this.lazy = lazy;
-        this.register = register;
-        this.menu = menu;
-        this.children = children;
-        this.routeParameters = routeParameters;
-        this.other = other;
+    public ClientViewConfig() {
+        other = new HashMap<>();
     }
 
     /**
@@ -75,27 +56,27 @@ public final class ClientViewConfig {
         return other;
     }
 
-    public String title() {
+    public String getTitle() {
         return title;
     }
 
-    public String[] rolesAllowed() {
+    public String[] getRolesAllowed() {
         return rolesAllowed;
     }
 
-    public Boolean requiresLogin() {
+    public Boolean isRequiresLogin() {
         return requiresLogin;
     }
 
-    public String route() {
+    public String getRoute() {
         return route;
     }
 
-    public Boolean lazy() {
+    public Boolean isLazy() {
         return lazy;
     }
 
-    public Boolean register() {
+    public Boolean isRegister() {
         return register;
     }
 
@@ -103,17 +84,13 @@ public final class ClientViewConfig {
         return menu;
     }
 
-    public List<ClientViewConfig> children() {
+    public List<ClientViewConfig> getChildren() {
         return children;
     }
 
     @JsonProperty("params")
-    public Map<String, RouteParamType> routeParameters() {
+    public Map<String, RouteParamType> getRouteParameters() {
         return routeParameters;
-    }
-
-    public Map<String, Object> other() {
-        return other;
     }
 
     public ClientViewConfig getParent() {
@@ -122,5 +99,42 @@ public final class ClientViewConfig {
 
     public void setParent(ClientViewConfig parent) {
         this.parent = parent;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setRolesAllowed(String[] rolesAllowed) {
+        this.rolesAllowed = rolesAllowed;
+    }
+
+    public void setRequiresLogin(Boolean requiresLogin) {
+        this.requiresLogin = requiresLogin;
+    }
+
+    public void setRoute(String route) {
+        this.route = route;
+    }
+
+    public void setLazy(Boolean lazy) {
+        this.lazy = lazy;
+    }
+
+    public void setRegister(Boolean register) {
+        this.register = register;
+    }
+
+    public void setMenu(ClientViewMenuConfig menu) {
+        this.menu = menu;
+    }
+
+    public void setChildren(List<ClientViewConfig> children) {
+        this.children = children;
+    }
+
+    public void setRouteParameters(
+            Map<String, RouteParamType> routeParameters) {
+        this.routeParameters = routeParameters;
     }
 }

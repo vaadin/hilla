@@ -86,12 +86,12 @@ public class RouteUnifyingServiceInitListener
 
     private void registerAndRecurseChildren(String basePath,
             ClientViewConfig view) {
-        var path = view.route().isEmpty() ? basePath
-                : basePath + '/' + view.route();
-        if (view.children() == null || view.children().isEmpty()) {
+        var path = view.getRoute().isEmpty() ? basePath
+                : basePath + '/' + view.getRoute();
+        if (view.getChildren() == null || view.getChildren().isEmpty()) {
             clientRouteRegistry.addRoute(path, view);
         } else {
-            view.children().forEach(child -> {
+            view.getChildren().forEach(child -> {
                 child.setParent(view);
                 registerAndRecurseChildren(path, child);
             });

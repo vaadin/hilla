@@ -50,11 +50,12 @@ public class RouteUtil {
             ClientViewConfig viewConfig) {
         boolean isAllowed;
 
-        if (viewConfig.requiresLogin() && request.getUserPrincipal() == null) {
+        if (viewConfig.isRequiresLogin()
+                && request.getUserPrincipal() == null) {
             isAllowed = false;
         } else {
             // current logic means that an empty array denies access to all
-            var rolesAllowed = viewConfig.rolesAllowed();
+            var rolesAllowed = viewConfig.getRolesAllowed();
 
             if (rolesAllowed != null) {
                 isAllowed = Arrays.stream(rolesAllowed)

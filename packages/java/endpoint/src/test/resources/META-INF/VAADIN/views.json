@@ -1,41 +1,40 @@
 {
-  "path": "",
+  "route": "",
   "params": {},
   "children": [
     {
-      "path": "about",
       "route": "about",
       "title": "About",
       "params": {},
       "children": []
     },
     {
-      "path": "profile",
+      "route": "profile",
       "params": {},
       "children": [
         {
-          "path": "",
+          "route": "",
           "title": "Profile",
           "params": {},
           "children": []
         },
         {
-          "path": "account",
+          "route": "account",
           "title": "Account",
           "params": {},
           "children": [
             {
-              "path": "security",
+              "route": "security",
               "params": {},
               "children": [
                 {
-                  "path": "password",
+                  "route": "password",
                   "params": {},
                   "title": "Password",
                   "children": []
                 },
                 {
-                  "path": "two-factor-auth",
+                  "route": "two-factor-auth",
                   "params": {},
                   "title": "Two Factor Auth",
                   "children": []
@@ -45,12 +44,12 @@
           ]
         },
         {
-          "path": "friends",
+          "route": "friends",
           "params": {},
           "title": "Friends Layout",
           "children": [
             {
-              "path": "list",
+              "route": "list",
               "title": "List",
               "params": {},
               "unknown": {
@@ -59,10 +58,10 @@
               "children": []
             },
             {
-              "path": "user?",
+              "route": ":user?",
               "children": [
                 {
-                  "path": "edit",
+                  "route": "edit",
                   "title": "Friend Edit",
                   "params": {
                     ":user?": "opt"
@@ -71,7 +70,7 @@
               ]
             },
             {
-              "path": ":user",
+              "route": ":user",
               "title": "Friend Profile",
               "params": {
                 ":user": "req"
@@ -81,30 +80,30 @@
           ]
         },
         {
-          "path": "messages",
+          "route": "messages",
           "children": [
             {
-              "path": "*",
+              "route": "*",
               "title": "Messages",
               "params": {
                 "wildcard": "*"
               }
             }
           ]
-        }   
+        }
       ]
     },
     {
-      "path": "test",
+      "route": "test",
       "params": {},
       "children": [
         {
-          "path": "empty",
+          "route": "empty",
           "params": {},
           "children": []
         },
         {
-          "path": ":optional?",
+          "route": ":optional?",
           "title": "Optional",
           "params": {
             ":optional?": "opt"
@@ -112,7 +111,7 @@
           "children": []
         },
         {
-          "path": "*",
+          "route": "*",
           "title": "Wildcard",
           "params": {
             "*": "*"
@@ -120,7 +119,7 @@
           "children": []
         },
         {
-          "path": "no-default-export",
+          "route": "no-default-export",
           "title": "No Default Export",
           "params": {},
           "children": []

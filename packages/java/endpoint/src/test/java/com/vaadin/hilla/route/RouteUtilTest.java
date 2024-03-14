@@ -32,9 +32,17 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.addUserRole("ROLE_ADMIN");
 
-        registry.addRoute("/test",
-                new ClientViewConfig("Test", new String[] { "ROLE_ADMIN" },
-                        false, "/test", false, false, null, null, null, null));
+        ClientViewConfig config = new ClientViewConfig();
+        config.setTitle("Test");
+        config.setRolesAllowed(new String[] { "ROLE_ADMIN" });
+        config.setRequiresLogin(false);
+        config.setRoute("/test");
+        config.setLazy(false);
+        config.setRegister(false);
+        config.setMenu(null);
+        config.setChildren(null);
+        config.setRouteParameters(null);
+        registry.addRoute("/test", config);
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
@@ -47,9 +55,17 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.addUserRole("ROLE_USER");
 
-        registry.addRoute("/test",
-                new ClientViewConfig("Test", new String[] { "ROLE_ADMIN" },
-                        false, "/test", false, false, null, null, null, null));
+        ClientViewConfig config = new ClientViewConfig();
+        config.setTitle("Test");
+        config.setRolesAllowed(new String[] { "ROLE_ADMIN" });
+        config.setRequiresLogin(false);
+        config.setRoute("/test");
+        config.setLazy(false);
+        config.setRegister(false);
+        config.setMenu(null);
+        config.setChildren(null);
+        config.setRouteParameters(null);
+        registry.addRoute("/test", config);
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
@@ -62,8 +78,17 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(Mockito.mock(Principal.class));
 
-        registry.addRoute("/test", new ClientViewConfig("Test", null, true,
-                "/test", false, false, null, null, null, null));
+        ClientViewConfig config = new ClientViewConfig();
+        config.setTitle("Test");
+        config.setRolesAllowed(null);
+        config.setRequiresLogin(true);
+        config.setRoute("/test");
+        config.setLazy(false);
+        config.setRegister(false);
+        config.setMenu(null);
+        config.setChildren(null);
+        config.setRouteParameters(null);
+        registry.addRoute("/test", config);
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
@@ -76,8 +101,17 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        registry.addRoute("/test", new ClientViewConfig("Test", null, true,
-                "/test", false, false, null, null, null, null));
+        ClientViewConfig config = new ClientViewConfig();
+        config.setTitle("Test");
+        config.setRolesAllowed(null);
+        config.setRequiresLogin(true);
+        config.setRoute("/test");
+        config.setLazy(false);
+        config.setRegister(false);
+        config.setMenu(null);
+        config.setChildren(null);
+        config.setRouteParameters(null);
+        registry.addRoute("/test", config);
 
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
@@ -90,11 +124,28 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        var pageWithoutLogin = new ClientViewConfig("Test Page", null, false,
-                "", false, false, null, null, null, null);
-        var layoutWithLogin = new ClientViewConfig("Test Layout", null, true,
-                "/test", false, false, null, List.of(pageWithoutLogin), null,
-                null);
+        var pageWithoutLogin = new ClientViewConfig();
+        pageWithoutLogin.setTitle("Test Page");
+        pageWithoutLogin.setRolesAllowed(null);
+        pageWithoutLogin.setRequiresLogin(false);
+        pageWithoutLogin.setRoute("");
+        pageWithoutLogin.setLazy(false);
+        pageWithoutLogin.setRegister(false);
+        pageWithoutLogin.setMenu(null);
+        pageWithoutLogin.setChildren(null);
+        pageWithoutLogin.setRouteParameters(null);
+
+        var layoutWithLogin = new ClientViewConfig();
+        layoutWithLogin.setTitle("Test Layout");
+        layoutWithLogin.setRolesAllowed(null);
+        layoutWithLogin.setRequiresLogin(true);
+        layoutWithLogin.setRoute("/test");
+        layoutWithLogin.setLazy(false);
+        layoutWithLogin.setRegister(false);
+        layoutWithLogin.setMenu(null);
+        layoutWithLogin.setChildren(List.of(pageWithoutLogin));
+        layoutWithLogin.setRouteParameters(null);
+
         pageWithoutLogin.setParent(layoutWithLogin);
 
         registry.addRoute("/test", pageWithoutLogin);
@@ -110,11 +161,28 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        var pageWithLogin = new ClientViewConfig("Test Page", null, true, "",
-                false, false, null, null, null, null);
-        var layoutWithoutLogin = new ClientViewConfig("Test Layout", null,
-                false, "/test", false, false, null, List.of(pageWithLogin),
-                null, null);
+        var pageWithLogin = new ClientViewConfig();
+        pageWithLogin.setTitle("Test Page");
+        pageWithLogin.setRolesAllowed(null);
+        pageWithLogin.setRequiresLogin(true);
+        pageWithLogin.setRoute("");
+        pageWithLogin.setLazy(false);
+        pageWithLogin.setRegister(false);
+        pageWithLogin.setMenu(null);
+        pageWithLogin.setChildren(null);
+        pageWithLogin.setRouteParameters(null);
+
+        var layoutWithoutLogin = new ClientViewConfig();
+        layoutWithoutLogin.setTitle("Test Layout");
+        layoutWithoutLogin.setRolesAllowed(null);
+        layoutWithoutLogin.setRequiresLogin(false);
+        layoutWithoutLogin.setRoute("/test");
+        layoutWithoutLogin.setLazy(false);
+        layoutWithoutLogin.setRegister(false);
+        layoutWithoutLogin.setMenu(null);
+        layoutWithoutLogin.setChildren(List.of(pageWithLogin));
+        layoutWithoutLogin.setRouteParameters(null);
+
         pageWithLogin.setParent(layoutWithoutLogin);
 
         registry.addRoute("/test", pageWithLogin);
