@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,6 +51,8 @@ import com.vaadin.hilla.EndpointControllerMockBuilder;
 import jakarta.servlet.ServletContext;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -88,12 +91,10 @@ public class EndpointWithRestControllerTest {
                     .when(() -> ApplicationConfiguration.get(Mockito.any()))
                     .thenReturn(appConfig);
 
-            appConfig = Mockito.mock(ApplicationConfiguration.class);
-
             EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
             EndpointController controller = controllerMockBuilder
                     .withApplicationContext(applicationContext).build();
-            controller.registerEndpoints();
+            controller.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
             mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
                     .build();
             Assert.assertNotEquals(null, applicationContext);
@@ -192,5 +193,14 @@ public class EndpointWithRestControllerTest {
                 context.getAttribute(ApplicationConfiguration.class.getName()))
                 .thenReturn(appConfig);
         return context;
+    }
+
+    private URL getDefaultOpenApiResourcePathInDevMode() {
+        try {
+            return projectFolder.getRoot().toPath().resolve(appConfig.getBuildFolder())
+                .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

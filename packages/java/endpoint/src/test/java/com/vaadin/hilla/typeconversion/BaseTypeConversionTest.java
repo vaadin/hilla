@@ -17,6 +17,7 @@ package com.vaadin.hilla.typeconversion;
 
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -73,7 +74,8 @@ public abstract class BaseTypeConversionTest {
             EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
             EndpointController controller = controllerMockBuilder
                     .withApplicationContext(applicationContext).build();
-            controller.registerEndpoints();
+            var openApiResource = projectFolder.getRoot().toPath().resolve(appConfig.getBuildFolder()).resolve(EngineConfiguration.OPEN_API_PATH);
+            controller.registerEndpoints(openApiResource.toUri().toURL());
             mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
             Assert.assertNotEquals(null, applicationContext);
         }

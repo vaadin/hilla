@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -831,7 +834,7 @@ public class EndpointControllerTest {
                     mock(ServletContext.class), registry);
 
             new EndpointController(contextMock, registry, invoker, null)
-                    .registerEndpoints();
+                    .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
 
             verify(contextMock, never()).getBean(ObjectMapper.class);
             verify(contextMock, times(1))
@@ -1157,6 +1160,15 @@ public class EndpointControllerTest {
         assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
     }
 
+    private URL getDefaultOpenApiResourcePathInDevMode() {
+        try {
+            return projectFolder.getRoot().toPath().resolve(appConfig.getBuildFolder())
+                    .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private EndpointRegistry registerEndpoints(String openApiFilename) {
         var context = Mockito.mock(WebApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
@@ -1164,15 +1176,13 @@ public class EndpointControllerTest {
                 new ApplicationEndpoint(applicationComponent))).when(context)
                 .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
-        controller.setOpenApiResourceName(
-                "/com/vaadin/hilla/packages/" + openApiFilename);
         try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
                 .mockStatic(ApplicationConfiguration.class)) {
             applicationConfigurationMockedStatic
                     .when(() -> ApplicationConfiguration.get(Mockito.any()))
                     .thenReturn(appConfig);
 
-            controller.registerEndpoints();
+            controller.registerEndpoints(getClass().getResource("/com/vaadin/hilla/packages/" + openApiFilename));
         }
         return controller.endpointRegistry;
     }
@@ -1318,7 +1328,7 @@ public class EndpointControllerTest {
             EndpointController connectController = Mockito
                     .spy(new EndpointController(mockApplicationContext,
                             registry, invoker, csrfChecker));
-            connectController.registerEndpoints();
+            connectController.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
             return connectController;
         }
     }
@@ -1353,7 +1363,7 @@ public class EndpointControllerTest {
                     .withObjectMapperFactory(
                             new JacksonObjectMapperFactory.Json())
                     .withApplicationContext(applicationContext).build();
-            hillaController.registerEndpoints();
+            hillaController.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
             return hillaController;
         }
     }
