@@ -49,7 +49,7 @@ public class EndpointRegistryInitializer implements VaadinServiceInitListener {
             LOGGER.debug(String.format(
                     "%s Mode: Path %s to resource %s seems to be malformed/could not be parsed. ",
                     deploymentConfig.getMode(), openApiPathInDevMode.toUri(),
-                    OPEN_API_PROD_RESOURCE_PATH), e);
+                    EngineConfiguration.OPEN_API_PATH), e);
             return null;
         }
     }
