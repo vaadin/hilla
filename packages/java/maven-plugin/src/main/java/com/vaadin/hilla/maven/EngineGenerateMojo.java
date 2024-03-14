@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -56,8 +57,12 @@ public final class EngineGenerateMojo extends AbstractMojo {
             }
             var classLoader = new URLClassLoader(urls.toArray(URL[]::new),
                     getClass().getClassLoader());
-            var parserProcessor = new ParserProcessor(conf, classLoader);
-            var generatorProcessor = new GeneratorProcessor(conf, nodeCommand);
+            var isProduction = project.getActiveProfiles().stream()
+                    .map(Profile::getId).anyMatch("production"::equals);
+            var parserProcessor = new ParserProcessor(conf, classLoader,
+                    isProduction);
+            var generatorProcessor = new GeneratorProcessor(conf, nodeCommand,
+                    isProduction);
 
             parserProcessor.process();
             generatorProcessor.process();

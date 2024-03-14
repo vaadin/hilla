@@ -44,19 +44,25 @@ export type ViewConfig = Readonly<{
 }>;
 
 /**
+ * An unknown JavaScript module.
+ */
+export type Module = Readonly<Record<string, unknown>>;
+
+/**
  * A module that exports a component and an optional view configuration.
  */
-export type RouteModule<C = unknown> = Readonly<{
-  default: C;
-  config?: ViewConfig;
-}>;
+export type RouteModule<C = unknown> = Module &
+  Readonly<{
+    default: C;
+    config?: ViewConfig;
+  }>;
 
 /**
  * A framework-agnostic object generated from the file-based route.
  */
-export type AgnosticRoute<C = unknown> = Readonly<{
+export type AgnosticRoute = Readonly<{
   path: string;
-  module?: RouteModule<C>;
+  module?: Module;
   children?: ReadonlyArray<AgnosticRoute<T>>;
 }>;
 
