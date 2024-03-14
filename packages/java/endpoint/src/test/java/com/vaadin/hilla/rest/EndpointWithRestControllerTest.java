@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,13 +24,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -73,32 +71,20 @@ public class EndpointWithRestControllerTest {
     public TemporaryFolder projectFolder = new TemporaryFolder();
 
     @Before
-    public void setUp() {
-        try (MockedStatic<ApplicationConfiguration> applicationConfigurationMockedStatic = Mockito
-                .mockStatic(ApplicationConfiguration.class)) {
-            try {
-                projectFolder.newFolder("build");
-            } catch (IOException e) {
-                throw new AssertionError(
-                        "Failed to initialize project build folder", e);
-            }
-            appConfig = Mockito.mock(ApplicationConfiguration.class);
-            Mockito.when(appConfig.isProductionMode()).thenReturn(false);
-            Mockito.when(appConfig.getProjectFolder())
-                    .thenReturn(projectFolder.getRoot());
-            Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
-            applicationConfigurationMockedStatic
-                    .when(() -> ApplicationConfiguration.get(Mockito.any()))
-                    .thenReturn(appConfig);
+    public void setUp() throws IOException {
+        projectFolder.newFolder("build");
+        appConfig = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+        Mockito.when(appConfig.getProjectFolder())
+                .thenReturn(projectFolder.getRoot());
+        Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
 
-            EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
-            EndpointController controller = controllerMockBuilder
-                    .withApplicationContext(applicationContext).build();
-            controller.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
-            mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
-                    .build();
-            Assert.assertNotEquals(null, applicationContext);
-        }
+        EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
+        EndpointController controller = controllerMockBuilder
+                .withApplicationContext(applicationContext).build();
+        controller.registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+        mockMvcForEndpoint = MockMvcBuilders.standaloneSetup(controller)
+                .build();
     }
 
     @Test
