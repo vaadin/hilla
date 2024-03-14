@@ -14,6 +14,7 @@
     "@vaadin/hilla-react-auth": "{{version}}",
     "@vaadin/hilla-react-crud": "{{version}}",
     "@vaadin/hilla-react-form": "{{version}}",
+    "@vaadin/hilla-react-i18n": "{{version}}",
     "@vaadin/hilla-react-signals": "{{version}}",
     "@vaadin/hilla-file-router": "{{version}}"
   },

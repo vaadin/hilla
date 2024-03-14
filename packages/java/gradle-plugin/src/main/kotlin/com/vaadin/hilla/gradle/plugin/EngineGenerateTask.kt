@@ -71,8 +71,9 @@ public open class EngineGenerateTask : DefaultTask() {
                 urls.toTypedArray(),
                 javaClass.classLoader
             )
-            val parserProcessor = ParserProcessor(conf, classLoader)
-            val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand)
+            val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
+            val parserProcessor = ParserProcessor(conf, classLoader, isProductionMode)
+            val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand, isProductionMode)
 
             parserProcessor.process()
             generatorProcessor.process()

@@ -103,7 +103,7 @@ public class Hotswapper {
             throws IOException {
         Set<String> changedClassesSet = Set.of(changedClasses);
         Set<String> classesUsedInEndpoints = EndpointCodeGenerator.getInstance()
-                .getClassesUsedInOpenApi();
+                .getClassesUsedInOpenApi(false);
         for (String classUsedInEndpoints : classesUsedInEndpoints) {
             if (changedClassesSet.contains(classUsedInEndpoints)) {
                 getLogger().debug("The changed class " + classesUsedInEndpoints
