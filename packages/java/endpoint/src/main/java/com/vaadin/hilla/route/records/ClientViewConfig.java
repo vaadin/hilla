@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implementation of TypeScript's Hilla ConfigView. Represents a view
@@ -136,5 +138,40 @@ public final class ClientViewConfig {
     public void setRouteParameters(
             Map<String, RouteParamType> routeParameters) {
         this.routeParameters = routeParameters;
+    }
+
+    @Override
+    public String toString() {
+        return "ClientViewConfig{" + "title='" + title + '\''
+                + ", rolesAllowed=" + Arrays.toString(rolesAllowed)
+                + ", requiresLogin=" + requiresLogin + ", route='" + route
+                + '\'' + ", lazy=" + lazy + ", register=" + register + ", menu="
+                + menu + ", other=" + other + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ClientViewConfig that = (ClientViewConfig) o;
+        return Objects.equals(title, that.title)
+                && Arrays.equals(rolesAllowed, that.rolesAllowed)
+                && Objects.equals(requiresLogin, that.requiresLogin)
+                && Objects.equals(route, that.route)
+                && Objects.equals(lazy, that.lazy)
+                && Objects.equals(register, that.register)
+                && Objects.equals(menu, that.menu)
+                && Objects.equals(other, that.other);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(title, route, lazy, register, menu, other);
+        result = 31 * result + Arrays.hashCode(rolesAllowed);
+        return result;
     }
 }
