@@ -1,4 +1,4 @@
-import { batch, signal, type Signal } from '@vaadin/hilla-react-signals';
+import { batch, type ReadonlySignal, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
 import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
@@ -21,16 +21,21 @@ function determineInitialLanguage(options?: I18nOptions): string {
 export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
+  readonly #initialized: Signal<boolean> = signal(false);
   readonly #language: Signal<string | undefined> = signal(undefined);
   readonly #translations: Signal<Translations> = signal({});
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
   #formatCache: FormatCache = new FormatCache(navigator.language);
 
-  get language(): Signal<string | undefined> {
+  get initialized(): ReadonlySignal<boolean> {
+    return this.#initialized;
+  }
+
+  get language(): ReadonlySignal<string | undefined> {
     return this.#language;
   }
 
-  get resolvedLanguage(): Signal<string | undefined> {
+  get resolvedLanguage(): ReadonlySignal<string | undefined> {
     return this.#resolvedLanguage;
   }
 
@@ -62,6 +67,7 @@ export class I18n {
       this.#language.value = newLanguage;
       this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
       this.#formatCache = new FormatCache(newLanguage);
+      this.#initialized.value = true;
 
       if (updateSettings) {
         updateLanguageSettings({
