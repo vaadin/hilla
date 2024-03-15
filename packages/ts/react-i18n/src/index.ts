@@ -26,6 +26,16 @@ export class I18n {
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
   #formatCache: FormatCache = new FormatCache(navigator.language);
 
+  constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (!(window as any).Vaadin?.featureFlags?.hillaI18n) {
+      // Remove when removing feature flag
+      throw new Error(
+        `The Hilla I18n API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.hillaI18n=true to vaadin-featureflags.properties`,
+      );
+    }
+  }
+
   get language(): Signal<string | undefined> {
     return this.#language;
   }
