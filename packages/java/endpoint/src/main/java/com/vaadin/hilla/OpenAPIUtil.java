@@ -32,10 +32,26 @@ public class OpenAPIUtil {
      */
     public static String getCurrentOpenAPI(Path buildDirectory,
             boolean isProductionMode) throws IOException {
+        return Files.readString(
+                getCurrentOpenAPIPath(buildDirectory, isProductionMode));
+    }
+
+    /**
+     * Returns the path to open api file from the build directory.
+     *
+     * @param buildDirectory
+     *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
+     * @return the Path to the openapi json file
+     * @throws IOException
+     *             if something went wrong
+     */
+    public static Path getCurrentOpenAPIPath(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
-        return Files.readString(
-                engineConfiguration.getOpenAPIFile(isProductionMode));
+        return engineConfiguration.getOpenAPIFile(isProductionMode);
     }
 
     /**

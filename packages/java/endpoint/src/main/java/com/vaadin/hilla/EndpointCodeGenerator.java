@@ -87,7 +87,9 @@ public class EndpointCodeGenerator {
                 engineConfiguration, nodeExecutable, false);
         generator.process();
 
-        this.endpointController.registerEndpoints();
+        var openApiPath = OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory,
+                false);
+        this.endpointController.registerEndpoints(openApiPath.toUri().toURL());
     }
 
     private void initIfNeeded() {
