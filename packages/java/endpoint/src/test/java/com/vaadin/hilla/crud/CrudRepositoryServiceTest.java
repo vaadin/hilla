@@ -36,8 +36,7 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
 @ContextConfiguration(classes = { CrudConfiguration.class })
-@EnableAutoConfiguration(exclude = { EndpointController.class,
-        PushConfigurer.class })
+@EnableAutoConfiguration
 public class CrudRepositoryServiceTest {
 
     @Repository

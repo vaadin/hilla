@@ -99,9 +99,6 @@ public class EndpointController {
 
     private final EndpointInvoker endpointInvoker;
 
-    private String openApiResourceName = '/'
-            + EngineConfiguration.OPEN_API_PATH;
-
     /**
      * A constructor used to initialize the controller.
      *
@@ -124,23 +121,10 @@ public class EndpointController {
     }
 
     /**
-     * Sets the name of the OpenAPI definition resource.
-     * <p>
-     * The default value is {@code /com/vaadin/hilla/openapi.json}.
-     *
-     * @param openApiResourceName
-     *            the name of the OpenAPI definition resource
-     */
-    void setOpenApiResourceName(String openApiResourceName) {
-        this.openApiResourceName = openApiResourceName;
-    }
-
-    /**
      * Initializes the controller by registering all endpoints found in the
      * OpenApi definition or, as a fallback, in the Spring context.
      */
-    @PostConstruct
-    public void registerEndpoints() {
+    public void registerEndpoints(URL openApiResource) {
         // Spring returns bean names in lower camel case, while Hilla names
         // endpoints in upper camel case, so a case-insensitive map is used to
         // ease searching
@@ -152,7 +136,7 @@ public class EndpointController {
 
         // By default, only register those endpoints included in the Hilla
         // OpenAPI definition file
-        registerEndpointsFromApiDefinition(endpointBeans);
+        registerEndpointsFromApiDefinition(endpointBeans, openApiResource);
 
         if (endpointRegistry.isEmpty() && !endpointBeans.isEmpty()) {
             LOGGER.debug("No endpoints found in openapi.json:"
@@ -253,31 +237,6 @@ public class EndpointController {
 
     }
 
-    private URL getOpenApiAsResource() {
-        var vaadinContext = new VaadinServletContext(
-                ((WebApplicationContext) context).getServletContext());
-        var appConfiguration = ApplicationConfiguration.get(vaadinContext);
-        if (appConfiguration.isProductionMode()
-                || !("/" + EngineConfiguration.OPEN_API_PATH)
-                        .equals(openApiResourceName)) {
-            return getClass().getResource(openApiResourceName);
-        }
-        var openApiPathInDevMode = appConfiguration.getProjectFolder().toPath()
-                .resolve(appConfiguration.getBuildFolder())
-                .resolve(EngineConfiguration.OPEN_API_PATH);
-        try {
-            return openApiPathInDevMode.toFile().exists()
-                    ? openApiPathInDevMode.toUri().toURL()
-                    : null;
-        } catch (MalformedURLException e) {
-            LOGGER.debug(String.format(
-                    "%s Mode: Path %s to resource %s seems to be malformed/could not be parsed. ",
-                    appConfiguration.getMode(), openApiPathInDevMode.toUri(),
-                    openApiResourceName), e);
-            return null;
-        }
-    }
-
     /**
      * Parses the <code>openapi.json</code> file to discover defined endpoints.
      *
@@ -285,15 +244,13 @@ public class EndpointController {
      *            the endpoint beans found in the Spring context
      */
     private void registerEndpointsFromApiDefinition(
-            Map<String, Object> knownEndpointBeans) {
-        var resource = getOpenApiAsResource();
+            Map<String, Object> knownEndpointBeans, URL openApiResource) {
 
-        if (resource == null) {
+        if (openApiResource == null) {
             LOGGER.debug(
-                    "Resource '{}' is not available: endpoints cannot be registered yet",
-                    openApiResourceName);
+                    "Resource 'hilla-openapi.json' is not available: endpoints cannot be registered yet");
         } else {
-            try (var stream = resource.openStream()) {
+            try (var stream = openApiResource.openStream()) {
                 // Read the openapi.json file and extract the tags, which in
                 // turn define the endpoints and their implementation classes
                 var rootNode = new ObjectMapper().readTree(stream);
