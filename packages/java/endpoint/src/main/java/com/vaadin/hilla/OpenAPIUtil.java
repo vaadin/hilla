@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,11 +14,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for interacting with the generated openapi.json.
  */
 public class OpenAPIUtil {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(OpenAPIUtil.class);
 
     /**
      * Reads the open api file from the build directory.
@@ -32,8 +38,14 @@ public class OpenAPIUtil {
      */
     public static String getCurrentOpenAPI(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        return Files.readString(
-                getCurrentOpenAPIPath(buildDirectory, isProductionMode));
+        var openAPIPath = getCurrentOpenAPIPath(buildDirectory,
+                isProductionMode);
+        if (openAPIPath.isEmpty()) {
+            LOGGER.debug(
+                    "Trying to read the non-existing OpenApi json file. Empty string is returned.");
+            return "";
+        }
+        return Files.readString(openAPIPath.get());
     }
 
     /**
@@ -47,11 +59,15 @@ public class OpenAPIUtil {
      * @throws IOException
      *             if something went wrong
      */
-    public static Path getCurrentOpenAPIPath(Path buildDirectory,
+    public static Optional<Path> getCurrentOpenAPIPath(Path buildDirectory,
             boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
-        return engineConfiguration.getOpenAPIFile(isProductionMode);
+        if (engineConfiguration == null) {
+            return Optional.empty();
+        }
+        return Optional
+                .of(engineConfiguration.getOpenAPIFile(isProductionMode));
     }
 
     /**
