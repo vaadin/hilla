@@ -20,10 +20,10 @@ import java.util.Objects;
 public final class ClientViewConfig {
     private String title;
     private String[] rolesAllowed;
-    private Boolean requiresLogin;
+    private boolean requiresLogin;
     private String route;
-    private Boolean lazy;
-    private Boolean register;
+    private boolean lazy;
+    private boolean register;
     private ClientViewMenuConfig menu;
     private List<ClientViewConfig> children;
     @JsonProperty("params")
@@ -66,7 +66,7 @@ public final class ClientViewConfig {
         return rolesAllowed;
     }
 
-    public Boolean isRequiresLogin() {
+    public boolean isRequiresLogin() {
         return requiresLogin;
     }
 
@@ -74,11 +74,11 @@ public final class ClientViewConfig {
         return route;
     }
 
-    public Boolean isLazy() {
+    public boolean isLazy() {
         return lazy;
     }
 
-    public Boolean isRegister() {
+    public boolean isRegister() {
         return register;
     }
 
@@ -111,7 +111,7 @@ public final class ClientViewConfig {
         this.rolesAllowed = rolesAllowed;
     }
 
-    public void setRequiresLogin(Boolean requiresLogin) {
+    public void setRequiresLogin(boolean requiresLogin) {
         this.requiresLogin = requiresLogin;
     }
 
@@ -119,11 +119,11 @@ public final class ClientViewConfig {
         this.route = route;
     }
 
-    public void setLazy(Boolean lazy) {
+    public void setLazy(boolean lazy) {
         this.lazy = lazy;
     }
 
-    public void setRegister(Boolean register) {
+    public void setRegister(boolean register) {
         this.register = register;
     }
 
