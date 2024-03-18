@@ -44,10 +44,6 @@ public final class EngineConfigureMojo extends AbstractMojo {
 
     private static final String LEGACY_PROJECT_FRONTEND_PATH = "./frontend";
 
-    @Parameter(defaultValue = "${project.basedir}/"
-            + LEGACY_PROJECT_FRONTEND_PATH)
-    private File legacyFrontendFolder;
-
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
@@ -61,6 +57,8 @@ public final class EngineConfigureMojo extends AbstractMojo {
             return;
         }
         try {
+            var legacyFrontendFolder = project.getBasedir().toPath()
+                    .resolve(LEGACY_PROJECT_FRONTEND_PATH).toFile();
             if (legacyFrontendFolder.exists()) {
                 generatedTsFolder = legacyFrontendFolder.toPath()
                         .resolve("generated").toFile();
