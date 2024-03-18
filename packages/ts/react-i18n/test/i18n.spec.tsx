@@ -126,6 +126,12 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.language.value).to.equal(initialLanguage);
         expect(i18n.resolvedLanguage.value).to.equal(initialLanguage);
       });
+
+      it('should mark itself as initialized after configuration', async () => {
+        expect(i18n.initialized.value).to.be.false;
+        await i18n.configure();
+        expect(i18n.initialized.value).to.be.true;
+      });
     });
 
     describe('language', () => {
@@ -208,6 +214,21 @@ describe('@vaadin/hilla-react-i18n', () => {
         // Change language
         await i18n.setLanguage('de-DE');
         expect(effectSpy.calledOnceWith('de-DE', 'Stadt')).to.be.true;
+      });
+
+      it('should run effects when initialized changes', async () => {
+        const effectSpy = sinon.spy();
+        effect(() => {
+          effectSpy(i18n.initialized.value);
+        });
+
+        // Runs once initially
+        expect(effectSpy.calledOnceWith(false)).to.be.true;
+        effectSpy.resetHistory();
+
+        // Configure initial language
+        await i18n.configure({ language: 'en-US' });
+        expect(effectSpy.calledOnceWith(true)).to.be.true;
       });
     });
 
@@ -337,6 +358,18 @@ describe('@vaadin/hilla-react-i18n', () => {
         // Change language
         await i18n.setLanguage('de-DE');
         expect(getByText('Memoized translation: Stadt')).to.exist;
+      });
+
+      it('should allow rendering a placeholder while i18n is not initialized', async () => {
+        function TestPlaceholderComponent() {
+          return <div>{i18n.initialized.value ? 'Ready' : 'Loading'}</div>;
+        }
+
+        const { getByText } = render(<TestPlaceholderComponent />);
+
+        expect(getByText('Loading')).to.exist;
+        await i18n.configure({ language: 'en-US' });
+        expect(getByText('Ready')).to.exist;
       });
     });
 
