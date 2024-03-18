@@ -12,7 +12,7 @@
     "lit": "3.1.2"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7",
+    "@babel/preset-react": "7.23.3",
     "@rollup/plugin-replace": "5.0.5",
     "@rollup/pluginutils": "5.1.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -42,25 +42,25 @@
     "dependencies": {
       "@polymer/polymer": "3.5.1",
       "@vaadin/common-frontend": "0.0.19",
-      "@vaadin/hilla-frontend": "24.4.0-alpha14",
-      "@vaadin/hilla-lit-form": "24.4.0-alpha14",
+      "@vaadin/hilla-frontend": "24.4.0-alpha15",
+      "@vaadin/hilla-lit-form": "24.4.0-alpha15",
       "@vaadin/router": "1.7.5",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.2"
     },
     "devDependencies": {
-      "@babel/preset-react": "^7",
+      "@babel/preset-react": "7.23.3",
       "@rollup/plugin-replace": "5.0.5",
       "@rollup/pluginutils": "5.1.0",
-      "@vaadin/hilla-generator-cli": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-core": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-plugin-backbone": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-plugin-barrel": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-plugin-client": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-plugin-model": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-plugin-push": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-plugin-subtypes": "24.4.0-alpha14",
-      "@vaadin/hilla-generator-utils": "24.4.0-alpha14",
+      "@vaadin/hilla-generator-cli": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-core": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-plugin-backbone": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-plugin-barrel": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-plugin-client": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-plugin-model": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-plugin-push": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-plugin-subtypes": "24.4.0-alpha15",
+      "@vaadin/hilla-generator-utils": "24.4.0-alpha15",
       "@vitejs/plugin-react": "4.2.1",
       "async": "3.2.5",
       "glob": "10.3.10",
@@ -75,7 +75,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "c55fa963be29ce697c4ad68921431b782c216a665cbc732b8af5236def848c54"
+    "hash": "16fe7cd0f8057c50d8c7037e8e16e0a4cdfe41fe1ee534f6032949f1f6147583"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
