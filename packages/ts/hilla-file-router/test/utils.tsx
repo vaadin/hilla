@@ -2,12 +2,10 @@ import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { ComponentType, JSX } from 'react';
+import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
-import type { ServerViewConfig } from '../src/shared/internal.js';
-import { RouteParamType } from '../src/shared/routeParamType.js';
-import type { AgnosticRoute, RouteModule } from '../src/types.js';
+import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
@@ -224,105 +222,6 @@ export const components = {
     config: { title: 'Server' },
   },
 } satisfies Record<string, RouteModule>;
-
-export function createTestingAgnosticRoutes(): AgnosticRoute {
-  return {
-    path: '',
-    children: [
-      {
-        path: 'nameToReplace',
-        module: components.about,
-      },
-      {
-        path: 'hidden',
-        module: components.hidden,
-      },
-      {
-        path: 'profile',
-        children: [
-          {
-            path: 'friends',
-            module: components.friends,
-            children: [
-              {
-                path: 'list',
-                module: components.friendsList,
-              },
-              {
-                path: ':user',
-                module: components.friend,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        path: 'test',
-        children: [
-          {
-            path: '*',
-            module: components.wildcard,
-          },
-          {
-            path: ':optional?',
-            module: components.optional,
-          },
-        ],
-      },
-    ],
-  };
-}
-
-export function createTestingViewMap(): ServerViewConfig {
-  return {
-    route: '',
-    params: {},
-    children: [
-      { route: 'about', title: 'About', params: {}, children: [] },
-      {
-        route: 'profile',
-        params: {},
-        children: [
-          { route: '', title: 'Profile', params: {}, children: [] },
-          {
-            route: 'account',
-            title: 'Account',
-            params: {},
-            children: [
-              {
-                route: 'security',
-                params: {},
-                children: [
-                  { route: 'password', params: {}, title: 'Password', children: [] },
-                  { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth', children: [] },
-                ],
-              },
-            ],
-          },
-          {
-            route: 'friends',
-            params: {},
-            title: 'Friends Layout',
-            children: [
-              { route: 'list', title: 'List', params: {}, children: [] },
-              { route: ':user', title: 'User', params: { ':user': RouteParamType.Required }, children: [] },
-            ],
-          },
-        ],
-      },
-      {
-        route: 'test',
-        params: {},
-        children: [
-          { route: 'empty', params: {}, children: [] },
-          { route: ':optional?', title: 'Optional', params: { ':optional?': RouteParamType.Optional }, children: [] },
-          { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard }, children: [] },
-          { route: 'no-default-export', title: 'No Default Export', params: {}, children: [] },
-        ],
-      },
-    ],
-  };
-}
 
 export function createLogger(): Logger {
   return {
