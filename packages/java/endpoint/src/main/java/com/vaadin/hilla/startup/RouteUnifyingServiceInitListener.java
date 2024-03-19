@@ -18,6 +18,7 @@ package com.vaadin.hilla.startup;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.route.ClientRouteRegistry;
@@ -28,9 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
@@ -67,14 +67,15 @@ public class RouteUnifyingServiceInitListener
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
-        registerClientRoutes();
+        registerClientRoutes(event.getSource().getDeploymentConfiguration());
         event.addIndexHtmlRequestListener(
                 routeExtractionIndexHtmlRequestListener);
     }
 
-    protected void registerClientRoutes() {
-        try (var source = getClass()
-                .getResourceAsStream("/META-INF/VAADIN/views.json")) {
+    protected void registerClientRoutes(
+            DeploymentConfiguration deploymentConfiguration) {
+        try (var source = getViewsJsonAsResource(deploymentConfiguration)
+                .openStream()) {
             if (source != null) {
                 final Map<String, ClientViewConfig> clientViews = mapper
                         .readValue(source, new TypeReference<>() {
@@ -88,5 +89,15 @@ public class RouteUnifyingServiceInitListener
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
         }
+    }
+
+    private URL getViewsJsonAsResource(DeploymentConfiguration deploymentConfiguration)
+            throws MalformedURLException {
+        var isProductionMode = deploymentConfiguration.isProductionMode();
+        if (isProductionMode) {
+            return getClass().getResource("/META-INF/VAADIN/views.json");
+        }
+        return deploymentConfiguration.getFrontendFolder().toPath()
+                .resolve("generated").resolve("views.json").toUri().toURL();
     }
 }
