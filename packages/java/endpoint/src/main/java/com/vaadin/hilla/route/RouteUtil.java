@@ -50,7 +50,7 @@ public class RouteUtil {
             ClientViewConfig viewConfig) {
         boolean isAllowed;
 
-        if (viewConfig.isRequiresLogin()
+        if (viewConfig.isLoginRequired()
                 && request.getUserPrincipal() == null) {
             isAllowed = false;
         } else {

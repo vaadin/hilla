@@ -76,10 +76,10 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         ClientViewConfig homeConfig = new ClientViewConfig();
         homeConfig.setTitle("Home");
         homeConfig.setRolesAllowed(null);
-        homeConfig.setRequiresLogin(false);
+        homeConfig.setLoginRequired(false);
         homeConfig.setRoute("/home");
         homeConfig.setLazy(false);
-        homeConfig.setRegister(false);
+        homeConfig.setAutoRegistered(false);
         homeConfig.setMenu(null);
         homeConfig.setChildren(Collections.emptyList());
         homeConfig.setRouteParameters(Collections.emptyMap());
@@ -88,10 +88,10 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         ClientViewConfig profileConfig = new ClientViewConfig();
         profileConfig.setTitle("Profile");
         profileConfig.setRolesAllowed(new String[] { "ROLE_USER" });
-        profileConfig.setRequiresLogin(true);
+        profileConfig.setLoginRequired(true);
         profileConfig.setRoute("/profile");
         profileConfig.setLazy(false);
-        profileConfig.setRegister(false);
+        profileConfig.setAutoRegistered(false);
         profileConfig.setMenu(null);
         profileConfig.setChildren(Collections.emptyList());
         profileConfig.setRouteParameters(Collections.emptyMap());
@@ -100,10 +100,10 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
         ClientViewConfig userProfileConfig = new ClientViewConfig();
         userProfileConfig.setTitle("User Profile");
         userProfileConfig.setRolesAllowed(new String[] { "ROLE_ADMIN" });
-        userProfileConfig.setRequiresLogin(true);
+        userProfileConfig.setLoginRequired(true);
         userProfileConfig.setRoute("/user/:userId");
         userProfileConfig.setLazy(false);
-        userProfileConfig.setRegister(false);
+        userProfileConfig.setAutoRegistered(false);
         userProfileConfig.setMenu(null);
         userProfileConfig.setChildren(Collections.emptyList());
         userProfileConfig

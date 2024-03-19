@@ -20,10 +20,10 @@ import java.util.Objects;
 public final class ClientViewConfig {
     private String title;
     private String[] rolesAllowed;
-    private boolean requiresLogin;
+    private boolean loginRequired;
     private String route;
     private boolean lazy;
-    private boolean register;
+    private boolean autoRegistered;
     private ClientViewMenuConfig menu;
     private List<ClientViewConfig> children;
     @JsonProperty("params")
@@ -66,8 +66,8 @@ public final class ClientViewConfig {
         return rolesAllowed;
     }
 
-    public boolean isRequiresLogin() {
-        return requiresLogin;
+    public boolean isLoginRequired() {
+        return loginRequired;
     }
 
     public String getRoute() {
@@ -78,8 +78,8 @@ public final class ClientViewConfig {
         return lazy;
     }
 
-    public boolean isRegister() {
-        return register;
+    public boolean isAutoRegistered() {
+        return autoRegistered;
     }
 
     public ClientViewMenuConfig menu() {
@@ -111,8 +111,8 @@ public final class ClientViewConfig {
         this.rolesAllowed = rolesAllowed;
     }
 
-    public void setRequiresLogin(boolean requiresLogin) {
-        this.requiresLogin = requiresLogin;
+    public void setLoginRequired(boolean loginRequired) {
+        this.loginRequired = loginRequired;
     }
 
     public void setRoute(String route) {
@@ -123,8 +123,8 @@ public final class ClientViewConfig {
         this.lazy = lazy;
     }
 
-    public void setRegister(boolean register) {
-        this.register = register;
+    public void setAutoRegistered(boolean autoRegistered) {
+        this.autoRegistered = autoRegistered;
     }
 
     public void setMenu(ClientViewMenuConfig menu) {
@@ -144,9 +144,9 @@ public final class ClientViewConfig {
     public String toString() {
         return "ClientViewConfig{" + "title='" + title + '\''
                 + ", rolesAllowed=" + Arrays.toString(rolesAllowed)
-                + ", requiresLogin=" + requiresLogin + ", route='" + route
-                + '\'' + ", lazy=" + lazy + ", register=" + register + ", menu="
-                + menu + ", other=" + other + '}';
+                + ", requiresLogin=" + loginRequired + ", route='" + route
+                + '\'' + ", lazy=" + lazy + ", register=" + autoRegistered
+                + ", menu=" + menu + ", other=" + other + '}';
     }
 
     @Override
@@ -160,17 +160,18 @@ public final class ClientViewConfig {
         ClientViewConfig that = (ClientViewConfig) o;
         return Objects.equals(title, that.title)
                 && Arrays.equals(rolesAllowed, that.rolesAllowed)
-                && Objects.equals(requiresLogin, that.requiresLogin)
+                && Objects.equals(loginRequired, that.loginRequired)
                 && Objects.equals(route, that.route)
                 && Objects.equals(lazy, that.lazy)
-                && Objects.equals(register, that.register)
+                && Objects.equals(autoRegistered, that.autoRegistered)
                 && Objects.equals(menu, that.menu)
                 && Objects.equals(other, that.other);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(title, route, lazy, register, menu, other);
+        int result = Objects.hash(title, route, lazy, autoRegistered, menu,
+                other);
         result = 31 * result + Arrays.hashCode(rolesAllowed);
         return result;
     }
