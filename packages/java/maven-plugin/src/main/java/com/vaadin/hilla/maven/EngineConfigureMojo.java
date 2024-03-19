@@ -41,6 +41,9 @@ public final class EngineConfigureMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.basedir}/"
             + FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
     private File generatedTsFolder;
+
+    private static final String LEGACY_PROJECT_FRONTEND_PATH = "./frontend";
+
     @Parameter(defaultValue = "${project}", readonly = true)
     private MavenProject project;
 
@@ -49,13 +52,17 @@ public final class EngineConfigureMojo extends AbstractMojo {
 
         if (!FlowModeAbstractMojo.isHillaAvailable(project)) {
             getLog().warn(
-                    """
-                            The 'configure' goal is only meant to be used in Hilla projects with endpoints.
-                            """
+                    "The 'configure' goal is only meant to be used in Hilla projects with endpoints."
                             .stripIndent());
             return;
         }
         try {
+            var legacyFrontendFolder = project.getBasedir().toPath()
+                    .resolve(LEGACY_PROJECT_FRONTEND_PATH).toFile();
+            if (legacyFrontendFolder.exists()) {
+                generatedTsFolder = legacyFrontendFolder.toPath()
+                        .resolve("generated").toFile();
+            }
             var buildDir = project.getBuild().getDirectory();
             var conf = new EngineConfiguration.Builder(
                     project.getBasedir().toPath())

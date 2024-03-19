@@ -40,6 +40,8 @@ public open class EngineConfigureTask : DefaultTask() {
         description = "Hilla Configure Task"
     }
 
+    private val legacyProjectFrontendPath = "./frontend"
+
     @TaskAction
     public fun engineConfigure() {
         val extension: EngineProjectExtension = EngineProjectExtension.get(project)
@@ -53,14 +55,20 @@ public open class EngineConfigureTask : DefaultTask() {
             parser.setPackages(extension.exposedPackagesToParser)
         }
 
-        val projectBuildDir = project.buildDir.toPath()
+        val projectBuildDir = project.layout.buildDirectory.get().asFile.toPath()
         val projectClassesDir = projectBuildDir.resolve("classes")
         val classPathElements = (sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet)
             .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
 
+        var generatedTsFolder = vaadinExtension.generatedTsFolder.get().toPath()
+        val legacyFrontendFolder = project.projectDir.toPath().resolve(legacyProjectFrontendPath)
+        if (Files.exists(legacyFrontendFolder)) {
+            generatedTsFolder = legacyFrontendFolder.resolve("generated")
+        }
+
         val conf = EngineConfiguration.Builder(project.projectDir.toPath())
             .classPath(classPathElements)
-            .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
+            .outputDir(generatedTsFolder)
             .generator(generator)
             .parser(parser)
             .buildDir(vaadinExtension.projectBuildDir.get())
