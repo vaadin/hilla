@@ -91,7 +91,8 @@ public class RouteUnifyingServiceInitListener
         }
     }
 
-    private URL getViewsJsonAsResource(DeploymentConfiguration deploymentConfiguration)
+    private URL getViewsJsonAsResource(
+            DeploymentConfiguration deploymentConfiguration)
             throws MalformedURLException {
         var isProductionMode = deploymentConfiguration.isProductionMode();
         if (isProductionMode) {
