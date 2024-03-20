@@ -1,4 +1,9 @@
-import { login as _login, type LoginResult, logout as _logout } from '@vaadin/hilla-frontend';
+import {
+  login as _login,
+  type LoginResult,
+  logout as _logout,
+  UnauthorizedResponseError,
+} from '@vaadin/hilla-frontend';
 import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
@@ -47,7 +52,15 @@ function createAuthenticateThunk<TUser>(dispatch: Dispatch<LoginActions>, getAut
     dispatch({ type: LOGIN_FETCH });
 
     // Get user info from endpoint
-    const user = await getAuthenticatedUser();
+    const user = await getAuthenticatedUser().catch((error: unknown) => {
+      if (error instanceof UnauthorizedResponseError) {
+        // 401 response: the user is not authenticated
+        return undefined;
+      }
+
+      throw error;
+    });
+
     if (user) {
       dispatch({
         user,
