@@ -28,11 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Map;
 
 /**
  * Service init listener to add the
@@ -76,17 +72,30 @@ public class RouteUnifyingServiceInitListener
         try (var source = getClass()
                 .getResourceAsStream("/META-INF/VAADIN/views.json")) {
             if (source != null) {
-                final Map<String, ClientViewConfig> clientViews = mapper
-                        .readValue(source, new TypeReference<>() {
-                        });
-
                 clientRouteRegistry.clearRoutes();
-                clientViews.forEach(clientRouteRegistry::addRoute);
+                registerAndRecurseChildren("",
+                        mapper.readValue(source, new TypeReference<>() {
+                        }));
             } else {
                 LOGGER.warn("Failed to find views.json");
             }
         } catch (IOException e) {
             LOGGER.warn("Failed extract client views from views.json", e);
+        }
+    }
+
+    private void registerAndRecurseChildren(String basePath,
+            ClientViewConfig view) {
+        var path = view.getRoute() == null || view.getRoute().isEmpty()
+                ? basePath
+                : basePath + '/' + view.getRoute();
+        if (view.getChildren() == null || view.getChildren().isEmpty()) {
+            clientRouteRegistry.addRoute(path, view);
+        } else {
+            view.getChildren().forEach(child -> {
+                child.setParent(view);
+                registerAndRecurseChildren(path, child);
+            });
         }
     }
 }

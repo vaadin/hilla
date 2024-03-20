@@ -1,8 +1,8 @@
 import { type ComponentType, createElement } from 'react';
 import type { RouteObject as ReactRouteObject } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
+import { transformTreeSync } from '../shared/transformTree.js';
 import type { AgnosticRoute, Module, RouteModule } from '../types.js';
-import { transformRoute } from './utils.js';
 
 function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
   return module ? 'default' in module && typeof module.default === 'function' : true;
@@ -16,7 +16,7 @@ function isReactRouteModule(module?: Module): module is RouteModule<ComponentTyp
  * @returns The React Router tree.
  */
 export function toReactRouter(routes: AgnosticRoute): ReactRouteObject {
-  return transformRoute(
+  return transformTreeSync(
     routes,
     (route) => route.children?.values(),
     ({ path, module }, children) => {

@@ -45,6 +45,8 @@ async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | un
 
 const collator = new Intl.Collator('en-US');
 
+const phantomDirPattern = /\/?\$phantom/giu;
+
 /**
  * Collect route metadata from the file system and build a route tree.
  *
@@ -63,12 +65,12 @@ export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, logger, parent = dir }: CollectRoutesOptions,
 ): Promise<RouteMeta> {
-  const path = relative(fileURLToPath(parent), fileURLToPath(dir));
+  const path = relative(fileURLToPath(parent), fileURLToPath(dir)).replaceAll(phantomDirPattern, '');
   let children: RouteMeta[] = [];
   let layout: URL | undefined;
 
   for await (const d of await opendir(dir)) {
-    if (d.isDirectory()) {
+    if (d.isDirectory() && !d.name.startsWith('_')) {
       children.push(await collectRoutesFromFS(new URL(`${d.name}/`, dir), { extensions, logger, parent: dir }));
     } else if (d.isFile() && extensions.includes(extname(d.name))) {
       const file = new URL(d.name, dir);
@@ -84,7 +86,9 @@ export default async function collectRoutesFromFS(
             children: [],
           });
         } else {
-          throw new Error('Symbol "$" is reserved for special files; only "$layout" and "$index" are allowed');
+          throw new Error(
+            'Symbol "$" is reserved for special directories and files; only "$layout", "$phantom" and "$index" are allowed',
+          );
         }
       } else if (!name.startsWith('_')) {
         children.push({

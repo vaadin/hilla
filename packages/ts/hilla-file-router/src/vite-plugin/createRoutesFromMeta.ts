@@ -8,7 +8,8 @@ import ts, {
   type StringLiteral,
   type VariableStatement,
 } from 'typescript';
-import { transformRoute } from '../runtime/utils.js';
+
+import { transformTreeSync } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
 import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
@@ -77,7 +78,7 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
   ];
   let id = 0;
 
-  const routes = transformRoute<RouteMeta, CallExpression>(
+  const routes = transformTreeSync<RouteMeta, CallExpression>(
     views,
     (view) => view.children.values(),
     ({ file, layout, path }, children) => {
