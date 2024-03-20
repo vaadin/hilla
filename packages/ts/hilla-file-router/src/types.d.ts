@@ -12,6 +12,11 @@ export type ViewConfig = Readonly<{
   rolesAllowed?: readonly string[];
 
   /**
+   * Set to true to require the user to be logged in to access the view.
+   */
+  loginRequired?: boolean;
+
+  /**
    * Allows overriding the route path configuration. Uses the same syntax as
    * the path property with React Router. This can be used to define a route
    * that conflicts with the file name conventions, e.g. /foo/index.

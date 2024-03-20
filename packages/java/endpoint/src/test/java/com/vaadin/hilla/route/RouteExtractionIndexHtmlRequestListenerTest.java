@@ -72,17 +72,44 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
 
     private Map<String, ClientViewConfig> prepareClientRoutes() {
         final Map<String, ClientViewConfig> routes = new LinkedHashMap<>();
-        routes.put("/home",
-                new ClientViewConfig("Home", null, false, "/home", false, false,
-                        null, Collections.emptyMap(), Collections.emptyMap()));
-        routes.put("/profile",
-                new ClientViewConfig("Profile", new String[] { "ROLE_USER" },
-                        true, "/profile", false, false, null,
-                        Collections.emptyMap(), Collections.emptyMap()));
-        routes.put("/user/:userId", new ClientViewConfig("User Profile",
-                new String[] { "ROLE_ADMIN" }, true, "/user/:userId", false,
-                false, null, Map.of(":userId", RouteParamType.REQUIRED),
-                Collections.emptyMap()));
+
+        ClientViewConfig homeConfig = new ClientViewConfig();
+        homeConfig.setTitle("Home");
+        homeConfig.setRolesAllowed(null);
+        homeConfig.setLoginRequired(false);
+        homeConfig.setRoute("/home");
+        homeConfig.setLazy(false);
+        homeConfig.setAutoRegistered(false);
+        homeConfig.setMenu(null);
+        homeConfig.setChildren(Collections.emptyList());
+        homeConfig.setRouteParameters(Collections.emptyMap());
+        routes.put("/home", homeConfig);
+
+        ClientViewConfig profileConfig = new ClientViewConfig();
+        profileConfig.setTitle("Profile");
+        profileConfig.setRolesAllowed(new String[] { "ROLE_USER" });
+        profileConfig.setLoginRequired(true);
+        profileConfig.setRoute("/profile");
+        profileConfig.setLazy(false);
+        profileConfig.setAutoRegistered(false);
+        profileConfig.setMenu(null);
+        profileConfig.setChildren(Collections.emptyList());
+        profileConfig.setRouteParameters(Collections.emptyMap());
+        routes.put("/profile", profileConfig);
+
+        ClientViewConfig userProfileConfig = new ClientViewConfig();
+        userProfileConfig.setTitle("User Profile");
+        userProfileConfig.setRolesAllowed(new String[] { "ROLE_ADMIN" });
+        userProfileConfig.setLoginRequired(true);
+        userProfileConfig.setRoute("/user/:userId");
+        userProfileConfig.setLazy(false);
+        userProfileConfig.setAutoRegistered(false);
+        userProfileConfig.setMenu(null);
+        userProfileConfig.setChildren(Collections.emptyList());
+        userProfileConfig
+                .setRouteParameters(Map.of(":userId", RouteParamType.REQUIRED));
+        routes.put("/user/:userId", userProfileConfig);
+
         return routes;
     }
 
