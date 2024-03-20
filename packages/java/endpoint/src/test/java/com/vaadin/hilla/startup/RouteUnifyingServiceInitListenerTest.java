@@ -47,20 +47,20 @@ public class RouteUnifyingServiceInitListenerTest {
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
 
-        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(8));
-        MatcherAssert.assertThat(allRoutes.get("/about").title(),
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
+        MatcherAssert.assertThat(allRoutes.get("/about").getTitle(),
                 Matchers.is("About"));
+        MatcherAssert.assertThat(allRoutes.get("/profile/friends/list")
+                .getOther().get("unknown"), Matchers.notNullValue());
         MatcherAssert.assertThat(
-                allRoutes.get("/profile/friends/list").other().get("unknown"),
-                Matchers.notNullValue());
-        MatcherAssert.assertThat(
-                allRoutes.get("/profile/friends/:user?/edit").routeParameters(),
+                allRoutes.get("/profile/friends/:user?/edit")
+                        .getRouteParameters(),
                 Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
         MatcherAssert.assertThat(
-                allRoutes.get("/profile/friends/:user").routeParameters(),
+                allRoutes.get("/profile/friends/:user").getRouteParameters(),
                 Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
         MatcherAssert.assertThat(
-                allRoutes.get("/profile/messages/*").routeParameters(),
+                allRoutes.get("/profile/messages/*").getRouteParameters(),
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
 
     }

@@ -1,9 +1,9 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
+import { RouteParamType } from '../../shared/routeParamType.js';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
 import type { MenuItem } from '../../src/types.js';
-import { createTestingViewMap } from '../utils.js';
 
 use(chaiLike);
 
@@ -24,11 +24,22 @@ function cleanup(items: Array<Writable<MenuItem>>) {
 }
 
 describe('@vaadin/hilla-file-router', () => {
-  describe('getMenuItems', () => {
+  describe('createMenuItems', () => {
     it('should generate a set of menu items', () => {
       const items = createMenuItems({
         server: {
-          views: createTestingViewMap(),
+          views: {
+            '/about': { route: 'about', title: 'About' },
+            '/profile/': { title: 'Profile' },
+            '/profile/account/security/password': { title: 'Password' },
+            '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
+            '/profile/friends/list': { title: 'List' },
+            '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
+            '/test/empty': {},
+            '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
+            '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+            '/test/no-default-export': { title: 'No Default Export' },
+          },
         },
       });
       cleanup(items as Array<Writable<MenuItem>>);

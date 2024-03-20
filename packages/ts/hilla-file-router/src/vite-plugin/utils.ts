@@ -20,7 +20,7 @@ function getReplacer(type: RouteParamType): string {
 }
 
 /**
- * Converts a file system pattern to a URL pattern string.
+ * Converts a file system pattern to an URL pattern string.
  *
  * @param segment - a string representing a file system pattern:
  * - `{param}` - for a required single parameter;
