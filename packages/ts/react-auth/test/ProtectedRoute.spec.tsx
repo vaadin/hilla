@@ -20,14 +20,14 @@ const testRoutes: RouteObjectWithAuth[] = [
     path: '/protected/login',
     element: <TestView route="/protected/login" />,
     handle: {
-      requiresLogin: true,
+      loginRequired: true,
     },
   },
   {
     path: '/protected/role/user',
     element: <TestView route="/protected/role/user" />,
     handle: {
-      requiresLogin: true,
+      loginRequired: true,
       rolesAllowed: ['user'],
     },
   },
@@ -35,7 +35,7 @@ const testRoutes: RouteObjectWithAuth[] = [
     path: '/protected/role/admin',
     element: <TestView route="/protected/role/admin" />,
     handle: {
-      requiresLogin: true,
+      requiresLogin: true, // deprecated
       rolesAllowed: ['admin'],
     },
   },

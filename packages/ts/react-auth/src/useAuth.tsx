@@ -106,7 +106,19 @@ function reducer(state: AuthState<unknown>, action: LoginActions | LogoutAction)
  * They can be added to the route type handler as properties.
  */
 export type AccessProps = Readonly<{
+  /**
+   * If true, the user must be logged in to access the route.
+   */
+  loginRequired?: boolean;
+  /**
+   * If true, the user must be logged in to access the route.
+   *
+   * @deprecated Use `loginRequired` instead.
+   */
   requiresLogin?: boolean;
+  /**
+   * The list of roles that are allowed to access the route.
+   */
   rolesAllowed?: readonly string[];
 }>;
 
@@ -175,8 +187,8 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
     unauthenticate();
   }
 
-  function hasAccess(accessProps: AccessProps): boolean {
-    const requiresAuth = accessProps.requiresLogin ?? accessProps.rolesAllowed;
+  function hasAccess({ loginRequired, requiresLogin, rolesAllowed }: AccessProps): boolean {
+    const requiresAuth = loginRequired ?? requiresLogin ?? rolesAllowed;
     if (!requiresAuth) {
       return true;
     }
@@ -185,9 +197,9 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
       return false;
     }
 
-    if (accessProps.rolesAllowed) {
+    if (rolesAllowed) {
       const userRoles = config?.getRoles ? config.getRoles(state.user as TUser) : getDefaultRoles(state.user);
-      return accessProps.rolesAllowed.some((allowedRole) => userRoles.includes(allowedRole));
+      return rolesAllowed.some((allowedRole) => userRoles.includes(allowedRole));
     }
 
     return true;
