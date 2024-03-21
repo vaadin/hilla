@@ -2,9 +2,12 @@ package com.vaadin.hilla.startup;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -27,6 +30,7 @@ public class RouteUnifyingServiceInitListenerTest {
     private ServiceInitEvent event;
     private ClientRouteRegistry clientRouteRegistry;
     private DeploymentConfiguration mockDeploymentConfiguration;
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Rule
     public TemporaryFolder projectRoot = new TemporaryFolder();
@@ -91,14 +95,14 @@ public class RouteUnifyingServiceInitListenerTest {
         Mockito.when(mockDeploymentConfiguration.getFrontendFolder())
                 .thenReturn(frontendGeneratedDir.getParentFile());
 
-        createDevModeViewsJson();
+        createMockedDevModeViewsJson();
 
         routeUnifyingServiceInitListener.registerClientRoutes(
                 event.getSource().getDeploymentConfiguration());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
 
-        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(8));
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
         MatcherAssert.assertThat(allRoutes.get("/dev/about").getTitle(),
                 Matchers.is("About"));
         MatcherAssert.assertThat(allRoutes.get("/dev/profile/friends/list")
@@ -116,24 +120,18 @@ public class RouteUnifyingServiceInitListenerTest {
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
     }
 
-    private void createDevModeViewsJson() throws IOException {
+    private void createMockedDevModeViewsJson() throws IOException {
+        var viewsJsonProdAsResource = getClass()
+                .getResource("/META-INF/VAADIN/views.json");
+        assert viewsJsonProdAsResource != null;
+        String hierarchicalRoutesAsString = IOUtils.toString(
+                viewsJsonProdAsResource.openStream(), StandardCharsets.UTF_8);
+        String addedDevToRootRoute = hierarchicalRoutesAsString
+                .replaceFirst("\"route\": \"\",", "\"route\": \"dev\",");
         var viewsJsonFile = projectRoot
                 .newFile("frontend/generated/views.json");
         try (PrintWriter writer = new PrintWriter(viewsJsonFile)) {
-            writer.println(
-                    """
-                            {
-                              "/dev/about": { "title": "About" },
-                              "/dev/profile/": { "title": "Profile" },
-                              "/dev/profile/account/security/password": { "title": "Password" },
-                              "/dev/profile/account/security/two-factor-auth": { "title": "Two Factor Auth" },
-                              "/dev/profile/friends/list": { "title": "List", "unknown": {"anotherProp" :  "prop"} },
-                              "/dev/profile/friends/:user?/edit": { "title": "Friend Edit", "params": { ":user?":  "opt"} },
-                              "/dev/profile/friends/:user": { "title": "Friend Profile", "params" : { ":user":  "req"} },
-                              "/dev/profile/messages/*": { "title": "Messages", "params" : { "wildcard":  "*"} }
-                            }
-                            """
-                            .stripIndent());
+            writer.println(addedDevToRootRoute);
         }
     }
 
