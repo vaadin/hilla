@@ -97,6 +97,10 @@ export default async function collectRoutesFromFS(
           children: [],
         });
       }
+    } else {
+      logger.warn(
+        `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file: '${d.name}' will be ignored by router. Please consider storing it in another directory.`,
+      );
     }
   }
 
