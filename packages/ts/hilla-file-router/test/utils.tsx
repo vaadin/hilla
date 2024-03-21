@@ -20,10 +20,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   ├── layout.tsx
   // │   │   └── security
   // │   │       ├── password.jsx
-  // │   │       └── two-factor-auth.ts
   // │   ├── friends
   // │   │   ├── layout.tsx
-  // │   │   ├── list.js
   // │   │   └── {user}.tsx
   // │   ├── index.tsx
   // │   └── index.css
@@ -106,11 +104,6 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
                     file: new URL('profile/account/security/password.jsx', dir),
                     children: [],
                   },
-                  {
-                    path: 'two-factor-auth',
-                    file: new URL('profile/account/security/two-factor-auth.ts', dir),
-                    children: [],
-                  },
                 ],
               },
             ],
@@ -119,11 +112,6 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
             path: 'friends',
             layout: new URL('profile/friends/$layout.tsx', dir),
             children: [
-              {
-                path: 'list',
-                file: new URL('profile/friends/list.js', dir),
-                children: [],
-              },
               {
                 path: '{user}',
                 file: new URL('profile/friends/{user}.tsx', dir),
