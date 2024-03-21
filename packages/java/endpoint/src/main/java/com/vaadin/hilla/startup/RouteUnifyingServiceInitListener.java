@@ -99,7 +99,7 @@ public class RouteUnifyingServiceInitListener
         return deploymentConfiguration.getFrontendFolder().toPath()
                 .resolve("generated").resolve("views.json").toUri().toURL();
     }
-  
+
     private void registerAndRecurseChildren(String basePath,
             ClientViewConfig view) {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
