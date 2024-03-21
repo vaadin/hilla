@@ -2,12 +2,10 @@ import { appendFile, mkdir, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { ComponentType, JSX } from 'react';
+import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
-import type { ServerViewConfig } from '../src/shared/internal.js';
-import { RouteParamType } from '../src/shared/routeParamType.js';
-import type { AgnosticRoute, RouteModule } from '../src/types.js';
+import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
@@ -38,7 +36,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   await Promise.all([
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
-    mkdir(new URL('test/', dir), { recursive: true }),
+    mkdir(new URL('test', dir), { recursive: true }),
   ]);
   await Promise.all([
     appendFile(
@@ -224,69 +222,6 @@ export const components = {
     config: { title: 'Server' },
   },
 } satisfies Record<string, RouteModule>;
-
-export function createTestingAgnosticRoutes(): AgnosticRoute {
-  return {
-    path: '',
-    children: [
-      {
-        path: 'nameToReplace',
-        module: components.about,
-      },
-      {
-        path: 'hidden',
-        module: components.hidden,
-      },
-      {
-        path: 'profile',
-        children: [
-          {
-            path: 'friends',
-            module: components.friends,
-            children: [
-              {
-                path: 'list',
-                module: components.friendsList,
-              },
-              {
-                path: ':user',
-                module: components.friend,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        path: 'test',
-        children: [
-          {
-            path: '*',
-            module: components.wildcard,
-          },
-          {
-            path: ':optional?',
-            module: components.optional,
-          },
-        ],
-      },
-    ],
-  };
-}
-
-export function createTestingViewMap(): Record<string, ServerViewConfig> {
-  return {
-    '/about': { route: 'about', title: 'About' },
-    '/profile/': { title: 'Profile' },
-    '/profile/account/security/password': { title: 'Password' },
-    '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
-    '/profile/friends/list': { title: 'List' },
-    '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
-    '/test/empty': {},
-    '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
-    '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
-    '/test/no-default-export': { title: 'No Default Export' },
-  };
-}
 
 export function createLogger(): Logger {
   return {

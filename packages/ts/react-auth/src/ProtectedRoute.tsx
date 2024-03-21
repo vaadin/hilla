@@ -54,7 +54,7 @@ function* traverse<T extends RouteObject>(routes: T[]): Generator<T, undefined, 
 
 /**
  * Adds protection to routes that require authentication.
- * These routes should contain the {@link AccessProps.requiresLogin} and/or
+ * These routes should contain the {@link AccessProps.loginRequired} and/or
  * {@link AccessProps.rolesAllowed} properties.
  *
  * @param routes - the routes to check if any of them needs to be protected
@@ -65,13 +65,13 @@ function* traverse<T extends RouteObject>(routes: T[]): Generator<T, undefined, 
 export function protectRoutes(routes: RouteObjectWithAuth[], redirectPath: string = '/login'): RouteObjectWithAuth[] {
   for (const route of traverse(routes)) {
     const { handle } = route;
-    const requiresAuth = handle?.requiresLogin ?? handle?.rolesAllowed?.length;
+    const requiresAuth = handle?.loginRequired ?? handle?.requiresLogin ?? handle?.rolesAllowed?.length;
 
     if (requiresAuth) {
       route.element = (
         <ProtectedRoute
           redirectPath={redirectPath}
-          access={route.handle as AccessProps}
+          access={handle as AccessProps}
           element={route.element as JSX.Element}
         />
       );

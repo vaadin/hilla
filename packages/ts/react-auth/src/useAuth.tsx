@@ -1,4 +1,9 @@
-import { login as _login, type LoginResult, logout as _logout } from '@vaadin/hilla-frontend';
+import {
+  login as _login,
+  type LoginResult,
+  logout as _logout,
+  UnauthorizedResponseError,
+} from '@vaadin/hilla-frontend';
 import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
@@ -47,7 +52,15 @@ function createAuthenticateThunk<TUser>(dispatch: Dispatch<LoginActions>, getAut
     dispatch({ type: LOGIN_FETCH });
 
     // Get user info from endpoint
-    const user = await getAuthenticatedUser();
+    const user = await getAuthenticatedUser().catch((error: unknown) => {
+      if (error instanceof UnauthorizedResponseError) {
+        // 401 response: the user is not authenticated
+        return undefined;
+      }
+
+      throw error;
+    });
+
     if (user) {
       dispatch({
         user,
@@ -106,7 +119,19 @@ function reducer(state: AuthState<unknown>, action: LoginActions | LogoutAction)
  * They can be added to the route type handler as properties.
  */
 export type AccessProps = Readonly<{
+  /**
+   * If true, the user must be logged in to access the route.
+   */
+  loginRequired?: boolean;
+  /**
+   * If true, the user must be logged in to access the route.
+   *
+   * @deprecated Use `loginRequired` instead.
+   */
   requiresLogin?: boolean;
+  /**
+   * The list of roles that are allowed to access the route.
+   */
   rolesAllowed?: readonly string[];
 }>;
 
@@ -175,8 +200,8 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
     unauthenticate();
   }
 
-  function hasAccess(accessProps: AccessProps): boolean {
-    const requiresAuth = accessProps.requiresLogin ?? accessProps.rolesAllowed;
+  function hasAccess({ loginRequired, requiresLogin, rolesAllowed }: AccessProps): boolean {
+    const requiresAuth = loginRequired ?? requiresLogin ?? rolesAllowed;
     if (!requiresAuth) {
       return true;
     }
@@ -185,9 +210,9 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
       return false;
     }
 
-    if (accessProps.rolesAllowed) {
+    if (rolesAllowed) {
       const userRoles = config?.getRoles ? config.getRoles(state.user as TUser) : getDefaultRoles(state.user);
-      return accessProps.rolesAllowed.some((allowedRole) => userRoles.includes(allowedRole));
+      return rolesAllowed.some((allowedRole) => userRoles.includes(allowedRole));
     }
 
     return true;

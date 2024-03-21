@@ -2,11 +2,60 @@ import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import { toReactRouter } from '../../src/runtime/toReactRouter.js';
-import { components, createTestingAgnosticRoutes } from '../utils.js';
+import type { AgnosticRoute } from '../../src/types.js';
+import { components } from '../utils.js';
 
 use(chaiLike);
 
 describe('@vaadin/hilla-file-router', () => {
+  function createTestingAgnosticRoutes(): AgnosticRoute {
+    return {
+      path: '',
+      children: [
+        {
+          path: 'nameToReplace',
+          module: components.about,
+        },
+        {
+          path: 'hidden',
+          module: components.hidden,
+        },
+        {
+          path: 'profile',
+          children: [
+            {
+              path: 'friends',
+              module: components.friends,
+              children: [
+                {
+                  path: 'list',
+                  module: components.friendsList,
+                },
+                {
+                  path: ':user',
+                  module: components.friend,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: 'test',
+          children: [
+            {
+              path: '*',
+              module: components.wildcard,
+            },
+            {
+              path: ':optional?',
+              module: components.optional,
+            },
+          ],
+        },
+      ],
+    };
+  }
+
   describe('toReactRouter', () => {
     it('should be able to convert agnostic routes to React Router routes', () => {
       const routes = createTestingAgnosticRoutes();
