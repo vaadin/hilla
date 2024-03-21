@@ -1,6 +1,5 @@
 package com.vaadin.hilla.startup;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -100,19 +99,20 @@ public class RouteUnifyingServiceInitListenerTest {
                 .getAllRoutes();
 
         MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(8));
-        MatcherAssert.assertThat(allRoutes.get("/dev/about").title(),
+        MatcherAssert.assertThat(allRoutes.get("/dev/about").getTitle(),
                 Matchers.is("About"));
         MatcherAssert.assertThat(allRoutes.get("/dev/profile/friends/list")
-                .other().get("unknown"), Matchers.notNullValue());
+                .getOther().get("unknown"), Matchers.notNullValue());
         MatcherAssert.assertThat(
                 allRoutes.get("/dev/profile/friends/:user?/edit")
-                        .routeParameters(),
+                        .getRouteParameters(),
                 Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
         MatcherAssert.assertThat(
-                allRoutes.get("/dev/profile/friends/:user").routeParameters(),
+                allRoutes.get("/dev/profile/friends/:user")
+                        .getRouteParameters(),
                 Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
         MatcherAssert.assertThat(
-                allRoutes.get("/dev/profile/messages/*").routeParameters(),
+                allRoutes.get("/dev/profile/messages/*").getRouteParameters(),
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
     }
 
