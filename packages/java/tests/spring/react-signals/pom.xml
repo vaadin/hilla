@@ -46,7 +46,7 @@
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
-                <groupId>com.vaadin</groupId>
+                <groupId>com.vaadin.hilla</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
 
