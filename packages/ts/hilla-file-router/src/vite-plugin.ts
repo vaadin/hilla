@@ -92,6 +92,7 @@ export default function vitePluginFileSystemRouter({
         generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger).catch((e: unknown) =>
           _logger.error(String(e)),
         );
+        server.hot.send({ type: 'full-reload' });
       };
 
       server.watcher.on('add', changeListener);
