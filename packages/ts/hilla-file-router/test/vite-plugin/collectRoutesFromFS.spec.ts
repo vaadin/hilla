@@ -27,7 +27,7 @@ function cleanupRouteMeta(route: Writable<RouteMeta>): void {
 
 describe('@vaadin/hilla-file-router', () => {
   describe('collectFileRoutes', () => {
-    const extensions = ['.tsx', '.jsx', '.ts', '.js'];
+    const extensions = ['.tsx', '.jsx'];
     let tmp: URL;
     let logger: Logger;
 
