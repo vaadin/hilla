@@ -20,10 +20,12 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   ├── layout.tsx
   // │   │   └── security
   // │   │       ├── password.jsx
-  // │   │       └── two-factor-auth.ts
+  // │   │       └── two-factor-auth.tsx
+  // │   │       └── two-factor-auth-ignored.ts
   // │   ├── friends
   // │   │   ├── layout.tsx
-  // │   │   ├── list.js
+  // │   │   ├── list.jsx
+  // │   │   ├── list-ignored.js
   // │   │   └── {user}.tsx
   // │   ├── index.tsx
   // │   └── index.css
@@ -46,13 +48,21 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(new URL('profile/account/security/password.jsx', dir), 'export default function Password() {};'),
     appendFile(new URL('profile/account/security/password.scss', dir), ''),
     appendFile(
-      new URL('profile/account/security/two-factor-auth.ts', dir),
+      new URL('profile/account/security/two-factor-auth.tsx', dir),
       'export default function TwoFactorAuth() {};',
+    ),
+    appendFile(
+      new URL('profile/account/security/two-factor-auth-ignored.ts', dir),
+      'export default function TwoFactorAuthIgnored() {};',
     ),
     appendFile(new URL('profile/friends/$layout.tsx', dir), 'export default function FriendsLayout() {};'),
     appendFile(
-      new URL('profile/friends/list.js', dir),
+      new URL('profile/friends/list.jsx', dir),
       "export const config = { title: 'List' };\nexport default function List() {};",
+    ),
+    appendFile(
+      new URL('profile/friends/list-ignored.js', dir),
+      "export const config = { title: 'List' };\nexport default function ListIgnored() {};",
     ),
     appendFile(
       new URL('profile/friends/{user}.tsx', dir),
@@ -108,7 +118,7 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
                   },
                   {
                     path: 'two-factor-auth',
-                    file: new URL('profile/account/security/two-factor-auth.ts', dir),
+                    file: new URL('profile/account/security/two-factor-auth.tsx', dir),
                     children: [],
                   },
                 ],
@@ -121,7 +131,7 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
             children: [
               {
                 path: 'list',
-                file: new URL('profile/friends/list.js', dir),
+                file: new URL('profile/friends/list.jsx', dir),
                 children: [],
               },
               {

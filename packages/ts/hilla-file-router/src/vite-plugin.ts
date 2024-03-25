@@ -25,7 +25,7 @@ export type PluginOptions = Readonly<{
    * The list of extensions that will be collected as routes of the file-based
    * router.
    *
-   * @defaultValue `['.tsx', '.jsx', '.ts', '.js']`
+   * @defaultValue `['.tsx', '.jsx']`
    */
   extensions?: readonly string[];
 }>;
@@ -39,7 +39,7 @@ export type PluginOptions = Readonly<{
 export default function vitePluginFileSystemRouter({
   viewsDir = 'frontend/views/',
   generatedDir = 'frontend/generated/',
-  extensions = ['.tsx', '.jsx', '.ts', '.js'],
+  extensions = ['.tsx', '.jsx'],
 }: PluginOptions = {}): Plugin {
   const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
 

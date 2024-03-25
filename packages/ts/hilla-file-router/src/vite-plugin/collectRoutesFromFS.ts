@@ -47,6 +47,8 @@ const collator = new Intl.Collator('en-US');
 
 const phantomDirPattern = /\/?\$phantom/giu;
 
+const warningFor = ['.ts', '.js'];
+
 /**
  * Collect route metadata from the file system and build a route tree.
  *
@@ -97,6 +99,10 @@ export default async function collectRoutesFromFS(
           children: [],
         });
       }
+    } else if (d.isFile() && !d.name.startsWith('_') && warningFor.includes(extname(d.name))) {
+      logger.warn(
+        `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file '${d.name}' will be ignored by router, as it doesn't match this convention. Please consider storing it in another directory.`,
+      );
     }
   }
 
