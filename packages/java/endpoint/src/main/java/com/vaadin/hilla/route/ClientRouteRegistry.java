@@ -16,6 +16,7 @@
 package com.vaadin.hilla.route;
 
 import com.vaadin.hilla.route.records.ClientViewConfig;
+
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
@@ -23,6 +24,8 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Keeps track of registered client side routes.
@@ -84,11 +87,34 @@ public class ClientRouteRegistry implements Serializable {
     public ClientViewConfig getRouteByPath(String path) {
         final Set<String> routes = registeredRoutes.keySet();
         final AntPathMatcher pathMatcher = new AntPathMatcher();
-        for (String route : routes) {
-            if (pathMatcher.match(route, path)) {
-                return registeredRoutes.get(route);
-            }
+        return Stream.of(addTrailingSlash(path), removeTrailingSlash(path))
+                .map(p -> {
+                    for (String route : routes) {
+                        if (pathMatcher.match(route, p)) {
+                            return registeredRoutes.get(route);
+                        }
+                    }
+                    return null;
+                }).filter(Objects::nonNull).findFirst().orElse(null);
+    }
+
+    private String addTrailingSlash(String path) {
+        if (path.isEmpty()) {
+            return "/";
         }
-        return null;
+        if (path.charAt(path.length() - 1) != '/') {
+            return path + "/";
+        }
+        return path;
+    }
+
+    private String removeTrailingSlash(String path) {
+        if (path.isEmpty()) {
+            return "";
+        }
+        if (path.charAt(path.length() - 1) == '/') {
+            return path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 }
