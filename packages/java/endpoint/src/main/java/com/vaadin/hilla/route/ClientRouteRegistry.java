@@ -112,23 +112,11 @@ public class ClientRouteRegistry implements Serializable {
     }
 
     private String addTrailingSlash(String path) {
-        if (path.isEmpty()) {
-            return "/";
-        }
-        if (!path.endsWith("/")) {
-            return path + "/";
-        }
-        return path;
+        return path.endsWith("/") ? path : path + '/';
     }
 
     private String removeTrailingSlash(String path) {
-        if (path.isEmpty()) {
-            return "";
-        }
-        if (path.endsWith("/")) {
-            return path.substring(0, path.length() - 1);
-        }
-        return path;
+        return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
     }
 
     /**
