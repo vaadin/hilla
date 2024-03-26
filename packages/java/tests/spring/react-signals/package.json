@@ -6,7 +6,7 @@
     "@polymer/polymer": "3.5.1",
     "@vaadin/bundles": "24.4.0-alpha18",
     "@vaadin/common-frontend": "0.0.19",
-    "@vaadin/hilla-file-router": "file:../../../../ts/hilla-file-router",
+    "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
