@@ -7,17 +7,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.vaadin.flow.component.Component;
@@ -32,22 +34,30 @@ import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 
-public class RouteExtractionIndexHtmlRequestListenerTest {
+public class RouteUnifyingIndexHtmlRequestListenerTest {
 
-    protected static final String SCRIPT_STRING = RouteExtractionIndexHtmlRequestListener.SCRIPT_STRING
+    protected static final String SCRIPT_STRING = RouteUnifyingIndexHtmlRequestListener.SCRIPT_STRING
             .replace("%s;", "");
 
     private final ClientRouteRegistry clientRouteRegistry = Mockito
             .mock(ClientRouteRegistry.class);
-    private final RouteExtractionIndexHtmlRequestListener requestListener = new RouteExtractionIndexHtmlRequestListener(
-            clientRouteRegistry);
+    private RouteUnifyingIndexHtmlRequestListener requestListener;
     private IndexHtmlResponse indexHtmlResponse;
-
     private VaadinService vaadinService;
+    private DeploymentConfiguration deploymentConfiguration;
+
+    @Rule
+    public TemporaryFolder projectRoot = new TemporaryFolder();
 
     @Before
     public void setUp() {
         vaadinService = Mockito.mock(VaadinService.class);
+        deploymentConfiguration = Mockito.mock(DeploymentConfiguration.class);
+        Mockito.when(vaadinService.getDeploymentConfiguration())
+                .thenReturn(deploymentConfiguration);
+        requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                clientRouteRegistry, deploymentConfiguration);
+
         indexHtmlResponse = Mockito.mock(IndexHtmlResponse.class);
 
         final Document document = Mockito.mock(Document.class);
@@ -148,12 +158,13 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
     }
 
     @Test
-    public void should_modifyIndexHtmlResponse()
-            throws JsonProcessingException, IOException {
+    public void when_productionMode_should_modifyIndexHtmlResponse()
+            throws IOException {
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-
+            Mockito.when(deploymentConfiguration.isProductionMode())
+                    .thenReturn(true);
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
         Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
@@ -177,7 +188,38 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
                 .getResource("/META-INF/VAADIN/available-views.json"));
 
         MatcherAssert.assertThat(actual, Matchers.is(expected));
+    }
 
+    @Test
+    public void when_developmentMode_should_modifyIndexHtmlResponse()
+            throws IOException {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class)) {
+            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
+            mockDevelopmentMode();
+            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+        }
+        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
+
+        DataNode script = indexHtmlResponse.getDocument().head()
+                .select("script").dataNodes().get(0);
+
+        final String scriptText = script.getWholeData();
+        MatcherAssert.assertThat(scriptText,
+                Matchers.startsWith(SCRIPT_STRING));
+
+        final String views = scriptText.substring(SCRIPT_STRING.length());
+
+        final var mapper = new ObjectMapper();
+
+        var actual = mapper.readTree(views);
+        var expected = mapper.readTree(getClass()
+                .getResource("/META-INF/VAADIN/available-views.json"));
+
+        MatcherAssert.assertThat(actual, Matchers.is(expected));
     }
 
     @Test
@@ -210,10 +252,29 @@ public class RouteExtractionIndexHtmlRequestListenerTest {
     }
 
     @Test
-    public void should_collectClientViews() {
+    public void when_productionMode_should_collectClientViews() {
         final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
+        Mockito.when(deploymentConfiguration.isProductionMode())
+                .thenReturn(true);
         requestListener.collectClientViews(views);
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+    }
+
+    @Test
+    public void when_developmentMode_should_collectClientViews()
+            throws IOException {
+        final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
+        mockDevelopmentMode();
+        requestListener.collectClientViews(views);
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+    }
+
+    private void mockDevelopmentMode() throws IOException {
+        Mockito.when(deploymentConfiguration.isProductionMode())
+                .thenReturn(false);
+        var frontendGeneratedDir = projectRoot.newFolder("frontend/generated");
+        Mockito.when(deploymentConfiguration.getFrontendFolder())
+                .thenReturn(frontendGeneratedDir.getParentFile());
     }
 
     @PageTitle("RouteTarget")
