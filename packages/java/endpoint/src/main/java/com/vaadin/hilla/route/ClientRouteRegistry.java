@@ -115,7 +115,7 @@ public class ClientRouteRegistry implements Serializable {
         if (path.isEmpty()) {
             return "/";
         }
-        if (path.charAt(path.length() - 1) != '/') {
+        if (!path.endsWith("/")) {
             return path + "/";
         }
         return path;
@@ -125,7 +125,7 @@ public class ClientRouteRegistry implements Serializable {
         if (path.isEmpty()) {
             return "";
         }
-        if (path.charAt(path.length() - 1) == '/') {
+        if (path.endsWith("/")) {
             return path.substring(0, path.length() - 1);
         }
         return path;
