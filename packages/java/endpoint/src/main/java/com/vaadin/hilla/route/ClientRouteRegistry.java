@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -116,30 +117,43 @@ public class ClientRouteRegistry implements Serializable {
      */
     public void registerClientRoutes(
             DeploymentConfiguration deploymentConfiguration) {
-        try (var source = getViewsJsonAsResource(deploymentConfiguration)
-                .openStream()) {
+        var viewsJsonAsResource = getViewsJsonAsResource(
+                deploymentConfiguration);
+        if (viewsJsonAsResource == null || !Paths
+                .get(viewsJsonAsResource.getPath()).toFile().exists()) {
+            LOGGER.debug(
+                    "No 'views.json' found either in the frontend/generated "
+                            + "folder or in the META-INF/VAADIN folder. Skipping client "
+                            + "route registration.");
+            return;
+        }
+        try (var source = viewsJsonAsResource.openStream()) {
             if (source != null) {
                 clearRoutes();
                 registerAndRecurseChildren("",
                         mapper.readValue(source, new TypeReference<>() {
                         }));
-            } else {
-                LOGGER.warn("Failed to find views.json");
             }
         } catch (IOException e) {
-            LOGGER.warn("Failed extract client views from views.json", e);
+            LOGGER.warn("Failed load client views from {}",
+                    viewsJsonAsResource.getPath(), e);
         }
     }
 
     private URL getViewsJsonAsResource(
-            DeploymentConfiguration deploymentConfiguration)
-            throws MalformedURLException {
+            DeploymentConfiguration deploymentConfiguration) {
         var isProductionMode = deploymentConfiguration.isProductionMode();
         if (isProductionMode) {
             return getClass().getResource("/META-INF/VAADIN/views.json");
         }
-        return deploymentConfiguration.getFrontendFolder().toPath()
-                .resolve("generated").resolve("views.json").toUri().toURL();
+        try {
+            return deploymentConfiguration.getFrontendFolder().toPath()
+                    .resolve("generated").resolve("views.json").toUri().toURL();
+        } catch (MalformedURLException e) {
+            LOGGER.warn("Failed to find views.json under frontend/generated",
+                    e);
+            throw new RuntimeException(e);
+        }
     }
 
     private void registerAndRecurseChildren(String basePath,

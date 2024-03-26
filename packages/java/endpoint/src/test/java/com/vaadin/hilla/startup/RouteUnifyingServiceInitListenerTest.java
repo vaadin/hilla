@@ -41,16 +41,30 @@ public class RouteUnifyingServiceInitListenerTest {
     }
 
     @Test
-    public void should_addRouteIndexHtmlRequestListener() {
-        Assert.assertFalse("Unexpected RouteIndexHtmlRequestListener added",
-                eventHasAddedRouteIndexHtmlRequestListener(event));
+    public void should_addRouteIndexHtmlRequestListener_when_react_is_enabled() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(true);
+
+        Assert.assertFalse("Unexpected RouteUnifyingServiceInitListener added",
+                hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
         routeUnifyingServiceInitListener.serviceInit(event);
         Assert.assertTrue(
-                "Expected event to have RouteIndexHtmlRequestListener added",
-                eventHasAddedRouteIndexHtmlRequestListener(event));
+                "Expected to have RouteUnifyingServiceInitListener added",
+                hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
     }
 
-    private boolean eventHasAddedRouteIndexHtmlRequestListener(
+    @Test
+    public void should_not_addRouteIndexHtmlRequestListener_when_react_is_not_enabled() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(false);
+
+        routeUnifyingServiceInitListener.serviceInit(event);
+        Assert.assertFalse(
+                "RouteIndexHtmlRequestListener added unexpectedly when React is not enabled",
+                hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
+    }
+
+    private boolean hasRouteUnifyingIndexHtmlRequestListenerAdded(
             ServiceInitEvent event) {
         return event.getAddedIndexHtmlRequestListeners().anyMatch(
                 indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteUnifyingIndexHtmlRequestListener);
