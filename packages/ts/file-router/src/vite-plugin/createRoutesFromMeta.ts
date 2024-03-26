@@ -76,11 +76,19 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
       ([statement]) => statement as ts.ImportDeclaration,
     ),
   ];
+  const errors: string[] = [];
   let id = 0;
 
   const routes = transformTreeSync<RouteMeta, CallExpression>(
     views,
-    (view) => view.children.values(),
+    (view) => {
+      const paths = view.children.map((c) => c.path);
+      const uniquePaths = new Set(paths);
+      paths
+        .filter((p) => !uniquePaths.delete(p))
+        .forEach((p) => errors.push(`console.error("Two views share the same path: ${p}");`));
+      return view.children.values();
+    },
     ({ file, layout, path }, children) => {
       const currentId = id;
       id += 1;
@@ -100,6 +108,8 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
 
   const routeDeclaration = template(
     `import a from 'IMPORTS';
+
+${errors.join('\n')}
 
 const routes = ROUTE;
 
