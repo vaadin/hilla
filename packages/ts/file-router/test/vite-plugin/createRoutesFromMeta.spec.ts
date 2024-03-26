@@ -41,5 +41,16 @@ const routes = createRoute("", [createRoute("nameToReplace", Page0), createRoute
 export default routes;
 `);
     });
+
+    it('should add console.error calls for duplicated paths', () => {
+      const metaWithDuplicatedPaths = createTestingRouteMeta(new URL('./views/', dir));
+      metaWithDuplicatedPaths.children.push({
+        path: 'profile',
+        file: new URL('profile/$index.tsx', dir),
+        children: [],
+      });
+      const generated = createRoutesFromMeta(metaWithDuplicatedPaths, runtimeUrls);
+      expect(generated).to.contain('console.error("Two views share the same path: profile");');
+    });
   });
 });
