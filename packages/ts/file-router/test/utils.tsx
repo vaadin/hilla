@@ -9,7 +9,7 @@ import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
-  return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);
+  return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'file-router-'))}/`);
 }
 
 export async function createTestingRouteFiles(dir: URL): Promise<void> {

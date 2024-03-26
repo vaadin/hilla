@@ -13,9 +13,6 @@ import java.util.Objects;
 /**
  * Implementation of TypeScript's Hilla ConfigView. Represents a view
  * configuration from Hilla file-system-routing module.
- *
- * @see <a href=
- *      "https://github.com/vaadin/hilla/tree/main/packages/ts/hilla-file-router/src/utils.ts#L3">ConfigView</a>
  */
 public final class ClientViewConfig {
     private String title;

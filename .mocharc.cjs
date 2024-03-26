@@ -5,7 +5,7 @@ const karmaMochaConfig = {
 }
 
 module.exports = {
-  extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'],
+  extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs', 'tsx'],
   import: 'tsx',
   exit: true,
   karmaMochaConfig,

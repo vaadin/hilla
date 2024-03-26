@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,24 +16,19 @@
 
 package com.vaadin.hilla.startup;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.route.ClientRouteRegistry;
-import com.vaadin.hilla.route.RouteExtractionIndexHtmlRequestListener;
-import com.vaadin.hilla.route.records.ClientViewConfig;
+import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 /**
  * Service init listener to add the
- * {@link RouteExtractionIndexHtmlRequestListener} to the service and to
- * register client routes to {@link ClientRouteRegistry}.
+ * {@link RouteUnifyingIndexHtmlRequestListener} to the service and to register
+ * client routes to {@link ClientRouteRegistry}.
  */
 @Component
 public class RouteUnifyingServiceInitListener
@@ -41,61 +36,33 @@ public class RouteUnifyingServiceInitListener
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingServiceInitListener.class);
 
-    private final RouteExtractionIndexHtmlRequestListener routeExtractionIndexHtmlRequestListener;
     private final ClientRouteRegistry clientRouteRegistry;
-    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Creates a new instance of the listener.
      *
-     * @param routeExtractionIndexHtmlRequestListener
-     *            the listener to add
      * @param clientRouteRegistry
      *            the registry to add the client routes to
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
-            RouteExtractionIndexHtmlRequestListener routeExtractionIndexHtmlRequestListener,
             ClientRouteRegistry clientRouteRegistry) {
-        this.routeExtractionIndexHtmlRequestListener = routeExtractionIndexHtmlRequestListener;
         this.clientRouteRegistry = clientRouteRegistry;
     }
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
-        registerClientRoutes();
+        var deploymentConfiguration = event.getSource()
+                .getDeploymentConfiguration();
+        var routeExtractionIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+                clientRouteRegistry, deploymentConfiguration);
+        var deploymentMode = deploymentConfiguration.isProductionMode()
+                ? "PRODUCTION"
+                : "DEVELOPMENT";
         event.addIndexHtmlRequestListener(
                 routeExtractionIndexHtmlRequestListener);
-    }
-
-    protected void registerClientRoutes() {
-        try (var source = getClass()
-                .getResourceAsStream("/META-INF/VAADIN/views.json")) {
-            if (source != null) {
-                clientRouteRegistry.clearRoutes();
-                registerAndRecurseChildren("",
-                        mapper.readValue(source, new TypeReference<>() {
-                        }));
-            } else {
-                LOGGER.warn("Failed to find views.json");
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Failed extract client views from views.json", e);
-        }
-    }
-
-    private void registerAndRecurseChildren(String basePath,
-            ClientViewConfig view) {
-        var path = view.getRoute() == null || view.getRoute().isEmpty()
-                ? basePath
-                : basePath + '/' + view.getRoute();
-        if (view.getChildren() == null || view.getChildren().isEmpty()) {
-            clientRouteRegistry.addRoute(path, view);
-        } else {
-            view.getChildren().forEach(child -> {
-                child.setParent(view);
-                registerAndRecurseChildren(path, child);
-            });
-        }
+        LOGGER.debug(
+                "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
+                deploymentMode);
     }
 }

@@ -45,8 +45,6 @@ async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | un
 
 const collator = new Intl.Collator('en-US');
 
-const phantomDirPattern = /\/?\$phantom/giu;
-
 const warningFor = ['.ts', '.js'];
 
 /**
@@ -67,7 +65,7 @@ export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, logger, parent = dir }: CollectRoutesOptions,
 ): Promise<RouteMeta> {
-  const path = relative(fileURLToPath(parent), fileURLToPath(dir)).replaceAll(phantomDirPattern, '');
+  const path = relative(fileURLToPath(parent), fileURLToPath(dir));
   let children: RouteMeta[] = [];
   let layout: URL | undefined;
 
@@ -89,7 +87,7 @@ export default async function collectRoutesFromFS(
           });
         } else {
           throw new Error(
-            'Symbol "$" is reserved for special directories and files; only "$layout", "$phantom" and "$index" are allowed',
+            'Symbol "$" is reserved for special directories and files; only "$layout" and "$index" are allowed',
           );
         }
       } else if (!name.startsWith('_')) {
