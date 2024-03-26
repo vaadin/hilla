@@ -28,6 +28,12 @@ export type PluginOptions = Readonly<{
    * @defaultValue `['.tsx', '.jsx']`
    */
   extensions?: readonly string[];
+  /**
+   * The flag to indicate whether the plugin is running in development mode.
+   *
+   * @defaultValue `false`
+   */
+  isDevMode?: boolean;
 }>;
 
 /**
@@ -40,6 +46,7 @@ export default function vitePluginFileSystemRouter({
   viewsDir = 'frontend/views/',
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx'],
+  isDevMode = false,
 }: PluginOptions = {}): Plugin {
   const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
 
@@ -63,7 +70,7 @@ export default function vitePluginFileSystemRouter({
       _logger.info(`The output directory: ${String(_outDir)}`);
 
       runtimeUrls = {
-        json: new URL('views.json', _outDir),
+        json: new URL('views.json', isDevMode ? _generatedDir : _outDir),
         code: new URL('views.ts', _generatedDir),
       };
     },
@@ -85,6 +92,7 @@ export default function vitePluginFileSystemRouter({
         generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger).catch((e: unknown) =>
           _logger.error(String(e)),
         );
+        server.hot.send({ type: 'full-reload' });
       };
 
       server.watcher.on('add', changeListener);

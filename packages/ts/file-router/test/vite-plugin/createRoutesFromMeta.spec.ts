@@ -14,7 +14,7 @@ describe('@vaadin/hilla-file-router', () => {
     let runtimeUrls: RuntimeFileUrls;
 
     beforeEach(() => {
-      dir = pathToFileURL(join(tmpdir(), 'hilla-file-router/'));
+      dir = pathToFileURL(join(tmpdir(), 'file-router/'));
       meta = createTestingRouteMeta(new URL('./views/', dir));
       runtimeUrls = {
         json: new URL('server/views.json', dir),
