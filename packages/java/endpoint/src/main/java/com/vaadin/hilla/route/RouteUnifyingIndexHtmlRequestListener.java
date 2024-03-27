@@ -73,11 +73,14 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
+        LOGGER.debug("modifyIndexHtmlResponse is called.");
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>();
         collectClientViews(availableViews);
         collectServerViews(availableViews);
 
         if (availableViews.isEmpty()) {
+            LOGGER.debug(
+                    "No server-side nor client-side views found, skipping response modification.");
             return;
         }
         try {
@@ -111,9 +114,10 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     private void loadLatestDevModeViewsJsonIfNeeded() {
         var devModeViewsJsonFile = deploymentConfiguration.getFrontendFolder()
-                .toPath().resolve("generated").resolve("views.json").toFile();
+                .toPath().resolve("generated").resolve("file-routes.json")
+                .toFile();
         if (!devModeViewsJsonFile.exists()) {
-            LOGGER.warn("Failed to find views.json under {}",
+            LOGGER.warn("Failed to find file-routes.json under {}",
                     deploymentConfiguration.getFrontendFolder().toPath()
                             .resolve("generated"));
             return;
@@ -127,8 +131,11 @@ public class RouteUnifyingIndexHtmlRequestListener
     }
 
     private void registerClientRoutes(LocalDateTime newLastUpdated) {
-        lastUpdated = newLastUpdated;
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        var hasClientRoutesRegistered = clientRouteRegistry
+                .registerClientRoutes(deploymentConfiguration);
+        if (hasClientRoutesRegistered) {
+            lastUpdated = newLastUpdated;
+        }
     }
 
     protected void collectServerViews(

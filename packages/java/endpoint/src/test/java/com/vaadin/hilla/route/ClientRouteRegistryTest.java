@@ -60,7 +60,7 @@ public class ClientRouteRegistryTest {
 
         mockDevelopmentMode();
 
-        projectRoot.newFile("frontend/generated/views.json");
+        projectRoot.newFile("frontend/generated/file-routes.json");
 
         clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
@@ -147,14 +147,14 @@ public class ClientRouteRegistryTest {
 
     private void createMockedDevModeViewsJson() throws IOException {
         var viewsJsonProdAsResource = getClass()
-                .getResource("/META-INF/VAADIN/views.json");
+                .getResource("/META-INF/VAADIN/file-routes.json");
         assert viewsJsonProdAsResource != null;
         String hierarchicalRoutesAsString = IOUtils.toString(
                 viewsJsonProdAsResource.openStream(), StandardCharsets.UTF_8);
         String addedDevToRootRoute = hierarchicalRoutesAsString
                 .replaceFirst("\"route\": \"\",", "\"route\": \"dev\",");
         var viewsJsonFile = projectRoot
-                .newFile("frontend/generated/views.json");
+                .newFile("frontend/generated/file-routes.json");
         try (PrintWriter writer = new PrintWriter(viewsJsonFile)) {
             writer.println(addedDevToRootRoute);
         }
