@@ -24,13 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import com.vaadin.flow.router.internal.ClientRoutesProvider;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
  * Keeps track of registered client side routes.
  */
 @Component
-public class ClientRouteRegistry implements Serializable {
+public class ClientRouteRegistry implements ClientRoutesProvider {
 
     /**
      * A map of registered routes and their corresponding client view
@@ -184,4 +185,10 @@ public class ClientRouteRegistry implements Serializable {
             });
         }
     }
+
+    @Override
+    public List<String> getClientRoutes() {
+        return getAllRoutes().keySet().stream().toList();
+    }
+
 }
