@@ -50,9 +50,9 @@ const warningFor = ['.ts', '.js'];
 /**
  * Collect route metadata from the file system and build a route tree.
  *
- * It accepts files that start with `$` as special files.
- * - `$layout` contains a component that wraps the child components.
- * - `$index` contains a component that will be used as the index page of the directory.
+ * It accepts files that start with `@` as special files.
+ * - `@layout` contains a component that wraps the child components.
+ * - `@index` contains a component that will be used as the index page of the directory.
  *
  * It accepts files that start with `_` as private files. They will be ignored.
  *
@@ -76,10 +76,10 @@ export default async function collectRoutesFromFS(
       const file = new URL(d.name, dir);
       const name = basename(d.name, extname(d.name));
 
-      if (name.startsWith('$')) {
-        if (name === '$layout') {
+      if (name.startsWith('@')) {
+        if (name === '@layout') {
           layout = file;
-        } else if (name === '$index') {
+        } else if (name === '@index') {
           children.push({
             path: '',
             file,
@@ -87,7 +87,7 @@ export default async function collectRoutesFromFS(
           });
         } else {
           throw new Error(
-            'Symbol "$" is reserved for special directories and files; only "$layout" and "$index" are allowed',
+            'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
           );
         }
       } else if (!name.startsWith('_')) {

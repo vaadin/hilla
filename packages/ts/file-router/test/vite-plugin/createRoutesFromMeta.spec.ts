@@ -27,13 +27,13 @@ describe('@vaadin/hilla-file-router', () => {
 
       expect(generated).to.equal(`import { createRoute } from "@vaadin/hilla-file-router/runtime.js";
 import * as Page0 from "../views/nameToReplace.js";
-import * as Page1 from "../views/profile/$index.js";
+import * as Page1 from "../views/profile/@index.js";
 import * as Page2 from "../views/profile/account/security/password.js";
 import * as Page3 from "../views/profile/account/security/two-factor-auth.js";
-import * as Layout5 from "../views/profile/account/$layout.js";
+import * as Layout5 from "../views/profile/account/@layout.js";
 import * as Page6 from "../views/profile/friends/list.js";
 import * as Page7 from "../views/profile/friends/{user}.js";
-import * as Layout8 from "../views/profile/friends/$layout.js";
+import * as Layout8 from "../views/profile/friends/@layout.js";
 import * as Page11 from "../views/test/{{optional}}.js";
 import * as Page12 from "../views/test/{...wildcard}.js";
 import * as Page13 from "../views/test/no-default-export.js";
@@ -46,7 +46,7 @@ export default routes;
       const metaWithDuplicatedPaths = createTestingRouteMeta(new URL('./views/', dir));
       metaWithDuplicatedPaths.children.push({
         path: 'profile',
-        file: new URL('profile/$index.tsx', dir),
+        file: new URL('profile/@index.tsx', dir),
         children: [],
       });
       const generated = createRoutesFromMeta(metaWithDuplicatedPaths, runtimeUrls);
