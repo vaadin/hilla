@@ -12,6 +12,10 @@
     <version>24.4-SNAPSHOT</version>
     <url>https://hilla.dev</url>
 
+    <properties>
+        <enforcer.skip>true</enforcer.skip>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

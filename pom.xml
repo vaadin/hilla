@@ -86,6 +86,7 @@
     <jaxb.version>4.0.4</jaxb.version>
     <github.javaparser.core.version>3.25.9</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
+    <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
   </properties>
 
   <organization>
