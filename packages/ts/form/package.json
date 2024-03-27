@@ -1,6 +1,6 @@
 {
   "name": "@hilla/form",
-  "version": "1.5.0-alpha1",
+  "version": "1.5.0-alpha2",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -66,7 +66,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@hilla/frontend": "1.5.0-alpha1",
+    "@hilla/frontend": "1.5.0-alpha2",
     "validator": "^13.11.0"
   },
   "peerDependencies": {
