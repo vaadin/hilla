@@ -45,14 +45,14 @@ async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | un
 
 const collator = new Intl.Collator('en-US');
 
-const phantomDirPattern = /\/?\$phantom/giu;
+const warningFor = ['.ts', '.js'];
 
 /**
  * Collect route metadata from the file system and build a route tree.
  *
- * It accepts files that start with `$` as special files.
- * - `$layout` contains a component that wraps the child components.
- * - `$index` contains a component that will be used as the index page of the directory.
+ * It accepts files that start with `@` as special files.
+ * - `@layout` contains a component that wraps the child components.
+ * - `@index` contains a component that will be used as the index page of the directory.
  *
  * It accepts files that start with `_` as private files. They will be ignored.
  *
@@ -65,7 +65,7 @@ export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, logger, parent = dir }: CollectRoutesOptions,
 ): Promise<RouteMeta> {
-  const path = relative(fileURLToPath(parent), fileURLToPath(dir)).replaceAll(phantomDirPattern, '');
+  const path = relative(fileURLToPath(parent), fileURLToPath(dir));
   let children: RouteMeta[] = [];
   let layout: URL | undefined;
 
@@ -76,10 +76,10 @@ export default async function collectRoutesFromFS(
       const file = new URL(d.name, dir);
       const name = basename(d.name, extname(d.name));
 
-      if (name.startsWith('$')) {
-        if (name === '$layout') {
+      if (name.startsWith('@')) {
+        if (name === '@layout') {
           layout = file;
-        } else if (name === '$index') {
+        } else if (name === '@index') {
           children.push({
             path: '',
             file,
@@ -87,7 +87,7 @@ export default async function collectRoutesFromFS(
           });
         } else {
           throw new Error(
-            'Symbol "$" is reserved for special directories and files; only "$layout", "$phantom" and "$index" are allowed',
+            'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
           );
         }
       } else if (!name.startsWith('_')) {
@@ -97,6 +97,10 @@ export default async function collectRoutesFromFS(
           children: [],
         });
       }
+    } else if (d.isFile() && !d.name.startsWith('_') && warningFor.includes(extname(d.name))) {
+      logger.warn(
+        `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file '${d.name}' will be ignored by router, as it doesn't match this convention. Please consider storing it in another directory.`,
+      );
     }
   }
 

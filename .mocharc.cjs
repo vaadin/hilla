@@ -6,10 +6,9 @@ const karmaMochaConfig = {
 };
 
 module.exports = {
-  extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'],
+  extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs', 'tsx'],
   import: join(__dirname, 'scripts/hooks.js'),
   exit: true,
-  verbose: true,
   karmaMochaConfig,
   ...karmaMochaConfig,
 };

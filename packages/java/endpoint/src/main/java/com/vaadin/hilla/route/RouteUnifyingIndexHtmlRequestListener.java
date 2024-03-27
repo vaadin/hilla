@@ -16,14 +16,16 @@
 package com.vaadin.hilla.route;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,28 +42,33 @@ import com.vaadin.hilla.route.records.RouteParamType;
  * Index HTML request listener for collecting the client side and the server
  * side views and adding them to index.html response.
  */
-@Component
-public class RouteExtractionIndexHtmlRequestListener
+public class RouteUnifyingIndexHtmlRequestListener
         implements IndexHtmlRequestListener {
     protected static final String SCRIPT_STRING = """
             window.Vaadin = window.Vaadin ?? {};
             window.Vaadin.server = window.Vaadin.server ?? {};
             window.Vaadin.server.views = %s;""";
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(RouteExtractionIndexHtmlRequestListener.class);
+            .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
     private final ClientRouteRegistry clientRouteRegistry;
     private final ObjectMapper mapper = new ObjectMapper();
+    private final DeploymentConfiguration deploymentConfiguration;
+
+    private LocalDateTime lastUpdated;
 
     /**
      * Creates a new listener instance with the given route registry.
      *
      * @param clientRouteRegistry
      *            the client route registry for getting the client side views
+     * @param deploymentConfiguration
+     *            the runtime deployment configuration
      */
-    @Autowired
-    public RouteExtractionIndexHtmlRequestListener(
-            ClientRouteRegistry clientRouteRegistry) {
+    public RouteUnifyingIndexHtmlRequestListener(
+            ClientRouteRegistry clientRouteRegistry,
+            DeploymentConfiguration deploymentConfiguration) {
         this.clientRouteRegistry = clientRouteRegistry;
+        this.deploymentConfiguration = deploymentConfiguration;
     }
 
     @Override
@@ -85,6 +92,12 @@ public class RouteExtractionIndexHtmlRequestListener
 
     protected void collectClientViews(
             Map<String, AvailableViewInfo> availableViews) {
+        if (!deploymentConfiguration.isProductionMode()) {
+            loadLatestDevModeViewsJsonIfNeeded();
+        } else if (lastUpdated == null) {
+            // initial (and only) registration in production mode:
+            registerClientRoutes(LocalDateTime.now());
+        }
         clientRouteRegistry.getAllRoutes().forEach((route, config) -> {
             final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
                     config.getTitle(), config.getRolesAllowed(),
@@ -94,6 +107,28 @@ public class RouteExtractionIndexHtmlRequestListener
             availableViews.put(route, availableViewInfo);
         });
 
+    }
+
+    private void loadLatestDevModeViewsJsonIfNeeded() {
+        var devModeViewsJsonFile = deploymentConfiguration.getFrontendFolder()
+                .toPath().resolve("generated").resolve("views.json").toFile();
+        if (!devModeViewsJsonFile.exists()) {
+            LOGGER.warn("Failed to find views.json under {}",
+                    deploymentConfiguration.getFrontendFolder().toPath()
+                            .resolve("generated"));
+            return;
+        }
+        var lastModified = devModeViewsJsonFile.lastModified();
+        var lastModifiedTime = Instant.ofEpochMilli(lastModified)
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (lastUpdated == null || lastModifiedTime.isAfter(lastUpdated)) {
+            registerClientRoutes(lastModifiedTime);
+        }
+    }
+
+    private void registerClientRoutes(LocalDateTime newLastUpdated) {
+        lastUpdated = newLastUpdated;
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
     }
 
     protected void collectServerViews(

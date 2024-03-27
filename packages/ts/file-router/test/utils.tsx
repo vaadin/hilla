@@ -9,7 +9,7 @@ import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 export async function createTmpDir(): Promise<URL> {
-  return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'hilla-file-router-'))}/`);
+  return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'file-router-'))}/`);
 }
 
 export async function createTestingRouteFiles(dir: URL): Promise<void> {
@@ -20,10 +20,12 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   ├── layout.tsx
   // │   │   └── security
   // │   │       ├── password.jsx
-  // │   │       └── two-factor-auth.ts
+  // │   │       └── two-factor-auth.tsx
+  // │   │       └── two-factor-auth-ignored.ts
   // │   ├── friends
   // │   │   ├── layout.tsx
-  // │   │   ├── list.js
+  // │   │   ├── list.jsx
+  // │   │   ├── list-ignored.js
   // │   │   └── {user}.tsx
   // │   ├── index.tsx
   // │   └── index.css
@@ -40,26 +42,34 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   ]);
   await Promise.all([
     appendFile(
-      new URL('profile/account/$layout.tsx', dir),
+      new URL('profile/account/@layout.tsx', dir),
       "export const config = { title: 'Account' };\nexport default function AccountLayout() {};",
     ),
     appendFile(new URL('profile/account/security/password.jsx', dir), 'export default function Password() {};'),
     appendFile(new URL('profile/account/security/password.scss', dir), ''),
     appendFile(
-      new URL('profile/account/security/two-factor-auth.ts', dir),
+      new URL('profile/account/security/two-factor-auth.tsx', dir),
       'export default function TwoFactorAuth() {};',
     ),
-    appendFile(new URL('profile/friends/$layout.tsx', dir), 'export default function FriendsLayout() {};'),
     appendFile(
-      new URL('profile/friends/list.js', dir),
+      new URL('profile/account/security/two-factor-auth-ignored.ts', dir),
+      'export default function TwoFactorAuthIgnored() {};',
+    ),
+    appendFile(new URL('profile/friends/@layout.tsx', dir), 'export default function FriendsLayout() {};'),
+    appendFile(
+      new URL('profile/friends/list.jsx', dir),
       "export const config = { title: 'List' };\nexport default function List() {};",
+    ),
+    appendFile(
+      new URL('profile/friends/list-ignored.js', dir),
+      "export const config = { title: 'List' };\nexport default function ListIgnored() {};",
     ),
     appendFile(
       new URL('profile/friends/{user}.tsx', dir),
       "export const config = { title: 'User' };\nexport default function User() {};",
     ),
     appendFile(
-      new URL('profile/$index.tsx', dir),
+      new URL('profile/@index.tsx', dir),
       "export const config = { title: 'Profile' };\nexport default function Profile() {};",
     ),
     appendFile(new URL('profile/index.css', dir), ''),
@@ -93,10 +103,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
       {
         path: 'profile',
         children: [
-          { path: '', file: new URL('profile/$index.tsx', dir), children: [] },
+          { path: '', file: new URL('profile/@index.tsx', dir), children: [] },
           {
             path: 'account',
-            layout: new URL('profile/account/$layout.tsx', dir),
+            layout: new URL('profile/account/@layout.tsx', dir),
             children: [
               {
                 path: 'security',
@@ -108,7 +118,7 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
                   },
                   {
                     path: 'two-factor-auth',
-                    file: new URL('profile/account/security/two-factor-auth.ts', dir),
+                    file: new URL('profile/account/security/two-factor-auth.tsx', dir),
                     children: [],
                   },
                 ],
@@ -117,11 +127,11 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           },
           {
             path: 'friends',
-            layout: new URL('profile/friends/$layout.tsx', dir),
+            layout: new URL('profile/friends/@layout.tsx', dir),
             children: [
               {
                 path: 'list',
-                file: new URL('profile/friends/list.js', dir),
+                file: new URL('profile/friends/list.jsx', dir),
                 children: [],
               },
               {
