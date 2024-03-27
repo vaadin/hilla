@@ -147,14 +147,14 @@ public class ClientRouteRegistryTest {
 
     private void createMockedDevModeViewsJson() throws IOException {
         var viewsJsonProdAsResource = getClass()
-                .getResource("/META-INF/VAADIN/file-routes.json");
+                .getResource(ClientRouteRegistry.FILE_ROUTES_JSON_PROD_PATH);
         assert viewsJsonProdAsResource != null;
         String hierarchicalRoutesAsString = IOUtils.toString(
                 viewsJsonProdAsResource.openStream(), StandardCharsets.UTF_8);
         String addedDevToRootRoute = hierarchicalRoutesAsString
                 .replaceFirst("\"route\": \"\",", "\"route\": \"dev\",");
-        var viewsJsonFile = projectRoot
-                .newFile("frontend/generated/file-routes.json");
+        var viewsJsonFile = projectRoot.newFile("frontend/generated/"
+                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME);
         try (PrintWriter writer = new PrintWriter(viewsJsonFile)) {
             writer.println(addedDevToRootRoute);
         }

@@ -43,7 +43,8 @@ import java.util.stream.Stream;
 public class ClientRouteRegistry implements Serializable {
 
     public static final String FILE_ROUTES_JSON_NAME = "file-routes.json";
-    public static final String FILE_ROUTES_JSON_PROD_PATH = "/META-INF/VAADIN/" + FILE_ROUTES_JSON_NAME;
+    public static final String FILE_ROUTES_JSON_PROD_PATH = "/META-INF/VAADIN/"
+            + FILE_ROUTES_JSON_NAME;
 
     /**
      * A map of registered routes and their corresponding client view
@@ -175,9 +176,8 @@ public class ClientRouteRegistry implements Serializable {
                     .resolve("generated").resolve(FILE_ROUTES_JSON_NAME).toUri()
                     .toURL();
         } catch (MalformedURLException e) {
-            LOGGER.warn(
-                    "Failed to find {} under frontend/generated", FILE_ROUTES_JSON_NAME,
-                    e);
+            LOGGER.warn("Failed to find {} under frontend/generated",
+                    FILE_ROUTES_JSON_NAME, e);
             throw new RuntimeException(e);
         }
     }
