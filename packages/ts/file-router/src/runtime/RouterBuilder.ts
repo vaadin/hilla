@@ -34,7 +34,7 @@ function mergeRoutes(a: RouteObject[], b: RouteObject[]): RouteObject[] {
  * A builder for creating a Vaadin-specific router for React with
  * authentication and server routes support.
  */
-export default class RouterBuilder {
+export class RouterBuilder {
   #routes: RouteObject[] = [];
 
   /**

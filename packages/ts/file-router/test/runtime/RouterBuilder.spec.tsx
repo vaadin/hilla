@@ -1,7 +1,7 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import sinonChai from 'sinon-chai';
-import RouterBuilder from '../../src/runtime/RouterBuilder.js';
+import { RouterBuilder } from '../../src/runtime/RouterBuilder.js';
 import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoutes } from '../mocks/vaadin-hilla-react-auth.js';
 
