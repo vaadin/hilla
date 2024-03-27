@@ -137,7 +137,7 @@ describe('RouterBuilder', () => {
         },
       ],
     });
-    routerBuilder.withServerRoutes(<Server />);
+    routerBuilder.withServerRoutes(Server);
 
     expect(routerBuilder.routes).to.be.like([
       {

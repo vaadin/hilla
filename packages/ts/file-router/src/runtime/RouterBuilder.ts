@@ -1,5 +1,5 @@
 import { protectRoutes, type RouteObjectWithAuth } from '@vaadin/hilla-react-auth';
-import type { ReactElement } from 'react';
+import { type ComponentType, createElement, type ReactElement } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { transformTreeSync } from '../shared/transformTree.js';
 import type { AgnosticRoute } from '../types.js';
@@ -77,11 +77,11 @@ export class RouterBuilder {
    * Adds the given server route element to each branch of the current list of
    * routes.
    *
-   * @param element - The element to add to each branch of the current list of
-   * routes.
+   * @param component - The React component to add to each branch of the
+   * current list of routes.
    */
-  withServerRoutes(element: ReactElement): this {
-    const flowRoute: RouteObject = { path: '*', element };
+  withServerRoutes(component: ComponentType): this {
+    const createServerRoute = () => ({ path: '*', element: createElement(component) });
 
     this.#routes = this.#routes.map((route) =>
       transformTreeSync<RouteObject, RouteObject>(
@@ -91,12 +91,12 @@ export class RouterBuilder {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           ({
             ...r,
-            children: [...children, flowRoute],
+            children: [...children, createServerRoute()],
           }) as RouteObject,
       ),
     );
 
-    this.#routes.push(flowRoute);
+    this.#routes.push(createServerRoute());
 
     return this;
   }
