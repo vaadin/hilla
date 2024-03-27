@@ -102,17 +102,6 @@ export class RouterBuilder {
   }
 
   /**
-   * Adds the given routes to the current list of routes. All the routes are
-   * deeply merged to preserve the path uniqueness.
-   *
-   * @param routes - A list of routes to add to the current list.
-   */
-  with(...routes: RouteObject[]): this {
-    this.#routes = mergeRoutes(this.#routes, routes);
-    return this;
-  }
-
-  /**
    * Protects all the routes that require authentication. For more details see
    * {@link @vaadin/hilla-react-auth#protectRoutes} function.
    *
