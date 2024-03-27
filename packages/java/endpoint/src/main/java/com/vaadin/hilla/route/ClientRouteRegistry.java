@@ -45,7 +45,6 @@ public class ClientRouteRegistry implements Serializable {
     public static final String FILE_ROUTES_JSON_NAME = "file-routes.json";
     public static final String FILE_ROUTES_JSON_PROD_PATH = "/META-INF/VAADIN/" + FILE_ROUTES_JSON_NAME;
 
-
     /**
      * A map of registered routes and their corresponding client view
      * configurations with ordered insertion.
@@ -140,8 +139,7 @@ public class ClientRouteRegistry implements Serializable {
             DeploymentConfiguration deploymentConfiguration) {
         var viewsJsonAsResource = getViewsJsonAsResource(
                 deploymentConfiguration);
-        if (viewsJsonAsResource == null || !Paths
-                .get(viewsJsonAsResource.getPath()).toFile().exists()) {
+        if (viewsJsonAsResource == null) {
             LOGGER.debug(
                     "No {} found under {} directory. Skipping client route registration.",
                     FILE_ROUTES_JSON_NAME,
@@ -156,8 +154,9 @@ public class ClientRouteRegistry implements Serializable {
                 registerAndRecurseChildren("",
                         mapper.readValue(source, new TypeReference<>() {
                         }));
+                return true;
             }
-            return true;
+            return false;
         } catch (IOException e) {
             LOGGER.warn("Failed load {} from {}", FILE_ROUTES_JSON_NAME,
                     viewsJsonAsResource.getPath(), e);
