@@ -54,15 +54,17 @@ public class RouteUnifyingServiceInitListener
     public void serviceInit(ServiceInitEvent event) {
         var deploymentConfiguration = event.getSource()
                 .getDeploymentConfiguration();
-        var routeExtractionIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
-                clientRouteRegistry, deploymentConfiguration);
-        var deploymentMode = deploymentConfiguration.isProductionMode()
-                ? "PRODUCTION"
-                : "DEVELOPMENT";
-        event.addIndexHtmlRequestListener(
-                routeExtractionIndexHtmlRequestListener);
-        LOGGER.debug(
-                "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
-                deploymentMode);
+        if (deploymentConfiguration.isReactEnabled()) {
+            var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    clientRouteRegistry, deploymentConfiguration);
+            var deploymentMode = deploymentConfiguration.isProductionMode()
+                    ? "PRODUCTION"
+                    : "DEVELOPMENT";
+            event.addIndexHtmlRequestListener(
+                    routeUnifyingIndexHtmlRequestListener);
+            LOGGER.debug(
+                    "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
+                    deploymentMode);
+        }
     }
 }
