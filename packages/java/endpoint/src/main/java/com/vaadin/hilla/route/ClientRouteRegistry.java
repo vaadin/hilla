@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.hilla.route.records.ClientViewConfig;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,8 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Keeps track of registered client side routes.
@@ -98,12 +101,23 @@ public class ClientRouteRegistry implements Serializable {
     public ClientViewConfig getRouteByPath(String path) {
         final Set<String> routes = registeredRoutes.keySet();
         final AntPathMatcher pathMatcher = new AntPathMatcher();
-        for (String route : routes) {
-            if (pathMatcher.match(route, path)) {
-                return registeredRoutes.get(route);
-            }
-        }
-        return null;
+        return Stream.of(addTrailingSlash(path), removeTrailingSlash(path))
+                .map(p -> {
+                    for (String route : routes) {
+                        if (pathMatcher.match(route, p)) {
+                            return registeredRoutes.get(route);
+                        }
+                    }
+                    return null;
+                }).filter(Objects::nonNull).findFirst().orElse(null);
+    }
+
+    private String addTrailingSlash(String path) {
+        return path.endsWith("/") ? path : path + '/';
+    }
+
+    private String removeTrailingSlash(String path) {
+        return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
     }
 
     /**

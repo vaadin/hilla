@@ -190,4 +190,31 @@ public class RouteUtilTest {
         boolean actual = endpointUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
     }
+
+    /**
+     * Verifies that the root route is allowed when login is not required,
+     * despite the mismatch between "/" and "".
+     */
+    @Test
+    public void test_login_not_required_on_root() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/context/");
+        request.setContextPath("/context");
+        request.setUserPrincipal(null);
+
+        ClientViewConfig config = new ClientViewConfig();
+        config.setTitle("Root");
+        config.setRolesAllowed(null);
+        config.setLoginRequired(false);
+        config.setRoute("");
+        config.setLazy(false);
+        config.setAutoRegistered(false);
+        config.setMenu(null);
+        config.setChildren(null);
+        config.setRouteParameters(null);
+        registry.addRoute("", config);
+
+        boolean actual = endpointUtil.isRouteAllowed(request);
+        Assert.assertTrue(actual);
+    }
 }
