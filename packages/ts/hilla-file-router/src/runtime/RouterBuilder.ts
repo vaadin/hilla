@@ -13,31 +13,21 @@ import { toReactRouter } from './toReactRouter.js';
  * @param b - The second list of routes.
  */
 function mergeRoutes(a: RouteObject[], b: RouteObject[]): RouteObject[] {
-  let result = a;
-
-  for (const route of b) {
-    let found = false;
-    result = result.map((r) => {
-      if (r.path === route.path) {
-        found = true;
-        // eslint-disable-next-line
-        return {
-          ...r,
-          ...route,
-          children: r.children ? mergeRoutes(r.children, route.children ?? []) : route.children,
-        } as RouteObject;
+  return b.reduce(
+    (result, route) => {
+      const existingRoute = result.find((r) => r.path === route.path);
+      if (existingRoute) {
+        Object.assign(existingRoute, route);
+        existingRoute.children = existingRoute.children
+          ? mergeRoutes(existingRoute.children, route.children ?? [])
+          : route.children;
+      } else {
+        result.push(route);
       }
-
-      return r;
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!found) {
-      result = [...result, route];
-    }
-  }
-
-  return result;
+      return result;
+    },
+    [...a],
+  );
 }
 
 /**
