@@ -21,8 +21,8 @@ describe('@vaadin/hilla-file-router', () => {
 
       viewsDir = new URL('views/', tmp);
       runtimeUrls = {
-        json: new URL('server/views.json', tmp),
-        code: new URL('generated/views.ts', tmp),
+        json: new URL('server/file-routes.json', tmp),
+        code: new URL('generated/file-routes.ts', tmp),
       };
 
       await createTestingRouteFiles(viewsDir);

@@ -123,7 +123,9 @@ export default routes;
     ],
   );
 
-  const file = createSourceFile(routeDeclaration, 'views.ts');
-
+  const file = createSourceFile(routeDeclaration, 'file-routes.ts');
+  // also keep the old file temporarily for compatibility purposes:
+  const tempFile = createSourceFile(routeDeclaration, 'views.ts');
+  printer.printFile(tempFile);
   return printer.printFile(file);
 }

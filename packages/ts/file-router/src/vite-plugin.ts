@@ -70,8 +70,8 @@ export default function vitePluginFileSystemRouter({
       _logger.info(`The output directory: ${String(_outDir)}`);
 
       runtimeUrls = {
-        json: new URL('views.json', isDevMode ? _generatedDir : _outDir),
-        code: new URL('views.ts', _generatedDir),
+        json: new URL('file-routes.json', isDevMode ? _generatedDir : _outDir),
+        code: new URL('file-routes.ts', _generatedDir),
       };
     },
     async buildStart() {
@@ -89,10 +89,9 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger).catch((e: unknown) =>
-          _logger.error(String(e)),
-        );
-        server.hot.send({ type: 'full-reload' });
+        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger)
+          .then(() => server.hot.send({ type: 'full-reload' }))
+          .catch((e: unknown) => _logger.error(String(e)));
       };
 
       server.watcher.on('add', changeListener);
