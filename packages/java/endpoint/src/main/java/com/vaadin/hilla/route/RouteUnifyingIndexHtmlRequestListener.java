@@ -83,12 +83,15 @@ public class RouteUnifyingIndexHtmlRequestListener
             return;
         }
         try {
-            final String fileRoutesJson = mapper.writeValueAsString(availableViews);
+            final String fileRoutesJson = mapper
+                    .writeValueAsString(availableViews);
             final String script = SCRIPT_STRING.formatted(fileRoutesJson);
             response.getDocument().head().appendElement("script")
                     .appendChild(new DataNode(script));
         } catch (IOException e) {
-            LOGGER.error("Failure while to write client and server routes to index html response", e);
+            LOGGER.error(
+                    "Failure while to write client and server routes to index html response",
+                    e);
         }
     }
 
@@ -112,9 +115,9 @@ public class RouteUnifyingIndexHtmlRequestListener
     }
 
     private void loadLatestDevModeFileRoutesJsonIfNeeded() {
-        var devModeFileRoutesJsonFile = deploymentConfiguration.getFrontendFolder()
-                .toPath().resolve("generated").resolve("file-routes.json")
-                .toFile();
+        var devModeFileRoutesJsonFile = deploymentConfiguration
+                .getFrontendFolder().toPath().resolve("generated")
+                .resolve("file-routes.json").toFile();
         if (!devModeFileRoutesJsonFile.exists()) {
             LOGGER.warn("Failed to find file-routes.json under {}",
                     deploymentConfiguration.getFrontendFolder().toPath()

@@ -54,8 +54,7 @@ public class RouteUnifyingServiceInitListener
     public void serviceInit(ServiceInitEvent event) {
         var deploymentConfiguration = event.getSource()
                 .getDeploymentConfiguration();
-        LOGGER.debug(
-                "deploymentConfiguration.isReactEnabled() = {}",
+        LOGGER.debug("deploymentConfiguration.isReactEnabled() = {}",
                 deploymentConfiguration.isReactEnabled());
         if (deploymentConfiguration.isReactEnabled()) {
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
