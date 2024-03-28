@@ -73,7 +73,6 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
-        LOGGER.debug("modifyIndexHtmlResponse is called.");
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>();
         collectClientViews(availableViews);
         collectServerViews(availableViews);
@@ -84,19 +83,19 @@ public class RouteUnifyingIndexHtmlRequestListener
             return;
         }
         try {
-            final String viewsJson = mapper.writeValueAsString(availableViews);
-            final String script = SCRIPT_STRING.formatted(viewsJson);
+            final String fileRoutesJson = mapper.writeValueAsString(availableViews);
+            final String script = SCRIPT_STRING.formatted(fileRoutesJson);
             response.getDocument().head().appendElement("script")
                     .appendChild(new DataNode(script));
         } catch (IOException e) {
-            LOGGER.error("Failed to write server views to index response", e);
+            LOGGER.error("Failure while to write client and server routes to index html response", e);
         }
     }
 
     protected void collectClientViews(
             Map<String, AvailableViewInfo> availableViews) {
         if (!deploymentConfiguration.isProductionMode()) {
-            loadLatestDevModeViewsJsonIfNeeded();
+            loadLatestDevModeFileRoutesJsonIfNeeded();
         } else if (lastUpdated == null) {
             // initial (and only) registration in production mode:
             registerClientRoutes(LocalDateTime.now());
@@ -112,17 +111,17 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     }
 
-    private void loadLatestDevModeViewsJsonIfNeeded() {
-        var devModeViewsJsonFile = deploymentConfiguration.getFrontendFolder()
+    private void loadLatestDevModeFileRoutesJsonIfNeeded() {
+        var devModeFileRoutesJsonFile = deploymentConfiguration.getFrontendFolder()
                 .toPath().resolve("generated").resolve("file-routes.json")
                 .toFile();
-        if (!devModeViewsJsonFile.exists()) {
+        if (!devModeFileRoutesJsonFile.exists()) {
             LOGGER.warn("Failed to find file-routes.json under {}",
                     deploymentConfiguration.getFrontendFolder().toPath()
                             .resolve("generated"));
             return;
         }
-        var lastModified = devModeViewsJsonFile.lastModified();
+        var lastModified = devModeFileRoutesJsonFile.lastModified();
         var lastModifiedTime = Instant.ofEpochMilli(lastModified)
                 .atZone(ZoneId.systemDefault()).toLocalDateTime();
         if (lastUpdated == null || lastModifiedTime.isAfter(lastUpdated)) {
