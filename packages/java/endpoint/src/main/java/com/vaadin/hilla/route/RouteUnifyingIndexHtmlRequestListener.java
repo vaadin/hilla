@@ -119,7 +119,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                 .getFrontendFolder().toPath().resolve("generated")
                 .resolve("file-routes.json").toFile();
         if (!devModeFileRoutesJsonFile.exists()) {
-            LOGGER.warn("Failed to find file-routes.json under {}",
+            LOGGER.debug("No file-routes.json found under {}",
                     deploymentConfiguration.getFrontendFolder().toPath()
                             .resolve("generated"));
             return;
