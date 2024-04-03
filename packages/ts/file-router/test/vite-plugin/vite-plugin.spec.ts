@@ -1,7 +1,7 @@
-import { use } from '@esm-bundle/chai';
+import { EventEmitter } from 'node:events';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { FSWatcher } from 'chokidar';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import vitePluginFileSystemRouter from '../../src/vite-plugin';
@@ -11,7 +11,11 @@ use(sinonChai);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('vite-plugin', () => {
-    const watcher = new FSWatcher();
+    const rootDir = pathToFileURL('/path/to/project/');
+    const outDir = new URL('dist/', rootDir);
+    const viewsDir = new URL('frontend/views/', rootDir);
+    const generatedDir = new URL('frontend/generated/', rootDir);
+    const watcher = new EventEmitter();
     const mockServer = {
       hot: {
         send: sinon.spy(),
@@ -20,14 +24,14 @@ describe('@vaadin/hilla-file-router', () => {
     };
     const plugin = vitePluginFileSystemRouter({ isDevMode: true });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+    // @ts-expect-error: the configResolved method could be either a function or an object.
     plugin.configResolved({
       logger: { info: sinon.spy() },
-      root: '/path/to/project',
-      build: { outDir: '/path/to/project/dist' },
+      root: fileURLToPath(rootDir),
+      build: { outDir: fileURLToPath(outDir) },
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+    // @ts-expect-error: the configResolved method could be either a function or an object.
     plugin.configureServer(mockServer);
 
     beforeEach(() => {
@@ -35,24 +39,21 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should send full-reload only when file-routes.json is added', () => {
-      sinon.assert.notCalled(mockServer.hot.send);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      mockServer.watcher.emit('add', '/path/to/generated/file-routes.json');
-      sinon.assert.calledWith(mockServer.hot.send, { type: 'full-reload' });
+      expect(mockServer.hot.send).to.not.be.called;
+      mockServer.watcher.emit('add', fileURLToPath(new URL('file-routes.json', generatedDir)));
+      expect(mockServer.hot.send).to.be.calledWith({ type: 'full-reload' });
     });
 
     it('should send full-reload only when file-routes.json changes', () => {
-      sinon.assert.notCalled(mockServer.hot.send);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      mockServer.watcher.emit('change', '/path/to/generated/file-routes.json');
-      sinon.assert.calledWith(mockServer.hot.send, { type: 'full-reload' });
+      expect(mockServer.hot.send).to.not.be.called;
+      mockServer.watcher.emit('change', fileURLToPath(new URL('file-routes.json', generatedDir)));
+      expect(mockServer.hot.send).to.be.calledWith({ type: 'full-reload' });
     });
 
     it('should not send full-reload when other files change', () => {
-      sinon.assert.notCalled(mockServer.hot.send);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      mockServer.watcher.emit('change', '/path/to/views/file.tsx');
-      sinon.assert.notCalled(mockServer.hot.send);
+      expect(mockServer.hot.send).to.not.be.called;
+      mockServer.watcher.emit('change', fileURLToPath(new URL('file.tsx', viewsDir)));
+      expect(mockServer.hot.send).to.not.be.called;
     });
   });
 });
