@@ -86,12 +86,15 @@ export default function vitePluginFileSystemRouter({
 
       const changeListener = (file: string): void => {
         if (!file.startsWith(dir)) {
+          if (file === fileURLToPath(runtimeUrls.json)) {
+            server.hot.send({ type: 'full-reload' });
+          }
           return;
         }
 
-        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger)
-          .then(() => server.hot.send({ type: 'full-reload' }))
-          .catch((e: unknown) => _logger.error(String(e)));
+        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger).catch((e: unknown) =>
+          _logger.error(String(e)),
+        );
       };
 
       server.watcher.on('add', changeListener);
