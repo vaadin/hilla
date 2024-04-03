@@ -1103,7 +1103,7 @@ describe('@vaadin/hilla-react-crud', () => {
         await assertColumns(grid, 'email', 'firstName');
       });
 
-      it('should hide configured columns and keep default order', async () => {
+      it('should hide columns and keep default order', async () => {
         const grid = await GridController.init(
           render(<TestAutoGrid hiddenColumns={['gender', 'birthDate', 'address.country']} />),
           user,

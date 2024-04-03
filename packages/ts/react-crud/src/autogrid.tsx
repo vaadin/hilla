@@ -57,8 +57,7 @@ interface AutoGridOwnProps<TItem> {
    *
    * By default, the grid shows columns for all properties of the model which
    * have a type that is supported. Use the `visibleColumns` option to customize
-   * which columns to show and in which order. Use the `hiddenColumns` option to
-   * hide certain columns and to keep the default order.
+   * which columns to show and in which order.
    */
   model: DetachedModelConstructor<AbstractModel<TItem>>;
   /**
