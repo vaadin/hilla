@@ -267,13 +267,7 @@ function useColumns(
 
   // When using `hiddenColumns` option, remove columns to hide using their `key`
   if (options.hiddenColumns) {
-    columns = columns.filter((column) => {
-      const { key } = column;
-      if (key) {
-        return !options.hiddenColumns?.includes(key);
-      }
-      return true;
-    });
+    columns = columns.filter(({ key }) => !(key && options.hiddenColumns?.includes(key)));
   }
 
   if (options.rowNumbers) {
