@@ -54,7 +54,6 @@ public class RouteUtil {
                 && request.getUserPrincipal() == null) {
             isAllowed = false;
         } else {
-            // current logic means that an empty array denies access to all
             var rolesAllowed = viewConfig.getRolesAllowed();
 
             if (rolesAllowed != null) {
