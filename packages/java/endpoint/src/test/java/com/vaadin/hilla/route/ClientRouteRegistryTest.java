@@ -30,7 +30,7 @@ public class ClientRouteRegistryTest {
     public void when_clearRoutes_isCalled_then_allRoutesAreCleared()
             throws IOException {
         mockDevelopmentMode();
-        createMockedDevModeViewsJson();
+        createMockedDevModeFileRouteJson();
 
         clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
@@ -43,7 +43,7 @@ public class ClientRouteRegistryTest {
     }
 
     @Test
-    public void when_developmentMode_and_noViewsJsonFile_then_noRoutesAreRegistered()
+    public void when_developmentMode_and_noFileRouteJsonFile_then_noRoutesAreRegistered()
             throws IOException {
 
         mockDevelopmentMode();
@@ -55,12 +55,12 @@ public class ClientRouteRegistryTest {
     }
 
     @Test
-    public void when_developmentMode_and_emptyViewsJsonFile_then_noRoutesAreRegistered()
+    public void when_developmentMode_and_emptyFileRouteJsonFile_then_noRoutesAreRegistered()
             throws IOException {
 
         mockDevelopmentMode();
 
-        projectRoot.newFile("frontend/generated/views.json");
+        projectRoot.newFile("frontend/generated/file-routes.json");
 
         clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
@@ -106,7 +106,7 @@ public class ClientRouteRegistryTest {
             throws IOException {
 
         mockDevelopmentMode();
-        createMockedDevModeViewsJson();
+        createMockedDevModeFileRouteJson();
 
         clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
@@ -145,17 +145,18 @@ public class ClientRouteRegistryTest {
                 .thenReturn(frontendGeneratedDir.getParentFile());
     }
 
-    private void createMockedDevModeViewsJson() throws IOException {
-        var viewsJsonProdAsResource = getClass()
-                .getResource("/META-INF/VAADIN/views.json");
-        assert viewsJsonProdAsResource != null;
+    private void createMockedDevModeFileRouteJson() throws IOException {
+        var fileRoutesJsonProdAsResource = getClass()
+                .getResource(ClientRouteRegistry.FILE_ROUTES_JSON_PROD_PATH);
+        assert fileRoutesJsonProdAsResource != null;
         String hierarchicalRoutesAsString = IOUtils.toString(
-                viewsJsonProdAsResource.openStream(), StandardCharsets.UTF_8);
+                fileRoutesJsonProdAsResource.openStream(),
+                StandardCharsets.UTF_8);
         String addedDevToRootRoute = hierarchicalRoutesAsString
                 .replaceFirst("\"route\": \"\",", "\"route\": \"dev\",");
-        var viewsJsonFile = projectRoot
-                .newFile("frontend/generated/views.json");
-        try (PrintWriter writer = new PrintWriter(viewsJsonFile)) {
+        var fileRoutesJsonFile = projectRoot.newFile("frontend/generated/"
+                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME);
+        try (PrintWriter writer = new PrintWriter(fileRoutesJsonFile)) {
             writer.println(addedDevToRootRoute);
         }
     }

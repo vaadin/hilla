@@ -1093,7 +1093,7 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('IT');
       });
 
-      it('should ignore unknown columns', async () => {
+      it('should ignore unknown columns when using visibleColumns', async () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid visibleColumns={['foo', 'email', 'bar', 'firstName', 'address.foo', 'department.foo']} />,
@@ -1101,6 +1101,51 @@ describe('@vaadin/hilla-react-crud', () => {
           user,
         );
         await assertColumns(grid, 'email', 'firstName');
+      });
+
+      it('should hide columns and keep default order', async () => {
+        const grid = await GridController.init(
+          render(<TestAutoGrid hiddenColumns={['gender', 'birthDate', 'address.country']} />),
+          user,
+        );
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'department',
+        );
+      });
+
+      it('should ignore unknown columns when using hiddenColumns', async () => {
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid hiddenColumns={['foo', 'gender', 'bar', 'birthDate', 'address.foo', 'department.foo']} />,
+          ),
+          user,
+        );
+        await assertColumns(
+          grid,
+          'firstName',
+          'lastName',
+          'email',
+          'someInteger',
+          'someDecimal',
+          'vip',
+          'shiftStart',
+          'appointmentTime',
+          'address.street',
+          'address.city',
+          'address.country',
+          'department',
+        );
       });
 
       it('uses custom column options on top of the type defaults', async () => {
@@ -1318,6 +1363,41 @@ describe('@vaadin/hilla-react-crud', () => {
         );
         await assertColumnsOrder(grid, 'fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart');
         expect(grid.getBodyCellContent(0, 0)).to.have.rendered.text('Jane Love');
+      });
+
+      it('should hide configured columns and render remaining columns including custom columns at the end', async () => {
+        const grid = await GridController.init(
+          render(
+            <TestAutoGrid
+              noHeaderFilters
+              hiddenColumns={[
+                'email',
+                'someInteger',
+                'someDecimal',
+                'vip',
+                'shiftStart',
+                'appointmentTime',
+                'address.street',
+                'address.city',
+                'address.country',
+                'department',
+                'secondFullName',
+              ]}
+              customColumns={[
+                <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
+                <GridColumn
+                  key="secondFullName"
+                  header="Second full name"
+                  autoWidth
+                  renderer={FullNameHyphenRenderer}
+                ></GridColumn>,
+              ]}
+            />,
+          ),
+          user,
+        );
+        await assertColumnsOrder(grid, 'firstName', 'lastName', 'gender', 'birthDate', 'fullName');
+        expect(grid.getBodyCellContent(0, 4)).to.have.rendered.text('Jane Love');
       });
 
       describe('with header filters', () => {
