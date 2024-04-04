@@ -724,6 +724,22 @@ describe('@vaadin/hilla-react-crud', () => {
       });
     });
 
+    describe('hiddenFields', () => {
+      it('does not render fields for the specified properties', async () => {
+        const form = await populatePersonForm(1, { hiddenFields: ['firstName', 'lastName', 'id'] });
+        expect(form.queryField('First name')).to.be.undefined;
+        expect(form.queryField('Last name')).to.be.undefined;
+        expect(form.queryField('Id')).to.be.undefined;
+        expect(form.queryField('Gender')).to.exist;
+      });
+
+      it('should ignore unknown columns when using hiddenFields', async () => {
+        const form = await populatePersonForm(1, { hiddenFields: ['lastName', 'foo'] });
+        expect(form.queryField('First name')).to.exist;
+        expect(form.queryField('Last name')).to.be.undefined;
+      });
+    });
+
     describe('Delete button', () => {
       let service: CrudService<Person> & HasTestInfo;
       let person: Person;
