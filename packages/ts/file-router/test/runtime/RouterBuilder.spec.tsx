@@ -1,7 +1,7 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import sinonChai from 'sinon-chai';
-import { RouterBuilder } from '../../src/runtime/RouterBuilder.js';
+import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoutes } from '../mocks/vaadin-hilla-react-auth.js';
 
@@ -9,7 +9,7 @@ use(chaiLike);
 use(sinonChai);
 
 describe('RouterBuilder', () => {
-  let routerBuilder: RouterBuilder;
+  let builder: RouterConfigurationBuilder;
 
   function NextTest() {
     return <></>;
@@ -22,7 +22,7 @@ describe('RouterBuilder', () => {
   }
 
   beforeEach(() => {
-    routerBuilder = new RouterBuilder().withReactRoutes({
+    builder = new RouterConfigurationBuilder().withReactRoutes({
       path: '',
       children: [
         {
@@ -34,21 +34,23 @@ describe('RouterBuilder', () => {
   });
 
   it('should merge React routes deeply', () => {
-    routerBuilder.withReactRoutes({
-      path: '',
-      children: [
-        {
-          path: '/test',
-          element: <div>AlternatedTest</div>,
-        },
-        {
-          path: '/next-test',
-          element: <div>NextTest</div>,
-        },
-      ],
-    });
+    const { routes } = builder
+      .withReactRoutes({
+        path: '',
+        children: [
+          {
+            path: '/test',
+            element: <div>AlternatedTest</div>,
+          },
+          {
+            path: '/next-test',
+            element: <div>NextTest</div>,
+          },
+        ],
+      })
+      .build();
 
-    expect(routerBuilder.routes).to.be.like([
+    expect(routes).to.be.like([
       {
         path: '',
         children: [
@@ -66,30 +68,32 @@ describe('RouterBuilder', () => {
   });
 
   it('should merge file routes deeply', () => {
-    routerBuilder.withFileRoutes({
-      path: '',
-      children: [
-        {
-          path: '/test',
-          module: {
-            // eslint-disable-next-line func-name-matching
-            default: AltTest,
-            config: {
-              route: '/alt-test',
+    const { routes } = builder
+      .withFileRoutes({
+        path: '',
+        children: [
+          {
+            path: '/test',
+            module: {
+              // eslint-disable-next-line func-name-matching
+              default: AltTest,
+              config: {
+                route: '/alt-test',
+              },
             },
           },
-        },
-        {
-          path: '/next-test',
-          module: {
-            // eslint-disable-next-line func-name-matching
-            default: NextTest,
+          {
+            path: '/next-test',
+            module: {
+              // eslint-disable-next-line func-name-matching
+              default: NextTest,
+            },
           },
-        },
-      ],
-    });
+        ],
+      })
+      .build();
 
-    expect(routerBuilder.routes).to.be.like([
+    expect(routes).to.be.like([
       {
         path: '',
         children: [
@@ -114,32 +118,34 @@ describe('RouterBuilder', () => {
   });
 
   it('should add server routes to children deeply', () => {
-    routerBuilder.withReactRoutes({
-      path: '',
-      children: [
-        {
-          path: '/test',
-          children: [
-            {
-              path: '/child-test',
-              element: <div>ChildTest</div>,
-            },
-          ],
-        },
-        {
-          path: '/next-test',
-          children: [
-            {
-              path: '/next-child-test',
-              element: <div>ChildTest</div>,
-            },
-          ],
-        },
-      ],
-    });
-    routerBuilder.withServerRoutes(Server);
+    const { routes } = builder
+      .withReactRoutes({
+        path: '',
+        children: [
+          {
+            path: '/test',
+            children: [
+              {
+                path: '/child-test',
+                element: <div>ChildTest</div>,
+              },
+            ],
+          },
+          {
+            path: '/next-test',
+            children: [
+              {
+                path: '/next-child-test',
+                element: <div>ChildTest</div>,
+              },
+            ],
+          },
+        ],
+      })
+      .withFallback(Server)
+      .build();
 
-    expect(routerBuilder.routes).to.be.like([
+    expect(routes).to.be.like([
       {
         path: '',
         children: [
@@ -183,31 +189,36 @@ describe('RouterBuilder', () => {
   });
 
   it('should protect routes', () => {
-    routerBuilder.withReactRoutes({
-      path: '',
-      children: [
-        {
-          path: '/test',
-          element: <div>Test</div>,
-        },
-      ],
-    });
-    routerBuilder.protect('/login');
-    expect(protectRoutes).to.have.been.calledWith(routerBuilder.routes, '/login');
+    const { routes } = builder
+      .withReactRoutes({
+        path: '',
+        children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
+        ],
+      })
+      .protect('/login')
+      .build();
+
+    expect(protectRoutes).to.have.been.calledWith(routes, '/login');
   });
 
   it('should build the router', () => {
-    routerBuilder.withReactRoutes({
-      path: '',
-      children: [
-        {
-          path: '/test',
-          element: <div>Test</div>,
-        },
-      ],
-    });
-    const router = routerBuilder.build();
+    const { routes, router } = builder
+      .withReactRoutes({
+        path: '',
+        children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
+        ],
+      })
+      .build();
+
     expect(router).to.equal(browserRouter);
-    expect(createBrowserRouter).to.have.been.calledWith(routerBuilder.routes);
+    expect(createBrowserRouter).to.have.been.calledWith(routes);
   });
 });

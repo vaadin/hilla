@@ -2,7 +2,7 @@ import { protectRoutes, type RouteObjectWithAuth } from '@vaadin/hilla-react-aut
 import { type ComponentType, createElement, type ReactElement } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { transformTreeSync } from '../shared/transformTree.js';
-import type { AgnosticRoute } from '../types.js';
+import type { AgnosticRoute, RouterConfiguration } from '../types.js';
 import { toReactRouter } from './toReactRouter.js';
 
 /**
@@ -12,7 +12,7 @@ import { toReactRouter } from './toReactRouter.js';
  * @param a - The first list of routes.
  * @param b - The second list of routes.
  */
-function mergeRoutes(a: RouteObject[], b: RouteObject[]): RouteObject[] {
+function mergeRoutes(a: readonly RouteObject[], b: readonly RouteObject[]): RouteObject[] {
   return b.reduce(
     (result, route) => {
       const existingRoute = result.find((r) => r.path === route.path);
@@ -34,15 +34,9 @@ function mergeRoutes(a: RouteObject[], b: RouteObject[]): RouteObject[] {
  * A builder for creating a Vaadin-specific router for React with
  * authentication and server routes support.
  */
-export class RouterBuilder {
-  #routes: RouteObject[] = [];
-
-  /**
-   * Returns the current list of routes.
-   */
-  get routes(): readonly RouteObject[] {
-    return this.#routes;
-  }
+export class RouterConfigurationBuilder {
+  readonly #initializers: Array<(routes: readonly RouteObject[]) => readonly RouteObject[]> = [];
+  readonly #finalizers: Array<(routes: readonly RouteObject[]) => readonly RouteObject[]> = [];
 
   /**
    * Adds the given routes to the current list of routes. All the routes are
@@ -50,12 +44,14 @@ export class RouterBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withReactRoutes(...routes: RouteObject[]): this {
-    if (!this.#routes.length) {
-      this.#routes = routes;
-    } else {
-      this.#routes = mergeRoutes(this.#routes, routes);
-    }
+  withReactRoutes(...routes: readonly RouteObject[]): this {
+    this.#initializers.push((existingRoutes) => {
+      if (!existingRoutes.length) {
+        return routes;
+      }
+
+      return mergeRoutes(existingRoutes, routes);
+    });
 
     return this;
   }
@@ -68,8 +64,15 @@ export class RouterBuilder {
    * @param routes - A list of routes to add to the current list.
    */
   withFileRoutes(...routes: readonly AgnosticRoute[]): this {
-    const reactRoutes = routes.map(toReactRouter);
-    this.withReactRoutes(...reactRoutes);
+    this.#initializers.push((existingRoutes) => {
+      const reactRoutes = routes.map(toReactRouter);
+
+      if (!existingRoutes.length) {
+        return reactRoutes;
+      }
+
+      return mergeRoutes(existingRoutes, reactRoutes);
+    });
     return this;
   }
 
@@ -80,23 +83,27 @@ export class RouterBuilder {
    * @param component - The React component to add to each branch of the
    * current list of routes.
    */
-  withServerRoutes(component: ComponentType): this {
-    const createServerRoute = () => ({ path: '*', element: createElement(component) });
+  withFallback(component: ComponentType): this {
+    this.#finalizers.push((existingRoutes) => {
+      const createServerRoute = () => ({ path: '*', element: createElement(component) });
 
-    this.#routes = this.#routes.map((route) =>
-      transformTreeSync<RouteObject, RouteObject>(
-        route,
-        (r) => r.children?.values(),
-        (r, children) =>
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          ({
-            ...r,
-            children: [...children, createServerRoute()],
-          }) as RouteObject,
-      ),
-    );
+      const newRoutes = existingRoutes.map((route) =>
+        transformTreeSync<RouteObject, RouteObject>(
+          route,
+          (r) => r.children?.values(),
+          (r, children) =>
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            ({
+              ...r,
+              children: [...children, createServerRoute()],
+            }) as RouteObject,
+        ),
+      );
 
-    this.#routes.push(createServerRoute());
+      newRoutes.push(createServerRoute());
+
+      return newRoutes;
+    });
 
     return this;
   }
@@ -109,14 +116,20 @@ export class RouterBuilder {
    * and the user is not authenticated.
    */
   protect(redirectPath?: string): this {
-    protectRoutes(this.#routes as RouteObjectWithAuth[], redirectPath);
+    this.#finalizers.push((existingRoutes) => protectRoutes(existingRoutes as RouteObjectWithAuth[], redirectPath));
     return this;
   }
 
   /**
    * Builds the router with the current list of routes.
    */
-  build(): ReturnType<typeof createBrowserRouter> {
-    return createBrowserRouter(this.#routes);
+  build(): RouterConfiguration {
+    let routes = this.#initializers.reduce<readonly RouteObject[]>((acc, callback) => callback(acc), []);
+    routes = this.#finalizers.reduce<readonly RouteObject[]>((acc, callback) => callback(acc), routes);
+
+    return {
+      routes,
+      router: createBrowserRouter([...routes]),
+    };
   }
 }
