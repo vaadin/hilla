@@ -740,6 +740,14 @@ describe('@vaadin/hilla-react-crud', () => {
         const form = await populatePersonForm(1, { hiddenFields: ['address.street'] });
         expect(form.queryField('Street')).to.be.undefined;
       });
+
+      it('ignores non-existing properties', async () => {
+        const service = personService();
+        const person = (await getItem(service, 1))!;
+
+        const form = await populatePersonForm(1, { hiddenFields: ['foo'] });
+        await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
+      });
     });
 
     describe('Delete button', () => {

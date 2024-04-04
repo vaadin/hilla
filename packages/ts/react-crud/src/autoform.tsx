@@ -403,7 +403,7 @@ export function AutoForm<M extends AbstractModel>({
 
   // When using `hiddenFields`, remove fields to hide using their `name`
   if (hiddenFields) {
-    visibleProperties = visibleProperties.filter(({ name }) => !(name && hiddenFields.includes(name)));
+    visibleProperties = visibleProperties.filter(({ name }) => !hiddenFields.includes(name));
   }
 
   const fields = visibleProperties.map(createAutoFormField);
