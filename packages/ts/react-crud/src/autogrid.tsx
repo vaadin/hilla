@@ -86,6 +86,12 @@ interface AutoGridOwnProps<TItem> {
    */
   visibleColumns?: string[];
   /**
+   * Allows to customize which columns to hide. This must be an array of property
+   * names that are defined in the model. Nested properties can be specified using
+   * dot notation, e.g. `address.street`.
+   */
+  hiddenColumns?: string[];
+  /**
    * Disables header filters, which are otherwise enabled by default.
    */
   noHeaderFilters?: boolean;
@@ -136,6 +142,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<
 
 interface ColumnConfigurationOptions {
   visibleColumns?: string[];
+  hiddenColumns?: string[];
   noHeaderFilters?: boolean;
   customColumns?: JSX.Element[];
   columnOptions?: Record<string, ColumnOptions>;
@@ -258,6 +265,11 @@ function useColumns(
 
   columns = addCustomColumns(columns, options, setColumnFilter);
 
+  // When using `hiddenColumns` option, remove columns to hide using their `key`
+  if (options.hiddenColumns) {
+    columns = columns.filter(({ key }) => !(key && options.hiddenColumns?.includes(key)));
+  }
+
   if (options.rowNumbers) {
     columns = [
       <GridColumn key="rownumbers" width="4em" flexGrow={0} renderer={AutoGridRowNumberRenderer}></GridColumn>,
@@ -292,6 +304,7 @@ function AutoGridInner<TItem>(
     itemIdProperty,
     experimentalFilter,
     visibleColumns,
+    hiddenColumns,
     noHeaderFilters,
     customColumns,
     columnOptions,
@@ -351,6 +364,7 @@ function AutoGridInner<TItem>(
   const properties = visibleColumns ? modelInfo.getProperties(visibleColumns) : getDefaultProperties(modelInfo);
   const children = useColumns(properties, setHeaderFilter, {
     visibleColumns,
+    hiddenColumns,
     noHeaderFilters,
     customColumns,
     columnOptions,
