@@ -33,7 +33,7 @@ export type CollectRoutesOptions = Readonly<{
 async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | undefined> {
   if (url) {
     const contents = await readFile(url, 'utf-8');
-    if (contents === '' || contents.trim() === '') {
+    if (contents.trim() === '') {
       return undefined;
     } else if (!contents.includes('export default')) {
       logger.error(`The file "${String(url)}" should contain a default export of a component`);
