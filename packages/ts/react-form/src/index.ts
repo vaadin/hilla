@@ -223,7 +223,7 @@ export function useForm<M extends AbstractModel>(
 
   useEffect(() => {
     binder.addEventListener(CHANGED.type, update);
-    clear();
+    clear(); // this allows to initialize the validation strategies (issue 2282)
   }, [binder]);
 
   return {
