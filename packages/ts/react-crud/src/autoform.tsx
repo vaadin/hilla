@@ -171,6 +171,13 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      */
     visibleFields?: string[];
     /**
+     * Defines the fields to hide in the form, keeping the default order. This takes
+     * an array of property names. Properties that are not included in this
+     * array will not be hidden in the form, and properties that are included,
+     * but don't exist in the model, will be ignored.
+     */
+    hiddenFields?: string[];
+    /**
      * Allows to customize the FormLayout used by default. This is especially useful
      * to define the `responsiveSteps`. See the
      * {@link https://hilla.dev/docs/react/components/form-layout | FormLayout documentation}
@@ -258,6 +265,7 @@ export function AutoForm<M extends AbstractModel>({
   disabled,
   layoutRenderer: LayoutRenderer,
   visibleFields,
+  hiddenFields,
   formLayoutProps,
   fieldOptions,
   style,
@@ -391,7 +399,12 @@ export function AutoForm<M extends AbstractModel>({
     );
   }
 
-  const visibleProperties = visibleFields ? modelInfo.getProperties(visibleFields) : getDefaultProperties(modelInfo);
+  let visibleProperties = visibleFields ? modelInfo.getProperties(visibleFields) : getDefaultProperties(modelInfo);
+
+  // When using `hiddenFields`, remove fields to hide using their `name`
+  if (hiddenFields) {
+    visibleProperties = visibleProperties.filter(({ name }) => !hiddenFields.includes(name));
+  }
 
   const fields = visibleProperties.map(createAutoFormField);
 
