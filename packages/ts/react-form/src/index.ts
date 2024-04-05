@@ -219,14 +219,16 @@ export function useForm<M extends AbstractModel>(
   const update = useUpdate();
   const binder = useMemo(() => new BinderRoot(Model, configRef.current), [Model]);
   const field = useFields(binder);
+  const clear = binder.clear.bind(binder);
 
   useEffect(() => {
     binder.addEventListener(CHANGED.type, update);
+    clear();
   }, [binder]);
 
   return {
     ...getFormPart(binder),
-    clear: binder.clear.bind(binder),
+    clear,
     field,
     read: binder.read.bind(binder),
     reset: binder.reset.bind(binder),
