@@ -11,7 +11,7 @@ export type ViewConfig = Readonly<{
   /**
    * Same as in the explicit React Router configuration.
    */
-  rolesAllowed?: readonly string[];
+  rolesAllowed?: readonly [string, ...string[]];
 
   /**
    * Set to true to require the user to be logged in to access the view.

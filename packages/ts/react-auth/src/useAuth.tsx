@@ -132,7 +132,7 @@ export type AccessProps = Readonly<{
   /**
    * The list of roles that are allowed to access the route.
    */
-  rolesAllowed?: readonly string[];
+  rolesAllowed?: readonly [string, ...string[]];
 }>;
 
 /**
