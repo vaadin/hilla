@@ -9,7 +9,7 @@ public class RouteUnifyingConfiguration {
 
     @Bean
     @ConfigurationProperties(prefix = "vaadin")
-    public RouteUnifyingConfigurationProperties serverRoutesExposureToClientConfigProperties() {
+    public RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties() {
         return new RouteUnifyingConfigurationProperties();
     }
 }
