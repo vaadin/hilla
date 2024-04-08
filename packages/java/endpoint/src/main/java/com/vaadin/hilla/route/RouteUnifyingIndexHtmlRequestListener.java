@@ -53,6 +53,7 @@ public class RouteUnifyingIndexHtmlRequestListener
     private final ClientRouteRegistry clientRouteRegistry;
     private final ObjectMapper mapper = new ObjectMapper();
     private final DeploymentConfiguration deploymentConfiguration;
+    private final boolean exposeServerRoutesToClient;
 
     private LocalDateTime lastUpdated;
 
@@ -63,19 +64,27 @@ public class RouteUnifyingIndexHtmlRequestListener
      *            the client route registry for getting the client side views
      * @param deploymentConfiguration
      *            the runtime deployment configuration
+     * @param exposeServerRoutesToClient
+     *            whether to expose server routes to the client
      */
     public RouteUnifyingIndexHtmlRequestListener(
             ClientRouteRegistry clientRouteRegistry,
-            DeploymentConfiguration deploymentConfiguration) {
+            DeploymentConfiguration deploymentConfiguration,
+            boolean exposeServerRoutesToClient) {
         this.clientRouteRegistry = clientRouteRegistry;
         this.deploymentConfiguration = deploymentConfiguration;
+        this.exposeServerRoutesToClient = exposeServerRoutesToClient;
     }
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>();
         collectClientViews(availableViews);
-        collectServerViews(availableViews);
+        if (exposeServerRoutesToClient) {
+            LOGGER.debug(
+                    "Exposing server-side views to the client based on user configuration");
+            collectServerViews(availableViews);
+        }
 
         if (availableViews.isEmpty()) {
             LOGGER.debug(

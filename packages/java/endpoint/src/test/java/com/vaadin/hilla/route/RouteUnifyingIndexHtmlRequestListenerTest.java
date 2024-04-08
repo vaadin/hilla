@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -56,7 +57,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Mockito.when(vaadinService.getDeploymentConfiguration())
                 .thenReturn(deploymentConfiguration);
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
-                clientRouteRegistry, deploymentConfiguration);
+                clientRouteRegistry, deploymentConfiguration, true);
 
         indexHtmlResponse = Mockito.mock(IndexHtmlResponse.class);
 
@@ -267,6 +268,37 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         mockDevelopmentMode();
         requestListener.collectClientViews(views);
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+    }
+
+    @Test
+    public void when_exposeServerRoutesToClient_false_serverSideRoutesAreNotInResponse()
+            throws IOException {
+        Mockito.when(deploymentConfiguration.isProductionMode())
+                .thenReturn(true);
+        var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                clientRouteRegistry, deploymentConfiguration, false);
+        requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
+
+        DataNode script = indexHtmlResponse.getDocument().head()
+                .select("script").dataNodes().get(0);
+
+        final String scriptText = script.getWholeData();
+        MatcherAssert.assertThat(scriptText,
+                Matchers.startsWith(SCRIPT_STRING));
+
+        final String views = scriptText.substring(SCRIPT_STRING.length());
+
+        final var mapper = new ObjectMapper();
+
+        var actual = mapper.readTree(views);
+        var expected = mapper.readTree(getClass()
+                .getResource("/META-INF/VAADIN/only-client-views.json"));
+
+        MatcherAssert.assertThat(actual, Matchers.is(expected));
     }
 
     private void mockDevelopmentMode() throws IOException {
