@@ -92,11 +92,13 @@ export class RouterConfigurationBuilder {
           route,
           (r) => r.children?.values(),
           (r, children) =>
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            ({
-              ...r,
-              children: [...children, createServerRoute()],
-            }) as RouteObject,
+            children
+              ? // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                ({
+                  ...r,
+                  children: [...children, createServerRoute()],
+                } as RouteObject)
+              : r,
         ),
       );
 
