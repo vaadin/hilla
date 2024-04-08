@@ -1,4 +1,5 @@
 import type { AbstractModel, DetachedModelConstructor } from '@vaadin/hilla-lit-form';
+import { GridSelectionColumn } from '@vaadin/react-components';
 import { Grid, type GridElement, type GridProps } from '@vaadin/react-components/Grid.js';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { GridColumnGroup } from '@vaadin/react-components/GridColumnGroup.js';
@@ -130,6 +131,10 @@ interface AutoGridOwnProps<TItem> {
    */
   filteredCount?: boolean;
   /**
+   * When enabled, adds a selection column to the grid.
+   */
+  selectionColumn?: boolean;
+  /**
    * Allows to customize the grid footer with a custom renderer component for
    *  the total count and filtered item count.
    * This requires the provided service to implement the CountService interface,
@@ -151,6 +156,7 @@ interface ColumnConfigurationOptions {
   filteredCount?: boolean;
   footerCountRenderer?: ComponentType<ItemCounts>;
   itemCounts?: ItemCounts;
+  selectionColumn?: boolean;
 }
 
 function wrapCustomColumn(
@@ -270,12 +276,17 @@ function useColumns(
     columns = columns.filter(({ key }) => !(key && options.hiddenColumns?.includes(key)));
   }
 
+  const specialColumns = [];
   if (options.rowNumbers) {
-    columns = [
+    specialColumns.push(
       <GridColumn key="rownumbers" width="4em" flexGrow={0} renderer={AutoGridRowNumberRenderer}></GridColumn>,
-      ...columns,
-    ];
+    );
   }
+  if (options.selectionColumn) {
+    specialColumns.push(<GridSelectionColumn key="selection"></GridSelectionColumn>);
+  }
+  columns = [...specialColumns, ...columns];
+
   const { totalCount, filteredCount, itemCounts, footerCountRenderer } = options;
   if (totalCount ?? filteredCount) {
     const col = (
@@ -312,6 +323,7 @@ function AutoGridInner<TItem>(
     totalCount,
     filteredCount,
     footerCountRenderer,
+    selectionColumn,
     ...gridProps
   }: AutoGridProps<TItem>,
   ref: ForwardedRef<AutoGridRef<TItem>>,
@@ -373,6 +385,7 @@ function AutoGridInner<TItem>(
     filteredCount,
     footerCountRenderer,
     itemCounts,
+    selectionColumn,
   });
 
   useEffect(() => {
