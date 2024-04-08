@@ -724,6 +724,32 @@ describe('@vaadin/hilla-react-crud', () => {
       });
     });
 
+    describe('hiddenFields', () => {
+      it('hides fields only for the specified properties', async () => {
+        const form = await populatePersonForm(1, { hiddenFields: ['gender', 'birthDate', 'appointmentTime'] });
+        expect(form.queryField('Gender')).to.be.undefined;
+        expect(form.queryField('Birth date')).to.be.undefined;
+        expect(form.queryField('Appointment time')).to.be.undefined;
+        const visibleFields = LABELS.filter((label) => !['Gender', 'Birth date', 'Appointment time'].includes(label));
+        for (const visibleField of visibleFields) {
+          expect(form.queryField(visibleField)).to.exist;
+        }
+      });
+
+      it('hides fields for nested properties that are not included by default', async () => {
+        const form = await populatePersonForm(1, { hiddenFields: ['address.street'] });
+        expect(form.queryField('Street')).to.be.undefined;
+      });
+
+      it('ignores non-existing properties', async () => {
+        const service = personService();
+        const person = (await getItem(service, 1))!;
+
+        const form = await populatePersonForm(1, { hiddenFields: ['foo'] });
+        await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
+      });
+    });
+
     describe('Delete button', () => {
       let service: CrudService<Person> & HasTestInfo;
       let person: Person;
