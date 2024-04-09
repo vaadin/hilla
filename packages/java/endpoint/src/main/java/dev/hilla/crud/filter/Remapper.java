@@ -36,6 +36,9 @@ public class Remapper {
      * Declares a function that will be applied to all
      * {@link PropertyStringFilter} instances. This can be used to modify the
      * filter value in a more complex way than a simple mapping.
+     * <p>
+     * Note: The passed in {@code filterTransformation} function is applied
+     * after all other mappings are applied.
      *
      * @param filterTransformation
      *            The function to apply.
