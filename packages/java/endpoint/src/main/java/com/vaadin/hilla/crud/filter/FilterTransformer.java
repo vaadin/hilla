@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
- * Remaps property names in filters and pageable objects.
+ * Utility class for transforming property names in filters and pageable objects.
  */
 public class FilterTransformer {
 
