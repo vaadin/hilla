@@ -1,4 +1,4 @@
-package dev.hilla.crud.filter;
+package com.vaadin.hilla.crud.filter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 /**
  * Remaps property names in filters and pageable objects.
  */
-public class Remapper {
+public class FilterTransformer {
 
     private final Map<String, String> mappings = new HashMap<>();
     private Function<PropertyStringFilter, PropertyStringFilter> filterTransformation;
@@ -27,7 +27,7 @@ public class Remapper {
      *            The new property name.
      * @return This instance.
      */
-    public Remapper withMapping(String from, String to) {
+    public FilterTransformer withMapping(String from, String to) {
         mappings.put(from, to);
         return this;
     }
@@ -44,7 +44,7 @@ public class Remapper {
      *            The function to apply.
      * @return This instance.
      */
-    public Remapper withFilterTransformation(
+    public FilterTransformer withFilterTransformation(
             Function<PropertyStringFilter, PropertyStringFilter> filterTransformation) {
         this.filterTransformation = filterTransformation;
         return this;

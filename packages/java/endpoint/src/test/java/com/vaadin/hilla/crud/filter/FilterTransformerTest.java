@@ -1,6 +1,12 @@
-package dev.hilla.crud.filter;
+package com.vaadin.hilla.crud.filter;
 
 import java.util.List;
+
+import com.vaadin.hilla.crud.JpaFilterConverter;
+import com.vaadin.hilla.crud.TestEnum;
+import com.vaadin.hilla.crud.TestObject;
+import com.vaadin.hilla.crud.TestRepository;
+import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,17 +15,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import dev.hilla.crud.JpaFilterConverter;
-import dev.hilla.crud.TestEnum;
-import dev.hilla.crud.TestObject;
-import dev.hilla.crud.TestRepository;
-import dev.hilla.crud.filter.PropertyStringFilter.Matcher;
-
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest()
-public class RemapperTest {
+public class FilterTransformerTest {
     @Autowired
     private TestEntityManager entityManager;
 
@@ -75,7 +75,7 @@ public class RemapperTest {
         var andFilter = new AndFilter();
         andFilter.setChildren(List.of(nameFilter, orFilter));
 
-        var remapper = new Remapper().withMapping("dtoName", "name")
+        var transformer = new FilterTransformer().withMapping("dtoName", "name")
                 .withMapping("dtoIntValue", "intValue")
                 .withMapping("dtoEnumValue", "enumValue")
                 .withFilterTransformation(filter -> {
@@ -87,7 +87,7 @@ public class RemapperTest {
                     return filter;
                 });
 
-        var filter = remapper.remap(andFilter);
+        var filter = transformer.remap(andFilter);
         var spec = jpaFilterConverter.toSpec(filter, TestObject.class);
         var result = repository.findAll(spec);
         assertEquals(2, result.size());
