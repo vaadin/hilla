@@ -95,13 +95,15 @@ public class FilterTransformer {
     }
 
     /**
-     * Remaps a pageable, replacing all property names with their mapped values.
+     * Applies registered property mappings on the provided pageable instance.
+     * <p>
+     * Note: The passed in {@code filterTransformation} function is not applied on pageables.
      *
      * @param pageable
-     *            The pageable to remap.
-     * @return The remapped pageable.
+     *            The pageable instance to transform.
+     * @return The transformed pageable.
      */
-    public Pageable remap(Pageable pageable) {
+    public Pageable apply(Pageable pageable) {
         if (pageable == null) {
             return null;
         }
