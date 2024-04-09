@@ -8,7 +8,7 @@ export type RouteMeta = Readonly<{
   path: string;
   file?: URL;
   layout?: URL;
-  children: RouteMeta[];
+  children?: RouteMeta[];
 }>;
 
 /**
@@ -88,7 +88,6 @@ export default async function collectRoutesFromFS(
           children.push({
             path: '',
             file,
-            children: [],
           });
         } else {
           throw new Error(
@@ -99,7 +98,6 @@ export default async function collectRoutesFromFS(
         children.push({
           path: name,
           file,
-          children: [],
         });
       }
     } else if (d.isFile() && !d.name.startsWith('_') && warningFor.includes(extname(d.name))) {

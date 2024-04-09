@@ -29,7 +29,7 @@ export function toReactRouter(routes: AgnosticRoute): ReactRouteObject {
       return {
         path: module?.config?.route ?? path,
         element: module?.default ? createElement(module.default) : undefined,
-        children: children.length > 0 ? (children as ReactRouteObject[]) : undefined,
+        children: children && children.length > 0 ? (children as ReactRouteObject[]) : undefined,
         handle: {
           ...module?.config,
           title,

@@ -1,8 +1,8 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
-import { RouteParamType } from '../../shared/routeParamType.js';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
+import { RouteParamType } from '../../src/shared/routeParamType.js';
 import type { MenuItem } from '../../src/types.js';
 
 use(chaiLike);
