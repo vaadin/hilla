@@ -1,0 +1,34 @@
+{
+  "/home": {
+    "title": "Home",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "/home",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
+  },
+  "/profile": {
+    "title": "Profile",
+    "rolesAllowed": ["ROLE_USER"],
+    "requiresLogin": true,
+    "route": "/profile",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
+  },
+  "/user/:userId": {
+    "title": "User Profile",
+    "rolesAllowed": ["ROLE_ADMIN"],
+    "requiresLogin": true,
+    "route": "/user/:userId",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":userId": "req"
+    }
+  }
+}

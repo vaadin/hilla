@@ -7,3 +7,4 @@ com.vaadin.hilla.startup.EndpointRegistryInitializer
 com.vaadin.hilla.startup.RouteUnifyingServiceInitListener
 com.vaadin.hilla.route.ClientRouteRegistry
 com.vaadin.hilla.route.RouteUtil
+com.vaadin.hilla.route.RouteUnifyingConfiguration

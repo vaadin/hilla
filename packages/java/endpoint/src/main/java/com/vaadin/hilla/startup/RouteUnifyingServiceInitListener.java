@@ -20,6 +20,7 @@ import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +39,22 @@ public class RouteUnifyingServiceInitListener
 
     private final ClientRouteRegistry clientRouteRegistry;
 
+    private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties;
+
     /**
      * Creates a new instance of the listener.
      *
      * @param clientRouteRegistry
      *            the registry to add the client routes to
+     * @param routeUnifyingConfigurationProperties
+     *            the configuration properties instance
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
-            ClientRouteRegistry clientRouteRegistry) {
+            ClientRouteRegistry clientRouteRegistry,
+            RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties) {
         this.clientRouteRegistry = clientRouteRegistry;
+        this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
     }
 
     @Override
@@ -58,7 +65,9 @@ public class RouteUnifyingServiceInitListener
                 deploymentConfiguration.isReactEnabled());
         if (deploymentConfiguration.isReactEnabled()) {
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
-                    clientRouteRegistry, deploymentConfiguration);
+                    clientRouteRegistry, deploymentConfiguration,
+                    routeUnifyingConfigurationProperties
+                            .isExposeServerRoutesToClient());
             var deploymentMode = deploymentConfiguration.isProductionMode()
                     ? "PRODUCTION"
                     : "DEVELOPMENT";
