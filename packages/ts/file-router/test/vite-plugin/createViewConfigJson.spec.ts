@@ -69,14 +69,12 @@ describe('@vaadin/hilla-file-router', () => {
               route: 'test',
               params: {},
               children: [
-                { route: 'empty', params: {} },
                 {
                   route: ':optional?',
                   title: 'Optional',
                   params: { ':optional?': RouteParamType.Optional },
                 },
                 { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
-                { route: 'no-default-export', title: 'No Default Export', params: {} },
               ],
             },
           ],

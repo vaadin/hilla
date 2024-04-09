@@ -33,6 +33,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
   // │   └── empty.tsx
+  // │   └── _ignored.tsx
+  // │   └── no-default-export.tsx
   // └── nameToReplace.tsx
 
   await Promise.all([
@@ -142,11 +144,6 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
         path: 'test',
         children: [
           // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
-          {
-            // Empty route doesn't have any `file` or `layout` property because the file itself is empty.
-            // We keep the path though.
-            path: 'empty',
-          },
           // Also empty files or files without default export are not included.
           {
             path: '{{optional}}',
@@ -155,10 +152,6 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           {
             path: '{...wildcard}',
             file: new URL('test/{...wildcard}.tsx', dir),
-          },
-          {
-            path: 'no-default-export',
-            file: new URL('test/no-default-export.tsx', dir),
           },
         ],
       },
