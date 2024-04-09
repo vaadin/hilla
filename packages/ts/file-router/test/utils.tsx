@@ -33,6 +33,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
   // │   └── empty.tsx
+  // │   └── _ignored.tsx
+  // │   └── no-default-export.tsx
   // └── nameToReplace.tsx
 
   await Promise.all([
@@ -98,12 +100,11 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
       {
         path: 'nameToReplace',
         file: new URL('nameToReplace.tsx', dir),
-        children: [],
       },
       {
         path: 'profile',
         children: [
-          { path: '', file: new URL('profile/@index.tsx', dir), children: [] },
+          { path: '', file: new URL('profile/@index.tsx', dir) },
           {
             path: 'account',
             layout: new URL('profile/account/@layout.tsx', dir),
@@ -114,12 +115,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
                   {
                     path: 'password',
                     file: new URL('profile/account/security/password.jsx', dir),
-                    children: [],
                   },
                   {
                     path: 'two-factor-auth',
                     file: new URL('profile/account/security/two-factor-auth.tsx', dir),
-                    children: [],
                   },
                 ],
               },
@@ -132,12 +131,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
               {
                 path: 'list',
                 file: new URL('profile/friends/list.jsx', dir),
-                children: [],
               },
               {
                 path: '{user}',
                 file: new URL('profile/friends/{user}.tsx', dir),
-                children: [],
               },
             ],
           },
@@ -151,12 +148,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           {
             path: '{{optional}}',
             file: new URL('test/{{optional}}.tsx', dir),
-            children: [],
           },
           {
             path: '{...wildcard}',
             file: new URL('test/{...wildcard}.tsx', dir),
-            children: [],
           },
         ],
       },
