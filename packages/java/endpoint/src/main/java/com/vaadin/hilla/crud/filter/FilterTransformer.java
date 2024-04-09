@@ -18,7 +18,7 @@ public class FilterTransformer {
 
     /**
      * Declares a mapping from one property name to another. If a filter or
-     * pageable is remapped, all occurrences of the property name will be
+     * pageable is transformed, all occurrences of the property name will be
      * replaced with the new name.
      *
      * @param from
