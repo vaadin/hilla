@@ -1,9 +1,9 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
-import { TextField } from '@hilla/react-components/TextField.js';
-import { render, type RenderResult, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -17,7 +17,7 @@ import { getItem, PersonModel, personService } from './test-models-and-services.
 use(sinonChai);
 use(chaiDom);
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
@@ -57,7 +57,7 @@ describe('@hilla/react-crud', () => {
       expect(firstName.disabled).to.be.true;
 
       const someInteger = await form.getField('Some integer');
-      expect(someInteger.value).to.equal('0');
+      expect(someInteger.value).to.equal('');
       expect(someInteger.disabled).to.be.true;
     });
 
@@ -113,8 +113,8 @@ describe('@hilla/react-crud', () => {
 
       expect(firstNameField.value).to.equal('');
       expect(lastNameField.value).to.equal('');
-      expect(someIntegerField.value).to.equal('0');
-      expect(someDecimalField.value).to.equal('0');
+      expect(someIntegerField.value).to.equal('');
+      expect(someDecimalField.value).to.equal('');
       await form.typeInField('First name', 'Jeff');
       await form.typeInField('Last name', 'Lastname');
       await form.typeInField('Email', 'first.last@domain.com');
@@ -147,11 +147,12 @@ describe('@hilla/react-crud', () => {
       await form.typeInField('Email', 'first.last@domain.com');
       await form.typeInField('Some integer', '12');
       await form.typeInField('Some decimal', '12.345');
+
       await form.submit();
       await form.typeInField('First name', 'Jerp');
       await form.submit();
       expect(grid.getBodyCellContent(1, 0)).to.have.rendered.text('Jerp');
-      expect(grid.getVisibleRowCount()).to.equal(3);
+      expect(grid.getRowCount()).to.equal(3);
     });
 
     it('updates grid and form when creating a new item after selecting an existing item', async () => {
@@ -188,13 +189,13 @@ describe('@hilla/react-crud', () => {
 
     it('refreshes grid after confirming delete', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
-      expect(grid.getVisibleRowCount()).to.equal(2);
+      expect(grid.getRowCount()).to.equal(2);
       await grid.toggleRowSelected(1);
       const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.confirm();
-      expect(grid.getVisibleRowCount()).to.equal(1);
+      expect(grid.getRowCount()).to.equal(1);
     });
 
     it('clears and disables the form after confirming delete', async () => {
@@ -214,13 +215,13 @@ describe('@hilla/react-crud', () => {
 
     it('does not refresh grid when not confirming delete', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
-      expect(grid.getVisibleRowCount()).to.equal(2);
+      expect(grid.getRowCount()).to.equal(2);
       await grid.toggleRowSelected(1);
       const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
       await dialog.cancel();
-      expect(grid.getVisibleRowCount()).to.equal(2);
+      expect(grid.getRowCount()).to.equal(2);
     });
 
     it('does render a delete button by default', async () => {
@@ -240,17 +241,58 @@ describe('@hilla/react-crud', () => {
       expect(deleteButton).to.not.exist;
     });
 
+    it('shows a default header above the form', async () => {
+      // Initial state
+      const result = render(<TestAutoCrud />);
+      let header = await result.findByRole('heading', { name: 'New item' });
+      expect(header).to.exist;
+      expect(header.style.color).to.contain('lumo-disabled-text-color');
+
+      // Create new item
+      const { grid, newButton } = await CrudController.init(result, user);
+      await user.click(newButton);
+      header = await result.findByRole('heading', { name: 'New item' });
+      expect(header).to.exist;
+      expect(header.style.color).to.contain('lumo-text-color');
+
+      // Edit existing item
+      await grid.toggleRowSelected(0);
+      header = await result.findByRole('heading', { name: 'Edit item' });
+      expect(header).to.exist;
+      expect(header.style.color).to.contain('lumo-text-color');
+    });
+
+    it('shows a custom header above the form', async () => {
+      // Initial state
+      const result = render(
+        <TestAutoCrud
+          formProps={{
+            headerRenderer: (editedItem) => (editedItem ? <h2>Edit person</h2> : <h2>Create person</h2>),
+          }}
+        />,
+      );
+      await expect(result.findByRole('heading', { name: 'Create person' })).to.eventually.exist;
+
+      // Create new item
+      const { grid, newButton } = await CrudController.init(result, user);
+      await user.click(newButton);
+      await expect(result.findByRole('heading', { name: 'Create person' })).to.eventually.exist;
+
+      // Edit existing item
+      await grid.toggleRowSelected(0);
+      await expect(result.findByRole('heading', { name: 'Edit person' })).to.eventually.exist;
+    });
+
     describe('mobile layout', () => {
       let saveSpy: sinon.SinonSpy;
-      let result: RenderResult;
+      let service: ReturnType<typeof personService>;
 
       beforeEach(() => {
         // iPhone 13 Pro resolution
         viewport.set(390, 844);
 
-        const service = personService();
+        service = personService();
         saveSpy = sinon.spy(service, 'save');
-        result = render(<TestAutoCrud service={service} />);
       });
 
       afterEach(() => {
@@ -262,6 +304,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('opens the form in a dialog when selecting an item', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
@@ -272,6 +315,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('opens the form in a dialog when creating a new item', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const newButton = await result.findByText('+ New');
         await user.click(newButton);
 
@@ -282,6 +326,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('closes the dialog when clicking close button', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
@@ -300,6 +345,7 @@ describe('@hilla/react-crud', () => {
       });
 
       it('closes the dialog when clicking submit button', async () => {
+        const result = render(<TestAutoCrud service={service} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
@@ -315,6 +361,64 @@ describe('@hilla/react-crud', () => {
 
         // saves
         expect(saveSpy).to.have.been.called;
+      });
+
+      it('shows a default header above the form', async () => {
+        // Initial state
+        const result = render(<TestAutoCrud />);
+        expect(result.queryByRole('heading', { name: 'New item' })).to.not.exist;
+
+        // Create new item
+        const newButton = await result.findByText('+ New');
+        await user.click(newButton);
+
+        let dialogOverlay = await screen.findByRole('dialog');
+        let header = await within(dialogOverlay).findByRole('heading', { name: 'New item' });
+        expect(header).to.exist;
+        expect(header.style.color).to.contain('lumo-text-color');
+
+        // Close dialog
+        const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
+        await user.click(closeButton);
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // Edit existing item
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+        dialogOverlay = await screen.findByRole('dialog');
+        header = await within(dialogOverlay).findByRole('heading', { name: 'Edit item' });
+        expect(header).to.exist;
+        expect(header.style.color).to.contain('lumo-text-color');
+      });
+
+      it('shows a custom header above the form', async () => {
+        // Initial state
+        const result = render(
+          <TestAutoCrud
+            formProps={{
+              headerRenderer: (editedItem) => (editedItem ? <h2>Edit person</h2> : <h2>Create person</h2>),
+            }}
+          />,
+        );
+        expect(result.queryByRole('heading', { name: 'Create person' })).to.not.exist;
+
+        // Create new item
+        const newButton = await result.findByText('+ New');
+        await user.click(newButton);
+
+        let dialogOverlay = await screen.findByRole('dialog');
+        await expect(within(dialogOverlay).findByRole('heading', { name: 'Create person' })).to.eventually.exist;
+
+        // Close dialog
+        const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
+        await user.click(closeButton);
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        // Edit existing item
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+        dialogOverlay = await screen.findByRole('dialog');
+        await expect(within(dialogOverlay).findByRole('heading', { name: 'Edit person' })).to.eventually.exist;
       });
     });
 
@@ -432,6 +536,28 @@ describe('@hilla/react-crud', () => {
 
         expect(deleteStub).to.have.been.calledOnce;
         expect(deleteStub).to.have.been.calledWith(person.email);
+      });
+    });
+
+    describe('other', () => {
+      it('shows aria-control with form id', async () => {
+        const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
+        await grid.toggleRowSelected(0);
+        const formId = form.instance.id;
+        expect(formId).to.exist;
+        expect(formId)
+          .to.be.a('string')
+          .and.satisfy((id: string) => id.startsWith('auto-form-'));
+        expect(grid.instance.getAttribute('aria-controls')).to.equal(formId);
+      });
+
+      it('shows aria-control with default id', async () => {
+        const { grid, form } = await CrudController.init(
+          render(<TestAutoCrud formProps={{ id: 'custom-form-id' }} />),
+          user,
+        );
+        await grid.toggleRowSelected(0);
+        expect(grid.instance.getAttribute('aria-controls')).to.equal(`custom-form-id`);
       });
     });
   });

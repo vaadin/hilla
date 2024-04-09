@@ -1,4 +1,4 @@
-import { GridSorter } from '@hilla/react-components/GridSorter.js';
+import { GridSorter } from '@vaadin/react-components/GridSorter.js';
 import { useContext, type ReactElement } from 'react';
 import { ColumnContext } from './autogrid-column-context.js';
 

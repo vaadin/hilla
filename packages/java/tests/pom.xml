@@ -4,9 +4,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>2.5-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -15,8 +15,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <testbench.element.version>24.3.0.alpha5</testbench.element.version>
-        <jetty.version>11.0.7</jetty.version>
+        <testbench.element.version>24.4-SNAPSHOT</testbench.element.version>
+        <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
         <license.skipDownloadLicenses>true</license.skipDownloadLicenses>
@@ -59,14 +59,35 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>endpoint</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-endpoint</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>engine-runtime</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-engine-runtime</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-dev</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <!--
+          Due to flow-react opt-out support feature
+          `FrontendUtils.isReactModuleAvailable()` checks, for instance,
+          `TaskUpdatePackages`, React components aren't installed
+          if the flow-react dependency is missing.
+        -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-react</artifactId>
+            <version>${flow.version}</version>
         </dependency>
 
         <dependency>
@@ -145,7 +166,7 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>dev.hilla</groupId>
+                    <groupId>com.vaadin</groupId>
                     <artifactId>hilla-maven-plugin</artifactId>
                     <version>${project.version}</version>
                     <executions>
@@ -252,7 +273,7 @@
                 <pluginManagement>
                     <plugins>
                         <plugin>
-                            <groupId>dev.hilla</groupId>
+                            <groupId>com.vaadin</groupId>
                             <artifactId>hilla-maven-plugin</artifactId>
                             <version>${project.version}</version>
                             <executions>
@@ -281,11 +302,11 @@
             </modules>
         </profile>
 
+        <!-- the spring module constains submodules to run with different profiles -->
         <profile>
             <id>it-modules-group-1</id>
             <modules>
                 <module>csrf</module>
-                <module>csrf-context</module>
                 <module>spring</module>
             </modules>
         </profile>
@@ -293,6 +314,7 @@
         <profile>
             <id>it-modules-group-2</id>
             <modules>
+                <module>csrf-context</module>
                 <module>spring</module>
             </modules>
         </profile>

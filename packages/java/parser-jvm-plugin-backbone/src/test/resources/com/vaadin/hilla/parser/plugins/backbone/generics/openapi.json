@@ -1,0 +1,463 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "GenericsBareEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEndpoint"
+    },
+    {
+      "name": "GenericsExtendedEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedEndpoint"
+    },
+    {
+      "name": "GenericsMethodsEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsMethodsEndpoint"
+    },
+    {
+      "name": "GenericsRefEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsRefEndpoint"
+    },
+    {
+      "name": "ImplementInterfaceEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.ImplementInterfaceEndpoint"
+    }
+  ],
+  "paths": {
+    "/GenericsBareEndpoint/getSomething": {
+      "post": {
+        "tags": ["GenericsBareEndpoint"],
+        "operationId": "GenericsBareEndpoint_getSomething_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "something": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsExtendedEndpoint/getMap": {
+      "post": {
+        "tags": ["GenericsExtendedEndpoint"],
+        "operationId": "GenericsExtendedEndpoint_getMap_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsMethodsEndpoint/getList": {
+      "post": {
+        "tags": ["GenericsMethodsEndpoint"],
+        "operationId": "GenericsMethodsEndpoint_getList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsMethodsEndpoint/getRef": {
+      "post": {
+        "tags": ["GenericsMethodsEndpoint"],
+        "operationId": "GenericsMethodsEndpoint_getRef_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsMethodsEndpoint/getValueWithGenericType": {
+      "post": {
+        "tags": ["GenericsMethodsEndpoint"],
+        "operationId": "GenericsMethodsEndpoint_getValueWithGenericType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "something": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsRefEndpoint/getBareReference": {
+      "post": {
+        "tags": ["GenericsRefEndpoint"],
+        "operationId": "GenericsRefEndpoint_getBareReference_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericsRefEndpoint/getExtendedReference": {
+      "post": {
+        "tags": ["GenericsRefEndpoint"],
+        "operationId": "GenericsRefEndpoint_getExtendedReference_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImplementInterfaceEndpoint/dealWithConcreteType": {
+      "post": {
+        "tags": ["ImplementInterfaceEndpoint"],
+        "operationId": "ImplementInterfaceEndpoint_dealWithConcreteType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImplementInterfaceEndpoint/dealWithGenericType": {
+      "post": {
+        "tags": ["ImplementInterfaceEndpoint"],
+        "operationId": "ImplementInterfaceEndpoint_dealWithGenericType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ImplementInterfaceEndpoint/dealWithItAgain": {
+      "post": {
+        "tags": ["ImplementInterfaceEndpoint"],
+        "operationId": "ImplementInterfaceEndpoint_dealWithItAgain_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity": {
+        "type": "object",
+        "properties": {
+          "bareGenericTypeProperty": {
+            "type": "object"
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
+        "type": "object",
+        "properties": {
+          "extendedGenericTypeReference": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+              }
+            ]
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType" : {
+        "type": "object"
+      }
+    }
+  }
+}

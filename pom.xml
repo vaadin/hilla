@@ -3,9 +3,8 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>dev.hilla</groupId>
   <artifactId>hilla-project</artifactId>
-  <version>2.5-SNAPSHOT</version>
+  <version>24.4-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
@@ -21,14 +20,9 @@
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>
     <module>packages/java/gradle-plugin</module>
-    <module>packages/java/plugin-base</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
     <module>packages/java/hilla-dev</module>
-    <module>packages/java/hilla-dev-mode</module>
-    <module>packages/java/hilla-react</module>
-    <module>packages/java/hilla-spring-boot-starter</module>
-    <module>packages/java/hilla-react-spring-boot-starter</module>
     <module>packages/java/parser-jvm-core</module>
     <module>packages/java/parser-jvm-plugin-backbone</module>
     <module>packages/java/parser-jvm-plugin-model</module>
@@ -71,28 +65,28 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.165</classgraph.version>
+    <classgraph.version>4.8.168</classgraph.version>
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
-    <jna.version>5.13.0</jna.version>
-    <swagger.core.version>2.2.19</swagger.core.version>
-    <swagger.models.version>2.2.19</swagger.models.version>
+    <jna.version>5.14.0</jna.version>
+    <swagger.core.version>2.2.20</swagger.core.version>
+    <swagger.models.version>2.2.20</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson.version>2.15.3</jackson.version>
+    <jackson.version>2.17.0</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.3.0.rc1</flow.version>
-    <copilot.version>24.3.0.alpha10</copilot.version>
+    <flow.version>24.4-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>3.2.0</spring.boot.version>
-    <testbench.version>9.2.0.rc1</testbench.version>
+    <spring.boot.version>3.2.4</spring.boot.version>
+    <testbench.version>9.2.5</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
-    <github.javaparser.core.version>3.25.6</github.javaparser.core.version>
+    <github.javaparser.core.version>3.25.10</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
+    <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
   </properties>
 
   <organization>

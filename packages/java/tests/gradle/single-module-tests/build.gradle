@@ -4,10 +4,10 @@ plugins {
 	id 'java'
 }
 
-apply plugin: 'dev.hilla'
+apply plugin: 'com.vaadin.hilla'
 
 hilla {
-	exposedPackagesToParser = ["dev.hilla.gradle.plugin.test"]
+	exposedPackagesToParser = ["com.vaadin.hilla.gradle.plugin.test"]
 }
 
 repositories {
@@ -29,8 +29,9 @@ test {
 }
 
 dependencies {
-	implementation 'dev.hilla:hilla-react'
-	implementation 'dev.hilla:hilla-spring-boot-starter'
+    implementation 'com.vaadin:vaadin-spring'
+    implementation 'com.vaadin:hilla'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.parttio:line-awesome:1.1.0'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -40,6 +41,7 @@ dependencies {
 
 dependencyManagement {
 	imports {
-		mavenBom "dev.hilla:hilla-bom:$hillaVersion"
+        mavenBom "com.vaadin:hilla-bom:$hillaVersion"
+        mavenBom "com.vaadin:flow-bom:$flowVersion"
 	}
 }

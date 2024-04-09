@@ -1,8 +1,8 @@
-# Hilla Frontend
+# Hilla Core
 
 [API documentation ↗](https://hilla.dev/docs/tutorials/in-depth-course/login-and-authentication)
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)](https://www.npmjs.com/package/@hilla/frontend)
+[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)](https://www.npmjs.com/package/@vaadin/hilla-frontend)
 
 A set of utilities to interact with the [Hilla](https://hilla.dev/docs/) application server.
 A part of the Hilla project.
@@ -12,13 +12,13 @@ A part of the Hilla project.
 **NOTE**: This package is not supposed to used separately from the Hilla project.
 
 ```bash
-$ npm install @hilla/frontend
+$ npm install @vaadin/hilla-frontend
 ```
 
 Once installed, import it in your application:
 
 ```js
-import {login} from '@hilla/frontend';
+import {login} from '@vaadin/hilla-frontend';
 ```
 
 ## Contribution

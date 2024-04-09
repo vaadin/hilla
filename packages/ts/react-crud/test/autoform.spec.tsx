@@ -2,14 +2,15 @@
 /// <reference types="karma-viewport" />
 
 import { expect, use } from '@esm-bundle/chai';
-import { ValidationError } from '@hilla/form';
-import { EndpointError } from '@hilla/frontend';
-import type { SelectElement } from '@hilla/react-components/Select.js';
-import { TextArea, type TextAreaElement } from '@hilla/react-components/TextArea.js';
-import type { TextFieldElement } from '@hilla/react-components/TextField.js';
-import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EndpointError } from '@vaadin/hilla-frontend';
+import { ValidationError } from '@vaadin/hilla-lit-form';
+import type { ValueError } from '@vaadin/hilla-lit-form/Validation.js';
+import type { SelectElement } from '@vaadin/react-components/Select.js';
+import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
+import type { TextFieldElement } from '@vaadin/react-components/TextField.js';
+import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -35,7 +36,7 @@ import {
 use(sinonChai);
 use(chaiAsPromised);
 
-describe('@hilla/react-crud', () => {
+describe('@vaadin/hilla-react-crud', () => {
   describe('Auto form', () => {
     const LABELS = [
       'First name',
@@ -58,8 +59,8 @@ describe('@hilla/react-crud', () => {
       lastName: '',
       gender: Gender.MALE,
       email: '',
-      someInteger: 0,
-      someDecimal: 0,
+      someInteger: NaN,
+      someDecimal: NaN,
       id: -1,
       version: -1,
       vip: false,
@@ -72,8 +73,6 @@ describe('@hilla/react-crud', () => {
         country: '',
       },
       department: {
-        id: 0,
-        version: 0,
         name: '',
       },
     };
@@ -85,8 +84,8 @@ describe('@hilla/react-crud', () => {
         person.lastName,
         person.gender,
         person.email,
-        person.someInteger.toString(),
-        person.someDecimal.toString(),
+        Number.isNaN(person.someInteger) ? '' : person.someInteger.toString(),
+        Number.isNaN(person.someDecimal) ? '' : person.someDecimal.toString(),
         person.vip.toString(),
         person.birthDate,
         person.shiftStart,
@@ -283,19 +282,26 @@ describe('@hilla/react-crud', () => {
       // Item is undefined
       const result = render(<AutoForm service={service} model={PersonModel} />);
       const form = await FormController.init(user, result.container);
-      await form.typeInField('First name', 'foo');
+
+      const typeMinInFields = async () => {
+        await form.typeInField('First name', 'foo');
+        await form.typeInField('Some integer', '0');
+        await form.typeInField('Some decimal', '0');
+      };
+      await typeMinInFields();
       await form.submit();
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
 
       // Item is null
       result.rerender(<AutoForm service={service} model={PersonModel} item={null} />);
-      await form.typeInField('First name', 'foo');
+      await typeMinInFields();
       await form.submit();
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
 
       // Item is emptyItem
       result.rerender(<AutoForm service={service} model={PersonModel} item={emptyItem} />);
-      await form.typeInField('First name', 'foo');
+      await typeMinInFields();
+
       await form.submit();
       await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(DEFAULT_PERSON));
     });
@@ -369,6 +375,58 @@ describe('@hilla/react-crud', () => {
         expect((error as Error).message).to.equal('foobar');
       }
       expect(errorSpy).to.have.not.been.called;
+    });
+
+    it('shows error for whole form when no property', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      const person = await getItem(service, 1);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        const valueError: ValueError = {
+          property: '',
+          message: 'message',
+          value: person,
+          validator: { message: 'message', validate: () => false },
+          validatorMessage: 'foobar',
+        };
+        throw new ValidationError([valueError]);
+      };
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(result.queryByText('message')).to.be.null;
+      expect(result.queryByText('foobar')).to.not.be.null;
+    });
+
+    it('shows multiple errors for whole form when no property', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      const person = await getItem(service, 1);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        const valueError: ValueError = {
+          property: '',
+          message: 'message',
+          value: person,
+          validator: { message: 'message', validate: () => false },
+          validatorMessage: 'foobar',
+        };
+
+        const valueError2: ValueError = {
+          ...valueError,
+          validatorMessage: 'just a message',
+        };
+        throw new ValidationError([valueError, valueError2]);
+      };
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(result.queryByText('message')).to.be.null;
+      expect(result.queryByText('foobar')).to.not.be.null;
+      expect(result.queryByText('just a message')).to.not.be.null;
     });
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
@@ -534,6 +592,14 @@ describe('@hilla/react-crud', () => {
       expect(submitButton.disabled).to.be.true;
     });
 
+    it('renders with empty number fields', async () => {
+      const result = render(<AutoForm service={personService()} model={PersonModel} />);
+      const form = await FormController.init(user, result.container);
+
+      const someIntegerField = await form.getField('Some integer');
+      expect(someIntegerField).to.have.property('value', '');
+    });
+
     describe('keyboard shortcuts', () => {
       it('submits the form when enter key is pressed on field', async () => {
         const service = personService();
@@ -655,6 +721,32 @@ describe('@hilla/react-crud', () => {
         await form.submit();
         expect(saveSpy).to.have.been.calledOnce;
         expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('department.name', 'foo'));
+      });
+    });
+
+    describe('hiddenFields', () => {
+      it('hides fields only for the specified properties', async () => {
+        const form = await populatePersonForm(1, { hiddenFields: ['gender', 'birthDate', 'appointmentTime'] });
+        expect(form.queryField('Gender')).to.be.undefined;
+        expect(form.queryField('Birth date')).to.be.undefined;
+        expect(form.queryField('Appointment time')).to.be.undefined;
+        const visibleFields = LABELS.filter((label) => !['Gender', 'Birth date', 'Appointment time'].includes(label));
+        for (const visibleField of visibleFields) {
+          expect(form.queryField(visibleField)).to.exist;
+        }
+      });
+
+      it('hides fields for nested properties that are not included by default', async () => {
+        const form = await populatePersonForm(1, { hiddenFields: ['address.street'] });
+        expect(form.queryField('Street')).to.be.undefined;
+      });
+
+      it('ignores non-existing properties', async () => {
+        const service = personService();
+        const person = (await getItem(service, 1))!;
+
+        const form = await populatePersonForm(1, { hiddenFields: ['foo'] });
+        await expect(form.getValues(...LABELS)).to.eventually.be.deep.equal(getExpectedValues(person));
       });
     });
 
@@ -997,80 +1089,187 @@ describe('@hilla/react-crud', () => {
         expect(addressField.value).to.equal(JSON.stringify(DEFAULT_PERSON.address));
         expect(departmentField.value).to.equal(JSON.stringify(DEFAULT_PERSON.department));
       });
+
+      it('renders JSON string with default values when creating new item', async () => {
+        const service = personService();
+        const result = render(
+          <AutoForm service={service} model={PersonModel} visibleFields={['address', 'department']} />,
+        );
+        const form = await FormController.init(user, result.container);
+        const [addressField, departmentField] = await form.getFields('Address', 'Department');
+
+        expect(addressField.value).to.equal(JSON.stringify(DEFAULT_PERSON.address));
+        expect(departmentField.value).to.equal(JSON.stringify(DEFAULT_PERSON.department));
+      });
     });
 
     describe('Field Options', () => {
-      it('renders custom field from field options instead of the default one', async () => {
-        const service = personService();
-        const saveSpy = sinon.spy(service, 'save');
+      describe('renderer', () => {
+        it('renders custom field instead of the default field', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
 
-        const result = await FormController.init(
-          user,
-          render(
-            <AutoForm
-              service={service}
-              model={PersonModel}
-              fieldOptions={{
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
                 lastName: {
                   label: 'Custom last name',
                   renderer: ({ field }) => <TextArea key={field.name} {...field} />,
                 },
-              }}
-            />,
-          ).container,
-        );
+              },
+            },
+            undefined,
+            false,
+            service,
+          );
 
-        const field = await result.getField('Custom last name');
-        expect(field.localName).to.equal('vaadin-text-area');
+          const field = await result.getField('Custom last name');
+          expect(field.localName).to.equal('vaadin-text-area');
 
-        await result.typeInField('Custom last name', 'Maxwell\nSmart');
-        await result.submit();
+          await result.typeInField('Custom last name', 'Maxwell\nSmart');
+          await result.submit();
 
-        expect(saveSpy).to.have.been.calledOnce;
-        expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
-      });
+          expect(saveSpy).to.have.been.calledOnce;
+          expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
+        });
 
-      it('disables custom field from field options when form is disabled', async () => {
-        const result = await FormController.init(
-          user,
-          render(
-            <AutoForm
-              service={personService()}
-              model={PersonModel}
-              disabled
-              fieldOptions={{
+        it('disables custom field when form is disabled', async () => {
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
                 lastName: {
                   renderer: ({ field }) => <TextArea key={field.name} {...field} />,
                 },
-              }}
-            />,
-          ).container,
-        );
+              },
+            },
+            undefined,
+            true,
+          );
 
-        const field = await result.getField('Last name');
-        expect(field.disabled).to.be.true;
+          const field = await result.getField('Last name');
+          expect(field.disabled).to.be.true;
+        });
+
+        it('prefers custom fields props over field options props', async () => {
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                label: 'This should not be used',
+                renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
+              },
+            },
+          });
+
+          const field = result.queryField('Custom last name');
+          expect(field).to.exist;
+        });
       });
 
-      it('allows setting a custom label on a custom field from field options', async () => {
-        const result = await FormController.init(
-          user,
-          render(
-            <AutoForm
-              service={personService()}
-              model={PersonModel}
-              disabled
-              fieldOptions={{
+      describe('element', () => {
+        it('renders custom field instead of the default field', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
                 lastName: {
-                  label: 'This should not be used',
-                  renderer: ({ field }) => <TextArea key={field.name} {...field} label="Custom last name" />,
+                  element: <TextArea label="Custom last name" />,
                 },
-              }}
-            />,
-          ).container,
-        );
+              },
+            },
+            undefined,
+            false,
+            service,
+          );
 
-        const field = result.queryField('Custom last name');
-        expect(field).to.exist;
+          const field = await result.getField('Custom last name');
+          expect(field.localName).to.equal('vaadin-text-area');
+
+          await result.typeInField('Custom last name', 'Maxwell\nSmart');
+          await result.submit();
+
+          expect(saveSpy).to.have.been.calledOnce;
+          expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell\nSmart'));
+        });
+
+        it('disables custom field when form is disabled', async () => {
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  element: <TextArea />,
+                },
+              },
+            },
+            undefined,
+            true,
+          );
+
+          const field = await result.getField('Last name');
+          expect(field.disabled).to.be.true;
+        });
+
+        it('applies field options props to custom field', async () => {
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                placeholder: 'Custom placeholder',
+                helperText: 'Custom helper text',
+                element: <TextArea />,
+              },
+            },
+          });
+
+          const field = (await result.getField('Last name')) as TextAreaElement;
+          expect(field.placeholder).to.equal('Custom placeholder');
+          expect(field.helperText).to.equal('Custom helper text');
+        });
+
+        it('prefers custom fields props over field options props', async () => {
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                label: 'This should not be used',
+                placeholder: 'This should not be used',
+                element: <TextArea label="Custom last name" placeholder="Custom placeholder" />,
+              },
+            },
+          });
+
+          const field = result.queryField('Custom last name') as TextAreaElement;
+          expect(field).to.exist;
+          expect(field.placeholder).to.equal('Custom placeholder');
+        });
+
+        it('preserves custom field props', async () => {
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                element: <TextArea clearButtonVisible />,
+              },
+            },
+          });
+
+          const field = (await result.getField('Last name')) as TextAreaElement;
+          expect(field.clearButtonVisible).to.be.true;
+        });
+
+        it('is not used if a renderer is defined', async () => {
+          const result = await populatePersonForm(1, {
+            fieldOptions: {
+              lastName: {
+                renderer: () => <TextArea label="Rendered element" />,
+                element: <TextArea label="Ignored element" />,
+              },
+            },
+          });
+
+          await expect(result.getField('Rendered element')).to.eventually.exist;
+        });
       });
 
       it('allows customizing common field props', async () => {

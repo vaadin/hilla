@@ -40,17 +40,24 @@ packages/ts/*/.coverage
 packages/ts/*/.vite
 packages/ts/*/types/**
 !packages/ts/*/.lintstagedrc.js
-scripts/generator/results/
+scripts/prepare/results/
 packages/java/hilla/*.json
 packages/java/hilla-react/*.json
-packages/java/hilla/src/main/java/dev/hilla/theme/
-packages/java/hilla-react/src/main/java/dev/hilla/theme/
+packages/java/hilla/src/main/java/com/vaadin/hilla/theme/
+packages/java/hilla/src/main/resources/
+packages/java/tests/**/src/main/bundles/
+
+packages/**/resources/vaadin-core-versions.json
 
 # npm pack
 packages/ts/*/*.tgz
+*.tgz
 
 # temporary scripts from platform for preparations
-scripts/generator/src/
+scripts/prepare/src/
 
 # backup files from some editors
 *~
+
+# nx cache
+.nx

@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>dev.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -15,16 +15,11 @@
   <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
-    <maven.version>3.9.5</maven.version>
+    <maven.version>3.9.6</maven.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>plugin-base</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-maven-plugin</artifactId>
@@ -51,7 +46,6 @@
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.10.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -59,14 +53,13 @@
       <artifactId>jsr305</artifactId>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>engine-core</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-engine-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -92,8 +85,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>parser-jvm-test-utils</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
@@ -106,6 +99,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>3.8.2</version>
+          <configuration>
+            <goalPrefix>vaadin</goalPrefix>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

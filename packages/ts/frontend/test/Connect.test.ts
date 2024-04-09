@@ -16,6 +16,7 @@ import {
   ForbiddenResponseError,
   type MiddlewareFunction,
   UnauthorizedResponseError,
+  type FluxConnection,
 } from '../src/index.js';
 import type { Vaadin, VaadinWindow } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
@@ -39,7 +40,7 @@ interface TestVaadinWindow extends Window {
 
 const $wnd = window as TestVaadinWindow;
 
-describe('@hilla/frontend', () => {
+describe('@vaadin/hilla-frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
 
@@ -606,6 +607,17 @@ describe('@hilla/frontend', () => {
       it('should call FluxConnection', () => {
         client.subscribe('FooEndpoint', 'fooMethod', { param: 1 });
         expect(fluxConnectionSubscriptionStubs.at(-1)).to.have.been.calledOnceWith('FooEndpoint', 'fooMethod', [1]);
+      });
+    });
+
+    describe('atmosphere configuration', () => {
+      let client: ConnectClient;
+      let fluxConnection: FluxConnection;
+
+      it('should pass custom configuration to flux connection', () => {
+        client = new ConnectClient({ atmosphereOptions: { fallbackMethod: 'fake' } });
+        ({ fluxConnection } = client);
+        expect(subscribeStub.lastCall.firstArg).to.have.property('fallbackMethod').which.equals('fake');
       });
     });
   });

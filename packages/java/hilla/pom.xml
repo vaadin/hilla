@@ -5,18 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>2.5-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
-    <groupId>dev.hilla</groupId>
     <artifactId>hilla</artifactId>
     <packaging>jar</packaging>
     <name>Hilla Platform</name>
     <description>Hilla Platform</description>
-    <version>2.5-SNAPSHOT</version>
+    <version>24.4-SNAPSHOT</version>
     <url>https://hilla.dev</url>
 
     <properties>
@@ -25,18 +24,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>endpoint</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-endpoint</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>engine-runtime</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla-dev</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-engine-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -88,28 +82,6 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- Copy versions file to classpath, so that Flow can use
-                    it to pin versions for pnpm. -->
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-and-rename-file</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <sourceFile>${basedir}/hilla-versions.json</sourceFile>
-                            <!-- use vaadin-core-versions.json here, as flow check this file firstly.
-                                 later we should consider to split this file for core and pro components. -->
-                            <destinationFile>${basedir}/target/classes/vaadin-core-versions.json</destinationFile>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -4,9 +4,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>2.5-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-security-contextpath</artifactId>
     <name>ITs for Vaadin Spring Security and Hilla / context path</name>
@@ -19,12 +19,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.hilla</groupId>
+            <groupId>com.vaadin</groupId>
             <artifactId>hilla</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -57,7 +53,7 @@
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
 

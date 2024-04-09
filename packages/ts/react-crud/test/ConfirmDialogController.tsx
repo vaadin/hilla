@@ -1,6 +1,6 @@
-import type { ConfirmDialogElement } from '@hilla/react-components/ConfirmDialog.js';
 import { waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import type { ConfirmDialogElement } from '@vaadin/react-components/ConfirmDialog.js';
 
 export default class ConfirmDialogController {
   readonly instance: ConfirmDialogElement;

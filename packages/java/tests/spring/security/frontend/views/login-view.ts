@@ -1,4 +1,4 @@
-import { LoginResult } from '@hilla/frontend';
+import { LoginResult } from '@vaadin/hilla-frontend';
 import { AfterEnterObserver, RouterLocation } from '@vaadin/router';
 import '@vaadin/login/vaadin-login-overlay';
 import { html } from 'lit';

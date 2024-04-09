@@ -1,9 +1,9 @@
-import type { AbstractModel, DetachedModelConstructor } from '@hilla/form';
-import { Button } from '@hilla/react-components/Button.js';
-import { AutoGrid, type CrudService } from '@hilla/react-crud';
+import type { AbstractModel, DetachedModelConstructor } from '@vaadin/hilla-lit-form';
+import { Button } from '@vaadin/react-components/Button.js';
+import { AutoGrid, type CrudService } from '@vaadin/hilla-react-crud';
 import { useState } from 'react';
-import CompanyModel from 'Frontend/generated/dev/hilla/test/reactgrid/CompanyModel.js';
-import PersonModel from 'Frontend/generated/dev/hilla/test/reactgrid/PersonModel.js';
+import CompanyModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/CompanyModel.js';
+import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import { CompanyService, PersonService } from 'Frontend/generated/endpoints.js';
 
 export function ReadOnlyGridWithHeaderFilters(): JSX.Element {

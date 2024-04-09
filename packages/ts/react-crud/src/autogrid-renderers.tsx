@@ -1,12 +1,14 @@
-import type { GridItemModel } from '@hilla/react-components/Grid.js';
-import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
-import { Icon } from '@hilla/react-components/Icon.js';
-// eslint-disable-next-line
-import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
-import { type CSSProperties, type JSX, useContext } from 'react';
+import type { GridItemModel } from '@vaadin/react-components/Grid.js';
+import type { GridColumnElement } from '@vaadin/react-components/GridColumn.js';
+import { Icon } from '@vaadin/react-components/Icon.js';
+import { type ComponentType, createContext, type CSSProperties, type JSX, useContext } from 'react';
 import { ColumnContext } from './autogrid-column-context';
+import type { ItemCounts } from './data-provider';
 import { useLocaleFormatter } from './locale.js';
 import { convertToTitleCase } from './util';
+
+// eslint-disable-next-line
+import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
 export type RendererOptions<TItem> = {
   item: TItem;
@@ -77,4 +79,36 @@ export function AutoGridJsonRenderer<TItem>({ item }: RendererOptions<TItem>): J
 
 export function AutoGridRowNumberRenderer<TItem>({ model }: RendererOptions<TItem>): JSX.Element {
   return <>{model.index + 1}</>;
+}
+
+export type FooterContextType = {
+  totalCount?: boolean;
+  filteredCount?: boolean;
+  footerCountRenderer?: ComponentType<ItemCounts>;
+  itemCounts?: ItemCounts;
+};
+
+export const FooterContext = createContext<FooterContextType>(undefined!);
+
+export function AutoGridFooterItemCountRenderer(): JSX.Element {
+  const footerContext = useContext(FooterContext);
+  const { totalCount, filteredCount, itemCounts, footerCountRenderer: FooterRenderer } = footerContext;
+
+  if (FooterRenderer) {
+    return <FooterRenderer {...itemCounts} />;
+  }
+
+  let filterCountText: string | undefined;
+  if (filteredCount && itemCounts?.filteredCount !== undefined) {
+    filterCountText =
+      totalCount && itemCounts.totalCount !== undefined
+        ? `Showing: ${itemCounts.filteredCount} out of ${itemCounts.totalCount}`
+        : `Showing: ${itemCounts.filteredCount}`;
+  } else if (totalCount && itemCounts?.totalCount !== undefined) {
+    filterCountText = `Total: ${itemCounts.totalCount}`;
+  }
+  if (filterCountText) {
+    return <p>{filterCountText}</p>;
+  }
+  return <></>;
 }

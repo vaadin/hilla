@@ -4,9 +4,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>2.5-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-native</artifactId>
     <name>ITs for Hilla compiled to native</name>
@@ -25,10 +25,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla-react-spring-boot-starter</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
@@ -89,7 +85,7 @@
             </plugin>
 
             <plugin>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
                 <executions>
                     <execution>
@@ -375,7 +371,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>dev.hilla</groupId>
+                        <groupId>com.vaadin</groupId>
                         <artifactId>hilla-maven-plugin</artifactId>
                         <executions>
                             <execution>

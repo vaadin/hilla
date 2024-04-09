@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>dev.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>24.4-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>runtime-plugin-transfertypes</artifactId>
+  <artifactId>hilla-runtime-plugin-transfertypes</artifactId>
   <name>Hilla Runtime Transfer Types</name>
   <packaging>jar</packaging>
 
@@ -36,12 +36,10 @@
     <dependency>
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
-      <version>${jakarta.validation.version}</version>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
-      <version>${jakarta.annotation.api.version}</version>
   </dependency>
 </dependencies>
 </project>

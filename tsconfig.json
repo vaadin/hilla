@@ -19,5 +19,5 @@
     "useDefineForClassFields": true,
     "useUnknownInCatchVariables": true
   },
-  "include": ["scripts/*.ts", "scripts/*.d.ts", "./*.ts", "./*.d.ts", "./*.js", "./*.cjs"]
+  "include": ["scripts/**/*.ts", "scripts/*.d.ts", "./*.ts", "./*.d.ts", "./*.js", "./*.cjs"]
 }

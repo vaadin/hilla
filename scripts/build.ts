@@ -11,7 +11,7 @@ const scriptsDir = new URL('./', import.meta.url);
 const packageRoot = pathToFileURL(process.cwd() + sep);
 const [packageJsonFile, srcFiles] = await Promise.all([
   readFile(new URL('package.json', packageRoot), 'utf8'),
-  glob('src/**/*.{ts,tsx,obj.css}'),
+  glob('src/**/*.{ts,tsx,obj.css}', { ignore: ['**/*.d.ts'] }),
 ]);
 
 const packageJson: PackageJson = JSON.parse(packageJsonFile);

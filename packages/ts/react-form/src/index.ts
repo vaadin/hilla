@@ -16,7 +16,7 @@ import {
   type Validator,
   type Value,
   type ValueError,
-} from '@hilla/form';
+} from '@vaadin/hilla-lit-form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 
@@ -62,6 +62,7 @@ export type UseFormPartResult<M extends AbstractModel> = Readonly<{
 export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
   Readonly<{
     value: Value<M>;
+    submitting: boolean;
     setDefaultValue(value: Value<M>): void;
     setValue(value: Value<M>): void;
     submit(): Promise<Value<M> | undefined | void>;
@@ -77,6 +78,7 @@ type FieldState<T = unknown> = {
   errorMessage: string;
   strategy?: FieldStrategy<T>;
   element?: HTMLElement;
+  changeBlurHandler(): void;
   updateValue(): void;
   markVisited(): void;
   ref(element: HTMLElement | null): void;
@@ -127,14 +129,18 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
           element: undefined,
           errorMessage: '',
           invalid: false,
+          changeBlurHandler() {
+            fieldState!.updateValue();
+            fieldState!.markVisited();
+          },
           markVisited() {
             n.visited = true;
           },
           ref(element: HTMLElement | null) {
             if (!element) {
-              fieldState!.element?.removeEventListener('change', fieldState!.updateValue);
+              fieldState!.element?.removeEventListener('change', fieldState!.changeBlurHandler);
               fieldState!.element?.removeEventListener('input', fieldState!.updateValue);
-              fieldState!.element?.removeEventListener('blur', fieldState!.markVisited);
+              fieldState!.element?.removeEventListener('blur', fieldState!.changeBlurHandler);
               fieldState!.strategy?.removeEventListeners();
               fieldState!.element = undefined;
               fieldState!.strategy = undefined;
@@ -147,9 +153,9 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 
             if (fieldState!.element !== element) {
               fieldState!.element = element;
-              fieldState!.element.addEventListener('change', fieldState!.updateValue);
+              fieldState!.element.addEventListener('change', fieldState!.changeBlurHandler);
               fieldState!.element.addEventListener('input', fieldState!.updateValue);
-              fieldState!.element.addEventListener('blur', fieldState!.markVisited);
+              fieldState!.element.addEventListener('blur', fieldState!.changeBlurHandler);
               fieldState!.strategy = getDefaultFieldStrategy(element, model);
             }
           },
@@ -174,7 +180,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
       if (fieldState.strategy) {
         const valueFromField = convertFieldValue(model, fieldState.strategy.value);
         if (valueFromField !== n.value && !(Number.isNaN(n.value) && Number.isNaN(valueFromField))) {
-          fieldState.strategy.value = n.value;
+          fieldState.strategy.value = Number.isNaN(n.value) ? '' : n.value;
         }
 
         if (fieldState.required !== n.required) {
@@ -232,6 +238,7 @@ export function useForm<M extends AbstractModel>(
     },
     submit: binder.submit.bind(binder),
     value: binder.value,
+    submitting: binder.submitting,
     update,
   };
 }

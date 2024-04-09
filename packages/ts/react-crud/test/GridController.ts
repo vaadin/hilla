@@ -1,8 +1,9 @@
-import type { GridElement } from '@hilla/react-components/Grid.js';
-import type { GridColumnElement } from '@hilla/react-components/GridColumn.js';
-import type { GridSorterDirection, GridSorterElement } from '@hilla/react-components/GridSorter.js';
 import { type RenderResult, waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
+import type { GridElement } from '@vaadin/react-components/Grid.js';
+import type { GridColumnElement } from '@vaadin/react-components/GridColumn.js';
+import type { GridSorterDirection, GridSorterElement } from '@vaadin/react-components/GridSorter.js';
+import type { SinonFakeTimers } from 'sinon';
 import type Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 // @ts-expect-error no types for the utils
 import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
@@ -49,7 +50,7 @@ export default class GridController {
     return getCellContent(cell);
   }
 
-  getVisibleRowCount(): number {
+  getRowCount(): number {
     // @ts-expect-error: getting internal property
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return this.instance._dataProviderController.rootCache.size;
@@ -82,7 +83,7 @@ export default class GridController {
     return cells.map((cell) => (getCellContent(cell) as HTMLElement).innerText);
   }
 
-  generateColumnHeaders(paths: readonly string[]): readonly string[] {
+  static generateColumnHeaders(paths: readonly string[]): readonly string[] {
     return paths.map((path) =>
       path
         .substring(path.lastIndexOf('.') + 1)
@@ -123,7 +124,7 @@ export default class GridController {
   }
 
   async getSortOrder(): Promise<SortOrder | undefined> {
-    const sorters = Array.from(await waitFor(() => this.instance.querySelectorAll('vaadin-grid-sorter')!));
+    const sorters = Array.from(await waitFor(() => this.instance.querySelectorAll('vaadin-grid-sorter')));
     const activeSorters = sorters
       .filter((gridSorter) => !!gridSorter.direction)
       // @ts-expect-error: accessing internal property
@@ -137,5 +138,30 @@ export default class GridController {
 
   async #getSorter(): Promise<readonly GridSorterElement[]> {
     return Array.from(await waitFor(() => Array.from(this.instance.querySelectorAll('vaadin-grid-sorter'))));
+  }
+
+  getFooterRows(): HTMLElement[] {
+    // @ts-expect-error: getting internal property
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return getRows(this.instance.$.footer);
+  }
+
+  getFooterCellContent(row: number, col: number): HTMLElement {
+    return getCellContent(this.getFooterCell(row, col));
+  }
+
+  getFooterCell(row: number, col: number): HTMLElement {
+    // @ts-expect-error: getting internal property
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return getContainerCell(this.instance.$.footer, row, col);
+  }
+
+  async typeInHeaderFilter(row: number, col: number, filterValue: string, clock?: SinonFakeTimers): Promise<void> {
+    const firstNameFilterField = this.getHeaderCellContent(row, col).querySelector('vaadin-text-field')!;
+    firstNameFilterField.value = filterValue;
+    firstNameFilterField.dispatchEvent(new CustomEvent('input'));
+    if (clock) {
+      await clock.tickAsync(500);
+    }
   }
 }

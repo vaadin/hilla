@@ -66,8 +66,7 @@ repositories {
 
 dependencies {
     implementation('org.jetbrains.kotlin:kotlin-stdlib:1.7.20')
-    implementation("dev.hilla:engine-core:${pom.parent.version}")
-    implementation("dev.hilla:plugin-base:${pom.parent.version}")
+    implementation("com.vaadin:hilla-engine-core:${pom.parent.version}")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
 
     testImplementation("junit:junit:4.13.2")
@@ -105,9 +104,9 @@ jar {
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     archiveClassifier = 'sources'
-    include 'dev/**/*.groovy'
-    include 'dev/**/*.java'
-    include 'dev/**/*.kt'
+    include 'com/**/*.groovy'
+    include 'com/**/*.java'
+    include 'com/**/*.kt'
 }
 
 /**
@@ -146,8 +145,8 @@ gradlePlugin {
     testSourceSets sourceSets.functionalTest
     plugins {
         hillaPlugin {
-            id = 'dev.hilla'
-            implementationClass = 'dev.hilla.gradle.plugin.HillaPlugin'
+            id = 'com.vaadin.hilla'
+            implementationClass = 'com.vaadin.hilla.gradle.plugin.HillaPlugin'
         }
     }
 }
@@ -186,12 +185,6 @@ publishing {
  * Misc.
  *
  **********************************************************************************************************************/
-wrapper {
-    gradleVersion = '8.3'
-    distributionType = Wrapper.DistributionType.ALL
-}
-
-
 // This will print ongoing tests, taken from https://stackoverflow.com/a/4292739/377320
 // This will come in handy on the CI during long-running tests to prevent the CI killing
 //     the process due to a false indication of inactivity:

@@ -24,7 +24,7 @@ Hilla helps you access the backend easily with type-safe endpoints.
 
 ```ts
 // Type info is automatically generated based on Java
-import Person from 'Frontend/generated/dev/hilla/demo/entity/Person';
+import Person from 'Frontend/generated/com/vaadin/hilla/demo/entity/Person';
 import { PersonEndpoint } from 'Frontend/generated/endpoints';
 
 async function getPeopleWithPhoneNumber() {

@@ -1,0 +1,78 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "TransientEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.transients.TransientEndpoint"
+    }
+  ],
+  "paths": {
+    "/TransientEndpoint/getTransientModel": {
+      "post": {
+        "tags": ["TransientEndpoint"],
+        "operationId": "TransientEndpoint_getTransientModel_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.transients.TransientEndpoint$TransientModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.transients.TransientEndpoint$TransientModel": {
+        "type": "object",
+        "properties": {
+          "nonTransientEntity": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.transients.NonTransientEntity"
+              }
+            ]
+          },
+          "notTransientField": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.transients.NonTransientEntity": {
+        "type": "object",
+        "properties": {
+          "entityField": {
+            "type": "string",
+            "nullable": true
+          },
+          "transientWithGetter": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

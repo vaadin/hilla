@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>dev.hilla</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>tests</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>24.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>tests-csrf-context</artifactId>
@@ -27,17 +27,25 @@
   <dependencies>
     <!-- Project dependencies -->
     <dependency>
-      <groupId>dev.hilla</groupId>
-      <artifactId>hilla-dev</artifactId>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>dev.hilla</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>hilla-maven-plugin</artifactId>
+        <configuration>
+          <reactEnable>false</reactEnable>
+        </configuration>
       </plugin>
 
       <!-- This module is mapped to default web context -->

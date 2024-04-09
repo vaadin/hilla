@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render, type RenderResult } from '@testing-library/react';
+import { act, fireEvent, render, type RenderResult, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
@@ -7,13 +7,13 @@ import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Contract, EntityModel, type Login, LoginModel, type Project, type UserModel } from './models.js';
+import { type Contract, EntityModel, type FormUserModel, type Login, LoginModel, type Project } from './models.js';
 
 use(sinonChai);
 use(chaiDom);
 use(chaiAsPromised);
 
-describe('@hilla/react-form', () => {
+describe('@vaadin/hilla-react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
   const useForm = sinon.spy(_useForm) as typeof _useForm;
 
@@ -21,7 +21,7 @@ describe('@hilla/react-form', () => {
   let onChange: (value: Login) => void;
 
   type UserFormProps = Readonly<{
-    model: UserModel;
+    model: FormUserModel;
   }>;
 
   function UserForm({ model: user }: UserFormProps) {
@@ -45,7 +45,7 @@ describe('@hilla/react-form', () => {
   }
 
   function LoginForm() {
-    const { field, model, submit, value } = useForm(LoginModel, { onChange, onSubmit });
+    const { field, model, submit, value, submitting } = useForm(LoginModel, { onChange, onSubmit });
 
     return (
       <>
@@ -59,6 +59,7 @@ describe('@hilla/react-form', () => {
         <button data-testid="submit" onClick={submit}>
           Submit
         </button>
+        {submitting ? <span data-testid="submitting">Submitting...</span> : null}
       </>
     );
   }
@@ -115,6 +116,26 @@ describe('@hilla/react-form', () => {
       await user.click(getByTestId('submit'));
 
       expect(onSubmit).to.not.have.been.called;
+    });
+
+    it('forwards submitting state from Binder', async () => {
+      let resolveSubmit: () => void = () => {};
+      onSubmit = async (login) =>
+        new Promise((resolve) => {
+          resolveSubmit = () => resolve(login);
+        });
+
+      // Initial render - submitting is false
+      const { getByTestId, queryByTestId } = render(<LoginForm />);
+      expect(queryByTestId('submitting')).to.not.exist;
+
+      // Submit - submitting is true
+      await fillAndSubmitLoginForm(getByTestId, user);
+      expect(queryByTestId('submitting')).to.exist;
+
+      // Resolve submit - submitting is false
+      resolveSubmit();
+      await waitFor(() => expect(queryByTestId('submitting')).to.not.exist);
     });
 
     it('shows empty values by default', () => {
@@ -299,6 +320,38 @@ describe('@hilla/react-form', () => {
       const loadFormBtn = await findByTestId('load');
       await user.click(loadFormBtn);
       await expect(findByTestId('contracts')).to.eventually.have.nested.property('selectedOptions.0.value', '202');
+    });
+
+    it('runs validators on change event', async () => {
+      function ProjectForm() {
+        const { addValidator, field, model } = useForm(EntityModel);
+        const [count, setCount] = useState(0);
+
+        useEffect(() => {
+          addValidator({
+            message: 'ID expected',
+            validate: (entity) => {
+              setCount(count + 1);
+              return !entity.projectId;
+            },
+          });
+        }, []);
+
+        return (
+          <>
+            <input type="number" data-testid="project" {...field(model.projectId)} />
+            <div data-testid="count">{count.toString()}</div>
+          </>
+        );
+      }
+
+      const { findByTestId } = render(<ProjectForm />);
+      const projectInput = await findByTestId('project');
+      await user.type(projectInput, '123');
+      // Mimic change that happens without blur
+      fireEvent.change(projectInput);
+      const count = await findByTestId('count');
+      expect(count).to.have.text('1');
     });
   });
 });

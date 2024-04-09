@@ -1,0 +1,127 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "ExtendedEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.nonnull.extended.ExtendedEndpoint"
+    }
+  ],
+  "paths": {
+    "/ExtendedEndpoint/getNonnullListOfNullableElements": {
+      "post": {
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_getNonnullListOfNullableElements_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.extended.ExtendedEndpoint$Entity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ExtendedEndpoint/superComplexType": {
+      "post": {
+        "tags": ["ExtendedEndpoint"],
+        "operationId": "ExtendedEndpoint_superComplexType_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "nullable": true
+                        }
+                      },
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "nullable": true,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "nullable": true
+                      }
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.nonnull.extended.ExtendedEndpoint$Entity": {
+        "type": "object",
+        "properties": {
+          "nonnullListOfNullableStrings": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

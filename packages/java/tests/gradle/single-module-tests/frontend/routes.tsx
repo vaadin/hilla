@@ -1,9 +1,9 @@
-import HelloReactView from 'Frontend/views/helloreact/HelloReactView.js';
-import MainLayout from 'Frontend/views/MainLayout.js';
+import HelloReactView from './_views/helloreact/HelloReactView.js';
+import MainLayout from './_views/MainLayout.js';
 import { lazy } from 'react';
 import { createBrowserRouter, IndexRouteObject, NonIndexRouteObject, useMatches } from 'react-router-dom';
 
-const AboutView = lazy(async () => import('Frontend/views/about/AboutView.js'));
+const AboutView = lazy(async () => import('./_views/about/AboutView.js'));
 export type MenuProps = Readonly<{
   icon?: string;
   title?: string;
@@ -28,13 +28,13 @@ export type ViewRouteMatch = Readonly<Override<RouteMatch, ViewMeta>>;
 
 export const useViewMatches = useMatches as () => readonly ViewRouteMatch[];
 
-export const routes: readonly ViewRouteObject[] = [
+export const routes: ViewRouteObject[] = [
   {
     element: <MainLayout />,
     handle: { icon: 'null', title: 'Main' },
     children: [
       { path: '/', element: <HelloReactView />, handle: { icon: 'globe-solid', title: 'Hello React' } },
-      { path: '/about', element: <AboutView />, handle: { icon: 'file', title: 'About' } },
+      { path: '/about', element: <AboutView />, handle: { icon: 'file', title: 'About' } }
     ],
   },
 ];
