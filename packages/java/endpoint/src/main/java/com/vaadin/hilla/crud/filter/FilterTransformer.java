@@ -51,13 +51,13 @@ public class FilterTransformer {
     }
 
     /**
-     * Remaps a filter, replacing all property names with their mapped values.
+     * Applies registered property mappings and transformation function on the provided filter instance.
      *
      * @param filter
-     *            The filter to remap.
-     * @return The remapped filter.
+     *            The filter instance to transform.
+     * @return The transformed filter.
      */
-    public Filter remap(Filter filter) {
+    public Filter apply(Filter filter) {
         if (filter == null) {
             return null;
         }
