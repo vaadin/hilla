@@ -20,7 +20,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   ├── layout.tsx
   // │   │   └── security
   // │   │       ├── password.jsx
-  // │   │       └── two-factor-auth.tsx
+  // │   │       ├── two-factor-auth.tsx
   // │   │       └── two-factor-auth-ignored.ts
   // │   ├── friends
   // │   │   ├── layout.tsx
@@ -30,9 +30,9 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   ├── index.tsx
   // │   └── index.css
   // ├── test
-  // │  ├── {{optional}}.tsx
-  // │  ├── {...wildcard}.tsx
-  // │  └── empty.tsx
+  // │   ├── {{optional}}.tsx
+  // │   ├── {...wildcard}.tsx
+  // │   └── empty.tsx
   // └── nameToReplace.tsx
 
   await Promise.all([
@@ -147,6 +147,7 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
             // We keep the path though.
             path: 'empty',
           },
+          // Also empty files or files without default export are not included.
           {
             path: '{{optional}}',
             file: new URL('test/{{optional}}.tsx', dir),
