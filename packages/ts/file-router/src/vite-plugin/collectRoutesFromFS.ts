@@ -33,10 +33,11 @@ export type CollectRoutesOptions = Readonly<{
 async function checkFile(url: URL | undefined, logger: Logger): Promise<URL | undefined> {
   if (url) {
     const contents = await readFile(url, 'utf-8');
-    if (contents === '') {
+    if (contents.trim() === '') {
       return undefined;
     } else if (!contents.includes('export default')) {
       logger.error(`The file "${String(url)}" should contain a default export of a component`);
+      return undefined;
     }
   }
 
@@ -74,6 +75,10 @@ export default async function collectRoutesFromFS(
       children.push(await collectRoutesFromFS(new URL(`${d.name}/`, dir), { extensions, logger, parent: dir }));
     } else if (d.isFile() && extensions.includes(extname(d.name))) {
       const file = new URL(d.name, dir);
+      const url = await checkFile(file, logger);
+      if (url === undefined) {
+        continue;
+      }
       const name = basename(d.name, extname(d.name));
 
       if (name.startsWith('@')) {
@@ -106,16 +111,11 @@ export default async function collectRoutesFromFS(
 
   [children, layout] = await Promise.all([
     Promise.all(
-      children.map(async (child) => {
-        let { file: f, layout: l } = child;
-        [f, l] = await Promise.all([checkFile(f, logger), checkFile(l, logger)]);
-
-        return {
-          ...child,
-          file: f,
-          layout: l,
-        };
-      }),
+      children.map(async (child) => ({
+        ...child,
+        file: child.file,
+        layout: await checkFile(child.layout, logger),
+      })),
     ),
     checkFile(layout, logger),
   ]);
