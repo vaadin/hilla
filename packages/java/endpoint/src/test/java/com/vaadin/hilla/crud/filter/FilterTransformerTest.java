@@ -87,7 +87,7 @@ public class FilterTransformerTest {
                     return filter;
                 });
 
-        var filter = transformer.remap(andFilter);
+        var filter = transformer.apply(andFilter);
         var spec = jpaFilterConverter.toSpec(filter, TestObject.class);
         var result = repository.findAll(spec);
         assertEquals(2, result.size());

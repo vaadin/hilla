@@ -9,7 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
- * Utility class for transforming property names in filters and pageable objects.
+ * Utility class for transforming property names in filters and pageable
+ * objects.
  */
 public class FilterTransformer {
 
@@ -34,8 +35,10 @@ public class FilterTransformer {
 
     /**
      * Declares a function that will be applied to all
-     * {@link PropertyStringFilter} instances. This can be used to modify the
-     * filter value in a more complex way than a simple mapping.
+     * {@link PropertyStringFilter} instances, allowing any kind of
+     * customization, including a replacement of the filter itself. This can be
+     * used to modify the filter value in a more complex way than a simple
+     * mapping.
      * <p>
      * Note: The passed in {@code filterTransformation} function is applied
      * after all other mappings are applied.
@@ -51,7 +54,8 @@ public class FilterTransformer {
     }
 
     /**
-     * Applies registered property mappings and transformation function on the provided filter instance.
+     * Applies registered property mappings and transformation function on the
+     * provided filter instance.
      *
      * @param filter
      *            The filter instance to transform.
@@ -65,12 +69,12 @@ public class FilterTransformer {
         if (filter instanceof AndFilter andFilter) {
             var newAndFilter = new AndFilter();
             newAndFilter.setChildren(
-                    andFilter.getChildren().stream().map(this::remap).toList());
+                    andFilter.getChildren().stream().map(this::apply).toList());
             return newAndFilter;
         } else if (filter instanceof OrFilter orFilter) {
             var newOrFilter = new OrFilter();
             newOrFilter.setChildren(
-                    orFilter.getChildren().stream().map(this::remap).toList());
+                    orFilter.getChildren().stream().map(this::apply).toList());
             return newOrFilter;
         } else if (filter instanceof PropertyStringFilter propertyStringFilter) {
             var property = propertyStringFilter.getPropertyId();
@@ -97,7 +101,8 @@ public class FilterTransformer {
     /**
      * Applies registered property mappings on the provided pageable instance.
      * <p>
-     * Note: The passed in {@code filterTransformation} function is not applied on pageables.
+     * Note: The passed in {@code filterTransformation} function is not applied
+     * on pageables.
      *
      * @param pageable
      *            The pageable instance to transform.
