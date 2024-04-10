@@ -1,42 +1,34 @@
-import { protectRoutes, type RouteObjectWithAuth } from '@vaadin/hilla-react-auth';
-import { type ComponentType, createElement, type ReactElement } from 'react';
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
+import { protectRoute } from '@vaadin/hilla-react-auth';
+import { type ComponentType, createElement } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
-import { transformTreeSync } from '../shared/transformTree.js';
-import type { AgnosticRoute, RouterConfiguration } from '../types.js';
-import { toReactRouter } from './toReactRouter.js';
+import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
+import { transformTree2 } from '../shared/transformTree2.js';
+import type { AgnosticRoute, Module, RouteModule, RouterConfiguration, ViewConfig } from '../types.js';
 
-/**
- * Deeply merges two lists of routes. If the specific path is already present,
- * the route is merged, otherwise the new routes are added to the list.
- *
- * @param a - The first list of routes.
- * @param b - The second list of routes.
- */
-function mergeRoutes(a: readonly RouteObject[], b: readonly RouteObject[]): RouteObject[] {
-  return b.reduce(
-    (result, route) => {
-      const existingRoute = result.find((r) => r.path === route.path);
-      if (existingRoute) {
-        Object.assign(existingRoute, route);
-        existingRoute.children = existingRoute.children
-          ? mergeRoutes(existingRoute.children, route.children ?? [])
-          : route.children;
-      } else {
-        result.push(route);
-      }
-      return result;
-    },
-    [...a],
-  );
+interface RouteBase {
+  path?: string;
+  children?: readonly this[];
 }
+
+type RoutesModifier = (routes: readonly RouteObject[]) => readonly RouteObject[];
+
+function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
+  return module ? 'default' in module && typeof module.default === 'function' : true;
+}
+
+type RouteTransformer<T> = (
+  original: RouteObject | undefined,
+  overriding: T,
+  children?: readonly RouteObject[],
+) => RouteObject;
 
 /**
  * A builder for creating a Vaadin-specific router for React with
  * authentication and server routes support.
  */
 export class RouterConfigurationBuilder {
-  readonly #initializers: Array<(routes: readonly RouteObject[]) => readonly RouteObject[]> = [];
-  readonly #finalizers: Array<(routes: readonly RouteObject[]) => readonly RouteObject[]> = [];
+  readonly #modifiers: RoutesModifier[] = [];
 
   /**
    * Adds the given routes to the current list of routes. All the routes are
@@ -45,15 +37,7 @@ export class RouterConfigurationBuilder {
    * @param routes - A list of routes to add to the current list.
    */
   withReactRoutes(...routes: readonly RouteObject[]): this {
-    this.#initializers.push((existingRoutes) => {
-      if (!existingRoutes.length) {
-        return routes;
-      }
-
-      return mergeRoutes(existingRoutes, routes);
-    });
-
-    return this;
+    return this.update(routes);
   }
 
   /**
@@ -64,16 +48,24 @@ export class RouterConfigurationBuilder {
    * @param routes - A list of routes to add to the current list.
    */
   withFileRoutes(...routes: readonly AgnosticRoute[]): this {
-    this.#initializers.push((existingRoutes) => {
-      const reactRoutes = routes.map(toReactRouter);
-
-      if (!existingRoutes.length) {
-        return reactRoutes;
+    return this.update(routes, (original, { module, path }, children) => {
+      if (!isReactRouteModule(module)) {
+        throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
       }
 
-      return mergeRoutes(existingRoutes, reactRoutes);
+      const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
+
+      return {
+        ...original,
+        path: module?.config?.route ?? path,
+        element: module?.default ? createElement(module.default) : undefined,
+        children: children as RouteObject[] | undefined,
+        handle: {
+          ...module?.config,
+          title,
+        },
+      } as RouteObject;
     });
-    return this;
   }
 
   /**
@@ -82,30 +74,20 @@ export class RouterConfigurationBuilder {
    *
    * @param component - The React component to add to each branch of the
    * current list of routes.
+   * @param config - An optional configuration that will be applied to
+   * each fallback component.
    */
-  withFallback(component: ComponentType): this {
-    this.#finalizers.push((existingRoutes) => {
-      const createServerRoute = () => ({ path: '*', element: createElement(component) });
+  withFallback(component: ComponentType, config?: ViewConfig): this {
+    const serverRoute = { path: '*', element: createElement(component), handle: config };
 
-      const newRoutes = existingRoutes.map((route) =>
-        transformTreeSync<RouteObject, RouteObject>(
-          route,
-          (r) => r.children?.values(),
-          (r, children) =>
-            children
-              ? // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                ({
-                  ...r,
-                  children: [...children, createServerRoute()],
-                } as RouteObject)
-              : r,
-        ),
-      );
-
-      newRoutes.push(createServerRoute());
-
-      return newRoutes;
-    });
+    this.update(undefined, (original, _, children) =>
+      children
+        ? ({
+            ...original!,
+            children: [...children, serverRoute],
+          } as RouteObject)
+        : original!,
+    );
 
     return this;
   }
@@ -118,7 +100,58 @@ export class RouterConfigurationBuilder {
    * and the user is not authenticated.
    */
   protect(redirectPath?: string): this {
-    this.#finalizers.push((existingRoutes) => protectRoutes(existingRoutes as RouteObjectWithAuth[], redirectPath));
+    this.update(undefined, (route, _, children) => {
+      const finalRoute = protectRoute(route!, redirectPath);
+      finalRoute.children = children as RouteObject[] | undefined;
+      return finalRoute;
+    });
+
+    return this;
+  }
+
+  update<T extends RouteBase>(routes: undefined, callback: RouteTransformer<undefined>): this;
+  update<T extends RouteBase>(routes: readonly T[], callback?: RouteTransformer<T>): this;
+  update<T extends RouteBase>(
+    routes: readonly T[] | undefined,
+    callback: RouteTransformer<T | undefined> = (original, overriding, children) =>
+      ({
+        ...original,
+        ...overriding,
+        children,
+      }) as RouteObject,
+  ): this {
+    this.#modifiers.push(
+      (existingRoutes) =>
+        transformTree2<
+          [readonly RouteObject[] | undefined, readonly T[] | undefined],
+          readonly RouteObject[] | undefined
+        >([existingRoutes, routes], ([original, incoming], next) => {
+          if (original && incoming) {
+            const final = new Map(original.map((route) => [route.path, route]));
+
+            for (const route of incoming) {
+              const existingRoute = final.get(route.path);
+              if (existingRoute) {
+                final.set(
+                  existingRoute.path,
+                  callback(existingRoute, route, next(existingRoute.children, route.children)),
+                );
+              } else {
+                const newRoute = callback(undefined, route, next(undefined, route.children));
+                final.set(newRoute.path, newRoute);
+              }
+            }
+
+            return [...final.values()];
+          } else if (original) {
+            return original;
+          } else if (incoming) {
+            return incoming.map((route) => callback(undefined, route, next(undefined, route.children)));
+          }
+
+          return undefined;
+        }) ?? [],
+    );
     return this;
   }
 
@@ -126,8 +159,7 @@ export class RouterConfigurationBuilder {
    * Builds the router with the current list of routes.
    */
   build(): RouterConfiguration {
-    let routes = this.#initializers.reduce<readonly RouteObject[]>((acc, callback) => callback(acc), []);
-    routes = this.#finalizers.reduce<readonly RouteObject[]>((acc, callback) => callback(acc), routes);
+    const routes = this.#modifiers.reduce<readonly RouteObject[]>((acc, mod) => mod(acc), []);
 
     return {
       routes,

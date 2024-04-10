@@ -70,7 +70,7 @@ export type RouteModule<C = unknown> = Module &
 export type AgnosticRoute = Readonly<{
   path: string;
   module?: Module;
-  children?: ReadonlyArray<AgnosticRoute<T>>;
+  children?: readonly AgnosticRoute[];
 }>;
 
 /**
