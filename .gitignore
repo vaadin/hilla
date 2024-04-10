@@ -42,6 +42,8 @@ packages/ts/*/types/**
 !packages/ts/*/.lintstagedrc.js
 scripts/prepare/results/
 packages/java/hilla/*.json
+packages/java/hilla/src/main/resources/
+packages/java/tests/**/src/main/bundles/
 
 packages/**/resources/vaadin-core-versions.json
 

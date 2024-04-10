@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,8 +17,11 @@ package com.vaadin.hilla.typeconversion;
 
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
+import java.io.IOException;
+
 @RunWith(SpringRunner.class)
 @WebMvcTest
 @Import(TestTypeConversionEndpoints.class)
@@ -47,16 +52,28 @@ public abstract class BaseTypeConversionTest {
 
     private ApplicationConfiguration appConfig;
 
+    @Rule
+    public TemporaryFolder projectFolder = new TemporaryFolder();
+
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
+        Assert.assertNotNull(applicationContext);
+        projectFolder.newFolder("build");
+
         appConfig = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.isProductionMode()).thenReturn(false);
+        Mockito.when(appConfig.getProjectFolder())
+                .thenReturn(projectFolder.getRoot());
+        Mockito.when(appConfig.getBuildFolder()).thenReturn("build");
 
         EndpointControllerMockBuilder controllerMockBuilder = new EndpointControllerMockBuilder();
         EndpointController controller = controllerMockBuilder
                 .withApplicationContext(applicationContext).build();
-        controller.registerEndpoints();
+        var openApiResource = projectFolder.getRoot().toPath()
+                .resolve(appConfig.getBuildFolder())
+                .resolve(EngineConfiguration.OPEN_API_PATH);
+        controller.registerEndpoints(openApiResource.toUri().toURL());
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        Assert.assertNotEquals(null, applicationContext);
     }
 
     protected void assertEqualExpectedValueWhenCallingMethod(String methodName,

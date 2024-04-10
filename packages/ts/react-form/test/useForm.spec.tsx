@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render, type RenderResult, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, type RenderResult, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
@@ -320,6 +320,38 @@ describe('@vaadin/hilla-react-form', () => {
       const loadFormBtn = await findByTestId('load');
       await user.click(loadFormBtn);
       await expect(findByTestId('contracts')).to.eventually.have.nested.property('selectedOptions.0.value', '202');
+    });
+
+    it('runs validators on change event', async () => {
+      function ProjectForm() {
+        const { addValidator, field, model } = useForm(EntityModel);
+        const [count, setCount] = useState(0);
+
+        useEffect(() => {
+          addValidator({
+            message: 'ID expected',
+            validate: (entity) => {
+              setCount(count + 1);
+              return !entity.projectId;
+            },
+          });
+        }, []);
+
+        return (
+          <>
+            <input type="number" data-testid="project" {...field(model.projectId)} />
+            <div data-testid="count">{count.toString()}</div>
+          </>
+        );
+      }
+
+      const { findByTestId } = render(<ProjectForm />);
+      const projectInput = await findByTestId('project');
+      await user.type(projectInput, '123');
+      // Mimic change that happens without blur
+      fireEvent.change(projectInput);
+      const count = await findByTestId('count');
+      expect(count).to.have.text('1');
     });
   });
 });

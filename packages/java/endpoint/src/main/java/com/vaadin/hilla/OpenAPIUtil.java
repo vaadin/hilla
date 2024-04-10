@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,26 +14,60 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for interacting with the generated openapi.json.
  */
 public class OpenAPIUtil {
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(OpenAPIUtil.class);
+
     /**
      * Reads the open api file from the build directory.
      *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong
      */
-    public static String getCurrentOpenAPI(Path buildDirectory)
-            throws IOException {
+    public static String getCurrentOpenAPI(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
+        var openAPIPath = getCurrentOpenAPIPath(buildDirectory,
+                isProductionMode);
+        if (openAPIPath.isEmpty()) {
+            LOGGER.debug(
+                    "Trying to read the non-existing OpenApi json file. Empty string is returned.");
+            return "";
+        }
+        return Files.readString(openAPIPath.get());
+    }
+
+    /**
+     * Returns the path to open api file from the build directory.
+     *
+     * @param buildDirectory
+     *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
+     * @return the Path to the openapi json file
+     * @throws IOException
+     *             if something went wrong
+     */
+    public static Optional<Path> getCurrentOpenAPIPath(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
-        return Files.readString(engineConfiguration.getOpenAPIFile());
+        if (engineConfiguration == null) {
+            return Optional.empty();
+        }
+        return Optional
+                .of(engineConfiguration.getOpenAPIFile(isProductionMode));
     }
 
     /**
@@ -41,16 +76,19 @@ public class OpenAPIUtil {
      *
      * @param buildDirectory
      *            the build directory, {@code target} if running with Maven
+     * @param isProductionMode
+     *            whether to generate the openapi for production mode
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong
      */
-    public static String generateOpenAPI(Path buildDirectory)
-            throws IOException {
+    public static String generateOpenAPI(Path buildDirectory,
+            boolean isProductionMode) throws IOException {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
         ParserProcessor parserProcessor = new ParserProcessor(
-                engineConfiguration, OpenAPIUtil.class.getClassLoader());
+                engineConfiguration, OpenAPIUtil.class.getClassLoader(),
+                isProductionMode);
         return parserProcessor.createOpenAPI();
     }
 

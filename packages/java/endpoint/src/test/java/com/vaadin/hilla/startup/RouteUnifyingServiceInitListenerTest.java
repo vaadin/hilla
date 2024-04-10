@@ -1,73 +1,76 @@
 package com.vaadin.hilla.startup;
 
-import java.util.Map;
+import java.io.IOException;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.hilla.route.ClientRouteRegistry;
-import com.vaadin.hilla.route.RouteExtractionIndexHtmlRequestListener;
-import com.vaadin.hilla.route.records.ClientViewConfig;
-import com.vaadin.hilla.route.records.RouteParamType;
+import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 
 public class RouteUnifyingServiceInitListenerTest {
 
     private RouteUnifyingServiceInitListener routeUnifyingServiceInitListener;
     private ServiceInitEvent event;
     private ClientRouteRegistry clientRouteRegistry;
+    private DeploymentConfiguration mockDeploymentConfiguration;
+    private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties = new RouteUnifyingConfigurationProperties();
+
+    @Rule
+    public TemporaryFolder projectRoot = new TemporaryFolder();
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         clientRouteRegistry = new ClientRouteRegistry();
+        routeUnifyingConfigurationProperties
+                .setExposeServerRoutesToClient(true);
         routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(
-                Mockito.mock(RouteExtractionIndexHtmlRequestListener.class),
-                clientRouteRegistry);
-        event = new ServiceInitEvent(Mockito.mock(VaadinService.class));
+                clientRouteRegistry, routeUnifyingConfigurationProperties);
+        VaadinService mockVaadinService = Mockito.mock(VaadinService.class);
+        mockDeploymentConfiguration = Mockito
+                .mock(DeploymentConfiguration.class);
+        Mockito.when(mockVaadinService.getDeploymentConfiguration())
+                .thenReturn(mockDeploymentConfiguration);
+        Mockito.when(mockDeploymentConfiguration.isProductionMode())
+                .thenReturn(true);
+        event = new ServiceInitEvent(mockVaadinService);
     }
 
     @Test
-    public void should_addRouteIndexHtmlRequestListener() {
-        Assert.assertFalse("Unexpected RouteIndexHtmlRequestListener added",
-                eventHasAddedRouteIndexHtmlRequestListener(event));
+    public void should_addRouteIndexHtmlRequestListener_when_react_is_enabled() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(true);
+
+        Assert.assertFalse("Unexpected RouteUnifyingServiceInitListener added",
+                hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
         routeUnifyingServiceInitListener.serviceInit(event);
         Assert.assertTrue(
-                "Expected event to have RouteIndexHtmlRequestListener added",
-                eventHasAddedRouteIndexHtmlRequestListener(event));
+                "Expected to have RouteUnifyingServiceInitListener added",
+                hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
     }
 
     @Test
-    public void should_extractClientViews() {
-        routeUnifyingServiceInitListener.registerClientRoutes();
-        Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
-                .getAllRoutes();
+    public void should_not_addRouteIndexHtmlRequestListener_when_react_is_not_enabled() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(false);
 
-        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(8));
-        MatcherAssert.assertThat(allRoutes.get("/about").title(),
-                Matchers.is("About"));
-        MatcherAssert.assertThat(
-                allRoutes.get("/profile/friends/list").other().get("unknown"),
-                Matchers.notNullValue());
-        MatcherAssert.assertThat(
-                allRoutes.get("/profile/friends/:user?/edit").routeParameters(),
-                Matchers.is(Map.of(":user?", RouteParamType.OPTIONAL)));
-        MatcherAssert.assertThat(
-                allRoutes.get("/profile/friends/:user").routeParameters(),
-                Matchers.is(Map.of(":user", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(
-                allRoutes.get("/profile/messages/*").routeParameters(),
-                Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
-
+        routeUnifyingServiceInitListener.serviceInit(event);
+        Assert.assertFalse(
+                "RouteIndexHtmlRequestListener added unexpectedly when React is not enabled",
+                hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
     }
 
-    private boolean eventHasAddedRouteIndexHtmlRequestListener(
+    private boolean hasRouteUnifyingIndexHtmlRequestListenerAdded(
             ServiceInitEvent event) {
         return event.getAddedIndexHtmlRequestListeners().anyMatch(
-                indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteExtractionIndexHtmlRequestListener);
+                indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteUnifyingIndexHtmlRequestListener);
     }
 }

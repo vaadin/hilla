@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-frontend",
-  "version": "24.4.0-alpha5",
+  "version": "24.4.0-alpha20",
   "description": "Hilla core frontend utils",
   "main": "index.js",
   "module": "index.js",
@@ -37,6 +37,10 @@
     "./Connect.js": {
       "types": "./Connect.d.ts",
       "default": "./Connect.js"
+    },
+    "./CookieManager.js": {
+      "types": "./CookieManager.d.ts",
+      "default": "./CookieManager.js"
     },
     "./EndpointErrors.js": {
       "types": "./EndpointErrors.d.ts",

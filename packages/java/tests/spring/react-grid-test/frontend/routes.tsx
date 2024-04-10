@@ -1,13 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from './MainLayout.js';
-import { AutoCrudView } from './views/AutoCrudView.js';
-import { AutoFormView } from './views/AutoFormView.js';
-import { GridWithEntityReferences } from './views/GridWithEntityReferences.js';
-import { ReadOnlyGrid } from './views/ReadOnlyGrid.js';
-import { ReadOnlyGridOrFilter } from './views/ReadOnlyGridOrFilter.js';
-import { ReadOnlyGridSinglePropertyFilter } from './views/ReadOnlyGridSinglePropertyFilter.js';
-import { ReadOnlyGridWithHeaderFilters } from './views/ReadOnlyGridWithHeaderFilter.js';
-import { GridUseDataProviderHook } from './views/GridUseDataProviderHookView';
+import { AutoCrudView } from 'Frontend/views/AutoCrudView.js';
+import { AutoFormView } from 'Frontend/views/AutoFormView.js';
+import { GridWithEntityReferences } from 'Frontend/views/GridWithEntityReferences.js';
+import { ReadOnlyGrid } from 'Frontend/views/ReadOnlyGrid.js';
+import { ReadOnlyGridOrFilter } from 'Frontend/views/ReadOnlyGridOrFilter.js';
+import { ReadOnlyGridSinglePropertyFilter } from 'Frontend/views/ReadOnlyGridSinglePropertyFilter.js';
+import { ReadOnlyGridWithHeaderFilters } from 'Frontend/views/ReadOnlyGridWithHeaderFilter.js';
+import { GridUseDataProviderHook } from 'Frontend/views/GridUseDataProviderHookView';
 import { ReadOnlyGridCustomFilter } from 'Frontend/views/ReadOnlyGridCustomFilter';
 
 export const routes = [
@@ -50,7 +50,7 @@ export const routes = [
       {
         path: '/auto-crud',
         element: <AutoCrudView />,
-      }
+      },
     ],
   },
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,27 +16,20 @@
 
 package com.vaadin.hilla.startup;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.route.ClientRouteRegistry;
-import com.vaadin.hilla.route.RouteExtractionIndexHtmlRequestListener;
-import com.vaadin.hilla.route.records.ClientViewConfig;
+import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Service init listener to add the
- * {@link RouteExtractionIndexHtmlRequestListener} to the service and to
- * register client routes to {@link ClientRouteRegistry}.
+ * {@link RouteUnifyingIndexHtmlRequestListener} to the service and to register
+ * client routes to {@link ClientRouteRegistry}.
  */
 @Component
 public class RouteUnifyingServiceInitListener
@@ -44,47 +37,45 @@ public class RouteUnifyingServiceInitListener
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingServiceInitListener.class);
 
-    private final RouteExtractionIndexHtmlRequestListener routeExtractionIndexHtmlRequestListener;
     private final ClientRouteRegistry clientRouteRegistry;
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties;
 
     /**
      * Creates a new instance of the listener.
      *
-     * @param routeExtractionIndexHtmlRequestListener
-     *            the listener to add
      * @param clientRouteRegistry
      *            the registry to add the client routes to
+     * @param routeUnifyingConfigurationProperties
+     *            the configuration properties instance
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
-            RouteExtractionIndexHtmlRequestListener routeExtractionIndexHtmlRequestListener,
-            ClientRouteRegistry clientRouteRegistry) {
-        this.routeExtractionIndexHtmlRequestListener = routeExtractionIndexHtmlRequestListener;
+            ClientRouteRegistry clientRouteRegistry,
+            RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties) {
         this.clientRouteRegistry = clientRouteRegistry;
+        this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
     }
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
-        registerClientRoutes();
-        event.addIndexHtmlRequestListener(
-                routeExtractionIndexHtmlRequestListener);
-    }
-
-    protected void registerClientRoutes() {
-        try {
-            final URL source = getClass()
-                    .getResource("/META-INF/VAADIN/views.json");
-            Map<String, ClientViewConfig> clientViews = new HashMap<>();
-            if (source != null) {
-                clientViews = mapper.readValue(source, new TypeReference<>() {
-                });
-            }
-
-            clientRouteRegistry.clearRoutes();
-            clientViews.forEach(clientRouteRegistry::addRoute);
-        } catch (IOException e) {
-            LOGGER.warn("Failed extract client views from views.json", e);
+        var deploymentConfiguration = event.getSource()
+                .getDeploymentConfiguration();
+        LOGGER.debug("deploymentConfiguration.isReactEnabled() = {}",
+                deploymentConfiguration.isReactEnabled());
+        if (deploymentConfiguration.isReactEnabled()) {
+            var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    clientRouteRegistry, deploymentConfiguration,
+                    routeUnifyingConfigurationProperties
+                            .isExposeServerRoutesToClient());
+            var deploymentMode = deploymentConfiguration.isProductionMode()
+                    ? "PRODUCTION"
+                    : "DEVELOPMENT";
+            event.addIndexHtmlRequestListener(
+                    routeUnifyingIndexHtmlRequestListener);
+            LOGGER.debug(
+                    "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
+                    deploymentMode);
         }
     }
 }

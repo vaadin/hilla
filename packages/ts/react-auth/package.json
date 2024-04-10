@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-auth",
-  "version": "24.4.0-alpha5",
+  "version": "24.4.0-alpha20",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -16,7 +16,7 @@
     "React"
   ],
   "scripts": {
-    "clean:build": "rimraf *.{d.ts.map,d.ts,js.map,js}",
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
     "build": "concurrently npm:build:*",
     "build:esbuild": "tsx ../../../scripts/build.ts",
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.4.0-alpha5"
+    "@vaadin/hilla-frontend": "24.4.0-alpha20"
   },
   "peerDependencies": {
     "react": "^18",

@@ -16,12 +16,16 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.server.VaadinContext;
@@ -33,6 +37,9 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
  */
 @Component
 public class EndpointCodeGenerator {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(EndpointCodeGenerator.class);
 
     private final EndpointController endpointController;
     private final VaadinContext context;
@@ -81,13 +88,23 @@ public class EndpointCodeGenerator {
         EngineConfiguration engineConfiguration = EngineConfiguration
                 .loadDirectory(buildDirectory);
         ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                getClass().getClassLoader());
+                getClass().getClassLoader(), false);
         parser.process();
         GeneratorProcessor generator = new GeneratorProcessor(
-                engineConfiguration, nodeExecutable);
+                engineConfiguration, nodeExecutable, false);
         generator.process();
 
-        this.endpointController.registerEndpoints();
+        OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
+                .ifPresent(openApiPath -> {
+                    try {
+                        this.endpointController
+                                .registerEndpoints(openApiPath.toUri().toURL());
+                    } catch (IOException e) {
+                        LOGGER.error(
+                                "Endpoints could not be registered due to an exception: ",
+                                e);
+                    }
+                });
     }
 
     private void initIfNeeded() {
@@ -104,12 +121,25 @@ public class EndpointCodeGenerator {
         }
     }
 
-    public Set<String> getClassesUsedInOpenApi() throws IOException {
+    public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            classesUsedInOpenApi = OpenAPIUtil.findOpenApiClasses(
-                    OpenAPIUtil.getCurrentOpenAPI(buildDirectory));
+            OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
+                    .ifPresent(openApiPath -> {
+                        if (openApiPath.toFile().exists()) {
+                            try {
+                                classesUsedInOpenApi = OpenAPIUtil
+                                        .findOpenApiClasses(
+                                                Files.readString(openApiPath));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            LOGGER.debug(
+                                    "No OpenAPI file is available yet ...");
+                        }
+                    });
         }
-        return classesUsedInOpenApi;
+        return Optional.ofNullable(classesUsedInOpenApi);
     }
 }

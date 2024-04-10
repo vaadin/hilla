@@ -23,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { ServletContextTestSetup.class,
@@ -48,6 +49,8 @@ public class EndpointHotSwapListenerTest {
                 var generatorMockedConstruction = mockConstruction(
                         GeneratorProcessor.class)) {
             var engineConfiguration = Mockito.mock(EngineConfiguration.class);
+            when(engineConfiguration.getOpenAPIFile(false))
+                    .thenReturn(Path.of("test-project/target/openapi.json"));
             engineConfigurationMockedStatic.when(
                     () -> EngineConfiguration.loadDirectory(Mockito.any()))
                     .thenReturn(engineConfiguration);
@@ -59,7 +62,7 @@ public class EndpointHotSwapListenerTest {
                     Path.of("test-project/target"), null));
 
             Mockito.verify(endpointController, Mockito.atLeastOnce())
-                    .registerEndpoints();
+                    .registerEndpoints(Mockito.any());
         }
     }
 
