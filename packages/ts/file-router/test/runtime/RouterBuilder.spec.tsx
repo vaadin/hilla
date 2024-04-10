@@ -3,7 +3,7 @@ import chaiLike from 'chai-like';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
-import { protectRoutes } from '../mocks/vaadin-hilla-react-auth.js';
+import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
 use(chaiLike);
 use(sinonChai);
@@ -142,8 +142,14 @@ describe('RouterBuilder', () => {
           },
         ],
       })
-      .withFallback(Server)
+      .withFallback(Server, { title: 'Server' })
       .build();
+
+    const serverRoute = {
+      path: '*',
+      element: <Server />,
+      handle: { title: 'Server' },
+    };
 
     expect(routes).to.be.like([
       {
@@ -156,10 +162,7 @@ describe('RouterBuilder', () => {
                 path: '/child-test',
                 element: <div>ChildTest</div>,
               },
-              {
-                path: '*',
-                element: <Server />,
-              },
+              serverRoute,
             ],
           },
           {
@@ -169,54 +172,28 @@ describe('RouterBuilder', () => {
                 path: '/next-child-test',
                 element: <div>ChildTest</div>,
               },
-              {
-                path: '*',
-                element: <Server />,
-              },
+              serverRoute,
             ],
           },
-          {
-            path: '*',
-            element: <Server />,
-          },
+          serverRoute,
         ],
       },
-      {
-        path: '*',
-        element: <Server />,
-      },
+      serverRoute,
     ]);
   });
 
   it('should protect routes', () => {
-    const { routes } = builder
-      .withReactRoutes({
-        path: '',
-        children: [
-          {
-            path: '/test',
-            element: <div>Test</div>,
-          },
-        ],
-      })
-      .protect('/login')
-      .build();
+    const { routes } = builder.protect('/login').build();
 
-    expect(protectRoutes).to.have.been.calledWith(routes, '/login');
+    const [root] = routes;
+    const [test] = root.children!;
+
+    expect(protectRoute).to.have.been.calledWith(root, '/login');
+    expect(protectRoute).to.have.been.calledWith(test, '/login');
   });
 
   it('should build the router', () => {
-    const { routes, router } = builder
-      .withReactRoutes({
-        path: '',
-        children: [
-          {
-            path: '/test',
-            element: <div>Test</div>,
-          },
-        ],
-      })
-      .build();
+    const { routes, router } = builder.build();
 
     expect(router).to.equal(browserRouter);
     expect(createBrowserRouter).to.have.been.calledWith(routes);

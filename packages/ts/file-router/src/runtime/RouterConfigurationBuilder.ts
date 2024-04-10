@@ -3,7 +3,7 @@ import { protectRoute } from '@vaadin/hilla-react-auth';
 import { type ComponentType, createElement } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
-import { transformTree2 } from '../shared/transformTree2.js';
+import { transformTree } from '../shared/transformTree.js';
 import type { AgnosticRoute, Module, RouteModule, RouterConfiguration, ViewConfig } from '../types.js';
 
 interface RouteBase {
@@ -11,7 +11,7 @@ interface RouteBase {
   children?: readonly this[];
 }
 
-type RoutesModifier = (routes: readonly RouteObject[]) => readonly RouteObject[];
+type RoutesModifier = (routes: readonly RouteObject[] | undefined) => readonly RouteObject[] | undefined;
 
 function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
   return module ? 'default' in module && typeof module.default === 'function' : true;
@@ -19,7 +19,7 @@ function isReactRouteModule(module?: Module): module is RouteModule<ComponentTyp
 
 type RouteTransformer<T> = (
   original: RouteObject | undefined,
-  overriding: T,
+  overriding: T | undefined,
   children?: readonly RouteObject[],
 ) => RouteObject;
 
@@ -48,23 +48,28 @@ export class RouterConfigurationBuilder {
    * @param routes - A list of routes to add to the current list.
    */
   withFileRoutes(...routes: readonly AgnosticRoute[]): this {
-    return this.update(routes, (original, { module, path }, children) => {
-      if (!isReactRouteModule(module)) {
-        throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
+    return this.update(routes, (original, added, children) => {
+      if (added) {
+        const { module, path } = added;
+        if (!isReactRouteModule(module)) {
+          throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
+        }
+
+        const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
+
+        return {
+          ...original,
+          path: module?.config?.route ?? path,
+          element: module?.default ? createElement(module.default) : undefined,
+          children: children as RouteObject[] | undefined,
+          handle: {
+            ...module?.config,
+            title,
+          },
+        } as RouteObject;
       }
 
-      const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
-
-      return {
-        ...original,
-        path: module?.config?.route ?? path,
-        element: module?.default ? createElement(module.default) : undefined,
-        children: children as RouteObject[] | undefined,
-        handle: {
-          ...module?.config,
-          title,
-        },
-      } as RouteObject;
+      return original!;
     });
   }
 
@@ -80,14 +85,18 @@ export class RouterConfigurationBuilder {
   withFallback(component: ComponentType, config?: ViewConfig): this {
     const serverRoute = { path: '*', element: createElement(component), handle: config };
 
-    this.update(undefined, (original, _, children) =>
-      children
-        ? ({
-            ...original!,
-            children: [...children, serverRoute],
-          } as RouteObject)
-        : original!,
-    );
+    this.update([serverRoute], (original, added, children) => {
+      if (original) {
+        return children
+          ? ({
+              ...original,
+              children: [...children, serverRoute],
+            } as RouteObject)
+          : original;
+      }
+
+      return added!;
+    });
 
     return this;
   }
@@ -120,37 +129,42 @@ export class RouterConfigurationBuilder {
         children,
       }) as RouteObject,
   ): this {
-    this.#modifiers.push(
-      (existingRoutes) =>
-        transformTree2<
-          [readonly RouteObject[] | undefined, readonly T[] | undefined],
-          readonly RouteObject[] | undefined
-        >([existingRoutes, routes], ([original, incoming], next) => {
-          if (original && incoming) {
-            const final = new Map(original.map((route) => [route.path, route]));
+    this.#modifiers.push((existingRoutes) =>
+      transformTree<[readonly RouteObject[] | undefined, readonly T[] | undefined], readonly RouteObject[] | undefined>(
+        [existingRoutes, routes],
+        ([original, added], next) => {
+          if (original && added) {
+            const originalMap = new Map(original.map((route) => [route.path, route]));
+            const addedMap = new Map(added.map((route) => [route.path, route]));
 
-            for (const route of incoming) {
-              const existingRoute = final.get(route.path);
-              if (existingRoute) {
-                final.set(
-                  existingRoute.path,
-                  callback(existingRoute, route, next(existingRoute.children, route.children)),
-                );
+            const paths = new Set([...originalMap.keys(), ...addedMap.keys()]);
+
+            for (const path of paths) {
+              const originalRoute = originalMap.get(path);
+              const addedRoute = addedMap.get(path);
+
+              let route: RouteObject;
+              if (originalRoute && addedRoute) {
+                route = callback(originalRoute, addedRoute, next(originalRoute.children, addedRoute.children));
+              } else if (originalRoute) {
+                route = callback(originalRoute, undefined, next(originalRoute.children, undefined));
               } else {
-                const newRoute = callback(undefined, route, next(undefined, route.children));
-                final.set(newRoute.path, newRoute);
+                route = callback(undefined, addedRoute, next(undefined, addedRoute!.children));
               }
+
+              originalMap.set(path, route);
             }
 
-            return [...final.values()];
+            return [...originalMap.values()];
           } else if (original) {
-            return original;
-          } else if (incoming) {
-            return incoming.map((route) => callback(undefined, route, next(undefined, route.children)));
+            return original.map((route) => callback(route, undefined, next(route.children, undefined)));
+          } else if (added) {
+            return added.map((route) => callback(undefined, route, next(undefined, route.children)));
           }
 
           return undefined;
-        }) ?? [],
+        },
+      ),
     );
     return this;
   }
@@ -159,7 +173,8 @@ export class RouterConfigurationBuilder {
    * Builds the router with the current list of routes.
    */
   build(): RouterConfiguration {
-    const routes = this.#modifiers.reduce<readonly RouteObject[]>((acc, mod) => mod(acc), []);
+    const routes =
+      this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
     return {
       routes,

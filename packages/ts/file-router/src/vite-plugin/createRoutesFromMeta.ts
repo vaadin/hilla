@@ -1,4 +1,4 @@
-import { sep, relative } from 'node:path';
+import { relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
@@ -9,7 +9,7 @@ import ts, {
   type VariableStatement,
 } from 'typescript';
 
-import { transformTreeSync } from '../shared/transformTree.js';
+import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
 import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
@@ -79,21 +79,21 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
   const errors: string[] = [];
   let id = 0;
 
-  const routes = transformTreeSync<RouteMeta, CallExpression>(
-    views,
-    (view) => {
-      if (view.children) {
-        const paths = view.children.map((c) => c.path);
-        const uniquePaths = new Set(paths);
-        paths
-          .filter((p) => !uniquePaths.delete(p))
-          .forEach((p) => errors.push(`console.error("Two views share the same path: ${p}");`));
-        return view.children.values();
+  const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>([views], (metas, next) =>
+    metas.map(({ file, layout, path, children }) => {
+      let _children: readonly CallExpression[] | undefined;
+
+      if (children) {
+        errors.push(
+          ...children
+            .map((route) => route.path)
+            .filter((item, index, arr) => arr.indexOf(item) !== index)
+            .map((dup) => `console.error("Two views share the same path: ${dup}");`),
+        );
+
+        _children = next(...children);
       }
 
-      return undefined;
-    },
-    ({ file, layout, path }, children) => {
       const currentId = id;
       id += 1;
 
@@ -106,8 +106,8 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
         imports.push(createImport(mod, relativize(layout, codeDir)));
       }
 
-      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, children);
-    },
+      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children);
+    }),
   );
 
   const routeDeclaration = template(
