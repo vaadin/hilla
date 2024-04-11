@@ -1,5 +1,5 @@
 import { type ComponentType, createElement } from 'react';
-import type { RouteObject as ReactRouteObject } from 'react-router-dom';
+import type { IndexRouteObject, NonIndexRouteObject, RouteObject as ReactRouteObject } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTreeSync } from '../shared/transformTree.js';
 import type { AgnosticRoute, Module, RouteModule } from '../types.js';
@@ -19,22 +19,34 @@ export function toReactRouter(routes: AgnosticRoute): ReactRouteObject {
   return transformTreeSync(
     routes,
     (route) => route.children?.values(),
-    ({ path, module }, children) => {
+    ({ path: filePath, module }, children) => {
       if (!isReactRouteModule(module)) {
-        throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
+        throw new Error(
+          `The module for the "${filePath}" section doesn't have the React component exported by default`,
+        );
       }
 
+      const path = module?.config?.route ?? filePath;
       const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
+      const element = module?.default ? createElement(module.default) : undefined;
+      const hasChildren = children && children.length > 0;
 
-      return {
-        path: module?.config?.route ?? path,
-        element: module?.default ? createElement(module.default) : undefined,
-        children: children && children.length > 0 ? (children as ReactRouteObject[]) : undefined,
+      const routeData = {
+        ...(element ? { element } : {}),
         handle: {
           ...module?.config,
           title,
         },
-      } satisfies ReactRouteObject;
+      };
+
+      const isIndex = !hasChildren && path === '';
+      return isIndex
+        ? ({ index: true, ...routeData } satisfies IndexRouteObject)
+        : ({
+            path,
+            ...(hasChildren ? { children: children as ReactRouteObject[] } : {}),
+            ...routeData,
+          } satisfies NonIndexRouteObject);
     },
   );
 }

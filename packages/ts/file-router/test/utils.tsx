@@ -29,17 +29,21 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   └── {user}.tsx
   // │   ├── index.tsx
   // │   └── index.css
+  // ├── empty-dir
+  // │   ├── empty-subdir
+  // │   │       └── empty-dir-ignored.ts
   // ├── test
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
-  // │   └── empty.tsx
-  // │   └── _ignored.tsx
+  // │   ├── empty.tsx
+  // │   ├── _ignored.tsx
   // │   └── no-default-export.tsx
   // └── nameToReplace.tsx
 
   await Promise.all([
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
+    mkdir(new URL('empty-dir/empty-subdir/', dir), { recursive: true }),
     mkdir(new URL('test', dir), { recursive: true }),
   ]);
   await Promise.all([
@@ -78,6 +82,10 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(
       new URL('nameToReplace.tsx', dir),
       "export const config = { route: 'about', title: 'About' };\nexport default function About() {};",
+    ),
+    appendFile(
+      new URL('empty-dir/empty-subdir/empty-dir-ignored.ts', dir),
+      'export default function EmptyDirIgnored() {};',
     ),
     appendFile(
       new URL('test/{...wildcard}.tsx', dir),
@@ -140,6 +148,7 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
           },
         ],
       },
+      // Directories where all files are ignored are also ignored (`empty-dir`)
       {
         path: 'test',
         children: [
@@ -215,6 +224,13 @@ export const components = {
       return <></>;
     },
     config: { title: 'Server' },
+  },
+  index: {
+    // eslint-disable-next-line func-name-matching
+    default: function Index(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Index' },
   },
 } satisfies Record<string, RouteModule>;
 

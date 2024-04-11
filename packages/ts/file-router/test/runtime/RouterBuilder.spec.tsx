@@ -160,6 +160,10 @@ describe('RouterBuilder', () => {
                 path: '*',
                 element: <Server />,
               },
+              {
+                index: true,
+                element: <Server />,
+              },
             ],
           },
           {
@@ -173,16 +177,28 @@ describe('RouterBuilder', () => {
                 path: '*',
                 element: <Server />,
               },
+              {
+                index: true,
+                element: <Server />,
+              },
             ],
           },
           {
             path: '*',
             element: <Server />,
           },
+          {
+            index: true,
+            element: <Server />,
+          },
         ],
       },
       {
         path: '*',
+        element: <Server />,
+      },
+      {
+        index: true,
         element: <Server />,
       },
     ]);

@@ -21,6 +21,10 @@ describe('@vaadin/hilla-file-router', () => {
           module: components.hidden,
         },
         {
+          path: '',
+          module: components.index,
+        },
+        {
           path: 'profile',
           children: [
             {
@@ -73,6 +77,11 @@ describe('@vaadin/hilla-file-router', () => {
             path: 'hidden',
             element: createElement(components.hidden.default),
             handle: components.hidden.config,
+          },
+          {
+            index: true,
+            element: createElement(components.index.default),
+            handle: components.index.config,
           },
           {
             path: 'profile',

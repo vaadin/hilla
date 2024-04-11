@@ -85,7 +85,11 @@ export class RouterConfigurationBuilder {
    */
   withFallback(component: ComponentType): this {
     this.#finalizers.push((existingRoutes) => {
-      const createServerRoute = () => ({ path: '*', element: createElement(component) });
+      // Fallback adds two routes, so that the index (empty path) has a fallback too
+      const fallbackRoutes = [
+        { path: '*', element: createElement(component) },
+        { index: true, element: createElement(component) },
+      ];
 
       const newRoutes = existingRoutes.map((route) =>
         transformTreeSync<RouteObject, RouteObject>(
@@ -96,15 +100,13 @@ export class RouterConfigurationBuilder {
               ? // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 ({
                   ...r,
-                  children: [...children, createServerRoute()],
+                  children: [...children, ...fallbackRoutes],
                 } as RouteObject)
               : r,
         ),
       );
 
-      newRoutes.push(createServerRoute());
-
-      return newRoutes;
+      return [...newRoutes, ...fallbackRoutes];
     });
 
     return this;
