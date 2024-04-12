@@ -58,10 +58,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       'export default function TwoFactorAuthIgnored() {};',
     ),
     appendFile(new URL('profile/friends/@layout.tsx', dir), 'export default function FriendsLayout() {};'),
-    appendFile(
-      new URL('profile/friends/list.jsx', dir),
-      "export const config = { title: 'List' };\nexport default function List() {};",
-    ),
+    // this file has no title configured, so it must be derived from its file name
+    appendFile(new URL('profile/friends/list.jsx', dir), 'export default function List() {};'),
     appendFile(
       new URL('profile/friends/list-ignored.js', dir),
       "export const config = { title: 'List' };\nexport default function ListIgnored() {};",

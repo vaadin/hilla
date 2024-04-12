@@ -24,7 +24,8 @@ export function toReactRouter(routes: AgnosticRoute): ReactRouteObject {
         throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
       }
 
-      const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
+      // client views always have a title, but the server views might not
+      const title = module?.config?.title ?? (module?.default && convertComponentNameToTitle(module.default));
 
       return {
         path: module?.config?.route ?? path,
