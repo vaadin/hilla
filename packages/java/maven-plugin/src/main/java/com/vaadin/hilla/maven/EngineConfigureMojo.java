@@ -3,7 +3,10 @@ package com.vaadin.hilla.maven;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -64,10 +67,14 @@ public final class EngineConfigureMojo extends AbstractMojo {
                         .resolve("generated").toFile();
             }
             var buildDir = project.getBuild().getDirectory();
+            var cp = Stream
+                    .of(project.getCompileClasspathElements(),
+                            project.getRuntimeClasspathElements(),
+                            project.getSystemClasspathElements())
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             var conf = new EngineConfiguration.Builder(
-                    project.getBasedir().toPath())
-                    .classPath(new LinkedHashSet<>(
-                            project.getRuntimeClasspathElements()))
+                    project.getBasedir().toPath()).classPath(cp)
                     .outputDir(generatedTsFolder.toPath()).generator(generator)
                     .parser(parser).buildDir(buildDir)
                     .classesDir(project.getBuild().getOutputDirectory())
