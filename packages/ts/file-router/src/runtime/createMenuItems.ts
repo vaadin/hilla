@@ -12,6 +12,7 @@ import type { MenuItem, ViewConfig } from '../types.js';
  * @returns A list of menu items.
  */
 export function createMenuItems(vaadinObject = (window as VaadinWindow).Vaadin): readonly MenuItem[] {
+  const collator = new Intl.Collator('en-US');
   return vaadinObject?.server?.views
     ? Object.entries(vaadinObject.server.views)
         // Filter out the views that are explicitly excluded from the menu.
@@ -36,7 +37,7 @@ export function createMenuItems(vaadinObject = (window as VaadinWindow).Vaadin):
         // Sort views according to the order specified in the view configuration.
         .sort((menuA, menuB) => {
           const ordersDiff = (menuA.order ?? Number.MAX_VALUE) - (menuB.order ?? Number.MAX_VALUE);
-          return ordersDiff !== 0 ? ordersDiff : menuA.to.localeCompare(menuB.to);
+          return ordersDiff !== 0 ? ordersDiff : collator.compare(menuA.to, menuB.to);
         })
     : [];
 }
