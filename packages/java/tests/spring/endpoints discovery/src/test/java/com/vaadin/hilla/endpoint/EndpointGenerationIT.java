@@ -15,9 +15,8 @@ public class EndpointGenerationIT {
      * Endpoint in com.example.application should be generated
      */
     @Test
-    public void shouldGenerateExampleEndpointAndEntities() {
+    public void shouldGenerateApplicationEndpoint() {
         assertTrue(Files.exists(frontendDir.resolve("ExampleEndpoint.ts")));
-        assertTrue(Files.exists(frontendDir.resolve("InvalidEndpoint.ts")));
         assertTrue(Files.exists(frontendDir
                 .resolve("com/example/application/ExampleEntity.ts")));
         assertTrue(Files.exists(
@@ -25,12 +24,31 @@ public class EndpointGenerationIT {
     }
 
     /**
-     * Endpoint not in com.example.application should not be generated
+     * Endpoint in configured packages should be generated
      */
     @Test
-    public void shouldNotGenerateExternalEndpointAndEntities() {
+    public void shouldGenerateConfiguredEndpoint() {
+        assertTrue(Files.exists(frontendDir.resolve("InvalidEndpoint.ts")));
+        assertTrue(Files.exists(frontendDir
+                .resolve("com/example/library/unpublished/SomeEntity.ts")));
+    }
+
+    /**
+     * Endpoint not in configured packages should not be generated
+     */
+    @Test
+    public void shouldNotGenerateExternalEndpoint() {
         assertFalse(Files.exists(frontendDir.resolve("ExternalEndpoint.ts")));
         assertFalse(Files
                 .exists(frontendDir.resolve("com/external/ExternalEntity.ts")));
+    }
+
+    /**
+     * Endpoint in system dependencies should be generated, provided that the
+     * package is whitelisted in configuration
+     */
+    @Test
+    public void shouldGenerateEndpointFromSystemDependencies() {
+        assertTrue(Files.exists(frontendDir.resolve("SomeEndpoint.ts")));
     }
 }
