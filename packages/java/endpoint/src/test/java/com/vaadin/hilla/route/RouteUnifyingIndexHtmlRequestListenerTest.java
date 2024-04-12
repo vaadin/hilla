@@ -36,7 +36,6 @@ import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 public class RouteUnifyingIndexHtmlRequestListenerTest {
 
@@ -64,7 +63,6 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Mockito.when(clientRouteRegistry.getAllRoutes())
                 .thenReturn(prepareClientRoutes());
         routeUtil = new RouteUtil(clientRouteRegistry);
-        routeUtil.protectHillaViews(Mockito.mock(HttpSecurity.class));
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
                 clientRouteRegistry, deploymentConfiguration, routeUtil, true);
 
@@ -254,48 +252,6 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(true);
             Mockito.when(vaadinRequest.isUserInRole("ROLE_ADMIN"))
                     .thenReturn(true);
-            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
-        }
-        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-admin.json"));
-
-        MatcherAssert.assertThat(actual, Matchers.is(expected));
-    }
-
-    @Test
-    public void when_productionMode_hillaViewProtection_not_enabled_anonymous_user_should_modifyIndexHtmlResponse_with_all_routes()
-            throws IOException {
-        try (MockedStatic<VaadinService> mocked = Mockito
-                .mockStatic(VaadinService.class)) {
-            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            Mockito.when(deploymentConfiguration.isProductionMode())
-                    .thenReturn(true);
-            Mockito.when(vaadinRequest.getUserPrincipal()).thenReturn(null); // anonymous
-                                                                             // user
-            routeUtil = new RouteUtil(clientRouteRegistry); // no protection
-                                                            // since
-                                                            // protectHillaViews
-                                                            // is not called
-            requestListener = new RouteUnifyingIndexHtmlRequestListener(
-                    clientRouteRegistry, deploymentConfiguration, routeUtil,
-                    true);
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
         Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();

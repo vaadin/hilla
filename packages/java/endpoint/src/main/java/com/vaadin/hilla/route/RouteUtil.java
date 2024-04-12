@@ -3,7 +3,6 @@ package com.vaadin.hilla.route;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -22,8 +21,6 @@ public class RouteUtil {
 
     private final ClientRouteRegistry registry;
 
-    private boolean hillaViewProtectionEnabled = false;
-
     /**
      * Initializes a new instance of the RouteUtil class with the given
      * registry.
@@ -37,21 +34,6 @@ public class RouteUtil {
     }
 
     /**
-     * Enables http level protection of detected Hilla views by
-     * hilla-file-router from unauthorized access.
-     *
-     * @param http
-     *            the HTTP security configuration to use
-     * @throws Exception
-     *             if the protection fails
-     */
-    public void protectHillaViews(HttpSecurity http) throws Exception {
-        hillaViewProtectionEnabled = true;
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(this::isRouteAllowed).permitAll());
-    }
-
-    /**
      * Checks if the given request is allowed route to the user.
      *
      * @param request
@@ -60,9 +42,6 @@ public class RouteUtil {
      *         <code>false</code> otherwise
      */
     public boolean isRouteAllowed(HttpServletRequest request) {
-        if (!hillaViewProtectionEnabled) {
-            return true;
-        }
         var viewConfig = getRouteData(request);
         var isUserAuthenticated = request.getUserPrincipal() != null;
         return viewConfig.filter(
@@ -73,9 +52,6 @@ public class RouteUtil {
 
     boolean isRouteAllowed(Predicate<? super String> isUserInRole,
             boolean isUserAuthenticated, ClientViewConfig viewConfig) {
-        if (!hillaViewProtectionEnabled) {
-            return true;
-        }
         boolean isAllowed;
 
         if (viewConfig.isLoginRequired() && !isUserAuthenticated) {
