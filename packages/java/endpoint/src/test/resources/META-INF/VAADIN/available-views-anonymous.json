@@ -1,0 +1,68 @@
+{
+  "/home": {
+    "title": "Home",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "/home",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
+  },
+  "/bar": {
+    "title": "Component",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "/bar",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
+  },
+  "/foo": {
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "/foo",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
+  },
+  "/wildcard/:___wildcard*": {
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "/wildcard/:___wildcard*",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":___wildcard*": "*"
+    }
+  },
+  "//:___userId/edit": {
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "//:___userId/edit",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":___userId": "req"
+    }
+  },
+  "/comments/:___commentId?": {
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "/comments/:___commentId?",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":___commentId?": "opt"
+    }
+  }
+}
