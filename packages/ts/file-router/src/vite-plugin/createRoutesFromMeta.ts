@@ -68,7 +68,7 @@ function createRouteData(path: string, mod: string | undefined, children?: reado
  * @param views - The abstract route tree.
  * @param generatedDir - The directory where the generated view file will be stored.
  */
-export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile }: RuntimeFileUrls): string {
+export default function createRoutesFromMeta(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls): string {
   const codeDir = new URL('./', codeFile);
   const imports: ImportDeclaration[] = [
     template(
@@ -79,8 +79,8 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
   const errors: string[] = [];
   let id = 0;
 
-  const routes = transformTreeSync<RouteMeta, CallExpression>(
-    views,
+  const rootCall = transformTreeSync<RouteMeta, CallExpression>(
+    { path: '', children: views },
     (view) => {
       if (view.children) {
         const paths = view.children.map((c) => c.path);
@@ -109,6 +109,8 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
       return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, children);
     },
   );
+
+  const routes = rootCall.arguments[rootCall.arguments.length - 1];
 
   const routeDeclaration = template(
     `import a from 'IMPORTS';
