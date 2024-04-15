@@ -11,7 +11,7 @@
   },
   "/profile": {
     "title": "Profile",
-    "rolesAllowed": ["ROLE_USER"],
+    "rolesAllowed": ["ROLE_USER", "ROLE_ADMIN"],
     "requiresLogin": true,
     "route": "/profile",
     "lazy": false,
