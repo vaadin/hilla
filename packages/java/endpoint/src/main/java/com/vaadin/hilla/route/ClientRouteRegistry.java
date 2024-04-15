@@ -29,12 +29,11 @@ import com.vaadin.flow.router.internal.ClientRoutesProvider;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -51,7 +50,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
      * A map of registered routes and their corresponding client view
      * configurations with ordered insertion.
      */
-    private final Map<String, ClientViewConfig> registeredRoutes = new LinkedHashMap<>();
+    private final Map<String, ClientViewConfig> registeredRoutes = new ConcurrentHashMap<>();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -202,5 +201,4 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
     public List<String> getClientRoutes() {
         return getAllRoutes().keySet().stream().toList();
     }
-
 }
