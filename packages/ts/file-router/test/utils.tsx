@@ -32,6 +32,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // ├── empty-dir
   // │   ├── empty-subdir
   // │   │       └── empty-dir-ignored.ts
+  // │   ├── empty-file-subdir
+  // │   │       └── empty.tsx
   // ├── test
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
@@ -44,6 +46,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
     mkdir(new URL('empty-dir/empty-subdir/', dir), { recursive: true }),
+    mkdir(new URL('empty-dir/empty-file-subdir/', dir), { recursive: true }),
     mkdir(new URL('test', dir), { recursive: true }),
   ]);
   await Promise.all([
@@ -87,6 +90,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       new URL('empty-dir/empty-subdir/empty-dir-ignored.ts', dir),
       'export default function EmptyDirIgnored() {};',
     ),
+    appendFile(new URL('empty-dir/empty-file-subdir/empty.tsx', dir), ''),
     appendFile(
       new URL('test/{...wildcard}.tsx', dir),
       "export const config = { title: 'Wildcard' };\nexport default function Wildcard() {};",
