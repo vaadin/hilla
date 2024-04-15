@@ -125,8 +125,12 @@ export default function vitePluginFileSystemRouter({
           );
         } else {
           // In production mode, the function name is assigned as name to the function itself to avoid minification
-          const functionName = (/export\s+default\s+function\s+(\w+)/u.exec(modifiedCode) ?? [])[1];
-          modifiedCode += `Object.defineProperty(${functionName}, 'name', { value: '${functionName}' });\n`;
+          const functionNames = /export\s+default\s+function\s+(\w+)/u.exec(modifiedCode) ?? [];
+
+          if (functionNames.length) {
+            const [, functionName] = functionNames;
+            modifiedCode += `Object.defineProperty(${functionName}, 'name', { value: '${functionName}' });\n`;
+          }
         }
 
         return {
