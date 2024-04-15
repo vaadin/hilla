@@ -50,9 +50,9 @@ function createImport(mod: string, file: string): ImportDeclaration {
  * @param mod - The name of the route module imported as a namespace.
  * @param children - The list of child route call expressions.
  */
-function createRouteData(path: string, mod: string | undefined, children: readonly CallExpression[]): CallExpression {
+function createRouteData(path: string, mod: string | undefined, children?: readonly CallExpression[]): CallExpression {
   return template(
-    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children.length > 0 ? `, CHILDREN` : ''})`,
+    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children && children.length > 0 ? `, CHILDREN` : ''})`,
     ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
     [
       transformer((node) =>
@@ -82,12 +82,16 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
   const routes = transformTreeSync<RouteMeta, CallExpression>(
     views,
     (view) => {
-      const paths = view.children.map((c) => c.path);
-      const uniquePaths = new Set(paths);
-      paths
-        .filter((p) => !uniquePaths.delete(p))
-        .forEach((p) => errors.push(`console.error("Two views share the same path: ${p}");`));
-      return view.children.values();
+      if (view.children) {
+        const paths = view.children.map((c) => c.path);
+        const uniquePaths = new Set(paths);
+        paths
+          .filter((p) => !uniquePaths.delete(p))
+          .forEach((p) => errors.push(`console.error("Two views share the same path: ${p}");`));
+        return view.children.values();
+      }
+
+      return undefined;
     },
     ({ file, layout, path }, children) => {
       const currentId = id;

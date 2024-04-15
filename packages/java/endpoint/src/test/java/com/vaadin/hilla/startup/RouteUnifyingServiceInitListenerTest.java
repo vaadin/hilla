@@ -2,6 +2,8 @@ package com.vaadin.hilla.startup;
 
 import java.io.IOException;
 
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
+import com.vaadin.hilla.route.RouteUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,6 +23,8 @@ public class RouteUnifyingServiceInitListenerTest {
     private ServiceInitEvent event;
     private ClientRouteRegistry clientRouteRegistry;
     private DeploymentConfiguration mockDeploymentConfiguration;
+    private RouteUtil routeUtil;
+    private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties = new RouteUnifyingConfigurationProperties();
 
     @Rule
     public TemporaryFolder projectRoot = new TemporaryFolder();
@@ -28,8 +32,12 @@ public class RouteUnifyingServiceInitListenerTest {
     @Before
     public void setup() throws IOException {
         clientRouteRegistry = new ClientRouteRegistry();
+        routeUnifyingConfigurationProperties
+                .setExposeServerRoutesToClient(true);
+        routeUtil = Mockito.mock(RouteUtil.class);
         routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(
-                clientRouteRegistry);
+                clientRouteRegistry, routeUtil,
+                routeUnifyingConfigurationProperties);
         VaadinService mockVaadinService = Mockito.mock(VaadinService.class);
         mockDeploymentConfiguration = Mockito
                 .mock(DeploymentConfiguration.class);

@@ -22,11 +22,11 @@ function cleanupRouteMeta(route: Writable<RouteMeta>): void {
     delete route.layout;
   }
 
-  route.children.sort(({ path: a }, { path: b }) => collator.compare(a, b)).forEach(cleanupRouteMeta);
+  route.children?.sort(({ path: a }, { path: b }) => collator.compare(a, b)).forEach(cleanupRouteMeta);
 }
 
 describe('@vaadin/hilla-file-router', () => {
-  describe('collectFileRoutes', () => {
+  describe('collectRoutesFromFS', () => {
     const extensions = ['.tsx', '.jsx'];
     let tmp: URL;
     let logger: Logger;

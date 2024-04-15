@@ -6,7 +6,7 @@ import type { RouteParamType } from './routeParamType.js';
  * view configuration with the route parameters.
  */
 export type ServerViewConfig = Readonly<{
-  children: readonly ServerViewConfig[];
+  children?: readonly ServerViewConfig[];
   params?: Readonly<Record<string, RouteParamType>>;
 }> &
   ViewConfig;

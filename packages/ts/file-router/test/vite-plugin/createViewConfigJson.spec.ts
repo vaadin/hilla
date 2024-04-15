@@ -10,7 +10,7 @@ import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '.
 use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
-  describe('generateJson', () => {
+  describe('createViewConfigJson', () => {
     let tmp: URL;
     let meta: RouteMeta;
 
@@ -33,12 +33,12 @@ describe('@vaadin/hilla-file-router', () => {
           route: '',
           params: {},
           children: [
-            { route: 'about', title: 'About', params: {}, children: [] },
+            { route: 'about', title: 'About', params: {} },
             {
               route: 'profile',
               params: {},
               children: [
-                { route: '', title: 'Profile', params: {}, children: [] },
+                { route: '', title: 'Profile', params: {} },
                 {
                   route: 'account',
                   title: 'Account',
@@ -48,8 +48,8 @@ describe('@vaadin/hilla-file-router', () => {
                       route: 'security',
                       params: {},
                       children: [
-                        { route: 'password', params: {}, title: 'Password', children: [] },
-                        { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth', children: [] },
+                        { route: 'password', params: {}, title: 'Password' },
+                        { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth' },
                       ],
                     },
                   ],
@@ -59,8 +59,8 @@ describe('@vaadin/hilla-file-router', () => {
                   params: {},
                   title: 'Friends Layout',
                   children: [
-                    { route: 'list', title: 'List', params: {}, children: [] },
-                    { route: ':user', title: 'User', params: { ':user': RouteParamType.Required }, children: [] },
+                    { route: 'list', title: 'List', params: {} },
+                    { route: ':user', title: 'User', params: { ':user': RouteParamType.Required } },
                   ],
                 },
               ],
@@ -69,15 +69,12 @@ describe('@vaadin/hilla-file-router', () => {
               route: 'test',
               params: {},
               children: [
-                { route: 'empty', params: {}, children: [] },
                 {
                   route: ':optional?',
                   title: 'Optional',
                   params: { ':optional?': RouteParamType.Optional },
-                  children: [],
                 },
-                { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard }, children: [] },
-                { route: 'no-default-export', title: 'No Default Export', params: {}, children: [] },
+                { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
               ],
             },
           ],

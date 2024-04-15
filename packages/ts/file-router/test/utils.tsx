@@ -20,7 +20,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   ├── layout.tsx
   // │   │   └── security
   // │   │       ├── password.jsx
-  // │   │       └── two-factor-auth.tsx
+  // │   │       ├── two-factor-auth.tsx
   // │   │       └── two-factor-auth-ignored.ts
   // │   ├── friends
   // │   │   ├── layout.tsx
@@ -30,9 +30,11 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   ├── index.tsx
   // │   └── index.css
   // ├── test
-  // │  ├── {{optional}}.tsx
-  // │  ├── {...wildcard}.tsx
-  // │  └── empty.tsx
+  // │   ├── {{optional}}.tsx
+  // │   ├── {...wildcard}.tsx
+  // │   └── empty.tsx
+  // │   └── _ignored.tsx
+  // │   └── no-default-export.tsx
   // └── nameToReplace.tsx
 
   await Promise.all([
@@ -98,12 +100,11 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
       {
         path: 'nameToReplace',
         file: new URL('nameToReplace.tsx', dir),
-        children: [],
       },
       {
         path: 'profile',
         children: [
-          { path: '', file: new URL('profile/@index.tsx', dir), children: [] },
+          { path: '', file: new URL('profile/@index.tsx', dir) },
           {
             path: 'account',
             layout: new URL('profile/account/@layout.tsx', dir),
@@ -114,12 +115,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
                   {
                     path: 'password',
                     file: new URL('profile/account/security/password.jsx', dir),
-                    children: [],
                   },
                   {
                     path: 'two-factor-auth',
                     file: new URL('profile/account/security/two-factor-auth.tsx', dir),
-                    children: [],
                   },
                 ],
               },
@@ -132,12 +131,10 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
               {
                 path: 'list',
                 file: new URL('profile/friends/list.jsx', dir),
-                children: [],
               },
               {
                 path: '{user}',
                 file: new URL('profile/friends/{user}.tsx', dir),
-                children: [],
               },
             ],
           },
@@ -147,26 +144,14 @@ export function createTestingRouteMeta(dir: URL): RouteMeta {
         path: 'test',
         children: [
           // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
-          {
-            // Empty route doesn't have any `file` or `layout` property because the file itself is empty.
-            // We keep the path though.
-            path: 'empty',
-            children: [],
-          },
+          // Also empty files or files without default export are not included.
           {
             path: '{{optional}}',
             file: new URL('test/{{optional}}.tsx', dir),
-            children: [],
           },
           {
             path: '{...wildcard}',
             file: new URL('test/{...wildcard}.tsx', dir),
-            children: [],
-          },
-          {
-            path: 'no-default-export',
-            file: new URL('test/no-default-export.tsx', dir),
-            children: [],
           },
         ],
       },

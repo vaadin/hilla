@@ -10,20 +10,20 @@
 export function transformTreeSync<T, U>(
   node: T,
   getChildren: (node: T) => IterableIterator<T> | null | undefined,
-  transformer: (node: T, children: readonly U[]) => U,
+  transformer: (node: T, children?: readonly U[]) => U,
 ): U {
   const children = getChildren(node);
 
   return transformer(
     node,
-    children ? Array.from(children, (child) => transformTreeSync(child, getChildren, transformer)) : [],
+    children ? Array.from(children, (child) => transformTreeSync(child, getChildren, transformer)) : undefined,
   );
 }
 
 export async function transformTree<T, U>(
   node: T,
   getChildren: (node: T) => IterableIterator<T> | null | undefined,
-  transformer: (node: T, children: readonly U[]) => Promise<U>,
+  transformer: (node: T, children?: readonly U[]) => Promise<U>,
 ): Promise<U> {
   const children = getChildren(node);
 
@@ -31,6 +31,6 @@ export async function transformTree<T, U>(
     node,
     children
       ? await Promise.all(Array.from(children, async (child) => transformTree(child, getChildren, transformer)))
-      : [],
+      : undefined,
   );
 }
