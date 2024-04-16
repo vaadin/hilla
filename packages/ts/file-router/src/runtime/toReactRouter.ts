@@ -29,23 +29,26 @@ export function toReactRouter(routes: AgnosticRoute): ReactRouteObject {
       const path = module?.config?.route ?? filePath;
       const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
       const element = module?.default ? createElement(module.default) : undefined;
-      const hasChildren = children && children.length > 0;
 
       const routeData = {
-        ...(element ? { element } : {}),
+        element,
         handle: {
           ...module?.config,
           title,
         },
       };
 
+      // Routes with path "" and no children are directory index routes. To
+      // make them match in their parent layout, ReactRouter requires declaring
+      // { index: true } instead of the path.
+      const hasChildren = children && children.length > 0;
       const isIndex = !hasChildren && path === '';
       return isIndex
         ? ({ index: true, ...routeData } satisfies IndexRouteObject)
         : ({
             path,
-            ...(hasChildren ? { children: children as ReactRouteObject[] } : {}),
             ...routeData,
+            children: children as ReactRouteObject[] | undefined,
           } satisfies NonIndexRouteObject);
     },
   );
