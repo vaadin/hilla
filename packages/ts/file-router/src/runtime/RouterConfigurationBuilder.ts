@@ -36,7 +36,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withReactRoutes(...routes: readonly RouteObject[]): this {
+  withReactRoutes(routes: readonly RouteObject[]): this {
     return this.update(routes);
   }
 
@@ -47,7 +47,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withFileRoutes(...routes: readonly AgnosticRoute[]): this {
+  withFileRoutes(routes: readonly AgnosticRoute[]): this {
     return this.update(routes, (original, added, children) => {
       if (added) {
         const { module, path } = added;
@@ -83,14 +83,18 @@ export class RouterConfigurationBuilder {
    * each fallback component.
    */
   withFallback(component: ComponentType, config?: ViewConfig): this {
-    const serverRoute = { path: '*', element: createElement(component), handle: config };
+    // Fallback adds two routes, so that the index (empty path) has a fallback too
+    const fallbackRoutes = [
+      { path: '*', element: createElement(component), handle: config },
+      { index: true, element: createElement(component), handle: config },
+    ];
 
-    this.update([serverRoute], (original, added, children) => {
+    this.update(fallbackRoutes, (original, added, children) => {
       if (original) {
         return children
           ? ({
               ...original,
-              children: [...children, serverRoute],
+              children: [...children, ...fallbackRoutes],
             } as RouteObject)
           : original;
       }

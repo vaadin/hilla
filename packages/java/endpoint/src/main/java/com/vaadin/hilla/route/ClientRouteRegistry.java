@@ -153,9 +153,10 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         try (var source = viewsJsonAsResource.openStream()) {
             if (source != null) {
                 clearRoutes();
-                registerAndRecurseChildren("",
-                        mapper.readValue(source, new TypeReference<>() {
-                        }));
+                mapper.readValue(source,
+                        new TypeReference<List<ClientViewConfig>>() {
+                        }).forEach(
+                                route -> registerAndRecurseChildren("", route));
                 return true;
             }
             return false;

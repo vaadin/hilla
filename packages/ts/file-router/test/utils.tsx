@@ -29,17 +29,24 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // │   │   └── {user}.tsx
   // │   ├── index.tsx
   // │   └── index.css
+  // ├── empty-dir
+  // │   ├── empty-subdir
+  // │   │       └── empty-dir-ignored.ts
+  // │   ├── empty-file-subdir
+  // │   │       └── empty.tsx
   // ├── test
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
-  // │   └── empty.tsx
-  // │   └── _ignored.tsx
+  // │   ├── empty.tsx
+  // │   ├── _ignored.tsx
   // │   └── no-default-export.tsx
   // └── nameToReplace.tsx
 
   await Promise.all([
     mkdir(new URL('profile/account/security/', dir), { recursive: true }),
     mkdir(new URL('profile/friends/', dir), { recursive: true }),
+    mkdir(new URL('empty-dir/empty-subdir/', dir), { recursive: true }),
+    mkdir(new URL('empty-dir/empty-file-subdir/', dir), { recursive: true }),
     mkdir(new URL('test', dir), { recursive: true }),
   ]);
   await Promise.all([
@@ -75,6 +82,11 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       "export const config = { route: 'about', title: 'About' };\nexport default function About() {};",
     ),
     appendFile(
+      new URL('empty-dir/empty-subdir/empty-dir-ignored.ts', dir),
+      'export default function EmptyDirIgnored() {};',
+    ),
+    appendFile(new URL('empty-dir/empty-file-subdir/empty.tsx', dir), ''),
+    appendFile(
       new URL('test/{...wildcard}.tsx', dir),
       "export const config = { title: 'Wildcard' };\nexport default function Wildcard() {};",
     ),
@@ -88,70 +100,68 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   ]);
 }
 
-export function createTestingRouteMeta(dir: URL): RouteMeta {
-  return {
-    path: '',
-    children: [
-      {
-        path: 'nameToReplace',
-        file: new URL('nameToReplace.tsx', dir),
-      },
-      {
-        path: 'profile',
-        children: [
-          { path: '', file: new URL('profile/@index.tsx', dir) },
-          {
-            path: 'account',
-            layout: new URL('profile/account/@layout.tsx', dir),
-            children: [
-              {
-                path: 'security',
-                children: [
-                  {
-                    path: 'password',
-                    file: new URL('profile/account/security/password.jsx', dir),
-                  },
-                  {
-                    path: 'two-factor-auth',
-                    file: new URL('profile/account/security/two-factor-auth.tsx', dir),
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            path: 'friends',
-            layout: new URL('profile/friends/@layout.tsx', dir),
-            children: [
-              {
-                path: 'list',
-                file: new URL('profile/friends/list.jsx', dir),
-              },
-              {
-                path: '{user}',
-                file: new URL('profile/friends/{user}.tsx', dir),
-              },
-            ],
-          },
-        ],
-      },
-      {
-        path: 'test',
-        children: [
-          // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
-          // Also empty files or files without default export are not included.
-          {
-            path: '{{optional}}',
-            file: new URL('test/{{optional}}.tsx', dir),
-          },
-          {
-            path: '{...wildcard}',
-            file: new URL('test/{...wildcard}.tsx', dir),
-          },
-        ],
-      },
-    ],
-  };
+export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
+  return [
+    {
+      path: 'nameToReplace',
+      file: new URL('nameToReplace.tsx', dir),
+    },
+    {
+      path: 'profile',
+      children: [
+        { path: '', file: new URL('profile/@index.tsx', dir) },
+        {
+          path: 'account',
+          layout: new URL('profile/account/@layout.tsx', dir),
+          children: [
+            {
+              path: 'security',
+              children: [
+                {
+                  path: 'password',
+                  file: new URL('profile/account/security/password.jsx', dir),
+                },
+                {
+                  path: 'two-factor-auth',
+                  file: new URL('profile/account/security/two-factor-auth.tsx', dir),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: 'friends',
+          layout: new URL('profile/friends/@layout.tsx', dir),
+          children: [
+            {
+              path: 'list',
+              file: new URL('profile/friends/list.jsx', dir),
+            },
+            {
+              path: '{user}',
+              file: new URL('profile/friends/{user}.tsx', dir),
+            },
+          ],
+        },
+      ],
+    },
+    // Directories where all files are ignored are also ignored (`empty-dir`)
+    {
+      path: 'test',
+      children: [
+        // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
+        // Also empty files or files without default export are not included.
+        {
+          path: '{{optional}}',
+          file: new URL('test/{{optional}}.tsx', dir),
+        },
+        {
+          path: '{...wildcard}',
+          file: new URL('test/{...wildcard}.tsx', dir),
+        },
+      ],
+    },
+  ];
 }
 
 export const components = {
@@ -210,6 +220,13 @@ export const components = {
       return <></>;
     },
     config: { title: 'Server' },
+  },
+  index: {
+    // eslint-disable-next-line func-name-matching
+    default: function Index(): JSX.Element {
+      return <></>;
+    },
+    config: { title: 'Index' },
   },
 } satisfies Record<string, RouteModule>;
 

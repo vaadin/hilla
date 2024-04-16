@@ -22,32 +22,36 @@ describe('RouterBuilder', () => {
   }
 
   beforeEach(() => {
-    builder = new RouterConfigurationBuilder().withReactRoutes({
-      path: '',
-      children: [
-        {
-          path: '/test',
-          element: <div>Test</div>,
-        },
-      ],
-    });
-  });
-
-  it('should merge React routes deeply', () => {
-    const { routes } = builder
-      .withReactRoutes({
+    builder = new RouterConfigurationBuilder().withReactRoutes([
+      {
         path: '',
         children: [
           {
             path: '/test',
-            element: <div>AlternatedTest</div>,
-          },
-          {
-            path: '/next-test',
-            element: <div>NextTest</div>,
+            element: <div>Test</div>,
           },
         ],
-      })
+      },
+    ]);
+  });
+
+  it('should merge React routes deeply', () => {
+    const { routes } = builder
+      .withReactRoutes([
+        {
+          path: '',
+          children: [
+            {
+              path: '/test',
+              element: <div>AlternatedTest</div>,
+            },
+            {
+              path: '/next-test',
+              element: <div>NextTest</div>,
+            },
+          ],
+        },
+      ])
       .build();
 
     expect(routes).to.be.like([
@@ -69,28 +73,30 @@ describe('RouterBuilder', () => {
 
   it('should merge file routes deeply', () => {
     const { routes } = builder
-      .withFileRoutes({
-        path: '',
-        children: [
-          {
-            path: '/test',
-            module: {
-              // eslint-disable-next-line func-name-matching
-              default: AltTest,
-              config: {
-                route: '/alt-test',
+      .withFileRoutes([
+        {
+          path: '',
+          children: [
+            {
+              path: '/test',
+              module: {
+                // eslint-disable-next-line func-name-matching
+                default: AltTest,
+                config: {
+                  route: '/alt-test',
+                },
               },
             },
-          },
-          {
-            path: '/next-test',
-            module: {
-              // eslint-disable-next-line func-name-matching
-              default: NextTest,
+            {
+              path: '/next-test',
+              module: {
+                // eslint-disable-next-line func-name-matching
+                default: NextTest,
+              },
             },
-          },
-        ],
-      })
+          ],
+        },
+      ])
       .build();
 
     expect(routes).to.be.like([
@@ -119,37 +125,46 @@ describe('RouterBuilder', () => {
 
   it('should add server routes to children deeply', () => {
     const { routes } = builder
-      .withReactRoutes({
-        path: '',
-        children: [
-          {
-            path: '/test',
-            children: [
-              {
-                path: '/child-test',
-                element: <div>ChildTest</div>,
-              },
-            ],
-          },
-          {
-            path: '/next-test',
-            children: [
-              {
-                path: '/next-child-test',
-                element: <div>ChildTest</div>,
-              },
-            ],
-          },
-        ],
-      })
+      .withReactRoutes([
+        {
+          path: '',
+          children: [
+            {
+              path: '/test',
+              children: [
+                {
+                  path: '/child-test',
+                  element: <div>ChildTest</div>,
+                },
+              ],
+            },
+            {
+              path: '/next-test',
+              children: [
+                {
+                  path: '/next-child-test',
+                  element: <div>ChildTest</div>,
+                },
+              ],
+            },
+          ],
+        },
+      ])
       .withFallback(Server, { title: 'Server' })
       .build();
 
-    const serverRoute = {
-      path: '*',
-      element: <Server />,
-      handle: { title: 'Server' },
-    };
+    const serverRoutes = [
+      {
+        path: '*',
+        element: <Server />,
+        handle: { title: 'Server' },
+      },
+      {
+        index: true,
+        element: <Server />,
+        handle: { title: 'Server' },
+      },
+    ];
 
     expect(routes).to.be.like([
       {
@@ -162,7 +177,7 @@ describe('RouterBuilder', () => {
                 path: '/child-test',
                 element: <div>ChildTest</div>,
               },
-              serverRoute,
+              ...serverRoutes,
             ],
           },
           {
@@ -172,13 +187,13 @@ describe('RouterBuilder', () => {
                 path: '/next-child-test',
                 element: <div>ChildTest</div>,
               },
-              serverRoute,
+              ...serverRoutes,
             ],
           },
-          serverRoute,
+          ...serverRoutes,
         ],
       },
-      serverRoute,
+      ...serverRoutes,
     ]);
   });
 

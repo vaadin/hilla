@@ -12,7 +12,7 @@ use(chaiAsPromised);
 describe('@vaadin/hilla-file-router', () => {
   describe('createViewConfigJson', () => {
     let tmp: URL;
-    let meta: RouteMeta;
+    let meta: readonly RouteMeta[];
 
     before(async () => {
       tmp = await createTmpDir();
@@ -29,56 +29,52 @@ describe('@vaadin/hilla-file-router', () => {
 
     it('should generate a JSON representation of the route tree', async () => {
       await expect(createViewConfigJson(meta)).to.eventually.equal(
-        JSON.stringify({
-          route: '',
-          params: {},
-          children: [
-            { route: 'about', title: 'About', params: {} },
-            {
-              route: 'profile',
-              params: {},
-              children: [
-                { route: '', title: 'Profile', params: {} },
-                {
-                  route: 'account',
-                  title: 'Account',
-                  params: {},
-                  children: [
-                    {
-                      route: 'security',
-                      params: {},
-                      children: [
-                        { route: 'password', params: {}, title: 'Password' },
-                        { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth' },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  route: 'friends',
-                  params: {},
-                  title: 'Friends Layout',
-                  children: [
-                    { route: 'list', params: {}, title: 'List' },
-                    { route: ':user', params: { ':user': RouteParamType.Required }, title: 'User' },
-                  ],
-                },
-              ],
-            },
-            {
-              route: 'test',
-              params: {},
-              children: [
-                {
-                  route: ':optional?',
-                  title: 'Optional',
-                  params: { ':optional?': RouteParamType.Optional },
-                },
-                { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
-              ],
-            },
-          ],
-        }),
+        JSON.stringify([
+          { route: 'about', title: 'About', params: {} },
+          {
+            route: 'profile',
+            params: {},
+            children: [
+              { route: '', title: 'Profile', params: {} },
+              {
+                route: 'account',
+                title: 'Account',
+                params: {},
+                children: [
+                  {
+                    route: 'security',
+                    params: {},
+                    children: [
+                      { route: 'password', params: {}, title: 'Password' },
+                      { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth' },
+                    ],
+                  },
+                ],
+              },
+              {
+                route: 'friends',
+                params: {},
+                title: 'Friends Layout',
+                children: [
+                  { route: 'list', params: {}, title: 'List' },
+                  { route: ':user', params: { ':user': RouteParamType.Required }, title: 'User' },
+                ],
+              },
+            ],
+          },
+          {
+            route: 'test',
+            params: {},
+            children: [
+              {
+                route: ':optional?',
+                title: 'Optional',
+                params: { ':optional?': RouteParamType.Optional },
+              },
+              { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+            ],
+          },
+        ]),
       );
     });
   });

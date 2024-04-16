@@ -68,29 +68,24 @@ function createRouteData(path: string, mod: string | undefined, children?: reado
  * @param views - The abstract route tree.
  * @param generatedDir - The directory where the generated view file will be stored.
  */
-export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile }: RuntimeFileUrls): string {
+export default function createRoutesFromMeta(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls): string {
   const codeDir = new URL('./', codeFile);
-  const imports: ImportDeclaration[] = [
-    template(
-      'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
-      ([statement]) => statement as ts.ImportDeclaration,
-    ),
-  ];
+  const imports: ImportDeclaration[] = [];
   const errors: string[] = [];
   let id = 0;
 
-  const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>([views], (metas, next) =>
-    metas.map(({ file, layout, path, children }) => {
+  const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(views, (metas, next) => {
+    errors.push(
+      ...metas
+        .map((route) => route.path)
+        .filter((item, index, arr) => arr.indexOf(item) !== index)
+        .map((dup) => `console.error("Two views share the same path: ${dup}");`),
+    );
+
+    return metas.map(({ file, layout, path, children }) => {
       let _children: readonly CallExpression[] | undefined;
 
       if (children) {
-        errors.push(
-          ...children
-            .map((route) => route.path)
-            .filter((item, index, arr) => arr.indexOf(item) !== index)
-            .map((dup) => `console.error("Two views share the same path: ${dup}");`),
-        );
-
         _children = next(...children);
       }
 
@@ -107,7 +102,23 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
       }
 
       return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children);
-    }),
+    });
+  });
+
+  // Prepend the import for `createRoute` if it was used
+  if (imports.length > 0) {
+    const createRouteImport = template(
+      'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
+      ([statement]) => statement as ts.ImportDeclaration,
+    );
+    imports.unshift(createRouteImport);
+  }
+
+  imports.unshift(
+    template(
+      'import type { AgnosticRoute } from "@vaadin/hilla-file-router/types.js";',
+      ([statement]) => statement as ts.ImportDeclaration,
+    ),
   );
 
   const routeDeclaration = template(
@@ -115,7 +126,7 @@ export default function createRoutesFromMeta(views: RouteMeta, { code: codeFile 
 
 ${errors.join('\n')}
 
-const routes = ROUTE;
+const routes: readonly AgnosticRoute[] = ROUTE;
 
 export default routes;
 `,
@@ -123,7 +134,9 @@ export default routes;
       transformer((node) =>
         ts.isImportDeclaration(node) && (node.moduleSpecifier as StringLiteral).text === 'IMPORTS' ? imports : node,
       ),
-      transformer((node) => (ts.isIdentifier(node) && node.text === 'ROUTE' ? routes : node)),
+      transformer((node) =>
+        ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes) : node,
+      ),
     ],
   );
 

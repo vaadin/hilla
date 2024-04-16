@@ -27,9 +27,9 @@ function* walkAST(node: Node): Generator<Node> {
  *
  * @param views - The route metadata tree.
  */
-export default async function createViewConfigJson(views: RouteMeta): Promise<string> {
-  const [res] = await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
-    [views],
+export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<string> {
+  const res = await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
+    views,
     async (routes, next) =>
       await Promise.all(
         routes.map(async ({ path, file, layout, children }) => {
