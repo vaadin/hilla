@@ -1,14 +1,16 @@
 package com.vaadin.hilla.route;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.VaadinRequest;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.jsoup.nodes.DataNode;
@@ -45,21 +47,32 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     private RouteUnifyingIndexHtmlRequestListener requestListener;
     private IndexHtmlResponse indexHtmlResponse;
     private VaadinService vaadinService;
+    private VaadinRequest vaadinRequest;
     private DeploymentConfiguration deploymentConfiguration;
+    private RouteUtil routeUtil;
 
     @Rule
     public TemporaryFolder projectRoot = new TemporaryFolder();
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         vaadinService = Mockito.mock(VaadinService.class);
         deploymentConfiguration = Mockito.mock(DeploymentConfiguration.class);
         Mockito.when(vaadinService.getDeploymentConfiguration())
                 .thenReturn(deploymentConfiguration);
+        Mockito.when(clientRouteRegistry.getAllRoutes())
+                .thenReturn(prepareClientRoutes());
+        routeUtil = new RouteUtil(clientRouteRegistry);
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
-                clientRouteRegistry, deploymentConfiguration, true);
+                clientRouteRegistry, deploymentConfiguration, routeUtil, true);
 
         indexHtmlResponse = Mockito.mock(IndexHtmlResponse.class);
+        vaadinRequest = Mockito.mock(VaadinRequest.class);
+        Mockito.when(indexHtmlResponse.getVaadinRequest())
+                .thenReturn(vaadinRequest);
+        var userPrincipal = Mockito.mock(Principal.class);
+        Mockito.when(vaadinRequest.getUserPrincipal())
+                .thenReturn(userPrincipal);
 
         final Document document = Mockito.mock(Document.class);
         final Element element = new Element("head");
@@ -98,7 +111,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
         ClientViewConfig profileConfig = new ClientViewConfig();
         profileConfig.setTitle("Profile");
-        profileConfig.setRolesAllowed(new String[] { "ROLE_USER" });
+        profileConfig
+                .setRolesAllowed(new String[] { "ROLE_USER", "ROLE_ADMIN" });
         profileConfig.setLoginRequired(true);
         profileConfig.setRoute("/profile");
         profileConfig.setLazy(false);
@@ -159,12 +173,49 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     }
 
     @Test
-    public void when_productionMode_should_modifyIndexHtmlResponse()
+    public void when_productionMode_anonymous_user_should_modifyIndexHtmlResponse_with_anonymously_allowed_routes()
             throws IOException {
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
             Mockito.when(deploymentConfiguration.isProductionMode())
+                    .thenReturn(true);
+            Mockito.when(vaadinRequest.getUserPrincipal()).thenReturn(null);
+
+            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+        }
+        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
+
+        DataNode script = indexHtmlResponse.getDocument().head()
+                .select("script").dataNodes().get(0);
+
+        final String scriptText = script.getWholeData();
+        MatcherAssert.assertThat(scriptText,
+                Matchers.startsWith(SCRIPT_STRING));
+
+        final String views = scriptText.substring(SCRIPT_STRING.length());
+
+        final var mapper = new ObjectMapper();
+
+        var actual = mapper.readTree(views);
+        var expected = mapper.readTree(getClass().getResource(
+                "/META-INF/VAADIN/available-views-anonymous.json"));
+
+        MatcherAssert.assertThat(actual, Matchers.is(expected));
+    }
+
+    @Test
+    public void when_productionMode_authenticated_user_should_modifyIndexHtmlResponse_with_user_allowed_routes()
+            throws IOException {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class)) {
+            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
+            Mockito.when(deploymentConfiguration.isProductionMode())
+                    .thenReturn(true);
+            Mockito.when(vaadinRequest.isUserInRole("ROLE_USER"))
                     .thenReturn(true);
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
@@ -186,7 +237,42 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
         var actual = mapper.readTree(views);
         var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views.json"));
+                .getResource("/META-INF/VAADIN/available-views-user.json"));
+
+        MatcherAssert.assertThat(actual, Matchers.is(expected));
+    }
+
+    @Test
+    public void when_productionMode_admin_user_should_modifyIndexHtmlResponse_with_anonymous_and_admin_allowed_routes()
+            throws IOException {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class)) {
+            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
+            Mockito.when(deploymentConfiguration.isProductionMode())
+                    .thenReturn(true);
+            Mockito.when(vaadinRequest.isUserInRole("ROLE_ADMIN"))
+                    .thenReturn(true);
+            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+        }
+        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
+
+        DataNode script = indexHtmlResponse.getDocument().head()
+                .select("script").dataNodes().get(0);
+
+        final String scriptText = script.getWholeData();
+        MatcherAssert.assertThat(scriptText,
+                Matchers.startsWith(SCRIPT_STRING));
+
+        final String views = scriptText.substring(SCRIPT_STRING.length());
+
+        final var mapper = new ObjectMapper();
+
+        var actual = mapper.readTree(views);
+        var expected = mapper.readTree(getClass()
+                .getResource("/META-INF/VAADIN/available-views-admin.json"));
 
         MatcherAssert.assertThat(actual, Matchers.is(expected));
     }
@@ -197,6 +283,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
+            Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
+                    .thenReturn(true);
             mockDevelopmentMode();
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
@@ -218,20 +306,20 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
         var actual = mapper.readTree(views);
         var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views.json"));
+                .getResource("/META-INF/VAADIN/available-views-admin.json"));
 
         MatcherAssert.assertThat(actual, Matchers.is(expected));
     }
 
     @Test
     public void should_collectServerViews() {
-        final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
+        final Map<String, AvailableViewInfo> views;
 
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            requestListener.collectServerViews(views);
+            views = requestListener.collectServerViews();
         }
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(5));
         MatcherAssert.assertThat(views.get("/bar").title(),
@@ -254,19 +342,23 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
     @Test
     public void when_productionMode_should_collectClientViews() {
-        final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
         Mockito.when(deploymentConfiguration.isProductionMode())
                 .thenReturn(true);
-        requestListener.collectClientViews(views);
+        Predicate<? super String> isUserInRole = role -> true;
+        boolean isAuthenticated = true;
+        var views = requestListener.collectClientViews(isUserInRole,
+                isAuthenticated);
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
     }
 
     @Test
     public void when_developmentMode_should_collectClientViews()
             throws IOException {
-        final Map<String, AvailableViewInfo> views = new LinkedHashMap<>();
         mockDevelopmentMode();
-        requestListener.collectClientViews(views);
+        boolean isUserAuthenticated = true;
+        Predicate<? super String> isUserInRole = role -> true;
+        var views = requestListener.collectClientViews(isUserInRole,
+                isUserAuthenticated);
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
     }
 
@@ -275,8 +367,11 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             throws IOException {
         Mockito.when(deploymentConfiguration.isProductionMode())
                 .thenReturn(true);
+        Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
+                .thenReturn(true);
         var requestListener = new RouteUnifyingIndexHtmlRequestListener(
-                clientRouteRegistry, deploymentConfiguration, false);
+                clientRouteRegistry, deploymentConfiguration, routeUtil, false);
+
         requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
 
         MatcherAssert.assertThat(

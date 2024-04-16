@@ -21,6 +21,7 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
+import com.vaadin.hilla.route.RouteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class RouteUnifyingServiceInitListener
 
     private final ClientRouteRegistry clientRouteRegistry;
 
+    private final RouteUtil routeUtil;
+
     private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties;
 
     /**
@@ -46,14 +49,18 @@ public class RouteUnifyingServiceInitListener
      *
      * @param clientRouteRegistry
      *            the registry to add the client routes to
+     * @param routeUtil
+     *            the ClientRouteRegistry aware utility for checking if user is
+     *            allowed to access a route
      * @param routeUnifyingConfigurationProperties
      *            the configuration properties instance
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
-            ClientRouteRegistry clientRouteRegistry,
+            ClientRouteRegistry clientRouteRegistry, RouteUtil routeUtil,
             RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties) {
         this.clientRouteRegistry = clientRouteRegistry;
+        this.routeUtil = routeUtil;
         this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
     }
 
@@ -65,7 +72,7 @@ public class RouteUnifyingServiceInitListener
                 deploymentConfiguration.isReactEnabled());
         if (deploymentConfiguration.isReactEnabled()) {
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
-                    clientRouteRegistry, deploymentConfiguration,
+                    clientRouteRegistry, deploymentConfiguration, routeUtil,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
             var deploymentMode = deploymentConfiguration.isProductionMode()
