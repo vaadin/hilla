@@ -8,23 +8,19 @@ const upperCaseSplitPattern = /(?=[A-Z])/gu;
  *
  * @returns The page title.
  */
-export function convertComponentNameToTitle(component?: unknown): string | undefined {
-  let name: string | undefined;
+export function convertComponentNameToTitle(component: unknown): string {
+  let name: string;
 
-  if (typeof component === 'string') {
-    name = component;
-  } else if (
+  if (
     component &&
     (typeof component === 'object' || typeof component === 'function') &&
     'name' in component &&
     typeof component.name === 'string'
   ) {
     ({ name } = component);
+  } else {
+    name = String(component);
   }
 
-  if (name) {
-    return name.replace(viewPattern, '').split(upperCaseSplitPattern).join(' ');
-  }
-
-  return undefined;
+  return name.replace(viewPattern, '').split(upperCaseSplitPattern).join(' ');
 }
