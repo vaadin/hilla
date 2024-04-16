@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.vaadin.flow.internal.AnnotationReader;
+import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
 import com.vaadin.flow.server.RouteRegistry;
@@ -38,6 +40,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
+import com.vaadin.hilla.route.records.ClientViewMenuConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 
 /**
@@ -188,18 +191,29 @@ public class RouteUnifyingIndexHtmlRequestListener
                 final String url = "/" + targetUrl;
 
                 final String title;
-                PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
+                PageTitle pageTitle = AnnotationReader
+                        .getAnnotationFor(viewClass, PageTitle.class)
+                        .orElse(null);
                 if (pageTitle != null) {
                     title = pageTitle.value();
                 } else {
                     title = serverView.getNavigationTarget().getSimpleName();
                 }
 
+                final ClientViewMenuConfig menuConfig = AnnotationReader
+                        .getAnnotationFor(viewClass, Menu.class)
+                        .map(menu -> new ClientViewMenuConfig(
+                                menu.title().isBlank() ? title : menu.title(),
+                                (menu.order() == Long.MIN_VALUE) ? null
+                                        : menu.order(),
+                                menu.icon(), menu.exclude()))
+                        .orElse(null);
+
                 final Map<String, RouteParamType> routeParameters = getRouteParameters(
                         serverView);
 
                 final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                        title, null, false, url, false, false, null,
+                        title, null, false, url, false, false, menuConfig,
                         routeParameters);
                 serverViews.put(url, availableViewInfo);
             }
