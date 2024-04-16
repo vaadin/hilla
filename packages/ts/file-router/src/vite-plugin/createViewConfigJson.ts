@@ -68,11 +68,25 @@ export default async function createViewConfigJson(views: RouteMeta): Promise<st
             }
           }
 
+          let title: string;
+
+          if (config?.title) {
+            ({ title } = config);
+          } else {
+            if (!componentName) {
+              throw new Error(
+                `The file "${String(file ?? layout!)}" must contain a default export of a component whose name will be used as title by default`,
+              );
+            }
+
+            title = convertComponentNameToTitle(componentName);
+          }
+
           return {
             route: convertFSRouteSegmentToURLPatternFormat(path),
             ...config,
             params: extractParameterFromRouteSegment(config?.route ?? path),
-            title: config?.title ?? convertComponentNameToTitle(componentName),
+            title,
             children: newChildren,
           } satisfies ServerViewConfig;
         }),
