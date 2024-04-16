@@ -60,17 +60,13 @@ export async function generateRuntimeFiles(
   logger.info('Collected file-based routes');
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
-  const tempUrl = new URL('views.ts', urls.code.href);
+
   await Promise.all([
     generateRuntimeFile(urls.json, viewConfigJson).then(() =>
       logger.info(`Frontend route list is generated: ${String(urls.json)}`),
     ),
     generateRuntimeFile(urls.code, runtimeRoutesCode).then(() =>
       logger.info(`File Route module is generated: ${String(urls.code)}`),
-    ),
-    // also keep the old file temporarily for compatibility purposes:
-    generateRuntimeFile(tempUrl, runtimeRoutesCode).then(() =>
-      logger.info(`Views module is generated: ${String(tempUrl)}`),
     ),
   ]);
 }
