@@ -156,7 +156,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
                 mapper.readValue(source,
                         new TypeReference<List<ClientViewConfig>>() {
                         }).forEach(
-                        route -> registerAndRecurseChildren("", route));
+                                route -> registerAndRecurseChildren("", route));
                 return true;
             }
             return false;
