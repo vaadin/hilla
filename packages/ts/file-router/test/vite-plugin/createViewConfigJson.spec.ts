@@ -60,7 +60,7 @@ describe('@vaadin/hilla-file-router', () => {
                   title: 'Friends Layout',
                   children: [
                     { route: 'list', params: {}, title: 'List' },
-                    { route: ':user', title: 'User', params: { ':user': RouteParamType.Required } },
+                    { route: ':user', params: { ':user': RouteParamType.Required }, title: 'User' },
                   ],
                 },
               ],

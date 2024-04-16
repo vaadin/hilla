@@ -64,10 +64,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       new URL('profile/friends/list-ignored.js', dir),
       "export const config = { title: 'List' };\nexport default function ListIgnored() {};",
     ),
-    appendFile(
-      new URL('profile/friends/{user}.tsx', dir),
-      "export const config = { title: 'User' };\nexport default function User() {};",
-    ),
+    appendFile(new URL('profile/friends/{user}.tsx', dir), 'const User = function() {};\nexport default User;'),
     appendFile(
       new URL('profile/@index.tsx', dir),
       "export const config = { title: 'Profile' };\nexport default function Profile() {};",
