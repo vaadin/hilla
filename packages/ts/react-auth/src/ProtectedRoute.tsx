@@ -53,29 +53,44 @@ function* traverse<T extends RouteObject>(routes: T[]): Generator<T, undefined, 
 }
 
 /**
- * Adds protection to routes that require authentication.
- * These routes should contain the {@link AccessProps.loginRequired} and/or
- * {@link AccessProps.rolesAllowed} properties.
+ * Adds protection to a single route that requires authentication.
+ * These route should contain the {@link AccessProps.loginRequired} and/or
+ * {@link AccessProps.rolesAllowed} property to get the protection. Route
+ * without that property won't be protected.
  *
- * @param routes - the routes to check if any of them needs to be protected
+ * @param route - the route to protect
+ * @param redirectPath - the path to redirect to if the route is protected
+ * and the user is not authenticated.
+ * @returns the route extended with protection if needed
+ */
+export function protectRoute(route: RouteObjectWithAuth, redirectPath: string = '/login'): RouteObjectWithAuth {
+  const { handle } = route;
+  const requiresAuth = handle?.loginRequired ?? handle?.requiresLogin ?? handle?.rolesAllowed?.length;
+
+  if (requiresAuth) {
+    route.element = (
+      <ProtectedRoute
+        redirectPath={redirectPath}
+        access={handle as AccessProps}
+        element={route.element as JSX.Element}
+      />
+    );
+  }
+
+  return route;
+}
+
+/**
+ * Protects a route tree with {@link protectRoute} function.
+ *
+ * @param routes - the roots of the route tree that requires protection.
  * @param redirectPath - the path to redirect to if the route is
  * protected and the user is not authenticated.
- * @returns the routes extended with protection if needed
+ * @returns the protected route tree
  */
 export function protectRoutes(routes: RouteObjectWithAuth[], redirectPath: string = '/login'): RouteObjectWithAuth[] {
   for (const route of traverse(routes)) {
-    const { handle } = route;
-    const requiresAuth = handle?.loginRequired ?? handle?.requiresLogin ?? handle?.rolesAllowed?.length;
-
-    if (requiresAuth) {
-      route.element = (
-        <ProtectedRoute
-          redirectPath={redirectPath}
-          access={handle as AccessProps}
-          element={route.element as JSX.Element}
-        />
-      );
-    }
+    protectRoute(route, redirectPath);
   }
 
   return routes;
