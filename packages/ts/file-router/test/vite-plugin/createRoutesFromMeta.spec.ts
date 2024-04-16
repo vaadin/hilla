@@ -41,6 +41,14 @@ export default routes;
 `);
     });
 
+    it('should generate an empty list when no routes are found', () => {
+      const generated = createRoutesFromMeta([], runtimeUrls);
+
+      expect(generated).to.equal(`const routes = [];
+export default routes;
+`);
+    });
+
     it('should add console.error calls for duplicated paths', () => {
       const metaWithDuplicatedPaths = [
         ...meta,
