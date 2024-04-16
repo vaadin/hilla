@@ -36,7 +36,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withReactRoutes(...routes: readonly RouteObject[]): this {
+  withReactRoutes(routes: readonly RouteObject[]): this {
     return this.update(routes);
   }
 
@@ -47,7 +47,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withFileRoutes(...routes: readonly AgnosticRoute[]): this {
+  withFileRoutes(routes: readonly AgnosticRoute[]): this {
     return this.update(routes, (original, added, children) => {
       if (added) {
         const { module, path } = added;

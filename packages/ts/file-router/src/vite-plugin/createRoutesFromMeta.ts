@@ -114,12 +114,19 @@ export default function createRoutesFromMeta(views: readonly RouteMeta[], { code
     imports.unshift(createRouteImport);
   }
 
+  imports.unshift(
+    template(
+      'import type { AgnosticRoute } from "@vaadin/hilla-file-router/types.js";',
+      ([statement]) => statement as ts.ImportDeclaration,
+    ),
+  );
+
   const routeDeclaration = template(
     `import a from 'IMPORTS';
 
 ${errors.join('\n')}
 
-const routes = ROUTE;
+const routes: readonly AgnosticRoute[] = ROUTE;
 
 export default routes;
 `,
