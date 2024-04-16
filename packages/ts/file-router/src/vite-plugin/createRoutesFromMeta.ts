@@ -1,4 +1,4 @@
-import { sep, relative } from 'node:path';
+import { relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
@@ -9,7 +9,7 @@ import ts, {
   type VariableStatement,
 } from 'typescript';
 
-import { transformTreeSync } from '../shared/transformTree.js';
+import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
 import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
@@ -70,30 +70,25 @@ function createRouteData(path: string, mod: string | undefined, children?: reado
  */
 export default function createRoutesFromMeta(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls): string {
   const codeDir = new URL('./', codeFile);
-  const imports: ImportDeclaration[] = [
-    template(
-      'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
-      ([statement]) => statement as ts.ImportDeclaration,
-    ),
-  ];
+  const imports: ImportDeclaration[] = [];
   const errors: string[] = [];
   let id = 0;
 
-  const rootCall = transformTreeSync<RouteMeta, CallExpression>(
-    { path: '', children: views },
-    (view) => {
-      if (view.children) {
-        const paths = view.children.map((c) => c.path);
-        const uniquePaths = new Set(paths);
-        paths
-          .filter((p) => !uniquePaths.delete(p))
-          .forEach((p) => errors.push(`console.error("Two views share the same path: ${p}");`));
-        return view.children.values();
+  const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(views, (metas, next) => {
+    errors.push(
+      ...metas
+        .map((route) => route.path)
+        .filter((item, index, arr) => arr.indexOf(item) !== index)
+        .map((dup) => `console.error("Two views share the same path: ${dup}");`),
+    );
+
+    return metas.map(({ file, layout, path, children }) => {
+      let _children: readonly CallExpression[] | undefined;
+
+      if (children) {
+        _children = next(...children);
       }
 
-      return undefined;
-    },
-    ({ file, layout, path }, children) => {
       const currentId = id;
       id += 1;
 
@@ -106,11 +101,18 @@ export default function createRoutesFromMeta(views: readonly RouteMeta[], { code
         imports.push(createImport(mod, relativize(layout, codeDir)));
       }
 
-      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, children);
-    },
-  );
+      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children);
+    });
+  });
 
-  const routes = rootCall.arguments[rootCall.arguments.length - 1];
+  // Prepend the import for `createRoute` if it was used
+  if (imports.length > 0) {
+    const createRouteImport = template(
+      'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
+      ([statement]) => statement as ts.ImportDeclaration,
+    );
+    imports.unshift(createRouteImport);
+  }
 
   const routeDeclaration = template(
     `import a from 'IMPORTS';
@@ -125,13 +127,12 @@ export default routes;
       transformer((node) =>
         ts.isImportDeclaration(node) && (node.moduleSpecifier as StringLiteral).text === 'IMPORTS' ? imports : node,
       ),
-      transformer((node) => (ts.isIdentifier(node) && node.text === 'ROUTE' ? routes : node)),
+      transformer((node) =>
+        ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes) : node,
+      ),
     ],
   );
 
   const file = createSourceFile(routeDeclaration, 'file-routes.ts');
-  // also keep the old file temporarily for compatibility purposes:
-  const tempFile = createSourceFile(routeDeclaration, 'views.ts');
-  printer.printFile(tempFile);
   return printer.printFile(file);
 }
