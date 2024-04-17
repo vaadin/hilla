@@ -88,6 +88,8 @@ public class RouteUnifyingServiceInitListener
             if (deploymentConfiguration.isProductionMode()) {
                 clientRouteRegistry.registerClientRoutes(
                         deploymentConfiguration, LocalDateTime.now());
+                LOGGER.debug(
+                        "Production mode: Registered client routes to ClientRouteRegistry.");
             }
         }
     }
