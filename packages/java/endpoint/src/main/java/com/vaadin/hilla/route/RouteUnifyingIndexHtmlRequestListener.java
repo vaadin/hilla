@@ -120,10 +120,8 @@ public class RouteUnifyingIndexHtmlRequestListener
             Predicate<? super String> isUserInRole,
             boolean isUserAuthenticated) {
         if (!deploymentConfiguration.isProductionMode()) {
-            synchronized (clientRouteRegistry) {
-                clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
-                        deploymentConfiguration);
-            }
+            clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                    deploymentConfiguration);
         }
         var clientViews = new HashMap<String, AvailableViewInfo>();
         clientRouteRegistry.getAllRoutes().entrySet().stream()
