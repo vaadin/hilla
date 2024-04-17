@@ -185,8 +185,8 @@ public class ClientRouteRegistryTest {
         String hierarchicalRoutesAsString = IOUtils.toString(
                 fileRoutesJsonProdAsResource.openStream(),
                 StandardCharsets.UTF_8);
-        String addedDevToRootRoute = hierarchicalRoutesAsString
-                .replaceFirst("\"route\": \"\",", "\"route\": \"dev\",");
+        String addedDevToRootRoute = "[{ \"route\": \"dev\", \"children\": "
+                + hierarchicalRoutesAsString + " }]";
         final String fileRoutesJsonPath = "frontend/generated/"
                 + ClientRouteRegistry.FILE_ROUTES_JSON_NAME;
         File fileRoutesJsonFile = projectRoot.getRoot().toPath()

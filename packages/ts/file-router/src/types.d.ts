@@ -1,4 +1,4 @@
-import type { createBrowserRouter } from 'react-router-dom';
+import type { createBrowserRouter, RouteObject } from 'react-router-dom';
 
 export type ViewConfig = Readonly<{
   /**
@@ -70,7 +70,7 @@ export type RouteModule<C = unknown> = Module &
 export type AgnosticRoute = Readonly<{
   path: string;
   module?: Module;
-  children?: ReadonlyArray<AgnosticRoute<T>>;
+  children?: readonly AgnosticRoute[];
 }>;
 
 /**
@@ -83,6 +83,6 @@ export type MenuItem = Readonly<{
 }>;
 
 export type RouterConfiguration = Readonly<{
-  routes: readonly RouterObject[];
+  routes: readonly RouteObject[];
   router: ReturnType<typeof createBrowserRouter>;
 }>;

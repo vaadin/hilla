@@ -8,7 +8,7 @@ export type RouteMeta = Readonly<{
   path: string;
   file?: URL;
   layout?: URL;
-  children?: RouteMeta[];
+  children?: readonly RouteMeta[];
 }>;
 
 /**
@@ -60,50 +60,68 @@ const warningFor = ['.ts', '.js'];
  * @param dir - The directory to collect routes from.
  * @param options - The options object.
  *
- * @returns The route metadata tree.
+ * @returns The route metadata array.
  */
 export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, logger, parent = dir }: CollectRoutesOptions,
-): Promise<RouteMeta> {
+): Promise<readonly RouteMeta[]> {
   const path = relative(fileURLToPath(parent), fileURLToPath(dir));
   let children: RouteMeta[] = [];
   let layout: URL | undefined;
 
   for await (const d of await opendir(dir)) {
-    if (d.isDirectory() && !d.name.startsWith('_')) {
-      children.push(await collectRoutesFromFS(new URL(`${d.name}/`, dir), { extensions, logger, parent: dir }));
-    } else if (d.isFile() && extensions.includes(extname(d.name))) {
-      const file = new URL(d.name, dir);
-      const url = await checkFile(file, logger);
-      if (url === undefined) {
-        continue;
-      }
-      const name = basename(d.name, extname(d.name));
+    if (d.name.startsWith('_')) {
+      continue;
+    }
 
-      if (name.startsWith('@')) {
-        if (name === '@layout') {
-          layout = file;
-        } else if (name === '@index') {
-          children.push({
-            path: '',
-            file,
-          });
-        } else {
-          throw new Error(
-            'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
-          );
-        }
-      } else if (!name.startsWith('_')) {
-        children.push({
-          path: name,
-          file,
-        });
+    if (d.isDirectory()) {
+      const directoryRoutes = await collectRoutesFromFS(new URL(`${d.name}/`, dir), {
+        extensions,
+        logger,
+        parent: dir,
+      });
+      if (directoryRoutes.length === 1 && directoryRoutes[0].layout) {
+        const [layoutRoute] = directoryRoutes;
+        children.push(layoutRoute);
+      } else if (directoryRoutes.length > 0) {
+        children.push({ path: d.name, children: directoryRoutes });
       }
-    } else if (d.isFile() && !d.name.startsWith('_') && warningFor.includes(extname(d.name))) {
-      logger.warn(
-        `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file '${d.name}' will be ignored by router, as it doesn't match this convention. Please consider storing it in another directory.`,
+      continue;
+    }
+
+    if (!extensions.includes(extname(d.name))) {
+      if (warningFor.includes(extname(d.name))) {
+        logger.warn(
+          `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file '${d.name}' will be ignored by router, as it doesn't match this convention. Please consider storing it in another directory.`,
+        );
+      }
+      continue;
+    }
+
+    const file = new URL(d.name, dir);
+    const url = await checkFile(file, logger);
+    if (url === undefined) {
+      continue;
+    }
+    const name = basename(d.name, extname(d.name));
+
+    if (name === '@layout') {
+      layout = file;
+    } else if (name === '@index') {
+      children.push({
+        path: '',
+        file,
+      });
+    } else if (name.startsWith('@')) {
+      throw new Error(
+        'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
       );
+    } else {
+      children.push({
+        path: name,
+        file,
+      });
     }
   }
 
@@ -118,9 +136,8 @@ export default async function collectRoutesFromFS(
     checkFile(layout, logger),
   ]);
 
-  return {
-    path,
-    layout,
-    children: children.sort(({ path: a }, { path: b }) => collator.compare(cleanUp(a), cleanUp(b))),
-  };
+  children = children.sort(({ path: a }, { path: b }) => collator.compare(cleanUp(a), cleanUp(b)));
+
+  // If a layout was found, wrap the other routes with the layout route.
+  return layout ? [{ path, layout, children }] : children;
 }

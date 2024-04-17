@@ -1,130 +1,126 @@
-{
-  "route": "",
-  "params": {},
-  "children": [
-    {
-      "route": "about",
-      "title": "About",
-      "params": {},
-      "children": []
-    },
-    {
-      "route": "profile",
-      "params": {},
-      "children": [
-        {
-          "route": "",
-          "title": "Profile",
-          "params": {},
-          "children": []
-        },
-        {
-          "route": "account",
-          "title": "Account",
-          "params": {},
-          "children": [
-            {
-              "route": "security",
-              "params": {},
-              "children": [
-                {
-                  "route": "password",
-                  "params": {},
-                  "title": "Password",
-                  "children": []
-                },
-                {
-                  "route": "two-factor-auth",
-                  "params": {},
-                  "title": "Two Factor Auth",
-                  "children": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "route": "friends",
-          "params": {},
-          "title": "Friends Layout",
-          "children": [
-            {
-              "route": "list",
-              "title": "List",
-              "params": {},
-              "unknown": {
-                "anotherProp": "prop"
+[
+  {
+    "route": "about",
+    "title": "About",
+    "params": {},
+    "children": []
+  },
+  {
+    "route": "profile",
+    "params": {},
+    "children": [
+      {
+        "route": "",
+        "title": "Profile",
+        "params": {},
+        "children": []
+      },
+      {
+        "route": "account",
+        "title": "Account",
+        "params": {},
+        "children": [
+          {
+            "route": "security",
+            "params": {},
+            "children": [
+              {
+                "route": "password",
+                "params": {},
+                "title": "Password",
+                "children": []
               },
-              "children": []
-            },
-            {
-              "route": ":user?",
-              "children": [
-                {
-                  "route": "edit",
-                  "title": "Friend Edit",
-                  "params": {
-                    ":user?": "opt"
-                  }
-                }
-              ]
-            },
-            {
-              "route": ":user",
-              "title": "Friend Profile",
-              "params": {
-                ":user": "req"
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "route": "messages",
-          "children": [
-            {
-              "route": "*",
-              "title": "Messages",
-              "params": {
-                "wildcard": "*"
+              {
+                "route": "two-factor-auth",
+                "params": {},
+                "title": "Two Factor Auth",
+                "children": []
               }
+            ]
+          }
+        ]
+      },
+      {
+        "route": "friends",
+        "params": {},
+        "title": "Friends Layout",
+        "children": [
+          {
+            "route": "list",
+            "title": "List",
+            "params": {},
+            "unknown": {
+              "anotherProp": "prop"
+            },
+            "children": []
+          },
+          {
+            "route": ":user?",
+            "children": [
+              {
+                "route": "edit",
+                "title": "Friend Edit",
+                "params": {
+                  ":user?": "opt"
+                }
+              }
+            ]
+          },
+          {
+            "route": ":user",
+            "title": "Friend Profile",
+            "params": {
+              ":user": "req"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "route": "messages",
+        "children": [
+          {
+            "route": "*",
+            "title": "Messages",
+            "params": {
+              "wildcard": "*"
             }
-          ]
-        }
-      ]
-    },
-    {
-      "route": "test",
-      "params": {},
-      "children": [
-        {
-          "route": "empty",
-          "params": {},
-          "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "test",
+    "params": {},
+    "children": [
+      {
+        "route": "empty",
+        "params": {},
+        "children": []
+      },
+      {
+        "route": ":optional?",
+        "title": "Optional",
+        "params": {
+          ":optional?": "opt"
         },
-        {
-          "route": ":optional?",
-          "title": "Optional",
-          "params": {
-            ":optional?": "opt"
-          },
-          "children": []
+        "children": []
+      },
+      {
+        "route": "*",
+        "title": "Wildcard",
+        "params": {
+          "*": "*"
         },
-        {
-          "route": "*",
-          "title": "Wildcard",
-          "params": {
-            "*": "*"
-          },
-          "children": []
-        },
-        {
-          "route": "no-default-export",
-          "title": "No Default Export",
-          "params": {},
-          "children": []
-        }
-      ]
-    }
-  ]
-}
+        "children": []
+      },
+      {
+        "route": "no-default-export",
+        "title": "No Default Export",
+        "params": {},
+        "children": []
+      }
+    ]
+  }
+]

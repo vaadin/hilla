@@ -22,7 +22,9 @@ function cleanupRouteMeta(route: Writable<RouteMeta>): void {
     delete route.layout;
   }
 
-  route.children?.sort(({ path: a }, { path: b }) => collator.compare(a, b)).forEach(cleanupRouteMeta);
+  (route.children as RouteMeta[] | undefined)
+    ?.sort(({ path: a }, { path: b }) => collator.compare(a, b))
+    .forEach(cleanupRouteMeta);
 }
 
 describe('@vaadin/hilla-file-router', () => {
@@ -46,10 +48,10 @@ describe('@vaadin/hilla-file-router', () => {
 
     it('should build a route tree', async () => {
       const routes = await collectRoutesFromFS(tmp, { extensions, logger });
-      cleanupRouteMeta(routes);
+      routes.forEach(cleanupRouteMeta);
 
       const expected = createTestingRouteMeta(tmp);
-      cleanupRouteMeta(expected);
+      expected.forEach(cleanupRouteMeta);
 
       expect(routes).to.deep.equal(expected);
       // eslint-disable-next-line @typescript-eslint/unbound-method
