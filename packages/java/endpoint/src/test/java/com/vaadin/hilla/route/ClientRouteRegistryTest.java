@@ -11,9 +11,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class ClientRouteRegistryTest {
@@ -32,7 +34,8 @@ public class ClientRouteRegistryTest {
         mockDevelopmentMode();
         createMockedDevModeFileRouteJson();
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
@@ -48,7 +51,8 @@ public class ClientRouteRegistryTest {
 
         mockDevelopmentMode();
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.anEmptyMap());
@@ -62,7 +66,8 @@ public class ClientRouteRegistryTest {
 
         projectRoot.newFile("frontend/generated/file-routes.json");
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.anEmptyMap());
@@ -74,7 +79,8 @@ public class ClientRouteRegistryTest {
         Mockito.when(deploymentConfiguration.isProductionMode())
                 .thenReturn(true);
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
 
@@ -108,7 +114,8 @@ public class ClientRouteRegistryTest {
         mockDevelopmentMode();
         createMockedDevModeFileRouteJson();
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
 
@@ -137,6 +144,32 @@ public class ClientRouteRegistryTest {
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
     }
 
+    @Test
+    public void when_developmentMode_then_loadLatestDevModeFileRoutesJsonIfNeeded_loads_only_when_fileRoutesJson_changes()
+            throws IOException {
+
+        mockDevelopmentMode();
+        createMockedDevModeFileRouteJson();
+
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
+        var allRoutes = clientRouteRegistry.getAllRoutes();
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
+        clientRouteRegistry.clearRoutes();
+
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
+        allRoutes = clientRouteRegistry.getAllRoutes();
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(0));
+
+        createMockedDevModeFileRouteJson();
+
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
+        allRoutes = clientRouteRegistry.getAllRoutes();
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
+    }
+
     private void mockDevelopmentMode() throws IOException {
         Mockito.when(deploymentConfiguration.isProductionMode())
                 .thenReturn(false);
@@ -154,8 +187,13 @@ public class ClientRouteRegistryTest {
                 StandardCharsets.UTF_8);
         String addedDevToRootRoute = "[{ \"route\": \"dev\", \"children\": "
                 + hierarchicalRoutesAsString + " }]";
-        var fileRoutesJsonFile = projectRoot.newFile("frontend/generated/"
-                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME);
+        final String fileRoutesJsonPath = "frontend/generated/"
+                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME;
+        File fileRoutesJsonFile = projectRoot.getRoot().toPath()
+                .resolve(fileRoutesJsonPath).toFile();
+        if (!fileRoutesJsonFile.exists()) {
+            projectRoot.newFile(fileRoutesJsonPath);
+        }
         try (PrintWriter writer = new PrintWriter(fileRoutesJsonFile)) {
             writer.println(addedDevToRootRoute);
         }
