@@ -29,11 +29,14 @@ import com.vaadin.flow.router.internal.ClientRoutesProvider;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -50,49 +53,49 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
      * A map of registered routes and their corresponding client view
      * configurations with ordered insertion.
      */
-    private final Map<String, ClientViewConfig> registeredRoutes = new ConcurrentHashMap<>();
+    private final Map<String, ClientViewConfig> registeredRoutes = new LinkedHashMap<>();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ClientRouteRegistry.class);
 
+    private volatile LocalDateTime lastUpdated;
+
     /**
      * Returns all registered routes.
      *
      * @return a map of all registered routes
      */
-    public Map<String, ClientViewConfig> getAllRoutes() {
+    public synchronized Map<String, ClientViewConfig> getAllRoutes() {
         return Map.copyOf(registeredRoutes);
     }
 
     /**
-     * Clears all registered routes.
+     * Clears all registered routes. For internal use only.
      */
-    public void clearRoutes() {
+    synchronized void clearRoutes() {
         registeredRoutes.clear();
     }
 
     /**
-     * Adds a new route to the registry.
+     * Adds a new route to the registry. For internal use only.
      *
      * @param route
      *            the route to add
      * @param clientView
      *            the client view to add
-     */
-    public void addRoute(String route, ClientViewConfig clientView) {
-        registeredRoutes.put(route, clientView);
-    }
-
-    /**
-     * Removes a route from the registry.
+     * @throws IllegalStateException
+     *             if the route has already been registered
      *
-     * @param route
-     *            the route to remove
      */
-    public void removeRoute(String route) {
-        registeredRoutes.remove(route);
+    synchronized void addRoute(String route, ClientViewConfig clientView) {
+        if (registeredRoutes.containsKey(route)) {
+            throw new IllegalStateException(
+                    "An attempt to register a route that is already registered. Route: "
+                            + route + " View: " + clientView.getRoute());
+        }
+        registeredRoutes.put(route, clientView);
     }
 
     /**
@@ -102,7 +105,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
      *            the URL path to get the client view configuration for
      * @return - the client view configuration for the given route
      */
-    public ClientViewConfig getRouteByPath(String path) {
+    public synchronized ClientViewConfig getRouteByPath(String path) {
         final Set<String> routes = registeredRoutes.keySet();
         final AntPathMatcher pathMatcher = new AntPathMatcher();
         return Stream.of(addTrailingSlash(path), removeTrailingSlash(path))
@@ -132,12 +135,12 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
      *
      * @param deploymentConfiguration
      *            the deployment configuration
-     *
-     * @return {@code true} if the client routes were successfully registered,
-     *         {@code false} otherwise
+     * @param lastUpdated
+     *            the time of latest loading of the file-routes.json
      */
-    public boolean registerClientRoutes(
-            DeploymentConfiguration deploymentConfiguration) {
+    public synchronized void registerClientRoutes(
+            DeploymentConfiguration deploymentConfiguration,
+            LocalDateTime lastUpdated) {
         var viewsJsonAsResource = getViewsJsonAsResource(
                 deploymentConfiguration);
         if (viewsJsonAsResource == null) {
@@ -147,7 +150,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
                     deploymentConfiguration.isProductionMode()
                             ? "'META-INF/VAADIN'"
                             : "'frontend/generated'");
-            return false;
+            return;
         }
         try (var source = viewsJsonAsResource.openStream()) {
             if (source != null) {
@@ -155,13 +158,31 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
                 registerAndRecurseChildren("",
                         mapper.readValue(source, new TypeReference<>() {
                         }));
-                return true;
+                this.lastUpdated = lastUpdated;
             }
-            return false;
         } catch (IOException e) {
             LOGGER.warn("Failed load {} from {}", FILE_ROUTES_JSON_NAME,
                     viewsJsonAsResource.getPath(), e);
-            return false;
+        }
+    }
+
+    public synchronized void loadLatestDevModeFileRoutesJsonIfNeeded(
+            DeploymentConfiguration deploymentConfiguration) {
+        var devModeFileRoutesJsonFile = deploymentConfiguration
+                .getFrontendFolder().toPath().resolve("generated")
+                .resolve("file-routes.json").toFile();
+        if (!devModeFileRoutesJsonFile.exists()) {
+            LOGGER.debug("No file-routes.json found under {}",
+                    deploymentConfiguration.getFrontendFolder().toPath()
+                            .resolve("generated"));
+            return;
+        }
+        var lastModified = devModeFileRoutesJsonFile.lastModified();
+        var lastModifiedTime = Instant.ofEpochMilli(lastModified)
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+        if (lastUpdated == null || lastModifiedTime.isAfter(lastUpdated)) {
+            LOGGER.debug("Loading latest file-routes.json from dev mode");
+            registerClientRoutes(deploymentConfiguration, lastModifiedTime);
         }
     }
 
@@ -198,7 +219,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
     }
 
     @Override
-    public List<String> getClientRoutes() {
+    public synchronized List<String> getClientRoutes() {
         return getAllRoutes().keySet().stream().toList();
     }
 }
