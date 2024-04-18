@@ -16,23 +16,28 @@
 package com.vaadin.hilla.route;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.router.BeforeEnterListener;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.auth.NavigationAccessControl;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.lang.Nullable;
 
 import com.vaadin.flow.internal.AnnotationReader;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
 import com.vaadin.flow.server.RouteRegistry;
@@ -60,6 +65,8 @@ public class RouteUnifyingIndexHtmlRequestListener
     private final ObjectMapper mapper = new ObjectMapper();
     private final DeploymentConfiguration deploymentConfiguration;
     private final RouteUtil routeUtil;
+    private final NavigationAccessControl accessControl;
+    private final ViewAccessChecker viewAccessChecker;
     private final boolean exposeServerRoutesToClient;
 
     /**
@@ -78,10 +85,15 @@ public class RouteUnifyingIndexHtmlRequestListener
     public RouteUnifyingIndexHtmlRequestListener(
             ClientRouteRegistry clientRouteRegistry,
             DeploymentConfiguration deploymentConfiguration,
-            RouteUtil routeUtil, boolean exposeServerRoutesToClient) {
+            RouteUtil routeUtil,
+            @Nullable NavigationAccessControl accessControl,
+            @Nullable ViewAccessChecker viewAccessChecker,
+            boolean exposeServerRoutesToClient) {
         this.clientRouteRegistry = clientRouteRegistry;
         this.deploymentConfiguration = deploymentConfiguration;
         this.routeUtil = routeUtil;
+        this.accessControl = accessControl;
+        this.viewAccessChecker = viewAccessChecker;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
     }
 
@@ -95,7 +107,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
                     "Exposing server-side views to the client based on user configuration");
-            availableViews.putAll(collectServerViews());
+            availableViews
+                    .putAll(collectServerViews(response.getVaadinRequest()));
         }
 
         if (availableViews.isEmpty()) {
@@ -123,6 +136,7 @@ public class RouteUnifyingIndexHtmlRequestListener
             clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
                     deploymentConfiguration);
         }
+
         var clientViews = new HashMap<String, AvailableViewInfo>();
         clientRouteRegistry.getAllRoutes().entrySet().stream()
                 .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
@@ -142,7 +156,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         return clientViews;
     }
 
-    protected Map<String, AvailableViewInfo> collectServerViews() {
+    protected Map<String, AvailableViewInfo> collectServerViews(
+            VaadinRequest vaadinRequest) {
         var serverViews = new HashMap<String, AvailableViewInfo>();
         final VaadinService vaadinService = VaadinService.getCurrent();
         if (vaadinService == null) {
@@ -152,41 +167,50 @@ public class RouteUnifyingIndexHtmlRequestListener
         }
         final RouteRegistry serverRouteRegistry = vaadinService.getRouter()
                 .getRegistry();
-        serverRouteRegistry.getRegisteredRoutes().forEach(serverView -> {
-            final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
-                    .getNavigationTarget();
-            final String targetUrl = serverView.getTemplate();
-            if (targetUrl != null) {
-                final String url = "/" + targetUrl;
 
-                final String title;
-                PageTitle pageTitle = AnnotationReader
-                        .getAnnotationFor(viewClass, PageTitle.class)
-                        .orElse(null);
-                if (pageTitle != null) {
-                    title = pageTitle.value();
-                } else {
-                    title = serverView.getNavigationTarget().getSimpleName();
-                }
+        List<BeforeEnterListener> accessControls = Stream
+                .of(accessControl, viewAccessChecker).filter(Objects::nonNull)
+                .toList();
 
-                final ClientViewMenuConfig menuConfig = AnnotationReader
-                        .getAnnotationFor(viewClass, Menu.class)
-                        .map(menu -> new ClientViewMenuConfig(
-                                menu.title().isBlank() ? title : menu.title(),
-                                (menu.order() == Long.MIN_VALUE) ? null
-                                        : menu.order(),
-                                menu.icon(), menu.exclude()))
-                        .orElse(null);
+        serverRouteRegistry.getRegisteredAccessibleMenuRoutes(vaadinRequest,
+                accessControls).forEach(serverView -> {
+                    final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
+                            .getNavigationTarget();
+                    final String targetUrl = serverView.getTemplate();
+                    if (targetUrl != null) {
+                        final String url = "/" + targetUrl;
 
-                final Map<String, RouteParamType> routeParameters = getRouteParameters(
-                        serverView);
+                        final String title;
+                        PageTitle pageTitle = AnnotationReader
+                                .getAnnotationFor(viewClass, PageTitle.class)
+                                .orElse(null);
+                        if (pageTitle != null) {
+                            title = pageTitle.value();
+                        } else {
+                            title = serverView.getNavigationTarget()
+                                    .getSimpleName();
+                        }
 
-                final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                        title, null, false, url, false, false, menuConfig,
-                        routeParameters);
-                serverViews.put(url, availableViewInfo);
-            }
-        });
+                        final ClientViewMenuConfig menuConfig = Optional
+                                .ofNullable(serverView.getMenuData())
+                                .map(menu -> new ClientViewMenuConfig(
+                                        (menu.getTitle() == null
+                                                || menu.getTitle().isBlank())
+                                                        ? title
+                                                        : menu.getTitle(),
+                                        menu.getOrder(), menu.getIcon(),
+                                        menu.isExclude()))
+                                .orElse(null);
+
+                        final Map<String, RouteParamType> routeParameters = getRouteParameters(
+                                serverView);
+
+                        final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
+                                title, null, false, url, false, false,
+                                menuConfig, routeParameters);
+                        serverViews.put(url, availableViewInfo);
+                    }
+                });
         return serverViews;
     }
 
