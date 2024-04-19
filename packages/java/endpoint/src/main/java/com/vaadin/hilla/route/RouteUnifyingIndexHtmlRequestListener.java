@@ -31,6 +31,7 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEnterListener;
 import com.vaadin.flow.server.AbstractConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.frontend.FrontendUtils;
@@ -189,7 +190,9 @@ public class RouteUnifyingIndexHtmlRequestListener
                 .toList();
 
         List<RouteData> serverRoutes = Collections.emptyList();
-        if (isClientMenuUsed(vaadinService)) {
+        if (vaadinService.getInstantiator().getMenuAccessControl()
+                .getPopulateClientSideMenu() == MenuAccessControl.PopulateClientMenu.ALWAYS
+                || isClientMenuUsed(vaadinService)) {
             serverRoutes = serverRouteRegistry
                     .getRegisteredAccessibleMenuRoutes(vaadinRequest,
                             accessControls);
