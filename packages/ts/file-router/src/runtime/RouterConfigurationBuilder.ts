@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 import { protectRoute } from '@vaadin/hilla-react-auth';
 import { type ComponentType, createElement } from 'react';
-import { createBrowserRouter, type RouteObject } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  type IndexRouteObject,
+  type NonIndexRouteObject,
+  type RouteObject,
+} from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { AgnosticRoute, Module, RouteModule, RouterConfiguration, ViewConfig } from '../types.js';
@@ -21,7 +26,11 @@ type RouteTransformer<T> = (
   original: RouteObject | undefined,
   overriding: T | undefined,
   children?: readonly RouteObject[],
-) => RouteObject;
+) => RouteObject | undefined;
+
+function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string, value: T] {
+  return [`${route.path ?? ''}-${route.children ? 'n' : 'i'}`, route];
+}
 
 /**
  * A builder for creating a Vaadin-specific router for React with
@@ -55,21 +64,31 @@ export class RouterConfigurationBuilder {
           throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
         }
 
-        const title = module?.config?.title ?? convertComponentNameToTitle(module?.default);
+        const element = module?.default ? createElement(module.default) : undefined;
+        const handle = {
+          ...module?.config,
+          title: module?.config?.title ?? convertComponentNameToTitle(module?.default),
+        };
+
+        if (path === '' && !children) {
+          return {
+            ...original,
+            element,
+            handle,
+            index: true,
+          } as IndexRouteObject;
+        }
 
         return {
           ...original,
           path: module?.config?.route ?? path,
-          element: module?.default ? createElement(module.default) : undefined,
-          children: children as RouteObject[] | undefined,
-          handle: {
-            ...module?.config,
-            title,
-          },
-        } as RouteObject;
+          element,
+          children,
+          handle,
+        } as NonIndexRouteObject;
       }
 
-      return original!;
+      return original;
     });
   }
 
@@ -138,8 +157,8 @@ export class RouterConfigurationBuilder {
         [existingRoutes, routes],
         ([original, added], next) => {
           if (original && added) {
-            const originalMap = new Map(original.map((route) => [route.path, route]));
-            const addedMap = new Map(added.map((route) => [route.path, route]));
+            const originalMap = new Map(original.map((route) => createRouteEntry(route)));
+            const addedMap = new Map(added.map((route) => createRouteEntry(route)));
 
             const paths = new Set([...originalMap.keys(), ...addedMap.keys()]);
 
@@ -147,7 +166,7 @@ export class RouterConfigurationBuilder {
               const originalRoute = originalMap.get(path);
               const addedRoute = addedMap.get(path);
 
-              let route: RouteObject;
+              let route: RouteObject | undefined;
               if (originalRoute && addedRoute) {
                 route = callback(originalRoute, addedRoute, next(originalRoute.children, addedRoute.children));
               } else if (originalRoute) {
@@ -156,14 +175,20 @@ export class RouterConfigurationBuilder {
                 route = callback(undefined, addedRoute, next(undefined, addedRoute!.children));
               }
 
-              originalMap.set(path, route);
+              if (route) {
+                originalMap.set(path, route);
+              }
             }
 
             return [...originalMap.values()];
           } else if (original) {
-            return original.map((route) => callback(route, undefined, next(route.children, undefined)));
+            return original
+              .map((route) => callback(route, undefined, next(route.children, undefined)))
+              .filter(Boolean) as readonly RouteObject[];
           } else if (added) {
-            return added.map((route) => callback(undefined, route, next(undefined, route.children)));
+            return added
+              .map((route) => callback(undefined, route, next(undefined, route.children)))
+              .filter(Boolean) as readonly RouteObject[];
           }
 
           return undefined;

@@ -11,6 +11,9 @@ use(sinonChai);
 describe('RouterBuilder', () => {
   let builder: RouterConfigurationBuilder;
 
+  function Index() {
+    return <></>;
+  }
   function NextTest() {
     return <></>;
   }
@@ -78,9 +81,14 @@ describe('RouterBuilder', () => {
           path: '',
           children: [
             {
+              path: '',
+              module: {
+                default: Index,
+              },
+            },
+            {
               path: '/test',
               module: {
-                // eslint-disable-next-line func-name-matching
                 default: AltTest,
                 config: {
                   route: '/alt-test',
@@ -90,7 +98,6 @@ describe('RouterBuilder', () => {
             {
               path: '/next-test',
               module: {
-                // eslint-disable-next-line func-name-matching
                 default: NextTest,
               },
             },
@@ -110,6 +117,13 @@ describe('RouterBuilder', () => {
               title: 'Alt Test',
               route: '/alt-test',
             },
+          },
+          {
+            element: <Index />,
+            handle: {
+              title: 'Index',
+            },
+            index: true,
           },
           {
             path: '/next-test',
@@ -170,6 +184,10 @@ describe('RouterBuilder', () => {
       {
         path: '',
         children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
           {
             path: '/test',
             children: [
