@@ -15,7 +15,10 @@
  */
 package com.vaadin.hilla.route;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +29,16 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEnterListener;
+import com.vaadin.flow.server.AbstractConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.route.records.ClientViewConfig;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +57,8 @@ import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewMenuConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Index HTML request listener for collecting the client side and the server
  * side views and adding them to index.html response.
@@ -58,6 +69,11 @@ public class RouteUnifyingIndexHtmlRequestListener
             window.Vaadin = window.Vaadin ?? {};
             window.Vaadin.server = window.Vaadin.server ?? {};
             window.Vaadin.server.views = %s;""";
+
+    public static final String FILE_ROUTES_JSON_NAME = "file-routes.json";
+    public static final String FILE_ROUTES_JSON_PROD_PATH = "/META-INF/VAADIN/"
+            + FILE_ROUTES_JSON_NAME;
+
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
 
@@ -172,45 +188,48 @@ public class RouteUnifyingIndexHtmlRequestListener
                 .of(accessControl, viewAccessChecker).filter(Objects::nonNull)
                 .toList();
 
-        serverRouteRegistry.getRegisteredAccessibleMenuRoutes(vaadinRequest,
-                accessControls).forEach(serverView -> {
-                    final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
-                            .getNavigationTarget();
-                    final String targetUrl = serverView.getTemplate();
-                    if (targetUrl != null) {
-                        final String url = "/" + targetUrl;
+        List<RouteData> serverRoutes = Collections.emptyList();
+        if (isClientMenuUsed(vaadinService)) {
+            serverRoutes = serverRouteRegistry
+                    .getRegisteredAccessibleMenuRoutes(vaadinRequest,
+                            accessControls);
+        }
+        serverRoutes.forEach(serverView -> {
+            final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
+                    .getNavigationTarget();
+            final String targetUrl = serverView.getTemplate();
+            if (targetUrl != null) {
+                final String url = "/" + targetUrl;
 
-                        final String title;
-                        PageTitle pageTitle = AnnotationReader
-                                .getAnnotationFor(viewClass, PageTitle.class)
-                                .orElse(null);
-                        if (pageTitle != null) {
-                            title = pageTitle.value();
-                        } else {
-                            title = serverView.getNavigationTarget()
-                                    .getSimpleName();
-                        }
+                final String title;
+                PageTitle pageTitle = AnnotationReader
+                        .getAnnotationFor(viewClass, PageTitle.class)
+                        .orElse(null);
+                if (pageTitle != null) {
+                    title = pageTitle.value();
+                } else {
+                    title = serverView.getNavigationTarget().getSimpleName();
+                }
 
-                        final ClientViewMenuConfig menuConfig = Optional
-                                .ofNullable(serverView.getMenuData())
-                                .map(menu -> new ClientViewMenuConfig(
-                                        (menu.getTitle() == null
-                                                || menu.getTitle().isBlank())
-                                                        ? title
-                                                        : menu.getTitle(),
-                                        menu.getOrder(), menu.getIcon(),
-                                        menu.isExclude()))
-                                .orElse(null);
+                final ClientViewMenuConfig menuConfig = Optional
+                        .ofNullable(serverView.getMenuData())
+                        .map(menu -> new ClientViewMenuConfig(
+                                (menu.getTitle() == null
+                                        || menu.getTitle().isBlank()) ? title
+                                                : menu.getTitle(),
+                                menu.getOrder(), menu.getIcon(),
+                                menu.isExclude()))
+                        .orElse(null);
 
-                        final Map<String, RouteParamType> routeParameters = getRouteParameters(
-                                serverView);
+                final Map<String, RouteParamType> routeParameters = getRouteParameters(
+                        serverView);
 
-                        final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                                title, null, false, url, false, false,
-                                menuConfig, routeParameters);
-                        serverViews.put(url, availableViewInfo);
-                    }
-                });
+                final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
+                        title, null, false, url, false, false, menuConfig,
+                        routeParameters);
+                serverViews.put(url, availableViewInfo);
+            }
+        });
         return serverViews;
     }
 
@@ -230,5 +249,32 @@ public class RouteUnifyingIndexHtmlRequestListener
             }
         });
         return routeParameters;
+    }
+
+    boolean isClientMenuUsed(VaadinService vaadinService) {
+        try {
+            String fileRoutesJson = readFileRoutesJsonFile(
+                    ApplicationConfiguration.get(vaadinService.getContext()));
+            return fileRoutesJson.contains("\"title\":\"Layout\"");
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private static String readFileRoutesJsonFile(
+            AbstractConfiguration configuration) throws IOException {
+        if (configuration.isProductionMode()) {
+            try (InputStream inputStream = FrontendUtils.class
+                    .getResourceAsStream(FILE_ROUTES_JSON_PROD_PATH)) {
+                if (inputStream != null) {
+                    return IOUtils.toString(inputStream, UTF_8);
+                }
+                return "";
+            }
+        }
+        return FileUtils.readFileToString(new File(
+                FrontendUtils.getFrontendGeneratedFolder(
+                        FrontendUtils.getProjectFrontendDir(configuration)),
+                FILE_ROUTES_JSON_NAME), UTF_8);
     }
 }

@@ -67,7 +67,12 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         routeUtil = new RouteUtil(clientRouteRegistry);
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
                 clientRouteRegistry, deploymentConfiguration, routeUtil, null,
-                null, true);
+                null, true) {
+            @Override
+            protected boolean isClientMenuUsed(VaadinService vaadinService) {
+                return true;
+            }
+        };
 
         indexHtmlResponse = Mockito.mock(IndexHtmlResponse.class);
         vaadinRequest = Mockito.mock(VaadinRequest.class);
@@ -223,6 +228,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(true);
             Mockito.when(vaadinRequest.isUserInRole("ROLE_USER"))
                     .thenReturn(true);
+
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
         Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
