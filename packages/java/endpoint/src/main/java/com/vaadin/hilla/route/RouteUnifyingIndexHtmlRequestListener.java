@@ -260,7 +260,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                     ApplicationConfiguration.get(vaadinService.getContext()));
             var json = mapper.readTree(fileRoutesJson);
             // as the client registry has no information about layouts, the JSON
-            // is parsed again to search for a root node whit children, which
+            // is parsed again to search for a root node with children, which
             // means that we have a root layout.
             return json.has(0) && json.get(0).has("children")
                     && json.get(0).get("children").isArray()
