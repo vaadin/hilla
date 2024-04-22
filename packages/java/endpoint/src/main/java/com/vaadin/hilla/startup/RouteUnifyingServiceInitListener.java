@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 /**
  * Service init listener to add the
  * {@link RouteUnifyingIndexHtmlRequestListener} to the service and to register
@@ -83,6 +85,12 @@ public class RouteUnifyingServiceInitListener
             LOGGER.debug(
                     "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
                     deploymentMode);
+            if (deploymentConfiguration.isProductionMode()) {
+                clientRouteRegistry.registerClientRoutes(
+                        deploymentConfiguration, LocalDateTime.now());
+                LOGGER.debug(
+                        "Production mode: Registered client routes to ClientRouteRegistry.");
+            }
         }
     }
 }

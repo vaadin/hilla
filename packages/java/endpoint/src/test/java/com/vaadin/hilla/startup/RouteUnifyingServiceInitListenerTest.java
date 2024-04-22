@@ -17,6 +17,9 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+
 public class RouteUnifyingServiceInitListenerTest {
 
     private RouteUnifyingServiceInitListener routeUnifyingServiceInitListener;
@@ -31,7 +34,7 @@ public class RouteUnifyingServiceInitListenerTest {
 
     @Before
     public void setup() throws IOException {
-        clientRouteRegistry = new ClientRouteRegistry();
+        clientRouteRegistry = Mockito.mock(ClientRouteRegistry.class);
         routeUnifyingConfigurationProperties
                 .setExposeServerRoutesToClient(true);
         routeUtil = Mockito.mock(RouteUtil.class);
@@ -43,8 +46,6 @@ public class RouteUnifyingServiceInitListenerTest {
                 .mock(DeploymentConfiguration.class);
         Mockito.when(mockVaadinService.getDeploymentConfiguration())
                 .thenReturn(mockDeploymentConfiguration);
-        Mockito.when(mockDeploymentConfiguration.isProductionMode())
-                .thenReturn(true);
         event = new ServiceInitEvent(mockVaadinService);
     }
 
@@ -70,6 +71,30 @@ public class RouteUnifyingServiceInitListenerTest {
         Assert.assertFalse(
                 "RouteIndexHtmlRequestListener added unexpectedly when React is not enabled",
                 hasRouteUnifyingIndexHtmlRequestListenerAdded(event));
+    }
+
+    @Test
+    public void should_registerClientRoutes_when_in_prodMode_and_react_is_enabled() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(true);
+        Mockito.when(mockDeploymentConfiguration.isProductionMode())
+                .thenReturn(true);
+
+        routeUnifyingServiceInitListener.serviceInit(event);
+        Mockito.verify(clientRouteRegistry, times(1))
+                .registerClientRoutes(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void should_not_registerClientRoutes_when_in_devMode_and_react_is_enabled() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(true);
+        Mockito.when(mockDeploymentConfiguration.isProductionMode())
+                .thenReturn(false);
+
+        routeUnifyingServiceInitListener.serviceInit(event);
+        Mockito.verify(clientRouteRegistry, never())
+                .registerClientRoutes(Mockito.any(), Mockito.any());
     }
 
     private boolean hasRouteUnifyingIndexHtmlRequestListenerAdded(

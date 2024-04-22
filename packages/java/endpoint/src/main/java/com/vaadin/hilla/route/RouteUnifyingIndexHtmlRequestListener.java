@@ -62,8 +62,6 @@ public class RouteUnifyingIndexHtmlRequestListener
     private final RouteUtil routeUtil;
     private final boolean exposeServerRoutesToClient;
 
-    private LocalDateTime lastUpdated;
-
     /**
      * Creates a new listener instance with the given route registry.
      *
@@ -122,12 +120,9 @@ public class RouteUnifyingIndexHtmlRequestListener
             Predicate<? super String> isUserInRole,
             boolean isUserAuthenticated) {
         if (!deploymentConfiguration.isProductionMode()) {
-            loadLatestDevModeFileRoutesJsonIfNeeded();
-        } else if (lastUpdated == null) {
-            // initial (and only) registration in production mode:
-            registerClientRoutes(LocalDateTime.now());
+            clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                    deploymentConfiguration);
         }
-
         var clientViews = new HashMap<String, AvailableViewInfo>();
         clientRouteRegistry.getAllRoutes().entrySet().stream()
                 .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
@@ -145,32 +140,6 @@ public class RouteUnifyingIndexHtmlRequestListener
                     clientViews.put(route, availableViewInfo);
                 });
         return clientViews;
-    }
-
-    private void loadLatestDevModeFileRoutesJsonIfNeeded() {
-        var devModeFileRoutesJsonFile = deploymentConfiguration
-                .getFrontendFolder().toPath().resolve("generated")
-                .resolve("file-routes.json").toFile();
-        if (!devModeFileRoutesJsonFile.exists()) {
-            LOGGER.debug("No file-routes.json found under {}",
-                    deploymentConfiguration.getFrontendFolder().toPath()
-                            .resolve("generated"));
-            return;
-        }
-        var lastModified = devModeFileRoutesJsonFile.lastModified();
-        var lastModifiedTime = Instant.ofEpochMilli(lastModified)
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-        if (lastUpdated == null || lastModifiedTime.isAfter(lastUpdated)) {
-            registerClientRoutes(lastModifiedTime);
-        }
-    }
-
-    private void registerClientRoutes(LocalDateTime newLastUpdated) {
-        var hasClientRoutesRegistered = clientRouteRegistry
-                .registerClientRoutes(deploymentConfiguration);
-        if (hasClientRoutesRegistered) {
-            lastUpdated = newLastUpdated;
-        }
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews() {
