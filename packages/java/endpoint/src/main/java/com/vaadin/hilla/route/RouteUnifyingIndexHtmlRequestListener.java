@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.vaadin.flow.internal.AnnotationReader;
+import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
 import com.vaadin.flow.server.RouteRegistry;
@@ -38,6 +40,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
+import com.vaadin.hilla.route.records.ClientViewMenuConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 
 /**
@@ -58,8 +61,6 @@ public class RouteUnifyingIndexHtmlRequestListener
     private final DeploymentConfiguration deploymentConfiguration;
     private final RouteUtil routeUtil;
     private final boolean exposeServerRoutesToClient;
-
-    private LocalDateTime lastUpdated;
 
     /**
      * Creates a new listener instance with the given route registry.
@@ -119,12 +120,9 @@ public class RouteUnifyingIndexHtmlRequestListener
             Predicate<? super String> isUserInRole,
             boolean isUserAuthenticated) {
         if (!deploymentConfiguration.isProductionMode()) {
-            loadLatestDevModeFileRoutesJsonIfNeeded();
-        } else if (lastUpdated == null) {
-            // initial (and only) registration in production mode:
-            registerClientRoutes(LocalDateTime.now());
+            clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                    deploymentConfiguration);
         }
-
         var clientViews = new HashMap<String, AvailableViewInfo>();
         clientRouteRegistry.getAllRoutes().entrySet().stream()
                 .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
@@ -142,32 +140,6 @@ public class RouteUnifyingIndexHtmlRequestListener
                     clientViews.put(route, availableViewInfo);
                 });
         return clientViews;
-    }
-
-    private void loadLatestDevModeFileRoutesJsonIfNeeded() {
-        var devModeFileRoutesJsonFile = deploymentConfiguration
-                .getFrontendFolder().toPath().resolve("generated")
-                .resolve("file-routes.json").toFile();
-        if (!devModeFileRoutesJsonFile.exists()) {
-            LOGGER.debug("No file-routes.json found under {}",
-                    deploymentConfiguration.getFrontendFolder().toPath()
-                            .resolve("generated"));
-            return;
-        }
-        var lastModified = devModeFileRoutesJsonFile.lastModified();
-        var lastModifiedTime = Instant.ofEpochMilli(lastModified)
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-        if (lastUpdated == null || lastModifiedTime.isAfter(lastUpdated)) {
-            registerClientRoutes(lastModifiedTime);
-        }
-    }
-
-    private void registerClientRoutes(LocalDateTime newLastUpdated) {
-        var hasClientRoutesRegistered = clientRouteRegistry
-                .registerClientRoutes(deploymentConfiguration);
-        if (hasClientRoutesRegistered) {
-            lastUpdated = newLastUpdated;
-        }
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews() {
@@ -188,18 +160,29 @@ public class RouteUnifyingIndexHtmlRequestListener
                 final String url = "/" + targetUrl;
 
                 final String title;
-                PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
+                PageTitle pageTitle = AnnotationReader
+                        .getAnnotationFor(viewClass, PageTitle.class)
+                        .orElse(null);
                 if (pageTitle != null) {
                     title = pageTitle.value();
                 } else {
                     title = serverView.getNavigationTarget().getSimpleName();
                 }
 
+                final ClientViewMenuConfig menuConfig = AnnotationReader
+                        .getAnnotationFor(viewClass, Menu.class)
+                        .map(menu -> new ClientViewMenuConfig(
+                                menu.title().isBlank() ? title : menu.title(),
+                                (menu.order() == Long.MIN_VALUE) ? null
+                                        : menu.order(),
+                                menu.icon(), menu.exclude()))
+                        .orElse(null);
+
                 final Map<String, RouteParamType> routeParameters = getRouteParameters(
                         serverView);
 
                 final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                        title, null, false, url, false, false, null,
+                        title, null, false, url, false, false, menuConfig,
                         routeParameters);
                 serverViews.put(url, availableViewInfo);
             }
