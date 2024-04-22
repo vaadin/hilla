@@ -24,7 +24,7 @@ interface ProtectedRouteProps {
   element: JSX.Element;
 }
 
-function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps): JSX.Element | null {
+export function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps): JSX.Element | null {
   const {
     state: { initializing, loading, user },
     hasAccess,
