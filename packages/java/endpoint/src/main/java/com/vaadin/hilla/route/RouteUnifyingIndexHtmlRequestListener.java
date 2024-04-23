@@ -15,9 +15,7 @@
  */
 package com.vaadin.hilla.route;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,17 +27,12 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEnterListener;
-import com.vaadin.flow.server.AbstractConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +50,6 @@ import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewMenuConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Index HTML request listener for collecting the client side and the server
@@ -188,8 +179,7 @@ public class RouteUnifyingIndexHtmlRequestListener
         List<RouteData> serverRoutes = Collections.emptyList();
         if (vaadinService.getInstantiator().getMenuAccessControl()
                 .getPopulateClientSideMenu() == MenuAccessControl.PopulateClientMenu.ALWAYS
-                || clientRouteRegistry.isClientMenuUsed(
-                        vaadinService.getDeploymentConfiguration())) {
+                || clientRouteRegistry.hasMainLayout()) {
             serverRoutes = serverRouteRegistry
                     .getRegisteredAccessibleMenuRoutes(vaadinRequest,
                             accessControls);
@@ -250,5 +240,4 @@ public class RouteUnifyingIndexHtmlRequestListener
         });
         return routeParameters;
     }
-
 }

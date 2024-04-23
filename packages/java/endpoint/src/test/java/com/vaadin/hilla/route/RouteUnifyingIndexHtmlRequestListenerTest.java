@@ -68,9 +68,6 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .thenReturn(deploymentConfiguration);
         Mockito.when(clientRouteRegistry.getAllRoutes())
                 .thenReturn(prepareClientRoutes());
-        Mockito.when(
-                clientRouteRegistry.isClientMenuUsed(deploymentConfiguration))
-                .thenReturn(true);
         routeUtil = new RouteUtil(clientRouteRegistry);
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
                 clientRouteRegistry, deploymentConfiguration, routeUtil, null,
