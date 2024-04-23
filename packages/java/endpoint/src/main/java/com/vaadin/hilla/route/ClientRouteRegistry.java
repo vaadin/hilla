@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import org.springframework.util.AntPathMatcher;
 import com.vaadin.flow.router.internal.ClientRoutesProvider;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
@@ -38,6 +40,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Keeps track of registered client side routes.
@@ -204,6 +208,21 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         }
     }
 
+    private String readFileRoutesJsonFile(
+            DeploymentConfiguration deploymentConfiguration)
+            throws IOException {
+        var viewsJsonAsResource = getViewsJsonAsResource(
+                deploymentConfiguration);
+        if (viewsJsonAsResource != null) {
+            try (InputStream inputStream = viewsJsonAsResource.openStream()) {
+                if (inputStream != null) {
+                    return IOUtils.toString(inputStream, UTF_8);
+                }
+            }
+        }
+        return null;
+    }
+
     private void registerAndRecurseChildren(String basePath,
             ClientViewConfig view) {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
@@ -216,6 +235,26 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
                 child.setParent(view);
                 registerAndRecurseChildren(path, child);
             });
+        }
+    }
+
+    public boolean isClientMenuUsed(
+            DeploymentConfiguration deploymentConfiguration) {
+        try {
+            String fileRoutesJson = readFileRoutesJsonFile(
+                    deploymentConfiguration);
+            if (fileRoutesJson == null) {
+                return false;
+            }
+            var json = mapper.readTree(fileRoutesJson);
+            // as the client registry has no information about layouts, the JSON
+            // is parsed again to search for a root node with children, which
+            // means that we have a root layout.
+            return json.has(0) && json.get(0).has("children")
+                    && json.get(0).get("children").isArray()
+                    && !json.get(0).get("children").isEmpty();
+        } catch (IOException e) {
+            return false;
         }
     }
 

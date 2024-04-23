@@ -3,9 +3,12 @@ package com.vaadin.hilla.route;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -168,6 +171,30 @@ public class ClientRouteRegistryTest {
                 deploymentConfiguration);
         allRoutes = clientRouteRegistry.getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJsonWithMainLayout_then_isClientMenuUsed_true()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = "[{ \"route\": \"\", \"children\": [ {} ]}]";
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        Assert.assertTrue(
+                clientRouteRegistry.isClientMenuUsed(deploymentConfiguration));
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJsonWithoutMainLayout_then_isClientMenuUsed_false()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = "[{ \"route\": \"\", \"children\": []}]";
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        Assert.assertFalse(
+                clientRouteRegistry.isClientMenuUsed(deploymentConfiguration));
     }
 
     private void mockDevelopmentMode() throws IOException {

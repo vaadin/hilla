@@ -71,10 +71,6 @@ public class RouteUnifyingIndexHtmlRequestListener
             window.Vaadin.server = window.Vaadin.server ?? {};
             window.Vaadin.server.views = %s;""";
 
-    public static final String FILE_ROUTES_JSON_NAME = "file-routes.json";
-    public static final String FILE_ROUTES_JSON_PROD_PATH = "/META-INF/VAADIN/"
-            + FILE_ROUTES_JSON_NAME;
-
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
 
@@ -192,7 +188,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         List<RouteData> serverRoutes = Collections.emptyList();
         if (vaadinService.getInstantiator().getMenuAccessControl()
                 .getPopulateClientSideMenu() == MenuAccessControl.PopulateClientMenu.ALWAYS
-                || isClientMenuUsed(vaadinService)) {
+                || clientRouteRegistry.isClientMenuUsed(
+                        vaadinService.getDeploymentConfiguration())) {
             serverRoutes = serverRouteRegistry
                     .getRegisteredAccessibleMenuRoutes(vaadinRequest,
                             accessControls);
@@ -254,36 +251,4 @@ public class RouteUnifyingIndexHtmlRequestListener
         return routeParameters;
     }
 
-    boolean isClientMenuUsed(VaadinService vaadinService) {
-        try {
-            String fileRoutesJson = readFileRoutesJsonFile(
-                    ApplicationConfiguration.get(vaadinService.getContext()));
-            var json = mapper.readTree(fileRoutesJson);
-            // as the client registry has no information about layouts, the JSON
-            // is parsed again to search for a root node with children, which
-            // means that we have a root layout.
-            return json.has(0) && json.get(0).has("children")
-                    && json.get(0).get("children").isArray()
-                    && !json.get(0).get("children").isEmpty();
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    private static String readFileRoutesJsonFile(
-            AbstractConfiguration configuration) throws IOException {
-        if (configuration.isProductionMode()) {
-            try (InputStream inputStream = FrontendUtils.class
-                    .getResourceAsStream(FILE_ROUTES_JSON_PROD_PATH)) {
-                if (inputStream != null) {
-                    return IOUtils.toString(inputStream, UTF_8);
-                }
-                return "";
-            }
-        }
-        return FileUtils.readFileToString(new File(
-                FrontendUtils.getFrontendGeneratedFolder(
-                        FrontendUtils.getProjectFrontendDir(configuration)),
-                FILE_ROUTES_JSON_NAME), UTF_8);
-    }
 }
