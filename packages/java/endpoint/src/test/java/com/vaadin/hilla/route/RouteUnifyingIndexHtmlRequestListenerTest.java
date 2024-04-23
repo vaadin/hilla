@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
 import org.hamcrest.MatcherAssert;
@@ -32,12 +33,15 @@ import com.vaadin.flow.router.RouteParameterData;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RouteUnifyingIndexHtmlRequestListenerTest {
 
@@ -103,6 +107,13 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final Map<String, ClientViewConfig> clientRoutes = prepareClientRoutes();
         Mockito.when(clientRouteRegistry.getAllRoutes())
                 .thenReturn(clientRoutes);
+
+        var instantiator = mock(Instantiator.class);
+        var menuAccessControl = mock(MenuAccessControl.class);
+        when(vaadinService.getInstantiator()).thenReturn(instantiator);
+        when(instantiator.getMenuAccessControl()).thenReturn(menuAccessControl);
+        when(menuAccessControl.getPopulateClientSideMenu())
+                .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
     }
 
     private Map<String, ClientViewConfig> prepareClientRoutes() {
