@@ -219,6 +219,18 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         }
     }
 
+    /**
+     * Checks if the route registry has a main layout.
+     * <ul>
+     * A main layout is an route that:
+     * </ul>
+     * <li>has an empty route path</li>
+     * <li>has a non-null children list (can be empty)</li>
+     * <li>has no parent</li>
+     *
+     * @return {@code true} if the registry has a main layout, {@code false}
+     *         otherwise
+     */
     public synchronized boolean hasMainLayout() {
         return getAllRoutes().values().stream()
                 .anyMatch(r -> r.getRoute().isBlank() && r.getChildren() != null
