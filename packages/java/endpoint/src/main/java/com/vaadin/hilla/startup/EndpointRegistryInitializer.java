@@ -32,6 +32,11 @@ public class EndpointRegistryInitializer implements VaadinServiceInitListener {
         var deploymentConfig = event.getSource().getDeploymentConfiguration();
         var openApiResource = getOpenApiAsResource(deploymentConfig);
         endpointController.registerEndpoints(openApiResource);
+        try {
+            HillaStats.report(deploymentConfig);
+        } catch (Throwable e) {
+            LOGGER.debug("Failed to report Hilla statistics", e);
+        }
     }
 
     private URL getOpenApiAsResource(DeploymentConfiguration deploymentConfig) {

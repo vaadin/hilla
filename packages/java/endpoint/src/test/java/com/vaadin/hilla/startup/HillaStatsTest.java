@@ -13,43 +13,33 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla;
+package com.vaadin.hilla.startup;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.Platform;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 @NotThreadSafe
 public class HillaStatsTest {
-    private ClassLoader oldContextClassLoader;
-
-    @Rule
-    public TemporaryFolder temporary = new TemporaryFolder();
-
-    @Before
-    public void rememberContextClassLoader() throws Exception {
-        oldContextClassLoader = Thread.currentThread().getContextClassLoader();
-        fakeHilla(false);
-    }
 
     @Before
     @After
@@ -61,42 +51,41 @@ public class HillaStatsTest {
         memoizedHillaVersionField.set(null, null);
     }
 
-    @After
-    public void restoreContextClassLoader() {
-        Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-    }
+    @Before
+    public void setup() {
 
-    private URL fakeJar(String artifactId, String version) throws IOException {
-        final Path jar = temporary.newFolder().toPath();
-        final Path pomProperties = jar
-                .resolve("META-INF/maven/com.vaadin.hilla/" + artifactId
-                        + "/pom.properties");
-        Files.createDirectories(pomProperties.getParent());
-        Files.writeString(pomProperties, "version=" + version);
-        return jar.toUri().toURL();
     }
 
     private void fakeHilla(boolean react) throws IOException {
-        final LinkedList<URL> classpath = new LinkedList<>();
-        classpath.add(fakeJar("hilla", "2.1.1"));
-        if (react) {
-            classpath.add(fakeJar("hilla-react", "2.1.1"));
-        }
-        final ClassLoader classLoader = new URLClassLoader(
-                classpath.toArray(new URL[0]), null);
-        Thread.currentThread().setContextClassLoader(classLoader);
+
     }
 
     @Test
     @Ignore("https://github.com/vaadin/hilla/issues/2129")
-    public void testLitIsReportedByDefault() {
-        Map<String, String> entries = getEntries();
-        assertEquals("entries: " + entries, 1, entries.size());
-        HillaStats.report();
-        entries = getEntries();
-        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla"));
-        assertEquals("entries: " + entries, "2.1.1", entries.get("hilla+lit"));
-        assertNull("entries: " + entries, entries.get("hilla+react"));
+    public void when_hillaIsUsed_and_reactIsNotEnabled_LitIsReportedByDefault() {
+        try (MockedStatic<Platform> mockedStaticPlatform = mockStatic(
+                Platform.class);
+                MockedStatic<FrontendUtils> mockedStaticFrontendUtils = mockStatic(
+                        FrontendUtils.class)) {
+            mockedStaticPlatform.when(Platform::getHillaVersion)
+                .thenReturn(Optional.of("24.4.0"));
+            mockedStaticFrontendUtils
+                    .when(() -> FrontendUtils.isHillaUsed(Mockito.any()))
+                    .thenReturn(true);
+
+            DeploymentConfiguration deploymentConfiguration = Mockito
+                    .mock(DeploymentConfiguration.class);
+            when(deploymentConfiguration.isReactEnabled()).thenReturn(false);
+
+            Map<String, String> entries = getEntries();
+            assertEquals("entries: " + entries, 1, entries.size());
+            HillaStats.report(deploymentConfiguration);
+            entries = getEntries();
+            assertEquals("entries: " + entries, "24.4.0", entries.get("hilla"));
+            assertEquals("entries: " + entries, "24.4.0",
+                    entries.get("hilla+lit"));
+            assertNull("entries: " + entries, entries.get("hilla+react"));
+        }
     }
 
     private static Map<String, String> getEntries() {
@@ -107,11 +96,12 @@ public class HillaStatsTest {
 
     @Test
     @Ignore("https://github.com/vaadin/hilla/issues/2129")
-    public void testReactIsReportedProperly() throws Exception {
+    public void when_hillaIsUsed_and_reactIsEnabled_ReactIsReportedProperly()
+            throws Exception {
         Map<String, String> entries = getEntries();
         assertEquals("entries: " + entries, 1, entries.size());
         fakeHilla(true);
-        HillaStats.report();
+        // HillaStats.report();
         entries = getEntries();
         assertEquals("entries: " + entries, "2.1.1", entries.get("hilla"));
         assertEquals("entries: " + entries, "2.1.1",
