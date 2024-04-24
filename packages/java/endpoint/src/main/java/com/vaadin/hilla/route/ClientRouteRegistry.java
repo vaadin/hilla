@@ -62,7 +62,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
 
     private volatile LocalDateTime lastUpdated;
 
-    private boolean hasMainLayout;
+    private volatile boolean hasMainLayout;
 
     /**
      * Returns all registered routes.
@@ -212,7 +212,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
                 ? basePath
                 : basePath + '/' + view.getRoute();
-        if (isMainLayout(view)) {
+        if (!hasMainLayout && isMainLayout(view)) {
             hasMainLayout = true;
         }
         if (view.getChildren() == null || view.getChildren().isEmpty()) {

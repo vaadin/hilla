@@ -224,15 +224,21 @@ public class ClientRouteRegistryTest {
     public void when_developmentMode_fileRoutesJsonWithoutMainLayout_then_hasMainLayout_false()
             throws IOException {
         mockDevelopmentMode();
+        // @formatter:off
+        // views/
+        // |_ some-route/
+        //    |_ @index.tsx
+        // @formatter:on
         String fileRoutesJson = """
                 [
                     {
                         "route": "some-route",
+                        "params": {},
                         "children": [
                             {
                                 "route": "",
                                 "params": {},
-                                "title": "Index"
+                                "title": "some-route"
                             }
                         ]
                     }
