@@ -62,6 +62,8 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
 
     private volatile LocalDateTime lastUpdated;
 
+    private boolean hasMainLayout;
+
     /**
      * Returns all registered routes.
      *
@@ -75,6 +77,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
      * Clears all registered routes. For internal use only.
      */
     synchronized void clearRoutes() {
+        hasMainLayout = false;
         registeredRoutes.clear();
     }
 
@@ -209,6 +212,9 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
                 ? basePath
                 : basePath + '/' + view.getRoute();
+        if (isMainLayout(view)) {
+            hasMainLayout = true;
+        }
         if (view.getChildren() == null || view.getChildren().isEmpty()) {
             addRoute(path, view);
         } else {
@@ -219,23 +225,19 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         }
     }
 
+    private boolean isMainLayout(ClientViewConfig view) {
+        return (view.getRoute() == null || view.getRoute().isBlank())
+                && view.getChildren() != null && view.getParent() == null;
+    }
+
     /**
-     * Checks if the route registry has a main layout.
-     * <p>
-     * A main layout is an route that:
-     * <ul>
-     * <li>has an empty route path</li>
-     * <li>has a non-null children list (can be empty)</li>
-     * <li>has no parent</li>
-     * </ul>
+     * Gets whether the registry has a main layout.
      *
      * @return {@code true} if the registry has a main layout, {@code false}
      *         otherwise
      */
     public synchronized boolean hasMainLayout() {
-        return getAllRoutes().values().stream()
-                .anyMatch(r -> r.getRoute().isBlank() && r.getChildren() != null
-                        && r.getParent() == null);
+        return hasMainLayout;
     }
 
     @Override
