@@ -40,7 +40,7 @@ public class RouteUnifyingServiceInitListenerTest {
         routeUtil = Mockito.mock(RouteUtil.class);
         routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(
                 clientRouteRegistry, routeUtil,
-                routeUnifyingConfigurationProperties);
+                routeUnifyingConfigurationProperties, null, null);
         VaadinService mockVaadinService = Mockito.mock(VaadinService.class);
         mockDeploymentConfiguration = Mockito
                 .mock(DeploymentConfiguration.class);
