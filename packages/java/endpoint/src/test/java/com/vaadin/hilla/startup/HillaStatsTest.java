@@ -51,15 +51,6 @@ public class HillaStatsTest {
         memoizedHillaVersionField.set(null, null);
     }
 
-    @Before
-    public void setup() {
-
-    }
-
-    private void fakeHilla(boolean react) throws IOException {
-
-    }
-
     @Test
     @Ignore("https://github.com/vaadin/hilla/issues/2129")
     public void when_hillaIsUsed_and_reactIsNotEnabled_LitIsReportedByDefault() {
@@ -100,7 +91,7 @@ public class HillaStatsTest {
             throws Exception {
         Map<String, String> entries = getEntries();
         assertEquals("entries: " + entries, 1, entries.size());
-        fakeHilla(true);
+        // fakeHilla(true);
         // HillaStats.report();
         entries = getEntries();
         assertEquals("entries: " + entries, "2.1.1", entries.get("hilla"));
