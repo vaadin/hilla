@@ -1752,6 +1752,22 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(grid.getBodyCellContent(0, 1)).to.have.text(JSON.stringify(person.department));
       });
 
+      it('renders object with custom path as string', async () => {
+        const service = personService();
+        grid = await GridController.init(
+          render(
+            <AutoGrid
+              service={service}
+              model={PersonModel}
+              columnOptions={{ department: { path: 'department.name' } }}
+            />,
+          ),
+          user,
+        );
+        const columnIndex = await grid.findColumnIndexByHeaderText('Department');
+        expect(grid.getBodyCellContent(0, columnIndex)).to.have.text('IT');
+      });
+
       it('renders undefined objects as empty string', async () => {
         const service = createService(personData.map((p) => ({ ...p, address: undefined })));
         grid = await GridController.init(

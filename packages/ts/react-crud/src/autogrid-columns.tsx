@@ -112,6 +112,14 @@ export function getColumnOptions(
   // TODO: Remove eslint-disable when all TypeScript version issues are resolved
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return customColumnOptions
-    ? { ...typeColumnOptions, headerFilterRenderer, ...customColumnOptions }
+    ? {
+        ...typeColumnOptions,
+        headerFilterRenderer,
+        ...customColumnOptions,
+        // Use default renderer for column of type object, if custom path is set and no other renderer is configured
+        ...(propertyInfo.type === 'object' &&
+          customColumnOptions.path &&
+          customColumnOptions.renderer === undefined && { renderer: null }),
+      }
     : typeColumnOptions;
 }
