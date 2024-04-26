@@ -67,11 +67,8 @@ export default async function collectRoutesFromFS(
   dir: URL,
   { extensions, logger, parent = dir }: CollectRoutesOptions,
 ): Promise<readonly RouteMeta[]> {
-  let children: RouteMeta[] = [];
-  if (!existsSync(dir)) {
-    return children;
-  }
   const path = relative(fileURLToPath(parent), fileURLToPath(dir));
+  let children: RouteMeta[] = [];
   let layout: URL | undefined;
 
   for await (const d of await opendir(dir)) {
