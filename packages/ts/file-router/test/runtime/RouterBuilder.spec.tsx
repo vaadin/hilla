@@ -226,9 +226,17 @@ describe('RouterBuilder', () => {
   });
 
   it('should build the router', () => {
+    const baseURI = 'https://example.com/foo';
+
+    Object.defineProperty(globalThis, 'document', {
+      value: {
+        baseURI,
+      },
+    });
+
     const { routes, router } = builder.build();
 
     expect(router).to.equal(browserRouter);
-    expect(createBrowserRouter).to.have.been.calledWith(routes);
+    expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
   });
 });
