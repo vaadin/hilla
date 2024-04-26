@@ -18,6 +18,8 @@ package com.vaadin.hilla.startup;
 
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.flow.server.auth.NavigationAccessControl;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
@@ -25,6 +27,7 @@ import com.vaadin.hilla.route.RouteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -46,6 +49,10 @@ public class RouteUnifyingServiceInitListener
 
     private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties;
 
+    private final NavigationAccessControl accessControl;
+
+    private final ViewAccessChecker viewAccessChecker;
+
     /**
      * Creates a new instance of the listener.
      *
@@ -60,10 +67,14 @@ public class RouteUnifyingServiceInitListener
     @Autowired
     public RouteUnifyingServiceInitListener(
             ClientRouteRegistry clientRouteRegistry, RouteUtil routeUtil,
-            RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties) {
+            RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties,
+            @Nullable NavigationAccessControl accessControl,
+            @Nullable ViewAccessChecker viewAccessChecker) {
         this.clientRouteRegistry = clientRouteRegistry;
         this.routeUtil = routeUtil;
         this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
+        this.accessControl = accessControl;
+        this.viewAccessChecker = viewAccessChecker;
     }
 
     @Override
@@ -75,6 +86,7 @@ public class RouteUnifyingServiceInitListener
         if (deploymentConfiguration.isReactEnabled()) {
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
                     clientRouteRegistry, deploymentConfiguration, routeUtil,
+                    accessControl, viewAccessChecker,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
             var deploymentMode = deploymentConfiguration.isProductionMode()
