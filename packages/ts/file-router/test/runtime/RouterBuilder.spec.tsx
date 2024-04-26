@@ -2,6 +2,7 @@ import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
+import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
@@ -227,16 +228,12 @@ describe('RouterBuilder', () => {
 
   it('should build the router', () => {
     const baseURI = 'https://example.com/foo';
-
-    Object.defineProperty(globalThis, 'document', {
-      value: {
-        baseURI,
-      },
-    });
+    const reset = mockDocumentBaseURI(baseURI);
 
     const { routes, router } = builder.build();
 
     expect(router).to.equal(browserRouter);
     expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
+    reset();
   });
 });
