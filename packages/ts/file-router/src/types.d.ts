@@ -1,3 +1,5 @@
+import type { createBrowserRouter, RouteObject } from 'react-router-dom';
+
 export type ViewConfig = Readonly<{
   /**
    * View title used in the main layout header, as <title> and as the default
@@ -68,7 +70,7 @@ export type RouteModule<C = unknown> = Module &
 export type AgnosticRoute = Readonly<{
   path: string;
   module?: Module;
-  children?: ReadonlyArray<AgnosticRoute<T>>;
+  children?: readonly AgnosticRoute[];
 }>;
 
 /**
@@ -78,4 +80,9 @@ export type MenuItem = Readonly<{
   to: string;
   icon?: string;
   title?: string;
+}>;
+
+export type RouterConfiguration = Readonly<{
+  routes: readonly RouteObject[];
+  router: ReturnType<typeof createBrowserRouter>;
 }>;

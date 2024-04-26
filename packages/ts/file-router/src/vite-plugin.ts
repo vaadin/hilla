@@ -102,26 +102,39 @@ export default function vitePluginFileSystemRouter({
       server.watcher.on('unlink', changeListener);
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
+      let modifiedCode = code;
       if (id.startsWith(fileURLToPath(_viewsDir)) && !basename(id).startsWith('_')) {
-        // To enable HMR for route files with exported configurations, we need
-        // to address a limitation in `react-refresh`. This library requires
-        // strict equality (`===`) for non-component exports. However, the
-        // dynamic nature of HMR makes maintaining this equality between object
-        // literals challenging.
-        //
-        // To work around this, we implement a strategy that preserves the
-        // reference to the original configuration object (`currentExports.config`),
-        // replacing any newly created configuration objects (`nextExports.config`)
-        // with it. This ensures that the HMR mechanism perceives the
-        // configuration as unchanged.
-        return {
-          code: code.replace(
+        if (isDevMode) {
+          // To enable HMR for route files with exported configurations, we need
+          // to address a limitation in `react-refresh`. This library requires
+          // strict equality (`===`) for non-component exports. However, the
+          // dynamic nature of HMR makes maintaining this equality between object
+          // literals challenging.
+          //
+          // To work around this, we implement a strategy that preserves the
+          // reference to the original configuration object (`currentExports.config`),
+          // replacing any newly created configuration objects (`nextExports.config`)
+          // with it. This ensures that the HMR mechanism perceives the
+          // configuration as unchanged.
+          modifiedCode = modifiedCode.replace(
             hmrInjectionPattern,
             `if (!nextExports) return;
-      if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {
-        nextExports = { ...nextExports, config: currentExports.config };
-      }`,
-          ),
+            if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {
+              nextExports = { ...nextExports, config: currentExports.config };
+            }`,
+          );
+        } else {
+          // In production mode, the function name is assigned as name to the function itself to avoid minification
+          const functionNames = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(modifiedCode);
+
+          if (functionNames?.length) {
+            const [, functionName] = functionNames;
+            modifiedCode += `Object.defineProperty(${functionName}, 'name', { value: '${functionName}' });\n`;
+          }
+        }
+
+        return {
+          code: modifiedCode,
         };
       }
 
