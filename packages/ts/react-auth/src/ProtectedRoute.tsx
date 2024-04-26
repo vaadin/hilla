@@ -42,6 +42,7 @@ function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps):
 
   return element;
 }
+ProtectedRoute.type = 'ProtectedRoute'; // This is for copilot to recognize this
 
 function* traverse<T extends RouteObject>(routes: T[]): Generator<T, undefined, undefined> {
   for (const route of routes) {
