@@ -12,12 +12,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 public class RouteUtilTest {
 
-    private final RouteUtil endpointUtil;
+    private final RouteUtil routeUtil;
     private final ClientRouteRegistry registry;
 
     public RouteUtilTest() {
         registry = new ClientRouteRegistry();
-        this.endpointUtil = new RouteUtil(registry);
+        this.routeUtil = new RouteUtil(registry);
     }
 
     @Before
@@ -44,7 +44,7 @@ public class RouteUtilTest {
         config.setRouteParameters(null);
         registry.addRoute("/test", config);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
     }
 
@@ -67,7 +67,7 @@ public class RouteUtilTest {
         config.setRouteParameters(null);
         registry.addRoute("/test", config);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
     }
 
@@ -90,7 +90,7 @@ public class RouteUtilTest {
         config.setRouteParameters(null);
         registry.addRoute("/test", config);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
     }
 
@@ -113,7 +113,7 @@ public class RouteUtilTest {
         config.setRouteParameters(null);
         registry.addRoute("/test", config);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
     }
 
@@ -150,7 +150,7 @@ public class RouteUtilTest {
 
         registry.addRoute("/test", pageWithoutLogin);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
     }
 
@@ -187,7 +187,7 @@ public class RouteUtilTest {
 
         registry.addRoute("/test", pageWithLogin);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertFalse(actual);
     }
 
@@ -214,7 +214,7 @@ public class RouteUtilTest {
         config.setRouteParameters(null);
         registry.addRoute("", config);
 
-        boolean actual = endpointUtil.isRouteAllowed(request);
+        boolean actual = routeUtil.isRouteAllowed(request);
         Assert.assertTrue(actual);
     }
 }
