@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import { opendir, readFile } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
