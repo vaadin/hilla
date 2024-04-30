@@ -1,4 +1,4 @@
-import { existsSync, watch } from 'node:fs';
+import { existsSync, rmSync, watch } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -53,6 +53,11 @@ describe('@vaadin/hilla-file-router', () => {
       });
       json.close();
       code.close();
+    });
+
+    it('should not throw if views does not exist', async () => {
+      rmSync(viewsDir, { force: true, recursive: true });
+      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger);
     });
   });
 });
