@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
 import collectRoutesFromFS from './collectRoutesFromFS.js';
@@ -56,7 +57,7 @@ export async function generateRuntimeFiles(
   extensions: readonly string[],
   logger: Logger,
 ): Promise<void> {
-  const routeMeta = await collectRoutesFromFS(viewsDir, { extensions, logger });
+  const routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
   logger.info('Collected file-based routes');
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
