@@ -23,10 +23,7 @@ import java.util.stream.Stream;
  */
 public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    private static class NotAJsonValue {
-    }
-
-    private final Map<Class<?>, Class<?>> jsonValues = new HashMap<>();
+    private final Map<Class<?>, Optional<Class<?>>> jsonValues = new HashMap<>();
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -62,12 +59,10 @@ public class JsonValuePlugin
 
     private Optional<Class<?>> getValueType(Class<?> cls) {
         // Use cached results to avoid recomputing the value type.
-        var valueType = jsonValues.computeIfAbsent(cls, this::findValueType);
-        return valueType == NotAJsonValue.class ? Optional.empty()
-                : Optional.of(valueType);
+        return jsonValues.computeIfAbsent(cls, this::findValueType);
     }
 
-    private Class<?> findValueType(Class<?> cls) {
+    private Optional<Class<?>> findValueType(Class<?> cls) {
         // First of all, we check that the `@JsonValue` annotation is
         // used on a method of the class.
         var jsonValue = Arrays.stream(cls.getMethods())
@@ -95,7 +90,7 @@ public class JsonValuePlugin
                     + " Hilla only supports classes with both annotations.");
         }
 
-        return jsonValue.orElse(NotAJsonValue.class);
+        return jsonValue;
     }
 
     // this shouldn't be a runtime exception, but `resolve` doesn't allow
