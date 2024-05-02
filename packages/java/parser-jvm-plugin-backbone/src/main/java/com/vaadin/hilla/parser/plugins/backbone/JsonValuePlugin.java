@@ -10,7 +10,11 @@ import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import jakarta.annotation.Nonnull;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -19,6 +23,11 @@ import java.util.stream.Stream;
  */
 public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
+    private static class NotAJsonValue {
+    }
+
+    private final Map<Class<?>, Class<?>> jsonValues = new HashMap<>();
+
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -40,44 +49,53 @@ public class JsonValuePlugin
         if (node instanceof TypeSignatureNode typeSignatureNode) {
             if (typeSignatureNode
                     .getSource() instanceof ClassRefSignatureModel classRefSignatureModel) {
-                // First of all, we check that the `@JsonValue` annotation is
-                // used on a method of the class.
-                var jsonValue = classRefSignatureModel.getClassInfo()
-                        .getMethods().stream()
-                        .filter(method -> method.getAnnotations().stream()
-                                .map(NamedModel::getName)
-                                .anyMatch(name -> name
-                                        .equals(JsonValue.class.getName())))
-                        .map(MethodInfoModel::getResultType).findFirst();
-
-                if (jsonValue.isPresent()) {
-                    // Then we check that the class has a `@JsonCreator`
-                    // annotation on a method or on a constructor.
-                    // This is a basic check, we could also check that they use
-                    // the same type, or if a class uses `@JsonCreator` without
-                    // `@JsonValue`.
-                    var cls = (Class<?>) classRefSignatureModel.getClassInfo()
-                            .get();
-                    Stream.concat(Arrays.stream(cls.getMethods()),
-                            Arrays.stream(cls.getConstructors()))
-                            .filter(executable -> executable
-                                    .isAnnotationPresent(JsonCreator.class))
-                            .findAny().orElseThrow(
-                                    () -> new MissingJsonCreatorAnnotationException(
-                                            "Class " + cls.getName()
-                                                    + " has @JsonValue, but no @JsonCreator."
-                                                    + " Hilla only supports classes with both annotations."));
-                }
-
-                // If the class has both annotations, we return the return type
-                // of the `@JsonValue`-annotated method, otherwise we return the
-                // type itself as usual.
-                return jsonValue.map(TypeSignatureNode::of)
-                        .orElse(typeSignatureNode);
+                var cls = (Class<?>) classRefSignatureModel.getClassInfo()
+                        .get();
+                Optional<TypeSignatureNode> valueNode = getValueType(cls)
+                        .map(SignatureModel::of).map(TypeSignatureNode::of);
+                return valueNode.orElse(typeSignatureNode);
             }
         }
 
         return node;
+    }
+
+    private Optional<Class<?>> getValueType(Class<?> cls) {
+        // Use cached results to avoid recomputing the value type.
+        var valueType = jsonValues.computeIfAbsent(cls, this::findValueType);
+        return valueType == NotAJsonValue.class ? Optional.empty()
+                : Optional.of(valueType);
+    }
+
+    private Class<?> findValueType(Class<?> cls) {
+        // First of all, we check that the `@JsonValue` annotation is
+        // used on a method of the class.
+        var jsonValue = Arrays.stream(cls.getMethods())
+                .filter(method -> Arrays.stream(method.getAnnotations())
+                        .map(ann -> ann.annotationType().getName()).anyMatch(
+                                name -> name.equals(JsonValue.class.getName())))
+                .map(Method::getReturnType).findAny();
+
+        // Then we check that the class has a `@JsonCreator` annotation
+        // on a method or on a constructor. This is a basic check, we
+        // could also check that they use the same type.
+        var jsonCreator = Stream
+                .concat(Arrays.stream(cls.getMethods()),
+                        Arrays.stream(cls.getConstructors()))
+                .filter(executable -> executable
+                        .isAnnotationPresent(JsonCreator.class))
+                .findAny();
+
+        // Classes having only one of those annotation are malformed in Hilla as
+        // they break the generator or, at least, make data transfer impossible,
+        // so we throw an exception for those.
+        if (jsonValue.isPresent() ^ jsonCreator.isPresent()) {
+            throw new MissingJsonCreatorAnnotationException("Class "
+                    + cls.getName() + " has @JsonValue, but no @JsonCreator."
+                    + " Hilla only supports classes with both annotations.");
+        }
+
+        return jsonValue.orElse(NotAJsonValue.class);
     }
 
     // this shouldn't be a runtime exception, but `resolve` doesn't allow
