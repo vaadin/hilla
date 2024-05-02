@@ -59,8 +59,7 @@ public class RouteUnifyingIndexHtmlRequestListener
         implements IndexHtmlRequestListener {
     protected static final String SCRIPT_STRING = """
             window.Vaadin = window.Vaadin ?? {};
-            window.Vaadin.server = window.Vaadin.server ?? {};
-            window.Vaadin.server.views = %s;""";
+            window.Vaadin.views = %s;""";
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingIndexHtmlRequestListener.class);

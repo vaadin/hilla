@@ -16,12 +16,8 @@ export type ServerViewMapItem = Readonly<{
 }> &
   ViewConfig;
 
-export type VaadinServer = Readonly<{
-  views: Readonly<Record<string, ServerViewMapItem>>;
-}>;
-
 export type VaadinObject = Readonly<{
-  server?: VaadinServer;
+  views: Readonly<Record<string, ServerViewMapItem>>;
 }>;
 
 export type VaadinWindow = Readonly<{
