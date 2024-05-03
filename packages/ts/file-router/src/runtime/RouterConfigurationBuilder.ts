@@ -9,7 +9,14 @@ import {
 } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
-import type { AgnosticRoute, Module, RouteModule, RouterConfiguration, ViewConfig } from '../types.js';
+import type {
+  AgnosticRoute,
+  Module,
+  RouteModule,
+  RouterBuildOptions,
+  RouterConfiguration,
+  ViewConfig,
+} from '../types.js';
 
 interface RouteBase {
   path?: string;
@@ -201,13 +208,13 @@ export class RouterConfigurationBuilder {
   /**
    * Builds the router with the current list of routes.
    */
-  build(): RouterConfiguration {
+  build(options?: RouterBuildOptions): RouterConfiguration {
     const routes =
       this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
     return {
       routes,
-      router: createBrowserRouter([...routes]),
+      router: createBrowserRouter([...routes], { basename: new URL(document.baseURI).pathname, ...options }),
     };
   }
 }

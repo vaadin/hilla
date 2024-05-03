@@ -26,6 +26,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>hilla-endpoint</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.hotswapagent</groupId>
