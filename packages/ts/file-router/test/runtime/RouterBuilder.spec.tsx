@@ -11,6 +11,7 @@ use(sinonChai);
 
 describe('RouterBuilder', () => {
   let builder: RouterConfigurationBuilder;
+  let reset: () => void;
 
   function Index() {
     return <></>;
@@ -37,6 +38,11 @@ describe('RouterBuilder', () => {
         ],
       },
     ]);
+    reset = mockDocumentBaseURI('https://example.com/foo');
+  });
+
+  afterEach(() => {
+    reset();
   });
 
   it('should merge React routes deeply', () => {
@@ -227,9 +233,6 @@ describe('RouterBuilder', () => {
   });
 
   it('should build the router', () => {
-    const baseURI = 'https://example.com/foo';
-    const reset = mockDocumentBaseURI(baseURI);
-
     const { routes, router } = builder.build();
 
     expect(router).to.equal(browserRouter);
