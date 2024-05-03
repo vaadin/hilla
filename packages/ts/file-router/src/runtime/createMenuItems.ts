@@ -13,8 +13,8 @@ import type { MenuItem, ViewConfig } from '../types.js';
  */
 export function createMenuItems(vaadinObject = (window as VaadinWindow).Vaadin): readonly MenuItem[] {
   const collator = new Intl.Collator('en-US');
-  return vaadinObject?.server?.views
-    ? Object.entries(vaadinObject.server.views)
+  return vaadinObject?.views
+    ? Object.entries(vaadinObject.views)
         // Filter out the views that are explicitly excluded from the menu.
         .filter(
           ([_key, value]) =>

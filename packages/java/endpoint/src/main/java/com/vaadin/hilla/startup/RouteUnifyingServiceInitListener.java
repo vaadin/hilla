@@ -97,12 +97,9 @@ public class RouteUnifyingServiceInitListener
             LOGGER.debug(
                     "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
                     deploymentMode);
-            if (deploymentConfiguration.isProductionMode()) {
-                clientRouteRegistry.registerClientRoutes(
-                        deploymentConfiguration, LocalDateTime.now());
-                LOGGER.debug(
-                        "Production mode: Registered client routes to ClientRouteRegistry.");
-            }
+
+            clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                    LocalDateTime.now());
         }
     }
 }
