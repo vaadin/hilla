@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.4-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <artifactId>hilla-endpoint</artifactId>
-    <version>24.4-SNAPSHOT</version>
+    <version>24.5-SNAPSHOT</version>
     <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 
