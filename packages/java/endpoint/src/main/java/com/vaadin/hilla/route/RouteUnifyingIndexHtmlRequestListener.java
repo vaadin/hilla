@@ -25,29 +25,28 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.router.BeforeEnterListener;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.auth.MenuAccessControl;
-import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
-import com.vaadin.hilla.route.records.ClientViewConfig;
-
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.AnnotationReader;
+import com.vaadin.flow.router.BeforeEnterListener;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
 import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.MenuAccessControl;
+import com.vaadin.flow.server.auth.NavigationAccessControl;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
+import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.ClientViewMenuConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
 
@@ -63,14 +62,13 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
-
-    private final ClientRouteRegistry clientRouteRegistry;
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final DeploymentConfiguration deploymentConfiguration;
-    private final RouteUtil routeUtil;
     private final NavigationAccessControl accessControl;
-    private final ViewAccessChecker viewAccessChecker;
+    private final ClientRouteRegistry clientRouteRegistry;
+    private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final RouteUtil routeUtil;
+    private final ViewAccessChecker viewAccessChecker;
 
     /**
      * Creates a new listener instance with the given route registry.
@@ -142,10 +140,13 @@ public class RouteUnifyingIndexHtmlRequestListener
 
         var clientViews = new HashMap<String, AvailableViewInfo>();
         clientRouteRegistry.getAllRoutes().entrySet().stream()
-                .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
-                        isUserInRole, isUserAuthenticated,
-                        clientViewConfigEntry.getValue()))
-                .forEach(clientViewConfigEntry -> {
+                .filter(clientViewConfigEntry -> {
+                    var config = clientViewConfigEntry.getValue();
+                    return routeUtil.isRouteAllowed(isUserInRole,
+                            isUserAuthenticated, config)
+                            && (config.getRouteParameters() == null
+                                    || config.getRouteParameters().isEmpty());
+                }).forEach(clientViewConfigEntry -> {
                     final String route = clientViewConfigEntry.getKey();
                     final ClientViewConfig config = clientViewConfigEntry
                             .getValue();
@@ -153,7 +154,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                             config.getTitle(), config.getRolesAllowed(),
                             config.isLoginRequired(), config.getRoute(),
                             config.isLazy(), config.isAutoRegistered(),
-                            config.menu(), config.getRouteParameters());
+                            config.menu());
                     clientViews.put(route, availableViewInfo);
                 });
         return clientViews;
@@ -183,60 +184,43 @@ public class RouteUnifyingIndexHtmlRequestListener
                     .getRegisteredAccessibleMenuRoutes(vaadinRequest,
                             accessControls);
         }
-        serverRoutes.forEach(serverView -> {
-            final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
-                    .getNavigationTarget();
-            final String targetUrl = serverView.getTemplate();
-            if (targetUrl != null) {
-                final String url = "/" + targetUrl;
+        serverRoutes.stream()
+                .filter(serverView -> serverView.getRouteParameters().isEmpty())
+                .forEach(serverView -> {
+                    final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
+                            .getNavigationTarget();
+                    final String targetUrl = serverView.getTemplate();
+                    if (targetUrl != null) {
+                        final String url = "/" + targetUrl;
 
-                final String title;
-                PageTitle pageTitle = AnnotationReader
-                        .getAnnotationFor(viewClass, PageTitle.class)
-                        .orElse(null);
-                if (pageTitle != null) {
-                    title = pageTitle.value();
-                } else {
-                    title = serverView.getNavigationTarget().getSimpleName();
-                }
+                        final String title;
+                        PageTitle pageTitle = AnnotationReader
+                                .getAnnotationFor(viewClass, PageTitle.class)
+                                .orElse(null);
+                        if (pageTitle != null) {
+                            title = pageTitle.value();
+                        } else {
+                            title = serverView.getNavigationTarget()
+                                    .getSimpleName();
+                        }
 
-                final ClientViewMenuConfig menuConfig = Optional
-                        .ofNullable(serverView.getMenuData())
-                        .map(menu -> new ClientViewMenuConfig(
-                                (menu.getTitle() == null
-                                        || menu.getTitle().isBlank()) ? title
-                                                : menu.getTitle(),
-                                menu.getOrder(), menu.getIcon(),
-                                menu.isExclude()))
-                        .orElse(null);
+                        final ClientViewMenuConfig menuConfig = Optional
+                                .ofNullable(serverView.getMenuData())
+                                .map(menu -> new ClientViewMenuConfig(
+                                        (menu.getTitle() == null
+                                                || menu.getTitle().isBlank())
+                                                        ? title
+                                                        : menu.getTitle(),
+                                        menu.getOrder(), menu.getIcon(),
+                                        menu.isExclude()))
+                                .orElse(null);
 
-                final Map<String, RouteParamType> routeParameters = getRouteParameters(
-                        serverView);
-
-                final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                        title, null, false, url, false, false, menuConfig,
-                        routeParameters);
-                serverViews.put(url, availableViewInfo);
-            }
-        });
+                        final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
+                                title, null, false, url, false, false,
+                                menuConfig);
+                        serverViews.put(url, availableViewInfo);
+                    }
+                });
         return serverViews;
-    }
-
-    private Map<String, RouteParamType> getRouteParameters(
-            RouteData serverView) {
-        final Map<String, RouteParamType> routeParameters = new HashMap<>();
-        serverView.getRouteParameters().forEach((route, params) -> {
-            if (params.getTemplate().contains("*")) {
-                routeParameters.put(params.getTemplate(),
-                        RouteParamType.WILDCARD);
-            } else if (params.getTemplate().contains("?")) {
-                routeParameters.put(params.getTemplate(),
-                        RouteParamType.OPTIONAL);
-            } else {
-                routeParameters.put(params.getTemplate(),
-                        RouteParamType.REQUIRED);
-            }
-        });
-        return routeParameters;
     }
 }

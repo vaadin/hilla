@@ -18,7 +18,6 @@ package com.vaadin.hilla.route.records;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,14 +30,12 @@ import java.util.Objects;
  * @param lazy
  * @param register
  * @param menu
- * @param routeParameters
  */
 public record AvailableViewInfo(String title, String[] rolesAllowed,
                                 Boolean requiresLogin,
                                 String route, Boolean lazy,
                                 Boolean register,
-                                ClientViewMenuConfig menu,
-    @JsonProperty("params") Map<String, RouteParamType> routeParameters) {
+                                ClientViewMenuConfig menu) {
 
     @Override
     public boolean equals(final Object o) {
@@ -54,13 +51,12 @@ public record AvailableViewInfo(String title, String[] rolesAllowed,
             && Objects.equals(route, that.route)
             && Objects.equals(lazy, that.lazy)
             && Objects.equals(register, that.register)
-            && Objects.equals(menu, that.menu)
-            && Objects.equals(routeParameters, that.routeParameters);
+            && Objects.equals(menu, that.menu);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(title, route, lazy, register, menu, routeParameters);
+        int result = Objects.hash(title, route, lazy, register, menu);
         result = 31 * result + Arrays.hashCode(rolesAllowed);
         return result;
     }
@@ -73,7 +69,6 @@ public record AvailableViewInfo(String title, String[] rolesAllowed,
             + ", route='" + route + '\''
             + ", lazy=" + lazy
             + ", register=" + register
-            + ", menu=" + menu
-            + ", routeParameters=" + routeParameters + '}';
+            + ", menu=" + menu + '}';
     }
 }

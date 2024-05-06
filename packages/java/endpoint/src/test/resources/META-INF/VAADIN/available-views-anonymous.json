@@ -6,8 +6,7 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/bar": {
     "title": "Component",
@@ -16,8 +15,7 @@
     "route": "/bar",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/foo": {
     "title": "RouteTarget",
@@ -26,43 +24,6 @@
     "route": "/foo",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
-  },
-  "/wildcard/:___wildcard*": {
-    "title": "RouteTarget",
-    "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "/wildcard/:___wildcard*",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {
-      ":___wildcard*": "*"
-    }
-  },
-  "//:___userId/edit": {
-    "title": "RouteTarget",
-    "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "//:___userId/edit",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {
-      ":___userId": "req"
-    }
-  },
-  "/comments/:___commentId?": {
-    "title": "RouteTarget",
-    "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "/comments/:___commentId?",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {
-      ":___commentId?": "opt"
-    }
+    "menu": null
   }
 }

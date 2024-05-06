@@ -6,8 +6,7 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/profile": {
     "title": "Profile",
@@ -16,19 +15,6 @@
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
-  },
-  "/user/:userId": {
-    "title": "User Profile",
-    "rolesAllowed": ["ROLE_ADMIN"],
-    "requiresLogin": true,
-    "route": "/user/:userId",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {
-      ":userId": "req"
-    }
+    "menu": null
   }
 }
