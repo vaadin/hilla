@@ -104,7 +104,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var instantiator = Mockito.mock(Instantiator.class);
         var menuAccessControl = Mockito.mock(MenuAccessControl.class);
         Mockito.when(vaadinService.getInstantiator()).thenReturn(instantiator);
-        Mockito.when(instantiator.getMenuAccessControl()).thenReturn(menuAccessControl);
+        Mockito.when(instantiator.getMenuAccessControl())
+                .thenReturn(menuAccessControl);
         Mockito.when(menuAccessControl.getPopulateClientSideMenu())
                 .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
     }
