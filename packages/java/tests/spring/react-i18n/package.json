@@ -21,15 +21,15 @@
     "@vaadin/vaadin-usage-statistics": "2.1.2",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.1.3",
-    "react": "18.3.0",
-    "react-dom": "18.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-router-dom": "6.23.0"
   },
   "devDependencies": {
     "@babel/preset-react": "7.24.1",
     "@rollup/plugin-replace": "5.0.5",
     "@rollup/pluginutils": "5.1.0",
-    "@types/react": "18.3.0",
+    "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -74,15 +74,15 @@
       "@vaadin/vaadin-usage-statistics": "2.1.2",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.1.3",
-      "react": "18.3.0",
-      "react-dom": "18.3.0",
+      "react": "18.3.1",
+      "react-dom": "18.3.1",
       "react-router-dom": "6.23.0"
     },
     "devDependencies": {
       "@babel/preset-react": "7.24.1",
       "@rollup/plugin-replace": "5.0.5",
       "@rollup/pluginutils": "5.1.0",
-      "@types/react": "18.3.0",
+      "@types/react": "18.3.1",
       "@types/react-dom": "18.3.0",
       "@vaadin/hilla-generator-cli": "24.4.0-beta1",
       "@vaadin/hilla-generator-core": "24.4.0-beta1",
@@ -107,7 +107,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "af34225cf43c2bb9a5d9cc816daee1a4a1c4636882f5f6e706f73ea533fdcc50"
+    "hash": "10911beb0d5bdbda7a2fb791dc82a75412c1266b6d6007d8f2ff2db1f139849b"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
