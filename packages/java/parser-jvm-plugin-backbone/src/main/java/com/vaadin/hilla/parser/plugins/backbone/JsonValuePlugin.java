@@ -48,6 +48,9 @@ public class JsonValuePlugin
                     .getSource() instanceof ClassRefSignatureModel classRefSignatureModel) {
                 var cls = (Class<?>) classRefSignatureModel.getClassInfo()
                         .get();
+                // Check if the class has the annotations which qualify for a
+                // value type. If so, replace the type with the corresponding
+                // value type.
                 Optional<TypeSignatureNode> valueNode = getValueType(cls)
                         .map(SignatureModel::of).map(TypeSignatureNode::of);
                 return valueNode.orElse(typeSignatureNode);
@@ -86,7 +89,8 @@ public class JsonValuePlugin
         // so we throw an exception for those.
         if (jsonValue.isPresent() ^ jsonCreator.isPresent()) {
             throw new MissingJsonCreatorAnnotationException("Class "
-                    + cls.getName() + " has @JsonValue, but no @JsonCreator."
+                    + cls.getName()
+                    + " has only one of @JsonValue and @JsonCreator."
                     + " Hilla only supports classes with both annotations.");
         }
 
