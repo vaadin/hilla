@@ -15,13 +15,11 @@ public class JsonValueNoJsonCreatorTest {
 
     @Test
     public void should_CorrectlyMapJsonValue() {
-        assertThrows(
-                JsonValuePlugin.MissingJsonCreatorAnnotationException.class,
-                () -> {
-                    new Parser().classLoader(getClass().getClassLoader())
-                            .classPath(Set.of(helper.getTargetDir().toString()))
-                            .endpointAnnotation(Endpoint.class.getName())
-                            .addPlugin(new BackbonePlugin()).execute();
-                });
+        assertThrows(JsonValuePlugin.MalformedValueTypeException.class, () -> {
+            new Parser().classLoader(getClass().getClassLoader())
+                    .classPath(Set.of(helper.getTargetDir().toString()))
+                    .endpointAnnotation(Endpoint.class.getName())
+                    .addPlugin(new BackbonePlugin()).execute();
+        });
     }
 }

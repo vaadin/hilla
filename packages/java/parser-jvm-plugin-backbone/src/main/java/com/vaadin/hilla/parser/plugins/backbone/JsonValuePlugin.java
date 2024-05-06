@@ -88,8 +88,7 @@ public class JsonValuePlugin
         // they break the generator or, at least, make data transfer impossible,
         // so we throw an exception for those.
         if (jsonValue.isPresent() ^ jsonCreator.isPresent()) {
-            throw new MissingJsonCreatorAnnotationException("Class "
-                    + cls.getName()
+            throw new MalformedValueTypeException("Class " + cls.getName()
                     + " has only one of @JsonValue and @JsonCreator."
                     + " Hilla only supports classes with both annotations.");
         }
@@ -99,9 +98,8 @@ public class JsonValuePlugin
 
     // this shouldn't be a runtime exception, but `resolve` doesn't allow
     // checked exceptions
-    public static class MissingJsonCreatorAnnotationException
-            extends RuntimeException {
-        public MissingJsonCreatorAnnotationException(String message) {
+    public static class MalformedValueTypeException extends RuntimeException {
+        public MalformedValueTypeException(String message) {
             super(message);
         }
     }
