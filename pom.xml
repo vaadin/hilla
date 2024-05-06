@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>hilla-project</artifactId>
-  <version>24.4-SNAPSHOT</version>
+  <version>24.5-SNAPSHOT</version>
   <name>Hilla</name>
   <packaging>pom</packaging>
 
@@ -75,7 +75,7 @@
     <jackson.version>2.17.0</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.4-SNAPSHOT</flow.version>
+    <flow.version>24.5-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>3.2.5</spring.boot.version>
     <testbench.version>9.3.0.beta1</testbench.version>
