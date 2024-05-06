@@ -14,7 +14,7 @@ public class JsonValueNoJsonCreatorTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyMapJsonValue() {
+    public void should_ThrowExceptionWhenOnlyJsonValueIsUsed() {
         assertThrows(MalformedValueTypeException.class, () -> {
             new Parser().classLoader(getClass().getClassLoader())
                     .classPath(Set.of(helper.getTargetDir().toString()))
