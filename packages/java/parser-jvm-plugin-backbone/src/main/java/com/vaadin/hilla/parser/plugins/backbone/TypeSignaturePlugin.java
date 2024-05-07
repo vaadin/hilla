@@ -27,8 +27,9 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
-
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Generics;
+
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -177,6 +178,10 @@ public final class TypeSignaturePlugin
 
             if (!typeArguments.isEmpty()) {
                 items = List.of(typeArguments.get(0));
+            } else {
+                // Let's deal with classes extending or implementing an iterator
+                var cls = (Class<?>) ((ClassRefSignatureModel) signature).getClassInfo().get();
+                items = List.of(SignatureModel.of(Generics.getExactIterableType(cls)));
             }
         } else if (signature.isOptional()) {
             var typeArguments = ((ClassRefSignatureModel) signature)
