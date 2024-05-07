@@ -2,6 +2,7 @@ import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
+import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
@@ -10,6 +11,7 @@ use(sinonChai);
 
 describe('RouterBuilder', () => {
   let builder: RouterConfigurationBuilder;
+  let reset: () => void;
 
   function Index() {
     return <></>;
@@ -36,6 +38,11 @@ describe('RouterBuilder', () => {
         ],
       },
     ]);
+    reset = mockDocumentBaseURI('https://example.com/foo');
+  });
+
+  afterEach(() => {
+    reset();
   });
 
   it('should merge React routes deeply', () => {
@@ -229,6 +236,7 @@ describe('RouterBuilder', () => {
     const { routes, router } = builder.build();
 
     expect(router).to.equal(browserRouter);
-    expect(createBrowserRouter).to.have.been.calledWith(routes);
+    expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
+    reset();
   });
 });
