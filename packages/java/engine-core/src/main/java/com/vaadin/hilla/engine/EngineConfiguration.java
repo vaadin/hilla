@@ -20,6 +20,7 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 public class EngineConfiguration {
     public static final String DEFAULT_CONFIG_FILE_NAME = "hilla-engine-configuration.json";
     public static final String OPEN_API_PATH = "hilla-openapi.json";
+    public static final String FILE_ROUTES_PATH = "file-routes.json";
     static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD,

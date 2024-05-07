@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,10 +17,6 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.OpenAPIUtil;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.push.PushEndpoint;
@@ -41,6 +35,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         registerEndpointTypes(hints);
+        registerFileRoutes(hints);
 
         hints.reflection().registerType(PushEndpoint.class,
                 MemberCategory.values());
@@ -76,6 +71,10 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     e);
         }
         hints.resources().registerPattern(EngineConfiguration.OPEN_API_PATH);
+    }
+
+    private void registerFileRoutes(RuntimeHints hints) {
+        hints.resources().registerPattern(EngineConfiguration.FILE_ROUTES_PATH);
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {
