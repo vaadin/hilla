@@ -17,12 +17,12 @@
     }
   ],
   "paths" : {
-    "/JsonNodeEndpoint/echoJsonNode" : {
+    "/JsonNodeEndpoint/echo" : {
       "post" : {
         "tags" : [
           "JsonNodeEndpoint"
         ],
-        "operationId" : "JsonNodeEndpoint_echoJsonNode_POST",
+        "operationId" : "JsonNodeEndpoint_echo_POST",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -30,6 +30,7 @@
                 "type" : "object",
                 "properties" : {
                   "node" : {
+                    "nullable": true,
                     "type" : "object"
                   }
                 }
@@ -43,6 +44,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
+                  "nullable": true,
                   "type" : "object"
                 }
               }

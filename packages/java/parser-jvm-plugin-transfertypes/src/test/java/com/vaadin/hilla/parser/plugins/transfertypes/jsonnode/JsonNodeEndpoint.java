@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @Endpoint
 public class JsonNodeEndpoint {
-    public JsonNode echoJsonNode(JsonNode node) {
+    public JsonNode echo(JsonNode node) {
         return node;
     }
 }

@@ -14,7 +14,7 @@ public class JsonNodeTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_ReplaceUUIDClassWithString()
+    public void should_ReplaceJsonNodeClassWithObject()
             throws IOException, URISyntaxException {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
