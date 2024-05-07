@@ -30,12 +30,7 @@
                 "type" : "object",
                 "properties" : {
                   "node" : {
-                    "nullable" : true,
-                    "anyOf" : [
-                      {
-                        "$ref" : "#/components/schemas/com.vaadin.hilla.mappedtypes.JsonNode"
-                      }
-                    ]
+                    "type" : "object"
                   }
                 }
               }
@@ -48,24 +43,12 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "nullable" : true,
-                  "anyOf" : [
-                    {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.mappedtypes.JsonNode"
-                    }
-                  ]
+                  "type" : "object"
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-  "components" : {
-    "schemas" : {
-      "com.vaadin.hilla.mappedtypes.JsonNode" : {
-        "type" : "object"
       }
     }
   }
