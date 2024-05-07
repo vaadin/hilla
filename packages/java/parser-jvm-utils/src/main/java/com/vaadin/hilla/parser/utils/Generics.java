@@ -13,29 +13,33 @@ public class Generics {
     /**
      * Returns the exact type of the elements in an iterable class.
      *
-     * @param cls the class to get the exact type of
+     * @param cls
+     *            the class to get the exact type of
      * @return the exact type of the elements in the iterable class
      */
-    public static AnnotatedElement getExactIterableType(Class<?> cls) {
+    public static Type getExactIterableType(Class<?> cls) {
         try {
-            // We can find the exact type by looking at the iterator method return type
+            // We can find the exact type by looking at the iterator method
+            // return type
             var method = cls.getMethod("iterator");
-            var exactReturnType = GenericTypeReflector.getExactReturnType(method, cls);
+            var exactReturnType = GenericTypeReflector
+                    .getExactReturnType(method, cls);
 
             // We know the format of the method, so we can safely cast the type
             if (exactReturnType instanceof ParameterizedType) {
-                Type actualTypeArgument = ((ParameterizedType) exactReturnType).getActualTypeArguments()[0];
-
-                if (actualTypeArgument instanceof AnnotatedElement) {
-                    return (AnnotatedElement) actualTypeArgument;
-                }
+                return ((ParameterizedType) exactReturnType)
+                        .getActualTypeArguments()[0];
             }
 
             // If we get here, there's probably a case we haven't handled
-            throw new RuntimeException("Unable to determine the exact iterable type of " + cls.getName());
+            throw new RuntimeException(
+                    "Unable to determine the exact iterable type of "
+                            + cls.getName());
         } catch (NoSuchMethodException e) {
-            // This should really never happen if the passed class is an Iterable
-            throw new IllegalArgumentException("Class " + cls.getName() + " is not an Iterable");
+            // This should really never happen if the passed class is an
+            // Iterable
+            throw new IllegalArgumentException(
+                    "Class " + cls.getName() + " is not an Iterable");
         }
     }
 }

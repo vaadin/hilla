@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -180,8 +181,10 @@ public final class TypeSignaturePlugin
                 items = List.of(typeArguments.get(0));
             } else {
                 // Let's deal with classes extending or implementing an iterator
-                var cls = (Class<?>) ((ClassRefSignatureModel) signature).getClassInfo().get();
-                items = List.of(SignatureModel.of(Generics.getExactIterableType(cls)));
+                var cls = (Class<?>) ((ClassRefSignatureModel) signature)
+                        .getClassInfo().get();
+                items = List.of(SignatureModel.of(
+                        (AnnotatedElement) Generics.getExactIterableType(cls)));
             }
         } else if (signature.isOptional()) {
             var typeArguments = ((ClassRefSignatureModel) signature)

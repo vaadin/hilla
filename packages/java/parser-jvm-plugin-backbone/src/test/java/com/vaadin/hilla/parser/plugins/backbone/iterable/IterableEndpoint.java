@@ -59,9 +59,11 @@ public class IterableEndpoint {
         }
     }
 
-    public static class SpecializedIterable extends ArrayList<String> {}
+    public static class SpecializedIterable extends ArrayList<String> {
+    }
 
-    public static class SpecializedIterableCustom extends ArrayList<Foo> {}
+    public static class SpecializedIterableCustom extends ArrayList<Foo> {
+    }
 
     public static class Foo {
         public String bar = "bar";
