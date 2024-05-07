@@ -42,6 +42,7 @@ public final class TransferTypesPlugin
         classMap.put("reactor.core.publisher.Flux", Flux.class);
         classMap.put("com.vaadin.hilla.EndpointSubscription",
                 EndpointSubscription.class);
+        classMap.put("com.fasterxml.jackson.databind.JsonNode", Object.class);
     }
 
     public TransferTypesPlugin() {
