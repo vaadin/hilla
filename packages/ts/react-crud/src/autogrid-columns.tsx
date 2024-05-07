@@ -24,7 +24,7 @@ import type { PropertyInfo } from './model-info';
 export type ColumnOptions = HeaderFilterProps & Omit<GridColumnProps<any>, 'dangerouslySetInnerHTML'>;
 
 // eslint-disable-next-line consistent-return
-function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
+function getTypeColumnOptions(propertyInfo: PropertyInfo, customColumnOptions?: ColumnOptions): ColumnOptions {
   // eslint-disable-next-line default-case
   switch (propertyInfo.type) {
     case 'integer':
@@ -89,7 +89,8 @@ function getTypeColumnOptions(propertyInfo: PropertyInfo): ColumnOptions {
     case 'object':
       return {
         autoWidth: true,
-        renderer: AutoGridJsonRenderer,
+        renderer:
+          customColumnOptions?.path !== undefined && customColumnOptions.renderer == null ? null : AutoGridJsonRenderer,
         headerFilterRenderer: NoHeaderFilter,
       };
     default:
@@ -104,7 +105,7 @@ export function getColumnOptions(
   propertyInfo: PropertyInfo,
   customColumnOptions: ColumnOptions | undefined,
 ): ColumnOptions {
-  const typeColumnOptions = getTypeColumnOptions(propertyInfo);
+  const typeColumnOptions = getTypeColumnOptions(propertyInfo, customColumnOptions);
   const headerFilterRenderer =
     customColumnOptions?.filterable === false
       ? NoHeaderFilter

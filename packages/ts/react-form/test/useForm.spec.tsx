@@ -87,6 +87,13 @@ describe('@vaadin/hilla-react-form', () => {
       user = userEvent.setup();
     });
 
+    it('shows required field indicators', () => {
+      const { getByTestId } = render(<LoginForm />);
+
+      expect(getByTestId('user.name')).to.have.attribute('required');
+      expect(getByTestId('user.password')).to.have.attribute('required');
+    });
+
     it('collects info from a form', async () => {
       const { getByTestId } = render(<LoginForm />);
 
