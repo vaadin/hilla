@@ -86,14 +86,13 @@ public class RouteUnifyingServiceInitListenerTest {
     }
 
     @Test
-    public void should_not_registerClientRoutes_when_in_devMode_and_react_is_enabled() {
+    public void should_registerClientRoutes_when_in_devMode_and_react_is_enabled() {
         Mockito.when(mockDeploymentConfiguration.isReactEnabled())
                 .thenReturn(true);
         Mockito.when(mockDeploymentConfiguration.isProductionMode())
                 .thenReturn(false);
-
         routeUnifyingServiceInitListener.serviceInit(event);
-        Mockito.verify(clientRouteRegistry, never())
+        Mockito.verify(clientRouteRegistry, times(1))
                 .registerClientRoutes(Mockito.any(), Mockito.any());
     }
 

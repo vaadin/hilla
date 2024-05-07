@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <name>Hilla Platform (Bill of Materials)</name>
     <description>Hilla Platform (Bill of Materials)</description>
-    <version>24.4-SNAPSHOT</version>
+    <version>24.5-SNAPSHOT</version>
     <url>https://hilla.dev</url>
 
     <properties>

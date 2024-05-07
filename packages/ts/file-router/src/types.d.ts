@@ -86,3 +86,5 @@ export type RouterConfiguration = Readonly<{
   routes: readonly RouteObject[];
   router: ReturnType<typeof createBrowserRouter>;
 }>;
+
+export type RouterBuildOptions = Parameters<typeof createBrowserRouter>[1];
