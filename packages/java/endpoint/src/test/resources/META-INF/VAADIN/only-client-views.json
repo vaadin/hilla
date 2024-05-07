@@ -6,7 +6,8 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "params": {}
   },
   "/profile": {
     "title": "Profile",
@@ -15,6 +16,7 @@
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "params": {}
   }
 }

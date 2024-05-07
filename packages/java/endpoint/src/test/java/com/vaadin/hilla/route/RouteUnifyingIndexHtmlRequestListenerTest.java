@@ -338,13 +338,19 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
             views = requestListener.collectServerViews(vaadinRequest);
         }
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         MatcherAssert.assertThat(views.get("/bar").title(),
                 Matchers.is("Component"));
         MatcherAssert.assertThat(views.get("/foo").title(),
                 Matchers.is("RouteTarget"));
         MatcherAssert.assertThat(views.get("/bar").route(),
                 Matchers.is("/bar"));
+        MatcherAssert.assertThat(
+                views.get("/wildcard/:___wildcard*").routeParameters(),
+                Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
+        MatcherAssert.assertThat(
+                views.get("/comments/:___commentId?").routeParameters(),
+                Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
     }
 
     @Test

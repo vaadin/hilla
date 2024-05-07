@@ -15,10 +15,15 @@
  */
 package com.vaadin.hilla.route.records;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Arrays;
-import java.util.Objects;
+import com.vaadin.flow.router.RouteParameterData;
 
 /**
  * Represents a server side view configuration for the client side.
@@ -32,10 +37,24 @@ import java.util.Objects;
  * @param menu
  */
 public record AvailableViewInfo(String title, String[] rolesAllowed,
-                                Boolean requiresLogin,
-                                String route, Boolean lazy,
-                                Boolean register,
-                                ClientViewMenuConfig menu) {
+        Boolean requiresLogin, String route, Boolean lazy, Boolean register,
+        ClientViewMenuConfig menu,
+        @JsonProperty("params") Map<String, RouteParamType> routeParameters) {
+    public AvailableViewInfo(String title, String[] rolesAllowed,
+            Boolean requiresLogin, String route, Boolean lazy, Boolean register,
+            ClientViewMenuConfig menu,
+            Stream<RouteParameterData> routeParameters) {
+        this(title, rolesAllowed, requiresLogin, route, lazy, register, menu,
+                routeParameters.collect(Collectors
+                        .toMap(RouteParameterData::getTemplate, (params) -> {
+                            if (params.getTemplate().contains("*")) {
+                                return RouteParamType.WILDCARD;
+                            } else if (params.getTemplate().contains("?")) {
+                                return RouteParamType.OPTIONAL;
+                            }
+                            return RouteParamType.REQUIRED;
+                        })));
+    }
 
     @Override
     public boolean equals(final Object o) {
@@ -46,29 +65,29 @@ public record AvailableViewInfo(String title, String[] rolesAllowed,
         }
         final AvailableViewInfo that = (AvailableViewInfo) o;
         return Objects.equals(title, that.title)
-            && Arrays.equals(rolesAllowed, that.rolesAllowed)
-            && Objects.equals(requiresLogin, that.requiresLogin)
-            && Objects.equals(route, that.route)
-            && Objects.equals(lazy, that.lazy)
-            && Objects.equals(register, that.register)
-            && Objects.equals(menu, that.menu);
+                && Arrays.equals(rolesAllowed, that.rolesAllowed)
+                && Objects.equals(requiresLogin, that.requiresLogin)
+                && Objects.equals(route, that.route)
+                && Objects.equals(lazy, that.lazy)
+                && Objects.equals(register, that.register)
+                && Objects.equals(menu, that.menu)
+                && Objects.equals(routeParameters, that.routeParameters);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(title, route, lazy, register, menu);
+        int result = Objects.hash(title, route, lazy, register, menu,
+                routeParameters);
         result = 31 * result + Arrays.hashCode(rolesAllowed);
         return result;
     }
 
     @Override
     public String toString() {
-        return "AvailableViewInfo{" + "title='" + title
-            + '\'' + ", rolesAllowed=" + Arrays.toString(rolesAllowed)
-            + ", requiresLogin=" + requiresLogin
-            + ", route='" + route + '\''
-            + ", lazy=" + lazy
-            + ", register=" + register
-            + ", menu=" + menu + '}';
+        return "AvailableViewInfo{" + "title='" + title + '\''
+                + ", rolesAllowed=" + Arrays.toString(rolesAllowed)
+                + ", requiresLogin=" + requiresLogin + ", route='" + route
+                + '\'' + ", lazy=" + lazy + ", register=" + register + ", menu="
+                + menu + ", routeParameters=" + routeParameters + '}';
     }
 }
