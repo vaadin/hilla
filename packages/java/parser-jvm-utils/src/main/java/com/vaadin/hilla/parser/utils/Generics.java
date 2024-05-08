@@ -5,6 +5,7 @@ import com.googlecode.gentyref.GenericTypeReflector;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 /**
  * Utility class for working with generics.
@@ -17,7 +18,7 @@ public class Generics {
      *            the class to get the exact type of
      * @return the exact type of the elements in the iterable class
      */
-    public static Type getExactIterableType(Class<?> cls) {
+    public static Optional<Type> getExactIterableType(Class<?> cls) {
         try {
             // We can find the exact type by looking at the iterator method
             // return type
@@ -27,14 +28,11 @@ public class Generics {
 
             // We know the format of the method, so we can safely cast the type
             if (exactReturnType instanceof ParameterizedType) {
-                return ((ParameterizedType) exactReturnType)
-                        .getActualTypeArguments()[0];
+                return Optional.of( ((ParameterizedType) exactReturnType)
+                        .getActualTypeArguments()[0]);
             }
 
-            // If we get here, there's probably a case we haven't handled
-            throw new RuntimeException(
-                    "Unable to determine the exact iterable type of "
-                            + cls.getName());
+            return Optional.empty();
         } catch (NoSuchMethodException e) {
             // This should really never happen if the passed class is an
             // Iterable

@@ -183,8 +183,10 @@ public final class TypeSignaturePlugin
                 // Let's deal with classes extending or implementing an iterator
                 var cls = (Class<?>) ((ClassRefSignatureModel) signature)
                         .getClassInfo().get();
-                items = List.of(SignatureModel.of(
-                        (AnnotatedElement) Generics.getExactIterableType(cls)));
+                items = Generics.getExactIterableType(cls)
+                        .map(type -> List
+                                .of(SignatureModel.of((AnnotatedElement) type)))
+                        .orElse(items);
             }
         } else if (signature.isOptional()) {
             var typeArguments = ((ClassRefSignatureModel) signature)
