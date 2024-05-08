@@ -30,7 +30,6 @@
                 "type" : "object",
                 "properties" : {
                   "node" : {
-                    "nullable": true,
                     "type" : "object"
                   }
                 }
@@ -44,7 +43,6 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "nullable": true,
                   "type" : "object"
                 }
               }
