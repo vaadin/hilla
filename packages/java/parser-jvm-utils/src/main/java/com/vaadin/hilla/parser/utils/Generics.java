@@ -28,7 +28,7 @@ public class Generics {
 
             // We know the format of the method, so we can safely cast the type
             if (exactReturnType instanceof ParameterizedType) {
-                return Optional.of( ((ParameterizedType) exactReturnType)
+                return Optional.of(((ParameterizedType) exactReturnType)
                         .getActualTypeArguments()[0]);
             }
 

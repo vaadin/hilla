@@ -161,7 +161,8 @@ class ExplicitNullableTypeCheckerHelper {
 
             if (Iterable.class.isAssignableFrom(expectedClass)) {
                 // Let's deal with classes extending or implementing an iterator
-                itemType = Generics.getExactIterableType(expectedClass).orElse(Object.class);
+                itemType = Generics.getExactIterableType(expectedClass)
+                        .orElse(Object.class);
                 iterableDescription = "collection";
             } else {
                 itemType = expectedClass.getComponentType();
