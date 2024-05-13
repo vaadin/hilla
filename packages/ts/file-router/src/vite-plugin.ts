@@ -4,6 +4,9 @@ import type { TransformResult } from 'rollup';
 import type { Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
+const INJECTION =
+  "if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {nextExports = { ...nextExports, config: currentExports.config };}";
+
 /**
  * The options for the Vite file-based router plugin.
  */
@@ -116,13 +119,11 @@ export default function vitePluginFileSystemRouter({
           // replacing any newly created configuration objects (`nextExports.config`)
           // with it. This ensures that the HMR mechanism perceives the
           // configuration as unchanged.
-          modifiedCode = modifiedCode.replace(
-            hmrInjectionPattern,
-            `if (!nextExports) return;
-            if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {
-              nextExports = { ...nextExports, config: currentExports.config };
-            }`,
+          const injectionIndex = modifiedCode.lastIndexOf(
+            'if (!nextExports) return;',
+            modifiedCode.indexOf('import.meta.hot.accept'),
           );
+          modifiedCode = `${modifiedCode.substring(0, injectionIndex)}${INJECTION}${modifiedCode.substring(injectionIndex)}`;
         } else {
           // In production mode, the function name is assigned as name to the function itself to avoid minification
           const functionNames = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(modifiedCode);
