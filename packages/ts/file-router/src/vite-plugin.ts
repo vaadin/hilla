@@ -51,8 +51,6 @@ export default function vitePluginFileSystemRouter({
   extensions = ['.tsx', '.jsx'],
   isDevMode = false,
 }: PluginOptions = {}): Plugin {
-  const hmrInjectionPattern = /(?<=import\.meta\.hot\.accept[\s\S]+)if\s\(!nextExports\)\s+return;/u;
-
   let _viewsDir: URL;
   let _outDir: URL;
   let _logger: Logger;
@@ -119,11 +117,12 @@ export default function vitePluginFileSystemRouter({
           // replacing any newly created configuration objects (`nextExports.config`)
           // with it. This ensures that the HMR mechanism perceives the
           // configuration as unchanged.
-          const injectionIndex = modifiedCode.lastIndexOf(
-            'if (!nextExports) return;',
-            modifiedCode.indexOf('import.meta.hot.accept'),
-          );
-          modifiedCode = `${modifiedCode.substring(0, injectionIndex)}${INJECTION}${modifiedCode.substring(injectionIndex)}`;
+          const injectionPattern = /import\.meta\.hot\.accept[\s\S]if\s\(!nextExports\)\s+return;/gu;
+          injectionPattern.test(modifiedCode);
+
+          modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
+            injectionPattern.lastIndex,
+          )}`;
         } else {
           // In production mode, the function name is assigned as name to the function itself to avoid minification
           const functionNames = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(modifiedCode);
