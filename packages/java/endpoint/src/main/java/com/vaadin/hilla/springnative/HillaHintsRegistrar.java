@@ -22,6 +22,7 @@ import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
+import com.vaadin.hilla.route.ClientRouteRegistry;
 
 /**
  * Registers runtime hints for Spring 3 native support for Hilla.
@@ -74,7 +75,7 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     }
 
     private void registerFileRoutes(RuntimeHints hints) {
-        hints.resources().registerPattern(EngineConfiguration.FILE_ROUTES_PATH);
+        hints.resources().registerPattern(ClientRouteRegistry.FILE_ROUTES_JSON_PROD_PATH);
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {
