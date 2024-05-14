@@ -40,6 +40,7 @@ public class HillaStats {
     static final String HAS_HYBRID_ROUTING = "has-hybrid-routing";
     static final String HAS_ENDPOINT = "has-endpoint";
     static final String ENDPOINT_ACTIVE = "endpoint-active";
+    static final String HILLA_USAGE = "hilla";
 
     private static void reportHasReactAndLit(
             DeploymentConfiguration deploymentConfiguration,
@@ -86,6 +87,10 @@ public class HillaStats {
             if (hasHillaCustomRoute) {
                 UsageStatistics.markAsUsed(HAS_HILLA_CUSTOM_ROUTE,
                         hillaVersion);
+            }
+
+            if (hasHillaFsRoute || hasHillaCustomRoute) {
+                UsageStatistics.markAsUsed(HILLA_USAGE, hillaVersion);
             }
 
             var hasFlowRoute = !service.getRouter().getRegistry()

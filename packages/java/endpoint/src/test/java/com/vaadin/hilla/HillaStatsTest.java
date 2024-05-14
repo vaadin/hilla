@@ -48,6 +48,7 @@ import static com.vaadin.hilla.HillaStats.HAS_HYBRID_ROUTING;
 import static com.vaadin.hilla.HillaStats.HAS_LIT;
 import static com.vaadin.hilla.HillaStats.HAS_REACT;
 import static com.vaadin.hilla.HillaStats.HAS_REACT_LIT;
+import static com.vaadin.hilla.HillaStats.HILLA_USAGE;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 import static org.mockito.Mockito.mockStatic;
@@ -411,6 +412,60 @@ public class HillaStatsTest {
             HillaStats.reportGenericHasFeatures(vaadinService, true);
             Map<String, String> entries = getEntries();
             assertNull("entries: " + entries, entries.get(HAS_HYBRID_ROUTING));
+        }
+    }
+
+    @Test
+    public void when_hasHillaFsRoute_isTrue_hillaUsage_isReported() {
+        try (MockedStatic<Platform> mockedStaticPlatform = mockStatic(
+                Platform.class)) {
+            mockedStaticPlatform.when(Platform::getHillaVersion)
+                    .thenReturn(Optional.of("24.4.0"));
+
+            DeploymentConfiguration deploymentConfiguration = Mockito
+                    .mock(DeploymentConfiguration.class);
+            when(deploymentConfiguration.getFrontendFolder())
+                    .thenReturn(frontendFolder.getRoot());
+            when(deploymentConfiguration.isReactEnabled()).thenReturn(false);
+            var vaadinService = Mockito.mock(VaadinService.class);
+            when(vaadinService.getDeploymentConfiguration())
+                    .thenReturn(deploymentConfiguration);
+
+            Map<String, String> entries = getEntries();
+            assertNull("entries: " + entries, entries.get(HILLA_USAGE));
+
+            HillaStats.reportGenericHasFeatures(vaadinService, true);
+            entries = getEntries();
+            assertEquals("entries: " + entries, "24.4.0",
+                    entries.get(HILLA_USAGE));
+        }
+    }
+
+    @Test
+    public void when_hasHillaCustomRoute_isTrue_hillaUsage_isReported()
+            throws IOException {
+        try (MockedStatic<Platform> mockedStaticPlatform = mockStatic(
+                Platform.class)) {
+            mockedStaticPlatform.when(Platform::getHillaVersion)
+                    .thenReturn(Optional.of("24.4.0"));
+
+            DeploymentConfiguration deploymentConfiguration = Mockito
+                    .mock(DeploymentConfiguration.class);
+            when(deploymentConfiguration.getFrontendFolder())
+                    .thenReturn(frontendFolder.getRoot());
+            frontendFolder.newFile("routes.tsx");
+            when(deploymentConfiguration.isReactEnabled()).thenReturn(false);
+            var vaadinService = Mockito.mock(VaadinService.class);
+            when(vaadinService.getDeploymentConfiguration())
+                    .thenReturn(deploymentConfiguration);
+
+            Map<String, String> entries = getEntries();
+            assertNull("entries: " + entries, entries.get(HILLA_USAGE));
+
+            HillaStats.reportGenericHasFeatures(vaadinService, false);
+            entries = getEntries();
+            assertEquals("entries: " + entries, "24.4.0",
+                    entries.get(HILLA_USAGE));
         }
     }
 
