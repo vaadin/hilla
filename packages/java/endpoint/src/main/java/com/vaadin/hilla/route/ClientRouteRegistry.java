@@ -18,6 +18,7 @@ package com.vaadin.hilla.route;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
 import org.slf4j.Logger;
@@ -167,12 +168,12 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         } catch (IOException e) {
             if (deploymentConfiguration.isProductionMode()) {
                 // The file should be available in production mode:
-                LOGGER.warn("Failed to load {} from {}", FILE_ROUTES_JSON_NAME,
+                LOGGER.error("Failed to load {} from {}", FILE_ROUTES_JSON_NAME,
                         fileRoutesJsonAsResource.getPath(), e);
             } else {
                 LOGGER.debug(
-                        "Failed to load {} from {}. Skipping client route registration."
-                                + "There might be a problem with the contents of the file-routes.json file. ",
+                        "Failed to load {} from {}. Skipping client route registration. "
+                                + "There might be a problem with the contents of the file-routes.json file.",
                         FILE_ROUTES_JSON_NAME, "'frontend/generated'");
             }
         }
@@ -205,16 +206,18 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
             return getClass().getResource(FILE_ROUTES_JSON_PROD_PATH);
         }
         try {
-            var fileRoutesJson = deploymentConfiguration.getFrontendFolder()
-                    .toPath().resolve("generated")
-                    .resolve(FILE_ROUTES_JSON_NAME).toFile();
+            var fileRoutesJson = FrontendUtils
+                    .getFrontendGeneratedFolder(
+                            deploymentConfiguration.getFrontendFolder())
+                    .toPath().resolve(FILE_ROUTES_JSON_NAME).toFile();
             if (!fileRoutesJson.exists()) {
                 return null;
             } else {
                 return fileRoutesJson.toURI().toURL();
             }
         } catch (MalformedURLException e) {
-            LOGGER.warn("Failed to find {} under frontend/generated",
+            LOGGER.error(
+                    "Unexpected error while getting {} as resource from 'frontend/generated'.",
                     FILE_ROUTES_JSON_NAME, e);
             throw new RuntimeException(e);
         }
