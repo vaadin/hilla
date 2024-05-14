@@ -63,7 +63,7 @@ await Promise.all(
 );
 
 const reactComponentsPackageName = '@vaadin/react-components';
-const reactComponentsVersion = versions.core.react['react-components'].jsVersion ?? '';
+const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
 console.log(`Installing "${reactComponentsSpec}".`);
 // The root hoisted version should be updated first, before the workspaces
