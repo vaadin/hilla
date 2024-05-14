@@ -117,7 +117,7 @@ export default function vitePluginFileSystemRouter({
           // replacing any newly created configuration objects (`nextExports.config`)
           // with it. This ensures that the HMR mechanism perceives the
           // configuration as unchanged.
-          const injectionPattern = /import\.meta\.hot\.accept[\s\S]if\s\(!nextExports\)\s+return;/gu;
+          const injectionPattern = /import\.meta\.hot\.accept[\s\S]+if\s\(!nextExports\)\s+return;/gu;
           injectionPattern.test(modifiedCode);
 
           modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
