@@ -118,11 +118,11 @@ export default function vitePluginFileSystemRouter({
           // with it. This ensures that the HMR mechanism perceives the
           // configuration as unchanged.
           const injectionPattern = /import\.meta\.hot\.accept[\s\S]+if\s\(!nextExports\)\s+return;/gu;
-          injectionPattern.test(modifiedCode);
-
-          modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
-            injectionPattern.lastIndex,
-          )}`;
+          if (injectionPattern.test(modifiedCode)) {
+            modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
+              injectionPattern.lastIndex,
+            )}`;
+          }
         } else {
           // In production mode, the function name is assigned as name to the function itself to avoid minification
           const functionNames = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(modifiedCode);
