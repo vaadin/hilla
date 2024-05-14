@@ -144,18 +144,18 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
     public synchronized void registerClientRoutes(
             DeploymentConfiguration deploymentConfiguration,
             LocalDateTime lastUpdated) {
-        var viewsJsonAsResource = getViewsJsonAsResource(
+        var fileRoutesJsonAsResource = getFileRoutesJsonAsResource(
                 deploymentConfiguration);
-        if (viewsJsonAsResource == null) {
+        if (fileRoutesJsonAsResource == null) {
             LOGGER.debug(
-                    "No {} found under {} directory. Skipping client route registration.",
+                    "No {} found under {} directory yet. Skipping client route registration.",
                     FILE_ROUTES_JSON_NAME,
                     deploymentConfiguration.isProductionMode()
                             ? "'META-INF/VAADIN'"
                             : "'frontend/generated'");
             return;
         }
-        try (var source = viewsJsonAsResource.openStream()) {
+        try (var source = fileRoutesJsonAsResource.openStream()) {
             if (source != null) {
                 clearRoutes();
                 mapper.readValue(source,
@@ -165,8 +165,16 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
                 this.lastUpdated = lastUpdated;
             }
         } catch (IOException e) {
-            LOGGER.warn("Failed load {} from {}", FILE_ROUTES_JSON_NAME,
-                    viewsJsonAsResource.getPath(), e);
+            if (deploymentConfiguration.isProductionMode()) {
+                // The file should be available in production mode:
+                LOGGER.warn("Failed to load {} from {}", FILE_ROUTES_JSON_NAME,
+                        fileRoutesJsonAsResource.getPath(), e);
+            } else {
+                LOGGER.debug(
+                        "Failed to load {} from {}. Skipping client route registration."
+                                + "There might be a problem with the contents of the file-routes.json file. ",
+                        FILE_ROUTES_JSON_NAME, "'frontend/generated'");
+            }
         }
     }
 
@@ -190,16 +198,21 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         }
     }
 
-    private URL getViewsJsonAsResource(
+    private URL getFileRoutesJsonAsResource(
             DeploymentConfiguration deploymentConfiguration) {
         var isProductionMode = deploymentConfiguration.isProductionMode();
         if (isProductionMode) {
             return getClass().getResource(FILE_ROUTES_JSON_PROD_PATH);
         }
         try {
-            return deploymentConfiguration.getFrontendFolder().toPath()
-                    .resolve("generated").resolve(FILE_ROUTES_JSON_NAME).toUri()
-                    .toURL();
+            var fileRoutesJson = deploymentConfiguration.getFrontendFolder()
+                    .toPath().resolve("generated")
+                    .resolve(FILE_ROUTES_JSON_NAME).toFile();
+            if (!fileRoutesJson.exists()) {
+                return null;
+            } else {
+                return fileRoutesJson.toURI().toURL();
+            }
         } catch (MalformedURLException e) {
             LOGGER.warn("Failed to find {} under frontend/generated",
                     FILE_ROUTES_JSON_NAME, e);
