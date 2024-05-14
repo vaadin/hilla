@@ -1,7 +1,7 @@
 import type { VaadinWindow } from '../shared/internal.js';
 import { RouteParamType } from '../shared/routeParamType.js';
 import type { MenuItem, ViewConfig } from '../types.js';
-import { reportUsage } from './usageStats.js';
+import { reportUsage } from './stats.js';
 
 /**
  * Creates menu items from the views provided by the server. The views are sorted according to the
