@@ -1,6 +1,7 @@
 import type { VaadinWindow } from '../shared/internal.js';
 import { RouteParamType } from '../shared/routeParamType.js';
 import type { MenuItem, ViewConfig } from '../types.js';
+import { reportUsage } from './usageStats.js';
 
 /**
  * Creates menu items from the views provided by the server. The views are sorted according to the
@@ -12,6 +13,7 @@ import type { MenuItem, ViewConfig } from '../types.js';
  * @returns A list of menu items.
  */
 export function createMenuItems(vaadinObject = (window as VaadinWindow).Vaadin): readonly MenuItem[] {
+  reportUsage('createMenuItems', '24.4.0-beta1');
   const collator = new Intl.Collator('en-US');
   return vaadinObject?.views
     ? Object.entries(vaadinObject.views)
