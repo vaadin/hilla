@@ -8,5 +8,5 @@ package com.vaadin.hilla.route.records;
  * Used for configuring MainLayout navigation items
  *
  */
-public record ClientViewMenuConfig(String title, Long order, String icon, Boolean exclude) {
+public record ClientViewMenuConfig(String title, Double order, String icon, Boolean exclude) {
 }

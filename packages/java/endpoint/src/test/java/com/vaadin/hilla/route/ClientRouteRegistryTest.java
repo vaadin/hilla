@@ -3,17 +3,22 @@ package com.vaadin.hilla.route;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import com.vaadin.hilla.route.records.RouteParamType;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class ClientRouteRegistryTest {
@@ -32,7 +37,8 @@ public class ClientRouteRegistryTest {
         mockDevelopmentMode();
         createMockedDevModeFileRouteJson();
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
@@ -48,7 +54,8 @@ public class ClientRouteRegistryTest {
 
         mockDevelopmentMode();
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.anEmptyMap());
@@ -62,7 +69,8 @@ public class ClientRouteRegistryTest {
 
         projectRoot.newFile("frontend/generated/file-routes.json");
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
         MatcherAssert.assertThat(allRoutes, Matchers.anEmptyMap());
@@ -74,7 +82,8 @@ public class ClientRouteRegistryTest {
         Mockito.when(deploymentConfiguration.isProductionMode())
                 .thenReturn(true);
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
 
@@ -108,7 +117,8 @@ public class ClientRouteRegistryTest {
         mockDevelopmentMode();
         createMockedDevModeFileRouteJson();
 
-        clientRouteRegistry.registerClientRoutes(deploymentConfiguration);
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
         Map<String, ClientViewConfig> allRoutes = clientRouteRegistry
                 .getAllRoutes();
 
@@ -137,6 +147,193 @@ public class ClientRouteRegistryTest {
                 Matchers.is(Map.of("wildcard", RouteParamType.WILDCARD)));
     }
 
+    @Test
+    public void when_developmentMode_then_loadLatestDevModeFileRoutesJsonIfNeeded_loads_only_when_fileRoutesJson_changes()
+            throws IOException {
+
+        mockDevelopmentMode();
+        createMockedDevModeFileRouteJson();
+
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
+        var allRoutes = clientRouteRegistry.getAllRoutes();
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
+        clientRouteRegistry.clearRoutes();
+
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
+        allRoutes = clientRouteRegistry.getAllRoutes();
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(0));
+
+        createMockedDevModeFileRouteJson();
+
+        clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
+                deploymentConfiguration);
+        allRoutes = clientRouteRegistry.getAllRoutes();
+        MatcherAssert.assertThat(allRoutes, Matchers.aMapWithSize(12));
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJson_MainLayoutNoChildren_then_hasMainLayout_is_true()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = """
+                [
+                    {
+                        "route": "",
+                        "children": []
+                    }
+                ]""";
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
+        Assert.assertTrue("Main layout should be present",
+                clientRouteRegistry.hasMainLayout());
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJson_MainLayoutWithChildren_then_hasMainLayout_true()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = """
+                [
+                  {
+                    "route": "",
+                    "children": [
+                      {
+                        "route": "",
+                        "params": {},
+                        "title": "Index"
+                      }
+                    ]
+                  }
+                ]
+                """.stripIndent();
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
+        Assert.assertTrue("Main layout should be present",
+                clientRouteRegistry.hasMainLayout());
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJsonWithoutMainLayout_then_hasMainLayout_false()
+            throws IOException {
+        mockDevelopmentMode();
+        // @formatter:off
+        // views/
+        // |_ some-route/
+        //    |_ @index.tsx
+        // @formatter:on
+        String fileRoutesJson = """
+                [
+                    {
+                        "route": "some-route",
+                        "params": {},
+                        "children": [
+                            {
+                                "route": "",
+                                "params": {},
+                                "title": "some-route"
+                            }
+                        ]
+                    }
+                ]""".stripIndent();
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
+        Assert.assertFalse("Main layout should not be present",
+                clientRouteRegistry.hasMainLayout());
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJson_onlyWithNestedLayout_then_hasMainLayout_false()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = """
+                [
+                    {
+                        "route": "some-route",
+                        "children": [
+                            {
+                                "route": "",
+                                "params": {},
+                                "title": "Index",
+                                "children": []
+                            }
+                        ]
+                    }
+                ]""".stripIndent();
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
+        Assert.assertFalse("Main layout should not be present",
+                clientRouteRegistry.hasMainLayout());
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJson_withLogin_and_withoutMainLayout_then_hasMainLayout_false()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = """
+                [
+                    {
+                        "route": "login",
+                        "title": "Login"
+                    },
+                    {
+                        "route": "",
+                        "params": {},
+                        "title": "Index"
+                    }
+                ]""".stripIndent();
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
+        Assert.assertFalse("Main layout should not be present",
+                clientRouteRegistry.hasMainLayout());
+    }
+
+    @Test
+    public void when_developmentMode_fileRoutesJson_withLogin_and_mainLayout_then_hasMainLayout_true()
+            throws IOException {
+        mockDevelopmentMode();
+        String fileRoutesJson = """
+                [
+                    {
+                        "route": "login",
+                        "title": "Login"
+                    },
+                    {
+                        "route": "",
+                        "children": [
+                            {
+                                "route": "",
+                                "params": {},
+                                "title": "Index"
+                            }
+                        ]
+                    }
+                ]""".stripIndent();
+        FileUtils.write(
+                projectRoot.newFile("frontend/generated/file-routes.json"),
+                fileRoutesJson, StandardCharsets.UTF_8);
+        clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
+                LocalDateTime.now());
+        Assert.assertTrue("Main layout should be present",
+                clientRouteRegistry.hasMainLayout());
+    }
+
     private void mockDevelopmentMode() throws IOException {
         Mockito.when(deploymentConfiguration.isProductionMode())
                 .thenReturn(false);
@@ -152,10 +349,15 @@ public class ClientRouteRegistryTest {
         String hierarchicalRoutesAsString = IOUtils.toString(
                 fileRoutesJsonProdAsResource.openStream(),
                 StandardCharsets.UTF_8);
-        String addedDevToRootRoute = hierarchicalRoutesAsString
-                .replaceFirst("\"route\": \"\",", "\"route\": \"dev\",");
-        var fileRoutesJsonFile = projectRoot.newFile("frontend/generated/"
-                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME);
+        String addedDevToRootRoute = "[{ \"route\": \"dev\", \"children\": "
+                + hierarchicalRoutesAsString + " }]";
+        final String fileRoutesJsonPath = "frontend/generated/"
+                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME;
+        File fileRoutesJsonFile = projectRoot.getRoot().toPath()
+                .resolve(fileRoutesJsonPath).toFile();
+        if (!fileRoutesJsonFile.exists()) {
+            projectRoot.newFile(fileRoutesJsonPath);
+        }
         try (PrintWriter writer = new PrintWriter(fileRoutesJsonFile)) {
             writer.println(addedDevToRootRoute);
         }

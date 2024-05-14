@@ -1,3 +1,3 @@
 import sinon from 'sinon';
 
-export const protectRoutes = sinon.stub().callsFake((routes) => routes);
+export const protectRoute = sinon.stub().callsFake((route) => route);

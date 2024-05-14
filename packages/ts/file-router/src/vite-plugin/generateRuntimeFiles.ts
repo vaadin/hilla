@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
 import collectRoutesFromFS from './collectRoutesFromFS.js';
@@ -56,21 +57,17 @@ export async function generateRuntimeFiles(
   extensions: readonly string[],
   logger: Logger,
 ): Promise<void> {
-  const routeMeta = await collectRoutesFromFS(viewsDir, { extensions, logger });
+  const routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
   logger.info('Collected file-based routes');
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
-  const tempUrl = new URL('views.ts', urls.code.href);
+
   await Promise.all([
     generateRuntimeFile(urls.json, viewConfigJson).then(() =>
       logger.info(`Frontend route list is generated: ${String(urls.json)}`),
     ),
     generateRuntimeFile(urls.code, runtimeRoutesCode).then(() =>
       logger.info(`File Route module is generated: ${String(urls.code)}`),
-    ),
-    // also keep the old file temporarily for compatibility purposes:
-    generateRuntimeFile(tempUrl, runtimeRoutesCode).then(() =>
-      logger.info(`Views module is generated: ${String(tempUrl)}`),
     ),
   ]);
 }

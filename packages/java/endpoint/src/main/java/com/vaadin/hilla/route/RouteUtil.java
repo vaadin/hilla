@@ -1,5 +1,6 @@
 package com.vaadin.hilla.route;
 
+import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Predicate;
+
 import org.springframework.http.server.RequestPath;
 
 /**
@@ -15,7 +18,7 @@ import org.springframework.http.server.RequestPath;
  * For internal use only. May be renamed or removed in a future release.
  */
 @Component
-public class RouteUtil {
+public class RouteUtil implements FileRouterRequestUtil {
 
     private final ClientRouteRegistry registry;
 
@@ -39,33 +42,35 @@ public class RouteUtil {
      * @return <code>true</code> if the request goes allowed route,
      *         <code>false</code> otherwise
      */
+    @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
         var viewConfig = getRouteData(request);
+        var isUserAuthenticated = request.getUserPrincipal() != null;
         return viewConfig.filter(
-                clientViewConfig -> isRouteAllowed(request, clientViewConfig))
+                clientViewConfig -> isRouteAllowed(request::isUserInRole,
+                        isUserAuthenticated, clientViewConfig))
                 .isPresent();
     }
 
-    private boolean isRouteAllowed(HttpServletRequest request,
-            ClientViewConfig viewConfig) {
+    boolean isRouteAllowed(Predicate<? super String> isUserInRole,
+            boolean isUserAuthenticated, ClientViewConfig viewConfig) {
         boolean isAllowed;
 
-        if (viewConfig.isLoginRequired()
-                && request.getUserPrincipal() == null) {
+        if (viewConfig.isLoginRequired() && !isUserAuthenticated) {
             isAllowed = false;
         } else {
             var rolesAllowed = viewConfig.getRolesAllowed();
 
             if (rolesAllowed != null) {
-                isAllowed = Arrays.stream(rolesAllowed)
-                        .anyMatch(request::isUserInRole);
+                isAllowed = Arrays.stream(rolesAllowed).anyMatch(isUserInRole);
             } else {
                 isAllowed = true;
             }
         }
 
         if (isAllowed && viewConfig.getParent() != null) {
-            isAllowed = isRouteAllowed(request, viewConfig.getParent());
+            isAllowed = isRouteAllowed(isUserInRole, isUserAuthenticated,
+                    viewConfig.getParent());
         }
 
         return isAllowed;
