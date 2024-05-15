@@ -149,7 +149,7 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
                 deploymentConfiguration);
         if (fileRoutesJsonAsResource == null) {
             LOGGER.debug(
-                    "No {} found under {} directory yet. Skipping client route registration.",
+                    "No {} found under {} directory. Skipping client route registration.",
                     FILE_ROUTES_JSON_NAME,
                     deploymentConfiguration.isProductionMode()
                             ? "'META-INF/VAADIN'"
