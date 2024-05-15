@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -27,8 +28,9 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
-
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Generics;
+
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -177,6 +179,14 @@ public final class TypeSignaturePlugin
 
             if (!typeArguments.isEmpty()) {
                 items = List.of(typeArguments.get(0));
+            } else {
+                // Let's deal with classes extending or implementing an iterator
+                var cls = (Class<?>) ((ClassRefSignatureModel) signature)
+                        .getClassInfo().get();
+                items = Generics.getExactIterableType(cls)
+                        .map(type -> List
+                                .of(SignatureModel.of((AnnotatedElement) type)))
+                        .orElse(items);
             }
         } else if (signature.isOptional()) {
             var typeArguments = ((ClassRefSignatureModel) signature)
