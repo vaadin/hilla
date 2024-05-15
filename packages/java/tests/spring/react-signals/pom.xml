@@ -26,12 +26,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-date-picker-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-time-picker-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
         </dependency>
 
         <dependency>
