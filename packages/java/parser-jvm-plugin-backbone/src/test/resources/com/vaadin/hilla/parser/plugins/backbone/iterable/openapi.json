@@ -180,6 +180,58 @@
           }
         }
       }
+    },
+    "/IterableEndpoint/getSpecializedIterable": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getSpecializedIterable_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items" : {
+                    "type" : "string",
+                    "nullable" : true
+                  },
+                  "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$SpecializedIterable"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/IterableEndpoint/getSpecializedIterableCustom": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getSpecializedIterableCustom_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Foo"
+                      }
+                    ]
+                  },
+                  "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$SpecializedIterableCustom"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

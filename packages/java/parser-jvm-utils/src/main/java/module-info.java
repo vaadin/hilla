@@ -7,6 +7,7 @@ module com.vaadin.hilla.parser.utils {
     requires com.fasterxml.jackson.datatype.jsr310;
     requires com.fasterxml.jackson.datatype.jdk8;
     requires com.fasterxml.jackson.module.paramnames;
+    requires gentyref;
 
     exports com.vaadin.hilla.parser.utils;
     exports com.vaadin.hilla.parser.jackson;
