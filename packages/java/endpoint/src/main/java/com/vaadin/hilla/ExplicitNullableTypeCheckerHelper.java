@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.hilla.parser.utils.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,8 +157,17 @@ class ExplicitNullableTypeCheckerHelper {
                     .getActualTypeArguments()[0];
             iterableDescription = "collection";
         } else if (expectedType instanceof Class<?>) {
-            itemType = ((Class<?>) expectedType).getComponentType();
-            iterableDescription = "array";
+            var expectedClass = ((Class<?>) expectedType);
+
+            if (Iterable.class.isAssignableFrom(expectedClass)) {
+                // Let's deal with classes extending or implementing an iterator
+                itemType = Generics.getExactIterableType(expectedClass)
+                        .orElse(Object.class);
+                iterableDescription = "collection";
+            } else {
+                itemType = expectedClass.getComponentType();
+                iterableDescription = "array";
+            }
         }
 
         for (Object item : value) {
