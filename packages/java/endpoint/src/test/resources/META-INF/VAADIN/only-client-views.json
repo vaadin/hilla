@@ -7,8 +7,7 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": []
+    "menu": null
   },
   "/user/:userId": {
     "params": {
@@ -22,8 +21,7 @@
     "route": "/user/:userId",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": []
+    "menu": null
   },
   "/profile": {
     "params": {},
@@ -36,7 +34,6 @@
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": []
+    "menu": null
   }
 }

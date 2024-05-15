@@ -34,6 +34,7 @@ import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         this.accessControl = accessControl;
         this.viewAccessChecker = viewAccessChecker;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
+
+        mapper.addMixIn(AvailableViewInfo.class, IgnoreMixin.class);
     }
 
     @Override
@@ -177,5 +180,13 @@ public class RouteUnifyingIndexHtmlRequestListener
                     accessControls, serverViews);
         }
         return serverViews;
+    }
+
+    /**
+     * Mixin to ignore unwanted fields in the json results.
+     */
+    abstract class IgnoreMixin {
+        @JsonIgnore
+        abstract List<AvailableViewInfo> children(); // we don't need it!
     }
 }

@@ -7,8 +7,7 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": []
+    "menu": null
   },
   "/foo": {
     "params": {},
@@ -18,8 +17,7 @@
     "route": "/foo",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": null
+    "menu": null
   },
   "/wildcard/:___wildcard*": {
     "params": {
@@ -31,8 +29,7 @@
     "route": "/wildcard/:___wildcard*",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": null
+    "menu": null
   },
   "/bar": {
     "params": {},
@@ -42,8 +39,7 @@
     "route": "/bar",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": null
+    "menu": null
   },
   "/comments/:___commentId?": {
     "params": {
@@ -55,8 +51,7 @@
     "route": "/comments/:___commentId?",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": null
+    "menu": null
   },
   "//:___userId/edit": {
     "params": {
@@ -68,7 +63,6 @@
     "route": "//:___userId/edit",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "children": null
+    "menu": null
   }
 }
