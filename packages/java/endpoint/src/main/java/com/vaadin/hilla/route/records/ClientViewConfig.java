@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.vaadin.flow.router.MenuData;
+import com.vaadin.flow.server.menu.RouteParamType;
+
 /**
  * Implementation of TypeScript's Hilla ConfigView. Represents a view
  * configuration from Hilla file-system-routing module.
@@ -21,7 +24,7 @@ public final class ClientViewConfig {
     private String route;
     private boolean lazy;
     private boolean autoRegistered;
-    private ClientViewMenuConfig menu;
+    private MenuData menu;
     private List<ClientViewConfig> children;
     @JsonProperty("params")
     private Map<String, RouteParamType> routeParameters;
@@ -79,7 +82,7 @@ public final class ClientViewConfig {
         return autoRegistered;
     }
 
-    public ClientViewMenuConfig menu() {
+    public MenuData menu() {
         return menu;
     }
 
@@ -124,7 +127,7 @@ public final class ClientViewConfig {
         this.autoRegistered = autoRegistered;
     }
 
-    public void setMenu(ClientViewMenuConfig menu) {
+    public void setMenu(MenuData menu) {
         this.menu = menu;
     }
 
