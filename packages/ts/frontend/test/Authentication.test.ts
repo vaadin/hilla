@@ -147,163 +147,32 @@ describe('@vaadin/hilla-frontend', () => {
     });
 
     describe('logout', () => {
+      let href: sinon.SinonStub;
+      let location: Pick<Location, 'href'>;
+
+      beforeEach(() => {
+        href = sinon.stub();
+        location = Object.defineProperty({ href: '' }, 'href', {
+          get() {},
+          set: href,
+        });
+        CookieManager.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
+      });
+
       afterEach(() => {
-        fetchMock.restore();
         CookieManager.remove(JWT_COOKIE_NAME);
       });
 
-      it('should set the csrf token on logout', async () => {
-        fetchMock.post(
-          '/logout',
-          {
-            body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
-          },
-          { headers: requestHeaders },
-        );
-        await logout();
-        expect(fetchMock.calls()).to.have.lengthOf(1);
-        verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
-      });
-
-      it('should clear the csrf tokens on failed server logout', async () => {
-        const fakeError = new Error('unable to connect');
-        fetchMock.post(
-          '/logout',
-          () => {
-            throw fakeError;
-          },
-          { headers: requestHeaders },
-        );
-        fetchMock.get('?nocache', {
-          body: happyCaseLogoutResponseText,
-        });
-
-        let thrownError;
-        try {
-          await logout();
-        } catch (err) {
-          thrownError = err;
-        }
-        expect(thrownError).to.equal(fakeError);
-        expect(fetchMock.calls()).to.have.lengthOf(3);
-        verifySpringCsrfTokenIsCleared();
-      });
-
-      it('should clear the JWT cookie on logout', async () => {
-        fetchMock.post(
-          '/logout',
-          {
-            body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
-          },
-          { headers: requestHeaders },
-        );
-
-        CookieManager.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
-        await logout();
-
-        expect(fetchMock.calls()).to.have.lengthOf(1);
+      it('should reload the page on logout', () => {
+        logout({ location });
+        expect(href).to.have.been.calledOnceWithExactly('/logout');
         expect(CookieManager.get(JWT_COOKIE_NAME)).to.be.undefined;
       });
 
-      it('should clear the JWT cookie on failed server logout', async () => {
-        const fakeError = new Error('unable to connect');
-        fetchMock.post('/logout', () => {
-          throw fakeError;
-        });
-        fetchMock.get('?nocache', () => {
-          throw fakeError;
-        });
-
-        CookieManager.set(JWT_COOKIE_NAME, 'jwtCookieMockValue');
-        let thrownError;
-        try {
-          await logout();
-        } catch (err) {
-          thrownError = err;
-        }
-        expect(thrownError).to.equal(fakeError);
+      it('should accept a custom logout URL', () => {
+        logout({ logoutUrl: '/custom-logout', location });
+        expect(href).to.have.been.calledOnceWithExactly('/custom-logout');
         expect(CookieManager.get(JWT_COOKIE_NAME)).to.be.undefined;
-      });
-
-      // when started the app offline, the spring csrf meta tags are not available
-      it('should retry when no spring csrf metas in the doc', async () => {
-        clearSpringCsrfMetaTags();
-
-        verifySpringCsrfTokenIsCleared();
-        fetchMock.post('/logout', 403, { repeat: 1 });
-        fetchMock.get('?nocache', {
-          body: happyCaseLogoutResponseText,
-        });
-        fetchMock.post(
-          '/logout',
-          {
-            body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
-          },
-          { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
-        );
-        await logout();
-        expect(fetchMock.calls()).to.have.lengthOf(3);
-        verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
-      });
-
-      // when started the app offline, the spring csrf meta tags are not available
-      it('should retry when no spring csrf metas in the doc and clear the csrf token on failed server logout with the retry', async () => {
-        clearSpringCsrfMetaTags();
-
-        verifySpringCsrfTokenIsCleared();
-
-        fetchMock.post('/logout', 403, { repeat: 1 });
-        fetchMock.get('?nocache', {
-          body: happyCaseLogoutResponseText,
-        });
-        const fakeError = new Error('server error');
-        fetchMock.post(
-          '/logout',
-          () => {
-            throw fakeError;
-          },
-          { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
-        );
-
-        let thrownError;
-        try {
-          await logout();
-        } catch (err) {
-          thrownError = err;
-        }
-        expect(thrownError).to.equal(fakeError);
-        expect(fetchMock.calls()).to.have.lengthOf(3);
-
-        setupSpringCsrfMetaTags();
-      });
-
-      // when the page has been opend too long the session has expired
-      it('should retry when expired spring csrf metas in the doc', async () => {
-        const expiredSpringCsrfToken = `expired-${TEST_SPRING_CSRF_TOKEN_VALUE}`;
-
-        setupSpringCsrfMetaTags(expiredSpringCsrfToken);
-
-        const headersWithExpiredSpringCsrfToken: Record<string, string> = {};
-        headersWithExpiredSpringCsrfToken[TEST_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
-
-        fetchMock.post('/logout', 403, { headers: headersWithExpiredSpringCsrfToken, repeat: 1 });
-        fetchMock.get('?nocache', {
-          body: happyCaseLogoutResponseText,
-        });
-        fetchMock.post(
-          '/logout',
-          {
-            body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
-          },
-          { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
-        );
-        await logout();
-        expect(fetchMock.calls()).to.have.lengthOf(3);
-        verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
       });
     });
 

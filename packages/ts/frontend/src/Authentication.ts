@@ -1,13 +1,8 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import CookieManager from './CookieManager.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
+import { getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
 
 const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
-
-function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
-  const doc = new DOMParser().parseFromString(body, 'text/html');
-  return getSpringCsrfInfo(doc);
-}
 
 function clearSpringCsrfMetaTags() {
   Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
@@ -27,29 +22,6 @@ function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
   document.head.appendChild(tokenMeta);
 }
 
-const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined => {
-  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"\}\};/iu.exec(body);
-  return match ? match[1] : undefined;
-};
-
-async function updateCsrfTokensBasedOnResponse(response: Response): Promise<string | undefined> {
-  const responseText = await response.text();
-  const token = getVaadinCsrfTokenFromResponseBody(responseText);
-  const springCsrfTokenInfo = getSpringCsrfTokenFromResponseBody(responseText);
-  updateSpringCsrfMetaTags(springCsrfTokenInfo);
-
-  return token;
-}
-
-async function doLogout(logoutUrl: string, headers: Record<string, string>) {
-  const response = await fetch(logoutUrl, { headers, method: 'POST' });
-  if (!response.ok) {
-    throw new Error(`failed to logout with response ${response.status}`);
-  }
-
-  await updateCsrfTokensBasedOnResponse(response);
-}
-
 export interface LoginResult {
   error: boolean;
   token?: string;
@@ -65,6 +37,7 @@ export interface LoginOptions {
 
 export interface LogoutOptions {
   logoutUrl?: string;
+  location?: Pick<Location, 'href'>;
 }
 
 /**
@@ -138,27 +111,9 @@ export async function login(username: string, password: string, options?: LoginO
  * A helper method for Spring Security based form logout
  * @param options - defines additional options, e.g, the logoutUrl.
  */
-export async function logout(options?: LogoutOptions): Promise<void> {
-  // this assumes the default Spring Security logout configuration (handler URL)
-  const logoutUrl = options?.logoutUrl ?? 'logout';
-  try {
-    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    await doLogout(logoutUrl, headers);
-  } catch {
-    try {
-      const response = await fetch('?nocache');
-      const responseText = await response.text();
-      const doc = new DOMParser().parseFromString(responseText, 'text/html');
-      const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
-      await doLogout(logoutUrl, headers);
-    } catch (error) {
-      // clear the token if the call fails
-      clearSpringCsrfMetaTags();
-      throw error;
-    }
-  } finally {
-    CookieManager.remove(JWT_COOKIE_NAME);
-  }
+export function logout({ logoutUrl = '/logout', location = window.location }: LogoutOptions = {}): void {
+  CookieManager.remove(JWT_COOKIE_NAME);
+  location.href = logoutUrl;
 }
 
 /**
