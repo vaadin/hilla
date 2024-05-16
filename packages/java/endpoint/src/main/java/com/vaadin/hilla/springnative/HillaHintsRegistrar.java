@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -22,7 +23,6 @@ import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
-import com.vaadin.hilla.route.ClientRouteRegistry;
 
 /**
  * Registers runtime hints for Spring 3 native support for Hilla.
@@ -36,7 +36,9 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         registerEndpointTypes(hints);
-        registerFileRoutes(hints);
+
+        hints.resources().registerPattern("META-INF/VAADIN/*");
+        hints.reflection().registerType(ClientViewConfig.class, MemberCategory.values());
 
         hints.reflection().registerType(PushEndpoint.class,
                 MemberCategory.values());
@@ -72,10 +74,6 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                     e);
         }
         hints.resources().registerPattern(EngineConfiguration.OPEN_API_PATH);
-    }
-
-    private void registerFileRoutes(RuntimeHints hints) {
-        hints.resources().registerPattern(ClientRouteRegistry.FILE_ROUTES_JSON_PROD_PATH);
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {
