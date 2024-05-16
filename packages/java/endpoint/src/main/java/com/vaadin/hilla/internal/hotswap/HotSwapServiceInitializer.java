@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -61,7 +61,7 @@ class HotSwapServiceInitializer implements VaadinServiceInitListener {
                                     + "You can change the interval by defining a positive value for the hilla.endpoint.hot-reload.pollInterval property in application.properties file.");
                         } else {
                             info("Hilla Endpoint Hot-Reload service is disabled. "
-                                    + "You can enable it by removing the hilla.endpoint.hot-reload.enabled=true property from your application.properties file, "
+                                    + "You can enable it by adding the hilla.endpoint.hot-reload.enabled=true property to your application.properties file, "
                                     + "or by setting its value to true.");
                         }
                     }
