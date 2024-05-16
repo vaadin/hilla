@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEnterListener;
+import com.vaadin.flow.router.RouteParameterData;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
@@ -186,9 +187,28 @@ public class RouteUnifyingIndexHtmlRequestListener
         serverRoutes.forEach(serverView -> {
             final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
                     .getNavigationTarget();
+            final boolean excludeFromMenu;
             final String targetUrl = serverView.getTemplate();
             if (targetUrl != null) {
-                final String url = "/" + targetUrl;
+                final String url;
+                if (!serverView.getRouteParameters().isEmpty()) {
+                    String editUrl = "/" + targetUrl;
+                    excludeFromMenu = serverView.getRouteParameters().values()
+                            .stream().anyMatch(param -> !param.getTemplate()
+                                    .contains("?"));
+                    for (RouteParameterData param : serverView
+                            .getRouteParameters().values()) {
+                        editUrl = editUrl.replace("/" + param.getTemplate(),
+                                "");
+                    }
+                    if (editUrl.isEmpty()) {
+                        editUrl = "/";
+                    }
+                    url = editUrl;
+                } else {
+                    excludeFromMenu = false;
+                    url = "/" + targetUrl;
+                }
 
                 final String title;
                 PageTitle pageTitle = AnnotationReader
@@ -207,7 +227,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                                         || menu.getTitle().isBlank()) ? title
                                                 : menu.getTitle(),
                                 menu.getOrder(), menu.getIcon(),
-                                menu.isExclude()))
+                                excludeFromMenu || menu.isExclude()))
                         .orElse(null);
 
                 final Map<String, RouteParamType> routeParameters = getRouteParameters(
