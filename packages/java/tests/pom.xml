@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <testbench.element.version>24.4-SNAPSHOT</testbench.element.version>
+        <vaadin.components.version>24.4-SNAPSHOT</vaadin.components.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
@@ -89,41 +89,46 @@
             <artifactId>flow-react</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+            <version>${vaadin.components.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-login-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-grid-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-notification-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-select-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-testbench</artifactId>
-            <version>${testbench.element.version}</version>
+            <version>${vaadin.components.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

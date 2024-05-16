@@ -35,9 +35,9 @@ import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
-import com.vaadin.hilla.route.records.AvailableViewInfo;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.menu.RouteParamType;
 import com.vaadin.hilla.route.records.ClientViewConfig;
-import com.vaadin.hilla.route.records.RouteParamType;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -337,7 +337,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            views = requestListener.collectServerViews(vaadinRequest);
+            views = requestListener.collectServerViews();
         }
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(5));
         MatcherAssert.assertThat(views.get("/bar").title(),

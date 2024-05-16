@@ -1,68 +1,68 @@
 {
   "/home": {
+    "params": {},
     "title": "Home",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
-  },
-  "/bar": {
-    "title": "Component",
-    "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "/bar",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/foo": {
+    "params": {},
     "title": "RouteTarget",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/foo",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/wildcard/:___wildcard*": {
+    "params": {
+      ":___wildcard*": "*"
+    },
     "title": "RouteTarget",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/wildcard/:___wildcard*",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {
-      ":___wildcard*": "*"
-    }
+    "menu": null
   },
-  "//:___userId/edit": {
-    "title": "RouteTarget",
+  "/bar": {
+    "params": {},
+    "title": "Component",
     "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "//:___userId/edit",
+    "loginRequired": false,
+    "route": "/bar",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {
-      ":___userId": "req"
-    }
+    "menu": null
   },
   "/comments/:___commentId?": {
+    "params": {
+      ":___commentId?": "opt"
+    },
     "title": "RouteTarget",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/comments/:___commentId?",
     "lazy": false,
     "register": false,
-    "menu": null,
+    "menu": null
+  },
+  "//:___userId/edit": {
     "params": {
-      ":___commentId?": "opt"
-    }
+      ":___userId": "req"
+    },
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "//:___userId/edit",
+    "lazy": false,
+    "register": false,
+    "menu": null
   }
 }
