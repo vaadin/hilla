@@ -1,6 +1,7 @@
 package com.vaadin.hilla.route;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.flow.server.menu.RouteParamType;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
@@ -343,8 +344,8 @@ public class ClientRouteRegistryTest {
     }
 
     private void createMockedDevModeFileRouteJson() throws IOException {
-        var fileRoutesJsonProdAsResource = getClass()
-                .getResource(ClientRouteRegistry.FILE_ROUTES_JSON_PROD_PATH);
+        var fileRoutesJsonProdAsResource = MenuRegistry.getClassLoader()
+                .getResource(MenuRegistry.FILE_ROUTES_JSON_PROD_PATH);
         assert fileRoutesJsonProdAsResource != null;
         String hierarchicalRoutesAsString = IOUtils.toString(
                 fileRoutesJsonProdAsResource.openStream(),
@@ -352,7 +353,7 @@ public class ClientRouteRegistryTest {
         String addedDevToRootRoute = "[{ \"route\": \"dev\", \"children\": "
                 + hierarchicalRoutesAsString + " }]";
         final String fileRoutesJsonPath = "frontend/generated/"
-                + ClientRouteRegistry.FILE_ROUTES_JSON_NAME;
+                + MenuRegistry.FILE_ROUTES_JSON_NAME;
         File fileRoutesJsonFile = projectRoot.getRoot().toPath()
                 .resolve(fileRoutesJsonPath).toFile();
         if (!fileRoutesJsonFile.exists()) {

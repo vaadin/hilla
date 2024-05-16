@@ -16,23 +16,21 @@
 package com.vaadin.hilla.route;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEnterListener;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.server.menu.MenuRegistry;
-import com.vaadin.hilla.route.records.ClientViewConfig;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jsoup.nodes.DataNode;
@@ -100,11 +98,8 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     @Override
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
-        final boolean isUserAuthenticated = response.getVaadinRequest()
-                .getUserPrincipal() != null;
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
-                collectClientViews(response.getVaadinRequest()::isUserInRole,
-                        isUserAuthenticated));
+                collectClientViews(response.getVaadinRequest()));
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
                     "Exposing server-side views to the client based on user configuration");
@@ -130,31 +125,15 @@ public class RouteUnifyingIndexHtmlRequestListener
     }
 
     protected Map<String, AvailableViewInfo> collectClientViews(
-            Predicate<? super String> isUserInRole,
-            boolean isUserAuthenticated) {
+            VaadinRequest request) {
+
         if (!deploymentConfiguration.isProductionMode()) {
             clientRouteRegistry.loadLatestDevModeFileRoutesJsonIfNeeded(
                     deploymentConfiguration);
         }
 
-        var clientViews = new HashMap<String, AvailableViewInfo>();
-        clientRouteRegistry.getAllRoutes().entrySet().stream()
-                .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
-                        isUserInRole, isUserAuthenticated,
-                        clientViewConfigEntry.getValue()))
-                .forEach(clientViewConfigEntry -> {
-                    final String route = clientViewConfigEntry.getKey();
-                    final ClientViewConfig config = clientViewConfigEntry
-                            .getValue();
-                    final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                            config.getTitle(), config.getRolesAllowed(),
-                            config.isLoginRequired(), config.getRoute(),
-                            config.isLazy(), config.isAutoRegistered(),
-                            config.menu(), Collections.emptyList(),
-                            config.getRouteParameters());
-                    clientViews.put(route, availableViewInfo);
-                });
-        return clientViews;
+        return MenuRegistry.collectClientMenuItems(true,
+                deploymentConfiguration, request);
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews() {

@@ -18,18 +18,15 @@ package com.vaadin.hilla.route;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
-import com.vaadin.flow.router.internal.ClientRoutesProvider;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -40,15 +37,13 @@ import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static com.vaadin.flow.server.menu.MenuRegistry.FILE_ROUTES_JSON_NAME;
+
 /**
  * Keeps track of registered client side routes.
  */
 @Component
-public class ClientRouteRegistry implements ClientRoutesProvider {
-
-    public static final String FILE_ROUTES_JSON_NAME = "file-routes.json";
-    public static final String FILE_ROUTES_JSON_PROD_PATH = "/META-INF/VAADIN/"
-            + FILE_ROUTES_JSON_NAME;
+public class ClientRouteRegistry {
 
     /**
      * A map of registered routes and their corresponding client view
@@ -145,8 +140,8 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
     public synchronized void registerClientRoutes(
             DeploymentConfiguration deploymentConfiguration,
             LocalDateTime lastUpdated) {
-        var fileRoutesJsonAsResource = getFileRoutesJsonAsResource(
-                deploymentConfiguration);
+        var fileRoutesJsonAsResource = MenuRegistry
+                .getViewsJsonAsResource(deploymentConfiguration);
         if (fileRoutesJsonAsResource == null) {
             LOGGER.debug(
                     "No {} found under {} directory. Skipping client route registration.",
@@ -199,30 +194,6 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         }
     }
 
-    private URL getFileRoutesJsonAsResource(
-            DeploymentConfiguration deploymentConfiguration) {
-        var isProductionMode = deploymentConfiguration.isProductionMode();
-        if (isProductionMode) {
-            return getClass().getResource(FILE_ROUTES_JSON_PROD_PATH);
-        }
-        try {
-            var fileRoutesJson = FrontendUtils
-                    .getFrontendGeneratedFolder(
-                            deploymentConfiguration.getFrontendFolder())
-                    .toPath().resolve(FILE_ROUTES_JSON_NAME).toFile();
-            if (!fileRoutesJson.exists()) {
-                return null;
-            } else {
-                return fileRoutesJson.toURI().toURL();
-            }
-        } catch (MalformedURLException e) {
-            LOGGER.error(
-                    "Unexpected error while getting {} as resource from 'frontend/generated'.",
-                    FILE_ROUTES_JSON_NAME, e);
-            throw new RuntimeException(e);
-        }
-    }
-
     private void registerAndRecurseChildren(String basePath,
             ClientViewConfig view) {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
@@ -254,10 +225,5 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
      */
     public synchronized boolean hasMainLayout() {
         return hasMainLayout;
-    }
-
-    @Override
-    public synchronized List<String> getClientRoutes() {
-        return getAllRoutes().keySet().stream().toList();
     }
 }
