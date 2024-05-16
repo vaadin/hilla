@@ -46,14 +46,6 @@ export const remote = {
   // https://raw.githubusercontent.com/vaadin/platform/24.3.0/scripts/generator/src/writer.js
   src: new URL(`platform/${branch}/scripts/generator/src/`, repoUrl),
   versions: new URL(`platform/${branch}/versions.json`, repoUrl),
-  lumo: new URL(
-    `flow-components/${branch}/vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java`,
-    repoUrl,
-  ),
-  material: new URL(
-    `flow-components/${branch}/vaadin-material-theme-flow-parent/vaadin-material-theme-flow/src/main/java/com/vaadin/flow/theme/material/Material.java`,
-    repoUrl,
-  ),
 };
 
 export const destination = {
@@ -67,7 +59,6 @@ export const destination = {
     new URL('packages/java/tests/spring/react-i18n/src/main/resources/vaadin-core-versions.json', root),
     new URL('packages/java/tests/spring/react-signals/src/main/resources/vaadin-core-versions.json', root),
   ],
-  themeDir: new URL('packages/java/hilla/src/main/java/com/vaadin/hilla/theme/', root),
   components: new URL(
     'packages/java/hilla/src/main/resources/com/vaadin/flow/server/frontend/dependencies/hilla/components/',
     root,
