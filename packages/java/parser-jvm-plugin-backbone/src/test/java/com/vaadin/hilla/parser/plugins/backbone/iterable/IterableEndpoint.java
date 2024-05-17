@@ -25,6 +25,14 @@ public class IterableEndpoint {
         return Arrays.asList(new Foo(), new Foo());
     }
 
+    public SpecializedIterable getSpecializedIterable() {
+        return new SpecializedIterable();
+    }
+
+    public SpecializedIterableCustom getSpecializedIterableCustom() {
+        return new SpecializedIterableCustom();
+    }
+
     public List<Foo> getFooList() {
         return new ArrayList<>();
     }
@@ -49,6 +57,12 @@ public class IterableEndpoint {
         public Iterator<T> iterator() {
             return list.iterator();
         }
+    }
+
+    public static class SpecializedIterable extends ArrayList<String> {
+    }
+
+    public static class SpecializedIterableCustom extends ArrayList<Foo> {
     }
 
     public static class Foo {
