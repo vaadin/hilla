@@ -352,8 +352,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat(
                 views.get("//:___userId/edit").routeParameters(),
                 Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(
-                views.get("/comments/:___commentId?").routeParameters(),
+        MatcherAssert.assertThat(views.get("/comments").routeParameters(),
                 Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
 
     }

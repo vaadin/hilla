@@ -63,11 +63,11 @@
       ":___userId": "req"
     }
   },
-  "/comments/:___commentId?": {
+  "/comments": {
     "title": "RouteTarget",
     "rolesAllowed": null,
     "requiresLogin": false,
-    "route": "/comments/:___commentId?",
+    "route": "/comments",
     "lazy": false,
     "register": false,
     "menu": null,
