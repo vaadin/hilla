@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
@@ -32,7 +33,7 @@ public final class TransferTypesPlugin
         extends AbstractPlugin<PluginConfiguration> {
     static private final Map<String, Class<?>> classMap = new HashMap<>();
 
-    {
+    static {
         classMap.put("org.springframework.data.domain.Page", List.class);
         classMap.put("org.springframework.data.domain.Pageable",
                 Pageable.class);
@@ -42,6 +43,7 @@ public final class TransferTypesPlugin
         classMap.put("reactor.core.publisher.Flux", Flux.class);
         classMap.put("com.vaadin.hilla.EndpointSubscription",
                 EndpointSubscription.class);
+        classMap.put(JsonNode.class.getName(), Object.class);
     }
 
     public TransferTypesPlugin() {

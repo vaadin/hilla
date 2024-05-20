@@ -64,14 +64,14 @@ describe('@vaadin/hilla-file-router', () => {
       let failureDir: URL;
       let internalDir: URL;
 
-      before(async () => {
+      beforeEach(async () => {
         failureDir = new URL('./failure/', tmp);
         internalDir = new URL('./internal/', failureDir);
         await mkdir(internalDir, { recursive: true });
         await appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}');
       });
 
-      after(async () => {
+      afterEach(async () => {
         await rm(failureDir, { recursive: true, force: true });
       });
 
