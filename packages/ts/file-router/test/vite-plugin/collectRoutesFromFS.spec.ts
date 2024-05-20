@@ -68,6 +68,7 @@ describe('@vaadin/hilla-file-router', () => {
         failureDir = new URL('./failure/', tmp);
         internalDir = new URL('./internal/', failureDir);
         await mkdir(internalDir, { recursive: true });
+        await appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}');
       });
 
       after(async () => {
@@ -76,7 +77,6 @@ describe('@vaadin/hilla-file-router', () => {
 
       it('should throw an error if file starts with "@" and is not an "@index" or "@layout"', async () => {
         await Promise.all([
-          appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}'),
           appendFile(new URL('./@error.tsx', failureDir), 'export default function FailureError() {}'),
         ]);
 
@@ -87,8 +87,20 @@ describe('@vaadin/hilla-file-router', () => {
 
       it('should throw an error if there is file and directory with the same name', async () => {
         await Promise.all([
-          appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}'),
           appendFile(new URL('./internal.tsx', failureDir), 'export default function FailureFileAndDir() {}'),
+        ]);
+
+        await expect(collectRoutesFromFS(tmp, { extensions, logger })).to.be.rejectedWith(
+          'You cannot create a file and a directory with the same name. Use `@index` instead.',
+        );
+      });
+
+      it('should throw an error if there is @index and optional route in the same directory', async () => {
+        await Promise.all([
+          appendFile(
+            new URL('./{{optional}}.tsx', internalDir),
+            'export default function FailureInternalOptional() {}',
+          ),
         ]);
 
         await expect(collectRoutesFromFS(tmp, { extensions, logger })).to.be.rejectedWith(

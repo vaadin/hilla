@@ -2,7 +2,8 @@ import { opendir, readFile } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Logger } from 'vite';
-import { cleanUp } from './utils.js';
+import { RouteParamType } from '../shared/routeParamType.js';
+import { cleanUp, routeParamTypeMap } from './utils.js';
 
 export type RouteMeta = Readonly<{
   path: string;
@@ -106,7 +107,14 @@ export default async function collectRoutesFromFS(
     }
     const name = basename(d.name, extname(d.name));
 
-    if (name === '@layout') {
+    const optionalParamType = routeParamTypeMap.get(RouteParamType.Optional)!;
+
+    if (
+      (name === '@index' && children.some(({ path: p }) => optionalParamType.test(p))) ||
+      (optionalParamType.test(name) && children.some(({ path: p }) => p === '@index'))
+    ) {
+      throw new Error('You cannot create an `@index` file in a directory with optional parameters');
+    } else if (name === '@layout') {
       layout = file;
     } else if (name === '@index') {
       children.push({

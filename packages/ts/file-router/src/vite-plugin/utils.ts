@@ -1,6 +1,6 @@
 import { RouteParamType } from '../shared/routeParamType.js';
 
-const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
+export const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
   [RouteParamType.Wildcard, /\{\.{3}(.+)\}/gu],
   [RouteParamType.Optional, /\{{2}(.+)\}{2}/gu],
   [RouteParamType.Required, /\{(.+)\}/gu],
