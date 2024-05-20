@@ -1,5 +1,6 @@
 package com.invalid;
 
+import com.example.library.unpublished.SomeEntity;
 import com.vaadin.hilla.Endpoint;
 
 @Endpoint
@@ -17,5 +18,9 @@ public class InvalidEndpoint {
 
     public String getMessage() {
         return message;
+    }
+
+    public SomeEntity getSomeEntity() {
+        return null;
     }
 }

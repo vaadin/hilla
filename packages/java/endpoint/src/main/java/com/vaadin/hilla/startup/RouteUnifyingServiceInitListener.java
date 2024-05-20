@@ -20,6 +20,7 @@ import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
+import com.vaadin.hilla.HillaStats;
 import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
@@ -100,6 +101,11 @@ public class RouteUnifyingServiceInitListener
 
             clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
                     LocalDateTime.now());
+
+            boolean hasHillaFsRoute = !clientRouteRegistry.getAllRoutes()
+                    .isEmpty();
+            HillaStats.reportGenericHasFeatures(event.getSource(),
+                    hasHillaFsRoute);
         }
     }
 }
