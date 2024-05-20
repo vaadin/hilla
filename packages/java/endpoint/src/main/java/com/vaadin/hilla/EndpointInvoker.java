@@ -387,6 +387,7 @@ public class EndpointInvoker {
             Function<String, Boolean> rolesChecker)
             throws EndpointAccessDeniedException, EndpointBadRequestException,
             EndpointInternalException {
+        HillaStats.reportEndpointActive();
         EndpointAccessChecker accessChecker = getAccessChecker();
 
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
