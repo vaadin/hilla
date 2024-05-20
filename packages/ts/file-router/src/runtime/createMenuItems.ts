@@ -12,6 +12,9 @@ import type { MenuItem, ViewConfig } from '../types.js';
  * @returns A list of menu items.
  */
 export function createMenuItems(vaadinObject = (window as VaadinWindow).Vaadin): readonly MenuItem[] {
+  // @ts-expect-error: esbuild injection
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  __REGISTER__('createMenuItems', vaadinObject);
   const collator = new Intl.Collator('en-US');
   return vaadinObject?.views
     ? Object.entries(vaadinObject.views)
