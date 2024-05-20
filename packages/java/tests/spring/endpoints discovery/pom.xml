@@ -31,6 +31,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>unpublished-library</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/unpublished-library-1.0.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
@@ -43,6 +50,7 @@
                         <packages>
                             <package>com.example.application</package>
                             <package>com.invalid</package>
+                            <package>com.example.library.unpublished</package>
                         </packages>
                     </parser>
                 </configuration>
@@ -59,6 +67,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
             </plugin>
         </plugins>
     </build>
