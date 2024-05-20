@@ -1,8 +1,8 @@
 package com.vaadin.hilla.route;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.menu.RouteParamType;
 import com.vaadin.hilla.route.records.ClientViewConfig;
-import com.vaadin.hilla.route.records.RouteParamType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
