@@ -53,13 +53,13 @@
     "meow": "^12.1.1"
   },
   "devDependencies": {
-    "@vaadin/hilla-generator-core": "24.4.0-beta1",
     "@types/chai": "^4.3.6",
     "@types/chai-as-promised": "^7.1.6",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.7.1",
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
+    "@vaadin/hilla-generator-core": "24.4.0-beta1",
     "c8": "^8.0.1",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
@@ -67,7 +67,6 @@
     "copyfiles": "^2.4.1",
     "mocha": "^10.2.0",
     "pino": "^8.15.1",
-    "rimraf": "^5.0.5",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.3.2"
