@@ -345,11 +345,13 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 Matchers.is("RouteTarget"));
         MatcherAssert.assertThat(views.get("/bar").route(),
                 Matchers.is("/bar"));
-        MatcherAssert.assertThat(
-                views.get("/wildcard/:___wildcard*").routeParameters(),
+        MatcherAssert.assertThat(views.get("/wildcard").route(),
+                Matchers.is("/wildcard/:___wildcard*"));
+        MatcherAssert.assertThat(views.get("/wildcard").routeParameters(),
                 Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
-        MatcherAssert.assertThat(
-                views.get("/comments/:___commentId?").routeParameters(),
+        MatcherAssert.assertThat(views.get("/comments").route(),
+                Matchers.is("/comments/:___commentId?"));
+        MatcherAssert.assertThat(views.get("/comments").routeParameters(),
                 Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
     }
 

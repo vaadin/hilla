@@ -29,7 +29,7 @@
     "register": false,
     "menu": null
   },
-  "/wildcard/:___wildcard*": {
+  "/wildcard": {
     "params": {
       ":___wildcard*": "*"
     },
@@ -41,7 +41,7 @@
     "register": false,
     "menu": null
   },
-  "/comments/:___commentId?": {
+  "/comments": {
     "params": {
       ":___commentId?": "opt"
     },

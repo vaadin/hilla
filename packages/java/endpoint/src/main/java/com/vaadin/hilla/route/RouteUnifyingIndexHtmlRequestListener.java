@@ -177,8 +177,22 @@ public class RouteUnifyingIndexHtmlRequestListener
         return serverRoutes.values().stream()
                 .filter(view -> view.routeParameters().values().stream()
                         .noneMatch(param -> param == RouteParamType.REQUIRED))
-                .collect(Collectors.toMap(AvailableViewInfo::route,
+                .collect(Collectors.toMap(this::getMenuLink,
                         Function.identity()));
+    }
+
+    /**
+     * Gets menu link with omitted route parameters.
+     *
+     * @param info
+     *            the menu item's target view
+     * @return target path for menu link
+     */
+    private String getMenuLink(AvailableViewInfo info) {
+        final var parameterNames = info.routeParameters().keySet();
+        return Stream.of(info.route().split("/"))
+                .filter(Predicate.not(parameterNames::contains))
+                .collect(Collectors.joining("/"));
     }
 
     /**
