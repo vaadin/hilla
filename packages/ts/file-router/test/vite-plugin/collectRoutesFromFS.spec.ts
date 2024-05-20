@@ -64,19 +64,19 @@ describe('@vaadin/hilla-file-router', () => {
       let failureDir: URL;
       let internalDir: URL;
 
-      before(async () => {
+      beforeEach(async () => {
         failureDir = new URL('./failure/', tmp);
         internalDir = new URL('./internal/', failureDir);
         await mkdir(internalDir, { recursive: true });
+        await appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}');
       });
 
-      after(async () => {
+      afterEach(async () => {
         await rm(failureDir, { recursive: true, force: true });
       });
 
       it('should throw an error if file starts with "@" and is not an "@index" or "@layout"', async () => {
         await Promise.all([
-          appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}'),
           appendFile(new URL('./@error.tsx', failureDir), 'export default function FailureError() {}'),
         ]);
 
@@ -87,7 +87,6 @@ describe('@vaadin/hilla-file-router', () => {
 
       it('should throw an error if there is file and directory with the same name', async () => {
         await Promise.all([
-          appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}'),
           appendFile(new URL('./internal.tsx', failureDir), 'export default function FailureFileAndDir() {}'),
         ]);
 
