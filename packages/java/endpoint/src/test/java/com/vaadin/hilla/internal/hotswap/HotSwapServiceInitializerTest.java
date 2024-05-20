@@ -121,7 +121,7 @@ public class HotSwapServiceInitializerTest {
                     .thenReturn(Optional.of(mockedBrowserLiveReload));
 
             Mockito.when(mockedBrowserLiveReload.getBackend())
-                    .thenReturn(BrowserLiveReload.Backend.HOTSWAP_AGENT);
+                    .thenReturn(BrowserLiveReload.Backend.JREBEL);
 
             Mockito.when(deploymentConfiguration.isDevModeLiveReloadEnabled())
                     .thenReturn(Boolean.TRUE);
