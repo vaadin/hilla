@@ -117,6 +117,8 @@ export default async function collectRoutesFromFS(
       throw new Error(
         'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
       );
+    } else if (children.some(({ path: p }) => p === name)) {
+      throw new Error('You cannot create a file and a directory with the same name. Use `@index` instead.');
     } else {
       children.push({
         path: name,
