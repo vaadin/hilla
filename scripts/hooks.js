@@ -11,6 +11,14 @@ function createMessageChannel(
   return port2;
 }
 
+const portStats = createMessageChannel();
+
+register(new URL('./hooks/stats.js', import.meta.url), {
+  parentURL: import.meta.url,
+  data: { number: 2, port: portStats },
+  transferList: [portStats],
+});
+
 const portMocks = createMessageChannel();
 
 register(new URL('./hooks/mocks.js', import.meta.url), {

@@ -16,14 +16,11 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -54,12 +51,9 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
-import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.exception.EndpointException;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
@@ -146,8 +140,9 @@ public class EndpointController {
                     .registerEndpoint(endpointBean));
         }
 
-        // Usage statistics
-        HillaStats.report();
+        if (!endpointRegistry.isEmpty()) {
+            HillaStats.reportHasEndpoint();
+        }
     }
 
     /**
