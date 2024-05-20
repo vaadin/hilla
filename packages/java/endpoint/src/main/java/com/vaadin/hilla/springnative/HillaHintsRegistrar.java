@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.router.MenuData;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +39,13 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         registerEndpointTypes(hints);
 
-        hints.resources().registerPattern("META-INF/VAADIN/*");
-        hints.reflection().registerType(ClientViewConfig.class, MemberCategory.values());
+        hints.resources().registerPattern("file-routes.json");
+        hints.reflection().registerType(ClientViewConfig.class,
+                MemberCategory.values());
+        hints.reflection().registerType(MenuData.class,
+                MemberCategory.values());
+        hints.reflection().registerType(AvailableViewInfo.class,
+                MemberCategory.values());
 
         hints.reflection().registerType(PushEndpoint.class,
                 MemberCategory.values());
@@ -58,6 +65,10 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                 logger.error("Resource {} is not available",
                         openApiResourceName);
                 return;
+            } else {
+                logger.info(
+                        "Resource {} is being used for registering endpoint types",
+                        openApiResourceName);
             }
 
             var reader = new BufferedReader(
