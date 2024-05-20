@@ -237,6 +237,24 @@ public class ExplicitNullableTypeCheckerTest {
         verify(checker).checkValueForType("bar", String.class);
     }
 
+    private static class MyList extends ArrayList<String> {
+    }
+
+    @Test
+    public void should_Recognize_Extended_List() {
+        ExplicitNullableTypeCheckerHelper checker = spy(helper);
+
+        MyList list = new MyList();
+        list.add("foo");
+        list.add("bar");
+
+        checker.checkValueForType(list, MyList.class);
+        verify(checker).checkValueForType(list, MyList.class);
+
+        verify(checker).checkValueForType("foo", String.class);
+        verify(checker).checkValueForType("bar", String.class);
+    }
+
     @Test
     public void should_ReturnNull_When_GivenNonNullItems_InListType() {
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(

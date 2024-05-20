@@ -68,5 +68,11 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
+        <!-- Small reflection library -->
+        <dependency>
+            <groupId>com.vaadin.external</groupId>
+            <artifactId>gentyref</artifactId>
+            <version>1.2.0.vaadin1</version>
+        </dependency>
     </dependencies>
 </project>

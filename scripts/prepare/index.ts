@@ -31,7 +31,6 @@ const [{ version }, versions] = await Promise.all([
     .then((str) => JSON.parse(str, (_, val) => (val === '{{version}}' ? undefined : val))) as Promise<Versions>,
   mkdir(local.src, { recursive: true }),
   mkdir(local.results, { recursive: true }),
-  mkdir(destination.themeDir, { recursive: true }),
 ]);
 
 if (!version) {
@@ -72,25 +71,3 @@ const workspaceArg = `--workspace=@vaadin/hilla-react-crud`;
 // Workaround: doing "npm uninstall" first, the package.json in the workspace is not updated otherwise
 await run('npm', ['uninstall', reactComponentsPackageName, workspaceArg, '--save']);
 await run('npm', ['install', reactComponentsSpec, workspaceArg, '--save', '--save-exact']);
-
-const themeAnnotationsPattern = /.*(JsModule|NpmPackage).*\n/gmu;
-const themeFiles = new Map([
-  [remote.lumo, [new URL('Lumo.java', destination.themeDir)]],
-  [remote.material, [new URL('Material.java', destination.themeDir)]],
-]);
-
-console.log('Copying the theme files from flow-components to the final place.');
-
-await Promise.all(
-  Array.from(themeFiles.entries(), async ([url, dest]) => {
-    const response = await fetch(url);
-    let code = await response.text();
-    code = code.replaceAll(themeAnnotationsPattern, '');
-    await Promise.all(
-      dest.map(async (file) => {
-        await writeFile(file, code);
-        console.log(`Copied ${file.toString()}`);
-      }),
-    );
-  }),
-);
