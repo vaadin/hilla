@@ -18,9 +18,9 @@ package com.vaadin.hilla.route;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,22 +31,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.internal.AnnotationReader;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.RouteData;
-import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
-import com.vaadin.hilla.route.records.AvailableViewInfo;
-import com.vaadin.hilla.route.records.ClientViewMenuConfig;
-import com.vaadin.hilla.route.records.RouteParamType;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.server.menu.RouteParamType;
 
 /**
  * Index HTML request listener for collecting the client side and the server
@@ -94,6 +92,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         this.accessControl = accessControl;
         this.viewAccessChecker = viewAccessChecker;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
+
+        mapper.addMixIn(AvailableViewInfo.class, IgnoreMixin.class);
     }
 
     @Override
@@ -106,8 +106,7 @@ public class RouteUnifyingIndexHtmlRequestListener
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
                     "Exposing server-side views to the client based on user configuration");
-            availableViews
-                    .putAll(collectServerViews(response.getVaadinRequest()));
+            availableViews.putAll(collectServerViews());
         }
 
         if (availableViews.isEmpty()) {
@@ -148,13 +147,12 @@ public class RouteUnifyingIndexHtmlRequestListener
                         config.getRolesAllowed(), config.isLoginRequired(),
                         config.getRoute(), config.isLazy(),
                         config.isAutoRegistered(), config.menu(),
-                        config.getRouteParameters()))
+                        Collections.emptyList(), config.getRouteParameters()))
                 .collect(Collectors.toMap(AvailableViewInfo::route,
                         Function.identity()));
     }
 
-    protected Map<String, AvailableViewInfo> collectServerViews(
-            VaadinRequest vaadinRequest) {
+    protected Map<String, AvailableViewInfo> collectServerViews() {
         final var vaadinService = VaadinService.getCurrent();
         if (vaadinService == null) {
             LOGGER.debug(
@@ -166,50 +164,28 @@ public class RouteUnifyingIndexHtmlRequestListener
         var accessControls = Stream.of(accessControl, viewAccessChecker)
                 .filter(Objects::nonNull).toList();
 
-        var serverRoutes = Collections.<RouteData> emptyList();
+        var serverRoutes = new HashMap<String, AvailableViewInfo>();
+
         if (vaadinService.getInstantiator().getMenuAccessControl()
                 .getPopulateClientSideMenu() == MenuAccessControl.PopulateClientMenu.ALWAYS
                 || clientRouteRegistry.hasMainLayout()) {
-            serverRoutes = serverRouteRegistry
-                    .getRegisteredAccessibleMenuRoutes(vaadinRequest,
-                            accessControls);
+            MenuRegistry.collectAndAddServerMenuItems(
+                    RouteConfiguration.forRegistry(serverRouteRegistry),
+                    accessControls, serverRoutes);
         }
-        return serverRoutes.stream()
-                .filter(serverView -> serverView.getTemplate() != null)
-                .map(serverView -> {
-                    final var viewClass = serverView.getNavigationTarget();
-                    final var targetUrl = serverView.getTemplate();
-                    final var url = "/" + targetUrl;
 
-                    final String title;
-                    var pageTitle = AnnotationReader
-                            .getAnnotationFor(viewClass, PageTitle.class)
-                            .orElse(null);
-                    if (pageTitle != null) {
-                        title = pageTitle.value();
-                    } else {
-                        title = serverView.getNavigationTarget()
-                                .getSimpleName();
-                    }
-
-                    final var menuConfig = Optional
-                            .ofNullable(serverView.getMenuData())
-                            .map(menu -> new ClientViewMenuConfig(
-                                    (menu.getTitle() == null
-                                            || menu.getTitle().isBlank())
-                                                    ? title
-                                                    : menu.getTitle(),
-                                    menu.getOrder(), menu.getIcon(),
-                                    menu.isExclude()))
-                            .orElse(null);
-
-                    return new AvailableViewInfo(title, null, false, url, false,
-                            false, menuConfig,
-                            serverView.getRouteParameters().values().stream());
-                })
+        return serverRoutes.values().stream()
                 .filter(view -> view.routeParameters().values().stream()
                         .noneMatch(param -> param == RouteParamType.REQUIRED))
                 .collect(Collectors.toMap(AvailableViewInfo::route,
                         Function.identity()));
+    }
+
+    /**
+     * Mixin to ignore unwanted fields in the json results.
+     */
+    abstract static class IgnoreMixin {
+        @JsonIgnore
+        abstract List<AvailableViewInfo> children(); // we don't need it!
     }
 }

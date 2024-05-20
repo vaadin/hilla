@@ -1,8 +1,9 @@
 {
   "/home": {
+    "params": {},
     "title": "Home",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/home",
     "lazy": false,
     "register": false,
@@ -10,13 +11,16 @@
     "params": {}
   },
   "/profile": {
+    "params": {},
     "title": "Profile",
-    "rolesAllowed": ["ROLE_USER", "ROLE_ADMIN"],
-    "requiresLogin": true,
+    "rolesAllowed": [
+      "ROLE_USER",
+      "ROLE_ADMIN"
+    ],
+    "loginRequired": true,
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   }
 }

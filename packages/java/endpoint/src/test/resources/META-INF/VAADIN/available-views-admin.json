@@ -1,66 +1,69 @@
 {
-  "/home": {
-    "title": "Home",
-    "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "/home",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {}
-  },
-  "/profile": {
-    "title": "Profile",
-    "rolesAllowed": ["ROLE_USER", "ROLE_ADMIN"],
-    "requiresLogin": true,
-    "route": "/profile",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {}
-  },
-  "/bar": {
-    "title": "Component",
-    "rolesAllowed": null,
-    "requiresLogin": false,
-    "route": "/bar",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {}
-  },
   "/foo": {
+    "params": {},
     "title": "RouteTarget",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/foo",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
+  },
+  "/bar": {
+    "params": {},
+    "title": "Component",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/bar",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/home": {
+    "params": {},
+    "title": "Home",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/home",
+    "lazy": false,
+    "register": false,
+    "menu": null
   },
   "/wildcard/:___wildcard*": {
+    "params": {
+      ":___wildcard*": "*"
+    },
     "title": "RouteTarget",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/wildcard/:___wildcard*",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {
-      ":___wildcard*": "*"
-    }
+    "menu": null
   },
   "/comments/:___commentId?": {
+    "params": {
+      ":___commentId?": "opt"
+    },
     "title": "RouteTarget",
     "rolesAllowed": null,
-    "requiresLogin": false,
+    "loginRequired": false,
     "route": "/comments/:___commentId?",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {
-      ":___commentId?": "opt"
-    }
+    "menu": null
+  },
+  "/profile": {
+    "params": {},
+    "title": "Profile",
+    "rolesAllowed": [
+      "ROLE_USER",
+      "ROLE_ADMIN"
+    ],
+    "loginRequired": true,
+    "route": "/profile",
+    "lazy": false,
+    "register": false,
+    "menu": null
   }
 }

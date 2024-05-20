@@ -1,0 +1,55 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "JsonNodeEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.transfertypes.jsonnode.JsonNodeEndpoint"
+    }
+  ],
+  "paths" : {
+    "/JsonNodeEndpoint/echo" : {
+      "post" : {
+        "tags" : [
+          "JsonNodeEndpoint"
+        ],
+        "operationId" : "JsonNodeEndpoint_echo_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "node" : {
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
