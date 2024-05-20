@@ -61,3 +61,6 @@ scripts/prepare/src/
 
 # nx cache
 .nx
+
+# vite cache
+.vite
