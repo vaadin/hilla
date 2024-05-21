@@ -21,31 +21,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.router.BeforeEnterListener;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.server.auth.MenuAccessControl;
-import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
-import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.server.menu.MenuRegistry;
-import com.vaadin.hilla.route.records.ClientViewConfig;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.lang.Nullable;
 
-import com.vaadin.flow.server.RouteRegistry;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.MenuAccessControl;
+import com.vaadin.flow.server.auth.NavigationAccessControl;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.server.menu.RouteParamType;
 
 /**
  * Index HTML request listener for collecting the client side and the server
@@ -59,14 +58,13 @@ public class RouteUnifyingIndexHtmlRequestListener
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingIndexHtmlRequestListener.class);
-
-    private final ClientRouteRegistry clientRouteRegistry;
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final DeploymentConfiguration deploymentConfiguration;
-    private final RouteUtil routeUtil;
     private final NavigationAccessControl accessControl;
-    private final ViewAccessChecker viewAccessChecker;
+    private final ClientRouteRegistry clientRouteRegistry;
+    private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final RouteUtil routeUtil;
+    private final ViewAccessChecker viewAccessChecker;
 
     /**
      * Creates a new listener instance with the given route registry.
@@ -137,55 +135,70 @@ public class RouteUnifyingIndexHtmlRequestListener
                     deploymentConfiguration);
         }
 
-        var clientViews = new HashMap<String, AvailableViewInfo>();
-        clientRouteRegistry.getAllRoutes().entrySet().stream()
-                .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
-                        isUserInRole, isUserAuthenticated,
-                        clientViewConfigEntry.getValue()))
-                .forEach(clientViewConfigEntry -> {
-                    final String route = clientViewConfigEntry.getKey();
-                    final ClientViewConfig config = clientViewConfigEntry
-                            .getValue();
-                    final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                            config.getTitle(), config.getRolesAllowed(),
-                            config.isLoginRequired(), config.getRoute(),
-                            config.isLazy(), config.isAutoRegistered(),
-                            config.menu(), Collections.emptyList(),
-                            config.getRouteParameters());
-                    clientViews.put(route, availableViewInfo);
-                });
-        return clientViews;
+        return clientRouteRegistry.getAllRoutes().values().stream()
+                .filter(config -> config.getRouteParameters() == null
+                        || config.getRouteParameters().isEmpty()
+                        || config.getRouteParameters().values().stream()
+                                .noneMatch(
+                                        param -> param == RouteParamType.REQUIRED))
+                .filter(config -> routeUtil.isRouteAllowed(isUserInRole,
+                        isUserAuthenticated, config))
+                .map(config -> new AvailableViewInfo(config.getTitle(),
+                        config.getRolesAllowed(), config.isLoginRequired(),
+                        config.getRoute(), config.isLazy(),
+                        config.isAutoRegistered(), config.menu(),
+                        Collections.emptyList(), config.getRouteParameters()))
+                .collect(Collectors.toMap(AvailableViewInfo::route,
+                        Function.identity()));
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews() {
-        var serverViews = new HashMap<String, AvailableViewInfo>();
-        final VaadinService vaadinService = VaadinService.getCurrent();
+        final var vaadinService = VaadinService.getCurrent();
         if (vaadinService == null) {
             LOGGER.debug(
                     "No VaadinService found, skipping server view collection");
-            return serverViews;
+            return Collections.emptyMap();
         }
-        final RouteRegistry serverRouteRegistry = vaadinService.getRouter()
-                .getRegistry();
+        final var serverRouteRegistry = vaadinService.getRouter().getRegistry();
 
-        List<BeforeEnterListener> accessControls = Stream
-                .of(accessControl, viewAccessChecker).filter(Objects::nonNull)
-                .toList();
+        var accessControls = Stream.of(accessControl, viewAccessChecker)
+                .filter(Objects::nonNull).toList();
+
+        var serverRoutes = new HashMap<String, AvailableViewInfo>();
 
         if (vaadinService.getInstantiator().getMenuAccessControl()
                 .getPopulateClientSideMenu() == MenuAccessControl.PopulateClientMenu.ALWAYS
                 || clientRouteRegistry.hasMainLayout()) {
             MenuRegistry.collectAndAddServerMenuItems(
                     RouteConfiguration.forRegistry(serverRouteRegistry),
-                    accessControls, serverViews);
+                    accessControls, serverRoutes);
         }
-        return serverViews;
+
+        return serverRoutes.values().stream()
+                .filter(view -> view.routeParameters().values().stream()
+                        .noneMatch(param -> param == RouteParamType.REQUIRED))
+                .collect(Collectors.toMap(this::getMenuLink,
+                        Function.identity()));
+    }
+
+    /**
+     * Gets menu link with omitted route parameters.
+     *
+     * @param info
+     *            the menu item's target view
+     * @return target path for menu link
+     */
+    private String getMenuLink(AvailableViewInfo info) {
+        final var parameterNames = info.routeParameters().keySet();
+        return Stream.of(info.route().split("/"))
+                .filter(Predicate.not(parameterNames::contains))
+                .collect(Collectors.joining("/"));
     }
 
     /**
      * Mixin to ignore unwanted fields in the json results.
      */
-    abstract class IgnoreMixin {
+    abstract static class IgnoreMixin {
         @JsonIgnore
         abstract List<AvailableViewInfo> children(); // we don't need it!
     }

@@ -1,5 +1,4 @@
 import type { ViewConfig } from '../types.js';
-import type { RouteParamType } from './routeParamType.js';
 
 /**
  * Internal type used for server communication and menu building. It extends the
@@ -11,13 +10,8 @@ export type ServerViewConfig = Readonly<{
 }> &
   ViewConfig;
 
-export type ServerViewMapItem = Readonly<{
-  params?: Readonly<Record<string, RouteParamType>>;
-}> &
-  ViewConfig;
-
 export type VaadinObject = Readonly<{
-  views: Readonly<Record<string, ServerViewMapItem>>;
+  views: Readonly<Record<string, ViewConfig>>;
 }>;
 
 export type VaadinWindow = Readonly<{

@@ -9,20 +9,6 @@
     "register": false,
     "menu": null
   },
-  "/user/:userId": {
-    "params": {
-      ":userId": "req"
-    },
-    "title": "User Profile",
-    "rolesAllowed": [
-      "ROLE_ADMIN"
-    ],
-    "loginRequired": true,
-    "route": "/user/:userId",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
   "/bar": {
     "params": {},
     "title": "Component",
@@ -43,7 +29,7 @@
     "register": false,
     "menu": null
   },
-  "/wildcard/:___wildcard*": {
+  "/wildcard": {
     "params": {
       ":___wildcard*": "*"
     },
@@ -55,7 +41,7 @@
     "register": false,
     "menu": null
   },
-  "/comments/:___commentId?": {
+  "/comments": {
     "params": {
       ":___commentId?": "opt"
     },
@@ -76,18 +62,6 @@
     ],
     "loginRequired": true,
     "route": "/profile",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
-  "//:___userId/edit": {
-    "params": {
-      ":___userId": "req"
-    },
-    "title": "RouteTarget",
-    "rolesAllowed": null,
-    "loginRequired": false,
-    "route": "//:___userId/edit",
     "lazy": false,
     "register": false,
     "menu": null
