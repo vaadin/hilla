@@ -87,7 +87,13 @@ export interface LogoutOptions {
   navigate?: NavigateFunction;
 }
 
-function pageReloadNavigate(url: string) {
+function normalizePath(url: string): string {
+  return url.startsWith(document.baseURI) ? `/${url.slice(document.baseURI.length)}` : url;
+}
+
+function pageReloadNavigate(to: string) {
+  // Consider absolute path to be within application context
+  const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI).toString() : to;
   window.location.replace(url);
 }
 
@@ -135,7 +141,7 @@ export async function login(username: string, password: string, options?: LoginO
 
       const navigate = options?.navigate ?? pageReloadNavigate;
       const url = savedUrl ?? defaultUrl ?? document.baseURI;
-      navigate(url);
+      navigate(normalizePath(url));
 
       return {
         defaultUrl,
@@ -192,7 +198,7 @@ export async function logout(options?: LogoutOptions): Promise<void> {
       const normalizedPath = response.url.startsWith(document.baseURI)
         ? `/${response.url.slice(document.baseURI.length)}`
         : response.url;
-      navigate(normalizedPath);
+      navigate(normalizePath(response.url));
     }
   }
 }
