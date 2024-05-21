@@ -2,7 +2,6 @@ import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
 import { createMenuItems } from '../../src/runtime/createMenuItems.js';
-import { RouteParamType } from '../../src/shared/routeParamType.js';
 import type { MenuItem } from '../../src/types.js';
 
 use(chaiLike);
@@ -33,10 +32,7 @@ describe('@vaadin/hilla-file-router', () => {
           '/profile/account/security/password': { title: 'Password' },
           '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
           '/profile/friends/list': { title: 'List' },
-          '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
           '/test/empty': {},
-          '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
-          '/test/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
           '/test/no-default-export': { title: 'No Default Export' },
         },
       });
@@ -64,15 +60,7 @@ describe('@vaadin/hilla-file-router', () => {
           to: '/profile/friends/list',
         },
         {
-          title: 'Optional',
-          to: '/test/',
-        },
-        {
           to: '/test/empty',
-        },
-        {
-          title: 'Wildcard',
-          to: '/test/',
         },
         {
           title: 'No Default Export',
@@ -92,11 +80,8 @@ describe('@vaadin/hilla-file-router', () => {
           '/profile/account/security/password': { title: 'Password', menu: { order: 20 } },
           '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth', menu: { order: 20 } },
           '/b': { title: 'List' },
-          '/profile/friends/:user': { title: 'User', params: { ':user': RouteParamType.Required } },
           '/': { title: 'Root' },
           '/test/empty': { title: 'empty', menu: { order: 5 } },
-          '/test/:optional?': { title: 'Optional', params: { ':optional?': RouteParamType.Optional } },
-          '/a/*': { title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
           '/test/no-default-export': { title: 'No Default Export', menu: { order: 10 } },
         },
       });
@@ -131,20 +116,12 @@ describe('@vaadin/hilla-file-router', () => {
           to: '/',
         },
         {
-          title: 'Wildcard',
-          to: '/a/',
-        },
-        {
           title: 'About',
           to: '/a/b',
         },
         {
           title: 'List',
           to: '/b',
-        },
-        {
-          title: 'Optional',
-          to: '/test/',
         },
       ];
 

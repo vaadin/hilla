@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinRequest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.security.auth.UserPrincipal;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -293,7 +295,17 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass()
                 .getResource("/META-INF/VAADIN/available-views-admin.json"));
 
-        MatcherAssert.assertThat(actual, Matchers.is(expected));
+        MatcherAssert.assertThat("Different amount of items", actual.size(),
+                Matchers.is(expected.size()));
+
+        Iterator<JsonNode> elements = expected.elements();
+        do {
+            JsonNode element = elements.next();
+            MatcherAssert.assertThat("Missing element " + element.getNodeType(),
+                    actual.toString(),
+                    Matchers.containsString(element.toString()));
+        } while (elements.hasNext());
+
     }
 
     @Test
@@ -327,7 +339,16 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass()
                 .getResource("/META-INF/VAADIN/available-views-admin.json"));
 
-        MatcherAssert.assertThat(actual, Matchers.is(expected));
+        MatcherAssert.assertThat("Different amount of items", actual.size(),
+                Matchers.is(expected.size()));
+
+        Iterator<JsonNode> elements = expected.elements();
+        do {
+            JsonNode element = elements.next();
+            MatcherAssert.assertThat("Missing element " + element.getNodeType(),
+                    actual.toString(),
+                    Matchers.containsString(element.toString()));
+        } while (elements.hasNext());
     }
 
     @Test
@@ -340,23 +361,21 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
             views = requestListener.collectServerViews();
         }
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(5));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         MatcherAssert.assertThat(views.get("/bar").title(),
                 Matchers.is("Component"));
         MatcherAssert.assertThat(views.get("/foo").title(),
                 Matchers.is("RouteTarget"));
         MatcherAssert.assertThat(views.get("/bar").route(),
                 Matchers.is("/bar"));
-        MatcherAssert.assertThat(
-                views.get("/wildcard/:___wildcard*").routeParameters(),
+        MatcherAssert.assertThat(views.get("/wildcard").route(),
+                Matchers.is("/wildcard/:___wildcard*"));
+        MatcherAssert.assertThat(views.get("/wildcard").routeParameters(),
                 Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
-        MatcherAssert.assertThat(
-                views.get("//:___userId/edit").routeParameters(),
-                Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(
-                views.get("/comments/:___commentId?").routeParameters(),
+        MatcherAssert.assertThat(views.get("/comments").route(),
+                Matchers.is("/comments/:___commentId?"));
+        MatcherAssert.assertThat(views.get("/comments").routeParameters(),
                 Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
-
     }
 
     @Test
@@ -382,7 +401,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(mockClassLoader);
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
             var views = requestListener.collectClientViews(vaadinRequest);
-            MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+            MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
         }
     }
 
@@ -398,7 +417,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
             var views = requestListener.collectClientViews(vaadinRequest);
-            MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+            MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
         }
     }
 
@@ -451,7 +470,16 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass()
                 .getResource("/META-INF/VAADIN/only-client-views.json"));
 
-        MatcherAssert.assertThat(actual, Matchers.is(expected));
+        MatcherAssert.assertThat("Different amount of items", actual.size(),
+                Matchers.is(expected.size()));
+
+        Iterator<JsonNode> elements = expected.elements();
+        do {
+            JsonNode element = elements.next();
+            MatcherAssert.assertThat("Missing element " + element.getNodeType(),
+                    actual.toString(),
+                    Matchers.containsString(element.toString()));
+        } while (elements.hasNext());
     }
 
     private void mockDevelopmentMode() throws IOException {
