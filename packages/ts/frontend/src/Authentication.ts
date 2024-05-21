@@ -123,6 +123,16 @@ export async function login(username: string, password: string, options?: LoginO
     if (loginSuccessful) {
       const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') ?? undefined;
 
+      const springCsrfHeader = response.headers.get('Spring-CSRF-header') ?? undefined;
+      const springCsrfToken = response.headers.get('Spring-CSRF-token') ?? undefined;
+      if (springCsrfHeader && springCsrfToken) {
+        const springCsrfTokenInfo: Record<string, string> = {};
+        springCsrfTokenInfo._csrf = springCsrfToken;
+        // eslint-disable-next-line camelcase
+        springCsrfTokenInfo._csrf_header = springCsrfHeader;
+        updateSpringCsrfMetaTags(springCsrfTokenInfo);
+      }
+
       const navigate = options?.navigate ?? pageReloadNavigate;
       const url = savedUrl ?? defaultUrl ?? document.baseURI;
       navigate(url);
@@ -177,9 +187,10 @@ export async function logout(options?: LogoutOptions): Promise<void> {
     }
   } finally {
     CookieManager.remove(JWT_COOKIE_NAME);
-    if (response && response.ok && response.redirected) {
+    if (response && response.ok && response.redirected && response.url.startsWith(document.baseURI)) {
       const navigate = options?.navigate ?? pageReloadNavigate;
-      navigate(response.url);
+      const normalizedPath = `/${response.url.slice(document.baseURI.length)}`;
+      navigate(normalizedPath);
     }
   }
 }
