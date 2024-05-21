@@ -48,6 +48,8 @@ async function doLogout(logoutUrl: string, headers: Record<string, string>) {
   }
 
   await updateCsrfTokensBasedOnResponse(response);
+
+  return response;
 }
 
 export interface LoginResult {
@@ -59,12 +61,34 @@ export interface LoginResult {
   defaultUrl?: string;
 }
 
+export type NavigateFunction = (path: string) => void;
+
 export interface LoginOptions {
+  /**
+   * The URL for login request, defaults to `/login`.
+   */
   loginProcessingUrl?: string;
+
+  /**
+   * The success navigation callback. The default is reloading the page.
+   */
+  navigate?: NavigateFunction;
 }
 
 export interface LogoutOptions {
+  /**
+   * The URL for logout request, defaults to `/logout`.
+   */
   logoutUrl?: string;
+
+  /**
+   * The success navigation callback. The default is reloading the page.
+   */
+  navigate?: NavigateFunction;
+}
+
+function pageReloadNavigate(url: string) {
+  window.location.replace(url);
 }
 
 /**
@@ -99,15 +123,9 @@ export async function login(username: string, password: string, options?: LoginO
     if (loginSuccessful) {
       const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') ?? undefined;
 
-      const springCsrfHeader = response.headers.get('Spring-CSRF-header') ?? undefined;
-      const springCsrfToken = response.headers.get('Spring-CSRF-token') ?? undefined;
-      if (springCsrfHeader && springCsrfToken) {
-        const springCsrfTokenInfo: Record<string, string> = {};
-        springCsrfTokenInfo._csrf = springCsrfToken;
-        // eslint-disable-next-line camelcase
-        springCsrfTokenInfo._csrf_header = springCsrfHeader;
-        updateSpringCsrfMetaTags(springCsrfTokenInfo);
-      }
+      const navigate = options?.navigate ?? pageReloadNavigate;
+      const url = savedUrl ?? defaultUrl ?? document.baseURI;
+      navigate(url);
 
       return {
         defaultUrl,
@@ -141,16 +159,17 @@ export async function login(username: string, password: string, options?: LoginO
 export async function logout(options?: LogoutOptions): Promise<void> {
   // this assumes the default Spring Security logout configuration (handler URL)
   const logoutUrl = options?.logoutUrl ?? 'logout';
+  let response: Response | undefined;
   try {
     const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    await doLogout(logoutUrl, headers);
+    response = await doLogout(logoutUrl, headers);
   } catch {
     try {
-      const response = await fetch('?nocache');
-      const responseText = await response.text();
+      const noCacheResponse = await fetch('?nocache');
+      const responseText = await noCacheResponse.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
       const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
-      await doLogout(logoutUrl, headers);
+      response = await doLogout(logoutUrl, headers);
     } catch (error) {
       // clear the token if the call fails
       clearSpringCsrfMetaTags();
@@ -158,6 +177,10 @@ export async function logout(options?: LogoutOptions): Promise<void> {
     }
   } finally {
     CookieManager.remove(JWT_COOKIE_NAME);
+    if (response && response.ok && response.redirected) {
+      const navigate = options?.navigate ?? pageReloadNavigate;
+      navigate(response.url);
+    }
   }
 }
 
