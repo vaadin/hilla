@@ -195,11 +195,14 @@ public class RouteUnifyingIndexHtmlRequestListener
                         && !serverView.getRouteParameters().isEmpty()) {
                     String editUrl = "/" + targetUrl;
                     excludeFromMenu = serverView.getRouteParameters().values()
-                            .stream().anyMatch(param -> !param.getTemplate()
-                                    .contains("?"));
+                            .stream()
+                            .anyMatch(param -> !param.getTemplate()
+                                    .contains("?")
+                                    && !param.getTemplate().contains("*"));
                     for (RouteParameterData param : serverView
                             .getRouteParameters().values().stream()
-                            .filter(param -> param.getTemplate().contains("?"))
+                            .filter(param -> param.getTemplate().contains("?")
+                                    || param.getTemplate().contains("*"))
                             .toList()) {
                         editUrl = editUrl.replace("/" + param.getTemplate(),
                                 "");

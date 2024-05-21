@@ -346,8 +346,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 Matchers.is("RouteTarget"));
         MatcherAssert.assertThat(views.get("/bar").route(),
                 Matchers.is("/bar"));
-        MatcherAssert.assertThat(
-                views.get("/wildcard/:___wildcard*").routeParameters(),
+        MatcherAssert.assertThat(views.get("/wildcard").routeParameters(),
                 Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
         MatcherAssert.assertThat(
                 views.get("//:___userId/edit").routeParameters(),
