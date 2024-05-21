@@ -111,7 +111,7 @@ export default async function collectRoutesFromFS(
 
     if (
       (name === '@index' && children.some(({ path: p }) => optionalParamType.test(p))) ||
-      (optionalParamType.test(name) && children.some(({ path: p }) => p === '@index'))
+      (optionalParamType.test(name) && children.some(({ path: p }) => p === ''))
     ) {
       throw new Error('You cannot create an `@index` file in a directory with optional parameters');
     } else if (name === '@layout') {
@@ -126,7 +126,7 @@ export default async function collectRoutesFromFS(
         'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
       );
     } else if (children.some(({ path: p }) => p === name)) {
-      throw new Error('You cannot create a file and a directory with the same name. Use `@index` instead.');
+      throw new Error('You cannot create a file and a directory with the same name. Use `@index` instead');
     } else {
       children.push({
         path: name,
