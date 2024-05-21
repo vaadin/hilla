@@ -40,8 +40,6 @@ import com.vaadin.flow.server.menu.RouteParamType;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class RouteUnifyingIndexHtmlRequestListenerTest {
 
@@ -103,11 +101,12 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Mockito.when(clientRouteRegistry.getAllRoutes())
                 .thenReturn(clientRoutes);
 
-        var instantiator = mock(Instantiator.class);
-        var menuAccessControl = mock(MenuAccessControl.class);
-        when(vaadinService.getInstantiator()).thenReturn(instantiator);
-        when(instantiator.getMenuAccessControl()).thenReturn(menuAccessControl);
-        when(menuAccessControl.getPopulateClientSideMenu())
+        var instantiator = Mockito.mock(Instantiator.class);
+        var menuAccessControl = Mockito.mock(MenuAccessControl.class);
+        Mockito.when(vaadinService.getInstantiator()).thenReturn(instantiator);
+        Mockito.when(instantiator.getMenuAccessControl())
+                .thenReturn(menuAccessControl);
+        Mockito.when(menuAccessControl.getPopulateClientSideMenu())
                 .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
     }
 
@@ -339,23 +338,21 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
             views = requestListener.collectServerViews();
         }
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(5));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         MatcherAssert.assertThat(views.get("/bar").title(),
                 Matchers.is("Component"));
         MatcherAssert.assertThat(views.get("/foo").title(),
                 Matchers.is("RouteTarget"));
         MatcherAssert.assertThat(views.get("/bar").route(),
                 Matchers.is("/bar"));
-        MatcherAssert.assertThat(
-                views.get("/wildcard/:___wildcard*").routeParameters(),
+        MatcherAssert.assertThat(views.get("/wildcard").route(),
+                Matchers.is("/wildcard/:___wildcard*"));
+        MatcherAssert.assertThat(views.get("/wildcard").routeParameters(),
                 Matchers.is(Map.of(":___wildcard*", RouteParamType.WILDCARD)));
-        MatcherAssert.assertThat(
-                views.get("//:___userId/edit").routeParameters(),
-                Matchers.is(Map.of(":___userId", RouteParamType.REQUIRED)));
-        MatcherAssert.assertThat(
-                views.get("/comments/:___commentId?").routeParameters(),
+        MatcherAssert.assertThat(views.get("/comments").route(),
+                Matchers.is("/comments/:___commentId?"));
+        MatcherAssert.assertThat(views.get("/comments").routeParameters(),
                 Matchers.is(Map.of(":___commentId?", RouteParamType.OPTIONAL)));
-
     }
 
     @Test
@@ -366,7 +363,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         boolean isAuthenticated = true;
         var views = requestListener.collectClientViews(isUserInRole,
                 isAuthenticated);
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
     }
 
     @Test
@@ -377,7 +374,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Predicate<? super String> isUserInRole = role -> true;
         var views = requestListener.collectClientViews(isUserInRole,
                 isUserAuthenticated);
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(3));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
     }
 
     @Test

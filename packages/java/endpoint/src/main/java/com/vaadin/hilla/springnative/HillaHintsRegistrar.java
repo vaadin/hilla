@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.router.MenuData;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -19,10 +20,6 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.OpenAPIUtil;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.push.PushEndpoint;
@@ -42,6 +39,14 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         registerEndpointTypes(hints);
 
+        hints.resources().registerPattern("file-routes.json");
+        hints.reflection().registerType(ClientViewConfig.class,
+                MemberCategory.values());
+        hints.reflection().registerType(MenuData.class,
+                MemberCategory.values());
+        hints.reflection().registerType(AvailableViewInfo.class,
+                MemberCategory.values());
+
         hints.reflection().registerType(PushEndpoint.class,
                 MemberCategory.values());
 
@@ -60,6 +65,10 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
                 logger.error("Resource {} is not available",
                         openApiResourceName);
                 return;
+            } else {
+                logger.info(
+                        "Resource {} is being used for registering endpoint types",
+                        openApiResourceName);
             }
 
             var reader = new BufferedReader(
