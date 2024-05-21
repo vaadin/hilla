@@ -298,13 +298,15 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<JsonNode> elements = expected.elements();
+        Iterator<String> elementsFields = expected.fieldNames();
         do {
-            JsonNode element = elements.next();
-            MatcherAssert.assertThat("Missing element " + element.getNodeType(),
+            String field = elementsFields.next();
+            MatcherAssert.assertThat("Generated missing fieldName " + field,
+                    actual.has(field), Matchers.is(true));
+            MatcherAssert.assertThat("Missing element " + field,
                     actual.toString(),
-                    Matchers.containsString(element.toString()));
-        } while (elements.hasNext());
+                    Matchers.containsString(expected.get(field).toString()));
+        } while (elementsFields.hasNext());
 
     }
 
@@ -342,13 +344,15 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<JsonNode> elements = expected.elements();
+        Iterator<String> elementsFields = expected.fieldNames();
         do {
-            JsonNode element = elements.next();
-            MatcherAssert.assertThat("Missing element " + element.getNodeType(),
+            String field = elementsFields.next();
+            MatcherAssert.assertThat("Generated missing fieldName " + field,
+                    actual.has(field), Matchers.is(true));
+            MatcherAssert.assertThat("Missing element " + field,
                     actual.toString(),
-                    Matchers.containsString(element.toString()));
-        } while (elements.hasNext());
+                    Matchers.containsString(expected.get(field).toString()));
+        } while (elementsFields.hasNext());
     }
 
     @Test
@@ -473,13 +477,15 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<JsonNode> elements = expected.elements();
+        Iterator<String> elementsFields = expected.fieldNames();
         do {
-            JsonNode element = elements.next();
-            MatcherAssert.assertThat("Missing element " + element.getNodeType(),
+            String field = elementsFields.next();
+            MatcherAssert.assertThat("Generated missing fieldName " + field,
+                    actual.has(field), Matchers.is(true));
+            MatcherAssert.assertThat("Missing element " + field,
                     actual.toString(),
-                    Matchers.containsString(element.toString()));
-        } while (elements.hasNext());
+                    Matchers.containsString(expected.get(field).toString()));
+        } while (elementsFields.hasNext());
     }
 
     private void mockDevelopmentMode() throws IOException {
