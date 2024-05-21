@@ -22,7 +22,6 @@ export async function load(url, context, nextLoad) {
     );
 
     source = `${registerCode}\n\n${source}`;
-    console.log({source});
 
     return {
       ...result,
