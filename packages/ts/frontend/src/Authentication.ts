@@ -187,9 +187,11 @@ export async function logout(options?: LogoutOptions): Promise<void> {
     }
   } finally {
     CookieManager.remove(JWT_COOKIE_NAME);
-    if (response && response.ok && response.redirected && response.url.startsWith(document.baseURI)) {
+    if (response && response.ok && response.redirected) {
       const navigate = options?.navigate ?? pageReloadNavigate;
-      const normalizedPath = `/${response.url.slice(document.baseURI.length)}`;
+      const normalizedPath = response.url.startsWith(document.baseURI)
+        ? `/${response.url.slice(document.baseURI.length)}`
+        : response.url;
       navigate(normalizedPath);
     }
   }
