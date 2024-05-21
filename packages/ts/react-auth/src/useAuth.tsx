@@ -1,19 +1,18 @@
-import { login as _login, type LoginResult, logout, UnauthorizedResponseError } from '@vaadin/hilla-frontend';
 import {
-  createContext,
-  type Dispatch,
-  type FC,
-  type PropsWithChildren,
-  useContext,
-  useEffect,
-  useReducer,
-} from 'react';
+  login as _login,
+  type LoginResult,
+  logout as _logout,
+  UnauthorizedResponseError,
+} from '@vaadin/hilla-frontend';
+import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
+type LogoutFunction = () => Promise<void>;
 
 const LOGIN_FETCH = 'LOGIN_FETCH';
 const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 const LOGIN_FAILURE = 'LOGIN_FAILURE';
+const LOGOUT = 'LOGOUT';
 
 /**
  * The type of the function that is used to get the authenticated user.
@@ -43,6 +42,10 @@ type LoginFailureAction = Readonly<{
 }>;
 
 type LoginActions = LoginFailureAction | LoginFetchAction | LoginSuccessAction;
+
+type LogoutAction = Readonly<{
+  type: typeof LOGOUT;
+}>;
 
 function createAuthenticateThunk<TUser>(dispatch: Dispatch<LoginActions>, getAuthenticatedUser: GetUserFn<TUser>) {
   async function authenticate() {
@@ -74,12 +77,18 @@ function createAuthenticateThunk<TUser>(dispatch: Dispatch<LoginActions>, getAut
   return authenticate;
 }
 
+function createUnauthenticateThunk(dispatch: Dispatch<LogoutAction>) {
+  return () => {
+    dispatch({ type: LOGOUT });
+  };
+}
+
 const initialState: AuthState<unknown> = {
   initializing: true,
   loading: false,
 };
 
-function reducer(state: AuthState<unknown>, action: LoginActions) {
+function reducer(state: AuthState<unknown>, action: LoginActions | LogoutAction) {
   switch (action.type) {
     case LOGIN_FETCH:
       return {
@@ -98,6 +107,8 @@ function reducer(state: AuthState<unknown>, action: LoginActions) {
         loading: false,
         error: action.error,
       };
+    case LOGOUT:
+      return { initializing: false, loading: false };
     default:
       return state;
   }
@@ -130,7 +141,7 @@ export type AccessProps = Readonly<{
 export type Authentication<TUser> = Readonly<{
   state: AuthState<TUser>;
   login: LoginFunction;
-  logout: typeof logout;
+  logout: LogoutFunction;
   hasAccess(accessProps: AccessProps): boolean;
 }>;
 
@@ -164,14 +175,15 @@ interface UserWithRoles {
   roles?: any;
 }
 
-function getDefaultRoles(user: unknown) {
+const getDefaultRoles = (user: unknown) => {
   const userWithRoles = user as UserWithRoles;
   return Array.isArray(userWithRoles.roles) ? userWithRoles.roles : [];
-}
+};
 
 function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthProviderProps<TUser>) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const authenticate = createAuthenticateThunk(dispatch, getAuthenticatedUser);
+  const unauthenticate = createUnauthenticateThunk(dispatch);
 
   async function login(username: string, password: string): Promise<LoginResult> {
     const result = await _login(username, password);
@@ -181,6 +193,11 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
     }
 
     return result;
+  }
+
+  async function logout(): Promise<void> {
+    await _logout();
+    unauthenticate();
   }
 
   function hasAccess({ loginRequired, requiresLogin, rolesAllowed }: AccessProps): boolean {
@@ -229,7 +246,7 @@ function useAuth<TUser>(): Authentication<TUser> {
 }
 
 interface AuthModule<TUser> {
-  AuthProvider: FC<PropsWithChildren>;
+  AuthProvider: React.FC<React.PropsWithChildren>;
   useAuth: AuthHook<TUser>;
 }
 
