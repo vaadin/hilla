@@ -1,7 +1,7 @@
-import { fileURLToPath } from 'node:url';
+import { appendFile } from 'fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
-import { rimraf } from 'rimraf';
 import sinonChai from 'sinon-chai';
 import type { Writable } from 'type-fest';
 import type { Logger } from 'vite';
@@ -39,7 +39,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     after(async () => {
-      await rimraf(fileURLToPath(tmp));
+      await rm(tmp, { recursive: true, force: true });
     });
 
     beforeEach(() => {
@@ -58,6 +58,42 @@ describe('@vaadin/hilla-file-router', () => {
       expect(logger.error).to.be.calledOnceWithExactly(
         `The file "${new URL('./test/no-default-export.tsx', tmp).toString()}" should contain a default export of a component`,
       );
+    });
+
+    describe('failure cases', () => {
+      let failureDir: URL;
+      let internalDir: URL;
+
+      beforeEach(async () => {
+        failureDir = new URL('./failure/', tmp);
+        internalDir = new URL('./internal/', failureDir);
+        await mkdir(internalDir, { recursive: true });
+        await appendFile(new URL('./@index.tsx', internalDir), 'export default function FailureInternalIndex() {}');
+      });
+
+      afterEach(async () => {
+        await rm(failureDir, { recursive: true, force: true });
+      });
+
+      it('should throw an error if file starts with "@" and is not an "@index" or "@layout"', async () => {
+        await Promise.all([
+          appendFile(new URL('./@error.tsx', failureDir), 'export default function FailureError() {}'),
+        ]);
+
+        await expect(collectRoutesFromFS(tmp, { extensions, logger })).to.be.rejectedWith(
+          'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
+        );
+      });
+
+      it('should throw an error if there is file and directory with the same name', async () => {
+        await Promise.all([
+          appendFile(new URL('./internal.tsx', failureDir), 'export default function FailureFileAndDir() {}'),
+        ]);
+
+        await expect(collectRoutesFromFS(tmp, { extensions, logger })).to.be.rejectedWith(
+          'You cannot create a file and a directory with the same name. Use `@index` instead.',
+        );
+      });
     });
   });
 });

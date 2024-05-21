@@ -88,7 +88,6 @@
     "concurrently": "^8.2.1",
     "copyfiles": "^2.4.1",
     "mocha": "^10.2.0",
-    "rimraf": "^5.0.5",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.3.2"
