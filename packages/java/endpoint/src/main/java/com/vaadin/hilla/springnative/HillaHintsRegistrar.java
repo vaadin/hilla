@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.router.MenuData;
-import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.hilla.route.records.AvailableViewInfo;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
