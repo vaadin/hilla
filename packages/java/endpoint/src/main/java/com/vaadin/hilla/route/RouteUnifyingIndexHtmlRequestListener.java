@@ -244,10 +244,10 @@ public class RouteUnifyingIndexHtmlRequestListener
         if (route.getRouteParameters() != null
                 && !route.getRouteParameters().isEmpty()) {
             String editUrl = "/" + route.getTemplate();
-            var params = route.getRouteParameters().values()
-                .stream().filter(param -> param.getTemplate().contains("?")
-                    || param.getTemplate().contains("*"))
-                .toList();
+            var params = route.getRouteParameters().values().stream()
+                    .filter(param -> param.getTemplate().contains("?")
+                            || param.getTemplate().contains("*"))
+                    .toList();
             for (RouteParameterData param : params) {
                 editUrl = editUrl.replace("/" + param.getTemplate(), "");
             }
