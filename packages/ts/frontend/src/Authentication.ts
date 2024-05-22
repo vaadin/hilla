@@ -123,7 +123,10 @@ export async function login(username: string, password: string, options?: LoginO
 
     const result = response.headers.get('Result');
     const savedUrl = response.headers.get('Saved-url') ?? undefined;
-    const defaultUrl = response.headers.get('Default-url') ?? undefined;
+    let defaultUrl = response.headers.get('Default-url') ?? undefined;
+    if (defaultUrl?.startsWith('/')) {
+      defaultUrl = new URL(defaultUrl, document.baseURI).toString();
+    }
     const loginSuccessful = response.ok && result === 'success';
 
     if (loginSuccessful) {
