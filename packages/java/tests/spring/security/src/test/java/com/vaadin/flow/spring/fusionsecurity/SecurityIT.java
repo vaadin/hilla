@@ -185,8 +185,7 @@ public class SecurityIT extends ChromeBrowserTest {
     public void private_page_logout_should_redirect_to_root() {
         open("login");
         loginUser();
-        navigateTo("private", false);
-        assertPrivatePageShown(USER_FULLNAME);
+        navigateTo("private");
         clickLogout();
         assertRootPageShown();
     }
@@ -329,7 +328,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private TestBenchElement getMainView() {
         waitForDocumentReady();
-        return waitUntil(driver -> $("*").id("main-view"));
+        return $("*").withId("main-view").waitForFirst();
     }
 
     protected void assertLoginViewShown() {
