@@ -22,7 +22,9 @@ export class LoginView extends View implements AfterEnterObserver {
     // If login was opened directly, use the default URL provided by the server.
 
     // As we do not know if the target is a resource or a Fusion view or a Flow view, we cannot just use Router.go
-    window.location.href = result.redirectUrl || this.returnUrl || '';
+
+    // Navigation should happen automatically
+    // window.location.href = result.redirectUrl || this.returnUrl || '';
   };
 
   render() {
