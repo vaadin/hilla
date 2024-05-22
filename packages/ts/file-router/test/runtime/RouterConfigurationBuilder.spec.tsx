@@ -168,24 +168,56 @@ describe('RouterBuilder', () => {
                 },
               ],
             },
+            {
+              path: '/cases',
+              children: [
+                {
+                  path: '/index',
+                  children: [
+                    {
+                      index: true,
+                      element: <div>Index</div>,
+                    },
+                  ],
+                },
+                {
+                  path: '/wildcard',
+                  children: [
+                    {
+                      path: '*',
+                      element: <div>Wildcard</div>,
+                    },
+                  ],
+                },
+                {
+                  path: '/optional',
+                  children: [
+                    {
+                      path: ':optional?',
+                      element: <div>Optional</div>,
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
       ])
       .withFallback(Server, { title: 'Server' })
       .build();
 
-    const serverRoutes = [
-      {
-        path: '*',
-        element: <Server />,
-        handle: { title: 'Server' },
-      },
-      {
-        index: true,
-        element: <Server />,
-        handle: { title: 'Server' },
-      },
-    ];
+    const serverWildcard = {
+      path: '*',
+      element: <Server />,
+      handle: { title: 'Server' },
+    };
+    const serverIndex = {
+      index: true,
+      element: <Server />,
+      handle: { title: 'Server' },
+    };
+
+    const serverRoutes = [serverWildcard, serverIndex];
 
     expect(routes).to.be.like([
       {
@@ -211,6 +243,49 @@ describe('RouterBuilder', () => {
               {
                 path: '/next-child-test',
                 element: <div>ChildTest</div>,
+              },
+              ...serverRoutes,
+            ],
+          },
+          {
+            path: '/cases',
+            children: [
+              // If we already have an index route, all we want is to add a
+              // server wildcard
+              {
+                path: '/index',
+                children: [
+                  {
+                    index: true,
+                    element: <div>Index</div>,
+                  },
+                  serverWildcard,
+                ],
+              },
+              // If we already have a wildcard route, all we want is to add a
+              // server index.
+              {
+                path: '/wildcard',
+                children: [
+                  {
+                    path: '*',
+                    element: <div>Wildcard</div>,
+                  },
+                  serverIndex,
+                ],
+              },
+              // If we have an optional route, we just need to add a server
+              // wildcard to cover complicated cases like
+              // "/optional/something/else/deeply/nested"
+              {
+                path: '/optional',
+                children: [
+                  {
+                    path: ':optional?',
+                    element: <div>Optional</div>,
+                  },
+                  serverWildcard,
+                ],
               },
               ...serverRoutes,
             ],

@@ -110,19 +110,31 @@ export class RouterConfigurationBuilder {
    */
   withFallback(component: ComponentType, config?: ViewConfig): this {
     // Fallback adds two routes, so that the index (empty path) has a fallback too
-    const fallbackRoutes = [
+    const fallbackRoutes: readonly RouteObject[] = [
       { path: '*', element: createElement(component), handle: config },
       { index: true, element: createElement(component), handle: config },
     ];
 
     this.update(fallbackRoutes, (original, added, children) => {
       if (original) {
-        return children
-          ? ({
-              ...original,
-              children: [...children, ...fallbackRoutes],
-            } as RouteObject)
-          : original;
+        if (!children) {
+          return original;
+        }
+
+        const _fallback = [...fallbackRoutes];
+
+        if (children.some(({ path }) => path === '*')) {
+          _fallback.shift();
+        }
+
+        if (children.some(({ index: i, path }) => i ?? path?.includes('?'))) {
+          _fallback.pop();
+        }
+
+        return {
+          ...original,
+          children: [...children, ..._fallback],
+        } as RouteObject;
       }
 
       return added!;

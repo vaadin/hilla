@@ -1,9 +1,9 @@
 import { RouteParamType } from '../shared/routeParamType.js';
 
-const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
-  [RouteParamType.Wildcard, /\{\.{3}(.+)\}/gu],
-  [RouteParamType.Optional, /\{{2}(.+)\}{2}/gu],
-  [RouteParamType.Required, /\{(.+)\}/gu],
+export const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
+  [RouteParamType.Wildcard, /\{\.\.\.(.+)\}/gu], // e.g. "{...wildcard}"
+  [RouteParamType.Optional, /\{\{(.+)\}\}/gu], // e.g. "{{param}}"
+  [RouteParamType.Required, /\{(.+)\}/gu], // e.g. "{param}"
 ]);
 
 // eslint-disable-next-line consistent-return

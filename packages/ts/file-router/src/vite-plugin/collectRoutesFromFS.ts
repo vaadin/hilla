@@ -2,7 +2,8 @@ import { opendir, readFile } from 'node:fs/promises';
 import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Logger } from 'vite';
-import { cleanUp } from './utils.js';
+import { RouteParamType } from '../shared/routeParamType.js';
+import { cleanUp, routeParamTypeMap } from './utils.js';
 
 export type RouteMeta = Readonly<{
   path: string;
@@ -75,8 +76,24 @@ export default async function collectRoutesFromFS(
       continue;
     }
 
+    const extension = extname(d.name);
+    const name = basename(d.name, extension);
+
+    if (extension !== '' && !extensions.includes(extension)) {
+      if (warningFor.includes(extension)) {
+        logger.warn(
+          `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file '${d.name}' will be ignored by router, as it doesn't match this convention. Please consider storing it in another directory.`,
+        );
+      }
+      continue;
+    }
+
+    if (children.some(({ path: p }) => p === name)) {
+      throw new Error(`You cannot create a file and a directory with the same name ("${name}"). Use "@index" instead`);
+    }
+
     if (d.isDirectory()) {
-      const directoryRoutes = await collectRoutesFromFS(new URL(`${d.name}/`, dir), {
+      const directoryRoutes = await collectRoutesFromFS(new URL(`${name}/`, dir), {
         extensions,
         logger,
         parent: dir,
@@ -85,16 +102,7 @@ export default async function collectRoutesFromFS(
         const [layoutRoute] = directoryRoutes;
         children.push(layoutRoute);
       } else if (directoryRoutes.length > 0) {
-        children.push({ path: d.name, children: directoryRoutes });
-      }
-      continue;
-    }
-
-    if (!extensions.includes(extname(d.name))) {
-      if (warningFor.includes(extname(d.name))) {
-        logger.warn(
-          `File System based router expects only JSX files in 'Frontend/views/' directory, such as '*.tsx' and '*.jsx'. The file '${d.name}' will be ignored by router, as it doesn't match this convention. Please consider storing it in another directory.`,
-        );
+        children.push({ path: name, children: directoryRoutes });
       }
       continue;
     }
@@ -104,9 +112,14 @@ export default async function collectRoutesFromFS(
     if (url === undefined) {
       continue;
     }
-    const name = basename(d.name, extname(d.name));
+    const optionalParamType = routeParamTypeMap.get(RouteParamType.Optional)!;
 
-    if (name === '@layout') {
+    if (
+      (name === '@index' && children.some(({ path: p }) => p.search(optionalParamType) >= 0)) ||
+      (name.search(optionalParamType) >= 0 && children.some(({ path: p }) => p === ''))
+    ) {
+      throw new Error('You cannot create an `@index` file in a directory with optional parameters');
+    } else if (name === '@layout') {
       layout = file;
     } else if (name === '@index') {
       children.push({
@@ -117,8 +130,6 @@ export default async function collectRoutesFromFS(
       throw new Error(
         'Symbol "@" is reserved for special directories and files; only "@layout" and "@index" are allowed',
       );
-    } else if (children.some(({ path: p }) => p === name)) {
-      throw new Error('You cannot create a file and a directory with the same name. Use `@index` instead.');
     } else {
       children.push({
         path: name,
