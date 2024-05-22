@@ -88,7 +88,14 @@ export interface LogoutOptions {
 }
 
 function normalizePath(url: string): string {
-  return url.startsWith(document.baseURI) ? `/${url.slice(document.baseURI.length)}` : url;
+  const effectiveBaseURI = new URL('.', document.baseURI).toString();
+  let normalizedUrl = url;
+  if (normalizedUrl.startsWith('/')) {
+    normalizedUrl = new URL(url, effectiveBaseURI).toString();
+  }
+  return normalizedUrl.startsWith(effectiveBaseURI)
+    ? `/${normalizedUrl.slice(effectiveBaseURI.length)}`
+    : normalizedUrl;
 }
 
 function pageReloadNavigate(to: string) {
@@ -123,10 +130,7 @@ export async function login(username: string, password: string, options?: LoginO
 
     const result = response.headers.get('Result');
     const savedUrl = response.headers.get('Saved-url') ?? undefined;
-    let defaultUrl = response.headers.get('Default-url') ?? undefined;
-    if (defaultUrl?.startsWith('/')) {
-      defaultUrl = new URL(defaultUrl, document.baseURI).toString();
-    }
+    const defaultUrl = response.headers.get('Default-url') ?? undefined;
     const loginSuccessful = response.ok && result === 'success';
 
     if (loginSuccessful) {
