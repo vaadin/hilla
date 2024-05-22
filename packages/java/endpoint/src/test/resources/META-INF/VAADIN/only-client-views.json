@@ -18,17 +18,5 @@
     "register": false,
     "menu": null,
     "params": {}
-  },
-  "/user/:userId": {
-    "title": "User Profile",
-    "rolesAllowed": ["ROLE_ADMIN"],
-    "requiresLogin": true,
-    "route": "/user/:userId",
-    "lazy": false,
-    "register": false,
-    "menu": null,
-    "params": {
-      ":userId": "req"
-    }
   }
 }
