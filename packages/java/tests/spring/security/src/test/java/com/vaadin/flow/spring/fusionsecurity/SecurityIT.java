@@ -368,17 +368,6 @@ public class SecurityIT extends ChromeBrowserTest {
         }
 
         Assert.assertEquals(expected, url);
-
-//        waitUntil(driver -> {
-//            String url = driver.getCurrentUrl();
-//            String expected = getRootURL();
-//            if (includeUrlMapping) {
-//                expected += getUrlMappingBasePath();
-//            }
-//            expected += "/" + path;
-//
-//            return url.equals(expected) || url.equals(expected + "?continue");
-//        });
     }
 
     protected void assertResourceShown(String path) {
