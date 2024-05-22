@@ -107,11 +107,11 @@ export default async function collectRoutesFromFS(
     }
     const name = basename(d.name, extname(d.name));
 
-    const optionalParamType = new RegExp(routeParamTypeMap.get(RouteParamType.Optional)!.source, 'u');
+    const optionalParamType = routeParamTypeMap.get(RouteParamType.Optional)!;
 
     if (
-      (name === '@index' && children.some(({ path: p }) => optionalParamType.test(p))) ||
-      (optionalParamType.test(name) && children.some(({ path: p }) => p === ''))
+      (name === '@index' && children.some(({ path: p }) => p.search(optionalParamType) >= 0)) ||
+      (name.search(optionalParamType) >= 0 && children.some(({ path: p }) => p === ''))
     ) {
       throw new Error('You cannot create an `@index` file in a directory with optional parameters');
     } else if (name === '@layout') {
