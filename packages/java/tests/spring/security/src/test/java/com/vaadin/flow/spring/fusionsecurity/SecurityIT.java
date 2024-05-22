@@ -290,8 +290,8 @@ public class SecurityIT extends ChromeBrowserTest {
     public void private_page_reactive_endpoint_works() {
         open("login");
         loginUser();
-        navigateTo("private");
         getMainView();
+        navigateTo("private");
         waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
                 .exists());
         waitUntil(driver -> !$("output").id("balanceUpdates").getText()
@@ -318,13 +318,11 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private TestBenchElement getMainView() {
         waitForDocumentReady();
-        waitForDevServer();
         return waitUntil(driver -> $("*").id("main-view"));
     }
 
     protected void assertLoginViewShown() {
         assertPathShown("login");
-        waitForDevServer();
         waitUntil(driver -> $(LoginOverlayElement.class).exists());
     }
 
@@ -394,8 +392,8 @@ public class SecurityIT extends ChromeBrowserTest {
         form.getUsernameField().setValue(username);
         form.getPasswordField().setValue(password);
         form.submit();
-        waitForDocumentReady();
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
+        waitForDocumentReady();
     }
 
     protected void refresh() {
