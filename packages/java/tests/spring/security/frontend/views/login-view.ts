@@ -32,12 +32,17 @@ export class LoginView extends View implements AfterEnterObserver {
   }
 
   async login(event: CustomEvent): Promise<LoginResult> {
+    // @ts-ignore
+    window.reloadPending = true;
     this.error = false;
     const result = await login(event.detail.username, event.detail.password);
     this.error = result.error;
 
     if (!result.error) {
       this.onSuccess(result);
+    } else {
+      // @ts-ignore
+      window.reloadPending = false;
     }
 
     return result;

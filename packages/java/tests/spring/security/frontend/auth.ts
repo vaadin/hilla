@@ -69,6 +69,13 @@ export async function login(username: string, password: string): Promise<LoginRe
  */
 export async function logout() {
   setSessionExpired();
-  await logoutImpl();
+  // @ts-ignore
+  window.reloadPending = true;
+  try {
+    await logoutImpl();
+  } catch (e: unknown) {
+    // @ts-ignore
+    window.reloadPending = false;
+  }
   appStore.clearUserInfo();
 }

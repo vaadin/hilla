@@ -177,7 +177,8 @@ public class SecurityIT extends ChromeBrowserTest {
     public void private_page_logout_should_redirect_to_root() {
         open("login");
         loginUser();
-        navigateTo("private");
+        navigateTo("private", false);
+        assertPrivatePageShown(USER_FULLNAME);
         clickLogout();
         assertRootPageShown();
     }
@@ -290,7 +291,6 @@ public class SecurityIT extends ChromeBrowserTest {
     public void private_page_reactive_endpoint_works() {
         open("login");
         loginUser();
-        getMainView();
         navigateTo("private");
         waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
                 .exists());
@@ -313,7 +313,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void waitForDocumentReady() {
         waitUntil(driver -> this.getCommandExecutor().executeScript(
-                "return window.document.readyState === 'complete';"));
+                "return !window.reloadPending && window.document.readyState === 'complete';"));
     }
 
     private TestBenchElement getMainView() {
@@ -328,7 +328,6 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private void assertRootPageShown() {
         waitForDocumentReady();
-        getMainView();
         waitUntil(drive -> $("h1").attribute("id", "header").exists());
         String headerText = $("h1").id("header").getText();
         Assert.assertEquals(ROOT_PAGE_HEADER_TEXT, headerText);
@@ -336,7 +335,6 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void assertPrivatePageShown(String fullName) {
         assertPathShown("private");
-        getMainView();
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
         Assert.assertTrue(balance.startsWith(
@@ -345,7 +343,6 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private void assertAdminPageShown(String fullName) {
         assertPathShown("admin");
-        getMainView();
         TestBenchElement welcome = waitUntil(driver -> $("*").id("welcome"));
         String welcomeText = welcome.getText();
         Assert.assertEquals("Welcome to the admin page, " + fullName,
@@ -358,16 +355,30 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private void assertPathShown(String path, boolean includeUrlMapping) {
         waitForDocumentReady();
-        waitUntil(driver -> {
-            String url = driver.getCurrentUrl();
-            String expected = getRootURL();
-            if (includeUrlMapping) {
-                expected += getUrlMappingBasePath();
-            }
-            expected += "/" + path;
+        String url = driver.getCurrentUrl();
+        String expected = getRootURL();
+        if (includeUrlMapping) {
+            expected += getUrlMappingBasePath();
+        }
+        expected += "/" + path;
 
-            return url.equals(expected) || url.equals(expected + "?continue");
-        });
+        final String continueSuffix = "?continue";
+        if (url.endsWith(continueSuffix)) {
+            url = url.substring(0, url.length() - continueSuffix.length());
+        }
+
+        Assert.assertEquals(expected, url);
+
+//        waitUntil(driver -> {
+//            String url = driver.getCurrentUrl();
+//            String expected = getRootURL();
+//            if (includeUrlMapping) {
+//                expected += getUrlMappingBasePath();
+//            }
+//            expected += "/" + path;
+//
+//            return url.equals(expected) || url.equals(expected + "?continue");
+//        });
     }
 
     protected void assertResourceShown(String path) {
@@ -392,6 +403,7 @@ public class SecurityIT extends ChromeBrowserTest {
         form.getUsernameField().setValue(username);
         form.getPasswordField().setValue(password);
         form.submit();
+        waitForDocumentReady();
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
         waitForDocumentReady();
     }
