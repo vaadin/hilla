@@ -29,11 +29,11 @@
     "menu": null,
     "params": {}
   },
-  "/wildcard/:___wildcard*": {
+  "/wildcard": {
     "title": "RouteTarget",
     "rolesAllowed": null,
     "requiresLogin": false,
-    "route": "/wildcard/:___wildcard*",
+    "route": "/wildcard",
     "lazy": false,
     "register": false,
     "menu": null,
