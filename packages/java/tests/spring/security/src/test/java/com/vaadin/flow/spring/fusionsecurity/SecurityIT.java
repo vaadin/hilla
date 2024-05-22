@@ -291,6 +291,7 @@ public class SecurityIT extends ChromeBrowserTest {
         open("login");
         loginUser();
         navigateTo("private");
+        getMainView();
         waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
                 .exists());
         waitUntil(driver -> !$("output").id("balanceUpdates").getText()
@@ -312,7 +313,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void waitForDocumentReady() {
         waitUntil(driver -> this.getCommandExecutor().executeScript(
-                "return window.document.readyState == 'complete';"));
+                "return window.document.readyState === 'complete';"));
     }
 
     private TestBenchElement getMainView() {
