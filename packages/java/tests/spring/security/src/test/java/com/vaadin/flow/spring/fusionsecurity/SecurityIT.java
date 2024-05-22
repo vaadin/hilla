@@ -312,10 +312,10 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     protected void waitForDocumentReady() {
-        waitUntil(driver -> Boolean.TRUE.equals(this.getCommandExecutor()
-                .executeScript(
-                        "return !window.reloadPending && window.document.readyState " +
-                                "=== 'complete';")));
+        waitUntil(driver -> Boolean.TRUE
+                .equals(this.getCommandExecutor().executeScript(
+                        "return !window.reloadPending && window.document.readyState "
+                                + "=== 'complete';")));
     }
 
     private TestBenchElement getMainView() {
