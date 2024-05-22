@@ -105,9 +105,9 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var menuAccessControl = Mockito.mock(MenuAccessControl.class);
         Mockito.when(vaadinService.getInstantiator()).thenReturn(instantiator);
         Mockito.when(instantiator.getMenuAccessControl())
-            .thenReturn(menuAccessControl);
+                .thenReturn(menuAccessControl);
         Mockito.when(menuAccessControl.getPopulateClientSideMenu())
-            .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
+                .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
     }
 
     private Map<String, ClientViewConfig> prepareClientRoutes() {
