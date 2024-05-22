@@ -91,7 +91,7 @@ describe('@vaadin/hilla-file-router', () => {
         ]);
 
         await expect(collectRoutesFromFS(tmp, { extensions, logger })).to.be.rejectedWith(
-          'You cannot create a file and a directory with the same name. Use `@index` instead',
+          `You cannot create a file and a directory with the same name ("internal"). Use "@index" instead`,
         );
       });
 
