@@ -19,6 +19,18 @@
     "menu": null,
     "params": {}
   },
+  "/user/:userId": {
+    "title": "User Profile",
+    "rolesAllowed": ["ROLE_ADMIN"],
+    "requiresLogin": true,
+    "route": "/user/:userId",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":userId": "req"
+    }
+  },
   "/bar": {
     "title": "Component",
     "rolesAllowed": null,
@@ -49,6 +61,18 @@
     "menu": null,
     "params": {
       ":___wildcard*": "*"
+    }
+  },
+  "//:___userId/edit": {
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "//:___userId/edit",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":___userId": "req"
     }
   },
   "/comments": {

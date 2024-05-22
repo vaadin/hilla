@@ -41,6 +41,18 @@
       ":___wildcard*": "*"
     }
   },
+  "//:___userId/edit": {
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "//:___userId/edit",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {
+      ":___userId": "req"
+    }
+  },
   "/comments": {
     "title": "RouteTarget",
     "rolesAllowed": null,
