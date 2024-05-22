@@ -311,7 +311,8 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     protected void waitForDocumentReady() {
-        waitUntil(driver -> this.getCommandExecutor().executeScript("return window.document.readyState == 'complete';"));
+        waitUntil(driver -> this.getCommandExecutor().executeScript(
+                "return window.document.readyState == 'complete';"));
     }
 
     private TestBenchElement getMainView() {
