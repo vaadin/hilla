@@ -107,7 +107,7 @@ export default async function collectRoutesFromFS(
     }
     const name = basename(d.name, extname(d.name));
 
-    const optionalParamType = routeParamTypeMap.get(RouteParamType.Optional)!;
+    const optionalParamType = new RegExp(routeParamTypeMap.get(RouteParamType.Optional)!.source, 'u');
 
     if (
       (name === '@index' && children.some(({ path: p }) => optionalParamType.test(p))) ||
