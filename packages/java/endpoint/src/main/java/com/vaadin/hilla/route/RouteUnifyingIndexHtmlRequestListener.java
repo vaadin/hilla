@@ -18,34 +18,31 @@ package com.vaadin.hilla.route;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.router.BeforeEnterListener;
-import com.vaadin.flow.router.RouteParameterData;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.auth.MenuAccessControl;
-import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
-import com.vaadin.hilla.route.records.ClientViewConfig;
 
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.AnnotationReader;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
-import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.router.RouteParameterData;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.MenuAccessControl;
+import com.vaadin.flow.server.auth.NavigationAccessControl;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.hilla.route.records.AvailableViewInfo;
@@ -141,42 +138,37 @@ public class RouteUnifyingIndexHtmlRequestListener
                     deploymentConfiguration);
         }
 
-        var clientViews = new HashMap<String, AvailableViewInfo>();
-        clientRouteRegistry.getAllRoutes().entrySet().stream()
-                .filter(clientViewConfigEntry -> routeUtil.isRouteAllowed(
-                        isUserInRole, isUserAuthenticated,
-                        clientViewConfigEntry.getValue()))
-                .forEach(clientViewConfigEntry -> {
-                    final String route = clientViewConfigEntry.getKey();
-                    final ClientViewConfig config = clientViewConfigEntry
-                            .getValue();
-                    final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                            config.getTitle(), config.getRolesAllowed(),
-                            config.isLoginRequired(), config.getRoute(),
-                            config.isLazy(), config.isAutoRegistered(),
-                            config.menu(), config.getRouteParameters());
-                    clientViews.put(route, availableViewInfo);
-                });
-        return clientViews;
+        return clientRouteRegistry.getAllRoutes().values().stream()
+                .filter(config -> config.getRouteParameters() == null
+                        || config.getRouteParameters().isEmpty()
+                        || config.getRouteParameters().values().stream()
+                                .noneMatch(
+                                        param -> param == RouteParamType.REQUIRED))
+                .filter(config -> routeUtil.isRouteAllowed(isUserInRole,
+                        isUserAuthenticated, config))
+                .map(config -> new AvailableViewInfo(config.getTitle(),
+                        config.getRolesAllowed(), config.isLoginRequired(),
+                        config.getRoute(), config.isLazy(),
+                        config.isAutoRegistered(), config.menu(),
+                        config.getRouteParameters()))
+                .collect(Collectors.toMap(AvailableViewInfo::route,
+                        Function.identity()));
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews(
             VaadinRequest vaadinRequest) {
-        var serverViews = new HashMap<String, AvailableViewInfo>();
         final VaadinService vaadinService = VaadinService.getCurrent();
         if (vaadinService == null) {
             LOGGER.debug(
                     "No VaadinService found, skipping server view collection");
-            return serverViews;
+            return Collections.emptyMap();
         }
-        final RouteRegistry serverRouteRegistry = vaadinService.getRouter()
-                .getRegistry();
+        final var serverRouteRegistry = vaadinService.getRouter().getRegistry();
 
-        List<BeforeEnterListener> accessControls = Stream
-                .of(accessControl, viewAccessChecker).filter(Objects::nonNull)
-                .toList();
+        var accessControls = Stream.of(accessControl, viewAccessChecker)
+                .filter(Objects::nonNull).toList();
 
-        List<RouteData> serverRoutes = Collections.emptyList();
+        var serverRoutes = Collections.<RouteData> emptyList();
         if (vaadinService.getInstantiator().getMenuAccessControl()
                 .getPopulateClientSideMenu() == MenuAccessControl.PopulateClientMenu.ALWAYS
                 || clientRouteRegistry.hasMainLayout()) {
@@ -184,68 +176,42 @@ public class RouteUnifyingIndexHtmlRequestListener
                     .getRegisteredAccessibleMenuRoutes(vaadinRequest,
                             accessControls);
         }
-        serverRoutes.forEach(serverView -> {
-            final Class<? extends com.vaadin.flow.component.Component> viewClass = serverView
-                    .getNavigationTarget();
-            final boolean excludeFromMenu;
-            final String targetUrl = serverView.getTemplate();
-            if (targetUrl != null) {
-                final String url;
-                if (serverView.getRouteParameters() != null
-                        && !serverView.getRouteParameters().isEmpty()) {
-                    String editUrl = "/" + targetUrl;
-                    excludeFromMenu = serverView.getRouteParameters().values()
-                            .stream()
-                            .anyMatch(param -> !param.getTemplate()
-                                    .contains("?")
-                                    && !param.getTemplate().contains("*"));
-                    for (RouteParameterData param : serverView
-                            .getRouteParameters().values().stream()
-                            .filter(param -> param.getTemplate().contains("?")
-                                    || param.getTemplate().contains("*"))
-                            .toList()) {
-                        editUrl = editUrl.replace("/" + param.getTemplate(),
-                                "");
+        return serverRoutes.stream()
+                .filter(serverView -> serverView.getTemplate() != null)
+                .map(serverView -> {
+                    final var viewClass = serverView.getNavigationTarget();
+                    final var url = getRouteUrl(serverView);
+
+                    final String title;
+                    var pageTitle = AnnotationReader
+                            .getAnnotationFor(viewClass, PageTitle.class)
+                            .orElse(null);
+                    if (pageTitle != null) {
+                        title = pageTitle.value();
+                    } else {
+                        title = serverView.getNavigationTarget()
+                                .getSimpleName();
                     }
-                    if (editUrl.isEmpty()) {
-                        editUrl = "/";
-                    }
-                    url = editUrl;
-                } else {
-                    excludeFromMenu = false;
-                    url = "/" + targetUrl;
-                }
 
-                final String title;
-                PageTitle pageTitle = AnnotationReader
-                        .getAnnotationFor(viewClass, PageTitle.class)
-                        .orElse(null);
-                if (pageTitle != null) {
-                    title = pageTitle.value();
-                } else {
-                    title = serverView.getNavigationTarget().getSimpleName();
-                }
+                    final var menuConfig = Optional
+                            .ofNullable(serverView.getMenuData())
+                            .map(menu -> new ClientViewMenuConfig(
+                                    (menu.getTitle() == null
+                                            || menu.getTitle().isBlank())
+                                                    ? title
+                                                    : menu.getTitle(),
+                                    menu.getOrder(), menu.getIcon(),
+                                    menu.isExclude()))
+                            .orElse(null);
 
-                final ClientViewMenuConfig menuConfig = Optional
-                        .ofNullable(serverView.getMenuData())
-                        .map(menu -> new ClientViewMenuConfig(
-                                (menu.getTitle() == null
-                                        || menu.getTitle().isBlank()) ? title
-                                                : menu.getTitle(),
-                                menu.getOrder(), menu.getIcon(),
-                                excludeFromMenu || menu.isExclude()))
-                        .orElse(null);
-
-                final Map<String, RouteParamType> routeParameters = getRouteParameters(
-                        serverView);
-
-                final AvailableViewInfo availableViewInfo = new AvailableViewInfo(
-                        title, null, false, url, false, false, menuConfig,
-                        routeParameters);
-                serverViews.put(url, availableViewInfo);
-            }
-        });
-        return serverViews;
+                    return new AvailableViewInfo(title, null, false, url, false,
+                            false, menuConfig,
+                            serverView.getRouteParameters().values().stream());
+                })
+                .filter(view -> view.routeParameters().values().stream()
+                        .noneMatch(param -> param == RouteParamType.REQUIRED))
+                .collect(Collectors.toMap(AvailableViewInfo::route,
+                        Function.identity()));
     }
 
     private Map<String, RouteParamType> getRouteParameters(
@@ -264,5 +230,33 @@ public class RouteUnifyingIndexHtmlRequestListener
             }
         });
         return routeParameters;
+    }
+
+    /**
+     * Get the route url for the route. If the route has optional parameters,
+     * the url is stripped off from them.
+     *
+     * @param route
+     *            route to get url for
+     * @return url for the route
+     */
+    private static String getRouteUrl(RouteData route) {
+        if (route.getRouteParameters() != null
+                && !route.getRouteParameters().isEmpty()) {
+            String editUrl = "/" + route.getTemplate();
+            var params = route.getRouteParameters().values()
+                .stream().filter(param -> param.getTemplate().contains("?")
+                    || param.getTemplate().contains("*"))
+                .toList();
+            for (RouteParameterData param : params) {
+                editUrl = editUrl.replace("/" + param.getTemplate(), "");
+            }
+            if (editUrl.isEmpty()) {
+                editUrl = "/";
+            }
+            return editUrl;
+        } else {
+            return "/" + route.getTemplate();
+        }
     }
 }
