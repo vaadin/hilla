@@ -317,11 +317,13 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private TestBenchElement getMainView() {
         waitForDocumentReady();
+        waitForDevServer();
         return waitUntil(driver -> $("*").id("main-view"));
     }
 
     protected void assertLoginViewShown() {
         assertPathShown("login");
+        waitForDevServer();
         waitUntil(driver -> $(LoginOverlayElement.class).exists());
     }
 
