@@ -1,8 +1,7 @@
 import { existsSync, rmSync, watch } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { rm } from 'node:fs/promises';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
-import { rimraf } from 'rimraf';
 import type { Logger } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from '../../src/vite-plugin/generateRuntimeFiles.js';
 import { createLogger, createTestingRouteFiles, createTmpDir } from '../utils.js';
@@ -29,7 +28,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     after(async () => {
-      await rimraf(fileURLToPath(tmp));
+      await rm(tmp, { recursive: true, force: true });
     });
 
     beforeEach(() => {
