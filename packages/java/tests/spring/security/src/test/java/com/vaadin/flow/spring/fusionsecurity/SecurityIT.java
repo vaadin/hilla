@@ -366,7 +366,7 @@ public class SecurityIT extends ChromeBrowserTest {
     private void assertPathShown(String path, boolean includeUrlMapping) {
         waitForDocumentReady();
         waitUntil(driver -> {
-            String url = driver.getCurrentUrl();
+            String url = (String) executeScript("return window.location.href;");
             String expected = getRootURL();
             if (includeUrlMapping) {
                 expected += getUrlMappingBasePath();
