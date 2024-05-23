@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
@@ -28,6 +30,8 @@ public class SecurityIT extends ChromeBrowserTest {
     private static final int SERVER_PORT = 9999;
     protected static final String USER_FULLNAME = "John the User";
     protected static final String ADMIN_FULLNAME = "Emma the Admin";
+
+    static final Logger LOGGER = LoggerFactory.getLogger(SecurityIT.class);
 
     @Override
     protected int getDeploymentPort() {
@@ -230,13 +234,13 @@ public class SecurityIT extends ChromeBrowserTest {
         openResource(path);
         assertLoginViewShown();
         loginUser();
-        assertPathShown(path);
+        assertResourceShown(path);
         assertPageContains(contents);
         logout();
 
         openResource(path);
         loginAdmin();
-        assertPathShown(path);
+        assertResourceShown(path);
         assertPageContains(contents);
         logout();
 
@@ -257,7 +261,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
         openResource(path);
         loginAdmin();
-        assertPathShown(path);
+        assertResourceShown(path);
         String adminResult = getDriver().getPageSource();
         Assert.assertTrue(adminResult.contains(contents));
         logout();
@@ -337,7 +341,7 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     private void assertRootPageShown() {
-        waitForDocumentReady();
+        assertPathShown("");
         waitUntil(drive -> $("h1").attribute("id", "header").exists());
         String headerText = $("h1").id("header").getText();
         Assert.assertEquals(ROOT_PAGE_HEADER_TEXT, headerText);
@@ -372,6 +376,8 @@ public class SecurityIT extends ChromeBrowserTest {
                 expected += getUrlMappingBasePath();
             }
             expected += "/" + path;
+
+            LOGGER.info("Expected: {}, actual: {}", expected, url);
 
             return url.equals(expected) || url.equals(expected + "?continue");
         });

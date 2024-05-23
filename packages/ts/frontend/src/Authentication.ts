@@ -88,14 +88,21 @@ export interface LogoutOptions {
 }
 
 function normalizePath(url: string): string {
-  const effectiveBaseURI = new URL('.', document.baseURI).toString();
-  let normalizedUrl = url;
-  if (normalizedUrl.startsWith('/')) {
-    normalizedUrl = new URL(url, effectiveBaseURI).toString();
+  // URL with context path
+  const effectiveBaseURL = new URL('.', document.baseURI);
+  const effectiveBaseURI = effectiveBaseURL.toString();
+
+  let normalized = url;
+
+  // Strip context path prefix
+  if (normalized.startsWith(effectiveBaseURL.pathname)) {
+    return `/${normalized.slice(effectiveBaseURL.pathname.length)}`;
   }
-  return normalizedUrl.startsWith(effectiveBaseURI)
-    ? `/${normalizedUrl.slice(effectiveBaseURI.length)}`
-    : normalizedUrl;
+
+  // Strip base URI
+  normalized = normalized.startsWith(effectiveBaseURI) ? `/${normalized.slice(effectiveBaseURI.length)}` : normalized;
+
+  return normalized;
 }
 
 function pageReloadNavigate(to: string) {
