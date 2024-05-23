@@ -14,8 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
@@ -30,8 +28,6 @@ public class SecurityIT extends ChromeBrowserTest {
     private static final int SERVER_PORT = 9999;
     protected static final String USER_FULLNAME = "John the User";
     protected static final String ADMIN_FULLNAME = "Emma the Admin";
-
-    static final Logger LOGGER = LoggerFactory.getLogger(SecurityIT.class);
 
     @Override
     protected int getDeploymentPort() {
@@ -376,8 +372,6 @@ public class SecurityIT extends ChromeBrowserTest {
                 expected += getUrlMappingBasePath();
             }
             expected += "/" + path;
-
-            LOGGER.info("Expected: {}, actual: {}", expected, url);
 
             return url.equals(expected) || url.equals(expected + "?continue");
         });
