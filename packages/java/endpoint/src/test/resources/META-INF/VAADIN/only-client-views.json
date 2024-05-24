@@ -18,5 +18,25 @@
     "register": false,
     "menu": null,
     "params": {}
+  },
+  "/": {
+    "title": "Index",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
+  },
+  "/orders": {
+    "title": "Orders",
+    "rolesAllowed": null,
+    "requiresLogin": false,
+    "route": "",
+    "lazy": false,
+    "register": false,
+    "menu": null,
+    "params": {}
   }
 }
