@@ -61,7 +61,9 @@ export interface LoginResult {
   defaultUrl?: string;
 }
 
-export type NavigateFunction = (path: string) => Promise<void> | void;
+export type SuccessCallback = () => Promise<void> | void;
+
+export type NavigateFunction = (path: string) => void;
 
 export interface LoginOptions {
   /**
@@ -70,7 +72,13 @@ export interface LoginOptions {
   loginProcessingUrl?: string;
 
   /**
-   * The success navigation callback. The default is reloading the page.
+   * The success callback.
+   */
+  onSuccess?: SuccessCallback;
+
+  /**
+   * The navigation callback, called after successful login. The default
+   * reloads the page.
    */
   navigate?: NavigateFunction;
 }
@@ -82,7 +90,13 @@ export interface LogoutOptions {
   logoutUrl?: string;
 
   /**
-   * The success navigation callback. The default is reloading the page.
+   * The success callback.
+   */
+  onSuccess?: SuccessCallback;
+
+  /**
+   * The navigation callback, called after successful logout. The default
+   * reloads the page.
    */
   navigate?: NavigateFunction;
 }
@@ -105,13 +119,15 @@ function normalizePath(url: string): string {
   return normalized;
 }
 
-async function pageReloadNavigate(to: string): Promise<void> {
+/**
+ * Navigates to the provided path using page reload.
+ *
+ * @param to - navigation target path
+ */
+function navigateWithPageReload(to: string) {
   // Consider absolute path to be within application context
   const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI).toString() : to;
   window.location.replace(url);
-
-  // Prevent following interactions
-  return new Promise((resolve) => {});
 }
 
 /**
@@ -156,9 +172,14 @@ export async function login(username: string, password: string, options?: LoginO
         updateSpringCsrfMetaTags(springCsrfTokenInfo);
       }
 
-      const navigate = options?.navigate ?? pageReloadNavigate;
+      if (options?.onSuccess) {
+        await options.onSuccess();
+      }
+
       const url = savedUrl ?? defaultUrl ?? document.baseURI;
-      await Promise.resolve(navigate(normalizePath(url)));
+      const toPath = normalizePath(url);
+      const navigate = options?.navigate ?? navigateWithPageReload;
+      navigate(toPath);
 
       return {
         defaultUrl,
@@ -211,8 +232,12 @@ export async function logout(options?: LogoutOptions): Promise<void> {
   } finally {
     CookieManager.remove(JWT_COOKIE_NAME);
     if (response && response.ok && response.redirected) {
-      const navigate = options?.navigate ?? pageReloadNavigate;
-      await Promise.resolve(navigate(normalizePath(response.url)));
+      if (options?.onSuccess) {
+        await options.onSuccess();
+      }
+      const toPath = normalizePath(response.url);
+      const navigate = options?.navigate ?? navigateWithPageReload;
+      navigate(toPath);
     }
   }
 }

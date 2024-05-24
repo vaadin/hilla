@@ -3,15 +3,16 @@ import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { LoginOptions, LogoutOptions } from '../Authentication';
 import CookieManager from '../src/CookieManager.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
   ConnectClient,
   InvalidSessionMiddleware,
   login as originalLogin,
+  type LoginOptions,
   type LoginResult,
   logout as originalLogout,
+  type LogoutOptions,
   type OnInvalidSessionCallback,
 } from '../src/index.js';
 import {
@@ -55,6 +56,8 @@ describe('@vaadin/hilla-frontend', () => {
     }
 
     const navigate = sinon.fake<[string], void>();
+    const onSuccess = sinon.fake.resolves(undefined);
+
     const login = async (username: string, password: string, loginOptions?: LoginOptions) =>
       originalLogin(username, password, {
         navigate,
@@ -73,6 +76,7 @@ describe('@vaadin/hilla-frontend', () => {
     afterEach(() => {
       // delete window.Vaadin.TypeScript;
       clearSpringCsrfMetaTags();
+      onSuccess.resetHistory();
       navigate.resetHistory();
     });
 
@@ -83,7 +87,7 @@ describe('@vaadin/hilla-frontend', () => {
 
       it('should return an error on invalid credentials', async () => {
         fetchMock.post('/login', { redirectUrl: '/login?error' }, { headers: requestHeaders });
-        const result = await login('invalid-username', 'invalid-password');
+        const result = await login('invalid-username', 'invalid-password', { onSuccess });
         const expectedResult: LoginResult = {
           error: true,
           errorMessage: 'Check that you have entered the correct username and password and try again.',
@@ -92,6 +96,8 @@ describe('@vaadin/hilla-frontend', () => {
 
         expect(fetchMock.calls()).to.have.lengthOf(1);
         expect(result).to.deep.equal(expectedResult);
+        expect(onSuccess).to.not.be.called;
+        expect(navigate).to.not.be.called;
       });
 
       it('should return a CSRF token on valid credentials', async () => {
@@ -130,7 +136,7 @@ describe('@vaadin/hilla-frontend', () => {
           },
           { headers: requestHeaders },
         );
-        const result = await login('valid-username', 'valid-password');
+        const result = await login('valid-username', 'valid-password', { onSuccess });
         const expectedResult: LoginResult = {
           defaultUrl: '/',
           error: false,
@@ -140,6 +146,7 @@ describe('@vaadin/hilla-frontend', () => {
 
         expect(fetchMock.calls()).to.have.lengthOf(1);
         expect(result).to.deep.equal(expectedResult);
+        expect(onSuccess).to.be.calledBefore(navigate);
         expect(navigate).to.be.calledOnceWithExactly('/protected-view');
       });
     });
@@ -180,7 +187,7 @@ describe('@vaadin/hilla-frontend', () => {
 
         let thrownError;
         try {
-          await logout();
+          await logout({ onSuccess });
         } catch (err) {
           thrownError = err;
         }
@@ -305,9 +312,10 @@ describe('@vaadin/hilla-frontend', () => {
           },
           { headers: requestHeaders, overwriteRoutes: false, repeat: 1 },
         );
-        await logout();
+        await logout({ onSuccess });
         expect(fetchMock.calls()).to.have.lengthOf(3);
         verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
+        expect(onSuccess).to.be.calledBefore(navigate);
         expect(navigate).to.be.calledOnceWithExactly('/logout?login');
       });
     });
