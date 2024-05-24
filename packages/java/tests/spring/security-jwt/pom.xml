@@ -83,22 +83,15 @@
                     <mainClass>com.vaadin.flow.spring.fusionsecurityjwt.Application</mainClass>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <excludes>
                         <exclude>com/vaadin/flow/spring/fusionsecurity/**/*.java</exclude>
                     </excludes>
-
-                    <systemPropertyVariables>
-                        <!-- Limits server load from login / logout full page reloads -->
-                        <com.vaadin.testbench.Parameters.testsInParallel>4</com.vaadin.testbench.Parameters.testsInParallel>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
