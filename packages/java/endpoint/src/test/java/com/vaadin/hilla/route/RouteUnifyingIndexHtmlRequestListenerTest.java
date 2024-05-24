@@ -346,7 +346,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         MatcherAssert.assertThat(views.get("/bar").route(),
                 Matchers.is("/bar"));
         MatcherAssert.assertThat(views.get("/wildcard").route(),
-                 Matchers.is("/wildcard"));
+                Matchers.is("/wildcard"));
         MatcherAssert.assertThat(views.get("/comments").route(),
                 Matchers.is("/comments"));
     }
