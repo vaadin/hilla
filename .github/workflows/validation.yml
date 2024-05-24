@@ -207,7 +207,7 @@ jobs:
         include:
           - os: ubuntu-latest
             it-modules: group-1
-          - os: ubuntu-latest
+          - os: windows-latest
             it-modules: group-2
           - os: windows-latest
             it-modules: some
