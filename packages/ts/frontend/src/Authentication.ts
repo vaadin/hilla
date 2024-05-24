@@ -61,7 +61,7 @@ export interface LoginResult {
   defaultUrl?: string;
 }
 
-export type NavigateFunction = (path: string) => void;
+export type NavigateFunction = (path: string) => Promise<void> | void;
 
 export interface LoginOptions {
   /**
@@ -105,10 +105,13 @@ function normalizePath(url: string): string {
   return normalized;
 }
 
-function pageReloadNavigate(to: string) {
+async function pageReloadNavigate(to: string): Promise<void> {
   // Consider absolute path to be within application context
   const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI).toString() : to;
   window.location.replace(url);
+
+  // Prevent following interactions
+  return new Promise((resolve) => {});
 }
 
 /**
@@ -155,7 +158,7 @@ export async function login(username: string, password: string, options?: LoginO
 
       const navigate = options?.navigate ?? pageReloadNavigate;
       const url = savedUrl ?? defaultUrl ?? document.baseURI;
-      navigate(normalizePath(url));
+      await Promise.resolve(navigate(normalizePath(url)));
 
       return {
         defaultUrl,
@@ -209,7 +212,7 @@ export async function logout(options?: LogoutOptions): Promise<void> {
     CookieManager.remove(JWT_COOKIE_NAME);
     if (response && response.ok && response.redirected) {
       const navigate = options?.navigate ?? pageReloadNavigate;
-      navigate(normalizePath(response.url));
+      await Promise.resolve(navigate(normalizePath(response.url)));
     }
   }
 }
