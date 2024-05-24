@@ -14,6 +14,13 @@ public class OpenAPIUtilTest {
     @Test
     public void emptySchemaReturnsNoComponents() throws IOException {
         Assert.assertEquals(Collections.emptySet(),
+                parse("openapi-noendpoints.json"));
+    }
+
+    @Test
+    public void noComponentsReturnEndpointTypes() throws IOException {
+        Assert.assertEquals(Set.of(
+                "com.example.application.endpoints.helloreact.HelloReactEndpoint"),
                 parse("openapi-nocustomtypes.json"));
     }
 
