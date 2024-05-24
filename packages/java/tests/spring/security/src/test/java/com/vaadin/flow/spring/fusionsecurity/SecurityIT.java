@@ -1,6 +1,5 @@
 package com.vaadin.flow.spring.fusionsecurity;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,7 +9,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -32,12 +30,6 @@ public class SecurityIT extends ChromeBrowserTest {
     @Override
     protected int getDeploymentPort() {
         return SERVER_PORT;
-    }
-
-    @Before
-    public void setup() throws Exception {
-        super.setup();
-        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
     }
 
     @After
@@ -214,7 +206,6 @@ public class SecurityIT extends ChromeBrowserTest {
     @Test
     public void when_endpoint_class_is_proxied_and_not_annotated_then_anonymously_allowed_method_is_accessible() {
         open("proxied-service");
-        waitForDocumentReady();
         var view = $("proxied-service-test-view").waitForFirst();
         view.$(ButtonElement.class).id("say-hello-btn").click();
         NotificationElement notification = $(NotificationElement.class)
@@ -366,16 +357,19 @@ public class SecurityIT extends ChromeBrowserTest {
 
     private void assertPathShown(String path, boolean includeUrlMapping) {
         waitForDocumentReady();
-        waitUntil(driver -> {
-            String url = driver.getCurrentUrl();
-            String expected = getRootURL();
-            if (includeUrlMapping) {
-                expected += getUrlMappingBasePath();
-            }
-            expected += "/" + path;
+        String url = driver.getCurrentUrl();
+        String expected = getRootURL();
+        if (includeUrlMapping) {
+            expected += getUrlMappingBasePath();
+        }
+        expected += "/" + path;
 
-            return url.equals(expected) || url.equals(expected + "?continue");
-        });
+        final String continueSuffix = "?continue";
+        if (url.endsWith(continueSuffix)) {
+            url = url.substring(0, url.length() - continueSuffix.length());
+        }
+
+        Assert.assertEquals(expected, url);
     }
 
     protected void assertResourceShown(String path) {
