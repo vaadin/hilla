@@ -197,6 +197,8 @@
         -->
                 <module>endpoints-latest-java</module>
                 <module>react-grid-test</module>
+                <module>react-signals</module>
+                <module>react-i18n</module>
             </modules>
         </profile>
 
@@ -207,8 +209,6 @@
                 <module>security-contextpath</module>
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
-                <module>react-signals</module>
-                <module>react-i18n</module>
             </modules>
         </profile>
 
@@ -217,7 +217,7 @@
             <modules>
                 <module>endpoints</module>
                 <module>endpoints discovery</module>
-                <module>security</module>
+                <module>react-grid-test</module>
             </modules>
         </profile>
 
