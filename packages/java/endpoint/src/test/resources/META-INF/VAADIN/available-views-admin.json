@@ -36,7 +36,7 @@
     "title": "RouteTarget",
     "rolesAllowed": null,
     "loginRequired": false,
-    "route": "/wildcard/:___wildcard*",
+    "route": "/wildcard",
     "lazy": false,
     "register": false,
     "menu": null
@@ -48,7 +48,7 @@
     "title": "RouteTarget",
     "rolesAllowed": null,
     "loginRequired": false,
-    "route": "/comments/:___commentId?",
+    "route": "/comments",
     "lazy": false,
     "register": false,
     "menu": null
