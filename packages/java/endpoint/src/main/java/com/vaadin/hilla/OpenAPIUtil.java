@@ -104,30 +104,30 @@ public class OpenAPIUtil {
     public static Set<String> findOpenApiClasses(String openApiAsText)
             throws IOException {
         JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
-        if (!openApi.has("components")) {
-            return Collections.emptySet();
-        }
 
         Set<String> types = new HashSet<>();
 
         // Endpoints
-        ArrayNode tags = (ArrayNode) openApi.get("tags");
+        if (openApi.has("tags")) {
+            ArrayNode tags = (ArrayNode) openApi.get("tags");
 
-        if (tags != null) {
-            tags.forEach(nameAndClass -> {
-                types.add(nameAndClass.get("x-class-name").asText());
-            });
+            if (tags != null) {
+                tags.forEach(nameAndClass -> {
+                    types.add(nameAndClass.get("x-class-name").asText());
+                });
+            }
         }
 
         // Parameters and return types
-        ObjectNode schemas = (ObjectNode) openApi.get("components")
-                .get("schemas");
-        if (schemas != null) {
-            schemas.fieldNames().forEachRemaining(type -> {
-                types.add(type);
-            });
+        if (openApi.has("components")) {
+            ObjectNode schemas = (ObjectNode) openApi.get("components")
+                    .get("schemas");
+            if (schemas != null) {
+                schemas.fieldNames().forEachRemaining(type -> {
+                    types.add(type);
+                });
+            }
         }
-
         return types;
 
     }
