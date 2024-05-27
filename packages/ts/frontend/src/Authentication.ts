@@ -126,7 +126,7 @@ function normalizePath(url: string): string {
  */
 function navigateWithPageReload(to: string) {
   // Consider absolute path to be within application context
-  const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI).toString() : to;
+  const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI) : to;
   window.location.replace(url);
 }
 
