@@ -1,6 +1,7 @@
-import { expect } from '@esm-bundle/chai';
+import { expect, use } from '@esm-bundle/chai';
 import type { ReactiveControllerHost, ReactiveController } from '@lit/reactive-element';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import { FluxConnection, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
@@ -9,6 +10,8 @@ import type {
   ClientUpdateMessage,
 } from '../src/FluxMessages.js';
 import { getSubscriptionEventSpies, subscribeStub } from './mocks/atmosphere.js';
+
+use(sinonChai);
 
 describe('@vaadin/hilla-frontend', () => {
   describe('FluxConnection', () => {

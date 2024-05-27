@@ -1,9 +1,10 @@
 // eslint-disable-next-line
-/// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
 import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
+import { setViewport } from '@web/test-runner-commands';
+import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -15,20 +16,17 @@ import GridController from './GridController';
 import { getItem, PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);
+use(chaiAsPromised);
 use(chaiDom);
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Desktop resolution
-      viewport.set(1024, 768);
+      await setViewport({ width: 1024, height: 768 });
       user = userEvent.setup();
-    });
-
-    after(() => {
-      viewport.reset();
     });
 
     function TestAutoCrud(props: Partial<AutoCrudProps<PersonModel>> = {}) {
@@ -287,9 +285,9 @@ describe('@vaadin/hilla-react-crud', () => {
       let saveSpy: sinon.SinonSpy;
       let service: ReturnType<typeof personService>;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         // iPhone 13 Pro resolution
-        viewport.set(390, 844);
+        await setViewport({ width: 390, height: 844 });
 
         service = personService();
         saveSpy = sinon.spy(service, 'save');

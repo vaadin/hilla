@@ -4,6 +4,7 @@ import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import chaiAsPromised from 'chai-as-promised';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import type { WritableDeep } from 'type-fest';
 import type { MiddlewareContext, MiddlewareNext } from '../src/Connect.js';
 import CookieManager from '../src/CookieManager.js';
@@ -18,7 +19,7 @@ import {
   UnauthorizedResponseError,
   type FluxConnection,
 } from '../src/index.js';
-import type { Vaadin, VaadinWindow } from '../src/types.js';
+import type { Vaadin } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
 import { fluxConnectionSubscriptionStubs } from './mocks/FluxConnection.js';
 import {
@@ -28,6 +29,7 @@ import {
   TEST_SPRING_CSRF_TOKEN_VALUE,
 } from './SpringCsrfTestUtils.test.js';
 
+use(sinonChai);
 use(chaiAsPromised);
 
 // `connectClient.call` adds the host and context to the endpoint request.

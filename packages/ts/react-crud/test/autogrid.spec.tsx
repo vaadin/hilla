@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiAsPromised from 'chai-as-promised';
+import chaiDom from 'chai-dom';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -41,6 +42,7 @@ import TextFieldController from './TextFieldController.js';
 
 use(sinonChai);
 use(chaiAsPromised);
+use(chaiDom);
 
 export async function nextFrame(): Promise<void> {
   return new Promise<void>((resolve) => {
