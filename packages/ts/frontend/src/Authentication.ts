@@ -41,7 +41,7 @@ async function updateCsrfTokensBasedOnResponse(response: Response): Promise<stri
   return token;
 }
 
-async function doLogout(logoutUrl: string, headers: Record<string, string>) {
+async function doLogout(logoutUrl: URL | string, headers: Record<string, string>) {
   const response = await fetch(logoutUrl, { headers, method: 'POST' });
   if (!response.ok) {
     throw new Error(`failed to logout with response ${response.status}`);
@@ -69,7 +69,7 @@ export interface LoginOptions {
   /**
    * The URL for login request, defaults to `/login`.
    */
-  loginProcessingUrl?: string;
+  loginProcessingUrl?: URL | string;
 
   /**
    * The success callback.
@@ -87,7 +87,7 @@ export interface LogoutOptions {
   /**
    * The URL for logout request, defaults to `/logout`.
    */
-  logoutUrl?: string;
+  logoutUrl?: URL | string;
 
   /**
    * The success callback.
