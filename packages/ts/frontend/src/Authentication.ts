@@ -41,13 +41,15 @@ async function updateCsrfTokensBasedOnResponse(response: Response): Promise<stri
   return token;
 }
 
-async function doLogout(logoutUrl: string, headers: Record<string, string>) {
+async function doLogout(logoutUrl: URL | string, headers: Record<string, string>) {
   const response = await fetch(logoutUrl, { headers, method: 'POST' });
   if (!response.ok) {
     throw new Error(`failed to logout with response ${response.status}`);
   }
 
   await updateCsrfTokensBasedOnResponse(response);
+
+  return response;
 }
 
 export interface LoginResult {
@@ -59,12 +61,73 @@ export interface LoginResult {
   defaultUrl?: string;
 }
 
+export type SuccessCallback = () => Promise<void> | void;
+
+export type NavigateFunction = (path: string) => void;
+
 export interface LoginOptions {
-  loginProcessingUrl?: string;
+  /**
+   * The URL for login request, defaults to `/login`.
+   */
+  loginProcessingUrl?: URL | string;
+
+  /**
+   * The success callback.
+   */
+  onSuccess?: SuccessCallback;
+
+  /**
+   * The navigation callback, called after successful login. The default
+   * reloads the page.
+   */
+  navigate?: NavigateFunction;
 }
 
 export interface LogoutOptions {
-  logoutUrl?: string;
+  /**
+   * The URL for logout request, defaults to `/logout`.
+   */
+  logoutUrl?: URL | string;
+
+  /**
+   * The success callback.
+   */
+  onSuccess?: SuccessCallback;
+
+  /**
+   * The navigation callback, called after successful logout. The default
+   * reloads the page.
+   */
+  navigate?: NavigateFunction;
+}
+
+function normalizePath(url: string): string {
+  // URL with context path
+  const effectiveBaseURL = new URL('.', document.baseURI);
+  const effectiveBaseURI = effectiveBaseURL.toString();
+
+  let normalized = url;
+
+  // Strip context path prefix
+  if (normalized.startsWith(effectiveBaseURL.pathname)) {
+    return `/${normalized.slice(effectiveBaseURL.pathname.length)}`;
+  }
+
+  // Strip base URI
+  normalized = normalized.startsWith(effectiveBaseURI) ? `/${normalized.slice(effectiveBaseURI.length)}` : normalized;
+
+  return normalized;
+}
+
+/**
+ * Navigates to the provided path using page reload.
+ *
+ * @param to - navigation target path
+ */
+function navigateWithPageReload(to: string) {
+  // Consider absolute path to be within application context
+  const url = to.startsWith('/') ? new URL(`.${to}`, document.baseURI) : to;
+  window.location.replace(url);
 }
 
 /**
@@ -109,6 +172,15 @@ export async function login(username: string, password: string, options?: LoginO
         updateSpringCsrfMetaTags(springCsrfTokenInfo);
       }
 
+      if (options?.onSuccess) {
+        await options.onSuccess();
+      }
+
+      const url = savedUrl ?? defaultUrl ?? document.baseURI;
+      const toPath = normalizePath(url);
+      const navigate = options?.navigate ?? navigateWithPageReload;
+      navigate(toPath);
+
       return {
         defaultUrl,
         error: false,
@@ -141,16 +213,17 @@ export async function login(username: string, password: string, options?: LoginO
 export async function logout(options?: LogoutOptions): Promise<void> {
   // this assumes the default Spring Security logout configuration (handler URL)
   const logoutUrl = options?.logoutUrl ?? 'logout';
+  let response: Response | undefined;
   try {
     const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    await doLogout(logoutUrl, headers);
+    response = await doLogout(logoutUrl, headers);
   } catch {
     try {
-      const response = await fetch('?nocache');
-      const responseText = await response.text();
+      const noCacheResponse = await fetch('?nocache');
+      const responseText = await noCacheResponse.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
       const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
-      await doLogout(logoutUrl, headers);
+      response = await doLogout(logoutUrl, headers);
     } catch (error) {
       // clear the token if the call fails
       clearSpringCsrfMetaTags();
@@ -158,6 +231,14 @@ export async function logout(options?: LogoutOptions): Promise<void> {
     }
   } finally {
     CookieManager.remove(JWT_COOKIE_NAME);
+    if (response && response.ok && response.redirected) {
+      if (options?.onSuccess) {
+        await options.onSuccess();
+      }
+      const toPath = normalizePath(response.url);
+      const navigate = options?.navigate ?? navigateWithPageReload;
+      navigate(toPath);
+    }
   }
 }
 
