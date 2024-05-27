@@ -22,7 +22,9 @@ export class LoginView extends View implements AfterEnterObserver {
     // If login was opened directly, use the default URL provided by the server.
 
     // As we do not know if the target is a resource or a Fusion view or a Flow view, we cannot just use Router.go
-    window.location.href = result.redirectUrl || this.returnUrl || '';
+
+    // Navigation should happen automatically
+    // window.location.href = result.redirectUrl || this.returnUrl || '';
   };
 
   render() {
@@ -30,12 +32,17 @@ export class LoginView extends View implements AfterEnterObserver {
   }
 
   async login(event: CustomEvent): Promise<LoginResult> {
+    // @ts-ignore
+    window.reloadPending = true;
     this.error = false;
     const result = await login(event.detail.username, event.detail.password);
     this.error = result.error;
 
     if (!result.error) {
       this.onSuccess(result);
+    } else {
+      // @ts-ignore
+      window.reloadPending = false;
     }
 
     return result;
