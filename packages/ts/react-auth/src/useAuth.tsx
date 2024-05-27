@@ -1,7 +1,9 @@
 import {
   login as _login,
+  type LoginOptions,
   type LoginResult,
   logout as _logout,
+  type LogoutOptions,
   UnauthorizedResponseError,
 } from '@vaadin/hilla-frontend';
 import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
@@ -185,8 +187,8 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
   const authenticate = createAuthenticateThunk(dispatch, getAuthenticatedUser);
   const unauthenticate = createUnauthenticateThunk(dispatch);
 
-  async function login(username: string, password: string): Promise<LoginResult> {
-    const result = await _login(username, password);
+  async function login(username: string, password: string, options?: LoginOptions): Promise<LoginResult> {
+    const result = await _login(username, password, options);
 
     if (!result.error) {
       await authenticate();
@@ -195,8 +197,8 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
     return result;
   }
 
-  async function logout(): Promise<void> {
-    await _logout();
+  async function logout(options?: LogoutOptions): Promise<void> {
+    await _logout(options);
     unauthenticate();
   }
 

@@ -93,6 +93,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void open(String path) {
         getDriver().get(getRootURL() + getUrlMappingBasePath() + "/" + path);
+        waitForDocumentReady();
     }
 
     protected void openResource(String path) {
@@ -221,11 +222,13 @@ public class SecurityIT extends ChromeBrowserTest {
         openResource(path);
         assertLoginViewShown();
         loginUser();
+        assertResourceShown(path);
         assertPageContains(contents);
         logout();
 
         openResource(path);
         loginAdmin();
+        assertResourceShown(path);
         assertPageContains(contents);
         logout();
 
@@ -246,6 +249,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
         openResource(path);
         loginAdmin();
+        assertResourceShown(path);
         String adminResult = getDriver().getPageSource();
         Assert.assertTrue(adminResult.contains(contents));
         logout();
@@ -307,8 +311,16 @@ public class SecurityIT extends ChromeBrowserTest {
         }
     }
 
+    protected void waitForDocumentReady() {
+        waitUntil(driver -> Boolean.TRUE
+                .equals(this.getCommandExecutor().executeScript(
+                        "return !window.reloadPending && window.document.readyState "
+                                + "=== 'complete';")));
+    }
+
     private TestBenchElement getMainView() {
-        return waitUntil(driver -> $("*").id("main-view"));
+        waitForDocumentReady();
+        return $("*").withId("main-view").waitForFirst();
     }
 
     protected void assertLoginViewShown() {
@@ -317,6 +329,7 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     private void assertRootPageShown() {
+        assertPathShown("");
         waitUntil(drive -> $("h1").attribute("id", "header").exists());
         String headerText = $("h1").id("header").getText();
         Assert.assertEquals(ROOT_PAGE_HEADER_TEXT, headerText);
@@ -343,6 +356,7 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     private void assertPathShown(String path, boolean includeUrlMapping) {
+        waitForDocumentReady();
         waitUntil(driver -> {
             String url = driver.getCurrentUrl();
             String expected = getRootURL();
@@ -377,7 +391,9 @@ public class SecurityIT extends ChromeBrowserTest {
         form.getUsernameField().setValue(username);
         form.getPasswordField().setValue(password);
         form.submit();
+        waitForDocumentReady();
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
+        waitForDocumentReady();
     }
 
     protected void refresh() {
