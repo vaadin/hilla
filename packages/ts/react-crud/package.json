@@ -23,7 +23,7 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9879",
+    "test": "cd ../../.. && wtr --group react-crud",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
@@ -77,6 +77,7 @@
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@types/validator": "^13.11.2",
+    "@web/test-runner-commands": "^0.9.0",
     "chai-as-promised": "^7.1.1",
     "chai-dom": "^1.11.0",
     "karma-viewport": "^1.0.9",

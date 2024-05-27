@@ -6,7 +6,7 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "lib": ["es2021", "dom"],
+    "lib": ["esnext", "dom"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "strict": true,
