@@ -64,7 +64,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
               waitingForIdentifier = true;
             } else if (waitingForIdentifier && ts.isIdentifier(node)) {
               componentName = node.text;
-              break;
+              waitingForIdentifier = false;
             }
           }
 
@@ -93,5 +93,5 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
       ),
   );
 
-  return JSON.stringify(res);
+  return JSON.stringify(res, undefined, 2);
 }
