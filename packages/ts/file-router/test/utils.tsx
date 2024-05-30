@@ -37,6 +37,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // ├── test
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
+  // │   ├── config-after-default-export.tsx
   // │   ├── empty.tsx
   // │   ├── _ignored.tsx
   // │   └── no-default-export.tsx
@@ -93,6 +94,10 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(
       new URL('test/{{optional}}.tsx', dir),
       "export const config = { title: 'Optional' };\nexport default function Optional() {};",
+    ),
+    appendFile(
+      new URL('test/issue-002879-config-below.tsx', dir),
+      'export default function Issue002879ConfigBelow() {};\nexport const config = { title: "Config Below" };',
     ),
     appendFile(new URL('test/empty.tsx', dir), ''),
     appendFile(new URL('test/_ignored.tsx', dir), 'export default function Ignored() {};'),
@@ -158,6 +163,10 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
         {
           path: '{...wildcard}',
           file: new URL('test/{...wildcard}.tsx', dir),
+        },
+        {
+          path: 'issue-002879-config-below',
+          file: new URL('test/issue-002879-config-below.tsx', dir),
         },
       ],
     },
