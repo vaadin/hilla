@@ -87,7 +87,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             ...config,
             params: extractParameterFromRouteSegment(config?.route ?? path),
             title,
-            children: newChildren,
+            children: newChildren ?? (layout ? [] : undefined),
           } satisfies ServerViewConfig;
         }),
       ),

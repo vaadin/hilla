@@ -2,8 +2,7 @@
   {
     "route": "about",
     "title": "About",
-    "params": {},
-    "children": []
+    "params": {}
   },
   {
     "route": "profile",
@@ -12,8 +11,7 @@
       {
         "route": "",
         "title": "Profile",
-        "params": {},
-        "children": []
+        "params": {}
       },
       {
         "route": "account",
@@ -27,14 +25,12 @@
               {
                 "route": "password",
                 "params": {},
-                "title": "Password",
-                "children": []
+                "title": "Password"
               },
               {
                 "route": "two-factor-auth",
                 "params": {},
-                "title": "Two Factor Auth",
-                "children": []
+                "title": "Two Factor Auth"
               }
             ]
           }
@@ -51,8 +47,7 @@
             "params": {},
             "unknown": {
               "anotherProp": "prop"
-            },
-            "children": []
+            }
           },
           {
             "route": ":user?",
@@ -71,8 +66,7 @@
             "title": "Friend Profile",
             "params": {
               ":user": "req"
-            },
-            "children": []
+            }
           }
         ]
       },
@@ -96,31 +90,33 @@
     "children": [
       {
         "route": "empty",
-        "params": {},
-        "children": []
+        "params": {}
       },
       {
         "route": ":optional?",
         "title": "Optional",
         "params": {
           ":optional?": "opt"
-        },
-        "children": []
+        }
       },
       {
         "route": "*",
         "title": "Wildcard",
         "params": {
           "*": "*"
-        },
-        "children": []
+        }
       },
       {
         "route": "no-default-export",
         "title": "No Default Export",
-        "params": {},
-        "children": []
+        "params": {}
       }
     ]
+  },
+  {
+    "route": "layout-only",
+    "title": "Layout Only",
+    "params": {},
+    "children": []
   }
 ]

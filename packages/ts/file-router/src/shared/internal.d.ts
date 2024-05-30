@@ -1,4 +1,5 @@
 import type { ViewConfig } from '../types.js';
+import type { RouteParamType } from './routeParamType.js';
 
 /**
  * Internal type used for server communication and menu building. It extends the
