@@ -52,7 +52,7 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
-        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+        if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateEndpoint();
@@ -69,7 +69,7 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
-        if (!options.isDevBundleBuild() && !options.isFrontendHotdeploy()
+        if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateOpenAPI();
