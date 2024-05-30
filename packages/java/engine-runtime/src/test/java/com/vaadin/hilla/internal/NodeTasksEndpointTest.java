@@ -45,6 +45,7 @@ public class NodeTasksEndpointTest extends TaskTest {
                         .resolve(getFrontendDirectory()).toFile())
                 .withProductionMode(false)
                 .withBuildDirectory(getBuildDirectory())
+                .withFrontendHotdeploy(true).withRunNpmInstall(false)
                 .enablePackagesUpdate(false).enableImportsUpdate(false)
                 .withEmbeddableWebComponents(false)
                 .withFrontendGeneratedFolder(
@@ -80,7 +81,7 @@ public class NodeTasksEndpointTest extends TaskTest {
 
     @Test
     public void should_GenerateEndpointFilesInDevServerTask() throws Exception {
-        options = options.withFrontendHotdeploy(true);
+        options = options.withRunNpmInstall(true);
 
         new NodeTasks(options).execute();
         assertEndpointFiles(true);
