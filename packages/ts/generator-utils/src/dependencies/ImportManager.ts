@@ -25,12 +25,34 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return record.id;
   }
 
+  remove(path: string, specifier: string): void {
+    const specifiers = this.#map.get(path);
+
+    if (specifiers) {
+      specifiers.delete(specifier);
+
+      if (specifiers.size === 0) {
+        this.#map.delete(path);
+      }
+    }
+  }
+
   override clear(): void {
     this.#map.clear();
   }
 
   getIdentifier(path: string, specifier: string): Identifier | undefined {
     return this.#map.get(path)?.get(specifier)?.id;
+  }
+
+  find(predicate: (path: string, specifier: string) => boolean): [string, string, boolean, Identifier] | undefined {
+    for (const [path, specifiers] of this.#map) {
+      for (const [specifier, { id, isType }] of specifiers) {
+        if (predicate(path, specifier)) {
+          return [path, specifier, isType, id];
+        }
+      }
+    }
   }
 
   *identifiers(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
@@ -97,6 +119,14 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
     this.#map.clear();
   }
 
+  find(predicate: (id: Identifier) => boolean): string | undefined {
+    for (const [path, id] of this.#map) {
+      if (predicate(id)) {
+        return path;
+      }
+    }
+  }
+
   getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path);
   }
@@ -136,6 +166,20 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 
   getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path)?.id;
+  }
+
+  remove(path: string): void {
+    if (this.#map.has(path)) {
+      this.#map.delete(path);
+    }
+  }
+
+  find(predicate: (path: string) => boolean): [string, boolean, Identifier] | undefined {
+    for (const [path, { id, isType }] of this.#map) {
+      if (predicate(path)) {
+        return [path, isType, id];
+      }
+    }
   }
 
   override clear(): void {

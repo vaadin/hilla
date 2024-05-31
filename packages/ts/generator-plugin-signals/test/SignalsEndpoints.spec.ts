@@ -4,8 +4,8 @@ import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
 import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
-import SignalsPlugin from "../index.js";
-import BackbonePlugin from "@vaadin/hilla-generator-plugin-backbone";
+import SignalsPlugin from '../src/index.js';
+import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone';
 
 use(sinonChai);
 use(snapshotMatcher);
@@ -19,6 +19,11 @@ describe('SignalsPlugin', () => {
       const input = await readFile(new URL('./hilla-openapi.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
 
+      let i = 0;
+      for (const file of files) {
+        await expect(await file.text()).toMatchSnapshot(`number-signal-${i}`, import.meta.url);
+        i++;
+      }
     });
   });
 });

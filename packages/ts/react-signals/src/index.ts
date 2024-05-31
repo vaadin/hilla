@@ -4,3 +4,4 @@ import { installAutoSignalTracking } from '@preact/signals-react/runtime';
 installAutoSignalTracking();
 
 export * from '@preact/signals-react';
+export * from './SharedSignals.js';
