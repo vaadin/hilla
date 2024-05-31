@@ -129,18 +129,6 @@ public class EndpointController {
         endpointBeans
                 .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
 
-        if (FeatureFlags.get(VaadinService.getCurrent().getContext())
-                .isEnabled(FeatureFlags.HILLA_FULLSTACK_SIGNALS)) {
-            LOGGER.debug("Fullstack signals feature is enabled.");
-            if (endpointBeans.containsKey("signalsHandler")) {
-                LOGGER.debug("SignalsHandler endpoint will be registered.");
-            }
-        } else {
-            LOGGER.debug("Fullstack signals feature is disabled.");
-            endpointBeans.remove("signalsHandler");
-            LOGGER.debug("SignalsHandler endpoint will not be registered.");
-        }
-
         // By default, only register those endpoints included in the Hilla
         // OpenAPI definition file
         registerEndpointsFromApiDefinition(endpointBeans, openApiResource);
@@ -275,6 +263,8 @@ public class EndpointController {
                                 .or(() -> Optional
                                         .ofNullable(tag.get("x-class-name"))
                                         .map(JsonNode::asText)
+                                        .filter(className -> !("com.vaadin.hilla.signals.core.SignalsHandler"
+                                                .equals(className)))
                                         .map(this::instantiateEndpointByClassName))
                                 .ifPresent(endpointRegistry::registerEndpoint);
                     });

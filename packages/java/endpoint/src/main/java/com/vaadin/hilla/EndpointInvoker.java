@@ -489,31 +489,15 @@ public class EndpointInvoker {
         }
 
         if (returnValue instanceof SignalQueue<?>) {
-            if (FeatureFlags.get(VaadinService.getCurrent().getContext())
-                    .isEnabled(FeatureFlags.HILLA_FULLSTACK_SIGNALS)) {
-                if (signalsRegistry == null) {
-                    throw new EndpointInternalException(
-                            "Signal registry is not available");
-                }
-                if (signalsRegistry
-                        .contains(((SignalQueue<?>) returnValue).getId())) {
-                    getLogger().debug(
-                            "Signal already registered as a result of calling {}",
-                            methodName);
-                } else {
-                    signalsRegistry.register((SignalQueue<?>) returnValue);
-                    getLogger().debug(
-                            "Registered signal as a result of calling {}",
-                            methodName);
-                }
+            if (signalsRegistry
+                    .contains(((SignalQueue<?>) returnValue).getId())) {
+                getLogger().debug(
+                        "Signal already registered before. Ignoring the registration. Endpoint: '{}', method: '{}'",
+                        endpointName, methodName);
             } else {
-                String featureFlagFullName = FeatureFlags.SYSTEM_PROPERTY_PREFIX_EXPERIMENTAL
-                        + FeatureFlags.HILLA_FULLSTACK_SIGNALS;
-                throw new EndpointInternalException(String.format(
-                        "Full-Stack Signal usage are only allowed if the %s feature flag is enabled explicitly. "
-                                + "You can enable it either through the Vaadin Copilot's UI, or by manually setting the "
-                                + "%s=true in the src/main/resources/vaadin-featureflags.properties and restarting the application.",
-                        featureFlagFullName, featureFlagFullName));
+                signalsRegistry.register((SignalQueue<?>) returnValue);
+                getLogger().debug("Registered signal as a result of calling {}",
+                        methodName);
             }
         }
 

@@ -45,7 +45,6 @@ import jakarta.servlet.ServletContext;
  * A configuration class for customizing the {@link EndpointController} class.
  */
 @Configuration
-@Import(SignalsConfiguration.class)
 public class EndpointControllerConfiguration {
     private final EndpointProperties endpointProperties;
     private final SignalsRegistry signalsRegistry;
