@@ -18,6 +18,8 @@ package com.vaadin.hilla;
 
 import java.lang.reflect.Method;
 
+import com.vaadin.hilla.signals.config.SignalsConfiguration;
+import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,6 +27,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -42,8 +45,10 @@ import jakarta.servlet.ServletContext;
  * A configuration class for customizing the {@link EndpointController} class.
  */
 @Configuration
+@Import(SignalsConfiguration.class)
 public class EndpointControllerConfiguration {
     private final EndpointProperties endpointProperties;
+    private final SignalsRegistry signalsRegistry;
 
     /**
      * Initializes the endpoint configuration.
@@ -52,8 +57,10 @@ public class EndpointControllerConfiguration {
      *            Hilla endpoint properties
      */
     public EndpointControllerConfiguration(
-            EndpointProperties endpointProperties) {
+            EndpointProperties endpointProperties,
+            SignalsRegistry signalsRegistry) {
         this.endpointProperties = endpointProperties;
+        this.signalsRegistry = signalsRegistry;
     }
 
     /**
@@ -120,7 +127,8 @@ public class EndpointControllerConfiguration {
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         return new EndpointInvoker(applicationContext, endpointMapperFactory,
-                explicitNullableTypeChecker, servletContext, endpointRegistry);
+                explicitNullableTypeChecker, servletContext, endpointRegistry,
+                signalsRegistry);
     }
 
     /**
@@ -237,9 +245,9 @@ public class EndpointControllerConfiguration {
     }
 
     /**
-     * Can re-generate the TypeScipt code.
+     * Can re-generate the TypeScript code.
      *
-     * @param context
+     * @param servletContext
      *            the servlet context
      * @param endpointController
      *            the endpoint controller

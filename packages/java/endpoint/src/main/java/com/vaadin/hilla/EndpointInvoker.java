@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
@@ -32,6 +34,8 @@ import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.signals.core.SignalQueue;
+import com.vaadin.hilla.signals.core.SignalsRegistry;
 import jakarta.servlet.ServletContext;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -80,6 +84,7 @@ public class EndpointInvoker {
     private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
     private final ServletContext servletContext;
     private final Validator validator;
+    private final SignalsRegistry signalsRegistry;
 
     /**
      * Creates an instance of this bean.
@@ -103,7 +108,8 @@ public class EndpointInvoker {
     public EndpointInvoker(ApplicationContext applicationContext,
             JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ServletContext servletContext, EndpointRegistry endpointRegistry) {
+            ServletContext servletContext, EndpointRegistry endpointRegistry,
+            SignalsRegistry signalsRegistry) {
         this.applicationContext = applicationContext;
         this.servletContext = servletContext;
         this.endpointMapper = endpointMapperFactory != null
@@ -115,6 +121,7 @@ public class EndpointInvoker {
         }
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
+        this.signalsRegistry = signalsRegistry;
 
         Validator validator = null;
         try {
@@ -479,6 +486,35 @@ public class EndpointInvoker {
                     "Endpoint '%s' method '%s' returned a value that has validation errors: '%s'",
                     endpointName, methodName, returnValueConstraintViolations);
             throw new EndpointInternalException(errorMessage);
+        }
+
+        if (returnValue instanceof SignalQueue<?>) {
+            if (FeatureFlags.get(VaadinService.getCurrent().getContext())
+                    .isEnabled(FeatureFlags.HILLA_FULLSTACK_SIGNALS)) {
+                if (signalsRegistry == null) {
+                    throw new EndpointInternalException(
+                            "Signal registry is not available");
+                }
+                if (signalsRegistry
+                        .contains(((SignalQueue<?>) returnValue).getId())) {
+                    getLogger().debug(
+                            "Signal already registered as a result of calling {}",
+                            methodName);
+                } else {
+                    signalsRegistry.register((SignalQueue<?>) returnValue);
+                    getLogger().debug(
+                            "Registered signal as a result of calling {}",
+                            methodName);
+                }
+            } else {
+                String featureFlagFullName = FeatureFlags.SYSTEM_PROPERTY_PREFIX_EXPERIMENTAL
+                        + FeatureFlags.HILLA_FULLSTACK_SIGNALS;
+                throw new EndpointInternalException(String.format(
+                        "Full-Stack Signal usage are only allowed if the %s feature flag is enabled explicitly. "
+                                + "You can enable it either through the Vaadin Copilot's UI, or by manually setting the "
+                                + "%s=true in the src/main/resources/vaadin-featureflags.properties and restarting the application.",
+                        featureFlagFullName, featureFlagFullName));
+            }
         }
 
         return returnValue;

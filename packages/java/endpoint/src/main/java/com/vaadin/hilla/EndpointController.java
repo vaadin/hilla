@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import com.vaadin.experimental.FeatureFlags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -127,6 +128,18 @@ public class EndpointController {
         endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
         endpointBeans
                 .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
+
+        if (FeatureFlags.get(VaadinService.getCurrent().getContext())
+                .isEnabled(FeatureFlags.HILLA_FULLSTACK_SIGNALS)) {
+            LOGGER.debug("Fullstack signals feature is enabled.");
+            if (endpointBeans.containsKey("signalsHandler")) {
+                LOGGER.debug("SignalsHandler endpoint will be registered.");
+            }
+        } else {
+            LOGGER.debug("Fullstack signals feature is disabled.");
+            endpointBeans.remove("signalsHandler");
+            LOGGER.debug("SignalsHandler endpoint will not be registered.");
+        }
 
         // By default, only register those endpoints included in the Hilla
         // OpenAPI definition file

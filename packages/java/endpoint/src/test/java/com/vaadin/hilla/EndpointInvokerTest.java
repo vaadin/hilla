@@ -1,5 +1,6 @@
 package com.vaadin.hilla;
 
+import com.vaadin.hilla.signals.core.SignalsRegistry;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -55,6 +56,9 @@ public class EndpointInvokerTest {
     @Mock
     private ServletContext servletContext;
 
+    @Mock
+    private SignalsRegistry signalsRegistry;
+
     private EndpointInvoker endpointInvoker;
     private EndpointRegistry endpointRegistry;
 
@@ -67,7 +71,7 @@ public class EndpointInvokerTest {
         endpointRegistry = new EndpointRegistry(endpointNameChecker);
 
         endpointInvoker = new EndpointInvoker(applicationContext, null,
-                explicitNullableTypeChecker, servletContext, endpointRegistry) {
+                explicitNullableTypeChecker, servletContext, endpointRegistry, signalsRegistry) {
             protected EndpointAccessChecker getAccessChecker() {
                 return endpointAccessChecker;
             }

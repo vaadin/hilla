@@ -1,0 +1,223 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "HelloWorldService",
+      "x-class-name" : "com.vaadin.hilla.test.service.HelloWorldService"
+    },
+    {
+      "name" : "SharedCounterService",
+      "x-class-name" : "com.vaadin.hilla.test.service.SharedCounterService"
+    },
+    {
+      "name" : "SignalsHandler",
+      "x-class-name" : "com.vaadin.hilla.signals.endpoint.SignalsHandler"
+    }
+  ],
+  "paths" : {
+    "/HelloWorldService/sayHello" : {
+      "post" : {
+        "tags" : [
+          "HelloWorldService"
+        ],
+        "operationId" : "HelloWorldService_sayHello_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "x-java-type" : "java.lang.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SharedCounterService/anotherCounter" : {
+      "post" : {
+        "tags" : [
+          "SharedCounterService"
+        ],
+        "operationId" : "SharedCounterService_anotherCounter_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SharedCounterService/counter" : {
+      "post" : {
+        "tags" : [
+          "SharedCounterService"
+        ],
+        "operationId" : "SharedCounterService_counter_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SignalsHandler/subscribe" : {
+      "post" : {
+        "tags" : [
+          "SignalsHandler"
+        ],
+        "operationId" : "SignalsHandler_subscribe_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "signalId" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  },
+                  "continueFrom" : {
+                    "type" : "string",
+                    "nullable" : true,
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  },
+                  "x-class-name" : "com.vaadin.hilla.runtime.transfertypes.Flux"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SignalsHandler/update" : {
+      "post" : {
+        "tags" : [
+          "SignalsHandler"
+        ],
+        "operationId" : "SignalsHandler_update_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "signalId" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  },
+                  "event" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : ""
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.signals.NumberSignal" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.core.SignalQueue"
+          },
+          {
+            "type" : "object"
+          }
+        ]
+      },
+      "com.vaadin.hilla.signals.core.SignalQueue" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.core.EventQueue"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string",
+                "x-java-type" : "java.lang.String"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.signals.core.EventQueue" : {
+        "type" : "object"
+      }
+    }
+  }
+}
