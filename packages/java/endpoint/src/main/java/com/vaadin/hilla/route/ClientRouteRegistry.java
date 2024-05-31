@@ -15,18 +15,6 @@
  */
 package com.vaadin.hilla.route;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.hilla.route.records.ClientViewConfig;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
-import com.vaadin.flow.router.internal.ClientRoutesProvider;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,9 +24,22 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.router.internal.ClientRoutesProvider;
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.hilla.route.records.ClientViewConfig;
 
 /**
  * Keeps track of registered client side routes.
@@ -228,10 +229,14 @@ public class ClientRouteRegistry implements ClientRoutesProvider {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
                 ? basePath
                 : basePath + '/' + view.getRoute();
+
         if (!hasMainLayout && isMainLayout(view)) {
             hasMainLayout = true;
         }
-        if (view.getChildren() == null || view.getChildren().isEmpty()) {
+
+        // Skip layout views without children.
+        // https://github.com/vaadin/hilla/issues/2379
+        if (view.getChildren() == null) {
             addRoute(path, view);
         } else {
             view.getChildren().forEach(child -> {
