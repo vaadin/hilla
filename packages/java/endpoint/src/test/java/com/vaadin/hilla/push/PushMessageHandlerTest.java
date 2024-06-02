@@ -28,6 +28,7 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
+import com.vaadin.hilla.signals.config.SignalsConfiguration;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,9 +50,10 @@ import reactor.core.publisher.Flux;
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,
         Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
-        PushMessageHandler.class, ObjectMapper.class,
-        EndpointController.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class })
+        PushMessageHandler.class, JacksonAutoConfiguration.class,
+        ObjectMapper.class, EndpointController.class })
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
+        SignalsConfiguration.class })
 @RunWith(SpringRunner.class)
 @TestPropertySource(properties = "com.vaadin.hilla.FeatureFlagCondition.alwaysEnable=true")
 @NotThreadSafe

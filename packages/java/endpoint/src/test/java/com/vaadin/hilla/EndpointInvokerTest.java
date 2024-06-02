@@ -1,5 +1,6 @@
 package com.vaadin.hilla;
 
+import com.vaadin.hilla.signals.config.SignalsConfiguration;
 import com.vaadin.hilla.signals.core.SignalsRegistry;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -28,8 +30,10 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class })
+        JacksonProperties.class, JacksonAutoConfiguration.class,
+        EndpointController.class })
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
+        SignalsConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointInvokerTest {
 
