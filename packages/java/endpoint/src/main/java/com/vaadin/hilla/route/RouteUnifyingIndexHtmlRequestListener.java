@@ -140,7 +140,8 @@ public class RouteUnifyingIndexHtmlRequestListener
                 .entrySet().stream()
                 .filter(view -> !hasRequiredParameter(
                         view.getValue().routeParameters()))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        Map.Entry::getValue));
     }
 
     private boolean hasRequiredParameter(
