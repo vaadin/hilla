@@ -67,13 +67,3 @@ export abstract class SharedSignal<T> extends Computed<T> {
     this.key = key;
   }
 }
-
-type EntryReference<S = SharedSignal<any>> = EntryId | S;
-
-interface ListInsertResult<S extends SharedSignal<any>> {
-  readonly promise: Promise<boolean>,
-
-  readonly signal: S,
-}
-
-export { type ListInsertResult };

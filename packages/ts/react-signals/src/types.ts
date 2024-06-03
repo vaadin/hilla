@@ -53,9 +53,3 @@ export interface SnapshotEvent extends StateEvent {
     value: any;
   }[];
 }
-
-// Entry value for the root of a list
-interface ListRoot {
-  head: string | null,
-  tail: string | null
-}
