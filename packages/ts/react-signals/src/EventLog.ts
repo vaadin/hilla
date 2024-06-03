@@ -76,7 +76,6 @@ class EventLog<R extends Signal = Signal> {
     if (this.subscription) {
       return;
     }
-    console.log("Opening connection");
 
     this.subscription = this.queue.subscribe(this.queue.id, this.lastEvent).onNext(json => {
       const event = JSON.parse(json) as StateEvent;
@@ -123,7 +122,6 @@ class EventLog<R extends Signal = Signal> {
       return;
     }
 
-    console.log("Closing connection");
     this.subscription.cancel();
     this.subscription = undefined;
 
