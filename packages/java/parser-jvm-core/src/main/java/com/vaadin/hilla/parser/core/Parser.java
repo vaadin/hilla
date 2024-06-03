@@ -313,7 +313,7 @@ public final class Parser {
 
         // Packages explicitly defined in pom.xml have priority
         if (packages != null && !packages.isEmpty()) {
-            logger.info("Search for endpoints in packages {}", packages);
+            logger.debug("Search for endpoints in packages {}", packages);
             classGraph.acceptPackages(packages.toArray(String[]::new));
             classGraph.overrideClasspath(config.getClassPathElements());
         }
@@ -323,7 +323,7 @@ public final class Parser {
             var buildDirectories = config.getClassPathElements().stream()
                     .filter(e -> !e.endsWith(".jar"))
                     .collect(Collectors.toList());
-            logger.info("Search for endpoints in directories {}",
+            logger.debug("Search for endpoints in directories {}",
                     buildDirectories);
             classGraph.overrideClasspath(buildDirectories);
         }

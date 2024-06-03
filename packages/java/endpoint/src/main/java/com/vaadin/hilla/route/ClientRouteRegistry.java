@@ -33,8 +33,8 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.vaadin.flow.server.menu.MenuRegistry.FILE_ROUTES_JSON_NAME;
@@ -199,10 +199,14 @@ public class ClientRouteRegistry {
         var path = view.getRoute() == null || view.getRoute().isEmpty()
                 ? basePath
                 : basePath + '/' + view.getRoute();
+
         if (!hasMainLayout && isMainLayout(view)) {
             hasMainLayout = true;
         }
-        if (view.getChildren() == null || view.getChildren().isEmpty()) {
+
+        // Skip layout views without children.
+        // https://github.com/vaadin/hilla/issues/2379
+        if (view.getChildren() == null) {
             addRoute(path, view);
         } else {
             view.getChildren().forEach(child -> {

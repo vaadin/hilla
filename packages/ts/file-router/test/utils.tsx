@@ -8,6 +8,15 @@ import type { Logger } from 'vite';
 import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Chai {
+    interface PromisedAssertion {
+      like(expected: unknown): Promise<void>;
+    }
+  }
+}
+
 export async function createTmpDir(): Promise<URL> {
   return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'file-router-'))}/`);
 }
@@ -149,7 +158,7 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
     {
       path: 'test',
       children: [
-        // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
+        // Ignored route that has the name `_ignored.tsx` is not included in the route meta.
         // Also empty files or files without default export are not included.
         {
           path: '{{optional}}',

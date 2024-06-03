@@ -47,19 +47,21 @@ export function isAuthenticated() {
  * Uses `localStorage` for offline support.
  */
 export async function login(username: string, password: string): Promise<LoginResult> {
-  const result = await loginImpl(username, password);
-  if (!result.error) {
-    // Get user info from endpoint
-    await appStore.fetchUserInfo();
-    authentication = {
-      timestamp: new Date().getTime(),
-    };
+  return await loginImpl(username, password, {
+    async onSuccess() {
+      // Get user info from endpoint
+      await appStore.fetchUserInfo();
+      authentication = {
+        timestamp: new Date().getTime(),
+      };
 
-    // Save the authentication to local storage
-    localStorage.setItem(AUTHENTICATION_KEY, JSON.stringify(authentication));
-  }
+      // Save the authentication to local storage
+      localStorage.setItem(AUTHENTICATION_KEY, JSON.stringify(authentication));
 
-  return result;
+      // @ts-ignore
+      window.reloadPending = true;
+    },
+  });
 }
 
 /**
@@ -69,6 +71,9 @@ export async function login(username: string, password: string): Promise<LoginRe
  */
 export async function logout() {
   setSessionExpired();
-  await logoutImpl();
-  appStore.clearUserInfo();
+  await logoutImpl({onSuccess() {
+      // @ts-ignore
+      window.reloadPending = true;
+      appStore.clearUserInfo();
+    }});
 }
