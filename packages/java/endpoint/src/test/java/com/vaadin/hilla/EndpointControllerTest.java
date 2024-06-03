@@ -822,7 +822,7 @@ public class EndpointControllerTest {
 
         EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
                 mock(ExplicitNullableTypeChecker.class),
-                mock(ServletContext.class), registry);
+                mock(ServletContext.class), registry, null);
 
         new EndpointController(contextMock, registry, invoker, null)
                 .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
@@ -1300,7 +1300,7 @@ public class EndpointControllerTest {
         EndpointInvoker invoker = Mockito
                 .spy(new EndpointInvoker(mockApplicationContext,
                         endpointMapperFactory, explicitNullableTypeChecker,
-                        mock(ServletContext.class), registry));
+                        mock(ServletContext.class), registry, null));
 
         Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
 

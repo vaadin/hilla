@@ -67,7 +67,7 @@ public class EndpointInvokerTest {
         endpointRegistry = new EndpointRegistry(endpointNameChecker);
 
         endpointInvoker = new EndpointInvoker(applicationContext, null,
-                explicitNullableTypeChecker, servletContext, endpointRegistry) {
+                explicitNullableTypeChecker, servletContext, endpointRegistry, null) {
             protected EndpointAccessChecker getAccessChecker() {
                 return endpointAccessChecker;
             }

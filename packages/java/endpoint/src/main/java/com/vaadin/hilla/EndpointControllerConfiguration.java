@@ -18,6 +18,7 @@ package com.vaadin.hilla;
 
 import java.lang.reflect.Method;
 
+import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -52,7 +53,7 @@ public class EndpointControllerConfiguration {
      *            Hilla endpoint properties
      */
     public EndpointControllerConfiguration(
-            EndpointProperties endpointProperties) {
+        EndpointProperties endpointProperties) {
         this.endpointProperties = endpointProperties;
     }
 
@@ -111,6 +112,8 @@ public class EndpointControllerConfiguration {
      *            the servlet context
      * @param endpointRegistry
      *            the registry used to store endpoint information
+     * @param signalsRegistry
+     *
      *
      * @return the endpoint invoker
      */
@@ -118,9 +121,9 @@ public class EndpointControllerConfiguration {
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ServletContext servletContext, EndpointRegistry endpointRegistry) {
+            ServletContext servletContext, EndpointRegistry endpointRegistry, @Autowired(required = false) SignalsRegistry signalsRegistry) {
         return new EndpointInvoker(applicationContext, endpointMapperFactory,
-                explicitNullableTypeChecker, servletContext, endpointRegistry);
+                explicitNullableTypeChecker, servletContext, endpointRegistry, signalsRegistry);
     }
 
     /**

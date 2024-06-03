@@ -43,7 +43,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@preact/signals-react": "^2.0.0"
+    "@preact/signals-react": "^2.0.0",
+    "@vaadin/hilla-frontend": "^24.5.0-alpha1"
   },
   "peerDependencies": {
     "react": "^18",
