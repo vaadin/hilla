@@ -18,6 +18,7 @@ public class SignalsConfiguration {
         this.objectMapper = objectMapper;
     }
 
+    @ConditionalOnFeatureFlag("fullstackSignals")
     @Bean
     public SignalsRegistry signalsRegistry() {
         if (signalsRegistry == null) {

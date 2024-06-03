@@ -489,6 +489,18 @@ public class EndpointInvoker {
         }
 
         if (returnValue instanceof SignalQueue<?>) {
+            if (signalsRegistry == null) {
+                throw new IllegalStateException(
+                        """
+                                Signals registry is not available, cannot register signal.
+                                Please make sure you have enabled the Full Stack Signals
+                                feature preview flag either through the Vaadin Copilot's
+                                Features panel, or by manually setting the
+                                'com.vaadin.experimental.fullstackSignals=true' in
+                                'src/main/resources/vaadin-featureflags.properties'.
+                                """
+                                .stripLeading());
+            }
             if (signalsRegistry
                     .contains(((SignalQueue<?>) returnValue).getId())) {
                 getLogger().debug(

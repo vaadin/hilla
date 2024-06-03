@@ -57,7 +57,7 @@ public class EndpointControllerConfiguration {
      */
     public EndpointControllerConfiguration(
             EndpointProperties endpointProperties,
-            SignalsRegistry signalsRegistry) {
+            @Autowired(required = false) SignalsRegistry signalsRegistry) {
         this.endpointProperties = endpointProperties;
         this.signalsRegistry = signalsRegistry;
     }
@@ -124,7 +124,8 @@ public class EndpointControllerConfiguration {
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ServletContext servletContext, EndpointRegistry endpointRegistry) {
+            ServletContext servletContext,
+            @Autowired(required = false) EndpointRegistry endpointRegistry) {
         return new EndpointInvoker(applicationContext, endpointMapperFactory,
                 explicitNullableTypeChecker, servletContext, endpointRegistry,
                 signalsRegistry);
