@@ -16,8 +16,9 @@ import {
   type Validator,
   type Value,
   type ValueError,
+  type ArrayModel,
 } from '@vaadin/hilla-lit-form';
-import { useEffect, useMemo, useReducer, useRef } from 'react';
+import { createElement, Fragment, type ReactElement, useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 
 // @ts-expect-error: esbuild injection
@@ -71,6 +72,15 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     read(value: Value<M> | null | undefined): void;
     update(): void;
   }>;
+
+export type UseFormArrayResult<M extends AbstractModel = AbstractModel> =
+  M extends AbstractModel<infer T>
+    ? Readonly<{
+        append(item: T): void;
+        remove(index: number): void;
+        map(callback: (item: Omit<UseFormPartResult<M>, 'field'>) => ReactElement): ReactElement;
+      }>
+    : never;
 
 type FieldState<T = unknown> = {
   required: boolean;
@@ -252,4 +262,21 @@ export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResul
     ...getFormPart(binderNode),
     field,
   };
+}
+
+export function useFormArray<M extends ArrayModel>(
+  model: M,
+): M extends ArrayModel<infer M1> ? UseFormArrayResult<M1> : never {
+  return {
+    append(item) {
+      model.valueOf().push(item);
+    },
+    map(callback) {
+      const nodes = [...model].map(getFormPart).map(callback);
+      return createElement(Fragment, null, ...nodes);
+    },
+    remove(index) {
+      model.valueOf().splice(index, 1);
+    },
+  } satisfies UseFormArrayResult as any;
 }

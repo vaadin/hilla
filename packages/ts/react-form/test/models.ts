@@ -1,5 +1,6 @@
 import {
   _getPropertyModel,
+  ArrayModel,
   BooleanModel,
   makeObjectEmptyValueCreator,
   NumberModel,
@@ -101,4 +102,78 @@ export interface Project {
 export interface Contract {
   id: number;
   name: string;
+}
+
+// Player and Team entities used to test array models
+export interface Player {
+  id: number;
+  firstName: string;
+  lastName: string;
+  age: number;
+}
+
+export interface Team {
+  id: number;
+  name: string;
+  players: Player[];
+}
+
+export class PlayerModel<T extends Player = Player> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(PlayerModel);
+
+  get id(): NumberModel {
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
+  }
+
+  get firstName(): StringModel {
+    return this[_getPropertyModel](
+      'firstName',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
+    );
+  }
+
+  get lastName(): StringModel {
+    return this[_getPropertyModel](
+      'lastName',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
+    );
+  }
+
+  get age(): NumberModel {
+    return this[_getPropertyModel](
+      'age',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
+  }
+}
+
+export class TeamModel<T extends Team = Team> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(TeamModel);
+
+  get id(): NumberModel {
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
+    );
+  }
+
+  get name(): StringModel {
+    return this[_getPropertyModel](
+      'name',
+      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
+    );
+  }
+
+  get players(): ArrayModel<PlayerModel> {
+    return this[_getPropertyModel](
+      'players',
+      (parent, key) =>
+        new ArrayModel(parent, key, false, (p, k) => new PlayerModel(p, k, false), {
+          meta: { javaType: 'java.util.List' },
+        }),
+    );
+  }
 }
