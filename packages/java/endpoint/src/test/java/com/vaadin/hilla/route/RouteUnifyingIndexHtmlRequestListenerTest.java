@@ -111,9 +111,9 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     }
 
     private Map<String, ClientViewConfig> prepareClientRoutes() {
-        final Map<String, ClientViewConfig> routes = new LinkedHashMap<>();
+        final var routes = new LinkedHashMap<String, ClientViewConfig>();
 
-        ClientViewConfig homeConfig = new ClientViewConfig();
+        var homeConfig = new ClientViewConfig();
         homeConfig.setTitle("Home");
         homeConfig.setRolesAllowed(null);
         homeConfig.setLoginRequired(false);
@@ -121,11 +121,11 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         homeConfig.setLazy(false);
         homeConfig.setAutoRegistered(false);
         homeConfig.setMenu(null);
-        homeConfig.setChildren(Collections.emptyList());
+        homeConfig.setChildren(null);
         homeConfig.setRouteParameters(Collections.emptyMap());
         routes.put("/home", homeConfig);
 
-        ClientViewConfig profileConfig = new ClientViewConfig();
+        var profileConfig = new ClientViewConfig();
         profileConfig.setTitle("Profile");
         profileConfig
                 .setRolesAllowed(new String[] { "ROLE_USER", "ROLE_ADMIN" });
@@ -134,11 +134,11 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         profileConfig.setLazy(false);
         profileConfig.setAutoRegistered(false);
         profileConfig.setMenu(null);
-        profileConfig.setChildren(Collections.emptyList());
+        profileConfig.setChildren(null);
         profileConfig.setRouteParameters(Collections.emptyMap());
         routes.put("/profile", profileConfig);
 
-        ClientViewConfig userProfileConfig = new ClientViewConfig();
+        var userProfileConfig = new ClientViewConfig();
         userProfileConfig.setTitle("User Profile");
         userProfileConfig.setRolesAllowed(new String[] { "ROLE_ADMIN" });
         userProfileConfig.setLoginRequired(true);
@@ -146,7 +146,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         userProfileConfig.setLazy(false);
         userProfileConfig.setAutoRegistered(false);
         userProfileConfig.setMenu(null);
-        userProfileConfig.setChildren(Collections.emptyList());
+        userProfileConfig.setChildren(null);
         userProfileConfig
                 .setRouteParameters(Map.of(":userId", RouteParamType.REQUIRED));
         routes.put("/user/:userId", userProfileConfig);

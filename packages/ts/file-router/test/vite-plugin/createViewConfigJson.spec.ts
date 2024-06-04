@@ -1,21 +1,31 @@
-import { rm } from 'node:fs/promises';
+import { appendFile, mkdir, rm } from 'node:fs/promises';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
+import chaiLike from 'chai-like';
 import { RouteParamType } from '../../src/shared/routeParamType.js';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import createViewConfigJson from '../../src/vite-plugin/createViewConfigJson.js';
 import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
+use(chaiLike);
 use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('createViewConfigJson', () => {
     let tmp: URL;
     let meta: readonly RouteMeta[];
+    let layoutOnlyDir: URL;
+    let layoutOnlyDirLayout: URL;
 
     before(async () => {
       tmp = await createTmpDir();
+
+      layoutOnlyDir = new URL('layout-only/', tmp);
+      layoutOnlyDirLayout = new URL('@layout.tsx', layoutOnlyDir);
+
       await createTestingRouteFiles(tmp);
+      await mkdir(layoutOnlyDir, { recursive: true });
+      await appendFile(layoutOnlyDirLayout, 'export default function LayoutOnly() {};');
     });
 
     after(async () => {
@@ -23,7 +33,14 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     beforeEach(() => {
-      meta = createTestingRouteMeta(tmp);
+      meta = [
+        ...createTestingRouteMeta(tmp),
+        {
+          path: 'layout-only',
+          layout: layoutOnlyDirLayout,
+          children: undefined,
+        },
+      ];
     });
 
     it('should generate a JSON representation of the route tree', async () => {
@@ -74,6 +91,12 @@ describe('@vaadin/hilla-file-router', () => {
                 { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
                 { route: 'issue-002879-config-below', title: 'Config Below', params: {} },
               ],
+            },
+            {
+              route: 'layout-only',
+              params: {},
+              title: 'Layout Only',
+              children: [],
             },
           ],
           undefined,
