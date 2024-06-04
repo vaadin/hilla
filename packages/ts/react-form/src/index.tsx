@@ -3,6 +3,8 @@ import {
   _fromString,
   _validity,
   type AbstractModel,
+  type ArrayItemModel,
+  type ArrayModel,
   type BinderConfiguration,
   type BinderNode,
   BinderRoot,
@@ -16,9 +18,8 @@ import {
   type Validator,
   type Value,
   type ValueError,
-  type ArrayModel,
 } from '@vaadin/hilla-lit-form';
-import { createElement, Fragment, type ReactElement, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 
 // @ts-expect-error: esbuild injection
@@ -47,6 +48,7 @@ export type UseFormPartResult<M extends AbstractModel> = Readonly<{
   invalid: boolean;
   model: M;
   name: string;
+  list?: ReadonlyArray<UseFormPartResult<ArrayItemModel<M>>>;
   field: FieldDirective;
   ownErrors: ReadonlyArray<ValueError<Value<M>>>;
   required: boolean;
@@ -73,14 +75,11 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     update(): void;
   }>;
 
-export type UseFormArrayResult<M extends AbstractModel = AbstractModel> =
-  M extends AbstractModel<infer T>
-    ? Readonly<{
-        append(item: T): void;
-        remove(index: number): void;
-        map(callback: (item: Omit<UseFormPartResult<M>, 'field'>) => ReactElement): ReactElement;
-      }>
-    : never;
+export type UseFormArrayResult<M extends ArrayModel> = Readonly<{
+  append(item: Value<ArrayItemModel<M>>): void;
+  list: ReadonlyArray<UseFormPartResult<ArrayItemModel<M>>>;
+  remove(index: number): void;
+}>;
 
 type FieldState<T = unknown> = {
   required: boolean;
@@ -126,6 +125,8 @@ function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseForm
 }
 
 function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective {
+  const update = useUpdate();
+
   return useMemo(() => {
     const registry = new WeakMap<AbstractModel, FieldState>();
 
@@ -154,6 +155,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.strategy?.removeEventListeners();
               fieldState!.element = undefined;
               fieldState!.strategy = undefined;
+              update();
               return;
             }
 
@@ -167,6 +169,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.element.addEventListener('input', fieldState!.updateValue);
               fieldState!.element.addEventListener('blur', fieldState!.changeBlurHandler);
               fieldState!.strategy = getDefaultFieldStrategy(element, model);
+              update();
             }
           },
           required: false,
@@ -234,6 +237,7 @@ export function useForm<M extends AbstractModel>(
   useEffect(() => {
     binder.addEventListener(CHANGED.type, update);
     clear(); // this allows to initialize the validation strategies (issue 2282)
+    return () => binder.removeEventListener(CHANGED.type, update);
   }, [binder]);
 
   return {
@@ -258,25 +262,9 @@ export function useForm<M extends AbstractModel>(
 export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
+
   return {
     ...getFormPart(binderNode),
     field,
   };
-}
-
-export function useFormArray<M extends ArrayModel>(
-  model: M,
-): M extends ArrayModel<infer M1> ? UseFormArrayResult<M1> : never {
-  return {
-    append(item) {
-      model.valueOf().push(item);
-    },
-    map(callback) {
-      const nodes = [...model].map(getFormPart).map(callback);
-      return createElement(Fragment, null, ...nodes);
-    },
-    remove(index) {
-      model.valueOf().splice(index, 1);
-    },
-  } satisfies UseFormArrayResult as any;
 }

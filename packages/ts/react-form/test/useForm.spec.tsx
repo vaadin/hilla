@@ -1,22 +1,21 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, fireEvent, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, fireEvent, render, type RenderResult, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import React, { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useForm as _useForm, useFormArray, useFormPart } from '../src/index.js';
+import { useForm as _useForm, useFormPart } from '../src/index.js';
 import {
   type Contract,
   EntityModel,
   type FormUserModel,
   type Login,
   LoginModel,
+  type PlayerModel,
   type Project,
   TeamModel,
-  type Team,
-  type Player,
 } from './models.js';
 
 use(sinonChai);
@@ -372,24 +371,22 @@ describe('@vaadin/hilla-react-form', () => {
     });
   });
 
-  type TeamFormProps = ({
-    read,
-    append,
-    remove,
-  }: {
-    read(value: Team | null | undefined): void;
-    append(item: Player): void;
-    remove(index: number): void;
-  }) => void;
+  function TeamFormPlayer({ model }: { model: PlayerModel }) {
+    const { field, value, invalid, ownErrors } = useFormPart(model);
 
-  const TeamForm: React.FC<{ init: TeamFormProps }> = ({ init }) => {
-    const { field, model, read } = useForm(TeamModel);
-    const { map, append, remove } = useFormArray(model.players);
+    return (
+      <div>
+        <input data-testid={`lastName.${value!.id}`} type="text" {...field(model.lastName)} />
+        <output data-testid={`validation.lastName.${value!.id}`}>
+          {invalid ? ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
+      </div>
+    );
+  }
+
+  function TeamForm() {
+    const { field, model } = useForm(TeamModel);
     const name = useFormPart(model.name);
-
-    useEffect(() => {
-      init({ read, append, remove });
-    }, [init]);
 
     return (
       <>
@@ -397,94 +394,38 @@ describe('@vaadin/hilla-react-form', () => {
         <output data-testid="validation.team.name">
           {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
         </output>
-        {map(({ model: player, invalid, ownErrors }) => (
-          <>
-            <input
-              key={`${player.valueOf().id}`}
-              data-testid={`lastName.${player.valueOf().id}`}
-              type="text"
-              {...field(player.lastName)}
-            />
-            <output data-testid={`validation.lastName.${player.valueOf().id}`}>
-              {invalid ? ownErrors.map((e) => e.message).join(', ') : 'OK'}
-            </output>
-          </>
+        {Array.from(model.players, (player) => (
+          <TeamFormPlayer key={`${player.value!.id}`} model={player.model} />
         ))}
       </>
     );
-  };
+  }
 
-  describe('useFormArray', () => {
+  describe('arrays', () => {
     const player1 = { id: 10, firstName: 'John', lastName: 'Doe', age: 27 };
     const player2 = { id: 20, firstName: 'Jane', lastName: 'Smith', age: 28 };
 
     it('should iterate on array items', async () => {
-      const { findByTestId } = render(
-        <TeamForm
-          init={({ read }) => {
-            read({
-              id: 1,
-              name: 'Team 1',
-              players: [player1, player2],
-            });
-          }}
-        />,
-      );
+      const { findByTestId } = render(<TeamForm />);
+
+      // eslint-disable-next-line @typescript-eslint/require-await
+      await act(async () => {
+        const { read } = (useForm as UseFormSpy).returnValues[0];
+        read({
+          id: 1,
+          name: 'Team 1',
+          players: [player1, player2],
+        });
+      });
 
       expect(await findByTestId('team.name')).to.have.value('Team 1');
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
     });
 
     it('should add item to empty array', async () => {
-      const { findByTestId } = render(
-        <TeamForm
-          init={({ append }) => {
-            append(player1);
-          }}
-        />,
-      );
+      const { findByTestId } = render(<TeamForm />);
 
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
-    });
-
-    it('should add item to existing array', async () => {
-      let appendItem: (item: Player) => void = () => {};
-      const { findByTestId } = render(
-        <TeamForm
-          init={({ read, append }) => {
-            appendItem = append;
-            read({
-              id: 1,
-              name: 'Team 1',
-              players: [player1],
-            });
-          }}
-        />,
-      );
-
-      appendItem(player2);
-      expect(await findByTestId('lastName.20')).to.have.value('Smith');
-    });
-
-    it('should remove item from array', async () => {
-      let removeItem: (index: number) => void = () => {};
-      const { findByTestId } = render(
-        <TeamForm
-          init={({ read, remove }) => {
-            removeItem = remove;
-            read({
-              id: 1,
-              name: 'Team 1',
-              players: [player1, player2],
-            });
-          }}
-        />,
-      );
-
-      const lastName = await findByTestId('lastName.10');
-      expect(lastName).to.exist;
-      removeItem(0);
-      await waitForElementToBeRemoved(lastName);
     });
   });
 });
