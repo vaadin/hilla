@@ -3,8 +3,6 @@ import {
   _fromString,
   _validity,
   type AbstractModel,
-  type ArrayItemModel,
-  type ArrayModel,
   type BinderConfiguration,
   type BinderNode,
   BinderRoot,
@@ -48,7 +46,6 @@ export type UseFormPartResult<M extends AbstractModel> = Readonly<{
   invalid: boolean;
   model: M;
   name: string;
-  list?: ReadonlyArray<UseFormPartResult<ArrayItemModel<M>>>;
   field: FieldDirective;
   ownErrors: ReadonlyArray<ValueError<Value<M>>>;
   required: boolean;
@@ -74,12 +71,6 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     read(value: Value<M> | null | undefined): void;
     update(): void;
   }>;
-
-export type UseFormArrayResult<M extends ArrayModel> = Readonly<{
-  append(item: Value<ArrayItemModel<M>>): void;
-  list: ReadonlyArray<UseFormPartResult<ArrayItemModel<M>>>;
-  remove(index: number): void;
-}>;
 
 type FieldState<T = unknown> = {
   required: boolean;
