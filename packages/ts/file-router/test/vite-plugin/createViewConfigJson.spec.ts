@@ -44,62 +44,59 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate a JSON representation of the route tree', async () => {
-      await expect(createViewConfigJson(meta).then(JSON.parse)).to.eventually.be.like(
-        [
-          { route: 'about', title: 'About', params: {} },
-          {
-            route: 'profile',
-            params: {},
-            children: [
-              { route: '', title: 'Profile', params: {} },
-              {
-                route: 'account',
-                title: 'Account',
-                params: {},
-                children: [
-                  {
-                    route: 'security',
-                    params: {},
-                    children: [
-                      { route: 'password', params: {}, title: 'Password' },
-                      { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth' },
-                    ],
-                  },
-                ],
-              },
-              {
-                route: 'friends',
-                params: {},
-                title: 'Friends Layout',
-                children: [
-                  { route: 'list', params: {}, title: 'List' },
-                  { route: ':user', params: { ':user': RouteParamType.Required }, title: 'User' },
-                ],
-              },
-            ],
-          },
-          {
-            route: 'test',
-            params: {},
-            children: [
-              {
-                route: ':optional?',
-                title: 'Optional',
-                params: { ':optional?': RouteParamType.Optional },
-              },
-              { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
-            ],
-          },
-          {
-            route: 'layout-only',
-            params: {},
-            title: 'Layout Only',
-            children: [],
-          },
-        ],
-        undefined,
-        2,
-      );
+      await expect(createViewConfigJson(meta).then(JSON.parse)).to.eventually.be.like([
+        { route: 'about', title: 'About', params: {} },
+        {
+          route: 'profile',
+          params: {},
+          children: [
+            { route: '', title: 'Profile', params: {} },
+            {
+              route: 'account',
+              title: 'Account',
+              params: {},
+              children: [
+                {
+                  route: 'security',
+                  params: {},
+                  children: [
+                    { route: 'password', params: {}, title: 'Password' },
+                    { route: 'two-factor-auth', params: {}, title: 'Two Factor Auth' },
+                  ],
+                },
+              ],
+            },
+            {
+              route: 'friends',
+              params: {},
+              title: 'Friends Layout',
+              children: [
+                { route: 'list', params: {}, title: 'List' },
+                { route: ':user', params: { ':user': RouteParamType.Required }, title: 'User' },
+              ],
+            },
+          ],
+        },
+        {
+          route: 'test',
+          params: {},
+          children: [
+            {
+              route: ':optional?',
+              title: 'Optional',
+              params: { ':optional?': RouteParamType.Optional },
+            },
+            { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+            { route: 'issue-002879-config-below', title: 'Config Below', params: {} },
+          ],
+        },
+        {
+          route: 'layout-only',
+          params: {},
+          title: 'Layout Only',
+          children: [],
+        },
+      ]);
     });
   });
 });
