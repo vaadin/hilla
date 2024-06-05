@@ -17,6 +17,7 @@ import {
   type Value,
   type ValueError,
   type ArrayModel,
+  type ArrayItemModel,
 } from '@vaadin/hilla-lit-form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
@@ -73,11 +74,8 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     update(): void;
   }>;
 
-export type UseFormArrayPartResult<M extends ArrayModel, M1 extends AbstractModel = AbstractModel> = Omit<
-  UseFormPartResult<M>,
-  'field'
-> & {
-  items: readonly M1[];
+export type UseFormArrayPartResult<M extends ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
+  items: ReadonlyArray<ArrayItemModel<M>>;
 };
 
 type FieldState<T = unknown> = {
@@ -275,12 +273,10 @@ export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResul
  * @param model - The array model to access
  * @returns The array model part of the form
  */
-export function useFormArrayPart<M extends ArrayModel>(
-  model: M,
-): M extends ArrayModel<infer M1> ? UseFormArrayPartResult<M, M1> : never {
+export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
   const binderNode = getBinderNode(model);
   return {
     ...getFormPart(binderNode),
-    items: [...model].map((item) => item.model),
+    items: Array.from(model, (item) => item.model as ArrayItemModel<M>),
   } satisfies UseFormArrayPartResult<M> as any;
 }
