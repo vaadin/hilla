@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, render, type RenderResult, waitFor } from '@testing-library/react';
+import { act, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
@@ -7,7 +7,18 @@ import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Contract, EntityModel, type Login, LoginModel, type Project, type UserModel } from './models.js';
+import {
+  type Contract,
+  EntityModel,
+  type Login,
+  LoginModel,
+  type PlayerModel,
+  type Project,
+  TeamModel,
+  type Team,
+  type Player,
+  type UserModel,
+} from './models.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -320,6 +331,135 @@ describe('@hilla/react-form', () => {
       const loadFormBtn = await findByTestId('load');
       await user.click(loadFormBtn);
       await expect(findByTestId('contracts')).to.eventually.have.nested.property('selectedOptions.0.value', '202');
+    });
+  });
+
+  function TeamFormPlayer({ model }: { model: PlayerModel }) {
+    const { field, value, invalid, ownErrors } = useFormPart(model);
+
+    return (
+      <div>
+        <input data-testid={`lastName.${value!.id}`} type="text" {...field(model.lastName)} />
+        <output data-testid={`validation.lastName.${value!.id}`}>
+          {invalid ? ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
+      </div>
+    );
+  }
+
+  function TeamForm({
+    testAction,
+  }: {
+    testAction({
+      read,
+      value,
+      setValue,
+    }: {
+      read(value: Team | null | undefined): void;
+      value: Player[] | undefined;
+      setValue(value: Player[] | undefined): void;
+    }): void;
+  }) {
+    const { field, model, read } = useForm(TeamModel);
+    const name = useFormPart(model.name);
+    const { value, setValue } = useFormPart(model.players);
+
+    useEffect(() => {
+      testAction({ read, value, setValue });
+    }, []);
+
+    return (
+      <>
+        <input data-testid="team.name" type="text" {...field(model.name)} />
+        <output data-testid="validation.team.name">
+          {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
+        </output>
+        {Array.from(model.players, (player) => (
+          <TeamFormPlayer key={`${player.value!.id}`} model={player.model} />
+        ))}
+      </>
+    );
+  }
+
+  describe('arrays', () => {
+    const player1 = { id: 10, firstName: 'John', lastName: 'Doe', age: 27 };
+    const player2 = { id: 20, firstName: 'Jane', lastName: 'Smith', age: 28 };
+
+    it('should iterate on array items', async () => {
+      const { findByTestId } = render(
+        <TeamForm
+          testAction={({ read }) => {
+            read({
+              id: 1,
+              name: 'Team 1',
+              players: [player1, player2],
+            });
+          }}
+        />,
+      );
+
+      expect(await findByTestId('team.name')).to.have.value('Team 1');
+      expect(await findByTestId('lastName.10')).to.have.value('Doe');
+    });
+
+    it('should add item to empty array', async () => {
+      const { findByTestId } = render(
+        <TeamForm
+          testAction={({ read, value, setValue }) => {
+            read({
+              id: 1,
+              name: 'Team 1',
+              players: [],
+            });
+            setValue([...value!, player1]);
+          }}
+        />,
+      );
+
+      expect(await findByTestId('lastName.10')).to.have.value('Doe');
+    });
+
+    it('should add item to existing array', async () => {
+      let val: Player[] | undefined;
+      let setVal: ((value: Player[] | undefined) => void) | undefined;
+      const { findByTestId } = render(
+        <TeamForm
+          testAction={({ read, value, setValue }) => {
+            val = value;
+            setVal = setValue;
+            read({
+              id: 1,
+              name: 'Team 1',
+              players: [player1],
+            });
+          }}
+        />,
+      );
+
+      expect(await findByTestId('lastName.10')).to.have.value('Doe');
+      setVal!([...val!, player2]);
+      expect(await findByTestId('lastName.20')).to.have.value('Smith');
+    });
+
+    it('should remove item from array', async () => {
+      let setVal: (value: Player[] | undefined) => void;
+      const { findByTestId } = render(
+        <TeamForm
+          testAction={({ read, setValue }) => {
+            setVal = setValue;
+            read({
+              id: 1,
+              name: 'Team 1',
+              players: [player1, player2],
+            });
+          }}
+        />,
+      );
+
+      const lastName = await findByTestId('lastName.10');
+      expect(lastName).to.exist;
+      setVal!([player2]);
+      await waitForElementToBeRemoved(lastName);
     });
   });
 });
