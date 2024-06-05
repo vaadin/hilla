@@ -6,7 +6,7 @@ import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useForm as _useForm, useFormPart } from '../src/index.js';
+import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src/index.js';
 import {
   type Contract,
   EntityModel,
@@ -401,7 +401,7 @@ describe('@vaadin/hilla-react-form', () => {
   }) {
     const { field, model, read } = useForm(TeamModel);
     const name = useFormPart(model.name);
-    const { value, setValue } = useFormPart(model.players);
+    const { items, value, setValue } = useFormArrayPart(model.players);
 
     useEffect(() => {
       testAction({ read, value, setValue });
@@ -413,8 +413,8 @@ describe('@vaadin/hilla-react-form', () => {
         <output data-testid="validation.team.name">
           {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
         </output>
-        {Array.from(model.players, (player) => (
-          <TeamFormPlayer key={`${player.value!.id}`} model={player.model} />
+        {items.map((player, index) => (
+          <TeamFormPlayer key={`${value![index].id || -index}`} model={player} />
         ))}
       </>
     );
@@ -442,19 +442,23 @@ describe('@vaadin/hilla-react-form', () => {
     });
 
     it('should add item to empty array', async () => {
+      let val: Player[] | undefined;
+      let setVal: ((value: Player[] | undefined) => void) | undefined;
       const { findByTestId } = render(
         <TeamForm
           testAction={({ read, value, setValue }) => {
+            val = value;
+            setVal = setValue;
             read({
               id: 1,
               name: 'Team 1',
               players: [],
             });
-            setValue([...value!, player1]);
           }}
         />,
       );
 
+      setVal!([...val!, player1]);
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
     });
 
