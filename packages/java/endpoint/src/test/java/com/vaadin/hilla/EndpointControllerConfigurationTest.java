@@ -16,8 +16,10 @@ import com.vaadin.hilla.auth.EndpointAccessChecker;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, JacksonAutoConfiguration.class, EndpointController.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class, SignalsConfiguration.class })
+        JacksonProperties.class, JacksonAutoConfiguration.class,
+        EndpointController.class })
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
+        SignalsConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointControllerConfigurationTest {
 

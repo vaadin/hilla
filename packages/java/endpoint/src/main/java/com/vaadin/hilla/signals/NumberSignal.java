@@ -18,6 +18,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * A signal that holds a number value.
+ */
 public class NumberSignal {
 
     private static final Logger LOGGER = LoggerFactory
@@ -39,14 +42,12 @@ public class NumberSignal {
         this.mapper = new ObjectMapper();
     }
 
-    public Flux<JsonEvent> subscribe(@Nullable UUID continueFrom) {
-        LOGGER.debug("Continue from {}", continueFrom);
+    public Flux<JsonEvent> subscribe() {
         Sinks.Many<JsonEvent> sink = Sinks.many().multicast()
                 .onBackpressureBuffer();
 
         return sink.asFlux().doOnSubscribe(ignore -> {
             LOGGER.debug("New Flux subscription...");
-
             lock.lock();
             try {
                 var currentValue = createSnapshot();
@@ -58,6 +59,7 @@ public class NumberSignal {
         }).doFinally(ignore -> {
             lock.lock();
             try {
+                LOGGER.debug("Unsubscribing from NumberSignal...");
                 subscribers.remove(sink);
             } finally {
                 lock.unlock();
@@ -65,24 +67,29 @@ public class NumberSignal {
         });
     }
 
-    public synchronized void submit(JsonEvent event) {
-        processEvent(event);
-        // Notify subscribers
-        subscribers.removeIf(sink -> {
-            JsonEvent updatedValue = createSnapshot();
-            boolean failure = sink.tryEmitNext(updatedValue).isFailure();
-            if (failure) {
-                LOGGER.debug("Failed push");
-            }
-            return failure;
-        });
+    public void submit(JsonEvent event) {
+        lock.lock();
+        try {
+            processEvent(event);
+            // Notify subscribers
+            subscribers.removeIf(sink -> {
+                JsonEvent updatedValue = createSnapshot();
+                boolean failure = sink.tryEmitNext(updatedValue).isFailure();
+                if (failure) {
+                    LOGGER.debug("Failed push");
+                }
+                return failure;
+            });
+        } finally {
+            lock.unlock();
+        }
     }
 
     public UUID getId() {
         return this.id;
     }
 
-    protected JsonEvent createSnapshot() {
+    private JsonEvent createSnapshot() {
         ArrayNode snapshotEntries = mapper.createArrayNode();
         ObjectNode entryNode = snapshotEntries.addObject();
         entryNode.put("id", ROOT.toString());
@@ -92,7 +99,7 @@ public class NumberSignal {
         return new JsonEvent(null, snapshotData);
     }
 
-    protected void processEvent(JsonEvent event) {
+    private void processEvent(JsonEvent event) {
         ObjectNode json = event.getJson();
 
         if (!checkConditions(json)) {

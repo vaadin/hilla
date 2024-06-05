@@ -53,7 +53,7 @@ public class EndpointControllerConfiguration {
      *            Hilla endpoint properties
      */
     public EndpointControllerConfiguration(
-        EndpointProperties endpointProperties) {
+            EndpointProperties endpointProperties) {
         this.endpointProperties = endpointProperties;
     }
 
@@ -121,9 +121,11 @@ public class EndpointControllerConfiguration {
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ServletContext servletContext, EndpointRegistry endpointRegistry, @Autowired(required = false) SignalsRegistry signalsRegistry) {
+            ServletContext servletContext, EndpointRegistry endpointRegistry,
+            @Autowired(required = false) SignalsRegistry signalsRegistry) {
         return new EndpointInvoker(applicationContext, endpointMapperFactory,
-                explicitNullableTypeChecker, servletContext, endpointRegistry, signalsRegistry);
+                explicitNullableTypeChecker, servletContext, endpointRegistry,
+                signalsRegistry);
     }
 
     /**

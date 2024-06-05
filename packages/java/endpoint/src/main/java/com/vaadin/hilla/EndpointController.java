@@ -263,7 +263,7 @@ public class EndpointController {
                                         .ofNullable(tag.get("x-class-name"))
                                         .map(JsonNode::asText)
                                         .filter(className -> !("com.vaadin.hilla.signals.handler.SignalsHandler"
-                                            .equals(className)))
+                                                .equals(className)))
                                         .map(this::instantiateEndpointByClassName))
                                 .ifPresent(endpointRegistry::registerEndpoint);
                     });

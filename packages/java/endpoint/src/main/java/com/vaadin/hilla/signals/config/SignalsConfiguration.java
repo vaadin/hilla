@@ -7,6 +7,9 @@ import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Spring beans configuration for signals.
+ */
 @Configuration
 public class SignalsConfiguration {
 
@@ -18,6 +21,12 @@ public class SignalsConfiguration {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Initializes the SignalsRegistry bean when the fullstackSignals feature
+     * flag is enabled.
+     *
+     * @return SignalsRegistry bean instance
+     */
     @ConditionalOnFeatureFlag("fullstackSignals")
     @Bean
     public SignalsRegistry signalsRegistry() {
@@ -27,6 +36,12 @@ public class SignalsConfiguration {
         return signalsRegistry;
     }
 
+    /**
+     * Initializes the SignalsHandler endpoint when the fullstackSignals feature
+     * flag is enabled.
+     *
+     * @return SignalsHandler endpoint instance
+     */
     @ConditionalOnFeatureFlag("fullstackSignals")
     @Bean
     public SignalsHandler signalsHandler() {

@@ -10,6 +10,9 @@ import reactor.core.publisher.Flux;
 
 import java.util.UUID;
 
+/**
+ * Handler Endpoint for Fullstack Signals' subscription and update events.
+ */
 @AnonymousAllowed
 @BrowserCallable
 public class SignalsHandler {
@@ -22,12 +25,20 @@ public class SignalsHandler {
         this.jsonEventMapper = new JsonEventMapper(mapper);
     }
 
+    /**
+     * Subscribes to a signal.
+     *
+     * @param signalId
+     *            the signal to subscribe to
+     * @param continueFrom
+     *            the event to continue from
+     * @return a Flux of JSON events
+     */
     public Flux<String> subscribe(UUID signalId, @Nullable UUID continueFrom) {
         if (!registry.contains(signalId)) {
             throw new IllegalStateException("Signal not found: " + signalId);
         }
-        return registry.get(signalId).subscribe(continueFrom)
-                .map(jsonEventMapper::toJson);
+        return registry.get(signalId).subscribe().map(jsonEventMapper::toJson);
     }
 
     public void update(UUID signalId, String event) {
