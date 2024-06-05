@@ -32,7 +32,7 @@ import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-import com.vaadin.hilla.signals.SignalQueue;
+import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.core.SignalsRegistry;
 import jakarta.servlet.ServletContext;
 import jakarta.validation.ConstraintViolation;
@@ -104,9 +104,10 @@ public class EndpointInvoker {
      *            the registry used to store endpoint information
      */
     public EndpointInvoker(ApplicationContext applicationContext,
-                           JacksonObjectMapperFactory endpointMapperFactory,
-                           ExplicitNullableTypeChecker explicitNullableTypeChecker,
-                           ServletContext servletContext, EndpointRegistry endpointRegistry, SignalsRegistry signalsRegistry) {
+            JacksonObjectMapperFactory endpointMapperFactory,
+            ExplicitNullableTypeChecker explicitNullableTypeChecker,
+            ServletContext servletContext, EndpointRegistry endpointRegistry,
+            SignalsRegistry signalsRegistry) {
         this.applicationContext = applicationContext;
         this.servletContext = servletContext;
         this.endpointMapper = endpointMapperFactory != null
@@ -485,28 +486,27 @@ public class EndpointInvoker {
             throw new EndpointInternalException(errorMessage);
         }
 
-        if (returnValue instanceof SignalQueue<?>) {
+        if (returnValue instanceof NumberSignal signal) {
             if (signalsRegistry == null) {
                 throw new IllegalStateException(
-                    """
-                            Signals registry is not available, cannot register signal.
-                            Please make sure you have enabled the Full Stack Signals
-                            feature preview flag either through the Vaadin Copilot's
-                            Features panel, or by manually setting the
-                            'com.vaadin.experimental.fullstackSignals=true' in
-                            'src/main/resources/vaadin-featureflags.properties'.
-                            """
-                        .stripIndent());
+                        """
+                                Signals registry is not available, cannot register signal.
+                                Please make sure you have enabled the Full Stack Signals
+                                feature preview flag either through the Vaadin Copilot's
+                                Features panel, or by manually setting the
+                                'com.vaadin.experimental.fullstackSignals=true' in
+                                'src/main/resources/vaadin-featureflags.properties'.
+                                """
+                                .stripIndent());
             }
-            if (signalsRegistry
-                .contains(((SignalQueue<?>) returnValue).getId())) {
+            if (signalsRegistry.contains(signal.getId())) {
                 getLogger().debug(
-                    "Signal already registered before. Ignoring the registration. Endpoint: '{}', method: '{}'",
-                    endpointName, methodName);
+                        "Signal already registered before. Ignoring the registration. Endpoint: '{}', method: '{}'",
+                        endpointName, methodName);
             } else {
-                signalsRegistry.register((SignalQueue<?>) returnValue);
+                signalsRegistry.register(signal);
                 getLogger().debug("Registered signal as a result of calling {}",
-                    methodName);
+                        methodName);
             }
         }
 

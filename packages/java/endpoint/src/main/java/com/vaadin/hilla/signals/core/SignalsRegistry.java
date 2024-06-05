@@ -1,6 +1,7 @@
 package com.vaadin.hilla.signals.core;
 
-import com.vaadin.hilla.signals.SignalQueue;
+import com.vaadin.hilla.signals.NumberSignal;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,14 +14,14 @@ public class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
-    private final WeakHashMap<UUID, SignalQueue<?>> signals = new WeakHashMap<>();
+    private final WeakHashMap<UUID, NumberSignal> signals = new WeakHashMap<>();
 
-    public synchronized void register(SignalQueue<?> signal) {
+    public synchronized void register(NumberSignal signal) {
         signals.put(signal.getId(), signal);
         LOGGER.debug("Registered signal: {}", signal.getId());
     }
 
-    public synchronized SignalQueue<?> get(UUID uuid) {
+    public synchronized NumberSignal get(UUID uuid) {
         return signals.get(uuid);
     }
 
