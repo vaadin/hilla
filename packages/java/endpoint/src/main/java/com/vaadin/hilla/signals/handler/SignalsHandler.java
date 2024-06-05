@@ -41,11 +41,18 @@ public class SignalsHandler {
         return registry.get(signalId).subscribe().map(jsonEventMapper::toJson);
     }
 
+    /**
+     * Updates a signal with an event.
+     *
+     * @param signalId
+     *            the signal to update
+     * @param event
+     *            the event to update with
+     */
     public void update(UUID signalId, String event) {
         if (!registry.contains(signalId)) {
             throw new IllegalStateException("Signal not found: " + signalId);
         }
         registry.get(signalId).submit(jsonEventMapper.fromJson(event));
     }
-
 }
