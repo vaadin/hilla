@@ -151,6 +151,30 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .setRouteParameters(Map.of(":userId", RouteParamType.REQUIRED));
         routes.put("/user/:userId", userProfileConfig);
 
+        ClientViewConfig rootIndexConfig = new ClientViewConfig();
+        rootIndexConfig.setTitle("Index");
+        rootIndexConfig.setRolesAllowed(null);
+        rootIndexConfig.setLoginRequired(false);
+        rootIndexConfig.setRoute("");
+        rootIndexConfig.setLazy(false);
+        rootIndexConfig.setAutoRegistered(false);
+        rootIndexConfig.setMenu(null);
+        rootIndexConfig.setChildren(Collections.emptyList());
+        rootIndexConfig.setRouteParameters(Collections.emptyMap());
+        routes.put("/", rootIndexConfig);
+
+        ClientViewConfig ordersIndexConfig = new ClientViewConfig();
+        ordersIndexConfig.setTitle("Orders");
+        ordersIndexConfig.setRolesAllowed(null);
+        ordersIndexConfig.setLoginRequired(false);
+        ordersIndexConfig.setRoute("");
+        ordersIndexConfig.setLazy(false);
+        ordersIndexConfig.setAutoRegistered(false);
+        ordersIndexConfig.setMenu(null);
+        ordersIndexConfig.setChildren(Collections.emptyList());
+        ordersIndexConfig.setRouteParameters(Collections.emptyMap());
+        routes.put("/orders", ordersIndexConfig);
+
         return routes;
     }
 
@@ -359,7 +383,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         boolean isAuthenticated = true;
         var views = requestListener.collectClientViews(isUserInRole,
                 isAuthenticated);
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
     }
 
     @Test
@@ -370,7 +394,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Predicate<? super String> isUserInRole = role -> true;
         var views = requestListener.collectClientViews(isUserInRole,
                 isUserAuthenticated);
-        MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
+        MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
     }
 
     @Test

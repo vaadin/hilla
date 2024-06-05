@@ -45,6 +45,7 @@ import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.flow.server.menu.RouteParamType;
+import com.vaadin.hilla.route.records.ClientViewConfig;
 
 /**
  * Index HTML request listener for collecting the client side and the server
@@ -135,21 +136,29 @@ public class RouteUnifyingIndexHtmlRequestListener
                     deploymentConfiguration);
         }
 
-        return clientRouteRegistry.getAllRoutes().values().stream()
-                .filter(config -> config.getRouteParameters() == null
-                        || config.getRouteParameters().isEmpty()
-                        || config.getRouteParameters().values().stream()
-                                .noneMatch(
-                                        param -> param == RouteParamType.REQUIRED))
-                .filter(config -> routeUtil.isRouteAllowed(isUserInRole,
-                        isUserAuthenticated, config))
-                .map(config -> new AvailableViewInfo(config.getTitle(),
-                        config.getRolesAllowed(), config.isLoginRequired(),
-                        config.getRoute(), config.isLazy(),
-                        config.isAutoRegistered(), config.menu(),
-                        Collections.emptyList(), config.getRouteParameters()))
-                .collect(Collectors.toMap(AvailableViewInfo::route,
-                        Function.identity()));
+        return clientRouteRegistry.getAllRoutes().entrySet().stream()
+                .filter(viewMapping -> !hasRequiredParameter(
+                        viewMapping.getValue().getRouteParameters()))
+                .filter(viewMapping -> routeUtil.isRouteAllowed(isUserInRole,
+                        isUserAuthenticated, viewMapping.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        viewMapping -> toAvailableViewInfo(
+                                viewMapping.getValue())));
+    }
+
+    private boolean hasRequiredParameter(
+            Map<String, RouteParamType> routeParameters) {
+        return routeParameters != null && !routeParameters.isEmpty()
+                && routeParameters.values().stream().anyMatch(
+                        paramType -> paramType == RouteParamType.REQUIRED);
+    }
+
+    private AvailableViewInfo toAvailableViewInfo(ClientViewConfig config) {
+        return new AvailableViewInfo(config.getTitle(),
+                config.getRolesAllowed(), config.isLoginRequired(),
+                config.getRoute(), config.isLazy(), config.isAutoRegistered(),
+                config.menu(), Collections.emptyList(),
+                config.getRouteParameters());
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews() {

@@ -52,5 +52,25 @@
     "lazy": false,
     "register": false,
     "menu": null
+  },
+  "/": {
+    "params": {},
+    "title": "Index",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/orders": {
+    "params": {},
+    "title": "Orders",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "",
+    "lazy": false,
+    "register": false,
+    "menu": null
   }
 }
