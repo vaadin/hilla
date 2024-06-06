@@ -79,6 +79,8 @@ describe('@hilla/form', () => {
 
       const expectedEmptyOrder: Order = {
         idString: '',
+        dateStart: undefined,
+        dateEnd: undefined,
         customer: {
           idString: '',
           fullName: '',
