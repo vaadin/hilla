@@ -79,6 +79,8 @@ describe('@vaadin/hilla-lit-form', () => {
 
       const expectedEmptyOrder: Order = {
         idString: '',
+        dateStart: undefined,
+        dateEnd: undefined,
         customer: {
           idString: '',
           fullName: '',

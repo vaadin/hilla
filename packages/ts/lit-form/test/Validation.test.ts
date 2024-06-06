@@ -19,6 +19,7 @@ import {
   type Validator,
   type ValueError,
 } from '../src/index.js';
+import { Future } from '../Validators';
 import {
   type Customer,
   IdEntityModel,
@@ -176,6 +177,38 @@ describe('@vaadin/hilla-lit-form', () => {
         'products.1.price',
         'products.1.price',
       ]);
+    });
+
+    it('should run all validations after using binder.read()', async () => {
+      const valueFromEndpoint: Order = {
+        idString: '',
+        customer: {
+          idString: '',
+          fullName: 'Full Name',
+          nickName: 'Nick',
+        },
+        notes: 'ignore',
+        priority: 1,
+        products: [],
+      };
+      binder.read(valueFromEndpoint);
+
+      // Get nodes for optional fields to signal that they are bound
+      const dateStartNode = binder.for(binder.model.dateStart);
+      const dateEndNode = binder.for(binder.model.dateEnd);
+      expect(dateStartNode.value).to.be.undefined;
+      expect(dateEndNode.value).to.be.undefined;
+
+      // User sets values
+      dateStartNode.value = '2020-01-01';
+      dateEndNode.value = '2020-01-02';
+
+      const errors = await binder.validate();
+      expect(errors.length, 'number of errors').to.equal(2);
+      expect(errors[0].message).to.contain('future');
+      expect(errors[0].property).to.equal('dateStart');
+      expect(errors[0].message).to.contain('future');
+      expect(errors[1].property).to.equal('dateEnd');
     });
 
     describe('clearing', () => {
