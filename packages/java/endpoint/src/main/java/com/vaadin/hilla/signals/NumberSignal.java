@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.signals.core.JsonEvent;
-import jakarta.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -17,6 +16,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
+
+import com.vaadin.hilla.signals.core.JsonEvent;
 
 /**
  * A signal that holds a number value.
@@ -89,6 +90,10 @@ public class NumberSignal {
         return this.id;
     }
 
+    public Double getValue() {
+        return this.value;
+    }
+
     private JsonEvent createSnapshot() {
         ArrayNode snapshotEntries = mapper.createArrayNode();
         ObjectNode entryNode = snapshotEntries.addObject();
@@ -96,7 +101,7 @@ public class NumberSignal {
         entryNode.set("value", new DoubleNode(value));
         ObjectNode snapshotData = mapper.createObjectNode();
         snapshotData.set("entries", snapshotEntries);
-        return new JsonEvent(null, snapshotData);
+        return new JsonEvent(id, snapshotData);
     }
 
     private void processEvent(JsonEvent event) {

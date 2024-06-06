@@ -1,4 +1,3 @@
-
 export enum EntryType {
   VALUE,
   NUMBER,
@@ -18,13 +17,15 @@ export type Entry<T = any> = Readonly<ModifiableEntry<T>>;
 export type Entries = Map<EntryId, Entry | undefined>;
 
 export interface FullSignalOptions {
-  delay: boolean;
-  initialValue: any;
+  initialValue: unknown;
+  latencyCompensation: boolean;
+  delay: number | undefined;
 }
 
 export const defaultOptions : FullSignalOptions = {
-  delay: false,
   initialValue: null,
+  latencyCompensation: true,
+  delay: undefined,
 }
 
 export type SignalOptions = Partial<FullSignalOptions>;

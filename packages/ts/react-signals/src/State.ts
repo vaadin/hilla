@@ -32,8 +32,6 @@ export class State {
             return false;
           }
         }
-
-        // TODO add conditions for prev/next entry in a list
       }
     }
 
@@ -41,8 +39,6 @@ export class State {
       const { entries } = event as SnapshotEvent;
       for(const entry of entries) {
         const {id, ...rest} = entry;
-        // XXX Clean up old values before applying new snapshot (but preserve signals that are already in use)
-        // XXX assuming all children are values for now
         const existing = this.get(entry.id);
         const type : EntryType = existing?.type || EntryType.VALUE;
         this.entries.set(entry.id, {...rest, type})

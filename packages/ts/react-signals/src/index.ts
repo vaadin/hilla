@@ -4,5 +4,5 @@ import { installAutoSignalTracking } from '@preact/signals-react/runtime';
 installAutoSignalTracking();
 
 export * from '@preact/signals-react';
-export { NumberSignalQueue } from './EventLog.js';
+export { NumberSignalChannel } from './EventChannel';
 export * from './types.js';
