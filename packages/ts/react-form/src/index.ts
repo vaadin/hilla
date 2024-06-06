@@ -115,6 +115,8 @@ function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseForm
 }
 
 function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective {
+  const update = useUpdate();
+
   return useMemo(() => {
     const registry = new WeakMap<AbstractModel, FieldState>();
 
@@ -139,6 +141,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.strategy?.removeEventListeners();
               fieldState!.element = undefined;
               fieldState!.strategy = undefined;
+              update();
               return;
             }
 
@@ -152,6 +155,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.element.addEventListener('input', fieldState!.updateValue);
               fieldState!.element.addEventListener('blur', fieldState!.markVisited);
               fieldState!.strategy = getDefaultFieldStrategy(element, model);
+              update();
             }
           },
           required: false,
@@ -217,6 +221,7 @@ export function useForm<M extends AbstractModel>(
 
   useEffect(() => {
     binder.addEventListener(CHANGED.type, update);
+    return () => binder.removeEventListener(CHANGED.type, update);
   }, [binder]);
 
   return {
@@ -241,6 +246,7 @@ export function useForm<M extends AbstractModel>(
 export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
+
   return {
     ...getFormPart(binderNode),
     field,
