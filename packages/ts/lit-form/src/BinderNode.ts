@@ -257,18 +257,13 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       return undefined;
     }
 
-    let { value } = this.parent;
-
-    if (value === undefined) {
-      this.parent.initializeValue(true);
-      ({ value } = this.parent);
-    }
+    this.initializeValue();
 
     const key = this.model[_key];
 
     // The value of parent in unknown, so we need to cast it.
     type ParentValue = { readonly [K in typeof key]: Value<M> };
-    return (value as ParentValue)[key];
+    return (this.parent.value as ParentValue)[key];
   }
 
   set value(value: Value<M> | undefined) {
