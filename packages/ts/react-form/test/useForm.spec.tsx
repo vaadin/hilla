@@ -375,7 +375,7 @@ describe('@vaadin/hilla-react-form', () => {
   });
 
   describe('arrays', () => {
-    let playersSignal: Signal<Player[]>;
+    let players: Signal<Player[]>;
 
     function TeamFormPlayer({ model }: { model: PlayerModel }) {
       const { field, value, invalid, ownErrors } = useFormPart(model);
@@ -390,21 +390,21 @@ describe('@vaadin/hilla-react-form', () => {
       );
     }
 
-    function TeamForm({ players }: { players: Player[] }) {
+    function TeamForm({ initialPlayers }: { initialPlayers: Player[] }) {
       const { field, model, read } = useForm(TeamModel);
       const name = useFormPart(model.name);
       const { items, value, setValue } = useFormArrayPart(model.players);
 
-      playersSignal = useSignal(players);
+      players = useSignal(initialPlayers);
       useSignalEffect(() => {
-        setValue(playersSignal.value);
+        setValue(players.value);
       });
 
       useEffect(() => {
         read({
           id: 1,
           name: 'Team 1',
-          players: playersSignal.value,
+          players: initialPlayers,
         });
       }, []);
 
@@ -425,33 +425,33 @@ describe('@vaadin/hilla-react-form', () => {
     const player2 = { id: 20, firstName: 'Jane', lastName: 'Smith', age: 28 };
 
     it('should iterate on array items', async () => {
-      const { findByTestId } = render(<TeamForm players={[player1, player2]} />);
+      const { findByTestId } = render(<TeamForm initialPlayers={[player1, player2]} />);
 
       expect(await findByTestId('team.name')).to.have.value('Team 1');
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
     });
 
     it('should add item to empty array', async () => {
-      const { findByTestId } = render(<TeamForm players={[]} />);
+      const { findByTestId } = render(<TeamForm initialPlayers={[]} />);
 
-      playersSignal.value = [...playersSignal.value, player1];
+      players.value = [...players.value, player1];
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
     });
 
     it('should add item to existing array', async () => {
-      const { findByTestId } = render(<TeamForm players={[player1]} />);
+      const { findByTestId } = render(<TeamForm initialPlayers={[player1]} />);
 
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
-      playersSignal.value = [...playersSignal.value, player2];
+      players.value = [...players.value, player2];
       expect(await findByTestId('lastName.20')).to.have.value('Smith');
     });
 
     it('should remove item from array', async () => {
-      const { findByTestId } = render(<TeamForm players={[player1, player2]} />);
+      const { findByTestId } = render(<TeamForm initialPlayers={[player1, player2]} />);
 
       const lastName = await findByTestId('lastName.10');
       expect(lastName).to.exist;
-      playersSignal.value = [player2];
+      players.value = [player2];
       await waitForElementToBeRemoved(lastName);
     });
   });
