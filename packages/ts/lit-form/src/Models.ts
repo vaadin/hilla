@@ -77,10 +77,26 @@ export abstract class AbstractModel<T = unknown> {
     this[_meta] = options?.meta ?? {};
   }
 
+  /**
+   * @deprecated Use {@link BinderNode.value} with string conversion instead
+   *
+   * @example
+   * ```ts
+   * const result = String(binder.for(model).value);
+   * ```
+   */
   toString(): string {
     return String(this.valueOf());
   }
 
+  /**
+   * @deprecated Use {@link BinderNode.value} instead
+   *
+   * @example
+   * ```ts
+   * const result = binder.for(model).value;
+   * ```
+   */
   valueOf(): T {
     const { value } = getBinderNode(this);
 
@@ -228,17 +244,14 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
     this[_createEmptyItemValue] = createItem(this, 0).constructor.createEmptyValue as () => Value<MItem>;
   }
 
-  /**
-   * Iterates the current array value and yields a binder node for every item.
-   */
-  *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
-    const array = this.valueOf();
+  *items(): Generator<MItem, void, void> {
+    const values = getBinderNode(this).value ?? [];
 
-    if (array.length !== this.#items.length) {
-      this.#items.length = array.length;
+    if (values.length !== this.#items.length) {
+      this.#items.length = values.length;
     }
 
-    for (let i = 0; i < array.length; i++) {
+    for (let i = 0; i < values.length; i++) {
       let item: MItem | undefined = this.#items[i];
 
       if (!item) {
@@ -246,6 +259,17 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
         this.#items[i] = item;
       }
 
+      yield item;
+    }
+  }
+
+  /**
+   * Iterates the current array value and yields a binder node for every item.
+   *
+   * @deprecated Use {@link items} instead.
+   */
+  *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
+    for (const item of this.items()) {
       yield getBinderNode(item);
     }
   }

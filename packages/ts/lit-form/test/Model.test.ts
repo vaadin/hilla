@@ -284,11 +284,11 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should reuse model instance for the same array item', () => {
-        const nodes1 = [...binder.model.fieldArrayModel].slice();
+        const nodes1 = Array.from(binder.model.fieldArrayModel.items(), (model) => binder.for(model));
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         binder.for(binder.model.fieldArrayModel).value = idEntities.slice();
-        const nodes2 = [...binder.model.fieldArrayModel].slice();
+        const nodes2 = Array.from(binder.model.fieldArrayModel.items(), (model) => binder.for(model));
         [0, 1].forEach((i) => {
           expect(nodes1[i]).to.be.equal(nodes2[i]);
           expect(nodes1[i].model).to.be.equal(nodes2[i].model);
@@ -297,7 +297,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should reuse model instance for the same array item after it is modified', () => {
-        const nodes1 = [...binder.model.fieldArrayModel].slice();
+        const nodes1 = Array.from(binder.model.fieldArrayModel.items(), (model) => binder.for(model));
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         binder.for(nodes1[0].model.idString).value = 'foo';
@@ -307,7 +307,7 @@ describe('@vaadin/hilla-lit-form', () => {
         binder.for(binder.model.fieldArrayModel).prependItem();
         binder.for(binder.model.fieldArrayModel).appendItem();
 
-        const nodes2 = [...binder.model.fieldArrayModel].slice();
+        const nodes2 = Array.from(binder.model.fieldArrayModel.items(), (model) => binder.for(model));
 
         [0, 1].forEach((i) => {
           expect(nodes1[i]).to.be.equal(nodes2[i]);
@@ -317,7 +317,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should update model keySymbol when inserting items', () => {
-        const nodes1 = [...binder.model.fieldArrayModel].slice();
+        const nodes1 = Array.from(binder.model.fieldArrayModel.items(), (model) => binder.for(model));
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         for (let i = 0; i < nodes1.length; i++) {
@@ -325,12 +325,12 @@ describe('@vaadin/hilla-lit-form', () => {
         }
 
         binder.for(nodes1[0].model.idString).value = 'foo';
-        expect(binder.model.fieldArrayModel.valueOf()[0].idString).to.be.equal('foo');
+        expect(binder.for(binder.model.fieldArrayModel).value?.[0].idString).to.be.equal('foo');
 
         binder.for(binder.model.fieldArrayModel).prependItem();
-        expect(binder.model.fieldArrayModel.valueOf()[1].idString).to.be.equal('foo');
+        expect(binder.for(binder.model.fieldArrayModel).value?.[1].idString).to.be.equal('foo');
 
-        const nodes2 = [...binder.model.fieldArrayModel].slice();
+        const nodes2 = Array.from(binder.model.fieldArrayModel.items(), (model) => binder.for(model));
         expect(nodes2.length).to.be.equal(3);
         for (let i = 0; i < nodes2.length; i++) {
           expect(nodes2[i].model[_key]).to.be.equal(i);
@@ -369,7 +369,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
       it('should record and return the value', () => {
         binder.for(binder.model.fieldEnum).value = RecordStatus.REMOVED;
-        expect(binder.model.fieldEnum.valueOf()).to.equal(RecordStatus.REMOVED);
+        expect(binder.for(binder.model.fieldEnum).value).to.equal(RecordStatus.REMOVED);
       });
 
       it('should be undefined if the EnumModel.createEmptyValue() is used', () => {

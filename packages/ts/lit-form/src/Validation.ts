@@ -1,7 +1,7 @@
 import type { BinderNode } from './BinderNode.js';
 import { getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
-import { type AbstractModel, NumberModel, type Value } from './Models.js';
+import { AbstractModel, NumberModel, type Value } from './Models.js';
 import { Required } from './Validators.js';
 
 export interface ValueError<T = unknown> {
@@ -24,9 +24,10 @@ export class ValidationError extends Error {
     super(
       [
         'There are validation errors in the form.',
-        ...errors.map(
-          (e) => `${e.property.toString()} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`,
-        ),
+        ...errors.map((e) => {
+          const property = e.property instanceof AbstractModel ? String(getBinderNode(e.property).value) : e.property;
+          return `${property} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`;
+        }),
       ].join('\n - '),
     );
     this.errors = errors;
