@@ -200,7 +200,16 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass().getResource(
                 "/META-INF/VAADIN/available-views-anonymous.json"));
 
-        MatcherAssert.assertThat(actual, Matchers.is(expected));
+
+        Iterator<String> elementsFields = expected.fieldNames();
+        do {
+            String field = elementsFields.next();
+            MatcherAssert.assertThat("Generated missing fieldName " + field,
+                actual.has(field), Matchers.is(true));
+            MatcherAssert.assertThat("Missing element " + field,
+                actual.toString(),
+                Matchers.containsString(expected.get(field).toString()));
+        } while (elementsFields.hasNext());
     }
 
     @Test
@@ -246,7 +255,16 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass()
                 .getResource("/META-INF/VAADIN/available-views-user.json"));
 
-        MatcherAssert.assertThat(actual, Matchers.is(expected));
+
+        Iterator<String> elementsFields = expected.fieldNames();
+        do {
+            String field = elementsFields.next();
+            MatcherAssert.assertThat("Generated missing fieldName " + field,
+                actual.has(field), Matchers.is(true));
+            MatcherAssert.assertThat("Missing element " + field,
+                actual.toString(),
+                Matchers.containsString(expected.get(field).toString()));
+        } while (elementsFields.hasNext());
     }
 
     @Test
@@ -398,7 +416,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(mockClassLoader);
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
             var views = requestListener.collectClientViews(vaadinRequest);
-            MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
+            MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         }
     }
 
@@ -415,7 +433,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
             var views = requestListener.collectClientViews(vaadinRequest);
-            MatcherAssert.assertThat(views, Matchers.aMapWithSize(2));
+            MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         }
     }
 

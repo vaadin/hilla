@@ -19,5 +19,26 @@
     "rolesAllowed": ["ROLE_ADMIN"],
     "params": { ":userId": "req"},
     "title": "User Profile"
-  }
+  },
+  {
+  "params": {},
+  "title": "Index",
+  "rolesAllowed": null,
+  "loginRequired": false,
+  "route": "/",
+  "lazy": false,
+  "register": false,
+  "menu": null
+},
+  {
+  "params": {},
+  "title": "Orders",
+  "rolesAllowed": null,
+  "loginRequired": false,
+  "route": "/orders",
+  "lazy": false,
+  "register": false,
+  "menu": null
+}
 ]
+
