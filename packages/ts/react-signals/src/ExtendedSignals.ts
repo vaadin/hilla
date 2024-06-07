@@ -1,13 +1,5 @@
 import {computed, type ReadonlySignal, Signal} from "@preact/signals-react";
 
-export class DependencyTrackSignal<T = any> extends Signal<T> {
-
-  constructor(value: T | undefined, onSubscribe: () => void) {
-    super(value);
-    onSubscribe.call(null);
-  }
-}
-
 declare class Computed<T> extends Signal<T> implements ReadonlySignal<T> {
   constructor(compute: () => T);
 }
