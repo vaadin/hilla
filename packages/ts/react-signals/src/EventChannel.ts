@@ -1,6 +1,6 @@
 import { Signal } from "@preact/signals-react";
 import type { ConnectClient, Subscription } from "@vaadin/hilla-frontend";
-import { SharedSignal } from "./ExtendedSignals.js";
+import { NumberSignal } from "./Signals.js";
 import type { StateEvent, SetEvent, SnapshotEvent } from "./types.js";
 
 interface EventChannelDescriptor<T>  {
@@ -22,7 +22,7 @@ class EventChannel<S extends Signal = Signal> {
     this.connectClient = connectClient;
 
     this.internalSignal = this.createInternalSignal();
-    this.externalSignal = this.createExternalSignal(this.internalSignal);
+    this.externalSignal = this.createExternalSignal(this.internalSignal, (event: StateEvent) => this.publish(event));
 
     this.connect();
   }
@@ -39,17 +39,17 @@ class EventChannel<S extends Signal = Signal> {
     });
   }
 
-  private updateSignals(event: SnapshotEvent): void {
+  private updateSignals(snapshotEvent: SnapshotEvent): void {
     if (this.internalSignal) {
-      if (event.value) {
-        this.internalSignal.value = event.value;
+      if (snapshotEvent.value) {
+        this.internalSignal.value = snapshotEvent.value;
       } else {
         this.internalSignal = null;
         this.externalSignal = null;
       }
-    } else if (event.value) {
-      this.internalSignal = this.createInternalSignal(event.value);
-      this.externalSignal = this.createExternalSignal(this.internalSignal);
+    } else if (snapshotEvent.value) {
+      this.internalSignal = this.createInternalSignal(snapshotEvent.value);
+      this.externalSignal = this.createExternalSignal(this.internalSignal, (event: StateEvent) => this.publish(event));
     }
   }
 
@@ -63,60 +63,12 @@ class EventChannel<S extends Signal = Signal> {
     return this.externalSignal as S;
   }
 
-  private createInternalSignal<T>(initialValue?: T): Signal<T> {
-    return new Signal<T>(initialValue);
+  private createInternalSignal(initialValue?: number): Signal<number> {
+    return new Signal<number>(initialValue);
   }
 
-  private createExternalSignal<T>(internalSignal: Signal): Signal {
-    return new NumberSignal(internalSignal, this);
-  }
-}
-
-export class ValueSignal<T> extends SharedSignal<T> {
-  private readonly eventChannel: EventChannel;
-
-  constructor(internalSignal: Signal, eventChannel: EventChannel) {
-    super(() => internalSignal.value);
-
-    this.eventChannel = eventChannel;
-  }
-
-  override get value() {
-    return super.value;
-  }
-
-  override set value(value: T) {
-    const id = crypto.randomUUID();
-    const event: SetEvent = { id, set: 'id', value };
-    this.eventChannel.publish(event).then(r => undefined );
-  }
-
-  compareAndSet(expectedValue: T, newValue: T): Promise<boolean> {
-    const id = crypto.randomUUID();
-    const event: SetEvent = {
-      id,
-      set: 'id',
-      value: newValue,
-      conditions: [{ id: 'id', value: expectedValue }],
-    };
-
-    return this.eventChannel.publish(event);
-  }
-
-  async update(updater: (value: T) => T): Promise<void> {
-    while (!(await this.compareAndSet(this.value, updater(this.value)))) {}
-  }
-}
-
-export class NumberSignal extends ValueSignal<number> {
-
-  constructor(internalSignal: Signal, eventChannel: EventChannel) {
-    super(internalSignal, eventChannel);
-  }
-
-  async increment(delta?: number) {
-    const step = delta ?? 1;
-    await this.compareAndSet(this.value, this.value + step);
+  private createExternalSignal(internalSignal: Signal<number>, publish: (event: StateEvent) => Promise<boolean>): Signal<number> {
+    return new NumberSignal(internalSignal, publish);
   }
 }
 
