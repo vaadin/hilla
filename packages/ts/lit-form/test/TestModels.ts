@@ -17,6 +17,7 @@ import {
   Size,
   StringModel,
 } from '../src/index.js';
+import { Future } from '../Validators';
 
 export interface IdEntity {
   idString: string;
@@ -83,6 +84,8 @@ export class CustomerModel<T extends Customer = Customer> extends IdEntityModel<
 
 export interface Order extends IdEntity {
   customer: Customer;
+  dateStart?: string;
+  dateEnd?: string;
   notes: string;
   products: Product[];
   priority?: number;
@@ -96,6 +99,20 @@ export class OrderModel<T extends Order = Order> extends IdEntityModel<T> {
     return this[_getPropertyModel](
       'customer',
       (parent, key) => new CustomerModel(parent, key, false, { validators: [new Required()] }),
+    );
+  }
+
+  get dateStart(): StringModel {
+    return this[_getPropertyModel](
+      'dateStart',
+      (parent, key) => new StringModel(parent, key, true, { validators: [new Future()] }),
+    );
+  }
+
+  get dateEnd(): StringModel {
+    return this[_getPropertyModel](
+      'dateEnd',
+      (parent, key) => new StringModel(parent, key, true, { validators: [new Future()] }),
     );
   }
 

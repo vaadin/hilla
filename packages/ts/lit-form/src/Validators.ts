@@ -5,7 +5,6 @@ import isDecimal from 'validator/es/lib/isDecimal.js';
 import isEmail from 'validator/es/lib/isEmail.js';
 import isFloat from 'validator/es/lib/isFloat.js';
 import isLength from 'validator/es/lib/isLength.js';
-import isNumeric from 'validator/es/lib/isNumeric.js';
 import matches from 'validator/es/lib/matches.js';
 import toFloat from 'validator/es/lib/toFloat.js';
 import type { Validator } from './Validation.js';
@@ -72,7 +71,8 @@ function _value(attrs: ValueNumberAttributes | number | string) {
 
 abstract class NumberValidator<T> extends AbstractValidator<T> {
   override validate(value: T) {
-    return isNumeric(String(value));
+    const num = Number(value);
+    return !isNaN(num) && isFinite(num);
   }
 }
 

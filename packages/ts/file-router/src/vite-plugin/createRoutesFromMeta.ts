@@ -56,7 +56,9 @@ function createRouteData(path: string, mod: string | undefined, children?: reado
     ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
     [
       transformer((node) =>
-        ts.isIdentifier(node) && node.text === 'CHILDREN' ? ts.factory.createArrayLiteralExpression(children) : node,
+        ts.isIdentifier(node) && node.text === 'CHILDREN'
+          ? ts.factory.createArrayLiteralExpression(children, true)
+          : node,
       ),
     ],
   );
@@ -135,7 +137,7 @@ export default routes;
         ts.isImportDeclaration(node) && (node.moduleSpecifier as StringLiteral).text === 'IMPORTS' ? imports : node,
       ),
       transformer((node) =>
-        ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes) : node,
+        ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes, true) : node,
       ),
     ],
   );
