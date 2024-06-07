@@ -94,12 +94,9 @@ public class NumberSignal {
     }
 
     private JsonEvent createSnapshot() {
-        ArrayNode snapshotEntries = mapper.createArrayNode();
-        ObjectNode entryNode = snapshotEntries.addObject();
+        ObjectNode entryNode =  mapper.createObjectNode();
         entryNode.set("value", new DoubleNode(value));
-        ObjectNode snapshotData = mapper.createObjectNode();
-        snapshotData.set("entries", snapshotEntries);
-        return new JsonEvent(id, snapshotData);
+        return new JsonEvent(id, entryNode);
     }
 
     private void processEvent(JsonEvent event) {
