@@ -11,21 +11,19 @@ interface EventChannelDescriptor<T>  {
   publish(signalId: string, event: T): Promise<void>;
 }
 
-const rootKey = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
-
-class EventChannel<R extends Signal = Signal> {
-  private readonly eventChannelDescriptor: EventChannelDescriptor<string>;
+class EventChannel<S extends Signal = Signal> {
+  private readonly channelDescriptor: EventChannelDescriptor<string>;
   private readonly options: { delay?: number; };
 
   private readonly connectClient: ConnectClient;
   private readonly fluxConnectionActive = signal(true);
-  private eventChannelSubscription?: Subscription<string>;
+  private channelSubscription?: Subscription<string>;
 
   private readonly pendingChanges: Record<string, StateEvent> = {};
   private readonly pendingResults: Record<string, (accepted: boolean) => void> = {};
 
-  private readonly internalSignals: Map<EntryId, DependencyTrackSignal> = new Map();
-  private readonly externalSignals: Map<EntryId, Signal> = new Map();
+  private internalSignal: DependencyTrackSignal | null = null;
+  private externalSignal: Signal | null = null;
 
   private readonly confirmedState = new State();
   private visualState = new DerivedState(this.confirmedState);
@@ -37,23 +35,22 @@ class EventChannel<R extends Signal = Signal> {
     this.fluxConnectionActive.value = event.detail.active
   };
 
-  constructor(eventChannelDescriptor: EventChannelDescriptor<string>, connectClient: ConnectClient, options: SignalOptions, rootType: EntryType) {
-    this.eventChannelDescriptor = eventChannelDescriptor;
+  constructor(channelDescriptor: EventChannelDescriptor<string>, connectClient: ConnectClient, options: SignalOptions, valueType: EntryType) {
+    this.channelDescriptor = channelDescriptor;
     this.options = {...defaultOptions, ...options};
     this.connectClient = connectClient;
 
-    let rootValue: any;
-    if (rootType == EntryType.VALUE || rootType == EntryType.NUMBER) {
-      rootValue = options.initialValue;
+    let defaultValue: unknown;
+    if (valueType == EntryType.VALUE || valueType == EntryType.NUMBER) {
+      defaultValue = options.initialValue;
     } else {
-      throw Error(rootType);
+      throw Error(valueType);
     }
 
-    const internalRootSignal = this.createInternalSignal(rootValue);
-    this.internalSignals.set(rootKey, internalRootSignal);
-    this.externalSignals.set(rootKey, this.createExternalSignal(rootKey, internalRootSignal, rootType));
+    this.internalSignal = this.createInternalSignal(defaultValue);
+    this.externalSignal = this.createExternalSignal(this.internalSignal, valueType);
 
-    this.confirmedState.entries.set(rootKey, {type: rootType, next: null, prev: null, value: rootValue});
+    this.confirmedState.entries.set('id', {type: valueType, value: defaultValue});
 
     effect(() => {
       if (this.subscribeCount.value > 0 && this.fluxConnectionActive.value) {
@@ -75,11 +72,11 @@ class EventChannel<R extends Signal = Signal> {
   }
 
   private connect() {
-    if (this.eventChannelSubscription) {
+    if (this.channelSubscription) {
       return;
     }
 
-    this.eventChannelSubscription = this.eventChannelDescriptor.subscribe(this.eventChannelDescriptor.sharedSignalId, this.continueFrom).onNext(json => {
+    this.channelSubscription = this.channelDescriptor.subscribe(this.channelDescriptor.sharedSignalId, this.continueFrom).onNext(json => {
       const event = JSON.parse(json) as StateEvent;
       this.continueFrom = event.id;
 
@@ -87,7 +84,7 @@ class EventChannel<R extends Signal = Signal> {
         delete this.pendingChanges[event.id];
       }
 
-      // Create as a derived state so we can diff against the old confirmed state
+      // Create as a derived state, so we can diff against the old confirmed state
       const newConfirmedState = new DerivedState(this.confirmedState);
       const accepted = newConfirmedState.evaluate(event);
 
@@ -120,12 +117,12 @@ class EventChannel<R extends Signal = Signal> {
   }
 
   private disconnect() {
-    if (!this.eventChannelSubscription) {
+    if (!this.channelSubscription) {
       return;
     }
 
-    this.eventChannelSubscription.cancel();
-    this.eventChannelSubscription = undefined;
+    this.channelSubscription.cancel();
+    this.channelSubscription = undefined;
 
     this.connectClient.fluxConnection.removeEventListener('state-changed', this.fluxStateChangeListener);
   }
@@ -133,19 +130,16 @@ class EventChannel<R extends Signal = Signal> {
   private updateSignals(diff: Entries) {
     batch(() => {
       for (const [key, entry] of diff.entries()) {
-        const signal = this.internalSignals.get(key);
-        if (signal) {
+        if (this.internalSignal) {
           if (entry) {
-            signal.value = entry.value;
+            this.internalSignal.value = entry.value;
           } else {
-            signal.value = null;
-            this.internalSignals.delete(key);
-            this.externalSignals.delete(key);
+            this.internalSignal = null;
+            this.externalSignal = null;
           }
         } else if (entry) {
-          const internalSignal = this.createInternalSignal(entry.value);
-          this.internalSignals.set(key, internalSignal);
-          this.externalSignals.set(key, this.createExternalSignal(key, internalSignal, entry.type));
+          this.internalSignal = this.createInternalSignal(entry.value);
+          this.externalSignal = this.createExternalSignal(this.internalSignal, entry.type);
         }
       }
     });
@@ -183,7 +177,7 @@ class EventChannel<R extends Signal = Signal> {
     return new Promise((resolve, reject) => {
       this.pendingResults[event.id] = resolve;
 
-      const action = () => this.eventChannelDescriptor.publish(this.eventChannelDescriptor.sharedSignalId, JSON.stringify(event)).catch((error) => {
+      const action = () => this.channelDescriptor.publish(this.channelDescriptor.sharedSignalId, JSON.stringify(event)).catch((error) => {
         if (latencyCompensate) {
           this.removePendingChange(event);
         }
@@ -193,26 +187,18 @@ class EventChannel<R extends Signal = Signal> {
     });
   }
 
-  /*getSignal(id: string): Signal<any> | undefined {
-    return this.externalSignals.get(id);
-  }*/
-
-  getRoot(): R {
-    return this.externalSignals.get(rootKey) as R;
+  getSignal(): S {
+    return this.externalSignal as S;
   }
-
-  /*getEntry(key: string): Entry | undefined {
-    return this.visualState.get(key);
-  }*/
 
   private createInternalSignal<T>(initialValue: T): DependencyTrackSignal<T> {
     return new DependencyTrackSignal<T>(initialValue, () => this.subscribe());
   }
 
-  private createExternalSignal<T>(key: EntryId, internalSignal: Signal, type: EntryType): Signal {
+  private createExternalSignal<T>(internalSignal: Signal, type: EntryType): Signal {
     switch(type) {
       case EntryType.NUMBER: {
-        return new NumberSignal(key, internalSignal, this);
+        return new NumberSignal(internalSignal, this);
       }
       default: {
         throw new Error("Unsupported entry type: " + type);
@@ -224,8 +210,8 @@ class EventChannel<R extends Signal = Signal> {
 export class ValueSignal<T> extends SharedSignal<T> {
   private readonly eventChannel: EventChannel;
 
-  constructor(key: EntryId, internalSignal: Signal, eventChannel: EventChannel) {
-    super(() => internalSignal.value, key);
+  constructor(internalSignal: Signal, eventChannel: EventChannel) {
+    super(() => internalSignal.value);
 
     this.eventChannel = eventChannel;
   }
@@ -240,17 +226,17 @@ export class ValueSignal<T> extends SharedSignal<T> {
 
   set(value: T, latencyCompensate: boolean): Promise<void> {
     const id = crypto.randomUUID();
-    const event: SetEvent = { id, set: this.key, value };
+    const event: SetEvent = { id, set: 'id', value };
     return this.eventChannel.publish(event, latencyCompensate).then((_) => undefined);
   }
 
   compareAndSet(expectedValue: T, newValue: T, latencyCompensate: boolean = true): Promise<boolean> {
-    const id: string = crypto.randomUUID();
+    const id = crypto.randomUUID();
     const event: SetEvent = {
       id,
-      set: this.key,
+      set: 'id',
       value: newValue,
-      conditions: [{ id: this.key, value: expectedValue }],
+      conditions: [{ id: 'id', value: expectedValue }],
     };
 
     return this.eventChannel.publish(event, latencyCompensate);
@@ -263,8 +249,8 @@ export class ValueSignal<T> extends SharedSignal<T> {
 
 export class NumberSignal extends ValueSignal<number> {
 
-  constructor(key: EntryId, internalSignal: Signal, eventChannel: EventChannel) {
-    super(key, internalSignal, eventChannel);
+  constructor(internalSignal: Signal, eventChannel: EventChannel) {
+    super(internalSignal, eventChannel);
   }
 
   async increment(delta?: number): Promise<void> {

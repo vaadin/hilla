@@ -26,8 +26,7 @@ public class NumberSignal {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(NumberSignal.class);
-    public static final UUID ROOT = UUID
-            .fromString("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
+
     private final ReentrantLock lock = new ReentrantLock();
 
     private final ObjectMapper mapper;
@@ -97,7 +96,6 @@ public class NumberSignal {
     private JsonEvent createSnapshot() {
         ArrayNode snapshotEntries = mapper.createArrayNode();
         ObjectNode entryNode = snapshotEntries.addObject();
-        entryNode.put("id", ROOT.toString());
         entryNode.set("value", new DoubleNode(value));
         ObjectNode snapshotData = mapper.createObjectNode();
         snapshotData.set("entries", snapshotEntries);

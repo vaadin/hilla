@@ -7,8 +7,6 @@ export type EntryId = string;
 
 export interface ModifiableEntry<T = any> {
   value: T;
-  next: EntryId | null;
-  prev: EntryId | null;
   type: EntryType;
 }
 
@@ -33,7 +31,6 @@ export type SignalOptions = Partial<FullSignalOptions>;
 export interface EventCondition {
   id: EntryId;
   value?: any;
-  // TODO add conditions for prev / next pointers
 }
 
 export interface StateEvent {
@@ -42,15 +39,13 @@ export interface StateEvent {
 }
 
 export interface SetEvent extends StateEvent {
-  set: EntryId;
+  set: 'id';
   value: any;
 }
 
 export interface SnapshotEvent extends StateEvent {
   entries: {
     id: EntryId;
-    next: EntryId | null;
-    prev: EntryId | null;
     value: any;
   }[];
 }

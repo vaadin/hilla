@@ -1,5 +1,4 @@
 import {computed, type ReadonlySignal, Signal} from "@preact/signals-react";
-import type {EntryId} from "./types.js";
 
 export class DependencyTrackSignal<T = any> extends Signal<T> {
 
@@ -32,10 +31,7 @@ function Computed<T>(this: Computed<T>, compute: () => T) {
 Computed.prototype = (computed(() => {}) as any).__proto__;
 
 export abstract class SharedSignal<T> extends Computed<T> {
-  override readonly key: EntryId;
-
-  constructor(compute: () => T, key: EntryId) {
+  protected constructor(compute: () => T) {
     super(compute);
-    this.key = key;
   }
 }
