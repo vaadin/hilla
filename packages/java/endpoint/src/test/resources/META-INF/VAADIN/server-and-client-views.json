@@ -1,0 +1,79 @@
+{
+  "": {
+    "params": {},
+    "title": "Layout",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/foo": {
+    "params": {},
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/foo",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/bar": {
+    "params": {},
+    "title": "Component",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/bar",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/home": {
+    "params": {},
+    "title": "Home",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/home",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/comments": {
+    "params": {
+      ":___commentId?": "opt"
+    },
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/comments",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/wildcard": {
+    "params": {
+      ":___wildcard*": "*"
+    },
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/wildcard",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/profile": {
+    "params": {},
+    "title": "Profile",
+    "rolesAllowed": [
+      "ROLE_USER",
+      "ROLE_ADMIN"
+    ],
+    "loginRequired": true,
+    "route": "/profile",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  }
+}
