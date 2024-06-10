@@ -140,9 +140,8 @@ public class RouteUnifyingIndexHtmlRequestListener
                     deploymentConfiguration);
         }
 
-        return clientRouteRegistry.getAllRoutes().entrySet().stream()
-                .filter(viewMapping -> !hasRequiredParameter(
-                        viewMapping.getValue()))
+        return clientRouteRegistry.getAllRoutes().entrySet().stream().filter(
+                viewMapping -> !hasRequiredParameter(viewMapping.getValue()))
                 .filter(viewMapping -> routeUtil.isRouteAllowed(isUserInRole,
                         isUserAuthenticated, viewMapping.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
@@ -151,7 +150,8 @@ public class RouteUnifyingIndexHtmlRequestListener
     }
 
     private boolean hasRequiredParameter(ClientViewConfig config) {
-        final Map<String, RouteParamType> routeParameters = config.getRouteParameters();
+        final Map<String, RouteParamType> routeParameters = config
+                .getRouteParameters();
         if (routeParameters != null && !routeParameters.isEmpty()
                 && routeParameters.values().stream().anyMatch(
                         paramType -> paramType == RouteParamType.REQUIRED)) {

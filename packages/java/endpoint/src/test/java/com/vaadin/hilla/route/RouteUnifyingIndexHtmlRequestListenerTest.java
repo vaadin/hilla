@@ -187,7 +187,6 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         editProductConfig.setRouteParameters(Collections.emptyMap());
         routes.put("/products/:id/edit", editProductConfig);
 
-
         ClientViewConfig idParamConfig = new ClientViewConfig();
         idParamConfig.setRolesAllowed(null);
         idParamConfig.setLoginRequired(false);
@@ -196,7 +195,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         idParamConfig.setAutoRegistered(false);
         idParamConfig.setMenu(null);
         idParamConfig.setChildren(List.of(editProductConfig));
-        idParamConfig.setRouteParameters(Map.of(":id", RouteParamType.REQUIRED));
+        idParamConfig
+                .setRouteParameters(Map.of(":id", RouteParamType.REQUIRED));
         editProductConfig.setParent(idParamConfig);
 
         ClientViewConfig productsConfig = new ClientViewConfig();
