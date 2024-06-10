@@ -145,6 +145,8 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isTrue(validator.validate(1));
       assert.isTrue(validator.validate(1.2));
       assert.isTrue(validator.validate(-0.5));
+      assert.isTrue(validator.validate(6.757657e-8));
+      assert.isTrue(validator.validate(6.757657e8));
       assert.isFalse(validator.validate(Infinity));
       assert.isFalse(validator.validate(-Infinity));
       assert.isFalse(validator.validate(NaN));
