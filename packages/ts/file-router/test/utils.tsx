@@ -58,6 +58,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     mkdir(new URL('empty-dir/empty-subdir/', dir), { recursive: true }),
     mkdir(new URL('empty-dir/empty-file-subdir/', dir), { recursive: true }),
     mkdir(new URL('test', dir), { recursive: true }),
+    mkdir(new URL('test/issue-002378/{requiredParam}', dir), { recursive: true }),
   ]);
   await Promise.all([
     appendFile(
@@ -103,6 +104,10 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(
       new URL('test/{{optional}}.tsx', dir),
       "export const config = { title: 'Optional' };\nexport default function Optional() {};",
+    ),
+    appendFile(
+      new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
+      'export default function Issue002378RequiredParam() {};',
     ),
     appendFile(
       new URL('test/issue-002879-config-below.tsx', dir),
@@ -172,6 +177,20 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
         {
           path: '{...wildcard}',
           file: new URL('test/{...wildcard}.tsx', dir),
+        },
+        {
+          path: 'issue-002378',
+          children: [
+            {
+              path: '{requiredParam}',
+              children: [
+                {
+                  path: 'edit',
+                  file: new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
+                },
+              ],
+            },
+          ],
         },
         {
           path: 'issue-002879-config-below',
