@@ -97,9 +97,8 @@ public class RouteUnifyingIndexHtmlRequestListener
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
                     "Exposing server-side views to the client based on user configuration");
-            availableViews.putAll(collectServerViews(hasMainMenu(
-                    VaadinService.getCurrent().getDeploymentConfiguration(),
-                    response.getVaadinRequest())));
+            availableViews
+                    .putAll(collectServerViews(hasMainMenu(availableViews)));
         }
 
         if (availableViews.isEmpty()) {
@@ -169,10 +168,9 @@ public class RouteUnifyingIndexHtmlRequestListener
                         Function.identity()));
     }
 
-    private boolean hasMainMenu(DeploymentConfiguration deploymentConfiguration,
-            VaadinRequest request) {
-        Map<String, AvailableViewInfo> clientItems = MenuRegistry
-                .collectClientMenuItems(true, deploymentConfiguration, request);
+    private boolean hasMainMenu(Map<String, AvailableViewInfo> availableViews) {
+        Map<String, AvailableViewInfo> clientItems = new HashMap<>(
+                availableViews);
 
         Set<String> clientEntries = new HashSet<>(clientItems.keySet());
         for (String key : clientEntries) {

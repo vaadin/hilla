@@ -200,15 +200,14 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass().getResource(
                 "/META-INF/VAADIN/available-views-anonymous.json"));
 
-
         Iterator<String> elementsFields = expected.fieldNames();
         do {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
-                actual.has(field), Matchers.is(true));
+                    actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                actual.toString(),
-                Matchers.containsString(expected.get(field).toString()));
+                    actual.toString(),
+                    Matchers.containsString(expected.get(field).toString()));
         } while (elementsFields.hasNext());
     }
 
@@ -255,15 +254,14 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var expected = mapper.readTree(getClass()
                 .getResource("/META-INF/VAADIN/available-views-user.json"));
 
-
         Iterator<String> elementsFields = expected.fieldNames();
         do {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
-                actual.has(field), Matchers.is(true));
+                    actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                actual.toString(),
-                Matchers.containsString(expected.get(field).toString()));
+                    actual.toString(),
+                    Matchers.containsString(expected.get(field).toString()));
         } while (elementsFields.hasNext());
     }
 
