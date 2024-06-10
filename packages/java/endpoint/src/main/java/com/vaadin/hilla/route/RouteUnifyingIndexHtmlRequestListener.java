@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
@@ -141,7 +142,7 @@ public class RouteUnifyingIndexHtmlRequestListener
 
         return clientRouteRegistry.getAllRoutes().entrySet().stream()
                 .filter(viewMapping -> !hasRequiredParameter(
-                        viewMapping.getValue().getRouteParameters()))
+                        viewMapping.getValue()))
                 .filter(viewMapping -> routeUtil.isRouteAllowed(isUserInRole,
                         isUserAuthenticated, viewMapping.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey,
@@ -149,11 +150,21 @@ public class RouteUnifyingIndexHtmlRequestListener
                                 viewMapping.getValue())));
     }
 
-    private boolean hasRequiredParameter(
-            Map<String, RouteParamType> routeParameters) {
-        return routeParameters != null && !routeParameters.isEmpty()
+    private boolean hasRequiredParameter(ClientViewConfig config) {
+        final Map<String, RouteParamType> routeParameters = config.getRouteParameters();
+        if (routeParameters != null && !routeParameters.isEmpty()
                 && routeParameters.values().stream().anyMatch(
-                        paramType -> paramType == RouteParamType.REQUIRED);
+                        paramType -> paramType == RouteParamType.REQUIRED)) {
+            return true;
+        }
+
+        // Nested routes could have parameters on the parent, check them also
+        final ClientViewConfig parentConfig = config.getParent();
+        if (parentConfig != null) {
+            return hasRequiredParameter(parentConfig);
+        }
+
+        return false;
     }
 
     private AvailableViewInfo toAvailableViewInfo(ClientViewConfig config) {

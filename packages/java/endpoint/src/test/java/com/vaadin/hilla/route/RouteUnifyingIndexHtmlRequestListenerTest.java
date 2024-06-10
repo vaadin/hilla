@@ -175,6 +175,40 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         ordersIndexConfig.setRouteParameters(Collections.emptyMap());
         routes.put("/orders", ordersIndexConfig);
 
+        ClientViewConfig editProductConfig = new ClientViewConfig();
+        editProductConfig.setTitle("Edit Product");
+        editProductConfig.setRolesAllowed(null);
+        editProductConfig.setLoginRequired(true);
+        editProductConfig.setRoute("/edit");
+        editProductConfig.setLazy(false);
+        editProductConfig.setAutoRegistered(false);
+        editProductConfig.setMenu(null);
+        editProductConfig.setChildren(null);
+        editProductConfig.setRouteParameters(Collections.emptyMap());
+        routes.put("/products/:id/edit", editProductConfig);
+
+
+        ClientViewConfig idParamConfig = new ClientViewConfig();
+        idParamConfig.setRolesAllowed(null);
+        idParamConfig.setLoginRequired(false);
+        idParamConfig.setRoute("/:id");
+        idParamConfig.setLazy(false);
+        idParamConfig.setAutoRegistered(false);
+        idParamConfig.setMenu(null);
+        idParamConfig.setChildren(List.of(editProductConfig));
+        idParamConfig.setRouteParameters(Map.of(":id", RouteParamType.REQUIRED));
+        editProductConfig.setParent(idParamConfig);
+
+        ClientViewConfig productsConfig = new ClientViewConfig();
+        productsConfig.setRolesAllowed(new String[] { "ROLE_ADMIN" });
+        productsConfig.setRoute("/products");
+        productsConfig.setLazy(false);
+        productsConfig.setAutoRegistered(false);
+        productsConfig.setMenu(null);
+        productsConfig.setChildren(List.of(idParamConfig));
+        productsConfig.setRouteParameters(Collections.emptyMap());
+        idParamConfig.setParent(productsConfig);
+
         return routes;
     }
 
