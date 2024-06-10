@@ -32,8 +32,6 @@ import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.core.SignalsRegistry;
 import jakarta.servlet.ServletContext;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -82,7 +80,6 @@ public class EndpointInvoker {
     private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
     private final ServletContext servletContext;
     private final Validator validator;
-    private final SignalsRegistry signalsRegistry;
 
     /**
      * Creates an instance of this bean.
@@ -106,8 +103,7 @@ public class EndpointInvoker {
     public EndpointInvoker(ApplicationContext applicationContext,
             JacksonObjectMapperFactory endpointMapperFactory,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
-            ServletContext servletContext, EndpointRegistry endpointRegistry,
-            SignalsRegistry signalsRegistry) {
+            ServletContext servletContext, EndpointRegistry endpointRegistry) {
         this.applicationContext = applicationContext;
         this.servletContext = servletContext;
         this.endpointMapper = endpointMapperFactory != null
@@ -119,7 +115,6 @@ public class EndpointInvoker {
         }
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
-        this.signalsRegistry = signalsRegistry;
 
         Validator validator = null;
         try {
@@ -484,30 +479,6 @@ public class EndpointInvoker {
                     "Endpoint '%s' method '%s' returned a value that has validation errors: '%s'",
                     endpointName, methodName, returnValueConstraintViolations);
             throw new EndpointInternalException(errorMessage);
-        }
-
-        if (returnValue instanceof NumberSignal signal) {
-            if (signalsRegistry == null) {
-                throw new IllegalStateException(
-                        """
-                                Signals registry is not available, cannot register signal.
-                                Please make sure you have enabled the Full Stack Signals
-                                feature preview flag either through the Vaadin Copilot's
-                                Features panel, or by manually setting the
-                                'com.vaadin.experimental.fullstackSignals=true' in
-                                'src/main/resources/vaadin-featureflags.properties'.
-                                """
-                                .stripIndent());
-            }
-            if (signalsRegistry.contains(signal.getId())) {
-                getLogger().debug(
-                        "Signal already registered before. Ignoring the registration. Endpoint: '{}', method: '{}'",
-                        endpointName, methodName);
-            } else {
-                signalsRegistry.register(signal);
-                getLogger().debug("Registered signal as a result of calling {}",
-                        methodName);
-            }
         }
 
         return returnValue;

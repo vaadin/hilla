@@ -2,24 +2,30 @@ import { Signal } from "@preact/signals-react";
 import type { ConnectClient, Subscription } from "@vaadin/hilla-frontend";
 import { NumberSignal } from "./Signals.js";
 import type { StateEvent, SetEvent, SnapshotEvent } from "./types.js";
+import SignalsHandler from "./handler/SignalsHandler";
 
-interface EventChannelDescriptor<T>  {
-  sharedSignalId: string;
-  subscribe(signalId: string, continueFrom?: string): Subscription<T>;
-  publish(signalId: string, event: T): Promise<void>;
-}
+type EventChannelDescriptor<T> = {
+  signalProviderEndpointMethod: string;
+  subscribe: (channelDescriptor: string, clientSignalId: string) => Subscription<T>;
+  publish: (clientSignalId: string, event: T) => Promise<void>;
+};
 
 class EventChannel<S extends Signal = Signal> {
   private readonly channelDescriptor: EventChannelDescriptor<string>;
-
-  private readonly connectClient: ConnectClient;
+  private readonly signalsHandler: SignalsHandler;
+  private readonly id: string;
 
   private internalSignal: Signal | null = null;
   private externalSignal: Signal | null = null;
 
-  constructor(channelDescriptor: EventChannelDescriptor<string>, connectClient: ConnectClient) {
-    this.channelDescriptor = channelDescriptor;
-    this.connectClient = connectClient;
+  constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
+    this.id = crypto.randomUUID();
+    this.signalsHandler = new SignalsHandler(connectClient);
+    this.channelDescriptor = {
+      signalProviderEndpointMethod: signalProviderServiceMethod,
+      subscribe: (signalProviderEndpointMethod: string, signalId: string) => this.signalsHandler.subscribe(signalProviderEndpointMethod, signalId),
+      publish: (signalId: string, event: string) => this.signalsHandler.update(signalId, event),
+    }
 
     this.internalSignal = this.createInternalSignal();
     this.externalSignal = this.createExternalSignal(this.internalSignal, (event: StateEvent) => this.publish(event));
@@ -28,7 +34,7 @@ class EventChannel<S extends Signal = Signal> {
   }
 
   private connect() {
-    this.channelDescriptor.subscribe(this.channelDescriptor.sharedSignalId).onNext(json => {
+    this.channelDescriptor.subscribe(this.channelDescriptor.signalProviderEndpointMethod, this.id).onNext(json => {
       const event = JSON.parse(json) as SnapshotEvent;
 
       const accepted = true; // TODO: evaluate the conditions against the current value and the received event
@@ -54,7 +60,7 @@ class EventChannel<S extends Signal = Signal> {
   }
 
   public publish(event: StateEvent): Promise<boolean> {
-    return this.channelDescriptor.publish(this.channelDescriptor.sharedSignalId, JSON.stringify(event))
+    return this.channelDescriptor.publish(this.id, JSON.stringify(event))
           .then((_) => { return true; })
           .catch((error) => { throw Error(error); });
   }
@@ -73,7 +79,7 @@ class EventChannel<S extends Signal = Signal> {
 }
 
 export class NumberSignalChannel extends EventChannel<NumberSignal> {
-  constructor(eventChannelDescriptor: EventChannelDescriptor<string>, connectClient: ConnectClient) {
-    super(eventChannelDescriptor, connectClient);
+  constructor(signalProviderEndpointMethod: string, connectClient: ConnectClient) {
+    super(signalProviderEndpointMethod, connectClient);
   }
 }

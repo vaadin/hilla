@@ -1,11 +1,9 @@
 package com.vaadin.hilla;
 
-import com.vaadin.hilla.signals.config.SignalsConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -16,10 +14,8 @@ import com.vaadin.hilla.auth.EndpointAccessChecker;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, JacksonAutoConfiguration.class,
-        EndpointController.class })
-@ContextConfiguration(classes = { EndpointControllerConfiguration.class,
-        SignalsConfiguration.class })
+        JacksonProperties.class, EndpointController.class })
+@ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointControllerConfigurationTest {
 

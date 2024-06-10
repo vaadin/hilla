@@ -2,6 +2,7 @@ package com.vaadin.hilla.signals.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
+import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
 import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.springframework.context.annotation.Bean;
@@ -16,9 +17,12 @@ public class SignalsConfiguration {
     private SignalsRegistry signalsRegistry;
     private SignalsHandler signalsHandler;
     private final ObjectMapper objectMapper;
+    private final EndpointInvoker endpointInvoker;
 
-    public SignalsConfiguration(ObjectMapper objectMapper) {
+    public SignalsConfiguration(ObjectMapper objectMapper,
+            EndpointInvoker endpointInvoker) {
         this.objectMapper = objectMapper;
+        this.endpointInvoker = endpointInvoker;
     }
 
     /**
@@ -47,7 +51,7 @@ public class SignalsConfiguration {
     public SignalsHandler signalsHandler() {
         if (signalsHandler == null) {
             signalsHandler = new SignalsHandler(signalsRegistry(),
-                    objectMapper);
+                    endpointInvoker, objectMapper);
         }
         return signalsHandler;
     }
