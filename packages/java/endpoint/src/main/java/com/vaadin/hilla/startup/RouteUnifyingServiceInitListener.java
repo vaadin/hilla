@@ -85,11 +85,11 @@ public class RouteUnifyingServiceInitListener
                     "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
                     deploymentMode);
 
-            Map<String, AvailableViewInfo> stringAvailableViewInfoMap = MenuRegistry
+            Map<String, AvailableViewInfo> clientMenus = MenuRegistry
                     .collectClientMenuItems(false, deploymentConfiguration,
                             null);
 
-            boolean hasHillaFsRoute = !stringAvailableViewInfoMap.isEmpty();
+            boolean hasHillaFsRoute = !clientMenus.isEmpty();
 
             HillaStats.reportGenericHasFeatures(event.getSource(),
                     hasHillaFsRoute);
