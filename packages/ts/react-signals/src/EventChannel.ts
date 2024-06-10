@@ -2,7 +2,7 @@ import { Signal } from "@preact/signals-react";
 import type { ConnectClient, Subscription } from "@vaadin/hilla-frontend";
 import { NumberSignal } from "./Signals.js";
 import type { StateEvent, SetEvent, SnapshotEvent } from "./types.js";
-import SignalsHandler from "./handler/SignalsHandler";
+import SignalsHandler from "./handler/SignalsHandler.js";
 
 type EventChannelDescriptor<T> = {
   signalProviderEndpointMethod: string;
