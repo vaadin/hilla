@@ -10,13 +10,11 @@
         <version>24.4-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
-    
-    <groupId>com.vaadin</groupId>
+
     <artifactId>hilla-bom</artifactId>
     <packaging>pom</packaging>
     <name>Hilla Platform (Bill of Materials)</name>
     <description>Hilla Platform (Bill of Materials)</description>
-    <version>24.4-SNAPSHOT</version>
     <url>https://hilla.dev</url>
 
     <properties>
