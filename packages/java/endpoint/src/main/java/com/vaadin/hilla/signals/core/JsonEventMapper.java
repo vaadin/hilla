@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Converts {@link JsonEvent} instances to and from JSON.
+ */
 public class JsonEventMapper {
 
     private final ObjectMapper mapper;

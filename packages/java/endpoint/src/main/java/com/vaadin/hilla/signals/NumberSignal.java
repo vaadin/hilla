@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -37,11 +38,29 @@ public class NumberSignal {
 
     private final Set<Sinks.Many<JsonEvent>> subscribers = new HashSet<>();
 
-    public NumberSignal(Double defaultValue) {
+    /**
+     * Creates a new NumberSignal with the provided default value.
+     *
+     * @param defaultValue
+     *            the default value
+     */
+    public NumberSignal(@Nullable Double defaultValue) {
         this.value = defaultValue;
         this.mapper = new ObjectMapper();
     }
 
+    /**
+     * Creates a new NumberSignal with the default value of 0.
+     */
+    public NumberSignal() {
+        this(0.0);
+    }
+
+    /**
+     * Subscribes to the signal.
+     *
+     * @return a Flux of JSON events
+     */
     public Flux<JsonEvent> subscribe() {
         Sinks.Many<JsonEvent> sink = Sinks.many().multicast()
                 .onBackpressureBuffer();
@@ -67,6 +86,13 @@ public class NumberSignal {
         });
     }
 
+    /**
+     * Submits an event to the signal and notifies subscribers about the change
+     * of the signal value.
+     *
+     * @param event
+     *            the event to submit
+     */
     public void submit(JsonEvent event) {
         lock.lock();
         try {
@@ -85,10 +111,21 @@ public class NumberSignal {
         }
     }
 
+    /**
+     * Returns the signal UUID.
+     *
+     * @return the id
+     */
     public UUID getId() {
         return this.id;
     }
 
+    /**
+     * Returns the signal's current value.
+     *
+     * @return the value
+     */
+    @Nullable
     public Double getValue() {
         return this.value;
     }
@@ -129,7 +166,8 @@ public class NumberSignal {
         if (json.has("set")) {
             this.value = Double.valueOf(json.get("value").asText());
         } else {
-            throw new RuntimeException("Unsupported JSON: " + json.toString());
+            throw new UnsupportedOperationException(
+                    "Unsupported JSON: " + json);
         }
     }
 }
