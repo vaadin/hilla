@@ -204,5 +204,6 @@ kotlin {
 compileKotlin {
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs.addAll "-Xjsr305=strict", "-Xemit-jvm-type-annotations"
     }
 }
