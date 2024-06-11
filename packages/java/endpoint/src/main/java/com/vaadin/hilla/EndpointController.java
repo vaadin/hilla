@@ -85,6 +85,8 @@ public class EndpointController {
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
+    private static final String SIGNALS_HANDLER_BEAN_NAME = "signalsHandler";
+
     private final ApplicationContext context;
 
     EndpointRegistry endpointRegistry;
@@ -138,6 +140,15 @@ public class EndpointController {
 
             endpointBeans.forEach((name, endpointBean) -> endpointRegistry
                     .registerEndpoint(endpointBean));
+        }
+
+        // make sure that signalsHandler endpoint is always registered:
+        if (endpointRegistry.get(SIGNALS_HANDLER_BEAN_NAME) == null) {
+            var signalHandlerBean = endpointBeans
+                    .get(SIGNALS_HANDLER_BEAN_NAME);
+            if (signalHandlerBean != null) {
+                endpointRegistry.registerEndpoint(signalHandlerBean);
+            }
         }
 
         if (!endpointRegistry.isEmpty()) {
@@ -262,8 +273,6 @@ public class EndpointController {
                                 .or(() -> Optional
                                         .ofNullable(tag.get("x-class-name"))
                                         .map(JsonNode::asText)
-                                        .filter(className -> !("com.vaadin.hilla.signals.handler.SignalsHandler"
-                                                .equals(className)))
                                         .map(this::instantiateEndpointByClassName))
                                 .ifPresent(endpointRegistry::registerEndpoint);
                     });
