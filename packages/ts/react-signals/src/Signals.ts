@@ -1,6 +1,6 @@
 import {SharedSignal} from "./ExtendedSignals";
 import type {SetEvent, StateEvent} from "./types";
-import {Signal} from "@preact/signals-react";
+import {Signal} from "./core.js";
 
 export class ValueSignal<T> extends SharedSignal<T> {
   private readonly publish: (event: StateEvent) => Promise<boolean>;
