@@ -137,8 +137,11 @@ public class RouteUtil implements FileRouterRequestUtil {
 
     private Optional<AvailableViewInfo> getRouteData(
             HttpServletRequest request) {
-        if(registeredRoutes == null) {
-            return Optional.empty();
+        if (registeredRoutes == null
+                && request instanceof VaadinRequest vaadinRequest) {
+            setRoutes(MenuRegistry.collectClientMenuItems(false,
+                    vaadinRequest.getService().getDeploymentConfiguration(),
+                    vaadinRequest));
         }
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
