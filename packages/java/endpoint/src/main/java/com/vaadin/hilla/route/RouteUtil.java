@@ -137,6 +137,9 @@ public class RouteUtil implements FileRouterRequestUtil {
 
     private Optional<AvailableViewInfo> getRouteData(
             HttpServletRequest request) {
+        if(registeredRoutes == null) {
+            return Optional.empty();
+        }
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
         Map<String, AvailableViewInfo> availableRoutes = new HashMap<>(
