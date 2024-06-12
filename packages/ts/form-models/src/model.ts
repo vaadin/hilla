@@ -30,53 +30,55 @@ export declare enum Enum {}
 
 export type EmptyRecord = Record<never, never>;
 
-export type ModelConstructor<T = unknown, C extends object = EmptyRecord> = C &
-  Constructor<ExtendedModel<T>> &
-  Readonly<{
-    optional: boolean;
-    defaultValue: T;
-  }>;
+export const $key = Symbol();
+export const $name = Symbol();
+export const $owner = Symbol();
+export const $meta = Symbol();
+export const $optional = Symbol();
+export const $defaultValue = Symbol();
 
-export type ExtendedModel<T> = Model<T> &
+export const $enum = Symbol();
+export const $members = Symbol();
+export const $itemModel = Symbol();
+
+export interface Model<T = unknown> {
+  readonly [$key]: keyof any;
+  readonly [$name]: string;
+  readonly [$owner]: Model | ModelOwner;
+  readonly [$meta]: ModelMetadata;
+  readonly [$optional]: boolean;
+  readonly [$defaultValue]: T;
+  [Symbol.hasInstance](o: unknown): o is this;
+  toString(): string;
+}
+
+export type ExtendedModel<T = unknown, C extends object = EmptyRecord> = C &
+  Model<T> &
   Readonly<{
     [K in keyof T]: ExtendedModel<T[K]>;
   }>;
 
-export class Model<T = unknown> {
-  static get optional(): boolean {
-    return false;
-  }
-
-  static get defaultValue(): unknown {
-    return undefined;
-  }
-
-  static getKey(model: Model): keyof any {
-    return model.#key;
-  }
-
-  static getOwner(model: Model): Model | ModelOwner {
-    return model.#owner;
-  }
-
-  static getMeta(model: Model): ModelMetadata | undefined {
-    return model.#meta;
-  }
-
-  declare ['constructor']: typeof Model;
-
-  readonly #key: keyof any;
-  readonly #owner: Model | ModelOwner;
-  readonly #meta?: ModelMetadata;
-
-  constructor(key: keyof any, owner: Model | ModelOwner, meta?: ModelMetadata) {
-    this.#key = key;
-    this.#owner = owner;
-    this.#meta = meta;
-  }
-
-  toString(): string {
-    const { name, optional } = this.constructor;
-    return `${String(this.#owner)} / ${String(this.#key)}${optional ? '?' : ''}: ${name}`;
-  }
-}
+export const Model = Object.create(null, {
+  [$key]: {},
+  [$name]: {
+    value: 'Model',
+  },
+  [$owner]: {},
+  [$meta]: {},
+  [$optional]: {
+    value: false,
+  },
+  [$defaultValue]: {
+    value: undefined,
+  },
+  [Symbol.hasInstance]: {
+    value(o: unknown) {
+      return typeof o === 'object' && o != null && Object.prototype.isPrototypeOf.call(this, o);
+    },
+  },
+  toString: {
+    value(this: Model) {
+      return `${String(this[$owner])} / ${String(this[$key])}${this[$optional] ? '?' : ''}: ${this[$name]}`;
+    },
+  },
+});
