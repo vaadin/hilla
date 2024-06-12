@@ -14,6 +14,7 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.RouteUtil;
 
 public class RouteUnifyingServiceInitListenerTest {
 
@@ -29,7 +30,7 @@ public class RouteUnifyingServiceInitListenerTest {
     public void setup() throws IOException {
         routeUnifyingConfigurationProperties
                 .setExposeServerRoutesToClient(true);
-        routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(
+        routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(new RouteUtil(),
                 routeUnifyingConfigurationProperties, null, null);
         VaadinService mockVaadinService = Mockito.mock(VaadinService.class);
         mockDeploymentConfiguration = Mockito

@@ -24,6 +24,7 @@ import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.hilla.HillaStats;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.RouteUtil;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,8 @@ public class RouteUnifyingServiceInitListener
 
     private final ViewAccessChecker viewAccessChecker;
 
+    private final RouteUtil routeUtil;
+
     /**
      * Creates a new instance of the listener.
      *
@@ -57,9 +60,11 @@ public class RouteUnifyingServiceInitListener
      */
     @Autowired
     public RouteUnifyingServiceInitListener(
+            RouteUtil routeUtil,
             RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties,
             @Nullable NavigationAccessControl accessControl,
             @Nullable ViewAccessChecker viewAccessChecker) {
+        this.routeUtil = routeUtil;
         this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
         this.accessControl = accessControl;
         this.viewAccessChecker = viewAccessChecker;

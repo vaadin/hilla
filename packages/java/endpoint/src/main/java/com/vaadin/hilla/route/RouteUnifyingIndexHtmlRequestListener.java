@@ -179,24 +179,11 @@ public class RouteUnifyingIndexHtmlRequestListener
             }
             AvailableViewInfo viewInfo = clientItems.get(key);
             if (viewInfo.children() != null) {
-                removeChildren(clientItems, viewInfo, key);
+                RouteUtil.removeChildren(clientItems, viewInfo, key);
             }
         }
         return !clientItems.isEmpty() && clientItems.size() == 1
                 && clientItems.values().iterator().next().route().equals("");
-    }
-
-    private static void removeChildren(
-            Map<String, AvailableViewInfo> configurations,
-            AvailableViewInfo viewInfo, String parentPath) {
-        for (AvailableViewInfo child : viewInfo.children()) {
-            String childPath = (parentPath + "/" + child.route())
-                    .replaceAll("//", "/");
-            configurations.remove(childPath);
-            if (child.children() != null) {
-                removeChildren(configurations, child, childPath);
-            }
-        }
     }
 
     /**
