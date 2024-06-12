@@ -59,8 +59,7 @@ public class RouteUnifyingServiceInitListener
      *            the configuration properties instance
      */
     @Autowired
-    public RouteUnifyingServiceInitListener(
-            RouteUtil routeUtil,
+    public RouteUnifyingServiceInitListener(RouteUtil routeUtil,
             RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties,
             @Nullable NavigationAccessControl accessControl,
             @Nullable ViewAccessChecker viewAccessChecker) {
