@@ -2,22 +2,25 @@ package com.vaadin.hilla.startup;
 
 import java.io.IOException;
 
-import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
-import com.vaadin.hilla.route.RouteUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.route.ClientRouteRegistry;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
+import com.vaadin.hilla.route.RouteUtil;
 
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 
 public class RouteUnifyingServiceInitListenerTest {
@@ -94,6 +97,27 @@ public class RouteUnifyingServiceInitListenerTest {
         routeUnifyingServiceInitListener.serviceInit(event);
         Mockito.verify(clientRouteRegistry, times(1))
                 .registerClientRoutes(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void when_hillaIsUsed_and_reactIsDisabled_LitIsReported() {
+        Mockito.when(mockDeploymentConfiguration.isReactEnabled())
+                .thenReturn(false);
+        Mockito.when(mockDeploymentConfiguration.isProductionMode())
+                .thenReturn(false);
+
+        try (MockedStatic<FrontendUtils> mockedStaticFrontendUtils = mockStatic(
+                FrontendUtils.class)) {
+            mockedStaticFrontendUtils
+                    .when(() -> FrontendUtils.isHillaUsed(Mockito.any()))
+                    .thenReturn(true);
+            routeUnifyingServiceInitListener.serviceInit(event);
+            boolean litReported = UsageStatistics.getEntries()
+                    .anyMatch(entry -> "has-lit".equals(entry.getName()));
+            Assert.assertTrue(
+                    "Expected Lit to be reported in usage stats when 'isReactEnabled=false' and Hilla is used",
+                    litReported);
+        }
     }
 
     private boolean hasRouteUnifyingIndexHtmlRequestListenerAdded(
