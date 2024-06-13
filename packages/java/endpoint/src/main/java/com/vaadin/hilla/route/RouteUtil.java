@@ -1,9 +1,12 @@
 package com.vaadin.hilla.route;
 
 import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
+import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
@@ -60,11 +63,8 @@ public class RouteUtil implements FileRouterRequestUtil {
      */
     @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
-        if (registeredRoutes == null
-                && request instanceof VaadinRequest vaadinRequest) {
-            setRoutes(MenuRegistry.collectClientMenuItems(false,
-                    vaadinRequest.getService().getDeploymentConfiguration(),
-                    vaadinRequest));
+        if (registeredRoutes == null) {
+            collectClientRoutes(request);
         }
 
         var viewConfig = getRouteData(request);
@@ -137,12 +137,6 @@ public class RouteUtil implements FileRouterRequestUtil {
 
     private Optional<AvailableViewInfo> getRouteData(
             HttpServletRequest request) {
-        if (registeredRoutes == null
-                && request instanceof VaadinRequest vaadinRequest) {
-            setRoutes(MenuRegistry.collectClientMenuItems(false,
-                    vaadinRequest.getService().getDeploymentConfiguration(),
-                    vaadinRequest));
-        }
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
         Map<String, AvailableViewInfo> availableRoutes = new HashMap<>(
@@ -150,6 +144,12 @@ public class RouteUtil implements FileRouterRequestUtil {
         filterClientViews(availableRoutes, request);
         return Optional.ofNullable(getRouteByPath(availableRoutes,
                 requestPath.pathWithinApplication().value()));
+    }
+
+    private void collectClientRoutes(HttpServletRequest request) {
+        ApplicationConfiguration config = ApplicationConfiguration
+                .get(new VaadinServletContext(request.getServletContext()));
+        setRoutes(MenuRegistry.collectClientMenuItems(false, config, null));
     }
 
     /**
