@@ -1,8 +1,8 @@
-import { Signal } from "./core.js";
-import type { ConnectClient, Subscription } from "@vaadin/hilla-frontend";
-import { NumberSignal } from "./Signals.js";
-import type { StateEvent, SnapshotEvent } from "./types.js";
-import SignalsHandler from "./SignalsHandler";
+import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
+import { Signal } from './core.js';
+import { NumberSignal } from './Signals.js';
+import SignalsHandler from './SignalsHandler';
+import type { StateEvent, SnapshotEvent } from './types.js';
 
 type EventChannelDescriptor<T> = {
   signalProviderEndpointMethod: string;
@@ -34,7 +34,7 @@ class EventChannel<S extends Signal = Signal> {
   }
 
   private connect() {
-    this.channelDescriptor.subscribe(this.channelDescriptor.signalProviderEndpointMethod, this.id).onNext(json => {
+    this.channelDescriptor.subscribe(this.channelDescriptor.signalProviderEndpointMethod, this.id).onNext((json) => {
       const event = JSON.parse(json) as SnapshotEvent;
 
       const accepted = true; // TODO: evaluate the conditions against the current value and the received event
@@ -59,7 +59,7 @@ class EventChannel<S extends Signal = Signal> {
     }
   }
 
-  public publish(event: StateEvent): Promise<boolean> {
+  public async publish(event: StateEvent): Promise<boolean> {
     return this.channelDescriptor.publish(this.id, JSON.stringify(event))
           .then((_) => { return true; })
           .catch((error) => { throw Error(error); });
