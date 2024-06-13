@@ -46,14 +46,14 @@ class EventChannel<S extends Signal = Signal> {
   }
 
   private updateSignals(snapshotEvent: SnapshotEvent): void {
-    if (this.internalSignal) {
-      if (snapshotEvent.value) {
-        this.internalSignal.value = snapshotEvent.value;
+    if (this.internalSignal !== undefined) {
+      if (snapshotEvent.value !== undefined) {
+        this.internalSignal!.value = snapshotEvent.value;
       } else {
         this.internalSignal = null;
         this.externalSignal = null;
       }
-    } else if (snapshotEvent.value) {
+    } else if (snapshotEvent.value !== undefined) {
       this.internalSignal = this.createInternalSignal(snapshotEvent.value);
       this.externalSignal = this.createExternalSignal(this.internalSignal, (event: StateEvent) => this.publish(event));
     }
