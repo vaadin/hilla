@@ -6,9 +6,8 @@
 
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>hilla-project</artifactId>
-        <version>24.5-SNAPSHOT</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <artifactId>vaadin-parent</artifactId>
+        <version>2.2.1</version>
     </parent>
 
     <artifactId>hilla-bom</artifactId>
