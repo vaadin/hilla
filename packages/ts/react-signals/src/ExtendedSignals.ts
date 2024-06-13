@@ -1,4 +1,4 @@
-import {computed, type ReadonlySignal, Signal} from "./core.js";
+import { computed, type ReadonlySignal, Signal } from './core.js';
 
 declare class Computed<T> extends Signal<T> implements ReadonlySignal<T> {
   constructor(compute: () => T);

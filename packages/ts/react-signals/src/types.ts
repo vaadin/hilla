@@ -1,4 +1,3 @@
-
 export type EntryId = string;
 
 export interface EventCondition {

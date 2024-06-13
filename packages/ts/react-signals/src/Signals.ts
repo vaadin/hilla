@@ -1,6 +1,7 @@
-import {SharedSignal} from "./ExtendedSignals";
-import type {SetEvent, StateEvent} from "./types";
-import {Signal} from "./core.js";
+import type { Signal } from './core.js';
+import { SharedSignal } from './ExtendedSignals';
+import type { SetEvent, StateEvent } from './types';
+
 
 export class ValueSignal<T> extends SharedSignal<T> {
   private readonly publish: (event: StateEvent) => Promise<boolean>;
@@ -44,9 +45,4 @@ export class NumberSignal extends ValueSignal<number> {
     super(internalSignal, publish);
   }
 
-  // just as an API example, proper implementation is based on new "increment" event type
-  async increment(delta?: number) {
-    const step = delta ?? 1;
-    await this.compareAndSet(this.value, this.value + step);
-  }
 }
