@@ -30,7 +30,8 @@
                 "type" : "object",
                 "properties" : {
                   "node" : {
-                    "type" : "object"
+                    "type" : "array",
+                    "nullable" : true
                   }
                 }
               }
@@ -43,7 +44,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "object"
+                  "type" : "array",
+                  "nullable" : true
                 }
               }
             }
