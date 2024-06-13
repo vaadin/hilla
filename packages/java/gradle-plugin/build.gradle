@@ -204,6 +204,7 @@ kotlin {
 compileKotlin {
     kotlinOptions {
         jvmTarget = "17"
+        // Hilla relies on annotations from JVM bytecode, see: https://github.com/vaadin/hilla/issues/2343
         freeCompilerArgs.addAll "-Xjsr305=strict", "-Xemit-jvm-type-annotations"
     }
 }
