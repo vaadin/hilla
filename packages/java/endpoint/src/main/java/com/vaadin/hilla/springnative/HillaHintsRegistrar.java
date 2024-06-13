@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.router.MenuData;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -40,8 +39,6 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
         registerEndpointTypes(hints);
 
         hints.resources().registerPattern("file-routes.json");
-        hints.reflection().registerType(ClientViewConfig.class,
-                MemberCategory.values());
         hints.reflection().registerType(MenuData.class,
                 MemberCategory.values());
         hints.reflection().registerType(AvailableViewInfo.class,

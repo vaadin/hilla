@@ -2,6 +2,7 @@ package com.vaadin.hilla.startup;
 
 import java.io.IOException;
 
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,22 +15,17 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.hilla.route.ClientRouteRegistry;
-import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUtil;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
 
 public class RouteUnifyingServiceInitListenerTest {
 
     private RouteUnifyingServiceInitListener routeUnifyingServiceInitListener;
     private ServiceInitEvent event;
-    private ClientRouteRegistry clientRouteRegistry;
     private DeploymentConfiguration mockDeploymentConfiguration;
-    private RouteUtil routeUtil;
     private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties = new RouteUnifyingConfigurationProperties();
 
     @Rule
@@ -37,19 +33,21 @@ public class RouteUnifyingServiceInitListenerTest {
 
     @Before
     public void setup() throws IOException {
-        clientRouteRegistry = Mockito.mock(ClientRouteRegistry.class);
         routeUnifyingConfigurationProperties
                 .setExposeServerRoutesToClient(true);
-        routeUtil = Mockito.mock(RouteUtil.class);
         routeUnifyingServiceInitListener = new RouteUnifyingServiceInitListener(
-                clientRouteRegistry, routeUtil,
-                routeUnifyingConfigurationProperties, null, null);
+                new RouteUtil(), routeUnifyingConfigurationProperties, null,
+                null);
         VaadinService mockVaadinService = Mockito.mock(VaadinService.class);
         mockDeploymentConfiguration = Mockito
                 .mock(DeploymentConfiguration.class);
         Mockito.when(mockVaadinService.getDeploymentConfiguration())
                 .thenReturn(mockDeploymentConfiguration);
         event = new ServiceInitEvent(mockVaadinService);
+
+        var frontendGeneratedDir = projectRoot.newFolder("frontend/generated");
+        Mockito.when(mockDeploymentConfiguration.getFrontendFolder())
+                .thenReturn(frontendGeneratedDir.getParentFile());
     }
 
     @Test
@@ -84,8 +82,10 @@ public class RouteUnifyingServiceInitListenerTest {
                 .thenReturn(true);
 
         routeUnifyingServiceInitListener.serviceInit(event);
-        Mockito.verify(clientRouteRegistry, times(1))
-                .registerClientRoutes(Mockito.any(), Mockito.any());
+        Assert.assertTrue(
+                "RouteUnifyingIndexHtmlRequestListener was not registered",
+                event.getAddedIndexHtmlRequestListeners().anyMatch(
+                        indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteUnifyingIndexHtmlRequestListener));
     }
 
     @Test
@@ -95,8 +95,10 @@ public class RouteUnifyingServiceInitListenerTest {
         Mockito.when(mockDeploymentConfiguration.isProductionMode())
                 .thenReturn(false);
         routeUnifyingServiceInitListener.serviceInit(event);
-        Mockito.verify(clientRouteRegistry, times(1))
-                .registerClientRoutes(Mockito.any(), Mockito.any());
+        Assert.assertTrue(
+                "RouteUnifyingIndexHtmlRequestListener was not registered",
+                event.getAddedIndexHtmlRequestListeners().anyMatch(
+                        indexHtmlRequestListener -> indexHtmlRequestListener instanceof RouteUnifyingIndexHtmlRequestListener));
     }
 
     @Test
