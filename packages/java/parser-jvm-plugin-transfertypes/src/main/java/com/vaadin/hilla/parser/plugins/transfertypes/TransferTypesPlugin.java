@@ -29,6 +29,8 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
 import com.vaadin.hilla.runtime.transfertypes.Flux;
 
+import io.github.classgraph.ClassGraph;
+
 public final class TransferTypesPlugin
         extends AbstractPlugin<PluginConfiguration> {
     static private final Map<String, Class<?>> classMap = new HashMap<>();
@@ -44,6 +46,17 @@ public final class TransferTypesPlugin
         classMap.put("com.vaadin.hilla.EndpointSubscription",
                 EndpointSubscription.class);
         classMap.put(JsonNode.class.getName(), Object.class);
+        findJsonNodeSubclasses()
+                .forEach(className -> classMap.put(className, Object.class));
+    }
+
+    private static List<String> findJsonNodeSubclasses() {
+        try (var scanResult = new ClassGraph().enableClassInfo()
+                .acceptPackages("com.fasterxml.jackson.databind.node").scan()) {
+            return scanResult.getAllStandardClasses().filter(
+                    classInfo -> classInfo.extendsSuperclass(JsonNode.class))
+                    .getNames();
+        }
     }
 
     public TransferTypesPlugin() {
