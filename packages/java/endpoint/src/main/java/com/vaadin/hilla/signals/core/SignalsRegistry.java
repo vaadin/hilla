@@ -7,9 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 @Component
 public class SignalsRegistry {
@@ -116,20 +119,6 @@ public class SignalsRegistry {
     }
 
     /**
-     * Checks if a signal instance is registered.
-     *
-     * @param signalId
-     *            the signal id, must not be null
-     * @return true if the signal instance is registered, false otherwise
-     * @throws NullPointerException
-     *             if {@code signalId} is null
-     */
-    public synchronized boolean containsSignal(UUID signalId) {
-        Objects.requireNonNull(signalId, "Client signal id must not be null");
-        return signals.containsKey(signalId);
-    }
-
-    /**
      * Removes a signal instance by the provided {@code signalId}.
      * <p>
      * It also removes all the possible associated client signals, too.
@@ -139,7 +128,7 @@ public class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized void removeSignal(UUID signalId) {
+    public synchronized void unregister(UUID signalId) {
         Objects.requireNonNull(signalId,
                 "Signal id to remove must not be null");
         signals.remove(signalId);
@@ -161,20 +150,10 @@ public class SignalsRegistry {
     public synchronized void removeClientSignalToSignalMapping(
             UUID clientSignalId) {
         Objects.requireNonNull(clientSignalId,
-                "Signal id to remove must not be null");
+                "Client signal id to remove must not be null");
         clientSignalToSignalMapping.remove(clientSignalId);
         LOGGER.debug("Removed client signal to signal mapping: {}",
                 clientSignalId);
-    }
-
-    /**
-     * Removes all signal instances and all possible associated client signals,
-     * too.
-     */
-    public synchronized void clear() {
-        signals.clear();
-        clientSignalToSignalMapping.clear();
-        LOGGER.debug("Cleared all signal instances");
     }
 
     /**
@@ -186,4 +165,42 @@ public class SignalsRegistry {
         return signals.isEmpty();
     }
 
+    /**
+     * Returns the number of registered signal instances.
+     *
+     * @return the number of registered signal instances
+     */
+    public synchronized int size() {
+        return signals.size();
+    }
+
+    /**
+     * Returns the number of registered unique mappings between client signal
+     * ids and the signal instances.
+     *
+     * @return the number of registered client signals
+     */
+    public synchronized int getAllClientSubscriptionsSize() {
+        return clientSignalToSignalMapping.size();
+    }
+
+    /**
+     * Returns the Set of registered client signal ids for the provided
+     * {@code signalId}.
+     *
+     * @param signalId
+     *            the signal id, must not be null
+     * @return the Set of registered client signal ids
+     * @throws NullPointerException
+     *             if {@code signalId} is null
+     */
+    public synchronized Set<UUID> getAllClientSignalIdsFor(UUID signalId) {
+        Objects.requireNonNull(signalId, "Signal id must not be null");
+        if (!signals.containsKey(signalId)) {
+            return Set.of();
+        }
+        return clientSignalToSignalMapping.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(signalId))
+                .map(Map.Entry::getKey).collect(Collectors.toUnmodifiableSet());
+    }
 }
