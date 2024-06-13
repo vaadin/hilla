@@ -75,6 +75,7 @@ public class RouteUnifyingServiceInitListener
                 .getDeploymentConfiguration();
         LOGGER.debug("deploymentConfiguration.isReactEnabled() = {}",
                 deploymentConfiguration.isReactEnabled());
+        boolean hasHillaFsRoute = false;
         if (deploymentConfiguration.isReactEnabled()) {
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
                     deploymentConfiguration, accessControl, viewAccessChecker,
@@ -93,10 +94,8 @@ public class RouteUnifyingServiceInitListener
                     .collectClientMenuItems(false, deploymentConfiguration,
                             null);
 
-            boolean hasHillaFsRoute = !clientMenus.isEmpty();
-
-            HillaStats.reportGenericHasFeatures(event.getSource(),
-                    hasHillaFsRoute);
+            hasHillaFsRoute = !clientMenus.isEmpty();
         }
+        HillaStats.reportGenericHasFeatures(event.getSource(), hasHillaFsRoute);
     }
 }
