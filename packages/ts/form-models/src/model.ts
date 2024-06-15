@@ -1,6 +1,4 @@
 /* eslint-disable import/no-mutable-exports, @typescript-eslint/class-literal-property-style */
-import type { Constructor } from 'type-fest';
-
 export interface JvmTypeRef {
   jvmType: string;
   genericArguments?: JvmTypeRef[];
@@ -19,44 +17,46 @@ export interface ModelMetadata {
   annotations?: Annotation[];
 }
 
-/**
- * The model hierarchy root type
- */
-export interface ModelOwner<T = unknown> {
-  value: T;
-}
-
 export declare enum Enum {}
 
 export type EmptyRecord = Record<never, never>;
 
-export const $key = Symbol();
-export const $name = Symbol();
-export const $owner = Symbol();
-export const $meta = Symbol();
-export const $optional = Symbol();
-export const $defaultValue = Symbol();
+export const $key = Symbol('key');
+export const $name = Symbol('name');
+export const $owner = Symbol('owner');
+export const $meta = Symbol('meta');
+export const $optional = Symbol('optional');
+export const $defaultValue = Symbol('defaultValue');
 
-export const $enum = Symbol();
-export const $members = Symbol();
-export const $itemModel = Symbol();
+export const $enum = Symbol('enum');
+export const $members = Symbol('members');
+export const $itemModel = Symbol('itemModel');
+
+export type ModelValue<T> = T extends boolean | number | string
+  ? T
+  : T extends typeof Enum
+    ? T[keyof T]
+    : T extends unknown[]
+      ? T
+      : T extends object
+        ? T
+        : undefined extends T
+          ? Exclude<T, undefined>
+          : unknown;
 
 export interface Model<T = unknown> {
-  readonly [$key]: keyof any;
+  readonly [$key]?: keyof any;
   readonly [$name]: string;
-  readonly [$owner]: Model | ModelOwner;
-  readonly [$meta]: ModelMetadata;
+  readonly [$owner]?: Model;
+  readonly [$meta]?: ModelMetadata;
   readonly [$optional]: boolean;
   readonly [$defaultValue]: T;
+  readonly [Symbol.toStringTag]: string;
   [Symbol.hasInstance](o: unknown): o is this;
   toString(): string;
 }
 
-export type ExtendedModel<T = unknown, C extends object = EmptyRecord> = C &
-  Model<T> &
-  Readonly<{
-    [K in keyof T]: ExtendedModel<T[K]>;
-  }>;
+export type DefaultValueProvider<T, C extends object> = (model: C & Model<T>) => ModelValue<T>;
 
 export const Model = Object.create(null, {
   [$key]: {},
@@ -71,8 +71,13 @@ export const Model = Object.create(null, {
   [$defaultValue]: {
     value: undefined,
   },
+  [Symbol.toStringTag]: {
+    get(this: Model) {
+      return this[$name];
+    },
+  },
   [Symbol.hasInstance]: {
-    value(o: unknown) {
+    value(this: Model, o: unknown) {
       return typeof o === 'object' && o != null && Object.prototype.isPrototypeOf.call(this, o);
     },
   },

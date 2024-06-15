@@ -1,35 +1,42 @@
 import { CoreModelBuilder } from './builders.js';
-import { $enum, $itemModel, type Enum, Model } from './model.js';
+import { $enum, $itemModel, type $members, type Enum, Model } from './model.js';
 
-export const PrimitiveModel = CoreModelBuilder.from(Model, (): unknown => undefined)
-  .name('primitive')
-  .build();
+export const PrimitiveModel = new CoreModelBuilder(Model, (): unknown => undefined).name('primitive').build();
 
-export const StringModel = CoreModelBuilder.from(PrimitiveModel, () => '')
-  .name('string')
-  .build();
+export const StringModel = new CoreModelBuilder(PrimitiveModel, () => '').name('string').build();
 
-export const NumberModel = CoreModelBuilder.from(PrimitiveModel, () => 0)
-  .name('number')
-  .build();
+export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => 0).name('number').build();
 
-export const BooleanModel = CoreModelBuilder.from(PrimitiveModel, () => false)
-  .name('boolean')
-  .build();
+export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
-export const ArrayModel = CoreModelBuilder.from(Model, (): unknown[] => [])
+export interface ArrayModel<T> extends Model<T[]> {
+  readonly [$itemModel]: Model<T>;
+}
+
+export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .name('Array')
   .define($itemModel, Model)
   .build();
 
-export const ObjectModel = CoreModelBuilder.from(Model, () => ({}))
-  .name('Object')
-  .build();
+export type ObjectModel<T extends object = object> = Model<T> &
+  Readonly<{
+    [K in keyof T]: Model<T[K]>;
+  }>;
 
-export const EnumModel = CoreModelBuilder.from(
+export const ObjectModel = new CoreModelBuilder(Model, (): object => ({})).name('Object').build();
+
+export interface EnumModel<T extends typeof Enum> extends Model<T[keyof T]> {
+  readonly [$enum]: T;
+}
+
+export const EnumModel = new CoreModelBuilder<typeof Enum>(
   Model,
   (): (typeof Enum)[keyof typeof Enum] => Object.values(EnumModel[$enum])[0],
 )
   .name('Enum')
   .define($enum, {} as typeof Enum)
   .build();
+
+export interface UnionModel<TT extends unknown[]> extends Model<TT[number]> {
+  readonly [$members]: ReadonlyArray<Model<TT[number]>>;
+}
