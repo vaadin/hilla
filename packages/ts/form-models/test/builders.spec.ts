@@ -33,7 +33,7 @@ describe('ModelBuilder', () => {
     const AddressModel = m.extend(NamedModel).name<Address>('Address').property('street', StringModel).build();
 
     expect(AddressModel).to.be.instanceof(NamedModel);
-    expect(AddressModel).to.have.property('constructor').which.have.property('name', 'Address');
+    expect(AddressModel).to.have.property($name, 'Address');
     // Inherited property
     expect(AddressModel).to.have.property('name').which.is.instanceof(StringModel);
     // Own property
@@ -61,6 +61,7 @@ describe('ModelBuilder', () => {
       supervisor?: Employee;
     }
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const EmployeeModel = m.object<Employee>('Employee').property('supervisor', m.optional).build();
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
   });

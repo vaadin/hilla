@@ -9,8 +9,18 @@ export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => 0).name('n
 
 export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
+export type ModelLike<T = unknown> = T extends boolean | number | string
+  ? Model<T>
+  : T extends typeof Enum
+    ? EnumModel<T>
+    : T extends unknown[]
+      ? ArrayModel<T[number]>
+      : T extends object
+        ? ObjectModel<T>
+        : Model<T>;
+
 export interface ArrayModel<T> extends Model<T[]> {
-  readonly [$itemModel]: Model<T>;
+  readonly [$itemModel]: ModelLike<T>;
 }
 
 export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
@@ -20,7 +30,7 @@ export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
 
 export type ObjectModel<T extends object = object> = Model<T> &
   Readonly<{
-    [K in keyof T]: Model<T[K]>;
+    [K in keyof T]: ModelLike<T[K]>;
   }>;
 
 export const ObjectModel = new CoreModelBuilder(Model, (): object => ({})).name('Object').build();
@@ -38,5 +48,5 @@ export const EnumModel = new CoreModelBuilder<typeof Enum>(
   .build();
 
 export interface UnionModel<TT extends unknown[]> extends Model<TT[number]> {
-  readonly [$members]: ReadonlyArray<Model<TT[number]>>;
+  readonly [$members]: ReadonlyArray<ModelLike<TT[number]>>;
 }

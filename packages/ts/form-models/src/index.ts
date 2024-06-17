@@ -1,5 +1,5 @@
 import { CoreModelBuilder, ObjectModelBuilder } from './builders.js';
-import { ArrayModel, EnumModel, ObjectModel, type UnionModel } from './core.js';
+import { ArrayModel, EnumModel, type ModelLike, ObjectModel, type UnionModel } from './core.js';
 import {
   $defaultValue,
   $enum,
@@ -26,7 +26,7 @@ const m = {
   array<T>(itemModel: Model<T>): ArrayModel<T> {
     return new CoreModelBuilder<T[]>(ArrayModel)
       .name(`Array<${itemModel[$name]}>`)
-      .define($itemModel, itemModel)
+      .define($itemModel, itemModel as ModelLike<T>)
       .build();
   },
   object<T extends object>(name: string): ObjectModelBuilder<T, object, EmptyRecord, true> {
@@ -38,7 +38,7 @@ const m = {
   union<TT extends unknown[]>(...members: ReadonlyArray<Model<TT[number]>>): UnionModel<TT> {
     return new CoreModelBuilder(Model, () => members[0][$defaultValue] as ModelValue<TT[number]>)
       .name(members.map((model) => model.constructor.name).join(' | '))
-      .define($members, members)
+      .define($members, members as ReadonlyArray<ModelLike<TT[number]>>)
       .build();
   },
 };

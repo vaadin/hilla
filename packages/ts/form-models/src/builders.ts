@@ -11,6 +11,8 @@ import {
   type ModelMetadata,
 } from './model.js';
 
+const { create, defineProperty, fromEntries, entries } = Object;
+
 export type ModelBuilderPropertyOptions = Readonly<{
   meta?: ModelMetadata;
 }>;
@@ -26,10 +28,10 @@ export class CoreModelBuilder<T, C extends object = EmptyRecord, N extends boole
   protected readonly [$model]: C & Model<T>;
 
   constructor(base: Model, defaultValueProvider?: DefaultValueProvider<T, C>) {
-    this[$model] = Object.create(base);
+    this[$model] = create(base);
 
     if (defaultValueProvider) {
-      Object.defineProperty(this[$model], $defaultValue, {
+      defineProperty(this[$model], $defaultValue, {
         get(this: C & Model<T>) {
           return defaultValueProvider(this);
         },
@@ -43,13 +45,12 @@ export class CoreModelBuilder<T, C extends object = EmptyRecord, N extends boole
   }
 
   define<K extends symbol, V>(key: K, value: V): CoreModelBuilder<T, C & Readonly<Record<K, V>>, N> {
-    Object.defineProperty(this[$model], key, { value });
+    defineProperty(this[$model], key, { value });
     return this as CoreModelBuilder<T, C & Readonly<Record<K, V>>, N>;
   }
 
   name(name: string): CoreModelBuilder<T, C, true> {
-    this.define($name, name);
-    return this as CoreModelBuilder<T, C, true>;
+    return this.define($name, name) as CoreModelBuilder<T, C, true>;
   }
 
   build(): this extends NamedModelBuilder ? C & Model<T> : never {
@@ -71,8 +72,8 @@ export class ObjectModelBuilder<
     super(
       base,
       (m) =>
-        Object.fromEntries(
-          (Object.entries(m) as ReadonlyArray<readonly [string, Model<T[keyof T]>]>).map(([key, child]) => [
+        fromEntries(
+          (entries(m) as ReadonlyArray<readonly [string, Model<T[keyof T]>]>).map(([key, child]) => [
             key,
             child[$defaultValue],
           ]),
@@ -96,9 +97,9 @@ export class ObjectModelBuilder<
     model: Model<T[K]> | ModelProvider<T, K>,
     options?: ModelBuilderPropertyOptions,
   ): ObjectModelBuilder<T, Readonly<Record<K, T[K]>> & U, C, N> {
-    Object.defineProperty(this[$model], key, {
+    defineProperty(this[$model], key, {
       enumerable: true,
-      value: new CoreModelBuilder(typeof model === 'function' ? model(this[$model]) : model)
+      value: new CoreModelBuilder<T[K]>(typeof model === 'function' ? model(this[$model]) : model)
         .define($key, key)
         .define($owner, this[$model])
         .define($meta, options?.meta)

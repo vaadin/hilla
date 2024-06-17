@@ -19,7 +19,7 @@ export interface ModelMetadata {
 
 export declare enum Enum {}
 
-export type EmptyRecord = Record<never, never>;
+export type EmptyRecord = Record<keyof any, never>;
 
 export const $key = Symbol('key');
 export const $name = Symbol('name');
@@ -52,11 +52,12 @@ export interface Model<T = unknown> {
   readonly [$optional]: boolean;
   readonly [$defaultValue]: T;
   readonly [Symbol.toStringTag]: string;
-  [Symbol.hasInstance](o: unknown): o is this;
+  [Symbol.hasInstance](value: any): boolean;
   toString(): string;
+  [key: string]: unknown;
 }
 
-export type DefaultValueProvider<T, C extends object> = (model: C & Model<T>) => ModelValue<T>;
+export type DefaultValueProvider<T, C extends object> = (model: C & Model<T>) => T;
 
 export const Model = Object.create(null, {
   [$key]: {},
@@ -78,7 +79,7 @@ export const Model = Object.create(null, {
   },
   [Symbol.hasInstance]: {
     value(this: Model, o: unknown) {
-      return typeof o === 'object' && o != null && Object.prototype.isPrototypeOf.call(this, o);
+      return typeof o === 'object' && o != null && (this === o || Object.prototype.isPrototypeOf.call(this, o));
     },
   },
   toString: {
