@@ -1,3 +1,4 @@
+import type { EmptyObject } from 'type-fest';
 import type { ObjectModel } from './core';
 import {
   $defaultValue,
@@ -6,7 +7,7 @@ import {
   $name,
   $owner,
   type DefaultValueProvider,
-  type EmptyRecord,
+  type AnyObject,
   type Model,
   type ModelMetadata,
 } from './model.js';
@@ -19,93 +20,201 @@ export type ModelBuilderPropertyOptions = Readonly<{
 
 const $model = Symbol();
 
-declare const $named: unique symbol;
+export type Flags = {
+  named: boolean;
+  selfRefKeys: string;
+};
 
-export type NamedModelBuilder = Readonly<{ [$named]: true }>;
+/**
+ * A builder class for creating all basic models.
+ *
+ * @typeParam V - The final value type of the model.
+ * @typeParam EX - The extra properties of the model.
+ * @typeParam F - The flags for the model constructor that allow to determine specific characteristics of the model.
+ *
+ * @param base - The base model to extend.
+ * @param defaultValueProvider - The function that provides the default value for the model.
+ *
+ * @internal
+ */
+export class CoreModelBuilder<
+  V,
+  EX extends AnyObject = EmptyObject,
+  F extends Flags = { named: false; selfRefKeys: never },
+> {
+  protected readonly [$model]: Model<V, EX>;
 
-export class CoreModelBuilder<T, C extends object = EmptyRecord, N extends boolean = false> {
-  declare readonly [$named]: N;
-  protected readonly [$model]: C & Model<T>;
-
-  constructor(base: Model, defaultValueProvider?: DefaultValueProvider<T, C>) {
+  constructor(base: Model, defaultValueProvider?: (model: Model<V, EX>) => V) {
     this[$model] = create(base);
 
     if (defaultValueProvider) {
-      defineProperty(this[$model], $defaultValue, {
-        get(this: C & Model<T>) {
-          return defaultValueProvider(this);
-        },
-      });
+      this.defaultValueProvider(defaultValueProvider);
     }
   }
 
+  /**
+   * Appends metadata to the model.
+   *
+   * @param value - The metadata to append.
+   * @returns The current builder instance.
+   */
   meta(value: ModelMetadata): this {
     this.define($meta, value);
     return this;
   }
 
-  define<K extends symbol, V>(key: K, value: V): CoreModelBuilder<T, C & Readonly<Record<K, V>>, N> {
+  /**
+   * Defines a new property on the model. The property serves the purposes of storing the extra data for specific types
+   * of models.
+   *
+   * @remarks
+   * The key of the property should be a symbol to avoid conflicts with properties defined via
+   * {@link ObjectModelBuilder}.
+   *
+   * @param key - The key of the property.
+   * @param value - The value of the property.
+   * @returns The current builder instance.
+   */
+  define<DK extends symbol, DV>(key: DK, value: DV): CoreModelBuilder<V, EX & Readonly<Record<DK, DV>>, F> {
     defineProperty(this[$model], key, { value });
-    return this as CoreModelBuilder<T, C & Readonly<Record<K, V>>, N>;
+    return this as any;
   }
 
-  name(name: string): CoreModelBuilder<T, C, true> {
-    return this.define($name, name) as CoreModelBuilder<T, C, true>;
+  /**
+   * Sets the default value provider for the model. This is an alternative way to provide the default value for the
+   * model if for some reason using the constructor parameter is undesired.
+   *
+   * @param defaultValueProvider - The function that provides the default value for the model.
+   * @returns The current builder instance.
+   */
+  defaultValueProvider(defaultValueProvider: DefaultValueProvider<V, EX>): this {
+    defineProperty(this[$model], $defaultValue, {
+      get(this: Model<V, EX>) {
+        return defaultValueProvider(this);
+      },
+    });
+    return this;
   }
 
-  build(): this extends NamedModelBuilder ? C & Model<T> : never {
-    return this[$model] as this extends NamedModelBuilder ? C & Model<T> : never;
+  /**
+   * Sets the name of the model. The name is used for debugging purposes and is displayed in the string representation.
+   *
+   * @param name - The name of the model.
+   * @returns The current builder instance.
+   */
+  name(name: string): CoreModelBuilder<V, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
+    return this.define($name, name) as any;
+  }
+
+  /**
+   * Builds the model.
+   *
+   * @returns The model.
+   */
+  build(): F['named'] extends true ? Model<V, EX, F['selfRefKeys']> : never {
+    return this[$model] as any;
   }
 }
 
-export type ModelProvider<T extends object = Record<keyof any, unknown>, K extends keyof T = keyof T> = (
-  model: Model<T>,
-) => Model<T[K]>;
+const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
 
+/**
+ * A builder class for creating object models.
+ *
+ * @typeParam V - The final value type of the model.
+ * @typeParam CV - The current value type of the model. It changes as the model is being built and defines if the
+ * {@link ObjectModelBuilder.build} method can be called.
+ * @typeParam EX - The extra properties of the model.
+ * @typeParam F - The flags for the model constructor that allow to determine specific characteristics of the model.
+ *
+ * @internal
+ */
 export class ObjectModelBuilder<
-  T extends object,
-  U extends object = object,
-  C extends object = EmptyRecord,
-  N extends boolean = false,
-> extends CoreModelBuilder<T, C, N> {
+  V extends AnyObject,
+  CV extends AnyObject = EmptyObject,
+  EX extends AnyObject = EmptyObject,
+  F extends Flags = { named: false; selfRefKeys: never },
+> extends CoreModelBuilder<V, EX, F> {
   constructor(base: Model) {
     super(
       base,
       (m) =>
-        fromEntries(
-          (entries(m) as ReadonlyArray<readonly [string, Model<T[keyof T]>]>).map(([key, child]) => [
-            key,
-            child[$defaultValue],
-          ]),
-        ) as ReturnType<DefaultValueProvider<T, C>>,
+        fromEntries(entries<Model>(m).map(([key, child]) => [key, child[$defaultValue]])) as ReturnType<
+          DefaultValueProvider<V, EX>
+        >,
     );
   }
 
-  declare ['build']: () => this extends NamedModelBuilder ? (U extends T ? C & ObjectModel<T> : never) : never;
+  /**
+   * {@inheritDoc CoreModelBuilder.define}
+   */
+  declare ['define']: <DK extends symbol, DV>(
+    key: DK,
+    value: DV,
+  ) => ObjectModelBuilder<V, CV, EX & Readonly<Record<DK, DV>>, F>;
 
-  declare ['define']: <K extends symbol, V>(
-    key: K,
-    value: V,
-  ) => ObjectModelBuilder<T, U, C & Readonly<Record<K, V>>, N>;
+  /**
+   * {@inheritDoc CoreModelBuilder.name}
+   */
+  declare ['name']: <NV extends AnyObject>(
+    name: string,
+  ) => ObjectModelBuilder<NV, CV, EX, { named: true; selfRefKeys: F['selfRefKeys'] }>;
 
-  declare ['name']: <NT extends object>(name: string) => ObjectModelBuilder<NT, U, C, true>;
-
+  /**
+   * {@inheritDoc CoreModelBuilder.meta}
+   */
   declare ['meta']: (value: ModelMetadata) => this;
 
-  property<K extends keyof T>(
-    key: K,
-    model: Model<T[K]> | ModelProvider<T, K>,
+  /**
+   * Defines a new model property on the model. Unlike the {@link ObjectModelBuilder.define}, this property is public
+   * and allows the user to interact with the model data structure. It also updates the current value type of the model
+   * to make it closer to the final value type.
+   *
+   * @param key - The key of the property.
+   * @param model - The model of the property value. You can also provide a function that produces the model based on
+   * the current model.
+   * @param options - Additional options for the property.
+   */
+  property<PK extends string & keyof V, CK extends AnyObject = EmptyObject>(
+    key: PK,
+    model: Model<V[PK], CK> | ((model: Model<V, EX & Readonly<Record<PK, Model<V[PK], CK>>>>) => Model<V[PK], CK>),
     options?: ModelBuilderPropertyOptions,
-  ): ObjectModelBuilder<T, Readonly<Record<K, T[K]>> & U, C, N> {
+  ): Extract<V[PK], V> extends never
+    ? ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, Model<V[PK], CK>>>, F>
+    : ObjectModelBuilder<
+        V,
+        CV & Readonly<Record<PK, V[PK]>>,
+        EX,
+        { named: F['named']; selfRefKeys: F['selfRefKeys'] | PK }
+      > {
     defineProperty(this[$model], key, {
       enumerable: true,
-      value: new CoreModelBuilder<T[K]>(typeof model === 'function' ? model(this[$model]) : model)
-        .define($key, key)
-        .define($owner, this[$model])
-        .define($meta, options?.meta)
-        .build(),
+      get(this: Model<V, EX & Readonly<Record<PK, Model<V[PK], CK>>>>) {
+        if (!propertyRegistry.has(this)) {
+          propertyRegistry.set(this, {});
+        }
+
+        const props = propertyRegistry.get(this)!;
+
+        props[key] ??= new CoreModelBuilder(typeof model === 'function' ? model(this) : model)
+          .define($key, key)
+          .define($owner, this)
+          .define($meta, options?.meta)
+          .build();
+
+        return props[key];
+      },
     });
 
-    return this as ObjectModelBuilder<T, Readonly<Record<K, T[K]>> & U, C, N>;
+    return this as any;
   }
+
+  /**
+   * {@inheritDoc CoreModelBuilder.build}
+   */
+  declare ['build']: () => F['named'] extends true
+    ? CV extends V
+      ? ObjectModel<V, EX, F['selfRefKeys']>
+      : never
+    : never;
 }

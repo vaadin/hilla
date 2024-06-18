@@ -1,5 +1,6 @@
+import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder, ObjectModelBuilder } from './builders.js';
-import { ArrayModel, EnumModel, type ModelLike, ObjectModel, type UnionModel } from './core.js';
+import { ArrayModel, EnumModel, ObjectModel, type UnionModel } from './core.js';
 import {
   $defaultValue,
   $enum,
@@ -7,38 +8,40 @@ import {
   $members,
   $name,
   $optional,
-  type EmptyRecord,
   type Enum,
+  type AnyObject,
   Model,
-  type ModelValue,
+  type Value,
 } from './model.js';
 
 export * from './model.js';
 export * from './core.js';
 
 const m = {
-  extend<SU extends object>(base: Model<SU>): ObjectModelBuilder<object, SU> {
+  extend<SU extends AnyObject>(base: Model<SU>): ObjectModelBuilder<AnyObject, SU> {
     return new ObjectModelBuilder(base);
   },
-  optional<T>(base: Model): Model<T | undefined> {
-    return new CoreModelBuilder<T | undefined>(base).define($optional, true).build();
+  optional<M extends Model>(base: M): M {
+    return new CoreModelBuilder(base).define($optional, true).build();
   },
-  array<T>(itemModel: Model<T>): ArrayModel<T> {
+  array<T, C extends AnyObject>(itemModel: Model<T, C>): ArrayModel<T, C> {
     return new CoreModelBuilder<T[]>(ArrayModel)
       .name(`Array<${itemModel[$name]}>`)
-      .define($itemModel, itemModel as ModelLike<T>)
+      .define($itemModel, itemModel)
       .build();
   },
-  object<T extends object>(name: string): ObjectModelBuilder<T, object, EmptyRecord, true> {
+  object<T extends AnyObject>(
+    name: string,
+  ): ObjectModelBuilder<T, EmptyObject, EmptyObject, { named: true; selfRefKeys: never }> {
     return m.extend(ObjectModel).name<T>(name);
   },
   enum<T extends typeof Enum>(obj: T, name: string): EnumModel<T> {
     return new CoreModelBuilder<T[keyof T]>(EnumModel).define($enum, obj).name(name).build();
   },
-  union<TT extends unknown[]>(...members: ReadonlyArray<Model<TT[number]>>): UnionModel<TT> {
-    return new CoreModelBuilder(Model, () => members[0][$defaultValue] as ModelValue<TT[number]>)
+  union<MM extends Model[]>(...members: MM): UnionModel<MM> {
+    return new CoreModelBuilder(Model, () => members[0][$defaultValue] as Value<MM[number]>)
       .name(members.map((model) => model.constructor.name).join(' | '))
-      .define($members, members as ReadonlyArray<ModelLike<TT[number]>>)
+      .define($members, members)
       .build();
   },
 };

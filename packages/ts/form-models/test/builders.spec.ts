@@ -1,6 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
-import m, { $defaultValue, $enum, $itemModel, $name, ArrayModel, Model, StringModel } from '../src/index.js';
+import m, { $defaultValue, $enum, $itemModel, $name, $owner, ArrayModel, Model, StringModel } from '../src/index.js';
 
 use(chaiLike);
 
@@ -61,9 +61,14 @@ describe('ModelBuilder', () => {
       supervisor?: Employee;
     }
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    const EmployeeModel = m.object<Employee>('Employee').property('supervisor', m.optional).build();
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      .property('supervisor', m.optional)
+      .build();
+
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
+    expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
   });
 
   it('should allow array types', () => {
@@ -96,4 +101,31 @@ describe('ModelBuilder', () => {
     expect(StatusModel).to.have.property($enum, Status);
     expect(StatusModel).to.have.property($defaultValue).which.is.equal(Status.Pending);
   });
+
+  it('correctly sets the model owner', () => {
+    interface Street {
+      name: string;
+    }
+
+    interface Address {
+      street: Street;
+    }
+
+    interface Person {
+      name: string;
+      address: Address;
+    }
+
+    const StreetModel = m.object<Street>('Street').property('name', StringModel).build();
+    const AddressModel = m.object<Address>('Address').property('street', StreetModel).build();
+    const PersonModel = m
+      .object<Person>('Person')
+      .property('name', StringModel)
+      .property('address', AddressModel)
+      .build();
+
+    expect(PersonModel.address.street).to.have.property($owner).which.has.property($owner).which.is.equal(PersonModel);
+  });
+
+  it('');
 });
