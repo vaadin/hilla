@@ -1,4 +1,4 @@
 {
   "reporter": ["lcov"],
-  "report-dir": "./.coverage"
+  "report-dir": ".coverage"
 }
