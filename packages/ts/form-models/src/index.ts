@@ -22,26 +22,26 @@ const m = {
     return new ObjectModelBuilder(base);
   },
   optional<M extends Model>(base: M): M {
-    return new CoreModelBuilder(base).define($optional, true).build();
+    return new CoreModelBuilder(base).define($optional, { value: true }).build();
   },
   array<T, C extends AnyObject>(itemModel: Model<T, C>): ArrayModel<T, C> {
     return new CoreModelBuilder<T[]>(ArrayModel)
       .name(`Array<${itemModel[$name]}>`)
-      .define($itemModel, itemModel)
+      .define($itemModel, { value: itemModel })
       .build();
   },
   object<T extends AnyObject>(
     name: string,
   ): ObjectModelBuilder<T, EmptyObject, EmptyObject, { named: true; selfRefKeys: never }> {
-    return m.extend(ObjectModel).name<T>(name);
+    return new ObjectModelBuilder(ObjectModel).name<T>(name);
   },
   enum<T extends typeof Enum>(obj: T, name: string): EnumModel<T> {
-    return new CoreModelBuilder<T[keyof T]>(EnumModel).define($enum, obj).name(name).build();
+    return new CoreModelBuilder<T[keyof T]>(EnumModel).define($enum, { value: obj }).name(name).build();
   },
   union<MM extends Model[]>(...members: MM): UnionModel<MM> {
     return new CoreModelBuilder(Model, () => members[0][$defaultValue] as Value<MM[number]>)
-      .name(members.map((model) => model.constructor.name).join(' | '))
-      .define($members, members)
+      .name(members.map((model) => model[$name]).join(' | '))
+      .define($members, { value: members })
       .build();
   },
 };

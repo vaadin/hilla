@@ -9,16 +9,16 @@ export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => 0).name('n
 
 export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
-export type ArrayModel<T, C extends AnyObject> = Model<
+export type ArrayModel<T, C extends AnyObject, R extends string = never> = Model<
   T[],
   Readonly<{
-    [$itemModel]: C & Model<T>;
+    [$itemModel]: Model<T, C, R>;
   }>
 >;
 
 export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .name('Array')
-  .define($itemModel, Model)
+  .define($itemModel, { value: Model })
   .build();
 
 export type ObjectModel<T extends object, C extends object, R extends string = never> = Model<T, C, R>;
@@ -36,7 +36,8 @@ export type EnumModel<T extends typeof Enum> = Model<
 
 export const EnumModel = new CoreModelBuilder<(typeof Enum)[keyof typeof Enum]>(Model)
   .name('Enum')
-  .define($enum, {} as typeof Enum)
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  .define($enum, { value: {} as typeof Enum })
   .defaultValueProvider((self) => Object.values(self[$enum])[0])
   .build();
 

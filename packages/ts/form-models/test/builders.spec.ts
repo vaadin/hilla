@@ -1,6 +1,17 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
-import m, { $defaultValue, $enum, $itemModel, $name, $owner, ArrayModel, Model, StringModel } from '../src/index.js';
+import m, {
+  $defaultValue,
+  $enum,
+  $itemModel,
+  $name,
+  $owner,
+  ArrayModel,
+  Model,
+  StringModel,
+  $members,
+  NumberModel,
+} from '../src/index.js';
 
 use(chaiLike);
 
@@ -127,5 +138,21 @@ describe('ModelBuilder', () => {
     expect(PersonModel.address.street).to.have.property($owner).which.has.property($owner).which.is.equal(PersonModel);
   });
 
-  it('');
+  it('should allow union types', () => {
+    interface User {
+      name: string;
+    }
+
+    interface Group {
+      quantity: number;
+    }
+
+    const UserModel = m.object<User>('User').property('name', StringModel).build();
+    const GroupModel = m.object<Group>('Group').property('quantity', NumberModel).build();
+
+    const UnionModel = m.union(UserModel, GroupModel);
+
+    expect(UnionModel).to.have.property($members).which.is.an('array').with.lengthOf(2);
+    expect(UnionModel).to.have.property($defaultValue).which.is.like({ name: '' });
+  });
 });

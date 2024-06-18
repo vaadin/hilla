@@ -59,7 +59,7 @@ export class CoreModelBuilder<
    * @returns The current builder instance.
    */
   meta(value: ModelMetadata): this {
-    this.define($meta, value);
+    this.define($meta, { value });
     return this;
   }
 
@@ -72,11 +72,14 @@ export class CoreModelBuilder<
    * {@link ObjectModelBuilder}.
    *
    * @param key - The key of the property.
-   * @param value - The value of the property.
+   * @param value - The descriptor of the property.
    * @returns The current builder instance.
    */
-  define<DK extends symbol, DV>(key: DK, value: DV): CoreModelBuilder<V, EX & Readonly<Record<DK, DV>>, F> {
-    defineProperty(this[$model], key, { value });
+  define<DK extends symbol, DV>(
+    key: DK,
+    value: TypedPropertyDescriptor<DV>,
+  ): CoreModelBuilder<V, EX & Readonly<Record<DK, DV>>, F> {
+    defineProperty(this[$model], key, value);
     return this as any;
   }
 
@@ -103,7 +106,7 @@ export class CoreModelBuilder<
    * @returns The current builder instance.
    */
   name(name: string): CoreModelBuilder<V, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
-    return this.define($name, name) as any;
+    return this.define($name, { value: name }) as any;
   }
 
   /**
@@ -150,7 +153,7 @@ export class ObjectModelBuilder<
    */
   declare ['define']: <DK extends symbol, DV>(
     key: DK,
-    value: DV,
+    value: TypedPropertyDescriptor<DV>,
   ) => ObjectModelBuilder<V, CV, EX & Readonly<Record<DK, DV>>, F>;
 
   /**
@@ -197,9 +200,9 @@ export class ObjectModelBuilder<
         const props = propertyRegistry.get(this)!;
 
         props[key] ??= new CoreModelBuilder(typeof model === 'function' ? model(this) : model)
-          .define($key, key)
-          .define($owner, this)
-          .define($meta, options?.meta)
+          .define($key, { value: key })
+          .define($owner, { value: this })
+          .define($meta, { value: options?.meta })
           .build();
 
         return props[key];
