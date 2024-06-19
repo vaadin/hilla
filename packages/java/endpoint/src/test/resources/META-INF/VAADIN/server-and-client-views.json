@@ -1,4 +1,14 @@
 {
+  "": {
+    "params": {},
+    "title": "Layout",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
   "/foo": {
     "params": {},
     "title": "RouteTarget",
@@ -29,18 +39,6 @@
     "register": false,
     "menu": null
   },
-  "/wildcard": {
-    "params": {
-      ":___wildcard*": "*"
-    },
-    "title": "RouteTarget",
-    "rolesAllowed": null,
-    "loginRequired": false,
-    "route": "/wildcard",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
   "/comments": {
     "params": {
       ":___commentId?": "opt"
@@ -49,6 +47,18 @@
     "rolesAllowed": null,
     "loginRequired": false,
     "route": "/comments",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/wildcard": {
+    "params": {
+      ":___wildcard*": "*"
+    },
+    "title": "RouteTarget",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/wildcard",
     "lazy": false,
     "register": false,
     "menu": null
@@ -62,26 +72,6 @@
     ],
     "loginRequired": true,
     "route": "/profile",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
-  "/": {
-    "params": {},
-    "title": "Index",
-    "rolesAllowed": null,
-    "loginRequired": false,
-    "route": "/",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
-  "/orders": {
-    "params": {},
-    "title": "Orders",
-    "rolesAllowed": null,
-    "loginRequired": false,
-    "route": "/orders",
     "lazy": false,
     "register": false,
     "menu": null
