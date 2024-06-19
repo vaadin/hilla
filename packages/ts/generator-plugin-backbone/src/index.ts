@@ -65,9 +65,9 @@ export default class BackbonePlugin extends Plugin {
     this.logger.debug('Processing entities');
 
     return storage.api.components?.schemas
-      ? Object.entries(storage.api.components.schemas).map(([name, component]) =>
-          new EntityProcessor(name, component, this).process(),
-        )
+      ? Object.entries(storage.api.components.schemas)
+          .filter(([, component]) => 'type' in component)
+          .map(([name, component]) => new EntityProcessor(name, component, this).process())
       : [];
   }
 }

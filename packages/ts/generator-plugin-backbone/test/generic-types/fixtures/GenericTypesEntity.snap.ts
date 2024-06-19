@@ -1,4 +1,4 @@
-interface GenericTypesEntity {
-    value: unknown;
+interface GenericTypesEntity<T> {
+    value: T;
 }
 export default GenericTypesEntity;

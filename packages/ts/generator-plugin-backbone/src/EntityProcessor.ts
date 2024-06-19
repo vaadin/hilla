@@ -14,6 +14,7 @@ import {
   isObjectSchema,
   isReferenceSchema,
   type ObjectSchema,
+  type SchemaWithGenerics,
 } from '@vaadin/hilla-generator-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -89,7 +90,7 @@ export class EntityProcessor {
     return ts.factory.createInterfaceDeclaration(
       undefined,
       this.#id,
-      undefined,
+      EntityProcessor.#processTypeArguments(schema as SchemaWithGenerics),
       undefined,
       this.#processTypeElements(schema as ObjectSchema),
     );
@@ -167,5 +168,15 @@ export class EntityProcessor {
         type,
       );
     });
+  }
+
+  static #processTypeArguments(schema: SchemaWithGenerics): readonly ts.TypeParameterDeclaration[] | undefined {
+    if (!schema['x-type-parameters']) {
+      return undefined;
+    }
+
+    return schema['x-type-parameters'].map((name) =>
+      ts.factory.createTypeParameterDeclaration(undefined, name, undefined, undefined),
+    );
   }
 }

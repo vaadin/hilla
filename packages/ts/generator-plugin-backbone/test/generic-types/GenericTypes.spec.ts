@@ -17,13 +17,15 @@ describe('BackbonePlugin', () => {
       const generator = createGenerator([BackbonePlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-console
+      files.forEach(async (f) => f.text().then(console.log)); // temporary log, remove
       expect(files.length).to.equal(2);
 
       const [endpointFile, entity] = files;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
       await expect(await entity.text()).toMatchSnapshot('GenericTypesEntity', import.meta.url);
-      expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
+      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
       expect(entity.name).to.equal(`${modelSectionPath}/GenericTypesEntity.ts`);
+      expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
   });
 });

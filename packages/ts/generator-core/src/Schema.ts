@@ -35,6 +35,12 @@ export type MapSchema = EmptyObjectSchema & Readonly<Required<Pick<ObjectSchema,
 
 export type Schema = ReferenceSchema | RegularSchema;
 
+export type SchemaWithGenerics = Schema & {
+  'x-type-arguments'?: string[];
+  'x-type-parameters'?: string[];
+  'x-type-parameter'?: string;
+};
+
 export function isReferenceSchema(schema: Schema): schema is ReferenceSchema {
   return '$ref' in schema;
 }
