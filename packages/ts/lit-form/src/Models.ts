@@ -3,7 +3,7 @@ import { type BinderNode, getBinderNode } from './BinderNode.js';
 import type { Validator } from './Validation.js';
 import { IsNumber } from './Validators.js';
 
-export const _createEmptyItemValue = Symbol('itemModel');
+export const _createEmptyItemValue = Symbol('createEmptyItemValue');
 export const _parent = Symbol('parent');
 export const _key = Symbol('key');
 export const _fromString = Symbol('fromString');
@@ -11,6 +11,7 @@ export const _validators = Symbol('validators');
 export const _meta = Symbol('meta');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
+export const _items = Symbol('items');
 
 const _optional = Symbol('optional');
 
@@ -244,7 +245,7 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
     this[_createEmptyItemValue] = createItem(this, 0).constructor.createEmptyValue as () => Value<MItem>;
   }
 
-  *items(): Generator<MItem, void, void> {
+  *[_items](): Generator<MItem, void, void> {
     const values = getBinderNode(this).value ?? [];
 
     if (values.length !== this.#items.length) {
@@ -266,10 +267,10 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
   /**
    * Iterates the current array value and yields a binder node for every item.
    *
-   * @deprecated Use {@link items} instead.
+   * @deprecated Use {@link ArrayModel.[_items]} instead.
    */
   *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
-    for (const item of this.items()) {
+    for (const item of this[_items]()) {
       yield getBinderNode(item);
     }
   }
