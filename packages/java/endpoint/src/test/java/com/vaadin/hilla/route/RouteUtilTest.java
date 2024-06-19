@@ -1,28 +1,30 @@
 package com.vaadin.hilla.route;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
-import com.vaadin.hilla.route.records.ClientViewConfig;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+
+import static java.util.Map.entry;
+
 public class RouteUtilTest {
 
     private final RouteUtil routeUtil;
-    private final ClientRouteRegistry registry;
 
     public RouteUtilTest() {
-        registry = new ClientRouteRegistry();
-        this.routeUtil = new RouteUtil(registry);
+        this.routeUtil = new RouteUtil();
     }
 
     @Before
     public void setup() throws Exception {
-        registry.clearRoutes();
+        routeUtil.setRoutes(null);
     }
 
     @Test
@@ -32,20 +34,13 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.addUserRole("ROLE_ADMIN");
 
-        ClientViewConfig config = new ClientViewConfig();
-        config.setTitle("Test");
-        config.setRolesAllowed(new String[] { "ROLE_ADMIN" });
-        config.setLoginRequired(false);
-        config.setRoute("/test");
-        config.setLazy(false);
-        config.setAutoRegistered(false);
-        config.setMenu(null);
-        config.setChildren(null);
-        config.setRouteParameters(null);
-        registry.addRoute("/test", config);
+        AvailableViewInfo config = new AvailableViewInfo("Test",
+                new String[] { "ROLE_ADMIN" }, false, "/test", false, false,
+                null, null, null);
+        routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertTrue(actual);
+        Assert.assertTrue("Route should be allowed for ADMIN role.",
+                routeUtil.isRouteAllowed(request));
     }
 
     @Test
@@ -55,20 +50,13 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.addUserRole("ROLE_USER");
 
-        ClientViewConfig config = new ClientViewConfig();
-        config.setTitle("Test");
-        config.setRolesAllowed(new String[] { "ROLE_ADMIN" });
-        config.setLoginRequired(false);
-        config.setRoute("/test");
-        config.setLazy(false);
-        config.setAutoRegistered(false);
-        config.setMenu(null);
-        config.setChildren(null);
-        config.setRouteParameters(null);
-        registry.addRoute("/test", config);
+        AvailableViewInfo config = new AvailableViewInfo("Test",
+                new String[] { "ROLE_ADMIN" }, false, "/test", false, false,
+                null, null, null);
+        routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertFalse(actual);
+        Assert.assertFalse("USER role should not allow ADMIN route.",
+                routeUtil.isRouteAllowed(request));
     }
 
     @Test
@@ -78,20 +66,12 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(Mockito.mock(Principal.class));
 
-        ClientViewConfig config = new ClientViewConfig();
-        config.setTitle("Test");
-        config.setRolesAllowed(null);
-        config.setLoginRequired(true);
-        config.setRoute("/test");
-        config.setLazy(false);
-        config.setAutoRegistered(false);
-        config.setMenu(null);
-        config.setChildren(null);
-        config.setRouteParameters(null);
-        registry.addRoute("/test", config);
+        AvailableViewInfo config = new AvailableViewInfo("Test", null, true,
+                "/test", false, false, null, null, null);
+        routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertTrue(actual);
+        Assert.assertTrue("Request with user principal should be allowed",
+                routeUtil.isRouteAllowed(request));
     }
 
     @Test
@@ -101,20 +81,12 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        ClientViewConfig config = new ClientViewConfig();
-        config.setTitle("Test");
-        config.setRolesAllowed(null);
-        config.setLoginRequired(true);
-        config.setRoute("/test");
-        config.setLazy(false);
-        config.setAutoRegistered(false);
-        config.setMenu(null);
-        config.setChildren(null);
-        config.setRouteParameters(null);
-        registry.addRoute("/test", config);
+        AvailableViewInfo config = new AvailableViewInfo("Test", null, true,
+                "/test", false, false, null, null, null);
+        routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertFalse(actual);
+        Assert.assertFalse("No login should be denied access",
+                routeUtil.isRouteAllowed(request));
     }
 
     @Test
@@ -124,34 +96,18 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        var pageWithoutLogin = new ClientViewConfig();
-        pageWithoutLogin.setTitle("Test Page");
-        pageWithoutLogin.setRolesAllowed(null);
-        pageWithoutLogin.setLoginRequired(false);
-        pageWithoutLogin.setRoute("");
-        pageWithoutLogin.setLazy(false);
-        pageWithoutLogin.setAutoRegistered(false);
-        pageWithoutLogin.setMenu(null);
-        pageWithoutLogin.setChildren(null);
-        pageWithoutLogin.setRouteParameters(null);
+        AvailableViewInfo pageWithoutLogin = new AvailableViewInfo("Test Page",
+                null, false, "/test", false, false, null, null, null);
 
-        var layoutWithLogin = new ClientViewConfig();
-        layoutWithLogin.setTitle("Test Layout");
-        layoutWithLogin.setRolesAllowed(null);
-        layoutWithLogin.setLoginRequired(true);
-        layoutWithLogin.setRoute("/test");
-        layoutWithLogin.setLazy(false);
-        layoutWithLogin.setAutoRegistered(false);
-        layoutWithLogin.setMenu(null);
-        layoutWithLogin.setChildren(List.of(pageWithoutLogin));
-        layoutWithLogin.setRouteParameters(null);
+        AvailableViewInfo layoutWithLogin = new AvailableViewInfo("Test Layout",
+                null, true, "", false, false, null,
+                Collections.singletonList(pageWithoutLogin), null);
+        routeUtil.setRoutes(Map.ofEntries(entry("/test", pageWithoutLogin),
+                entry("", layoutWithLogin)));
 
-        pageWithoutLogin.setParent(layoutWithLogin);
-
-        registry.addRoute("/test", pageWithoutLogin);
-
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertFalse(actual);
+        Assert.assertFalse(
+                "Access should be denied for layout with login required",
+                routeUtil.isRouteAllowed(request));
     }
 
     @Test
@@ -161,34 +117,17 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        var pageWithLogin = new ClientViewConfig();
-        pageWithLogin.setTitle("Test Page");
-        pageWithLogin.setRolesAllowed(null);
-        pageWithLogin.setLoginRequired(true);
-        pageWithLogin.setRoute("");
-        pageWithLogin.setLazy(false);
-        pageWithLogin.setAutoRegistered(false);
-        pageWithLogin.setMenu(null);
-        pageWithLogin.setChildren(null);
-        pageWithLogin.setRouteParameters(null);
+        AvailableViewInfo pageWithLogin = new AvailableViewInfo("Test Page",
+                null, true, "/test", false, false, null, null, null);
 
-        var layoutWithoutLogin = new ClientViewConfig();
-        layoutWithoutLogin.setTitle("Test Layout");
-        layoutWithoutLogin.setRolesAllowed(null);
-        layoutWithoutLogin.setLoginRequired(false);
-        layoutWithoutLogin.setRoute("/test");
-        layoutWithoutLogin.setLazy(false);
-        layoutWithoutLogin.setAutoRegistered(false);
-        layoutWithoutLogin.setMenu(null);
-        layoutWithoutLogin.setChildren(List.of(pageWithLogin));
-        layoutWithoutLogin.setRouteParameters(null);
+        AvailableViewInfo layoutWithoutLogin = new AvailableViewInfo(
+                "Test Layout", null, false, "", false, false, null,
+                Collections.singletonList(pageWithLogin), null);
+        routeUtil.setRoutes(Map.ofEntries(entry("/test", pageWithLogin),
+                entry("", layoutWithoutLogin)));
 
-        pageWithLogin.setParent(layoutWithoutLogin);
-
-        registry.addRoute("/test", pageWithLogin);
-
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertFalse(actual);
+        Assert.assertFalse("Access should be denied for page requiring login",
+                routeUtil.isRouteAllowed(request));
     }
 
     /**
@@ -202,19 +141,11 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         request.setUserPrincipal(null);
 
-        ClientViewConfig config = new ClientViewConfig();
-        config.setTitle("Root");
-        config.setRolesAllowed(null);
-        config.setLoginRequired(false);
-        config.setRoute("");
-        config.setLazy(false);
-        config.setAutoRegistered(false);
-        config.setMenu(null);
-        config.setChildren(null);
-        config.setRouteParameters(null);
-        registry.addRoute("", config);
+        AvailableViewInfo config = new AvailableViewInfo("Root", null, false,
+                "", false, false, null, null, null);
+        routeUtil.setRoutes(Collections.singletonMap("", config));
 
-        boolean actual = routeUtil.isRouteAllowed(request);
-        Assert.assertTrue(actual);
+        Assert.assertTrue("Login no required should allow access",
+                routeUtil.isRouteAllowed(request));
     }
 }
