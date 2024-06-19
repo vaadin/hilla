@@ -4,6 +4,8 @@ import m, {
   $defaultValue,
   $enum,
   $itemModel,
+  $items,
+  $key,
   $members,
   $meta,
   $name,
@@ -294,6 +296,31 @@ describe('@vaadin/hilla-form-models', () => {
     describe('ArrayModel', () => {
       it('should have a default value', () => {
         expect(ArrayModel[$defaultValue]).to.be.like([]);
+      });
+
+      it('should allow to iterate through the item models', () => {
+        const target: AttachTarget<Comment[]> = {
+          value: [
+            { title: 'FooTitle', text: 'FooText' },
+            { title: 'BarTitle', text: 'BarText' },
+          ],
+        };
+
+        const AttachedCommentsModel = m.attach(m.array(CommentModel), target);
+
+        expect(AttachedCommentsModel).to.have.property(Symbol.iterator);
+        expect(AttachedCommentsModel).to.have.property($items);
+
+        const items = [...AttachedCommentsModel];
+
+        expect(items).to.be.an('array').with.lengthOf(2);
+
+        for (let i = 0; i < items.length; i++) {
+          expect(items[i]).to.be.instanceof(CommentModel);
+          expect(items[i]).to.have.property($owner).which.is.equal(AttachedCommentsModel);
+          expect(items[i]).to.have.property($key).which.is.equal(i);
+          expect(getValue(items[i])).to.be.equal(target.value[i]);
+        }
       });
     });
 
