@@ -20,23 +20,23 @@ import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.hilla.HillaStats;
-import com.vaadin.hilla.route.ClientRouteRegistry;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
-import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import com.vaadin.hilla.route.RouteUtil;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * Service init listener to add the
- * {@link RouteUnifyingIndexHtmlRequestListener} to the service and to register
- * client routes to {@link ClientRouteRegistry}.
+ * {@link RouteUnifyingIndexHtmlRequestListener} to the service.
  */
 @Component
 public class RouteUnifyingServiceInitListener
@@ -44,34 +44,25 @@ public class RouteUnifyingServiceInitListener
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RouteUnifyingServiceInitListener.class);
 
-    private final ClientRouteRegistry clientRouteRegistry;
-
-    private final RouteUtil routeUtil;
-
     private final RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties;
 
     private final NavigationAccessControl accessControl;
 
     private final ViewAccessChecker viewAccessChecker;
 
+    private final RouteUtil routeUtil;
+
     /**
      * Creates a new instance of the listener.
      *
-     * @param clientRouteRegistry
-     *            the registry to add the client routes to
-     * @param routeUtil
-     *            the ClientRouteRegistry aware utility for checking if user is
-     *            allowed to access a route
      * @param routeUnifyingConfigurationProperties
      *            the configuration properties instance
      */
     @Autowired
-    public RouteUnifyingServiceInitListener(
-            ClientRouteRegistry clientRouteRegistry, RouteUtil routeUtil,
+    public RouteUnifyingServiceInitListener(RouteUtil routeUtil,
             RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties,
             @Nullable NavigationAccessControl accessControl,
             @Nullable ViewAccessChecker viewAccessChecker) {
-        this.clientRouteRegistry = clientRouteRegistry;
         this.routeUtil = routeUtil;
         this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
         this.accessControl = accessControl;
@@ -87,8 +78,7 @@ public class RouteUnifyingServiceInitListener
         boolean hasHillaFsRoute = false;
         if (deploymentConfiguration.isReactEnabled()) {
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
-                    clientRouteRegistry, deploymentConfiguration, routeUtil,
-                    accessControl, viewAccessChecker,
+                    deploymentConfiguration, accessControl, viewAccessChecker,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
             var deploymentMode = deploymentConfiguration.isProductionMode()
@@ -100,10 +90,11 @@ public class RouteUnifyingServiceInitListener
                     "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
                     deploymentMode);
 
-            clientRouteRegistry.registerClientRoutes(deploymentConfiguration,
-                    LocalDateTime.now());
+            Map<String, AvailableViewInfo> clientMenus = MenuRegistry
+                    .collectClientMenuItems(false, deploymentConfiguration,
+                            null);
 
-            hasHillaFsRoute = !clientRouteRegistry.getAllRoutes().isEmpty();
+            hasHillaFsRoute = !clientMenus.isEmpty();
         }
         HillaStats.reportGenericHasFeatures(event.getSource(), hasHillaFsRoute);
     }

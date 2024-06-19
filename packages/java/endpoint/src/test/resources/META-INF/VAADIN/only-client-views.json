@@ -23,23 +23,23 @@
     "menu": null
   },
   "/": {
+    "params": {},
     "title": "Index",
     "rolesAllowed": null,
     "loginRequired": false,
-    "route": "",
+    "route": "/",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/orders": {
+    "params": {},
     "title": "Orders",
     "rolesAllowed": null,
     "loginRequired": false,
-    "route": "",
+    "route": "/orders",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   }
 }
