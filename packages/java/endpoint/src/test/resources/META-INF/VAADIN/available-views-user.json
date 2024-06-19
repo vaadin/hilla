@@ -71,7 +71,7 @@
     "title": "Index",
     "rolesAllowed": null,
     "loginRequired": false,
-    "route": "",
+    "route": "/",
     "lazy": false,
     "register": false,
     "menu": null
@@ -81,7 +81,7 @@
     "title": "Orders",
     "rolesAllowed": null,
     "loginRequired": false,
-    "route": "",
+    "route": "/orders",
     "lazy": false,
     "register": false,
     "menu": null
