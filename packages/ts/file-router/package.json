@@ -27,7 +27,7 @@
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "mocha test/**/*.spec.{ts,tsx} --config ../../../.mocharc.cjs",
-    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
+    "test:coverage": "c8 --experimental-monocart -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
