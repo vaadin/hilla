@@ -230,14 +230,16 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
 
   [_createEmptyItemValue]: () => Value<MItem>;
 
-  readonly #createItem: (parent: this, index: number) => MItem;
+  // The `parent` parameter is AbstractModel here for purpose; for some reason, setting it to `ArrayModel<MItem>` or
+  // `this` breaks the type inference in TS (v5.3.2).
+  readonly #createItem: (parent: AbstractModel, index: number) => MItem;
   #items: Array<MItem | undefined> = [];
 
   constructor(
     parent: ModelParent,
     key: keyof any,
     optional: boolean,
-    createItem: (parent: ArrayModel<MItem>, key: number) => MItem,
+    createItem: (parent: AbstractModel, key: number) => MItem,
     options?: ModelOptions<Array<Value<MItem>>>,
   ) {
     super(parent, key, optional, options);
@@ -267,11 +269,15 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
   /**
    * Iterates the current array value and yields a binder node for every item.
    *
-   * @deprecated Use {@link ArrayModel.[_items]} instead.
+   * @deprecated Use the {@link getIterator} function instead.
    */
   *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
     for (const item of this[_items]()) {
       yield getBinderNode(item);
     }
   }
+}
+
+export function getIterator<M extends ArrayModel>(model: M): Generator<ArrayItemModel<M>, void, void> {
+  return model[_items]() as Generator<ArrayItemModel<M>, void, void>;
 }
