@@ -278,5 +278,5 @@ export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPa
   return {
     ...getFormPart(binderNode),
     items: Array.from(model, (item) => item.model as ArrayItemModel<M>),
-  } satisfies UseFormArrayPartResult<M> as any;
+  };
 }
