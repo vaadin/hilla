@@ -1,7 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import { act, fireEvent, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { type Signal, useSignal, useSignalEffect } from '@vaadin/hilla-react-signals';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
@@ -17,7 +16,6 @@ import {
   type PlayerModel,
   type Project,
   TeamModel,
-  type Team,
   type Player,
 } from './models.js';
 
@@ -375,7 +373,7 @@ describe('@vaadin/hilla-react-form', () => {
   });
 
   describe('arrays', () => {
-    let players: Signal<Player[]>;
+    let updatePlayers: (updater: (oldPlayers: Player[]) => Player[]) => void;
 
     function TeamFormPlayer({ model }: { model: PlayerModel }) {
       const { field, value, invalid, ownErrors } = useFormPart(model);
@@ -395,10 +393,9 @@ describe('@vaadin/hilla-react-form', () => {
       const name = useFormPart(model.name);
       const { items, value, setValue } = useFormArrayPart(model.players);
 
-      players = useSignal(initialPlayers);
-      useSignalEffect(() => {
-        setValue(players.value);
-      });
+      updatePlayers = (updater) => {
+        setValue(updater(value ?? []));
+      };
 
       useEffect(() => {
         read({
@@ -434,7 +431,7 @@ describe('@vaadin/hilla-react-form', () => {
     it('should add item to empty array', async () => {
       const { findByTestId } = render(<TeamForm initialPlayers={[]} />);
 
-      players.value = [...players.value, player1];
+      updatePlayers((oldPlayers) => [...oldPlayers, player1]);
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
     });
 
@@ -442,7 +439,7 @@ describe('@vaadin/hilla-react-form', () => {
       const { findByTestId } = render(<TeamForm initialPlayers={[player1]} />);
 
       expect(await findByTestId('lastName.10')).to.have.value('Doe');
-      players.value = [...players.value, player2];
+      updatePlayers((oldPlayers) => [...oldPlayers, player2]);
       expect(await findByTestId('lastName.20')).to.have.value('Smith');
     });
 
@@ -451,7 +448,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       const lastName = await findByTestId('lastName.10');
       expect(lastName).to.exist;
-      players.value = [player2];
+      updatePlayers(() => [player2]);
       await waitForElementToBeRemoved(lastName);
     });
   });
