@@ -4,7 +4,6 @@ import m, {
   $defaultValue,
   $enum,
   $itemModel,
-  $items,
   $key,
   $members,
   $meta,
@@ -15,6 +14,7 @@ import m, {
   type AttachTarget,
   BooleanModel,
   type EnumModel,
+  getIterator,
   getValue,
   Model,
   NumberModel,
@@ -308,10 +308,7 @@ describe('@vaadin/hilla-form-models', () => {
 
         const AttachedCommentsModel = m.attach(m.array(CommentModel), target);
 
-        expect(AttachedCommentsModel).to.have.property(Symbol.iterator);
-        expect(AttachedCommentsModel).to.have.property($items);
-
-        const items = [...AttachedCommentsModel];
+        const items = [...getIterator(AttachedCommentsModel)];
 
         expect(items).to.be.an('array').with.lengthOf(2);
 

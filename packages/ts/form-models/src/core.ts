@@ -26,47 +26,38 @@ export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => 0).name('n
 export type BooleanModel = PrimitiveModel<boolean>;
 export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
-export const $items = Symbol('items');
 const arrayItemModels = new WeakMap<ArrayModel, Model[]>();
 
 export type ArrayModel<M extends Model = Model> = Model<
   Array<Value<M>>,
   Readonly<{
     [$itemModel]: M;
-    [$items](): Generator<M, void, void>;
-    [Symbol.iterator](): Generator<M, void, void>;
   }>
 >;
+
+export function* getIterator<V extends Model>(model: ArrayModel<V>): Generator<V, void, void> {
+  const items = arrayItemModels.get(model) ?? [];
+  arrayItemModels.set(model, items);
+  const value = getValue(model);
+
+  items.length = value.length;
+
+  for (let i = 0; i < value.length; i++) {
+    if (!items[i]) {
+      items[i] = new CoreModelBuilder(model[$itemModel], () => value[i])
+        .name(`${model[$itemModel][$name]}[${i}]`)
+        .define($key, { value: i })
+        .define($owner, { value: model })
+        .build();
+    }
+
+    yield items[i] as V;
+  }
+}
 
 export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .name('Array')
   .define($itemModel, { value: Model })
-  .define($items, {
-    *value(this: ArrayModel) {
-      return yield* this;
-    },
-  })
-  .define(Symbol.iterator, {
-    *value(this: ArrayModel) {
-      const items = arrayItemModels.get(this) ?? [];
-      arrayItemModels.set(this, items);
-      const value = getValue(this);
-
-      items.length = value.length;
-
-      for (let i = 0; i < value.length; i++) {
-        if (!items[i]) {
-          items[i] = new CoreModelBuilder(this[$itemModel], () => value[i])
-            .name(`${this[$itemModel][$name]}[${i}]`)
-            .define($key, { value: i })
-            .define($owner, { value: this })
-            .build();
-        }
-
-        yield items[i];
-      }
-    },
-  })
   .build();
 
 export type ObjectModel<V, EX extends AnyObject = EmptyObject, R extends string = never> = Model<V, EX, R>;
