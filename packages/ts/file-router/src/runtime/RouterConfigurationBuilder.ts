@@ -5,6 +5,7 @@ import {
   createBrowserRouter,
   type IndexRouteObject,
   type NonIndexRouteObject,
+  type Params,
   type RouteObject,
 } from 'react-router-dom';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
@@ -73,15 +74,29 @@ export class RouterConfigurationBuilder {
 
         const element = module?.default ? createElement(module.default) : undefined;
         const handle = {
-          ...module?.config,
+          // Remove the loader from the config
+          ...(() => {
+            const { loader, ...rest } = module?.config ?? {};
+            return rest;
+          })(),
           title: module?.config?.title ?? convertComponentNameToTitle(module?.default),
         };
+
+        // Create a router loader from the passed function, if any. The parameters are
+        // passed in the order they are defined in the route path. No check is possible
+        // on the number and type of parameters, but the server will return an error
+        // in case of deserialization issues.
+        const loader =
+          module?.config?.loader &&
+          (async ({ params }: { params: Params }) =>
+            module.config?.loader!(...Object.keys(params).map((key) => params[key])));
 
         if (path === '' && !children) {
           return {
             ...original,
             element,
             handle,
+            loader,
             index: true,
           } as IndexRouteObject;
         }
@@ -92,6 +107,7 @@ export class RouterConfigurationBuilder {
           element,
           children,
           handle,
+          loader,
         } as NonIndexRouteObject;
       }
 
