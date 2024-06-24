@@ -66,8 +66,8 @@ const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '
 const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
 console.log(`Installing "${reactComponentsSpec}".`);
 // The root hoisted version should be updated first, before the workspaces
-await run('npm', ['install', reactComponentsSpec, '--save-dev', '--save-exact']);
+await run('npm', ['install', reactComponentsSpec, '--save-dev', '--save-exact', '--legacy-peer-deps']);
 const workspaceArg = `--workspace=@vaadin/hilla-react-crud`;
 // Workaround: doing "npm uninstall" first, the package.json in the workspace is not updated otherwise
-await run('npm', ['uninstall', reactComponentsPackageName, workspaceArg, '--save']);
-await run('npm', ['install', reactComponentsSpec, workspaceArg, '--save', '--save-exact']);
+await run('npm', ['uninstall', reactComponentsPackageName, workspaceArg, '--save', '--legacy-peer-deps']);
+await run('npm', ['install', reactComponentsSpec, workspaceArg, '--save', '--save-exact', '--legacy-peer-deps']);

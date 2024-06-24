@@ -75,7 +75,8 @@ public class TaskTest {
                 : Stream.<String> empty();
 
         var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
-                "install", "--no-save", "--install-links");
+                "install", "--no-save", "--install-links",
+                "--legacy-peer-deps");
 
         var generatorFiles = Files.list(packagesDirectory).map(Path::toString);
 

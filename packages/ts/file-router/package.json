@@ -57,7 +57,7 @@
     "access": "public"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
+    "react": "19.0.0-rc-3563387fe3-20240621",
     "react-router-dom": "^6.21.1"
   },
   "devDependencies": {
@@ -81,7 +81,7 @@
   "dependencies": {
     "@vaadin/hilla-generator-utils": "24.5.0-alpha3",
     "@vaadin/hilla-react-auth": "24.5.0-alpha3",
-    "react": "^18.2.0",
+    "react": "19.0.0-rc-3563387fe3-20240621",
     "rollup": "^4.12.0",
     "typescript": "5.5.2"
   }

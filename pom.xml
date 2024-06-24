@@ -75,7 +75,7 @@
     <jackson.version>2.17.1</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>24.5-SNAPSHOT</flow.version>
+    <flow.version>24.5.react19-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>3.2.7</spring.boot.version>
     <testbench.version>9.3.1</testbench.version>

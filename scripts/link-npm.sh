@@ -15,4 +15,4 @@ do
   pkgs+=" "@vaadin/hilla-`basename $tsPkg`@$tsPkg
 done
 
-npm i $pkgs --offline
+npm i $pkgs --offline --legacy-peer-deps

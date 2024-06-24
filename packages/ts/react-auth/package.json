@@ -49,7 +49,7 @@
     "@vaadin/hilla-frontend": "24.5.0-alpha3"
   },
   "peerDependencies": {
-    "react": "^18",
+    "react": "19.0.0-rc-3563387fe3-20240621",
     "react-router-dom": "^6"
   },
   "devDependencies": {

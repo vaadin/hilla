@@ -51,7 +51,7 @@
     "intl-messageformat": "^10.5.11"
   },
   "peerDependencies": {
-    "react": "^18"
+    "react": "19.0.0-rc-3563387fe3-20240621"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
