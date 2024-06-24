@@ -52,7 +52,7 @@ function createImport(mod: string, file: string): ImportDeclaration {
  */
 function createRouteData(path: string, mod: string | undefined, children?: readonly CallExpression[]): CallExpression {
   return template(
-    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children && children.length > 0 ? `, CHILDREN` : ''})`,
+    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children ? `, CHILDREN` : ''})`,
     ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
     [
       transformer((node) =>
