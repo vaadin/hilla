@@ -8,7 +8,7 @@ for Java
 ![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)
 [![Releases](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fdev%2Fhilla%2Fhilla%2Fmaven-metadata.xml)](https://github.com/vaadin/hilla/releases)
   
-[hilla.dev](https://hilla.dev) · [Docs](https://hilla.dev/docs) · [Chat](https://discord.gg/MYFq5RTbBn)
+[hilla.dev](https://hilla.dev) · [Docs](https://hilla.dev/docs) · [Forum](https://vaadin.com/forum/c/hilla/18)
 
 </div>
 
@@ -83,7 +83,7 @@ Follow the tutorials at https://hilla.dev/docs
 
 ## Contributing
 
-The best way to contribute is to try out Hilla and provide feedback to the development team in our [Discord chat](https://discord.gg/MYFq5RTbBn) or with [GitHub issues](https://github.com/vaadin/hilla/issues).
+The best way to contribute is to try out Hilla and provide feedback to the development team in our [Forum](https://vaadin.com/forum/c/hilla/18) or with [GitHub issues](https://github.com/vaadin/hilla/issues).
 
 ### Development
 
