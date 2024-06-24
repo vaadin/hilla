@@ -15,6 +15,7 @@ public final class JsonPrinter {
     public JsonPrinter() {
         // Putting the `pretty` initialization here allows preserving correct
         // class initialization sequence.
+        mapper.findAndRegisterModules();
         pretty = new Pretty();
     }
 
