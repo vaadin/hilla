@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-utils",
-  "version": "24.5.0-alpha2",
+  "version": "24.5.0-alpha3",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
@@ -59,7 +59,7 @@
   "dependencies": {
     "pino": "^8.15.1",
     "pino-pretty": "^10.2.0",
-    "typescript": "5.3.2"
+    "typescript": "5.5.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.6",
