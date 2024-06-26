@@ -28,8 +28,7 @@ describe('@vaadin/hilla-file-router', () => {
     plugin.configResolved({
       logger: { info: sinon.spy() },
       root: fileURLToPath(rootDir),
-      build: { outDir: fileURLToPath(outDir) },
-      debug: true,
+      build: { outDir: fileURLToPath(outDir) }
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error: the configResolved method could be either a function or an object.
