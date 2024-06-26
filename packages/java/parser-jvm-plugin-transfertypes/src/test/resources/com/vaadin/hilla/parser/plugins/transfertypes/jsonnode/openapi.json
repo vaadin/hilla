@@ -17,12 +17,82 @@
     }
   ],
   "paths" : {
-    "/JsonNodeEndpoint/echo" : {
+    "/JsonNodeEndpoint/arrayNode" : {
       "post" : {
         "tags" : [
           "JsonNodeEndpoint"
         ],
-        "operationId" : "JsonNodeEndpoint_echo_POST",
+        "operationId" : "JsonNodeEndpoint_arrayNode_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "node" : {
+                    "type" : "array",
+                    "nullable" : true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "nullable" : true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/JsonNodeEndpoint/jsonNode" : {
+      "post" : {
+        "tags" : [
+          "JsonNodeEndpoint"
+        ],
+        "operationId" : "JsonNodeEndpoint_jsonNode_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "node" : {
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/JsonNodeEndpoint/objectNode" : {
+      "post" : {
+        "tags" : [
+          "JsonNodeEndpoint"
+        ],
+        "operationId" : "JsonNodeEndpoint_objectNode_POST",
         "requestBody" : {
           "content" : {
             "application/json" : {
