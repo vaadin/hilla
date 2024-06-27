@@ -49,12 +49,13 @@
     "@vaadin/hilla-lit-form": "24.5.0-alpha3"
   },
   "peerDependencies": {
-    "react": "^18"
+    "react": "19.0.0-rc-3563387fe3-20240621"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.5.1",
+    "@testing-library/dom": "^10.2.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/chai": "^4.3.6",
     "@types/chai-as-promised": "^7.1.8",
     "@types/chai-dom": "^1.11.1",
