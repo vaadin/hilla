@@ -267,11 +267,12 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
   }
 
   /**
-   * Iterates the current array value and yields a binder node for every item.
+   * Iterates over the current model and yields a binder node for every item
+   * model.
    *
-   * @deprecated Use the {@link getItemsIterator} function instead. E.g.:
+   * @deprecated Use the {@link m.items} function instead. E.g.:
    * ```ts
-   * const items = Array.from(getItemsIterator(model), (itemModel) => (itemModel));
+   * const itemValues = Array.from(m.items(model), (itemModel) => m.value(itemModel));
    * ```
    */
   *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
@@ -279,14 +280,4 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
       yield getBinderNode(item);
     }
   }
-}
-
-/**
- * Returns an iterator over item models in the array model.
- *
- * @param model - The array model to iterate.
- * @returns An iterator over item models.
- */
-export function getItemsIterator<M extends ArrayModel>(model: M): Generator<ArrayItemModel<M>, void, void> {
-  return model[_items]() as Generator<ArrayItemModel<M>, void, void>;
 }
