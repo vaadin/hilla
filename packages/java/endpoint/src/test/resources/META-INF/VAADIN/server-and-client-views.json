@@ -1,14 +1,4 @@
 {
-  "": {
-    "params": {},
-    "title": "Layout",
-    "rolesAllowed": null,
-    "loginRequired": false,
-    "route": "",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
   "/foo": {
     "params": {},
     "title": "RouteTarget",
