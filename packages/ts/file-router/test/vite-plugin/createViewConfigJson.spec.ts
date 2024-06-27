@@ -87,6 +87,17 @@ describe('@vaadin/hilla-file-router', () => {
               params: { ':optional?': RouteParamType.Optional },
             },
             { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+            {
+              route: 'issue-002378',
+              params: {},
+              children: [
+                {
+                  route: ':requiredParam',
+                  params: { ':requiredParam': RouteParamType.Required },
+                  children: [{ route: 'edit', params: {}, title: 'Issue002378 Required Param' }],
+                },
+              ],
+            },
             { route: 'issue-002879-config-below', title: 'Config Below', params: {} },
           ],
         },
