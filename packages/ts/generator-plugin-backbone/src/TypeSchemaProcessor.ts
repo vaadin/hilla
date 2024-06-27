@@ -3,6 +3,8 @@ import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
+  findTypeArgument,
+  findTypeParameters,
   isArraySchema,
   isBooleanSchema,
   isComposedSchema,
@@ -16,7 +18,6 @@ import {
   type NonComposedSchema,
   type ReferenceSchema,
   type Schema,
-  type SchemaWithGenerics,
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import ts, { type TypeNode } from 'typescript';
@@ -66,14 +67,14 @@ export default class TypeSchemaProcessor {
 
     const unwrappedSchema = unwrapPossiblyNullableSchema(this.#schema);
 
-    const typeParameter = TypeSchemaProcessor.#processTypeParameter(unwrappedSchema as SchemaWithGenerics);
-
-    if (typeParameter) {
-      return [typeParameter];
+    const typeArg = TypeSchemaProcessor.#processTypeArgument(this.#schema);
+    if (typeArg) {
+      return [typeArg];
     }
 
     if (isReferenceSchema(unwrappedSchema)) {
-      node = this.#processReference(unwrappedSchema);
+      const typeArguments = TypeSchemaProcessor.#processTypeParameters(this.#schema);
+      node = this.#processReference(unwrappedSchema, typeArguments);
     } else if (isArraySchema(unwrappedSchema)) {
       node = this.#processArray(unwrappedSchema);
     } else if (isMapSchema(unwrappedSchema)) {
@@ -89,14 +90,6 @@ export default class TypeSchemaProcessor {
     }
 
     return isNullableSchema(this.#schema) ? [node, createUndefined()] : [node];
-  }
-
-  static #processTypeParameter(schema: SchemaWithGenerics): TypeNode | undefined {
-    if (!schema['x-type-parameter']) {
-      return undefined;
-    }
-
-    return ts.factory.createTypeReferenceNode(schema['x-type-parameter']);
   }
 
   #processArray(schema: ArraySchema): TypeNode {
@@ -121,23 +114,22 @@ export default class TypeSchemaProcessor {
     ]);
   }
 
-  static #processTypeArguments(schema: SchemaWithGenerics): readonly ts.TypeReferenceNode[] | undefined {
-    if (!schema['x-type-arguments']) {
-      return undefined;
-    }
-
-    return schema['x-type-arguments'].map((typeArgument) => ts.factory.createTypeReferenceNode(typeArgument));
+  static #processTypeParameters(schema: Schema): readonly ts.TypeReferenceNode[] | undefined {
+    return findTypeParameters(schema)?.map((tp) => ts.factory.createTypeReferenceNode(tp));
   }
 
-  #processReference(schema: ReferenceSchema): TypeNode {
+  static #processTypeArgument(schema: Schema): ts.TypeReferenceNode | undefined {
+    const ref = findTypeArgument(schema);
+    return ref ? ts.factory.createTypeReferenceNode(ref) : undefined;
+  }
+
+  #processReference(schema: ReferenceSchema, typeArguments: readonly ts.TypeReferenceNode[] | undefined): TypeNode {
     const { imports, paths } = this.#dependencies;
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
     const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
 
     const identifier = imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
-
-    const typeArguments = TypeSchemaProcessor.#processTypeArguments(schema as SchemaWithGenerics);
 
     return ts.factory.createTypeReferenceNode(identifier, typeArguments);
   }

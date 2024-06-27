@@ -32,8 +32,11 @@
                   "value": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity",
-                        "x-type-arguments": [
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity"
+                      },
+                      {
+                        "type": "object",
+                        "x-type-parameters": [
                           "string"
                         ]
                       }
@@ -88,8 +91,11 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity",
-                      "x-type-arguments": [
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity"
+                    },
+                    {
+                      "type": "object",
+                      "x-type-parameters": [
                         "string"
                       ]
                     }
@@ -112,7 +118,7 @@
         "properties": {
           "value": {
             "type": "object",
-            "x-type-parameter": "T"
+            "x-type-argument": "T"
           }
         }
       }

@@ -7,6 +7,7 @@ import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
+  findTypeParameters,
   isComposedSchema,
   isEmptyObject,
   isEnumSchema,
@@ -14,7 +15,6 @@ import {
   isObjectSchema,
   isReferenceSchema,
   type ObjectSchema,
-  type SchemaWithGenerics,
 } from '@vaadin/hilla-generator-core/Schema.js';
 import {
   convertFullyQualifiedNameToRelativePath,
@@ -90,7 +90,7 @@ export class EntityProcessor {
     return ts.factory.createInterfaceDeclaration(
       undefined,
       this.#id,
-      EntityProcessor.#processTypeArguments(schema as SchemaWithGenerics),
+      EntityProcessor.#processTypeParameters(schema),
       undefined,
       this.#processTypeElements(schema as ObjectSchema),
     );
@@ -170,12 +170,8 @@ export class EntityProcessor {
     });
   }
 
-  static #processTypeArguments(schema: SchemaWithGenerics): readonly ts.TypeParameterDeclaration[] | undefined {
-    if (!schema['x-type-parameters']) {
-      return undefined;
-    }
-
-    return schema['x-type-parameters'].map((name) =>
+  static #processTypeParameters(schema: Schema): readonly ts.TypeParameterDeclaration[] | undefined {
+    return findTypeParameters(schema)?.map((name) =>
       ts.factory.createTypeParameterDeclaration(undefined, name, undefined, undefined),
     );
   }

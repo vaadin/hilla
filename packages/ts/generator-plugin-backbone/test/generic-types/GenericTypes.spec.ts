@@ -17,8 +17,6 @@ describe('BackbonePlugin', () => {
       const generator = createGenerator([BackbonePlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-console
-      files.forEach(async (f) => f.text().then(console.log)); // temporary log, remove
       expect(files.length).to.equal(2);
 
       const [endpointFile, entity] = files;
