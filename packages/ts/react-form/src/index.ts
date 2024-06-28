@@ -16,6 +16,8 @@ import {
   type Validator,
   type Value,
   type ValueError,
+  type ArrayModel,
+  type ArrayItemModel,
 } from '@vaadin/hilla-lit-form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
@@ -72,6 +74,10 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     update(): void;
   }>;
 
+export type UseFormArrayPartResult<M extends ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
+  items: ReadonlyArray<ArrayItemModel<M>>;
+};
+
 type FieldState<T = unknown> = {
   required: boolean;
   invalid: boolean;
@@ -116,6 +122,8 @@ function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseForm
 }
 
 function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective {
+  const update = useUpdate();
+
   return useMemo(() => {
     const registry = new WeakMap<AbstractModel, FieldState>();
 
@@ -144,6 +152,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.strategy?.removeEventListeners();
               fieldState!.element = undefined;
               fieldState!.strategy = undefined;
+              update();
               return;
             }
 
@@ -157,6 +166,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
               fieldState!.element.addEventListener('input', fieldState!.updateValue);
               fieldState!.element.addEventListener('blur', fieldState!.changeBlurHandler);
               fieldState!.strategy = getDefaultFieldStrategy(element, model);
+              update();
             }
           },
           required: false,
@@ -224,6 +234,7 @@ export function useForm<M extends AbstractModel>(
   useEffect(() => {
     binder.addEventListener(CHANGED.type, update);
     clear(); // this allows to initialize the validation strategies (issue 2282)
+    return () => binder.removeEventListener(CHANGED.type, update);
   }, [binder]);
 
   return {
@@ -248,8 +259,24 @@ export function useForm<M extends AbstractModel>(
 export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
+
   return {
     ...getFormPart(binderNode),
     field,
+  };
+}
+
+/**
+ * Hook to access an array model part of a form. It provides the same API as `useFormPart`,
+ * but adds an `items` property that allows to iterate over the items in form of an array of models.
+ *
+ * @param model - The array model to access
+ * @returns The array model part of the form
+ */
+export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
+  const binderNode = getBinderNode(model);
+  return {
+    ...getFormPart(binderNode),
+    items: Array.from(model, (item) => item.model as ArrayItemModel<M>),
   };
 }

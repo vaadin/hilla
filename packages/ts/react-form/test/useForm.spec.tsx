@@ -1,13 +1,23 @@
 import { expect, use } from '@esm-bundle/chai';
-import { act, fireEvent, render, type RenderResult, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useForm as _useForm, useFormPart } from '../src/index.js';
-import { type Contract, EntityModel, type FormUserModel, type Login, LoginModel, type Project } from './models.js';
+import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src/index.js';
+import {
+  type Contract,
+  EntityModel,
+  type FormUserModel,
+  type Login,
+  LoginModel,
+  type PlayerModel,
+  type Project,
+  TeamModel,
+  type Player,
+} from './models.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -359,6 +369,87 @@ describe('@vaadin/hilla-react-form', () => {
       fireEvent.change(projectInput);
       const count = await findByTestId('count');
       expect(count).to.have.text('1');
+    });
+  });
+
+  describe('arrays', () => {
+    let updatePlayers: (updater: (oldPlayers: Player[]) => Player[]) => void;
+
+    function TeamFormPlayer({ model }: { model: PlayerModel }) {
+      const { field, value, invalid, ownErrors } = useFormPart(model);
+
+      return (
+        <div>
+          <input data-testid={`lastName.${value!.id}`} type="text" {...field(model.lastName)} />
+          <output data-testid={`validation.lastName.${value!.id}`}>
+            {invalid ? ownErrors.map((e) => e.message).join(', ') : 'OK'}
+          </output>
+        </div>
+      );
+    }
+
+    function TeamForm({ initialPlayers }: { initialPlayers: Player[] }) {
+      const { field, model, read } = useForm(TeamModel);
+      const name = useFormPart(model.name);
+      const { items, value, setValue } = useFormArrayPart(model.players);
+
+      updatePlayers = (updater) => {
+        setValue(updater(value ?? []));
+      };
+
+      useEffect(() => {
+        read({
+          id: 1,
+          name: 'Team 1',
+          players: initialPlayers,
+        });
+      }, []);
+
+      return (
+        <>
+          <input data-testid="team.name" type="text" {...field(model.name)} />
+          <output data-testid="validation.team.name">
+            {name.invalid ? name.ownErrors.map((e) => e.message).join(', ') : 'OK'}
+          </output>
+          {items.map((player, index) => (
+            <TeamFormPlayer key={`${value![index].id || -index}`} model={player} />
+          ))}
+        </>
+      );
+    }
+
+    const player1 = { id: 10, firstName: 'John', lastName: 'Doe', age: 27 };
+    const player2 = { id: 20, firstName: 'Jane', lastName: 'Smith', age: 28 };
+
+    it('should iterate on array items', async () => {
+      const { findByTestId } = render(<TeamForm initialPlayers={[player1, player2]} />);
+
+      expect(await findByTestId('team.name')).to.have.value('Team 1');
+      expect(await findByTestId('lastName.10')).to.have.value('Doe');
+    });
+
+    it('should add item to empty array', async () => {
+      const { findByTestId } = render(<TeamForm initialPlayers={[]} />);
+
+      updatePlayers((oldPlayers) => [...oldPlayers, player1]);
+      expect(await findByTestId('lastName.10')).to.have.value('Doe');
+    });
+
+    it('should add item to existing array', async () => {
+      const { findByTestId } = render(<TeamForm initialPlayers={[player1]} />);
+
+      expect(await findByTestId('lastName.10')).to.have.value('Doe');
+      updatePlayers((oldPlayers) => [...oldPlayers, player2]);
+      expect(await findByTestId('lastName.20')).to.have.value('Smith');
+    });
+
+    it('should remove item from array', async () => {
+      const { findByTestId } = render(<TeamForm initialPlayers={[player1, player2]} />);
+
+      const lastName = await findByTestId('lastName.10');
+      expect(lastName).to.exist;
+      updatePlayers(() => [player2]);
+      await waitForElementToBeRemoved(lastName);
     });
   });
 });

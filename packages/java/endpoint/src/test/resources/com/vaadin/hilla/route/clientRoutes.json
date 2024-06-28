@@ -1,0 +1,70 @@
+[
+  {
+    "route": "/home",
+    "params": {},
+    "title": "Home"
+  },
+
+  {
+    "route": "/profile",
+    "params": {},
+    "title": "Profile",
+    "loginRequired": true,
+    "rolesAllowed": [ "ROLE_USER", "ROLE_ADMIN"]
+  },
+  {
+    "route": "/user/:userId",
+    "loginRequired": true,
+    "rolesAllowed": ["ROLE_ADMIN"],
+    "params": { ":userId": "req"},
+    "title": "User Profile"
+  },
+  {
+  "params": {},
+  "title": "Index",
+  "rolesAllowed": null,
+  "loginRequired": false,
+  "route": "/",
+  "lazy": false,
+  "register": false,
+  "menu": null
+},
+  {
+  "params": {},
+  "title": "Orders",
+  "rolesAllowed": null,
+  "loginRequired": false,
+  "route": "/orders",
+  "lazy": false,
+  "register": false,
+  "menu": null
+  },
+  {
+    "route": "/products",
+    "params": {},
+    "title": "Products",
+    "lazy": false,
+    "loginRequired": true,
+    "rolesAllowed": ["ROLE_ADMIN"],
+    "children": [
+      {
+        "route": "/:id",
+        "loginRequired": false,
+        "rolesAllowed": null,
+        "lazy": false,
+        "params": { ":id": "req"},
+        "title": "Product Page",
+        "children": [
+          {
+            "route": "/edit",
+            "loginRequired": false,
+            "rolesAllowed": null,
+            "lazy": false,
+            "title": "Edit Product"
+          }
+        ]
+      }
+    ]
+  }
+]
+

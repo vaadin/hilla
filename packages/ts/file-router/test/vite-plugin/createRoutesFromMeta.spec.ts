@@ -37,7 +37,34 @@ import * as Page7 from "../views/profile/friends/{user}.js";
 import * as Layout8 from "../views/profile/friends/@layout.js";
 import * as Page10 from "../views/test/{{optional}}.js";
 import * as Page11 from "../views/test/{...wildcard}.js";
-const routes: readonly AgnosticRoute[] = [createRoute("nameToReplace", Page0), createRoute("profile", [createRoute("", Page1), createRoute("account", Layout5, [createRoute("security", [createRoute("password", Page2), createRoute("two-factor-auth", Page3)])]), createRoute("friends", Layout8, [createRoute("list", Page6), createRoute(":user", Page7)])]), createRoute("test", [createRoute(":optional?", Page10), createRoute("*", Page11)])];
+import * as Page12 from "../views/test/issue-002378/{requiredParam}/edit.js";
+import * as Page15 from "../views/test/issue-002879-config-below.js";
+const routes: readonly AgnosticRoute[] = [
+    createRoute("nameToReplace", Page0),
+    createRoute("profile", [
+        createRoute("", Page1),
+        createRoute("account", Layout5, [
+            createRoute("security", [
+                createRoute("password", Page2),
+                createRoute("two-factor-auth", Page3)
+            ])
+        ]),
+        createRoute("friends", Layout8, [
+            createRoute("list", Page6),
+            createRoute(":user", Page7)
+        ])
+    ]),
+    createRoute("test", [
+        createRoute(":optional?", Page10),
+        createRoute("*", Page11),
+        createRoute("issue-002378", [
+            createRoute(":requiredParam", [
+                createRoute("edit", Page12)
+            ])
+        ]),
+        createRoute("issue-002879-config-below", Page15)
+    ])
+];
 export default routes;
 `);
     });

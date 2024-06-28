@@ -37,7 +37,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
 
           if (!file && !layout) {
             return {
-              route: path,
+              route: convertFSRouteSegmentToURLPatternFormat(path),
               params: extractParameterFromRouteSegment(path),
               children: newChildren,
             } satisfies ServerViewConfig;
@@ -64,7 +64,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
               waitingForIdentifier = true;
             } else if (waitingForIdentifier && ts.isIdentifier(node)) {
               componentName = node.text;
-              break;
+              waitingForIdentifier = false;
             }
           }
 
@@ -87,11 +87,11 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             ...config,
             params: extractParameterFromRouteSegment(config?.route ?? path),
             title,
-            children: newChildren,
+            children: newChildren ?? (layout ? [] : undefined),
           } satisfies ServerViewConfig;
         }),
       ),
   );
 
-  return JSON.stringify(res);
+  return JSON.stringify(res, undefined, 2);
 }

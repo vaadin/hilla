@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
@@ -44,6 +46,8 @@ public final class TransferTypesPlugin
         classMap.put("com.vaadin.hilla.EndpointSubscription",
                 EndpointSubscription.class);
         classMap.put(JsonNode.class.getName(), Object.class);
+        classMap.put(ObjectNode.class.getName(), Object.class);
+        classMap.put(ArrayNode.class.getName(), List.class);
     }
 
     public TransferTypesPlugin() {

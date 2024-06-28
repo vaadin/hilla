@@ -1,0 +1,35 @@
+[
+  {
+    "route": "",
+    "params": {},
+    "title": "Layout",
+    "children": [
+      {
+        "route": "/home",
+        "params": {},
+        "title": "Home"
+      },
+      {
+        "route": "/profile",
+        "params": {},
+        "title": "Profile",
+        "loginRequired": true,
+        "rolesAllowed": [
+          "ROLE_USER",
+          "ROLE_ADMIN"
+        ]
+      },
+      {
+        "route": "/user/:userId",
+        "loginRequired": true,
+        "rolesAllowed": [
+          "ROLE_ADMIN"
+        ],
+        "params": {
+          ":userId": "req"
+        },
+        "title": "User Profile"
+      }
+    ]
+  }
+]

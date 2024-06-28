@@ -569,7 +569,10 @@ describe('@vaadin/hilla-react-crud', () => {
           );
           // Number type
           await user.click(grid.getHeaderCellContent(1, 0).querySelector('vaadin-select-value-button')!);
-          let filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          await nextFrame();
+          let filterOptions = await waitFor(() =>
+            document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item'),
+          );
           expect(filterOptions).to.have.length(3);
           expect(filterOptions[0]).to.have.rendered.text('> Greater than');
 
@@ -577,7 +580,10 @@ describe('@vaadin/hilla-react-crud', () => {
 
           // Date type
           await user.click(grid.getHeaderCellContent(1, 2).querySelector('vaadin-select-value-button')!);
-          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          await nextFrame();
+          filterOptions = await waitFor(() =>
+            document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item'),
+          );
           expect(filterOptions).to.have.length(3);
           expect(filterOptions[0]).to.have.rendered.text('> After');
 
@@ -585,7 +591,10 @@ describe('@vaadin/hilla-react-crud', () => {
 
           // Time type
           await user.click(grid.getHeaderCellContent(1, 3).querySelector('vaadin-select-value-button')!);
-          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          await nextFrame();
+          filterOptions = await waitFor(() =>
+            document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item'),
+          );
           expect(filterOptions).to.have.length(3);
           expect(filterOptions[1]).to.have.rendered.text('< Before');
         });

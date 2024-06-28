@@ -8,6 +8,15 @@ import type { Logger } from 'vite';
 import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Chai {
+    interface PromisedAssertion {
+      like(expected: unknown): Promise<void>;
+    }
+  }
+}
+
 export async function createTmpDir(): Promise<URL> {
   return pathToFileURL(`${await mkdtemp(join(tmpdir(), 'file-router-'))}/`);
 }
@@ -37,6 +46,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
   // ├── test
   // │   ├── {{optional}}.tsx
   // │   ├── {...wildcard}.tsx
+  // │   ├── config-after-default-export.tsx
   // │   ├── empty.tsx
   // │   ├── _ignored.tsx
   // │   └── no-default-export.tsx
@@ -48,6 +58,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     mkdir(new URL('empty-dir/empty-subdir/', dir), { recursive: true }),
     mkdir(new URL('empty-dir/empty-file-subdir/', dir), { recursive: true }),
     mkdir(new URL('test', dir), { recursive: true }),
+    mkdir(new URL('test/issue-002378/{requiredParam}', dir), { recursive: true }),
   ]);
   await Promise.all([
     appendFile(
@@ -93,6 +104,14 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(
       new URL('test/{{optional}}.tsx', dir),
       "export const config = { title: 'Optional' };\nexport default function Optional() {};",
+    ),
+    appendFile(
+      new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
+      'export default function Issue002378RequiredParam() {};',
+    ),
+    appendFile(
+      new URL('test/issue-002879-config-below.tsx', dir),
+      'export default function Issue002879ConfigBelow() {};\nexport const config = { title: "Config Below" };',
     ),
     appendFile(new URL('test/empty.tsx', dir), ''),
     appendFile(new URL('test/_ignored.tsx', dir), 'export default function Ignored() {};'),
@@ -149,7 +168,7 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
     {
       path: 'test',
       children: [
-        // Ignored route (that has the name `_ignored.tsx` is not included in the route meta.
+        // Ignored route that has the name `_ignored.tsx` is not included in the route meta.
         // Also empty files or files without default export are not included.
         {
           path: '{{optional}}',
@@ -158,6 +177,24 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
         {
           path: '{...wildcard}',
           file: new URL('test/{...wildcard}.tsx', dir),
+        },
+        {
+          path: 'issue-002378',
+          children: [
+            {
+              path: '{requiredParam}',
+              children: [
+                {
+                  path: 'edit',
+                  file: new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: 'issue-002879-config-below',
+          file: new URL('test/issue-002879-config-below.tsx', dir),
         },
       ],
     },

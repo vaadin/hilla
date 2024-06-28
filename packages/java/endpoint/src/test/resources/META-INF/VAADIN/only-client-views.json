@@ -7,8 +7,7 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
-    "params": {}
+    "menu": null
   },
   "/profile": {
     "params": {},
@@ -19,6 +18,26 @@
     ],
     "loginRequired": true,
     "route": "/profile",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/": {
+    "params": {},
+    "title": "Index",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/",
+    "lazy": false,
+    "register": false,
+    "menu": null
+  },
+  "/orders": {
+    "params": {},
+    "title": "Orders",
+    "rolesAllowed": null,
+    "loginRequired": false,
+    "route": "/orders",
     "lazy": false,
     "register": false,
     "menu": null
