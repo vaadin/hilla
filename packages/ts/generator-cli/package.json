@@ -16,7 +16,7 @@
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
-    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
+    "test:coverage": "c8 --experimental-monocart -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
@@ -60,15 +60,17 @@
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@vaadin/hilla-generator-core": "24.5.0-alpha3",
-    "c8": "^8.0.1",
+    "c8": "^10.1.2",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
     "concurrently": "^8.2.1",
     "copyfiles": "^2.4.1",
     "mocha": "^10.2.0",
+    "monocart-coverage-reports": "^2.8.4",
     "pino": "^8.15.1",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "type-fest": "^4.3.2"
+    "type-fest": "^4.3.2",
+    "undefined": "^0.1.0"
   }
 }

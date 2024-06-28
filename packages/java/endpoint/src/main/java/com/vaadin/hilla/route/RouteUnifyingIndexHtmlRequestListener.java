@@ -94,11 +94,13 @@ public class RouteUnifyingIndexHtmlRequestListener
     public void modifyIndexHtmlResponse(IndexHtmlResponse response) {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
                 collectClientViews(response.getVaadinRequest()));
+        final boolean hasMainMenuRoute = hasMainMenu(
+                MenuRegistry.collectClientMenuItems(true,
+                        deploymentConfiguration, response.getVaadinRequest()));
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
                     "Exposing server-side views to the client based on user configuration");
-            availableViews
-                    .putAll(collectServerViews(hasMainMenu(availableViews)));
+            availableViews.putAll(collectServerViews(hasMainMenuRoute));
         }
 
         if (availableViews.isEmpty()) {
@@ -122,20 +124,51 @@ public class RouteUnifyingIndexHtmlRequestListener
     protected Map<String, AvailableViewInfo> collectClientViews(
             VaadinRequest request) {
 
-        return MenuRegistry
-                .collectClientMenuItems(true, deploymentConfiguration, request)
-                .entrySet().stream()
-                .filter(view -> !hasRequiredParameter(
-                        view.getValue().routeParameters()))
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        Map.Entry::getValue));
+        final Map<String, AvailableViewInfo> viewInfoMap = MenuRegistry
+                .collectClientMenuItems(true, deploymentConfiguration, request);
+
+        final Set<String> clientViewEntries = new HashSet<>(
+                viewInfoMap.keySet());
+        for (var path : clientViewEntries) {
+            if (!viewInfoMap.containsKey(path)) {
+                continue;
+            }
+
+            var viewInfo = viewInfoMap.get(path);
+            // Remove routes with required parameters, including nested ones
+            if (hasRequiredParameter(viewInfo)) {
+                viewInfoMap.remove(path);
+                if (viewInfo.children() != null) {
+                    RouteUtil.removeChildren(viewInfoMap, viewInfo, path);
+                }
+                continue;
+            }
+
+            // Remove layouts
+            if (viewInfo.children() != null) {
+                viewInfoMap.remove(path);
+            }
+        }
+
+        return viewInfoMap;
     }
 
-    private boolean hasRequiredParameter(
-            Map<String, RouteParamType> routeParameters) {
-        return routeParameters != null && !routeParameters.isEmpty()
+    private boolean hasRequiredParameter(AvailableViewInfo viewInfo) {
+        final Map<String, RouteParamType> routeParameters = viewInfo
+                .routeParameters();
+        if (routeParameters != null && !routeParameters.isEmpty()
                 && routeParameters.values().stream().anyMatch(
-                        paramType -> paramType == RouteParamType.REQUIRED);
+                        paramType -> paramType == RouteParamType.REQUIRED)) {
+            return true;
+        }
+
+        // Nested routes could have parameters on the parent, check them also
+        final AvailableViewInfo parentViewInfo = null;
+        if (parentViewInfo != null) {
+            return hasRequiredParameter(parentViewInfo);
+        }
+
+        return false;
     }
 
     protected Map<String, AvailableViewInfo> collectServerViews(
