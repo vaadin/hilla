@@ -270,10 +270,19 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
    * Iterates over the current model and yields a binder node for every item
    * model.
    *
-   * @deprecated Use the {@link m.items} function instead. E.g.:
-   * ```ts
-   * const itemValues = Array.from(m.items(model), (itemModel) => m.value(itemModel));
+   * @deprecated Use the {@link m.items} function instead. For example, in React:
+   * ```tsx
+   * const {model, field} = useForm(GroupModel);
+   * return Array.from(m.items(model.people), (personModel) => 
+   *   <TextField label="Full name" {...field(personModel.fullName)} />
+   * );
    * ```
+   * In Lit:
+   * ```ts
+   * return html`${repeat(m.items(this.binder.model.people), personModel => html`
+   *   <vaadin-text-field label="Full name" ${field(personModel.fullName)}></vaadin-text-field>
+   *  `)}
+   * `;
    */
   *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
     for (const item of this[_items]()) {
