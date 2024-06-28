@@ -273,16 +273,17 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
    * @deprecated Use the {@link m.items} function instead. For example, in React:
    * ```tsx
    * const {model, field} = useForm(GroupModel);
-   * return Array.from(m.items(model.people), (personModel) => 
+   * return Array.from(m.items(model.people), (personModel) =>
    *   <TextField label="Full name" {...field(personModel.fullName)} />
    * );
    * ```
    * In Lit:
    * ```ts
-   * return html`${repeat(m.items(this.binder.model.people), personModel => html`
-   *   <vaadin-text-field label="Full name" ${field(personModel.fullName)}></vaadin-text-field>
-   *  `)}
-   * `;
+   * return html`${repeat(
+   *   m.items(this.binder.model.people),
+   *   (personModel) => html`<vaadin-text-field label="Full name" ${field(personModel.fullName)}></vaadin-text-field>`,
+   * )}`;
+   * ```
    */
   *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
     for (const item of this[_items]()) {
@@ -290,3 +291,15 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
     }
   }
 }
+
+export const m = {
+  /**
+   * Returns an iterator over item models in the array model.
+   *
+   * @param model - The array model to iterate over.
+   * @returns An iterator over item models.
+   */
+  items<M extends ArrayModel>(model: M): Generator<ArrayItemModel<M>, void, void> {
+    return model[_items]() as Generator<ArrayItemModel<M>, void, void>;
+  },
+};

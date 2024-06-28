@@ -1,24 +1,25 @@
 import { expect } from '@esm-bundle/chai';
 // API to test
-import m, {
+import {
   _enum,
   _fromString,
   _key,
   _meta,
+  type AbstractModel,
   ArrayModel,
   Binder,
+  type BinderNode,
   EnumModel,
   IsNumber,
+  m,
+  type ModelMetadata,
   NotBlank,
   NotEmpty,
   NotNull,
   NumberModel,
   ObjectModel,
-  type ModelMetadata,
   Positive,
   Size,
-  type AbstractModel,
-  type BinderNode,
 } from '../src/index.js';
 
 import {
