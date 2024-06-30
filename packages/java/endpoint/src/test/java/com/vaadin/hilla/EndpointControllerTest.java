@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -819,10 +820,11 @@ public class EndpointControllerTest {
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
                 mock(EndpointNameChecker.class));
+        SignalsRegistry signalsRegistry = Mockito.mock(SignalsRegistry.class);
 
         EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
                 mock(ExplicitNullableTypeChecker.class),
-                mock(ServletContext.class), registry);
+                mock(ServletContext.class), registry, signalsRegistry);
 
         new EndpointController(contextMock, registry, invoker, null)
                 .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
@@ -1296,11 +1298,11 @@ public class EndpointControllerTest {
         ApplicationContext mockApplicationContext = mockApplicationContext(
                 endpoint);
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
-
+        SignalsRegistry signalsRegistry = Mockito.mock(SignalsRegistry.class);
         EndpointInvoker invoker = Mockito
                 .spy(new EndpointInvoker(mockApplicationContext,
                         endpointMapperFactory, explicitNullableTypeChecker,
-                        mock(ServletContext.class), registry));
+                        mock(ServletContext.class), registry, signalsRegistry));
 
         Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();
 

@@ -2,6 +2,7 @@ package com.vaadin.hilla;
 
 import static org.mockito.Mockito.mock;
 
+import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 
@@ -26,11 +27,12 @@ public class EndpointControllerMockBuilder {
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
         CsrfChecker csrfChecker = Mockito.mock(CsrfChecker.class);
         ServletContext servletContext = Mockito.mock(ServletContext.class);
+        SignalsRegistry signalsRegistry = Mockito.mock(SignalsRegistry.class);
         Mockito.when(csrfChecker.validateCsrfTokenInRequest(Mockito.any()))
                 .thenReturn(true);
-        EndpointInvoker invoker = Mockito
-                .spy(new EndpointInvoker(applicationContext, factory,
-                        explicitNullableTypeChecker, servletContext, registry));
+        EndpointInvoker invoker = Mockito.spy(new EndpointInvoker(
+                applicationContext, factory, explicitNullableTypeChecker,
+                servletContext, registry, signalsRegistry));
         EndpointController controller = Mockito.spy(new EndpointController(
                 applicationContext, registry, invoker, csrfChecker));
         Mockito.doReturn(mock(EndpointAccessChecker.class)).when(invoker)
