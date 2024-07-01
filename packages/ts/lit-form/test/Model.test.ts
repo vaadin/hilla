@@ -151,6 +151,14 @@ describe('@vaadin/hilla-lit-form', () => {
     });
 
     describe('array model', () => {
+      function* toBinderNode<M extends AbstractModel>(
+        iterable: Iterable<M>,
+      ): Generator<BinderNode<M>, undefined, void> {
+        for (const value of iterable) {
+          yield binder.for(value);
+        }
+      }
+
       const strings = ['foo', 'bar'];
 
       const idEntities: readonly IdEntity[] = [
@@ -167,23 +175,14 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should be iterable', () => {
-        function* toBinderNode<M extends AbstractModel>(iterable: Iterable<M>): Generator<BinderNode<M>, void, void> {
-          for (const value of iterable) {
-            yield binder.for(value);
-          }
-        }
-
         [binder.model.fieldArrayString, binder.model.fieldArrayModel].forEach((arrayModel) => {
           const values = binder.for(arrayModel).value!;
           const iterator = toBinderNode(m.items(arrayModel));
           for (let i = 0; i < values.length; i++) {
             const iteratorResult = iterator.next();
             expect(iteratorResult.done).to.be.false;
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             const binderNode = iteratorResult.value!;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             expect(binderNode.model[_key]).to.equal(i);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             expect(binderNode.value).to.equal(values[i]);
           }
 
@@ -294,11 +293,11 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should reuse model instance for the same array item', () => {
-        const nodes1 = Array.from(m.items(binder.model.fieldArrayModel), (model) => binder.for(model));
+        const nodes1 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         binder.for(binder.model.fieldArrayModel).value = idEntities.slice();
-        const nodes2 = Array.from(m.items(binder.model.fieldArrayModel), (model) => binder.for(model));
+        const nodes2 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
         [0, 1].forEach((i) => {
           expect(nodes1[i]).to.be.equal(nodes2[i]);
           expect(nodes1[i].model).to.be.equal(nodes2[i].model);
@@ -307,7 +306,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should reuse model instance for the same array item after it is modified', () => {
-        const nodes1 = Array.from(m.items(binder.model.fieldArrayModel), (model) => binder.for(model));
+        const nodes1 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         binder.for(nodes1[0].model.idString).value = 'foo';
@@ -317,7 +316,7 @@ describe('@vaadin/hilla-lit-form', () => {
         binder.for(binder.model.fieldArrayModel).prependItem();
         binder.for(binder.model.fieldArrayModel).appendItem();
 
-        const nodes2 = Array.from(m.items(binder.model.fieldArrayModel), (model) => binder.for(model));
+        const nodes2 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
 
         [0, 1].forEach((i) => {
           expect(nodes1[i]).to.be.equal(nodes2[i]);
@@ -327,7 +326,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should update model keySymbol when inserting items', () => {
-        const nodes1 = Array.from(m.items(binder.model.fieldArrayModel), (model) => binder.for(model));
+        const nodes1 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         for (let i = 0; i < nodes1.length; i++) {
@@ -340,7 +339,7 @@ describe('@vaadin/hilla-lit-form', () => {
         binder.for(binder.model.fieldArrayModel).prependItem();
         expect(binder.for(binder.model.fieldArrayModel).value?.[1].idString).to.be.equal('foo');
 
-        const nodes2 = Array.from(m.items(binder.model.fieldArrayModel), (model) => binder.for(model));
+        const nodes2 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
         expect(nodes2.length).to.be.equal(3);
         for (let i = 0; i < nodes2.length; i++) {
           expect(nodes2[i].model[_key]).to.be.equal(i);

@@ -1,5 +1,3 @@
-import { _items, type ArrayItemModel, type ArrayModel } from './Models.js';
-
 export * from './Binder.js';
 export * from './BinderRoot.js';
 export * from './BinderNode.js';
