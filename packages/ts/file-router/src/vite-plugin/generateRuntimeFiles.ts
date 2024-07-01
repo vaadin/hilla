@@ -50,24 +50,32 @@ async function generateRuntimeFile(url: URL, data: string): Promise<void> {
  * @param urls - The URLs of the files to generate.
  * @param extensions - The list of extensions that will be collected as routes.
  * @param logger - The Vite logger instance.
+ * @param debug - true to debug
  */
 export async function generateRuntimeFiles(
   viewsDir: URL,
   urls: RuntimeFileUrls,
   extensions: readonly string[],
   logger: Logger,
+  debug: boolean,
 ): Promise<void> {
   const routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
-  logger.info('Collected file-based routes');
+  if (debug) {
+    logger.info('Collected file-based routes');
+  }
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
 
   await Promise.all([
-    generateRuntimeFile(urls.json, viewConfigJson).then(() =>
-      logger.info(`Frontend route list is generated: ${String(urls.json)}`),
-    ),
-    generateRuntimeFile(urls.code, runtimeRoutesCode).then(() =>
-      logger.info(`File Route module is generated: ${String(urls.code)}`),
-    ),
+    generateRuntimeFile(urls.json, viewConfigJson).then(() => {
+      if (debug) {
+        logger.info(`Frontend route list is generated: ${String(urls.json)}`);
+      }
+    }),
+    generateRuntimeFile(urls.code, runtimeRoutesCode).then(() => {
+      if (debug) {
+        logger.info(`File Route module is generated: ${String(urls.code)}`);
+      }
+    }),
   ]);
 }
