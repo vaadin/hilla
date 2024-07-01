@@ -22,8 +22,10 @@ public class Hotswapper implements VaadinHotswapper {
     }
 
     @Override
-    public boolean onClassLoadEvent(VaadinService vaadinService, Set<Class<?>> classes, boolean redefined) {
-        onHotswap(redefined, classes.stream().map(Class::getName).toArray(String[]::new));
+    public boolean onClassLoadEvent(VaadinService vaadinService,
+            Set<Class<?>> classes, boolean redefined) {
+        onHotswap(redefined,
+                classes.stream().map(Class::getName).toArray(String[]::new));
         return false;
     }
 
