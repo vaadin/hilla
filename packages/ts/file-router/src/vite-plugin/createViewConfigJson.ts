@@ -37,7 +37,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
 
           if (!file && !layout) {
             return {
-              route: path,
+              route: convertFSRouteSegmentToURLPatternFormat(path),
               params: extractParameterFromRouteSegment(path),
               children: newChildren,
             } satisfies ServerViewConfig;

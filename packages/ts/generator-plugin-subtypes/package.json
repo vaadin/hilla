@@ -16,7 +16,7 @@
     "lint:fix": "eslint src test --fix",
     "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
     "test:update": "npm run test -- --update",
-    "test:coverage": "c8 -c ../../../.c8rc.json npm test",
+    "test:coverage": "c8 --experimental-monocart -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -69,11 +69,12 @@
     "@vaadin/hilla-generator-core": "24.5.0-alpha3",
     "@vaadin/hilla-generator-plugin-client": "24.5.0-alpha3",
     "@vaadin/hilla-generator-plugin-model": "24.5.0-alpha3",
-    "c8": "^8.0.1",
+    "c8": "^10.1.2",
     "chai": "^4.3.10",
     "concurrently": "^8.2.1",
     "copyfiles": "^2.4.1",
     "mocha": "^10.2.0",
+    "monocart-coverage-reports": "^2.8.4",
     "pino": "^8.15.1",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
