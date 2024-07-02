@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.24.7",
+    "@preact/signals-react-transform": "0.3.1",
     "@rollup/plugin-replace": "5.0.7",
     "@rollup/pluginutils": "5.1.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -190,6 +191,7 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.24.7",
+      "@preact/signals-react-transform": "0.3.1",
       "@rollup/plugin-replace": "5.0.7",
       "@rollup/pluginutils": "5.1.0",
       "@vaadin/hilla-generator-cli": "24.5.0-alpha3",
@@ -215,7 +217,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "945b19456d32c8072223abe4246a85324186f147ddd5637b852c58937f6cded7"
+    "hash": "781a68f423ea2710c40b3e7a5cd3a1ff893bc1c656e676483398509e0a9de882"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
