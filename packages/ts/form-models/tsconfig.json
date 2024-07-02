@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "experimentalDecorators": true,
+    "target": "es2022"
+  },
+  "include": ["src", "test"],
+  "exclude": ["test/**/*.snap.ts"]
+}
