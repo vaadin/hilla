@@ -2,12 +2,16 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
+import java.lang.reflect.AnnotatedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 
+import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.models.TypeVariableModel;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -22,9 +26,11 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
     private final SignatureModel type;
+    private final boolean generics;
 
-    public SchemaProcessor(SignatureModel type) {
+    public SchemaProcessor(SignatureModel type, boolean generics) {
         this.type = type;
+        this.generics = generics;
     }
 
     private static <T extends Schema<?>> T nullify(T schema,
@@ -55,6 +61,10 @@ final class SchemaProcessor {
             result = dateTimeSchema();
         } else if (type.isClassRef()) {
             result = refSchema();
+        } else if (generics && type.isTypeVariable()) {
+            result = typeVariableSchema();
+        } else if (generics && type.isTypeParameter()) {
+            result = typeParameterSchema();
         } else {
             result = anySchema();
         }
@@ -127,12 +137,39 @@ final class SchemaProcessor {
         var _type = (ClassRefSignatureModel) type;
         var fullyQualifiedName = _type.getClassInfo().getName();
 
-        return nullify(new ComposedSchema(), true)
-                .anyOf(new ArrayList<>(List.of(new Schema<>()
-                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName))));
+        var ref = new Schema<>()
+                .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName);
+        var args = _type.getTypeArguments().stream()
+                .map(arg -> (AnnotatedType) arg.get()).map(SignatureModel::of)
+                .map(arg -> new SchemaProcessor(arg, false).process())
+                .map(Schema::getType).filter(Objects::nonNull)
+                .toArray(String[]::new);
+
+        ObjectSchema gen = null;
+        if (args.length > 0) {
+            gen = new ObjectSchema();
+            gen.addExtension("x-type-parameters", args);
+        }
+
+        return nullify(new ComposedSchema(), true).anyOf(new ArrayList<>(
+                gen == null ? List.of(ref) : List.of(ref, gen)));
     }
 
     private Schema<?> stringSchema() {
         return nullify(new StringSchema(), !type.isPrimitive());
+    }
+
+    private Schema<?> typeVariableSchema() {
+        var _type = (TypeVariableModel) type;
+        var schema = nullify(new ObjectSchema(), true);
+        schema.addExtension("x-type-argument", _type.getName());
+        return schema;
+    }
+
+    private Schema<?> typeParameterSchema() {
+        var _type = (TypeParameterModel) type;
+        var schema = nullify(new ObjectSchema(), true);
+        schema.addExtension("x-type-argument", _type.getName());
+        return schema;
     }
 }

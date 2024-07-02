@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,6 +14,8 @@ import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.FieldInfoModel;
+import com.vaadin.hilla.parser.models.SpecializedModel;
+import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
@@ -28,8 +32,21 @@ public final class EntityPlugin
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = entityNode.getSource();
-            entityNode.setTarget(
-                    cls.isEnum() ? enumSchema(cls) : new ObjectSchema());
+            Schema<?> schema = cls.isEnum() ? enumSchema(cls)
+                    : new ObjectSchema();
+            entityNode.setTarget(schema);
+
+            var generics = entityNode.getSource().getTypeParameters().stream()
+                    .filter(tp -> !tp.getBounds().stream()
+                            .filter(Objects::nonNull)
+                            .anyMatch(Predicate
+                                    .not(SpecializedModel::isNativeObject)))
+                    .map(TypeParameterModel::getName)
+                    .collect(Collectors.toList());
+
+            if (!generics.isEmpty()) {
+                schema.addExtension("x-type-parameters", generics);
+            }
         }
     }
 

@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
+import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.ReflectionSignatureModel;
@@ -46,7 +47,22 @@ public final class TypeSignaturePlugin
         if (nodePath.getNode() instanceof TypedNode) {
             var typedNode = (TypedNode) nodePath.getNode();
             typedNode.setTarget(
-                    new SchemaProcessor(typedNode.getType()).process());
+                    new SchemaProcessor(typedNode.getType(), inEntity(nodePath))
+                            .process());
+        }
+    }
+
+    private boolean inEntity(NodePath<?> nodePath) {
+        while (true) {
+            if (nodePath.getNode() instanceof EntityNode) {
+                return true;
+            }
+
+            nodePath = nodePath.getParentPath();
+
+            if (nodePath.getNode() instanceof RootNode) {
+                return false;
+            }
         }
     }
 

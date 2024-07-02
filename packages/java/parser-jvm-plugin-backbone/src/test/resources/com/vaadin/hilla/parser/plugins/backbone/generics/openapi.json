@@ -222,6 +222,12 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      },
+                      {
+                        "type": "object",
+                        "x-type-parameters": [
+                          "string"
+                        ]
                       }
                     ]
                   }
@@ -240,6 +246,12 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    },
+                    {
+                      "type": "object",
+                      "x-type-parameters": [
+                        "string"
+                      ]
                     }
                   ]
                 }
@@ -296,6 +308,12 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      },
+                      {
+                        "type": "object",
+                        "x-type-parameters": [
+                          "string"
+                        ]
                       }
                     ]
                   }
@@ -314,6 +332,12 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    },
+                    {
+                      "type": "object",
+                      "x-type-parameters": [
+                        "string"
+                      ]
                     }
                   ]
                 }
@@ -496,16 +520,16 @@
     "schemas": {
       "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity": {
         "type": "object",
-        "x-type-parameters": [
-          "T"
-        ],
         "properties": {
           "bareGenericTypeProperty": {
             "type": "object",
             "nullable": true,
             "x-type-argument": "T"
           }
-        }
+        },
+        "x-type-parameters": [
+          "T"
+        ]
       },
       "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
         "type": "object",
@@ -515,6 +539,12 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+              },
+              {
+                "type": "object",
+                "x-type-parameters": [
+                  "string"
+                ]
               }
             ]
           }
