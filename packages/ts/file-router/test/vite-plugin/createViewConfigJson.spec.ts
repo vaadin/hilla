@@ -98,6 +98,7 @@ describe('@vaadin/hilla-file-router', () => {
                 },
               ],
             },
+            { route: 'issue-002571-empty-layout', params: {}, title: 'Issue002571 Empty Layout', children: [] },
             { route: 'issue-002879-config-below', title: 'Config Below', params: {} },
           ],
         },
