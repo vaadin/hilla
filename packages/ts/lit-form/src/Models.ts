@@ -3,7 +3,7 @@ import { type BinderNode, getBinderNode } from './BinderNode.js';
 import type { Validator } from './Validation.js';
 import { IsNumber } from './Validators.js';
 
-export const _createEmptyItemValue = Symbol('itemModel');
+export const _createEmptyItemValue = Symbol('createEmptyItemValue');
 export const _parent = Symbol('parent');
 export const _key = Symbol('key');
 export const _fromString = Symbol('fromString');
@@ -11,6 +11,7 @@ export const _validators = Symbol('validators');
 export const _meta = Symbol('meta');
 export const _getPropertyModel = Symbol('getPropertyModel');
 export const _enum = Symbol('enum');
+export const _items = Symbol('items');
 
 const _optional = Symbol('optional');
 
@@ -77,10 +78,26 @@ export abstract class AbstractModel<T = unknown> {
     this[_meta] = options?.meta ?? {};
   }
 
+  /**
+   * @deprecated Use {@link BinderNode.value} with string conversion instead
+   *
+   * @example
+   * ```ts
+   * const result = String(binder.for(model).value);
+   * ```
+   */
   toString(): string {
     return String(this.valueOf());
   }
 
+  /**
+   * @deprecated Use {@link BinderNode.value} instead
+   *
+   * @example
+   * ```ts
+   * const result = binder.for(model).value;
+   * ```
+   */
   valueOf(): T {
     const { value } = getBinderNode(this);
 
@@ -213,14 +230,16 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
 
   [_createEmptyItemValue]: () => Value<MItem>;
 
-  readonly #createItem: (parent: this, index: number) => MItem;
+  // The `parent` parameter is AbstractModel here for purpose; for some reason, setting it to `ArrayModel<MItem>` or
+  // `this` breaks the type inference in TS (v5.3.2).
+  readonly #createItem: (parent: AbstractModel, index: number) => MItem;
   #items: Array<MItem | undefined> = [];
 
   constructor(
     parent: ModelParent,
     key: keyof any,
     optional: boolean,
-    createItem: (parent: ArrayModel<MItem>, key: number) => MItem,
+    createItem: (parent: AbstractModel, key: number) => MItem,
     options?: ModelOptions<Array<Value<MItem>>>,
   ) {
     super(parent, key, optional, options);
@@ -228,17 +247,14 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
     this[_createEmptyItemValue] = createItem(this, 0).constructor.createEmptyValue as () => Value<MItem>;
   }
 
-  /**
-   * Iterates the current array value and yields a binder node for every item.
-   */
-  *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
-    const array = this.valueOf();
+  *[_items](): Generator<MItem, void, void> {
+    const values = getBinderNode(this).value ?? [];
 
-    if (array.length !== this.#items.length) {
-      this.#items.length = array.length;
+    if (values.length !== this.#items.length) {
+      this.#items.length = values.length;
     }
 
-    for (let i = 0; i < array.length; i++) {
+    for (let i = 0; i < values.length; i++) {
       let item: MItem | undefined = this.#items[i];
 
       if (!item) {
@@ -246,7 +262,44 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
         this.#items[i] = item;
       }
 
+      yield item;
+    }
+  }
+
+  /**
+   * Iterates over the current model and yields a binder node for every item
+   * model.
+   *
+   * @deprecated Use the {@link m.items} function instead. For example, in React:
+   * ```tsx
+   * const {model, field} = useForm(GroupModel);
+   * return Array.from(m.items(model.people), (personModel) =>
+   *   <TextField label="Full name" {...field(personModel.fullName)} />
+   * );
+   * ```
+   * In Lit:
+   * ```ts
+   * return html`${repeat(
+   *   m.items(this.binder.model.people),
+   *   (personModel) => html`<vaadin-text-field label="Full name" ${field(personModel.fullName)}></vaadin-text-field>`,
+   * )}`;
+   * ```
+   */
+  *[Symbol.iterator](): IterableIterator<BinderNode<MItem>> {
+    for (const item of this[_items]()) {
       yield getBinderNode(item);
     }
   }
 }
+
+export const m = {
+  /**
+   * Returns an iterator over item models in the array model.
+   *
+   * @param model - The array model to iterate over.
+   * @returns An iterator over item models.
+   */
+  items<M extends ArrayModel>(model: M): Generator<ArrayItemModel<M>, void, void> {
+    return model[_items]() as Generator<ArrayItemModel<M>, void, void>;
+  },
+};

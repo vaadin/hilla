@@ -9,13 +9,11 @@ import { Binder, type BinderConfiguration } from '../src/index.js';
 import {
   type Employee,
   EmployeeModel,
-  type Order,
-  OrderModel,
-  type TestEntity,
-  TestModel,
-  type Level1,
   Level1Model,
   Level2Model,
+  type Order,
+  OrderModel,
+  TestModel,
 } from './TestModels.js';
 
 use(sinonChai);
@@ -126,22 +124,11 @@ describe('@vaadin/hilla-lit-form', () => {
         assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
       });
 
-      it('should have valueOf', () => {
-        assert.equal(binder.model.notes.valueOf(), '');
-      });
-
-      it('should have toString', () => {
-        assert.equal(binder.model.notes.toString(), '');
-      });
-
       it('should have initial value', () => {
         assert.equal(binder.value, binder.defaultValue);
         assert.equal(binder.for(binder.model).value, binder.value);
         assert.equal(binder.for(binder.model.notes).value, '');
         assert.equal(binder.for(binder.model.customer.fullName).value, '');
-        assert.equal(binder.model.valueOf(), binder.value);
-        assert.equal(binder.model.notes.valueOf(), '');
-        assert.equal(binder.model.customer.fullName.valueOf(), '');
       });
 
       it('should change value on setValue', () => {
