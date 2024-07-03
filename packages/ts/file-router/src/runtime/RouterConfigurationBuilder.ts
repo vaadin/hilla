@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 import { protectRoute } from '@vaadin/hilla-react-auth';
-import { type ComponentType, createElement } from 'react';
+import { type ComponentType, createElement, type Provider } from 'react';
 import {
+  Outlet,
   createBrowserRouter,
   type IndexRouteObject,
   type NonIndexRouteObject,
@@ -45,7 +46,7 @@ function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string,
  */
 export class RouterConfigurationBuilder {
   readonly #modifiers: RoutesModifier[] = [];
-
+  routesContextProvider?: Provider<RouteObject[]>;
   /**
    * Adds the given routes to the current list of routes. All the routes are
    * deeply merged to preserve the path uniqueness.
@@ -144,6 +145,18 @@ export class RouterConfigurationBuilder {
   }
 
   /**
+   * Uses the given routes context provider.
+   *
+   * For internal use by Flow.
+   *
+   * @param routesContextProvider - The provider to use for the routes context.
+   */
+  withRoutesContextProvider(routesContextProvider: Provider<RouteObject[]>): this {
+    this.routesContextProvider = routesContextProvider;
+    return this;
+  }
+
+  /**
    * Protects all the routes that require authentication. For more details see
    * {@link @vaadin/hilla-react-auth#protectRoutes} function.
    *
@@ -221,8 +234,15 @@ export class RouterConfigurationBuilder {
    * Builds the router with the current list of routes.
    */
   build(options?: RouterBuildOptions): RouterConfiguration {
-    const routes =
+    let routes =
       this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
+
+    if (this.routesContextProvider) {
+      const outlet = createElement(Outlet);
+      const wrapperElement = createElement(this.routesContextProvider, { value: routes } as any, outlet);
+      const wrapperRoute: RouteObject = { element: wrapperElement, children: [...routes] };
+      routes = [wrapperRoute];
+    }
 
     return {
       routes,
