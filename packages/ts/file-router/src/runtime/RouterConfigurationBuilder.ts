@@ -224,6 +224,11 @@ export class RouterConfigurationBuilder {
     const routes =
       this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (window as any).Vaadin ??= {};
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (window as any).Vaadin.routesConfig = routes;
+
     return {
       routes,
       router: createBrowserRouter([...routes], { basename: new URL(document.baseURI).pathname, ...options }),
