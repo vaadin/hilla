@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
-import { isFilterEmpty } from '../src/util';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
+import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import { isFilterEmpty } from '../src/util.js';
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('util', () => {

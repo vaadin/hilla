@@ -11,9 +11,10 @@ import sinonChai from 'sinon-chai';
 import { type AutoCrudProps, AutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
-import FormController from './FormController';
-import GridController from './GridController';
+import FormController from './FormController.js';
+import GridController from './GridController.js';
 import { getItem, PersonModel, personService } from './test-models-and-services.js';
+import { viewports } from './utils.js';
 
 use(sinonChai);
 use(chaiAsPromised);
@@ -25,7 +26,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     beforeEach(async () => {
       // Desktop resolution
-      await setViewport({ width: 1024, height: 768 });
+      await setViewport(viewports.default);
       user = userEvent.setup();
     });
 

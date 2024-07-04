@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { parseArgs } from 'node:util';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import react from '@vitejs/plugin-react';
 import cssnanoPlugin from 'cssnano';
 import type { TsconfigRaw } from 'esbuild';
 import MagicString from 'magic-string';
@@ -89,18 +89,7 @@ async function load<T>(path: URL, ignoreFailure?: string): Promise<T | null> {
   }
 }
 
-const {
-  values: { group },
-} = parseArgs({
-  options: {
-    group: {
-      type: 'string',
-    },
-  },
-  strict: false,
-});
-
-const cwd = new URL(`./packages/ts/${group}/`, root);
+const cwd = pathToFileURL(`${process.cwd()}/`);
 
 export default defineConfig(async () => {
   const [tsconfig, packageJson, mocks] = await Promise.all([
@@ -130,13 +119,14 @@ export default defineConfig(async () => {
         },
       },
     },
-    plugins: [constructCss(), loadRegisterJs()],
+    plugins: [constructCss(), loadRegisterJs(), react()],
     resolve: {
       alias: Object.entries(mocks ?? {}).map(([find, file]) => {
         const replacement = fileURLToPath(new URL(`./test/mocks/${file}`, cwd));
 
         return {
-          customResolver(_, importer) {
+          customResolver(id, importer) {
+            console.log(id);
             if (importer?.includes('/mocks/')) {
               return false;
             }

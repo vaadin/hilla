@@ -33,11 +33,12 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
-    "@nx/js": "^18.0.4",
+    "@nx/js": "^19.1.1",
     "@remcovaes/web-test-runner-vite-plugin": "^1.2.1",
     "@types/karma": "^6.3.8",
     "@types/node": "^20.11.19",
     "@vaadin/react-components": "24.5.0-alpha3",
+    "@vitejs/plugin-react": "^4.3.1",
     "@web/test-runner": "^0.18.2",
     "@web/test-runner-commands": "^0.9.0",
     "chai-dom": "^1.12.0",
@@ -63,7 +64,7 @@
     "meow": "^13.2.0",
     "micromatch": "^4.0.5",
     "mocha": "^10.3.0",
-    "nx": "^18.0.4",
+    "nx": "^19.1.1",
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "simple-git-hooks": "^2.9.0",

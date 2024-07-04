@@ -3,22 +3,23 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
+import { setViewport } from '@web/test-runner-commands';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { ListService } from '../crud';
-import type { HeaderFilterRendererProps } from '../header-filter';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
+import type { ListService } from '../src/crud.js';
 import type { CountService, CrudService } from '../src/crud.js';
+import type { HeaderFilterRendererProps } from '../src/header-filter.js';
 import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
@@ -39,6 +40,7 @@ import {
   PersonWithSimpleIdPropertyModel,
 } from './test-models-and-services.js';
 import TextFieldController from './TextFieldController.js';
+import { viewports } from './utils.js';
 
 use(sinonChai);
 use(chaiAsPromised);
@@ -82,13 +84,9 @@ describe('@vaadin/hilla-react-crud', () => {
 
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await setViewport(viewports.default);
       user = userEvent.setup();
-      sinon.spy(console, 'error');
-    });
-
-    afterEach(() => {
-      sinon.restore();
     });
 
     describe('basics', () => {
@@ -454,6 +452,7 @@ describe('@vaadin/hilla-react-crud', () => {
         });
 
         it('provides error in console when either of totalCount or filterCount are present and the service does not implement CountService', async () => {
+          const consoleErrorSpy = sinon.stub(console, 'error');
           const service = personListService();
           const personTestData: Person[] = Array(3)
             .fill(null)
@@ -463,9 +462,10 @@ describe('@vaadin/hilla-react-crud', () => {
           const result = render(<TestAutoGrid service={service} model={PersonModel} filteredCount totalCount />);
           await GridController.init(result, user);
 
-          expect(console.error).to.have.been.calledWith(
+          expect(consoleErrorSpy).to.have.been.calledWith(
             '"totalCount" and "filteredCount" props require the provided service to implement the CountService interface.',
           );
+          consoleErrorSpy.restore();
         });
       });
 

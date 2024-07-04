@@ -1,7 +1,9 @@
 import { expect } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
 import type { DatePickerDate } from '@vaadin/react-components/DatePicker.js';
+import { setViewport } from '@web/test-runner-commands';
 import { LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
+import { viewports } from './utils.js';
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('LocaleFormatter', () => {
@@ -31,6 +33,10 @@ describe('@vaadin/hilla-react-crud', () => {
       { locale: 'bg', input: '5.07.999 г.', output: '5.07.999 г.', iso: '0999-07-05' },
       { locale: 'bg', input: '5.07.99 г.', output: '5.07.99 г.', iso: '0099-07-05' },
     ];
+
+    beforeEach(async () => {
+      await setViewport(viewports.default);
+    });
 
     it('should format and parse dates', () => {
       function toIso(date: DatePickerDate) {

@@ -1,9 +1,10 @@
 import { expect, use } from '@esm-bundle/chai';
 import { renderHook } from '@testing-library/react';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
+import { setViewport } from '@web/test-runner-commands';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { CountService, ListService } from '../crud.js';
+import type { CountService, ListService } from '../src/crud.js';
 import { DataProvider } from '../src/data-provider.js';
 import {
   createDataProvider,
@@ -12,11 +13,12 @@ import {
   useDataProvider,
   type ItemCounts,
 } from '../src/data-provider.js';
-import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
-import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable.js';
+import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
+import { viewports } from './utils.js';
 
 use(sinonChai);
 
@@ -154,7 +156,8 @@ describe('@hilla/react-crud', () => {
     let countServiceListSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>;
     let countServiceCountSpy: sinon.SinonSpy<[filter: FilterUnion | undefined], Promise<number>>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await setViewport(viewports.default);
       listSpy = sinon.spy(listService, 'list');
       countServiceListSpy = sinon.spy(listAndCountService, 'list');
       countServiceCountSpy = sinon.spy(listAndCountService, 'count');

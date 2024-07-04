@@ -40,6 +40,7 @@ packages/ts/*/.coverage
 packages/ts/*/.vite
 packages/ts/*/types/**
 !packages/ts/*/.lintstagedrc.js
+!packages/ts/*/web-test-runner.config.js
 scripts/prepare/results/
 packages/java/hilla/*.json
 packages/java/hilla/src/main/resources/

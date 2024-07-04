@@ -1,6 +1,3 @@
-// eslint-disable-next-line
-/// <reference types="karma-viewport" />
-
 import { expect, use } from '@esm-bundle/chai';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +8,8 @@ import type { SelectElement } from '@vaadin/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
 import type { TextFieldElement } from '@vaadin/react-components/TextField.js';
 import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
+import { setViewport } from '@web/test-runner-commands';
+import type { Viewport } from '@web/test-runner-commands/plugins';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -32,6 +31,7 @@ import {
   PersonWithSimpleIdPropertyModel,
   PersonWithoutIdPropertyModel,
 } from './test-models-and-services.js';
+import { viewports } from './utils';
 
 use(sinonChai);
 use(chaiAsPromised);
@@ -108,12 +108,12 @@ describe('@vaadin/hilla-react-crud', () => {
     async function populatePersonForm(
       personId: number,
       formProps?: Omit<AutoFormProps<PersonModel>, 'item' | 'model' | 'service'>,
-      screenSize?: string,
+      screenSize?: Viewport,
       disabled?: boolean,
       service: CrudService<Person> & HasTestInfo = personService(),
     ): Promise<FormController> {
       if (screenSize) {
-        viewport.set(screenSize);
+        await setViewport(screenSize);
       }
       const person = await getItem(service, personId);
       const result = render(
@@ -122,12 +122,9 @@ describe('@vaadin/hilla-react-crud', () => {
       return await FormController.init(user, result.container);
     }
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await setViewport(viewports.default);
       user = userEvent.setup();
-    });
-
-    afterEach(() => {
-      viewport.reset();
     });
 
     it('renders fields for the properties in the form', async () => {
@@ -681,7 +678,7 @@ describe('@vaadin/hilla-react-crud', () => {
           return <VerticalLayout>{children}</VerticalLayout>;
         }
 
-        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, 'screen-1440-900');
+        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, viewports['screen-1440-900']);
         expect(form.formLayout).to.not.exist;
         const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
         expect(layout).to.exist;

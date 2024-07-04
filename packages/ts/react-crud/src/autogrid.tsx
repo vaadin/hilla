@@ -426,7 +426,7 @@ function AutoGridInner<TItem>(
   }, [experimentalFilter, internalFilter]);
 
   return (
-    <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
+    <Grid size={itemCounts?.totalCount} itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
       {children}
     </Grid>
   );
