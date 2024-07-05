@@ -28,12 +28,6 @@
             <version>${project.version}</version>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.hotswapagent</groupId>
-            <artifactId>hotswap-agent</artifactId>
-            <version>1.4.1</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

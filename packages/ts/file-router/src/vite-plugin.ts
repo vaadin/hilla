@@ -37,6 +37,12 @@ export type PluginOptions = Readonly<{
    * @defaultValue `false`
    */
   isDevMode?: boolean;
+  /**
+   * The flag to indicate whether to output debug information
+   *
+   * @defaultValue `false`
+   */
+  debug?: boolean;
 }>;
 
 /**
@@ -50,6 +56,7 @@ export default function vitePluginFileSystemRouter({
   generatedDir = 'frontend/generated/',
   extensions = ['.tsx', '.jsx'],
   isDevMode = false,
+  debug = false,
 }: PluginOptions = {}): Plugin {
   let _viewsDir: URL;
   let _outDir: URL;
@@ -66,10 +73,11 @@ export default function vitePluginFileSystemRouter({
       _outDir = pathToFileURL(outDir);
       _logger = logger;
 
-      _logger.info(`The directory of route files: ${String(_viewsDir)}`);
-      _logger.info(`The directory of generated files: ${String(_generatedDir)}`);
-      _logger.info(`The output directory: ${String(_outDir)}`);
-
+      if (debug) {
+        _logger.info(`The directory of route files: ${String(_viewsDir)}`);
+        _logger.info(`The directory of generated files: ${String(_generatedDir)}`);
+        _logger.info(`The output directory: ${String(_outDir)}`);
+      }
       runtimeUrls = {
         json: new URL('file-routes.json', isDevMode ? _generatedDir : _outDir),
         code: new URL('file-routes.ts', _generatedDir),
@@ -77,7 +85,7 @@ export default function vitePluginFileSystemRouter({
     },
     async buildStart() {
       try {
-        await generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger);
+        await generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug);
       } catch (e: unknown) {
         _logger.error(String(e));
       }
@@ -93,7 +101,7 @@ export default function vitePluginFileSystemRouter({
           return;
         }
 
-        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger).catch((e: unknown) =>
+        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug).catch((e: unknown) =>
           _logger.error(String(e)),
         );
       };

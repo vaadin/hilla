@@ -22,7 +22,7 @@ describe('@vaadin/hilla-file-router', () => {
       },
       watcher,
     };
-    const plugin = vitePluginFileSystemRouter({ isDevMode: true });
+    const plugin = vitePluginFileSystemRouter({ isDevMode: true, debug: true });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error: the configResolved method could be either a function or an object.
     plugin.configResolved({
