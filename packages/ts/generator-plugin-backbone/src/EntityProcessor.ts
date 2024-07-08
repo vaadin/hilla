@@ -7,7 +7,6 @@ import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
-  findTypeParameters,
   isComposedSchema,
   isEmptyObject,
   isEnumSchema,
@@ -31,6 +30,7 @@ import ts, {
   type TypeElement,
 } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
+import { findTypeParameters } from './utils.js';
 
 export class EntityProcessor {
   readonly #component: Schema;
@@ -134,7 +134,7 @@ export class EntityProcessor {
           declaration,
           declaration.modifiers,
           declaration.name,
-          undefined,
+          declaration.typeParameters,
           [
             ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
               ts.factory.createExpressionWithTypeArguments(identifier, undefined),
@@ -171,8 +171,8 @@ export class EntityProcessor {
   }
 
   static #processTypeParameters(schema: Schema): readonly ts.TypeParameterDeclaration[] | undefined {
-    return findTypeParameters(schema)?.map((name) =>
-      ts.factory.createTypeParameterDeclaration(undefined, name, undefined, undefined),
-    );
+    return findTypeParameters(schema)
+      ?.map(String)
+      .map((name) => ts.factory.createTypeParameterDeclaration(undefined, name, undefined, undefined));
   }
 }

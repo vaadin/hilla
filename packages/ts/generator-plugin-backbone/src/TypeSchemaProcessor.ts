@@ -3,8 +3,6 @@ import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
-  findTypeArgument,
-  findTypeParameters,
   isArraySchema,
   isBooleanSchema,
   isComposedSchema,
@@ -21,6 +19,7 @@ import {
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import ts, { type TypeNode } from 'typescript';
+import { findTypeArgument, findTypeParameters } from './utils.js';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -67,13 +66,13 @@ export default class TypeSchemaProcessor {
 
     const unwrappedSchema = unwrapPossiblyNullableSchema(this.#schema);
 
-    const typeArg = TypeSchemaProcessor.#processTypeArgument(this.#schema);
+    const typeArg = findTypeArgument(this.#schema);
     if (typeArg) {
-      return [typeArg];
+      return [ts.factory.createTypeReferenceNode(typeArg)];
     }
 
     if (isReferenceSchema(unwrappedSchema)) {
-      const typeArguments = TypeSchemaProcessor.#processTypeParameters(this.#schema);
+      const typeArguments = this.#processTypeParameters(this.#schema);
       node = this.#processReference(unwrappedSchema, typeArguments);
     } else if (isArraySchema(unwrappedSchema)) {
       node = this.#processArray(unwrappedSchema);
@@ -114,16 +113,13 @@ export default class TypeSchemaProcessor {
     ]);
   }
 
-  static #processTypeParameters(schema: Schema): readonly ts.TypeReferenceNode[] | undefined {
-    return findTypeParameters(schema)?.map((tp) => ts.factory.createTypeReferenceNode(tp));
+  #processTypeParameters(schema: Schema): readonly ts.TypeNode[] | undefined {
+    return findTypeParameters(schema)
+      ?.map((s) => new TypeSchemaProcessor(s, this.#dependencies).process())
+      .map((t) => ts.factory.createUnionTypeNode(t));
   }
 
-  static #processTypeArgument(schema: Schema): ts.TypeReferenceNode | undefined {
-    const ref = findTypeArgument(schema);
-    return ref ? ts.factory.createTypeReferenceNode(ref) : undefined;
-  }
-
-  #processReference(schema: ReferenceSchema, typeArguments: readonly ts.TypeReferenceNode[] | undefined): TypeNode {
+  #processReference(schema: ReferenceSchema, typeArguments: readonly ts.TypeNode[] | undefined): TypeNode {
     const { imports, paths } = this.#dependencies;
 
     const specifier = convertReferenceSchemaToSpecifier(schema);

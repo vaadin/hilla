@@ -37,7 +37,10 @@
                       {
                         "type": "object",
                         "x-type-parameters": [
-                          "string"
+                          {
+                            "type" : "string",
+                            "nullable" : true
+                          }
                         ]
                       }
                     ]
@@ -96,7 +99,9 @@
                     {
                       "type": "object",
                       "x-type-parameters": [
-                        "string"
+                        {
+                          "type" : "string"
+                        }
                       ]
                     }
                   ]

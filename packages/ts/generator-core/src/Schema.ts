@@ -35,9 +35,6 @@ export type MapSchema = EmptyObjectSchema & Readonly<Required<Pick<ObjectSchema,
 
 export type Schema = ReferenceSchema | RegularSchema;
 
-export type SchemaWithTypeParameters = Readonly<{ 'x-type-parameters': string[] }> & Schema;
-export type SchemaWithTypeArgument = Readonly<{ 'x-type-argument': string }> & Schema;
-
 export function isReferenceSchema(schema: Schema): schema is ReferenceSchema {
   return '$ref' in schema;
 }
@@ -129,34 +126,6 @@ export function isEmptyObject(schema: Schema): schema is EmptyObjectSchema {
 
 export function isMapSchema(schema: Schema): schema is MapSchema {
   return isEmptyObject(schema) && !!schema.additionalProperties;
-}
-
-export function isSchemaWithTypeParameters(schema: Schema): schema is SchemaWithTypeParameters {
-  return 'x-type-parameters' in schema;
-}
-
-export function isSchemaWithTypeArgument(schema: Schema): schema is SchemaWithTypeArgument {
-  return 'x-type-argument' in schema;
-}
-
-export function findTypeParameters(schema: Schema): readonly string[] | undefined {
-  if (isSchemaWithTypeParameters(schema)) {
-    return schema['x-type-parameters'];
-  }
-
-  if (isAnyOfRuleComposedSchema(schema)) {
-    return schema.anyOf.find(isSchemaWithTypeParameters)?.['x-type-parameters'];
-  }
-
-  return undefined;
-}
-
-export function findTypeArgument(schema: Schema): string | undefined {
-  if (isSchemaWithTypeArgument(schema)) {
-    return schema['x-type-argument'];
-  }
-
-  return undefined;
 }
 
 export function convertReferenceSchemaToSpecifier({ $ref }: ReferenceSchema): string {
