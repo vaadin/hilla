@@ -12,6 +12,7 @@ const MagicString = require('magic-string');
 const postcss = require('postcss');
 const cssnanoPlugin = require('cssnano');
 const { karmaMochaConfig } = require('./.mocharc.cjs');
+const reactPlugin = require('@vitejs/plugin-react');
 
 // The current package, one of the packages in the `packages` dir
 const cwd = process.cwd();
@@ -162,7 +163,23 @@ module.exports = (config) => {
             },
           },
         },
-        plugins: [loadRegisterJs(), constructCss()],
+        plugins: [
+          loadRegisterJs(),
+          constructCss(),
+          reactPlugin({
+            include: '**/*.tsx',
+            babel: {
+              plugins: [
+                [
+                  'module:@preact/signals-react-transform',
+                  {
+                    mode: 'all',
+                  },
+                ],
+              ],
+            },
+          }),
+        ],
         resolve: {
           alias: Object.entries(mocks).map(([find, file]) => {
             const replacement = join(cwd, `test/mocks/${file}`);
@@ -186,7 +203,8 @@ module.exports = (config) => {
     client: {
       mocha: karmaMochaConfig,
     },
-
+    customContextFile: resolve(cwd, '../../../karma-context.html'),
+    customDebugFile: resolve(cwd, '../../../karma-debug.html'),
     // Viewport configuration
     viewport: {
       breakpoints: [
