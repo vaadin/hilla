@@ -1,18 +1,6 @@
 import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder } from './builders.js';
-import {
-  $enum,
-  $itemModel,
-  $key,
-  type $members,
-  $name,
-  $owner,
-  type AnyObject,
-  type Enum,
-  Model,
-  type Value,
-} from './model.js';
-import { getValue } from './utils.js';
+import { $enum, $itemModel, type $members, type AnyObject, type Enum, Model, type Value } from './model.js';
 
 export type PrimitiveModel<V = unknown> = Model<V>;
 export const PrimitiveModel = new CoreModelBuilder(Model, (): unknown => undefined).name('primitive').build();
@@ -26,34 +14,12 @@ export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => 0).name('n
 export type BooleanModel = PrimitiveModel<boolean>;
 export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
-const arrayItemModels = new WeakMap<ArrayModel, Model[]>();
-
 export type ArrayModel<M extends Model = Model> = Model<
   Array<Value<M>>,
   Readonly<{
     [$itemModel]: M;
   }>
 >;
-
-export function* getIterator<V extends Model>(model: ArrayModel<V>): Generator<V, void, void> {
-  const items = arrayItemModels.get(model) ?? [];
-  arrayItemModels.set(model, items);
-  const value = getValue(model);
-
-  items.length = value.length;
-
-  for (let i = 0; i < value.length; i++) {
-    if (!items[i]) {
-      items[i] = new CoreModelBuilder(model[$itemModel], () => value[i])
-        .name(`${model[$itemModel][$name]}[${i}]`)
-        .define($key, { value: i })
-        .define($owner, { value: model })
-        .build();
-    }
-
-    yield items[i] as V;
-  }
-}
 
 export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .name('Array')

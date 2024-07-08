@@ -12,13 +12,13 @@ import {
   type ModelMetadata,
 } from './model.js';
 
-const { create, defineProperty, getPrototypeOf, getOwnPropertyDescriptor, fromEntries, entries } = Object;
+const { create, defineProperty } = Object;
 
 export type ModelBuilderPropertyOptions = Readonly<{
   meta?: ModelMetadata;
 }>;
 
-const $model = Symbol();
+const $model = Symbol('model');
 
 /**
  * The flags for the model constructor that allow to determine specific characteristics of the model.

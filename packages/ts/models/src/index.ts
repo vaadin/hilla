@@ -5,6 +5,7 @@ import {
   $defaultValue,
   $enum,
   $itemModel,
+  $key,
   $members,
   $name,
   $optional,
@@ -14,15 +15,36 @@ import {
   type Enum,
   type Extensions,
   Model,
+  nothing,
   type References,
   type Value,
 } from './model.js';
+import { getValue } from './utils.js';
 
 export * from './model.js';
 export * from './core.js';
 export * from './utils.js';
 
 const { defineProperty } = Object;
+
+const arrayItemModels = new WeakMap<ArrayModel, Model[]>();
+
+function getRawValue<T>(model: Model<T>): T | typeof nothing {
+  // TODO: Remove the error suppression when TypeScript 5.5 is released
+  // @ts-expect-error: https://github.com/microsoft/TypeScript/issues/56536
+  // (fixed in upcoming TS 5.5)
+  if (model[$owner] instanceof Model) {
+    // If the current model is a property of another model, the owner is
+    // definitely an object. So we just return the part of the value of
+    // the owner.
+    const parentValue = getRawValue(model[$owner] as Model<Record<keyof any, T>>);
+    return parentValue === nothing ? nothing : parentValue[model[$key]];
+  }
+
+  // Otherwise, the owner is an AttachTarget, so we can return the full
+  // value.
+  return (model[$owner] as AttachTarget<T>).value;
+}
 
 const m = {
   attach<M extends Model>(model: M, target: AttachTarget<Value<M>>): M {
@@ -102,6 +124,33 @@ const m = {
       .name(members.map((model) => model[$name]).join(' | '))
       .define($members, { value: members })
       .build();
+  },
+
+  *items<V extends Model>(model: ArrayModel<V>): Generator<V, undefined, void> {
+    const list = arrayItemModels.get(model) ?? [];
+    arrayItemModels.set(model, list);
+    const value = getValue(model);
+
+    list.length = value.length;
+
+    for (let i = 0; i < value.length; i++) {
+      if (!list[i]) {
+        list[i] = new CoreModelBuilder(model[$itemModel], () => value[i])
+          .name(`${model[$itemModel][$name]}[${i}]`)
+          .define($key, { value: i })
+          .define($owner, { value: model })
+          .build();
+      }
+
+      yield list[i] as V;
+    }
+  },
+
+  value(model: Model): Value<Model> {
+    const value = getRawValue(model);
+
+    // If the value is `nothing`, we return the default value of the model.
+    return value === nothing ? model[$defaultValue] : value;
   },
 };
 

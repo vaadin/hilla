@@ -14,8 +14,6 @@ import m, {
   type AttachTarget,
   BooleanModel,
   type EnumModel,
-  getIterator,
-  getValue,
   Model,
   NumberModel,
   ObjectModel,
@@ -78,9 +76,9 @@ describe('@vaadin/hilla-form-models', () => {
     AddressModel = m.object<Address>('Address').property('street', StreetModel).build();
     CommentModel = m.object<Comment>('Comment').property('title', StringModel).property('text', StringModel).build();
     PersonModel = m
-      .object<Person>('Person')
-      .property('name', StringModel)
-      .property('address', AddressModel)
+      .object<Person>('Person') // {}
+      .property('name', StringModel) // CV: { name: string } EX: { name: StringModel }
+      .property('address', AddressModel) // CV: {name: string, address: Address} EX: { name: StringModel, address: AddressModel }
       .property('comments', m.array(CommentModel))
       .property('role', RoleModel)
       .build();
@@ -211,7 +209,7 @@ describe('@vaadin/hilla-form-models', () => {
     expect(OptionalModel.name.toString()).to.be.equal('[[:detached: / model] Optional / name?] string');
   });
 
-  describe('getValue', () => {
+  describe('m.value', () => {
     let target: AttachTarget<Person>;
 
     beforeEach(() => {
@@ -233,7 +231,7 @@ describe('@vaadin/hilla-form-models', () => {
     });
 
     it('gets the default value if the model is detached', () => {
-      const personValue = getValue(PersonModel);
+      const personValue = m.value(PersonModel);
       expect(personValue).to.be.like({
         name: '',
         address: {
@@ -243,28 +241,28 @@ describe('@vaadin/hilla-form-models', () => {
         },
       });
 
-      expect(getValue(PersonModel.name)).to.be.string('');
-      expect(getValue(PersonModel.address)).to.be.like({
+      expect(m.value(PersonModel.name)).to.be.string('');
+      expect(m.value(PersonModel.address)).to.be.like({
         street: {
           name: '',
         },
       });
 
-      expect(getValue(PersonModel.address.street)).to.be.like({
+      expect(m.value(PersonModel.address.street)).to.be.like({
         name: '',
       });
 
-      expect(getValue(PersonModel.address.street.name)).to.be.string('');
+      expect(m.value(PersonModel.address.street.name)).to.be.string('');
     });
 
     it('returns the value from the attach target', () => {
       const AttachedPersonModel = m.attach(PersonModel, target);
 
       expect(AttachedPersonModel).to.have.property($owner).which.is.equal(target);
-      expect(getValue(AttachedPersonModel)).to.be.equal(target.value);
-      expect(getValue(AttachedPersonModel.name)).to.be.equal(target.value.name);
-      expect(getValue(AttachedPersonModel.address)).to.be.equal(target.value.address);
-      expect(getValue(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
+      expect(m.value(AttachedPersonModel)).to.be.equal(target.value);
+      expect(m.value(AttachedPersonModel.name)).to.be.equal(target.value.name);
+      expect(m.value(AttachedPersonModel.address)).to.be.equal(target.value.address);
+      expect(m.value(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
     });
   });
 
@@ -308,7 +306,7 @@ describe('@vaadin/hilla-form-models', () => {
 
         const AttachedCommentsModel = m.attach(m.array(CommentModel), target);
 
-        const items = [...getIterator(AttachedCommentsModel)];
+        const items = [...m.items(AttachedCommentsModel)];
 
         expect(items).to.be.an('array').with.lengthOf(2);
 
@@ -316,7 +314,7 @@ describe('@vaadin/hilla-form-models', () => {
           expect(items[i]).to.be.instanceof(CommentModel);
           expect(items[i]).to.have.property($owner).which.is.equal(AttachedCommentsModel);
           expect(items[i]).to.have.property($key).which.is.equal(i);
-          expect(getValue(items[i])).to.be.equal(target.value[i]);
+          expect(m.value(items[i])).to.be.equal(target.value[i]);
         }
       });
     });

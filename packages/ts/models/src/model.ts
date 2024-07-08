@@ -30,7 +30,7 @@ export type AttachTarget<T = unknown> = Readonly<{
   value: T;
 }>;
 
-export const nothing = Symbol();
+export const nothing = Symbol('nothing');
 
 const detachedTarget: AttachTarget = Object.create(
   {
@@ -44,7 +44,7 @@ const detachedTarget: AttachTarget = Object.create(
 
 export declare enum Enum {}
 
-export type AnyObject = Readonly<Record<never, never>>;
+export type AnyObject = Readonly<Record<never, never>>; // {}
 
 export const $key = Symbol('key');
 export const $name = Symbol('name');
