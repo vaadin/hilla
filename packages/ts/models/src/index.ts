@@ -19,20 +19,15 @@ import {
   type References,
   type Value,
 } from './model.js';
-import { getValue } from './utils.js';
 
 export * from './model.js';
 export * from './core.js';
-export * from './utils.js';
 
 const { defineProperty } = Object;
 
 const arrayItemModels = new WeakMap<ArrayModel, Model[]>();
 
 function getRawValue<T>(model: Model<T>): T | typeof nothing {
-  // TODO: Remove the error suppression when TypeScript 5.5 is released
-  // @ts-expect-error: https://github.com/microsoft/TypeScript/issues/56536
-  // (fixed in upcoming TS 5.5)
   if (model[$owner] instanceof Model) {
     // If the current model is a property of another model, the owner is
     // definitely an object. So we just return the part of the value of
@@ -126,10 +121,16 @@ const m = {
       .build();
   },
 
+  /**
+   * Iterates over the given array model yielding an item model for each item
+   * the model value has.
+   *
+   * @param model - The array model to iterate over.
+   */
   *items<V extends Model>(model: ArrayModel<V>): Generator<V, undefined, void> {
     const list = arrayItemModels.get(model) ?? [];
     arrayItemModels.set(model, list);
-    const value = getValue(model);
+    const value = m.value(model);
 
     list.length = value.length;
 
@@ -146,7 +147,14 @@ const m = {
     }
   },
 
-  value(model: Model): Value<Model> {
+  /**
+   * Provides the value the given model represents. For attached models it will
+   * be the owner value or its part, for detached models it will be the default
+   * value of the model.
+   *
+   * @param model - The model to get the value from.
+   */
+  value<T>(model: Model<T>): T {
     const value = getRawValue(model);
 
     // If the value is `nothing`, we return the default value of the model.
