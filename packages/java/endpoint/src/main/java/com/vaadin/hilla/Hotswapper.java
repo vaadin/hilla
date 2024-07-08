@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.flow.hotswap.VaadinHotswapper;
+import com.vaadin.flow.server.VaadinService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,12 +13,20 @@ import org.slf4j.LoggerFactory;
  * Takes care of updating internals of Hilla that need updates when application
  * classes are updated.
  */
-public class Hotswapper {
+public class Hotswapper implements VaadinHotswapper {
 
     private static boolean inUse;
 
     private static Logger getLogger() {
         return LoggerFactory.getLogger(Hotswapper.class);
+    }
+
+    @Override
+    public boolean onClassLoadEvent(VaadinService vaadinService,
+            Set<Class<?>> classes, boolean redefined) {
+        onHotswap(redefined,
+                classes.stream().map(Class::getName).toArray(String[]::new));
+        return false;
     }
 
     /**

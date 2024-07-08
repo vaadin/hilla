@@ -16,6 +16,8 @@ import {
   type Validator,
   type Value,
   type ValueError,
+  type ArrayModel,
+  type ArrayItemModel,
 } from '@vaadin/hilla-lit-form';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
@@ -71,6 +73,10 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     read(value: Value<M> | null | undefined): void;
     update(): void;
   }>;
+
+export type UseFormArrayPartResult<M extends ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
+  items: ReadonlyArray<ArrayItemModel<M>>;
+};
 
 type FieldState<T = unknown> = {
   required: boolean;
@@ -257,5 +263,20 @@ export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResul
   return {
     ...getFormPart(binderNode),
     field,
+  };
+}
+
+/**
+ * Hook to access an array model part of a form. It provides the same API as `useFormPart`,
+ * but adds an `items` property that allows to iterate over the items in form of an array of models.
+ *
+ * @param model - The array model to access
+ * @returns The array model part of the form
+ */
+export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
+  const binderNode = getBinderNode(model);
+  return {
+    ...getFormPart(binderNode),
+    items: Array.from(model, (item) => item.model as ArrayItemModel<M>),
   };
 }

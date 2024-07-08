@@ -36,7 +36,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate the runtime files', async () => {
-      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger);
+      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger, true);
       expect(existsSync(runtimeUrls.json)).to.be.true;
       expect(existsSync(runtimeUrls.code)).to.be.true;
       const listener = () => {
@@ -45,7 +45,7 @@ describe('@vaadin/hilla-file-router', () => {
       const json = watch(runtimeUrls.json, listener);
       const code = watch(runtimeUrls.code, listener);
 
-      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger);
+      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger, true);
       await new Promise((resolve) => {
         // Wait some time to ensure that the file is not changed
         setTimeout(resolve, 100);
@@ -56,7 +56,7 @@ describe('@vaadin/hilla-file-router', () => {
 
     it('should not throw if views does not exist', async () => {
       await rm(viewsDir, { force: true, recursive: true });
-      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger);
+      await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger, true);
     });
   });
 });
