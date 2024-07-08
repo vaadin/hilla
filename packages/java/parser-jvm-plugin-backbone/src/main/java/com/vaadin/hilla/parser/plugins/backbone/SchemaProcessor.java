@@ -5,7 +5,6 @@ import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 import java.lang.reflect.AnnotatedType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
@@ -142,8 +141,7 @@ final class SchemaProcessor {
         var args = _type.getTypeArguments().stream()
                 .map(arg -> (AnnotatedType) arg.get()).map(SignatureModel::of)
                 .map(arg -> new SchemaProcessor(arg, false).process())
-                .map(Schema::getType).filter(Objects::nonNull)
-                .toArray(String[]::new);
+                .toArray(Schema[]::new);
 
         ObjectSchema gen = null;
         if (args.length > 0) {

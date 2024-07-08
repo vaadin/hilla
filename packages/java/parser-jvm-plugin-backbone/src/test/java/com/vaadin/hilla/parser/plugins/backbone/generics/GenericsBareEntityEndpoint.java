@@ -6,4 +6,12 @@ public class GenericsBareEntityEndpoint {
             GenericsBareRefEntity<String> ref) {
         return ref;
     }
+
+    public record GenericsBareEntity(String bareEntityProperty) {
+    }
+
+    public GenericsBareRefEntity<GenericsBareEntity> getBareEntity(
+            GenericsBareRefEntity<GenericsBareEntity> ref) {
+        return ref;
+    }
 }

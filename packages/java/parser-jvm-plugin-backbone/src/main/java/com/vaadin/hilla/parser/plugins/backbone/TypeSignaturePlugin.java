@@ -315,6 +315,15 @@ public final class TypeSignaturePlugin
     private NodeDependencies scanTypeSignature(TypeSignatureNode node,
             NodeDependencies nodeDependencies) {
         var signature = node.getSource();
+
+        if (signature instanceof ClassRefSignatureModel) {
+            var classModel = (ClassRefSignatureModel) signature;
+            nodeDependencies = nodeDependencies
+                    .appendRelatedNodes(classModel.getTypeArguments().stream()
+                            .filter(SpecializedModel::isNonJDKClass)
+                            .map(TypeSignatureNode::of));
+        }
+
         var referredTypes = getReferredTypes(signature);
         return nodeDependencies.appendChildNodes(
                 referredTypes.stream().map(TypeSignatureNode::of));
