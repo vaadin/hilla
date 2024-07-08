@@ -3,7 +3,9 @@ import { MessageChannel } from 'node:worker_threads';
 
 function createMessageChannel(
   callback = (msg) => {
-    console.log(msg);
+    if (typeof msg === 'string') {
+      console.log(msg);
+    }
   },
 ) {
   const { port1, port2 } = new MessageChannel();

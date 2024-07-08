@@ -38,7 +38,8 @@ import * as Layout8 from "../views/profile/friends/@layout.js";
 import * as Page10 from "../views/test/{{optional}}.js";
 import * as Page11 from "../views/test/{...wildcard}.js";
 import * as Page12 from "../views/test/issue-002378/{requiredParam}/edit.js";
-import * as Page15 from "../views/test/issue-002879-config-below.js";
+import * as Layout15 from "../views/test/issue-002571-empty-layout/@layout.js";
+import * as Page16 from "../views/test/issue-002879-config-below.js";
 const routes: readonly AgnosticRoute[] = [
     createRoute("nameToReplace", Page0),
     createRoute("profile", [
@@ -62,7 +63,8 @@ const routes: readonly AgnosticRoute[] = [
                 createRoute("edit", Page12)
             ])
         ]),
-        createRoute("issue-002879-config-below", Page15)
+        createRoute("issue-002571-empty-layout", Layout15, []),
+        createRoute("issue-002879-config-below", Page16)
     ])
 ];
 export default routes;
