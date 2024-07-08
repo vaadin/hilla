@@ -173,6 +173,13 @@ export class EntityProcessor {
   static #processTypeParameters(schema: Schema): readonly ts.TypeParameterDeclaration[] | undefined {
     return findTypeParameters(schema)
       ?.map(String)
-      .map((name) => ts.factory.createTypeParameterDeclaration(undefined, name, undefined, undefined));
+      .map((name) =>
+        ts.factory.createTypeParameterDeclaration(
+          undefined,
+          name,
+          undefined,
+          ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
+        ),
+      );
   }
 }
