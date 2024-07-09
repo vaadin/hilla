@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.nonnull;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.PackageInfoModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -83,6 +85,49 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .map(AnnotationMatcher::doesMakeNullable)
                         .ifPresent(nullable -> schema
                                 .setNullable(nullable ? true : null));
+
+                if (nodeSource instanceof ClassRefSignatureModel) {
+                    var args = ((ClassRefSignatureModel) nodeSource)
+                            .getTypeArguments();
+
+                    if (!args.isEmpty()) {
+                        var anyOf = schema.getAnyOf();
+
+                        if (anyOf != null) {
+                            var schemas = anyOf.stream()
+                                    .map(Schema::getExtensions)
+                                    .filter(Objects::nonNull)
+                                    .map(e -> (Schema<?>[]) e
+                                            .get("x-type-parameters"))
+                                    .filter(Objects::nonNull)
+                                    .flatMap(Arrays::stream).toList();
+
+                            if (schemas.size() != args.size()) {
+                                throw new IllegalStateException(
+                                        "Number of parameters mismatch for "
+                                                + nodePath);
+                            }
+
+                            var nullables = args.stream().map(param -> Stream
+                                    .concat(getPackageAnnotationsStream(
+                                            nodePath),
+                                            param.getAnnotations().stream())
+                                    .map(annotation -> annotationsMap
+                                            .get(annotation.getName()))
+                                    .filter(Objects::nonNull)
+                                    .max(Comparator.comparingInt(
+                                            AnnotationMatcher::getScore))
+                                    .map(AnnotationMatcher::doesMakeNullable))
+                                    .toList();
+
+                            for (var i = 0; i < nullables.size(); i++) {
+                                var sch = schemas.get(i);
+                                nullables.get(i).ifPresent(nullable -> sch
+                                        .setNullable(nullable ? true : null));
+                            }
+                        }
+                    }
+                }
             }
         }
     }

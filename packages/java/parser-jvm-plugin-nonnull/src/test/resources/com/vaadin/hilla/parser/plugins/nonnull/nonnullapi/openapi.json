@@ -53,6 +53,120 @@
         }
       }
     },
+    "/NonNullApiEndpoint/genericMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_genericMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "generic": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
+                      },
+                      {
+                        "type": "object",
+                        "x-type-parameters": [
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
+                    },
+                    {
+                      "type": "object",
+                      "x-type-parameters": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NonNullApiEndpoint/genericNullableMethod": {
+      "post": {
+        "tags": ["NonNullApiEndpoint"],
+        "operationId": "NonNullApiEndpoint_genericNullableMethod_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "generic": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
+                      },
+                      {
+                        "type": "object",
+                        "x-type-parameters": [
+                          {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
+                    },
+                    {
+                      "type": "object",
+                      "x-type-parameters": [
+                        {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/NonNullApiEndpoint/nestedSignatureMethod": {
       "post": {
         "tags": ["NonNullApiEndpoint"],
@@ -322,6 +436,18 @@
             "nullable": true
           }
         }
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic": {
+        "type": "object",
+        "properties": {
+          "genericField": {
+            "type": "object",
+            "x-type-argument": "T"
+          }
+        },
+        "x-type-parameters": [
+          "T"
+        ]
       },
       "com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.subpackage.SubPackageDependency": {
         "type": "object",
