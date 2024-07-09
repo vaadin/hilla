@@ -67,7 +67,7 @@
     "prettier": "^3.2.5",
     "simple-git-hooks": "^2.9.0",
     "sync-request": "^6.1.0",
-    "tsx": "4.7.1",
+    "tsx": "^4.16.2",
     "typescript": "5.5.2",
     "vite": "5.3.1"
   }
