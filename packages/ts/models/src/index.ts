@@ -22,6 +22,7 @@ import {
 
 export * from './model.js';
 export * from './core.js';
+export type * from './builders.js';
 
 const { defineProperty } = Object;
 
@@ -41,7 +42,18 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
   return (model[$owner] as Target<T>).value;
 }
 
+/**
+ * The utility object that provides methods to create and manipulate models.
+ */
 const m = {
+  /**
+   * Attaches the given model to the target.
+   *
+   * @param model - The model to attach.
+   * @param target - The target to attach the model to. It could be a Binder
+   * instance, a Signal, or another object. However, it could never be another
+   * model.
+   */
   attach<M extends Model>(model: M, target: Target<Value<M>>): M {
     const _model = new CoreModelBuilder<Value<M>, Extensions<M>, { named: false; selfRefKeys: References<M> }>(model)
       .name(`@${model[$name]}`)

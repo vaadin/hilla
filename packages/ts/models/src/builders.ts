@@ -14,6 +14,9 @@ import {
 
 const { create, defineProperty } = Object;
 
+/**
+ * The options for creating the model property.
+ */
 export type ModelBuilderPropertyOptions = Readonly<{
   meta?: ModelMetadata;
 }>;
@@ -49,12 +52,6 @@ export type Flags = {
  * @typeParam EX - The extra properties of the model.
  * @typeParam F - The flags for the model constructor that allow to determine
  * specific characteristics of the model.
- *
- * @param base - The base model to extend.
- * @param defaultValueProvider - The function that provides the default value
- * for the model.
- *
- * @internal
  */
 export class CoreModelBuilder<
   V,
@@ -63,6 +60,11 @@ export class CoreModelBuilder<
 > {
   protected readonly [$model]: Model<V, EX>;
 
+  /**
+   * @param base - The base model to extend.
+   * @param defaultValueProvider - The function that provides the default value
+   * for the model.
+   */
   constructor(base: Model, defaultValueProvider?: (model: Model<V, EX>) => V) {
     this[$model] = create(base);
 
@@ -163,9 +165,6 @@ const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
  * @typeParam EX - The extra properties of the model.
  * @typeParam F - The flags for the model constructor that allow to determine
  * specific characteristics of the model.
- *
- *
- * @internal
  */
 export class ObjectModelBuilder<
   V extends AnyObject,

@@ -45,19 +45,67 @@ export declare enum Enum {}
 
 export type AnyObject = Readonly<Record<never, never>>; // {}
 
+/* eslint-disable tsdoc/syntax */
+/**
+ * The symbol that represents the {@link Model[$key]} property.
+ */
 export const $key = Symbol('key');
+
+/**
+ * The symbol that represents the {@link Model[$name]} property.
+ */
 export const $name = Symbol('name');
+
+/**
+ * The symbol that represents the {@link Model[$owner]} property.
+ */
 export const $owner = Symbol('owner');
+
+/**
+ * The symbol that represents the {@link Model[$meta]} property.
+ */
 export const $meta = Symbol('meta');
+
+/**
+ * The symbol that represents the {@link Model[$optional]} property.
+ */
 export const $optional = Symbol('optional');
+
+/**
+ * The symbol that represents the {@link Model[$value]} property.
+ */
 export const $defaultValue = Symbol('value');
 
-export const $enum = Symbol('enum');
+/**
+ * The symbol that represents the {@link EnumModel[$enumerate]} property.
+ */
+export const $enum = Symbol('enumerate');
+
+/**
+ * The symbol that represents the {@link UnionModel[$members]} property.
+ */
 export const $members = Symbol('members');
+
+/**
+ * The symbol that represents the {@link ArrayModel[$itemModel]} property.
+ */
 export const $itemModel = Symbol('itemModel');
 
+/* eslint-enable tsdoc/syntax */
+
+/**
+ * Extracts the value type the model represents.
+ */
 export type Value<M extends Model> = M extends Model<infer T> ? T : never;
+
+/**
+ * Extracts the list of extra properties of the model.
+ */
 export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : EmptyObject;
+
+/**
+ * Extracts the list of self-referencing properties of the model.
+ */
 export type References<M extends Model> = M extends Model<unknown, AnyObject, infer R> ? R : never;
 
 /**
