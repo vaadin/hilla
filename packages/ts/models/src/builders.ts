@@ -31,8 +31,15 @@ export type Flags = {
 
   /**
    * The keys of the self-referencing properties.
+   *
+   * @remarks
+   * The problem of self-reference models is that they cannot have intermediate
+   * type because during the property definition, the model itself is in the
+   * middle of construction. That's why we define the specific type-only flag
+   * that allows us to know which model properties are self-referenced. We can
+   * safely set it in the end of building using this flag.
    */
-  selfRefKeys: string;
+  selfRefKeys: keyof any;
 };
 
 /**
@@ -76,11 +83,12 @@ export class CoreModelBuilder<
   }
 
   /**
-   * Defines a new property on the model. The property serves the purposes of storing the extra data for specific types
-   * of models.
+   * Defines a new property on the model. The property serves the purposes of
+   * storing the extra data for specific types of models.
    *
    * @remarks
-   * The key of the property should be a symbol to avoid conflicts with properties defined via
+   * The key of the property should be a symbol to avoid conflicts with
+   * properties defined via
    * {@link ObjectModelBuilder}.
    *
    * @param key - The key of the property.
@@ -100,8 +108,8 @@ export class CoreModelBuilder<
    * to provide the default value for the model if for some reason using the
    * constructor parameter is undesired.
    *
-   * @param defaultValueProvider - The function that provides the default value for the
-   * model.
+   * @param defaultValueProvider - The function that provides the default value
+   * for the model.
    * @returns The current builder instance.
    */
   defaultValueProvider(defaultValueProvider: DefaultValueProvider<V, EX>): this {
@@ -126,7 +134,8 @@ export class CoreModelBuilder<
   }
 
   /**
-   * Builds the model.
+   * Builds the model. On the typing level, it checks if all the model parts are
+   * set correctly, and raises an error if not.
    *
    * @returns The model.
    */
@@ -135,6 +144,13 @@ export class CoreModelBuilder<
   }
 }
 
+/**
+ * A registry for the property models of the object model. Since the property
+ * registration is lazy, we cannot store the property models directly on the
+ * object model, so the registry plays a role of a private storage for them.
+ *
+ * @internal
+ */
 const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
 
 /**
@@ -147,6 +163,7 @@ const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
  * @typeParam EX - The extra properties of the model.
  * @typeParam F - The flags for the model constructor that allow to determine
  * specific characteristics of the model.
+ *
  *
  * @internal
  */
@@ -208,18 +225,34 @@ export class ObjectModelBuilder<
    * @param model - The model of the property value. You can also provide a
    * function that produces the model based on the current model.
    * @param options - Additional options for the property.
+   *
+   * @returns The current builder instance updated with the new property type.
+   * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
+   * flag for the specific property is set.
    */
   property<PK extends string & keyof V, EXK extends AnyObject = EmptyObject>(
     key: PK,
     model: Model<V[PK], EXK> | ((model: Model<V, EX & Readonly<Record<PK, Model<V[PK], EXK>>>>) => Model<V[PK], EXK>),
     options?: ModelBuilderPropertyOptions,
-  ): Extract<V[PK], V> extends never
-    ? ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, Model<V[PK], EXK>>>, F>
-    : ObjectModelBuilder<
+  ): // It is a workaround for the self-referencing models.
+  // If the type of the model property is not the model itself,
+  Extract<V[PK], V> extends never
+    ? // Then we simply extend the model with the property, and update the
+      // current value type of the model.
+      ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, Model<V[PK], EXK>>>, F>
+    : // Otherwise, we set a flag of the model that it contains a self-reference
+      // property.
+      ObjectModelBuilder<
         V,
         CV & Readonly<Record<PK, V[PK]>>,
         EX,
-        { named: F['named']; selfRefKeys: F['selfRefKeys'] | PK }
+        {
+          // Just inheriting the current flag.
+          named: F['named'];
+          // Adding the property name to all existing self-referencing
+          // properties.
+          selfRefKeys: F['selfRefKeys'] | PK;
+        }
       > {
     defineProperty(this[$model], key, {
       enumerable: true,

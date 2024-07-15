@@ -11,7 +11,7 @@ import {
   $optional,
   $owner,
   type AnyObject,
-  type AttachTarget,
+  type Target,
   type Enum,
   type Extensions,
   Model,
@@ -38,11 +38,11 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
 
   // Otherwise, the owner is an AttachTarget, so we can return the full
   // value.
-  return (model[$owner] as AttachTarget<T>).value;
+  return (model[$owner] as Target<T>).value;
 }
 
 const m = {
-  attach<M extends Model>(model: M, target: AttachTarget<Value<M>>): M {
+  attach<M extends Model>(model: M, target: Target<Value<M>>): M {
     const _model = new CoreModelBuilder<Value<M>, Extensions<M>, { named: false; selfRefKeys: References<M> }>(model)
       .name(`@${model[$name]}`)
       .build();

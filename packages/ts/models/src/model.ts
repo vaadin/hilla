@@ -1,4 +1,3 @@
-/* eslint-disable import/no-mutable-exports, @typescript-eslint/class-literal-property-style */
 import type { EmptyObject } from 'type-fest';
 
 export interface JvmTypeRef {
@@ -25,14 +24,14 @@ export interface ModelMetadata {
  * The target to which a model is attached. It could be a Binder instance, a
  * Signal or another object. However, it could never be another model.
  */
-export type AttachTarget<T = unknown> = Readonly<{
+export type Target<T = unknown> = Readonly<{
   model?: Model<T>;
   value: T;
 }>;
 
 export const nothing = Symbol('nothing');
 
-const detachedTarget: AttachTarget = Object.create(
+const detachedTarget: Target = Object.create(
   {
     toString: () => ':detached:',
   },
@@ -63,8 +62,20 @@ export type References<M extends Model> = M extends Model<unknown, AnyObject, in
 
 /**
  * A model that represents a specific type of data.
+ *
+ * @typeParam V - The type of the data described by the model.
+ * @typeParam EX - The extra properties of the model. It could be either a model
+ * that represents a property of the object the current model describe, or a
+ * model-specific metadata. It's recommended to use a symbol as a key for the
+ * metadata property to avoid the potential naming conflicts with the described
+ * object properties.
+ * @typeParam R - The keys of the self-referencing properties of the model.
+ *
+ * @remarks
+ * Since we know the full model definition only on this step, the `R` type
+ * parameter is essential to describe a model with self-reference properties.
  */
-export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends string = never> = EX &
+export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends keyof any = never> = EX &
   Readonly<{
     [P in R]: Model<V, EX, R>;
   }> &
@@ -84,7 +95,7 @@ export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends str
      * The owner model of the model. For detached models, the owner will always
      * be a specific global object `detachedTarget`.
      */
-    [$owner]: AttachTarget | Model;
+    [$owner]: Target | Model;
 
     /**
      * The metadata of the model.
@@ -102,14 +113,20 @@ export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends str
      */
     [$defaultValue]: V;
     [Symbol.toStringTag]: string;
-    [Symbol.hasInstance](value: any): value is Model<V, EX>;
+    [Symbol.hasInstance](value: any): value is Model<V, EX, R>;
     toString(): string;
   }>;
 
 /**
  * A function that provides a default value for a model.
+ *
+ * @typeParam V - The type of the data described by the model.
+ * @typeParam EX - The extra properties of the model.
+ * @typeParam R - The keys of the self-referencing properties of the model.
  */
-export type DefaultValueProvider<T, C extends object> = (model: Model<T, C>) => T;
+export type DefaultValueProvider<V, EX extends AnyObject = EmptyObject, R extends keyof any = never> = (
+  model: Model<V, EX, R>,
+) => V;
 
 export const Model: Model = Object.create(null, {
   [$key]: {

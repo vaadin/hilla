@@ -26,7 +26,7 @@ export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .define($itemModel, { value: Model })
   .build();
 
-export type ObjectModel<V, EX extends AnyObject = EmptyObject, R extends string = never> = Model<V, EX, R>;
+export type ObjectModel<V, EX extends AnyObject = EmptyObject, R extends keyof any = never> = Model<V, EX, R>;
 
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();
 

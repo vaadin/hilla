@@ -11,7 +11,7 @@ import m, {
   $optional,
   $owner,
   ArrayModel,
-  type AttachTarget,
+  type Target,
   BooleanModel,
   type EnumModel,
   Model,
@@ -159,7 +159,7 @@ describe('@vaadin/hilla-form-models', () => {
   });
 
   it('should has name prefixed with "@" if attached', () => {
-    const target: AttachTarget<Named> = { value: { name: 'John Doe' } };
+    const target: Target<Named> = { value: { name: 'John Doe' } };
     const AttachedNamedModel = m.attach(NamedModel, target);
 
     expect(AttachedNamedModel).to.have.property($name, '@Named');
@@ -210,7 +210,7 @@ describe('@vaadin/hilla-form-models', () => {
   });
 
   describe('m.value', () => {
-    let target: AttachTarget<Person>;
+    let target: Target<Person>;
 
     beforeEach(() => {
       target = Object.create(
@@ -255,7 +255,7 @@ describe('@vaadin/hilla-form-models', () => {
       expect(m.value(PersonModel.address.street.name)).to.be.string('');
     });
 
-    it('returns the value from the attach target', () => {
+    it('returns the value from the attached target', () => {
       const AttachedPersonModel = m.attach(PersonModel, target);
 
       expect(AttachedPersonModel).to.have.property($owner).which.is.equal(target);
@@ -297,7 +297,7 @@ describe('@vaadin/hilla-form-models', () => {
       });
 
       it('should allow to iterate through the item models', () => {
-        const target: AttachTarget<Comment[]> = {
+        const target: Target<Comment[]> = {
           value: [
             { title: 'FooTitle', text: 'FooText' },
             { title: 'BarTitle', text: 'BarText' },
