@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import com.vaadin.experimental.FeatureFlags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -262,6 +263,8 @@ public class EndpointController {
                                 .or(() -> Optional
                                         .ofNullable(tag.get("x-class-name"))
                                         .map(JsonNode::asText)
+                                        .filter(className -> !("com.vaadin.hilla.signals.core.SignalsHandler"
+                                                .equals(className)))
                                         .map(this::instantiateEndpointByClassName))
                                 .ifPresent(endpointRegistry::registerEndpoint);
                     });
