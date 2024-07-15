@@ -1,15 +1,15 @@
-# Hilla Form Models
+# Hilla Models
 
-[![Latest Stable Version](https://img.shields.io/npm/v/@hilla/react-form.svg)](https://www.npmjs.com/package/@hilla/react-form)
+[![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/hilla-models.svg)](https://www.npmjs.com/package/@vaadin/hilla-models)
 
-A set of models for building forms with TypeScript and React.
+A collection of utilities to build data models that could be used for data binging, validation, backend integration etc. 
 
 A part of the Hilla project.
 
 ## Installation
 
 ```bash
-$ npm install @hilla/react-form
+$ npm install @vaadin/hilla-models
 ```
 
 ## Contribution
