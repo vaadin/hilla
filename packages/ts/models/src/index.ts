@@ -37,8 +37,7 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
     return parentValue === nothing ? nothing : parentValue[model[$key]];
   }
 
-  // Otherwise, the owner is an AttachTarget, so we can return the full
-  // value.
+  // Otherwise, the owner is a Target, so we can return the full value.
   return (model[$owner] as Target<T>).value;
 }
 
