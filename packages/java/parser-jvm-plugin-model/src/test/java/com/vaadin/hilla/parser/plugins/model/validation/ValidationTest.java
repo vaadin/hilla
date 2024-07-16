@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.model.validation;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import com.vaadin.hilla.parser.plugins.model.Endpoint;
@@ -26,7 +27,7 @@ public class ValidationTest {
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
-                .execute();
+                .execute(List.of(ValidationEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

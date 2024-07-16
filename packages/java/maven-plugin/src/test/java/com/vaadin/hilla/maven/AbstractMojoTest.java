@@ -65,29 +65,11 @@ public class AbstractMojoTest {
                 .getOutputDirectory();
         Mockito.doReturn(mockBuild).when(project).getBuild();
 
-        var configFilePath = getBuildDirectory()
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
-
-        // Load reference EngineConfiguration
-        Files.copy(
-                Path.of(Objects
-                        .requireNonNull(getClass().getResource(
-                                EngineConfiguration.DEFAULT_CONFIG_FILE_NAME))
-                        .toURI()),
-                configFilePath);
-
-        var config = TestEngineConfigurationPathResolver.resolve(
-                EngineConfiguration.load(configFilePath.toFile()),
-                temporaryDirectory);
-
+        var config = new EngineConfiguration();
         assertNotNull(config, "expected reference "
                 + "EngineConfiguration to load from json");
         configurationBuilder = new EngineConfiguration.Builder(config)
                 .baseDir(getTemporaryDirectory());
-
-        // Delete reference json file from temporary directory
-        Files.delete(getBuildDirectory()
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME));
     }
 
     @AfterEach

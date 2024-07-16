@@ -15,6 +15,11 @@
  */
 package com.vaadin.hilla.internal;
 
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
+
+import jakarta.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +32,17 @@ import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import com.vaadin.hilla.engine.ParserProcessor;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+
+import com.vaadin.hilla.ApplicationContextProvider;
 
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint

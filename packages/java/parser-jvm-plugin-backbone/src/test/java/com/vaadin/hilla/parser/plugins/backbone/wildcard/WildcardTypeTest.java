@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone.wildcard;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,8 @@ public class WildcardTypeTest {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(WildcardTypeEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

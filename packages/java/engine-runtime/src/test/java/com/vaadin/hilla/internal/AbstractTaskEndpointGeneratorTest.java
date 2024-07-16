@@ -69,7 +69,7 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
 
         @Override
         public void execute() throws ExecutionFailedException {
-            getEngineConfiguration();
+
         }
     }
 

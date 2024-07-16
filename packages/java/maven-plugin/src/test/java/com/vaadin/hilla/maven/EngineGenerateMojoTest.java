@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -57,12 +58,6 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 var mockedStaticEngineConfiguration = Mockito
                         .mockStatic(EngineConfiguration.class)) {
 
-            // Use reference EngineConfiguration
-            mockedStaticEngineConfiguration
-                    .when(() -> EngineConfiguration
-                            .loadDirectory(Mockito.eq(getBuildDirectory())))
-                    .thenReturn(getEngineConfiguration());
-
             // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate",
                     getTestConfiguration());
@@ -80,7 +75,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     .get(0);
 
             var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
-            inOrder.verify(parserProcessor).process();
+            inOrder.verify(parserProcessor).process(List.of());
             inOrder.verify(generatorProcessor).process();
         }
     }

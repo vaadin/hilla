@@ -1,7 +1,5 @@
 package com.vaadin.hilla.engine;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -18,7 +16,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class EngineConfiguration {
-    public static final String DEFAULT_CONFIG_FILE_NAME = "hilla-engine-configuration.json";
     public static final String OPEN_API_PATH = "hilla-openapi.json";
     static final ObjectMapper MAPPER = new ObjectMapper()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
@@ -33,52 +30,20 @@ public class EngineConfiguration {
     private Path outputDir;
     private ParserConfiguration parser;
 
-    private EngineConfiguration() {
-    }
+    public EngineConfiguration() {
+        baseDir = Path.of(System.getProperty("user.dir"));
+        buildDir = baseDir.resolve("target");
+        classesDir = buildDir.resolve("classes");
+        generator = new GeneratorConfiguration();
+        parser = new ParserConfiguration();
+        classPath = new LinkedHashSet<>();
 
-    /**
-     * Reads the configuration from the given base directory. Reads only files
-     * with the default name.
-     *
-     * @param configDir
-     *            a directory that contains the configuration file.
-     * @return the configuration, or <code>null</code> if the configuration file
-     *         does not exist
-     * @throws IOException
-     *             if thrown while reading the configuration file
-     * @throws ConfigurationException
-     *             if the configuration file is invalid
-     */
-    public static EngineConfiguration loadDirectory(Path configDir)
-            throws IOException {
-        return load(configDir.resolve(DEFAULT_CONFIG_FILE_NAME).toFile());
-    }
-
-    /**
-     * Reads the configuration from the given file path.
-     *
-     * @param configFile
-     *            a path to a configuration file.
-     * @return the configuration, or <code>null</code> if the configuration file
-     *         does not exist
-     * @throws IOException
-     *             if thrown while reading the configuration file
-     * @throws ConfigurationException
-     *             if the configuration file is invalid
-     */
-    public static EngineConfiguration load(File configFile) throws IOException {
-        if (!configFile.isFile()) {
-            return null;
-        }
-
-        try {
-            return MAPPER.readValue(configFile, EngineConfiguration.class);
-        }
-        // This is mainly to wrap Jackson exceptions, but declaring them
-        // explicitly can cause problems in tests if they are not on the
-        // classpath
-        catch (RuntimeException e) {
-            throw new ConfigurationException(e);
+        var legacyFrontendGeneratedDir = baseDir.resolve("frontend/generated");
+        if (Files.exists(legacyFrontendGeneratedDir)) {
+            outputDir = legacyFrontendGeneratedDir;
+        } else {
+            outputDir = baseDir.resolve(
+                    FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR);
         }
     }
 
@@ -132,10 +97,6 @@ public class EngineConfiguration {
     public int hashCode() {
         return Objects.hash(baseDir, classPath, generator, parser, buildDir,
                 classesDir, outputDir);
-    }
-
-    public void store(File file) throws IOException {
-        MAPPER.writeValue(file, this);
     }
 
     @JsonIgnore

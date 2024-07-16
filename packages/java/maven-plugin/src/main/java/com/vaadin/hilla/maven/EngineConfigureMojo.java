@@ -85,9 +85,6 @@ public final class EngineConfigureMojo extends AbstractMojo {
             // project just to get this configuration again
             var configDir = project.getBasedir().toPath().resolve(buildDir);
             Files.createDirectories(configDir);
-            conf.store(configDir
-                    .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
-                    .toFile());
         } catch (DependencyResolutionRequiredException e) {
             throw new EngineConfigureMojoException("Configuration failed", e);
         } catch (IOException e) {

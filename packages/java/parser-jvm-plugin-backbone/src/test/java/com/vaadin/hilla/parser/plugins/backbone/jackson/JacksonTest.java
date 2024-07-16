@@ -28,7 +28,8 @@ public class JacksonTest {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(JacksonEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

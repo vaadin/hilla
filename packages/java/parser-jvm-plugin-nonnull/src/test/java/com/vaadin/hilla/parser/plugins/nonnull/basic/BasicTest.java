@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.nonnull.basic;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -29,7 +30,8 @@ public class BasicTest {
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).addPlugin(plugin).execute();
+                .addPlugin(new BackbonePlugin()).addPlugin(plugin)
+                .execute(List.of(BasicEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

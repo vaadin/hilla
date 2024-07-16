@@ -67,10 +67,8 @@ public final class EndpointPlugin
             var rootNode = (RootNode) nodeDependencies.getNode();
             var endpointAnnotationName = getStorage().getParserConfig()
                     .getEndpointAnnotationName();
-            var endpoints = rootNode.getSource()
-                    .getClassesWithAnnotation(endpointAnnotationName,
-                            "com.vaadin.hilla.BrowserCallable")
-                    .stream().map(ClassInfoModel::of).toList();
+            var endpoints = rootNode.getSource().stream()
+                    .map(ClassInfoModel::of).toList();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return nodeDependencies.appendChildNodes(
                     endpoints.stream().filter(ClassInfoModel::isNonJDKClass)

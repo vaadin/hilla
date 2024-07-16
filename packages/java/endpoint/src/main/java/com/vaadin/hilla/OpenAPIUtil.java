@@ -3,10 +3,7 @@ package com.vaadin.hilla;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,35 +58,9 @@ public class OpenAPIUtil {
      */
     public static Optional<Path> getCurrentOpenAPIPath(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        EngineConfiguration engineConfiguration = EngineConfiguration
-                .loadDirectory(buildDirectory);
-        if (engineConfiguration == null) {
-            return Optional.empty();
-        }
+        EngineConfiguration engineConfiguration = new EngineConfiguration();
         return Optional
                 .of(engineConfiguration.getOpenAPIFile(isProductionMode));
-    }
-
-    /**
-     * Generate a new openapi.json and return it, based on the classes in the
-     * build directory.
-     *
-     * @param buildDirectory
-     *            the build directory, {@code target} if running with Maven
-     * @param isProductionMode
-     *            whether to generate the openapi for production mode
-     * @return the contents of the generated openapi.json
-     * @throws IOException
-     *             if something went wrong
-     */
-    public static String generateOpenAPI(Path buildDirectory,
-            boolean isProductionMode) throws IOException {
-        EngineConfiguration engineConfiguration = EngineConfiguration
-                .loadDirectory(buildDirectory);
-        ParserProcessor parserProcessor = new ParserProcessor(
-                engineConfiguration, OpenAPIUtil.class.getClassLoader(),
-                isProductionMode);
-        return parserProcessor.createOpenAPI();
     }
 
     /**

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 public class AnnotationsTest {
@@ -25,7 +26,7 @@ public class AnnotationsTest {
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
-                .execute();
+                .execute(List.of(AnnotationsEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

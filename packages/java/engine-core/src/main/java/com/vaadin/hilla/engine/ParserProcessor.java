@@ -44,7 +44,7 @@ public final class ParserProcessor {
         applyConfiguration(conf.getParser());
     }
 
-    public String createOpenAPI() throws IOException {
+    private String createOpenAPI(List<Class<?>> endpoints) throws IOException {
         var parser = new Parser().classLoader(classLoader)
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
@@ -57,17 +57,17 @@ public final class ParserProcessor {
 
         logger.debug("Starting JVM Parser");
 
-        var openAPI = parser.execute();
+        var openAPI = parser.execute(endpoints);
 
         return new JsonPrinter().pretty().writeAsString(openAPI);
     }
 
-    public void process() throws ParserException {
+    public void process(List<Class<?>> endpoints) throws ParserException {
         String openAPIString;
 
         try {
             Files.createDirectories(openAPIFile.getParent());
-            openAPIString = createOpenAPI();
+            openAPIString = createOpenAPI(endpoints);
         } catch (IOException e) {
             throw new ParserException("Unable to prepare OpenAPI definition",
                     e);

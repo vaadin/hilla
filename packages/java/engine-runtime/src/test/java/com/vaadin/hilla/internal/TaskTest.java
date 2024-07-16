@@ -42,27 +42,6 @@ public class TaskTest {
                 .resolve(getFrontendDirectory());
         Files.createDirectories(frontendDir);
 
-        // Create hilla-engine-configuration.json from template
-        var configPath = buildDir
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
-        Files.copy(
-                Path.of(Objects
-                        .requireNonNull(getClass().getResource(
-                                EngineConfiguration.DEFAULT_CONFIG_FILE_NAME))
-                        .toURI()),
-                configPath);
-
-        var config = prepareConfiguration(buildDir);
-
-        Files.delete(configPath);
-        config.store(configPath.toFile());
-
-        // Let Hilla know that the file has been generated
-        var field = AbstractTaskEndpointGenerator.class
-                .getDeclaredField("firstRun");
-        field.setAccessible(true);
-        field.set(null, false);
-
         var packagesDirectory = Path
                 .of(getClass().getClassLoader().getResource("").toURI())
                 .getParent() // target
@@ -120,25 +99,5 @@ public class TaskTest {
 
     protected Path getTemporaryDirectory() {
         return temporaryDirectory;
-    }
-
-    /**
-     * Modifies runtime settings (paths, class path)
-     */
-    private EngineConfiguration prepareConfiguration(Path buildDir)
-            throws URISyntaxException, IOException, InvocationTargetException,
-            NoSuchMethodException, InstantiationException,
-            IllegalAccessException {
-        var classPath = new LinkedHashSet<>(List
-                .of(Path.of(getClass().getClassLoader().getResource("").toURI())
-                        .toString()));
-
-        var config = EngineConfiguration.loadDirectory(buildDir);
-
-        config = TestEngineConfigurationPathResolver.resolve(config,
-                temporaryDirectory);
-
-        return new EngineConfiguration.Builder(config).classPath(classPath)
-                .create();
     }
 }

@@ -40,6 +40,7 @@ public class BasicTests {
     private final List<String> classPath;
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
+    private final List<Class<?>> endpoints = List.of(BasicEndpoint.class);
 
     {
         try {
@@ -54,7 +55,7 @@ public class BasicTests {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BasicPlugin()).execute();
+                .addPlugin(new BasicPlugin()).execute(endpoints);
 
         assertEquals(String.join("\n", STEPS),
                 openAPI.getExtensions().get(BasicPlugin.FOOTSTEPS_STORAGE_KEY));
@@ -65,7 +66,7 @@ public class BasicTests {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BasicPlugin()).execute();
+                .addPlugin(new BasicPlugin()).execute(endpoints);
 
         assertEquals(String.join(", ",
                 List.of("FieldInfoModel foo", "FieldInfoModel fieldFoo",

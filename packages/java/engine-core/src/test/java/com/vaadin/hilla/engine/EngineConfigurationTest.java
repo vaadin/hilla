@@ -73,21 +73,6 @@ public class EngineConfigurationTest {
     }
 
     @Test
-    public void should_DeserializeFromJsonFile()
-            throws IOException, URISyntaxException, InvocationTargetException,
-            NoSuchMethodException, InstantiationException,
-            IllegalAccessException, NoSuchFieldException {
-        var config = configurationBuilder.create();
-        Files.copy(Path.of(TEST_CONFIG_URL.toURI()), configFile.toPath());
-
-        var loadedConfig = TestEngineConfigurationPathResolver
-                .resolve(EngineConfiguration.load(configFile), baseDirectory);
-
-        assertNotNull(loadedConfig);
-        JsonAssertions.assertEquals(config, loadedConfig);
-    }
-
-    @Test
     public void should_NotRelativizeOutputDir_WhenGivenRelative() {
         var config = configurationBuilder.outputDir("relative/path").create();
         assertEquals(baseDirectory.resolve("relative/path"),
@@ -103,20 +88,6 @@ public class EngineConfigurationTest {
     }
 
     @Test
-    public void should_SerializeToJsonFile() throws IOException,
-            InvocationTargetException, NoSuchMethodException,
-            InstantiationException, IllegalAccessException {
-        configurationBuilder.create().store(configFile);
-
-        var storedConfig = EngineConfiguration.MAPPER.readValue(configFile,
-                EngineConfiguration.class);
-        var expectedConfig = TestEngineConfigurationPathResolver
-                .resolve(EngineConfiguration.MAPPER.readValue(TEST_CONFIG_URL,
-                        EngineConfiguration.class), baseDirectory);
-
-        JsonAssertions.assertEquals(expectedConfig, storedConfig);
-    }
-
     @AfterEach
     public void tearDown() throws IOException {
         if (this.configFile.exists()) {

@@ -18,6 +18,8 @@ public class DependencyTests {
     private static final List<String> classPath;
     private static final ResourceLoader resourceLoader = new ResourceLoader(
             DependencyTests.class);
+    private static final List<Class<?>> endpoints = List
+            .of(DependencyEndpoint.class);
     private static OpenAPI openApi;
 
     static {
@@ -34,7 +36,7 @@ public class DependencyTests {
                 .classLoader(DependencyTests.class.getClassLoader())
                 .classPath(classPath)
                 .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new DependencyPlugin()).execute();
+                .addPlugin(new DependencyPlugin()).execute(endpoints);
     }
 
     @Test

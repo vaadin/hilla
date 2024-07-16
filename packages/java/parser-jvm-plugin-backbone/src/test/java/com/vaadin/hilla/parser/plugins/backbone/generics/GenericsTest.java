@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone.generics;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,12 @@ public class GenericsTest {
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(GenericsBareEndpoint.class,
+                        GenericsExtendedEndpoint.class,
+                        GenericsMethodsEndpoint.class,
+                        GenericsRefEndpoint.class,
+                        ImplementInterfaceEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

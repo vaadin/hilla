@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.maven.model.Profile;
@@ -27,7 +28,6 @@ import com.vaadin.hilla.engine.ParserProcessor;
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-@Execute(goal = "configure")
 public final class EngineGenerateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "node")
@@ -48,8 +48,7 @@ public final class EngineGenerateMojo extends AbstractMojo {
         try {
             var baseDir = project.getBasedir().toPath();
             var buildDir = baseDir.resolve(project.getBuild().getDirectory());
-            var conf = Objects.requireNonNull(
-                    EngineConfiguration.loadDirectory(buildDir));
+            var conf = new EngineConfiguration();
             var classPath = conf.getClassPath();
             var urls = new ArrayList<URL>(classPath.size());
             for (var classPathItem : classPath) {
@@ -64,7 +63,7 @@ public final class EngineGenerateMojo extends AbstractMojo {
             var generatorProcessor = new GeneratorProcessor(conf, nodeCommand,
                     isProduction);
 
-            parserProcessor.process();
+            parserProcessor.process(List.of());
             generatorProcessor.process();
         } catch (IOException e) {
             throw new EngineGenerateMojoException(

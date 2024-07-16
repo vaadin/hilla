@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.transfertypes.uuid;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,8 @@ public class UUIDTest {
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
                 .addPlugin(new BackbonePlugin())
-                .addPlugin(new TransferTypesPlugin()).execute();
+                .addPlugin(new TransferTypesPlugin())
+                .execute(List.of(UUIDEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

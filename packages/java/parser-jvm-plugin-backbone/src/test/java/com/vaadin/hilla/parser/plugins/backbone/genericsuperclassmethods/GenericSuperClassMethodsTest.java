@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone.genericsuperclassmethods;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import com.vaadin.hilla.parser.core.Parser;
@@ -19,7 +20,9 @@ public class GenericSuperClassMethodsTest {
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotation(Endpoint.class.getName())
                 .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(GenericSuperClassLong.class,
+                        GenericSuperClassString.class));
 
         helper.executeParserWithConfig(openAPI);
     }

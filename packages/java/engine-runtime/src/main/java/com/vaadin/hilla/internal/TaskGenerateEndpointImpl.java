@@ -19,13 +19,16 @@ import java.io.File;
 import java.net.URL;
 import java.util.function.Function;
 
+import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 /**
  * Starts the generation of TS files for endpoints.
@@ -75,17 +78,12 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        try {
-            var engineConfiguration = getEngineConfiguration();
+        ApplicationContextProvider.runOnContext(applicationContext -> {
+            var engineConfiguration = new EngineConfiguration();
             var processor = new GeneratorProcessor(engineConfiguration,
                     nodeCommand, productionMode);
             processor.process();
-        } catch (GeneratorException e) {
-            // Make sure the exception is printed in the logs
-            LOGGER.error("Failed to run TypeScript endpoint generator", e);
-            throw new ExecutionFailedException(
-                    "Failed to run TypeScript endpoint generator");
-        }
+        });
     }
 
 }

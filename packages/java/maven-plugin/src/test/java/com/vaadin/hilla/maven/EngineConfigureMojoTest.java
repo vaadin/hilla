@@ -18,8 +18,7 @@ public class EngineConfigureMojoTest extends AbstractMojoTest {
                 getMavenProject());
         engineConfigureMojo.execute();
 
-        var storedEngineConfiguration = EngineConfiguration
-                .loadDirectory(getBuildDirectory());
+        var storedEngineConfiguration = new EngineConfiguration();
         assertNotNull(storedEngineConfiguration);
         JsonAssertions.assertEquals(getEngineConfiguration(),
                 storedEngineConfiguration);
