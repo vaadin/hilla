@@ -143,7 +143,7 @@ export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends key
      * The owner model of the model. For detached models, the owner will always
      * be a specific global object `detachedTarget`.
      */
-    [$owner]: Target | Model;
+    [$owner]: Model | Target;
 
     /**
      * The metadata of the model.
