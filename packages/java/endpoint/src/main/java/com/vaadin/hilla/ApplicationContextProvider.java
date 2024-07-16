@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -29,7 +30,10 @@ public class ApplicationContextProvider implements ApplicationContextAware {
     }
 
     public static void runOnContext(Consumer<ApplicationContext> action) {
-        if (applicationContext == null) {
+        if (applicationContext == null
+                || (applicationContext instanceof ConfigurableApplicationContext
+                        && !((ConfigurableApplicationContext) applicationContext)
+                                .isActive())) {
             pendingActions.add(action);
         } else {
             action.accept(applicationContext);

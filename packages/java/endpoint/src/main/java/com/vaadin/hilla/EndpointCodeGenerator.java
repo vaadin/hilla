@@ -82,8 +82,6 @@ public class EndpointCodeGenerator {
                     "This method is not available in production mode");
         }
 
-        LOGGER.info("█████████████████████████████████ Updating endpoint code generator");
-
         ApplicationContextProvider.runOnContext(applicationContext -> {
             List<Class<?>> endpoints = Stream
                     .of(BrowserCallable.class, Endpoint.class)
