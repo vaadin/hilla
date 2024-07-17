@@ -5,7 +5,6 @@
       <pluginExecutionFilter>
         <goals>
           <goal>validate</goal>
-          <goal>prepare-frontend</goal>
           <goal>build-frontend</goal>
           <goal>configure</goal>
         </goals>
@@ -17,13 +16,26 @@
     <pluginExecution>
       <pluginExecutionFilter>
         <goals>
-          <goal>generate</goal>
+          <goal>prepare-frontend</goal>
         </goals>
       </pluginExecutionFilter>
       <action>
         <execute>
           <runOnIncremental>false</runOnIncremental>
           <runOnConfiguration>true</runOnConfiguration>
+        </execute>
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <goals>
+          <goal>generate</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <execute>
+          <runOnIncremental>true</runOnIncremental>
+          <runOnConfiguration>false</runOnConfiguration>
         </execute>
       </action>
     </pluginExecution>
