@@ -18,19 +18,24 @@ package com.vaadin.hilla.internal;
 import javax.annotation.Nonnull;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.engine.ParserException;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -38,8 +43,6 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vaadin.hilla.engine.EngineConfiguration;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
@@ -92,16 +95,54 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        ApplicationContextProvider.runOnContext(applicationContext -> {
-            List<Class<?>> endpoints = Stream
-                    .of(BrowserCallable.class, Endpoint.class)
-                    .map(applicationContext::getBeansWithAnnotation)
-                    .map(Map::values).flatMap(Collection::stream)
-                    .map(Object::getClass).distinct().toList();
-            var engineConfiguration = new EngineConfiguration();
-            var processor = new ParserProcessor(engineConfiguration,
-                    classLoader, isProductionMode);
-            processor.process(endpoints);
-        });
+        var json = Path.of(System.getProperty("user.dir"),
+                "target/spring-aot/main/resources/META-INF/native-image/com.example.application/skeleton-starter-hilla-react/reflect-config.json");
+        if (isProductionMode && Files.isRegularFile(json)) {
+            try {
+                String jsonContent = Files.readString(json);
+                var objectMapper = new ObjectMapper();
+                var rootNode = objectMapper.readTree(jsonContent);
+
+                if (rootNode.isArray()) {
+                    var candidates = new ArrayList<String>();
+
+                    for (var node : rootNode) {
+                        String name = node.get("name").asText();
+                        candidates.add(name);
+                    }
+
+                    List<Class<?>> endpoints = candidates.stream().map(name -> {
+                        try {
+                            return Class.forName(name);
+                        } catch (Throwable t) { // must also catch
+                                                // NoClassDefFoundError
+                            return null;
+                        }
+                    }).filter(Objects::nonNull).filter(cls -> cls
+                            .isAnnotationPresent(Endpoint.class)
+                            || cls.isAnnotationPresent(BrowserCallable.class))
+                            .collect(Collectors.toList());
+                    var engineConfiguration = new EngineConfiguration();
+                    var processor = new ParserProcessor(engineConfiguration,
+                            classLoader, isProductionMode);
+                    processor.process(endpoints);
+                }
+            } catch (IOException e) {
+                throw new ExecutionFailedException(e);
+            }
+        } else {
+            ApplicationContextProvider.runOnContext(applicationContext -> {
+                List<Class<?>> endpoints = Stream
+                        .of(BrowserCallable.class, Endpoint.class)
+                        .map(applicationContext::getBeansWithAnnotation)
+                        .map(Map::values).flatMap(Collection::stream)
+                        .map(Object::getClass).distinct()
+                        .collect(Collectors.toList());
+                var engineConfiguration = new EngineConfiguration();
+                var processor = new ParserProcessor(engineConfiguration,
+                        classLoader, isProductionMode);
+                processor.process(endpoints);
+            });
+        }
     }
 }
