@@ -45,7 +45,7 @@
     "cssnano": "^6.0.3",
     "esbuild": "^0.20.1",
     "eslint": "^8.56.0",
-    "eslint-config-vaadin": "^1.0.0-alpha.18",
+    "eslint-config-vaadin": "1.0.0-alpha.18",
     "eslint-plugin-mocha": "^10.3.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-tsdoc": "^0.2.17",
