@@ -31,7 +31,6 @@ import com.vaadin.flow.theme.Theme;
  * @since Flow 2.0
  */
 @Mojo(name = "build-frontend", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
-@Execute(goal = "configure")
 public class BuildFrontendMojo
         extends com.vaadin.flow.plugin.maven.BuildFrontendMojo {
 }
