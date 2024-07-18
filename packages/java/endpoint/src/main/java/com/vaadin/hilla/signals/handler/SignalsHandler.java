@@ -41,23 +41,26 @@ public class SignalsHandler {
      */
     public Flux<String> subscribe(String signalProviderEndpointMethod,
             UUID clientSignalId) {
-        String[] endpointMethodParts = signalProviderEndpointMethod
-                .split("\\.");
         try {
             if (registry.contains(clientSignalId)) {
-                return registry.get(clientSignalId).subscribe()
-                        .map(jsonEventMapper::toJson);
+                return signalAsFlux(clientSignalId);
             }
 
+            String[] endpointMethodParts = signalProviderEndpointMethod
+                    .split("\\.");
             NumberSignal signal = (NumberSignal) invoker.invoke(
                     endpointMethodParts[0], endpointMethodParts[1], null, null,
                     null);
             registry.register(clientSignalId, signal);
-            return registry.get(clientSignalId).subscribe()
-                    .map(jsonEventMapper::toJson);
+            return signalAsFlux(clientSignalId);
         } catch (Exception e) {
             return Flux.error(e);
         }
+    }
+
+    private Flux<String> signalAsFlux(UUID clientSignalId) {
+        return registry.get(clientSignalId).subscribe()
+                .map(jsonEventMapper::toJson);
     }
 
     /**
