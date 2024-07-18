@@ -77,8 +77,8 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.4-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>3.2.6</spring.boot.version>
-    <testbench.version>9.3.1</testbench.version>
+    <spring.boot.version>3.2.7</spring.boot.version>
+    <testbench.version>9.3.2</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
@@ -275,7 +275,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.13.0</version>
+        <version>2.16.1</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>

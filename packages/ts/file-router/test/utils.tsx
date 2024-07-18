@@ -59,6 +59,7 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     mkdir(new URL('empty-dir/empty-file-subdir/', dir), { recursive: true }),
     mkdir(new URL('test', dir), { recursive: true }),
     mkdir(new URL('test/issue-002378/{requiredParam}', dir), { recursive: true }),
+    mkdir(new URL('test/issue-002571-empty-layout/', dir), { recursive: true }),
   ]);
   await Promise.all([
     appendFile(
@@ -109,6 +110,11 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
       new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
       'export default function Issue002378RequiredParam() {};',
     ),
+    appendFile(
+      new URL('test/issue-002571-empty-layout/@layout.tsx', dir),
+      'export default function Issue002571EmptyLayout() {};',
+    ),
+    // this file has no title configured, so it must be derived from its file name
     appendFile(
       new URL('test/issue-002879-config-below.tsx', dir),
       'export default function Issue002879ConfigBelow() {};\nexport const config = { title: "Config Below" };',
@@ -191,6 +197,11 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
               ],
             },
           ],
+        },
+        {
+          path: 'issue-002571-empty-layout',
+          layout: new URL('test/issue-002571-empty-layout/@layout.tsx', dir),
+          children: [],
         },
         {
           path: 'issue-002879-config-below',
