@@ -18,7 +18,7 @@ export class ValueSignal<T> extends SharedSignal<T> {
 
   override set value(value: T) {
     const id = crypto.randomUUID();
-    const event: SetEvent = { id, set: 'id', value };
+    const event: SetEvent = { id, type: 'set', value };
     this.publish(event).then(r => undefined );
   }
 
@@ -26,7 +26,7 @@ export class ValueSignal<T> extends SharedSignal<T> {
     const id = crypto.randomUUID();
     const event: SetEvent = {
       id,
-      set: 'id',
+      type: 'set',
       value: newValue,
       conditions: [{ id: 'id', value: expectedValue }],
     };

@@ -137,7 +137,7 @@ public class NumberSignalTest {
         conditions.add(condition);
 
         var objectNode = mapper.createObjectNode();
-        objectNode.put("set", "id");
+        objectNode.put("type", "set");
         objectNode.put("value", value);
         objectNode.set("conditions", conditions);
 
@@ -146,7 +146,7 @@ public class NumberSignalTest {
 
     private JsonEvent createSetEvent(String value) {
         var objectNode = mapper.createObjectNode();
-        objectNode.put("set", "id");
+        objectNode.put("type", "set");
         objectNode.put("value", value);
         return new JsonEvent(UUID.randomUUID(), objectNode);
     }

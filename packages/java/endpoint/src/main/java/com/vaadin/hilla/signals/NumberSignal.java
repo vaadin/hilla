@@ -163,11 +163,15 @@ public class NumberSignal {
     }
 
     private void handleCommand(ObjectNode json) {
-        if (json.has("set")) {
+        if (isSetEvent(json)) {
             this.value = Double.valueOf(json.get("value").asText());
         } else {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + json);
         }
+    }
+
+    private boolean isSetEvent(ObjectNode json) {
+        return json.has("type") && json.get("type").asText().equals("set");
     }
 }

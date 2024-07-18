@@ -90,13 +90,17 @@ public class SignalsHandlerTest {
         Flux<String> firstFlux = signalsHandler.subscribe("endpoint.method",
                 CLIENT_SIGNAL_ID_1);
 
-        var event = String.format(
-                "{\"id\":\"%s\",\"set\":\"id\",\"value\":\"42\"}",
-                UUID.randomUUID());
+        var event = String.format("""
+                {
+                    "id":"%s",
+                    "type":"set",
+                    "value":"42"
+                }
+                """, UUID.randomUUID());
         signalsHandler.update(CLIENT_SIGNAL_ID_1, event);
 
-        var expectedUpdatedSignalEventJson = String
-                .format("{\"value\":42.0,\"id\":\"%s\"}", signalId);
+        var expectedUpdatedSignalEventJson = String.format("""
+                {"value":42.0,"id":"%s"}""", signalId);
         StepVerifier.create(firstFlux)
                 .expectNext(expectedUpdatedSignalEventJson).thenCancel()
                 .verify();

@@ -1,20 +1,20 @@
 export type EntryId = string;
 
-export interface EventCondition {
+export type EventCondition = {
   id: EntryId;
   value?: any;
 }
 
-export interface StateEvent {
+export type StateEvent = {
   id: string;
+  type: 'set' | 'snapshot';
   conditions?: EventCondition[];
 }
 
-export interface SetEvent extends StateEvent {
-  set: 'id';
+export type SetEvent = StateEvent & {
   value: any;
 }
 
-export interface SnapshotEvent extends StateEvent {
+export type SnapshotEvent = StateEvent & {
   value: any;
 }
