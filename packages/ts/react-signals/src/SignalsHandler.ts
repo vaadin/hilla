@@ -1,5 +1,11 @@
 import { ConnectClient, type EndpointRequestInit, type Subscription } from '@vaadin/hilla-frontend';
 
+/**
+ * SignalsHandler is a helper class for handling the
+ * communication of the full-stack signal instances
+ * and their server-side counterparts they are
+ * subscribed and publish their updates to.
+ */
 export default class SignalsHandler {
   private readonly client: ConnectClient;
 

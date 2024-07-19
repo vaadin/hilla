@@ -1,24 +1,36 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { Signal } from './core.js';
-import { NumberSignal } from './Signals.js';
+import { NumberSignal, ValueSignal } from './Signals.js';
 import SignalsHandler from './SignalsHandler';
 import type { StateEvent, SnapshotEvent } from './types.js';
 
-type EventChannelDescriptor<T> = {
+/**
+ * The type that describes the needed information to
+ * subscribe and publish to a server-side signal instance.
+ */
+type SignalChannelDescriptor<T> = {
   signalProviderEndpointMethod: string;
   subscribe: (channelDescriptor: string, clientSignalId: string) => Subscription<T>;
   publish: (clientSignalId: string, event: T) => Promise<void>;
 };
 
-class EventChannel<S extends Signal = Signal> {
-  private readonly channelDescriptor: EventChannelDescriptor<string>;
+/**
+ * A generic class that represents a signal channel
+ * that can be used to communicate with a server-side
+ * signal instance.
+ *
+ * The signal channel is responsible for subscribing to
+ * the server-side signal and updating the local signal
+ * based on the received events.
+ */
+abstract class SignalChannel<T, S extends Signal = Signal> {
+  private readonly channelDescriptor: SignalChannelDescriptor<string>;
   private readonly signalsHandler: SignalsHandler;
   private readonly id: string;
 
-  private internalSignal: Signal | null = null;
-  private externalSignal: Signal | null = null;
+  private internalSignal: ValueSignal<T> | null = null;
 
-  constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
+  protected constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
     this.id = crypto.randomUUID();
     this.signalsHandler = new SignalsHandler(connectClient);
     this.channelDescriptor = {
@@ -27,8 +39,7 @@ class EventChannel<S extends Signal = Signal> {
       publish: (signalId: string, event: string) => this.signalsHandler.update(signalId, event),
     }
 
-    this.internalSignal = this.createInternalSignal();
-    this.externalSignal = this.createExternalSignal(this.internalSignal, (event: StateEvent) => this.publish(event));
+    this.internalSignal = this.createInternalSignal((event: StateEvent) => this.publish(event));
 
     this.connect();
   }
@@ -36,26 +47,20 @@ class EventChannel<S extends Signal = Signal> {
   private connect() {
     this.channelDescriptor.subscribe(this.channelDescriptor.signalProviderEndpointMethod, this.id).onNext((json) => {
       const event = JSON.parse(json) as SnapshotEvent;
-
-      const accepted = true; // TODO: evaluate the conditions against the current value and the received event
-      if (accepted) {
-        // Update signals based on the new value from the event:
-        this.updateSignals(event);
-      }
+      // Update signals based on the new value from the event:
+      this.updateSignals(event);
     });
   }
 
   private updateSignals(snapshotEvent: SnapshotEvent): void {
     if (this.internalSignal !== undefined) {
       if (snapshotEvent.value !== undefined) {
-        this.internalSignal!.value = snapshotEvent.value;
+        this.internalSignal!.setValue(snapshotEvent.value);
       } else {
         this.internalSignal = null;
-        this.externalSignal = null;
       }
     } else if (snapshotEvent.value !== undefined) {
-      this.internalSignal = this.createInternalSignal(snapshotEvent.value);
-      this.externalSignal = this.createExternalSignal(this.internalSignal, (event: StateEvent) => this.publish(event));
+      this.internalSignal = this.createInternalSignal((event: StateEvent) => this.publish(event), snapshotEvent.value);
     }
   }
 
@@ -66,20 +71,22 @@ class EventChannel<S extends Signal = Signal> {
   }
 
   getSignal(): S {
-    return this.externalSignal as S;
+    return this.internalSignal as Signal as S;
   }
 
-  private createInternalSignal(initialValue?: number): Signal<number> {
-    return new Signal<number>(initialValue);
-  }
-
-  private createExternalSignal(internalSignal: Signal<number>, publish: (event: StateEvent) => Promise<boolean>): Signal<number> {
-    return new NumberSignal(internalSignal, publish);
-  }
+  protected abstract createInternalSignal(publish: (event: StateEvent) => Promise<boolean>, initialValue?: T): ValueSignal<T>;
 }
 
-export class NumberSignalChannel extends EventChannel<NumberSignal> {
+/**
+ * A signal channel that is used to communicate with a
+ * server-side signal instance that holds a number value.
+ */
+export class NumberSignalChannel extends SignalChannel<number, NumberSignal> {
   constructor(signalProviderEndpointMethod: string, connectClient: ConnectClient) {
     super(signalProviderEndpointMethod, connectClient);
+  }
+
+  protected createInternalSignal(publish: (event: StateEvent) => Promise<boolean>, initialValue?: number): NumberSignal {
+    return new NumberSignal(publish, initialValue);
   }
 }

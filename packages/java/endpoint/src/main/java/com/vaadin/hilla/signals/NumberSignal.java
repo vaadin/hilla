@@ -1,8 +1,6 @@
 package com.vaadin.hilla.signals;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -13,7 +11,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
@@ -139,27 +136,7 @@ public class NumberSignal {
     private void processEvent(JsonEvent event) {
         ObjectNode json = event.getJson();
 
-        if (!checkConditions(json)) {
-            return;
-        }
-
         handleCommand(json);
-    }
-
-    private boolean checkConditions(ObjectNode json) {
-        if (json.has("conditions")) {
-            ArrayNode conditions = (ArrayNode) json.get("conditions");
-            for (int i = 0; i < conditions.size(); i++) {
-                JsonNode condition = conditions.get(i);
-
-                if (condition.has("value") && !Objects.equals(
-                        Double.valueOf(condition.get("value").asText()),
-                        this.value)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     private void handleCommand(ObjectNode json) {

@@ -93,55 +93,12 @@ public class NumberSignalTest {
     }
 
     @Test
-    public void submit_setEventWithConditions_validatesValueConditionBeforeSettingNewValue() {
-        NumberSignal signal = new NumberSignal();
-
-        Flux<JsonEvent> flux = signal.subscribe();
-
-        var counter = new AtomicInteger(0);
-        flux.subscribe(jsonEvent -> {
-            assertNotNull(jsonEvent);
-            if (counter.get() == 1) { // ignoring the initial value notification
-                // condition not met, value should not be updated
-                assertEquals(0.0, jsonEvent.getJson().get("value").asDouble(),
-                        0.0);
-            } else if (counter.get() == 2) {
-                // condition met, value should be updated
-                assertEquals(42.0, jsonEvent.getJson().get("value").asDouble(),
-                        0.0);
-            }
-            counter.incrementAndGet();
-        });
-
-        // this event should not change the value:
-        signal.submit(createSetEventWithExpectedValueCondition("42", "1"));
-        // this event should change the value:
-        signal.submit(createSetEventWithExpectedValueCondition("42", "0"));
-    }
-
-    @Test
     public void submit_eventWithUnknownCommand_throws() {
         NumberSignal signal = new NumberSignal();
 
         var exception = assertThrows(UnsupportedOperationException.class,
                 () -> signal.submit(createUnknownCommandEvent()));
         assertTrue(exception.getMessage().startsWith("Unsupported JSON: "));
-    }
-
-    private JsonEvent createSetEventWithExpectedValueCondition(String value,
-            String expectedOriginalValue) {
-        var condition = mapper.createObjectNode();
-        condition.put("value", expectedOriginalValue);
-
-        var conditions = mapper.createArrayNode();
-        conditions.add(condition);
-
-        var objectNode = mapper.createObjectNode();
-        objectNode.put("type", "set");
-        objectNode.put("value", value);
-        objectNode.set("conditions", conditions);
-
-        return new JsonEvent(UUID.randomUUID(), objectNode);
     }
 
     private JsonEvent createSetEvent(String value) {
