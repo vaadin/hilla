@@ -16,7 +16,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
    * @param publish The function that publishes the
    * value of the signal to the server.
    * @param value The initial value of the signal
-   * (default: `undefined`).
+   * @defaultValue undefined
    */
   constructor(publish: (event: StateEvent) => Promise<boolean>, value?: T) {
     super(value);
