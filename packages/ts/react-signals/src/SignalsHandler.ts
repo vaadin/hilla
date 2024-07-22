@@ -1,4 +1,4 @@
-import { ConnectClient, type EndpointRequestInit, type Subscription } from '@vaadin/hilla-frontend';
+import type { ConnectClient, EndpointRequestInit, Subscription } from '@vaadin/hilla-frontend';
 
 /**
  * SignalsHandler is a helper class for handling the

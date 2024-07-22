@@ -1,6 +1,9 @@
 import { Signal } from './core.js';
 import type { SetEvent, StateEvent } from './types';
 
+// eslint-disable-next-line import/no-mutable-exports
+export let setInternalValue: <T>(signal: ValueSignal<T>, value: T) => void;
+
 /**
  * A signal that holds a value. The underlying
  * value of this signal is stored and updated as a
@@ -9,13 +12,17 @@ import type { SetEvent, StateEvent } from './types';
  * @internal
  */
 export abstract class ValueSignal<T> extends Signal<T> {
+  static {
+    setInternalValue = (signal: ValueSignal<unknown>, value: unknown): void => signal.#setInternalValue(value);
+  }
+
   readonly #publish: (event: StateEvent) => Promise<boolean>;
 
   /**
    * Creates a new ValueSignal instance.
-   * @param publish The function that publishes the
+   * @param publish - The function that publishes the
    * value of the signal to the server.
-   * @param value The initial value of the signal
+   * @param value - The initial value of the signal
    * @defaultValue undefined
    */
   constructor(publish: (event: StateEvent) => Promise<boolean>, value?: T) {
@@ -26,7 +33,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
   /**
    * Returns the value of the signal.
    */
-  override get value() {
+  override get value(): T {
     return super.value;
   }
 
@@ -35,20 +42,22 @@ export abstract class ValueSignal<T> extends Signal<T> {
    * Note that this method is not setting
    * the signal's value.
    *
-   * @param value The new value of the signal
+   * @param value - The new value of the signal
    * to be published to the server.
    */
   override set value(value: T) {
     const id = crypto.randomUUID();
-    this.#publish({ id, type: 'set', value } as SetEvent).then(r => undefined);
+    this.#publish({ id, type: 'set', value } as SetEvent).catch((error) => {
+      throw error;
+    });
   }
 
   /**
    * Sets the value of the signal.
-   * @param value The new value of the signal.
+   * @param value - The new value of the signal.
    * @internal
    */
-  setValue(value: T): void {
+  #setInternalValue(value: T): void {
     super.value = value;
   }
 }
@@ -65,7 +74,8 @@ export abstract class ValueSignal<T> extends Signal<T> {
  * `value` property (similar to a normal signal):
  *
  * @example
- * const counter = CounterService.counter();
+ * ```tsx
+ *  const counter = CounterService.counter();
  *
  * return (
  *    <Button onClick={() => counter++)}>
@@ -73,5 +83,6 @@ export abstract class ValueSignal<T> extends Signal<T> {
  *    </Button>
  *    <Button onClick={() => counter.value = 0}>Reset</Button>
  * );
+ * ```
  */
 export class NumberSignal extends ValueSignal<number> {}
