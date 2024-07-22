@@ -74,7 +74,7 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
   /**
    * Returns the signal instance to be used in components.
    */
-  getSignal(): S {
+  get signal(): S {
     return this.#internalSignal as S;
   }
 
