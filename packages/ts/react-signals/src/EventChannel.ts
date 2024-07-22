@@ -32,7 +32,7 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
 
   readonly #internalSignal: S;
 
-  protected constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
+  constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
     this.#id = crypto.randomUUID();
     this.#signalsHandler = new SignalsHandler(connectClient);
     this.#channelDescriptor = {
