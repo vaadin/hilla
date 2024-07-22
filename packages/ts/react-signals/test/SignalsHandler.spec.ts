@@ -17,6 +17,10 @@ describe('@vaadin/hilla-react-signals', () => {
       signalsHandler = new SignalsHandler(connectClientMock);
     });
 
+    afterEach(() => {
+      sinon.restore();
+    });
+
     it('subscribe should call client.subscribe', () => {
       const signalProviderEndpointMethod = 'testEndpoint';
       const clientSignalId = 'testSignalId';
