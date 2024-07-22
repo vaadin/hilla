@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.plugins.backbone.generics;
 
+import java.util.List;
+
 @Endpoint
 public class GenericsBareEntityEndpoint {
     public GenericsBareRefEntity<String> getBareReference(
@@ -12,6 +14,11 @@ public class GenericsBareEntityEndpoint {
 
     public GenericsBareRefEntity<GenericsBareEntity> getBareEntity(
             GenericsBareRefEntity<GenericsBareEntity> ref) {
+        return ref;
+    }
+
+    public GenericsBareRefEntity<List<String>> getBareEntityList(
+            GenericsBareRefEntity<List<String>> ref) {
         return ref;
     }
 }

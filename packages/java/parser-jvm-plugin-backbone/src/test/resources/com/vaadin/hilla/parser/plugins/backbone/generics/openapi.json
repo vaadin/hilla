@@ -139,6 +139,75 @@
         }
       }
     },
+    "/GenericsBareEntityEndpoint/getBareEntityList": {
+      "post": {
+        "tags": ["GenericsBareEntityEndpoint"],
+        "operationId": "GenericsBareEntityEndpoint_getBareEntityList_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                      },
+                      {
+                        "type": "object",
+                        "x-type-parameters": [
+                          {
+                            "type": "array",
+                            "nullable": true,
+                            "items": {
+                              "type": "string",
+                              "nullable": true
+                            }
+        
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                    },
+                    {
+                      "type": "object",
+                      "x-type-parameters": [
+                        {
+                          "type": "array",
+                          "nullable": true,
+                          "items": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/GenericsBareEntityEndpoint/getBareReference": {
       "post": {
         "tags": [
