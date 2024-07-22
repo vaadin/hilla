@@ -24,11 +24,11 @@ type SignalChannelDescriptor<T> = {
  * based on the received events.
  */
 abstract class SignalChannel<T, S extends Signal = Signal> {
-  private readonly channelDescriptor: SignalChannelDescriptor<string>;
-  private readonly signalsHandler: SignalsHandler;
-  private readonly id: string;
+  readonly #channelDescriptor: SignalChannelDescriptor<string>;
+  readonly #signalsHandler: SignalsHandler;
+  readonly #id: string;
 
-  private internalSignal: ValueSignal<T> | null = null;
+  #internalSignal: ValueSignal<T> | null = null;
 
   protected constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
     this.id = crypto.randomUUID();
@@ -44,7 +44,7 @@ abstract class SignalChannel<T, S extends Signal = Signal> {
     this.connect();
   }
 
-  private connect() {
+  #connect() {
     this.channelDescriptor.subscribe(this.channelDescriptor.signalProviderEndpointMethod, this.id).onNext((json) => {
       const event = JSON.parse(json) as SnapshotEvent;
       // Update signals based on the new value from the event:
@@ -65,9 +65,12 @@ abstract class SignalChannel<T, S extends Signal = Signal> {
   }
 
   public async publish(event: StateEvent): Promise<boolean> {
-    return this.channelDescriptor.publish(this.id, JSON.stringify(event))
-          .then((_) => { return true; })
-          .catch((error) => { throw Error(error); });
+    try {
+      await this.channelDescriptor.publish(this.id, JSON.stringify(event));
+      return true;
+    } catch (e: unknown) {
+      throw Error(e)
+    }
   }
 
   getSignal(): S {

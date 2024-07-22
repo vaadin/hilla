@@ -9,7 +9,7 @@ import type { SetEvent, StateEvent } from './types';
  * @internal
  */
 export abstract class ValueSignal<T> extends Signal<T> {
-  private readonly publish: (event: StateEvent) => Promise<boolean>;
+  readonly #publish: (event: StateEvent) => Promise<boolean>;
 
   /**
    * Creates a new ValueSignal instance.
@@ -40,8 +40,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
    */
   override set value(value: T) {
     const id = crypto.randomUUID();
-    const event: SetEvent = { id, type: 'set', value };
-    this.publish(event).then(r => undefined);
+    this.publish({ id, type: 'set', value }).then(r => undefined);
   }
 
   /**

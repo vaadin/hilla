@@ -7,7 +7,7 @@ import { ConnectClient, type EndpointRequestInit, type Subscription } from '@vaa
  * subscribed and publish their updates to.
  */
 export default class SignalsHandler {
-  private readonly client: ConnectClient;
+  readonly #client: ConnectClient;
 
   constructor(client: ConnectClient) {
     this.client = client;
