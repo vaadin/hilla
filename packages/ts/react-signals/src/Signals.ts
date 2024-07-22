@@ -20,7 +20,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
    */
   constructor(publish: (event: StateEvent) => Promise<boolean>, value?: T) {
     super(value);
-    this.publish = publish;
+    this.#publish = publish;
   }
 
   /**
@@ -40,7 +40,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
    */
   override set value(value: T) {
     const id = crypto.randomUUID();
-    this.publish({ id, type: 'set', value }).then(r => undefined);
+    this.#publish({ id, type: 'set', value } as SetEvent).then(r => undefined);
   }
 
   /**
