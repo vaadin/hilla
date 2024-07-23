@@ -73,6 +73,13 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
     return this.#internalSignal;
   }
 
+  /**
+   * Returns the id of the signal channel.
+   */
+  get id(): string {
+    return this.#id;
+  }
+
   abstract createInternalSignal(publish: (event: StateEvent) => Promise<boolean>, initialValue?: T): S;
 }
 

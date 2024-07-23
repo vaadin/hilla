@@ -4,7 +4,7 @@
 export type StateEvent = {
   id: string;
   type: 'set' | 'snapshot';
-}
+};
 
 /**
  * Event that describes setting the value
@@ -12,7 +12,7 @@ export type StateEvent = {
  */
 export type SetEvent = StateEvent & {
   value: any;
-}
+};
 
 /**
  * Event that describes a received updated
@@ -20,4 +20,4 @@ export type SetEvent = StateEvent & {
  */
 export type SnapshotEvent = StateEvent & {
   value: any;
-}
+};
