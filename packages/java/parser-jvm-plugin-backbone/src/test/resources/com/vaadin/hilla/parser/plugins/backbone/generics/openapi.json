@@ -165,7 +165,6 @@
                               "type": "string",
                               "nullable": true
                             }
-        
                           }
                         ]
                       }

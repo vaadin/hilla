@@ -37,9 +37,9 @@ public final class EntityPlugin
             entityNode.setTarget(schema);
 
             var generics = entityNode.getSource().getTypeParameters().stream()
-                    .filter(tp -> !tp.getBounds().stream()
+                    .filter(tp -> tp.getBounds().stream()
                             .filter(Objects::nonNull)
-                            .anyMatch(Predicate
+                            .noneMatch(Predicate
                                     .not(SpecializedModel::isNativeObject)))
                     .map(TypeParameterModel::getName)
                     .collect(Collectors.toList());
