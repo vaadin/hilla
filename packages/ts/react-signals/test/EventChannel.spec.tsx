@@ -4,11 +4,17 @@ import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { StateEvent } from '../src';
 import { NumberSignal, NumberSignalChannel } from '../src';
-import type {SetEvent, SnapshotEvent} from '../types';
+import type { SnapshotEvent } from '../types';
+import { nextFrame } from './Signals.spec';
 
 use(sinonChai);
+
+function simulateReceivedEvent(connectSubscriptionMock: Subscription<string>, event: SnapshotEvent) {
+  const onNextCallback = (connectSubscriptionMock.onNext as sinon.SinonStub).getCall(0).args[0];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  onNextCallback(JSON.stringify(event));
+}
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('NumberSignalChannel', () => {
@@ -50,20 +56,33 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should publish updates to signals handler endpoint', () => {
       const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
       numberSignalChannel.signal.value = 42;
-      const init = {};
       expect(connectClientMock.call).to.be.have.been.calledOnce;
     });
 
     it('should update signals based on the received event', () => {
       const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
       expect(numberSignalChannel.signal.value).to.be.undefined;
-      const snapshotEvent: SnapshotEvent = { id: 'someId', type: 'snapshot', value: 42 };
+
       // Simulate the event received from the server:
-      const onNextCallback = (connectSubscriptionMock.onNext as sinon.SinonStub).getCall(0).args[0];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      onNextCallback(JSON.stringify(snapshotEvent));
+      const snapshotEvent: SnapshotEvent = { id: 'someId', type: 'snapshot', value: 42 };
+      simulateReceivedEvent(connectSubscriptionMock, snapshotEvent);
+
       // Check if the signal value is updated:
       expect(numberSignalChannel.signal.value).to.equal(42);
+    });
+
+    it('should render the updated value', async () => {
+      const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
+      const numberSignal = numberSignalChannel.signal;
+      simulateReceivedEvent(connectSubscriptionMock, { id: 'someId', type: 'snapshot', value: 42 });
+
+      const result = render(<span>Value is {numberSignal}</span>);
+      await nextFrame();
+      expect(result.container.textContent).to.equal('Value is 42');
+
+      simulateReceivedEvent(connectSubscriptionMock, { id: 'someId', type: 'snapshot', value: 99 });
+      await nextFrame();
+      expect(result.container.textContent).to.equal('Value is 99');
     });
   });
 });

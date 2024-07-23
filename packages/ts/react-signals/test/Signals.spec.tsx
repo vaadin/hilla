@@ -21,7 +21,7 @@ describe('@vaadin/hilla-react-signals', () => {
     let publishSpy: sinon.SinonSpy;
 
     beforeEach(() => {
-      publishSpy = sinon.spy(async (event: StateEvent): Promise<boolean> => Promise.resolve(true));
+      publishSpy = sinon.spy(async (_: StateEvent): Promise<boolean> => Promise.resolve(true));
     });
 
     afterEach(() => {
