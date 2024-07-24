@@ -97,12 +97,15 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     @Override
     public void execute() throws ExecutionFailedException {
         try {
-            var root = Path.of(System.getProperty("user.dir"));
+            var aotOutput = Path.of(System.getProperty("user.dir"),
+                    "target/spring-aot/main");
+            String groupId = "com.example.application";
+            String artifactId = "skeleton-starter-hilla-react";
             var settings = List.of("org.vaadin.example.Application",
-                    root.resolve("target/spring-aot/main/sources").toString(),
-                    root.resolve("target/spring-aot/main/resources").toString(),
-                    root.resolve("target/spring-aot/main/classes").toString(),
-                    "com.example.application", "skeleton-starter-hilla-react");
+                    aotOutput.resolve("sources").toString(),
+                    aotOutput.resolve("resources").toString(),
+                    aotOutput.resolve("classes").toString(), groupId,
+                    artifactId);
             var javaExe = ProcessHandle.current().info().command()
                     .orElse(Path.of(System.getProperty("java.home", "bin/java"))
                             .toString());
@@ -118,8 +121,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             Process process = processBuilder.start();
             process.waitFor();
 
-            var json = Path.of(System.getProperty("user.dir"),
-                    "target/spring-aot/main/resources/META-INF/native-image/com.example.application/skeleton-starter-hilla-react/reflect-config.json");
+            var json = aotOutput
+                    .resolve(Path.of("resources/META-INF/native-image/",
+                            groupId, artifactId, "/reflect-config.json"));
             if (isProductionMode && Files.isRegularFile(json)) {
                 try {
                     String jsonContent = Files.readString(json);
