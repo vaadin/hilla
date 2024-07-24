@@ -10,18 +10,35 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Arrays;
 import java.util.UUID;
 
+/**
+ * A utility class for representing state events out of an ObjectNode. This
+ * helps to serialize and deserialize state events without getting involved with
+ * the string literals for field names and event types.
+ *
+ * @param <T>
+ *            The type of the value of the event.
+ */
 public class StateEvent<T> {
 
+    /**
+     * The field names used in the JSON representation of the state event.
+     */
     public static final class Field {
         public static final String ID = "id";
         public static final String TYPE = "type";
         public static final String VALUE = "value";
     }
 
+    /**
+     * Possible types of state events.
+     */
     public enum EventType {
         SNAPSHOT, SET,
     }
 
+    /**
+     * An exception thrown when the event type is null or invalid.
+     */
     public static class InvalidEventTypeException extends RuntimeException {
         public InvalidEventTypeException(String message) {
             super(message);
@@ -38,12 +55,28 @@ public class StateEvent<T> {
     private final EventType eventType;
     private final T value;
 
+    /**
+     * Creates a new state event using the given parameters.
+     *
+     * @param id
+     *            The unique identifier of the event.
+     * @param eventType
+     *            The type of the event.
+     * @param value
+     *            The value of the event.
+     */
     public StateEvent(UUID id, EventType eventType, T value) {
         this.id = id;
         this.eventType = eventType;
         this.value = value;
     }
 
+    /**
+     * Creates a new state event using the given JSON representation.
+     *
+     * @param json
+     *            The JSON representation of the event.
+     */
     public StateEvent(ObjectNode json) {
         this.id = UUID.fromString(json.get(Field.ID).asText());
         this.eventType = extractEventType(json);
@@ -64,7 +97,7 @@ public class StateEvent<T> {
         var rawType = json.get(Field.TYPE);
         if (rawType == null) {
             var message = String.format(
-                    "Missing event type. Type is required and should be either of: %s",
+                    "Missing event type. Type is required, and should be either of: %s",
                     Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message);
         }
@@ -91,6 +124,11 @@ public class StateEvent<T> {
         }
     }
 
+    /**
+     * Returns the JSON representation of the event.
+     *
+     * @return The JSON representation of the event.
+     */
     public ObjectNode toJson() {
         ObjectNode json = mapper.createObjectNode();
         json.put(Field.ID, id.toString());
@@ -99,14 +137,29 @@ public class StateEvent<T> {
         return json;
     }
 
+    /**
+     * Returns the unique identifier of the event.
+     *
+     * @return The unique identifier of the event.
+     */
     public UUID getId() {
         return id;
     }
 
+    /**
+     * Returns the type of the event.
+     *
+     * @return The type of the event.
+     */
     public EventType getEventType() {
         return eventType;
     }
 
+    /**
+     * Returns the value of the event.
+     *
+     * @return The value of the event.
+     */
     public T getValue() {
         return value;
     }
