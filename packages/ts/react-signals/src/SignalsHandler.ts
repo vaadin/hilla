@@ -1,4 +1,5 @@
 import type { ConnectClient, EndpointRequestInit, Subscription } from '@vaadin/hilla-frontend';
+import type { StateEvent } from './types';
 
 /**
  * SignalsHandler is a helper class for handling the
@@ -13,11 +14,11 @@ export default class SignalsHandler {
     this.#client = client;
   }
 
-  subscribe(signalProviderEndpointMethod: string, clientSignalId: string): Subscription<string> {
+  subscribe(signalProviderEndpointMethod: string, clientSignalId: string): Subscription<StateEvent> {
     return this.#client.subscribe('SignalsHandler', 'subscribe', { signalProviderEndpointMethod, clientSignalId });
   }
 
-  async update(clientSignalId: string, event: string, init?: EndpointRequestInit): Promise<void> {
+  async update(clientSignalId: string, event: StateEvent, init?: EndpointRequestInit): Promise<void> {
     return this.#client.call('SignalsHandler', 'update', { clientSignalId, event }, init);
   }
 }

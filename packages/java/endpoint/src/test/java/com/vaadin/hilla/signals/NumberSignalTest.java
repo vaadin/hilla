@@ -1,7 +1,9 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.signals.core.JsonEvent;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.StateEvent;
+import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 
@@ -55,7 +57,7 @@ public class NumberSignalTest {
     public void subscribe_returns_flux() {
         NumberSignal signal = new NumberSignal();
 
-        Flux<JsonEvent> flux = signal.subscribe();
+        Flux<ObjectNode> flux = signal.subscribe();
 
         assertNotNull(flux);
     }
@@ -64,27 +66,26 @@ public class NumberSignalTest {
     public void subscribe_returns_flux_withJsonEvents() {
         NumberSignal signal = new NumberSignal();
 
-        Flux<JsonEvent> flux = signal.subscribe();
+        Flux<ObjectNode> flux = signal.subscribe();
 
-        flux.subscribe(jsonEvent -> assertNotNull(jsonEvent));
+        flux.subscribe(Assert::assertNotNull);
     }
 
     @Test
     public void submit_notifies_subscribers() {
         NumberSignal signal = new NumberSignal();
 
-        Flux<JsonEvent> flux = signal.subscribe();
+        Flux<ObjectNode> flux = signal.subscribe();
 
         var counter = new AtomicInteger(0);
-        flux.subscribe(jsonEvent -> {
-            assertNotNull(jsonEvent);
+        flux.subscribe(eventJson -> {
+            assertNotNull(eventJson);
+            var stateEvent = new StateEvent<Double>(eventJson);
             if (counter.get() == 0) {
                 // notification for the initial value
-                assertEquals(0.0, jsonEvent.getJson().get("value").asDouble(),
-                        0.0);
+                assertEquals(0.0, stateEvent.getValue(), 0.0);
             } else if (counter.get() == 1) {
-                assertEquals(42.0, jsonEvent.getJson().get("value").asDouble(),
-                        0.0);
+                assertEquals(42.0, stateEvent.getValue(), 0.0);
             }
             counter.incrementAndGet();
         });
@@ -101,17 +102,17 @@ public class NumberSignalTest {
         assertTrue(exception.getMessage().startsWith("Unsupported JSON: "));
     }
 
-    private JsonEvent createSetEvent(String value) {
-        var objectNode = mapper.createObjectNode();
-        objectNode.put("type", "set");
-        objectNode.put("value", value);
-        return new JsonEvent(UUID.randomUUID(), objectNode);
+    private ObjectNode createSetEvent(String value) {
+        var setEvent = new StateEvent<>(UUID.randomUUID(),
+                StateEvent.EventType.SET, Double.parseDouble(value));
+        return setEvent.toJson();
     }
 
-    private JsonEvent createUnknownCommandEvent() {
-        var objectNode = mapper.createObjectNode();
-        objectNode.put("increase", "id");
-        objectNode.put("value", "42");
-        return new JsonEvent(UUID.randomUUID(), objectNode);
+    private ObjectNode createUnknownCommandEvent() {
+        var unknown = mapper.createObjectNode();
+        unknown.put(StateEvent.Field.ID, UUID.randomUUID().toString());
+        unknown.put("increase", "2");
+        unknown.put(StateEvent.Field.VALUE, "42");
+        return unknown;
     }
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.vaadin.hilla.signals.core.StateEvent;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.vaadin.hilla.signals.core.JsonEvent;
 
 /**
  * A signal that holds a number value.
@@ -33,7 +33,7 @@ public class NumberSignal {
 
     private Double value;
 
-    private final Set<Sinks.Many<JsonEvent>> subscribers = new HashSet<>();
+    private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
 
     /**
      * Creates a new NumberSignal with the provided default value.
@@ -58,8 +58,8 @@ public class NumberSignal {
      *
      * @return a Flux of JSON events
      */
-    public Flux<JsonEvent> subscribe() {
-        Sinks.Many<JsonEvent> sink = Sinks.many().multicast()
+    public Flux<ObjectNode> subscribe() {
+        Sinks.Many<ObjectNode> sink = Sinks.many().multicast()
                 .onBackpressureBuffer();
 
         return sink.asFlux().doOnSubscribe(ignore -> {
@@ -90,13 +90,13 @@ public class NumberSignal {
      * @param event
      *            the event to submit
      */
-    public void submit(JsonEvent event) {
+    public void submit(ObjectNode event) {
         lock.lock();
         try {
             processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
-                JsonEvent updatedValue = createSnapshot();
+                var updatedValue = createSnapshot();
                 boolean failure = sink.tryEmitNext(updatedValue).isFailure();
                 if (failure) {
                     LOGGER.debug("Failed push");
@@ -127,28 +127,28 @@ public class NumberSignal {
         return this.value;
     }
 
-    private JsonEvent createSnapshot() {
-        ObjectNode entryNode = mapper.createObjectNode();
-        entryNode.set("value", new DoubleNode(value));
-        return new JsonEvent(id, entryNode);
+    private ObjectNode createSnapshot() {
+        var snapshot = new StateEvent<>(this.id, StateEvent.EventType.SNAPSHOT,
+                this.value);
+        return snapshot.toJson();
     }
 
-    private void processEvent(JsonEvent event) {
-        ObjectNode json = event.getJson();
-
-        handleCommand(json);
-    }
-
-    private void handleCommand(ObjectNode json) {
-        if (isSetEvent(json)) {
-            this.value = Double.valueOf(json.get("value").asText());
-        } else {
+    private void processEvent(ObjectNode event) {
+        try {
+            var stateEvent = new StateEvent<Double>(event);
+            if (isSetEvent(stateEvent)) {
+                this.value = stateEvent.getValue();
+            } else {
+                throw new UnsupportedOperationException(
+                        "Unsupported event: " + event);
+            }
+        } catch (StateEvent.InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
-                    "Unsupported JSON: " + json);
+                    "Unsupported JSON: " + event, e);
         }
     }
 
-    private boolean isSetEvent(ObjectNode json) {
-        return json.has("type") && json.get("type").asText().equals("set");
+    private boolean isSetEvent(StateEvent<?> event) {
+        return StateEvent.EventType.SET.equals(event.getEventType());
     }
 }

@@ -1,6 +1,7 @@
 package com.vaadin.hilla.signals.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.core.SignalsRegistry;
@@ -13,7 +14,7 @@ import reactor.test.StepVerifier;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +34,7 @@ public class SignalsHandlerTest {
     public void setUp() {
         signalsRegistry = new SignalsRegistry();
         endpointInvoker = Mockito.mock(EndpointInvoker.class);
-        signalsHandler = new SignalsHandler(signalsRegistry, endpointInvoker,
-                mapper);
+        signalsHandler = new SignalsHandler(signalsRegistry, endpointInvoker);
     }
 
     @Test
@@ -46,24 +46,25 @@ public class SignalsHandlerTest {
         when(endpointInvoker.invoke("endpoint", "method", null, null, null))
                 .thenReturn(numberSignal);
 
-        var expectedSignalEventJson = String
-                .format("{\"value\":0.0,\"id\":\"%s\"}", signalId);
+        var expectedSignalEventJson = new ObjectNode(mapper.getNodeFactory())
+                .put("value", 0.0).put("id", signalId.toString())
+                .put("type", "snapshot");
 
         // first client subscribe to a signal, it registers the signal:
-        Flux<String> firstFlux = signalsHandler.subscribe("endpoint.method",
+        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint.method",
                 CLIENT_SIGNAL_ID_1);
         firstFlux.subscribe(next -> {
-            assertFalse(next.isEmpty());
+            assertNotNull(next);
             assertEquals(expectedSignalEventJson, next);
         }, error -> {
             throw new RuntimeException(error);
         });
 
         // another client subscribes to the same signal:
-        Flux<String> secondFlux = signalsHandler.subscribe("endpoint.method",
-                CLIENT_SIGNAL_ID_2);
+        Flux<ObjectNode> secondFlux = signalsHandler
+                .subscribe("endpoint.method", CLIENT_SIGNAL_ID_2);
         secondFlux.subscribe(next -> {
-            assertFalse(next.isEmpty());
+            assertNotNull(next);
             assertEquals(expectedSignalEventJson, next);
         }, error -> {
             throw new RuntimeException(error);
@@ -75,8 +76,10 @@ public class SignalsHandlerTest {
 
     @Test
     public void when_signalIsNotRegistered_update_throwsException() {
+        var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 0.0)
+                .put("id", UUID.randomUUID().toString()).put("type", "set");
         assertThrows(IllegalStateException.class,
-                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, "event"));
+                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent));
     }
 
     @Test
@@ -87,20 +90,16 @@ public class SignalsHandlerTest {
         when(endpointInvoker.invoke("endpoint", "method", null, null, null))
                 .thenReturn(numberSignal);
 
-        Flux<String> firstFlux = signalsHandler.subscribe("endpoint.method",
+        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint.method",
                 CLIENT_SIGNAL_ID_1);
 
-        var event = String.format("""
-                {
-                    "id":"%s",
-                    "type":"set",
-                    "value":"42"
-                }
-                """, UUID.randomUUID());
-        signalsHandler.update(CLIENT_SIGNAL_ID_1, event);
+        var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 42)
+                .put("id", UUID.randomUUID().toString()).put("type", "set");
+        signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent);
 
-        var expectedUpdatedSignalEventJson = String.format("""
-                {"value":42.0,"id":"%s"}""", signalId);
+        var expectedUpdatedSignalEventJson = new ObjectNode(
+                mapper.getNodeFactory()).put("value", 42.0)
+                .put("id", signalId.toString()).put("type", "snapshot");
         StepVerifier.create(firstFlux)
                 .expectNext(expectedUpdatedSignalEventJson).thenCancel()
                 .verify();

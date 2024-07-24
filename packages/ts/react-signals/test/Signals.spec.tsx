@@ -5,16 +5,9 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { StateEvent } from '../src';
 import { NumberSignal } from '../src';
+import { nextFrame } from './utils.js';
 
 use(sinonChai);
-
-export async function nextFrame(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-}
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('NumberSignal', () => {

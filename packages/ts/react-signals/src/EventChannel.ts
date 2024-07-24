@@ -1,7 +1,7 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { NumberSignal, setInternalValue, type ValueSignal } from './Signals.js';
 import SignalsHandler from './SignalsHandler';
-import type { StateEvent, SnapshotEvent } from './types.js';
+import { type StateEvent, StateEventType } from './types.js';
 
 /**
  * The type that describes the needed information to
@@ -9,7 +9,7 @@ import type { StateEvent, SnapshotEvent } from './types.js';
  */
 type SignalChannelDescriptor<T> = Readonly<{
   signalProviderEndpointMethod: string;
-  subscribe(channelDescriptor: string, clientSignalId: string): Subscription<T>;
+  subscribe(signalProviderEndpointMethod: string, clientSignalId: string): Subscription<T>;
   publish(clientSignalId: string, event: T): Promise<void>;
 }>;
 
@@ -26,7 +26,7 @@ type SignalChannelDescriptor<T> = Readonly<{
  * @typeParam S - The type of the signal instance.
  */
 abstract class SignalChannel<T, S extends ValueSignal<T>> {
-  readonly #channelDescriptor: SignalChannelDescriptor<string>;
+  readonly #channelDescriptor: SignalChannelDescriptor<StateEvent>;
   readonly #signalsHandler: SignalsHandler;
   readonly #id: string;
 
@@ -39,7 +39,7 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
       signalProviderEndpointMethod: signalProviderServiceMethod,
       subscribe: (signalProviderEndpointMethod: string, signalId: string) =>
         this.#signalsHandler.subscribe(signalProviderEndpointMethod, signalId),
-      publish: async (signalId: string, event: string) => this.#signalsHandler.update(signalId, event),
+      publish: async (signalId: string, event: StateEvent) => this.#signalsHandler.update(signalId, event),
     };
 
     this.#internalSignal = this.createInternalSignal(async (event: StateEvent) => this.publish(event));
@@ -48,21 +48,22 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
   }
 
   #connect() {
-    this.#channelDescriptor.subscribe(this.#channelDescriptor.signalProviderEndpointMethod, this.#id).onNext((json) => {
-      const event = JSON.parse(json) as SnapshotEvent;
-      // Update signals based on the new value from the event:
-      this.#updateSignals(event);
-    });
+    this.#channelDescriptor
+      .subscribe(this.#channelDescriptor.signalProviderEndpointMethod, this.#id)
+      .onNext((stateEvent) => {
+        // Update signals based on the new value from the event:
+        this.#updateSignals(stateEvent);
+      });
   }
 
-  #updateSignals(snapshotEvent: SnapshotEvent): void {
-    if (snapshotEvent.value !== undefined) {
-      setInternalValue(this.#internalSignal, snapshotEvent.value);
+  #updateSignals(stateEvent: StateEvent): void {
+    if (stateEvent.type === StateEventType.SNAPSHOT) {
+      setInternalValue(this.#internalSignal, stateEvent.value);
     }
   }
 
   async publish(event: StateEvent): Promise<boolean> {
-    await this.#channelDescriptor.publish(this.#id, JSON.stringify(event));
+    await this.#channelDescriptor.publish(this.#id, event);
     return true;
   }
 

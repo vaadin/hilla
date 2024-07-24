@@ -1,5 +1,5 @@
 import { Signal } from './core.js';
-import type { SetEvent, StateEvent } from './types';
+import { type StateEvent, StateEventType } from './types';
 
 // eslint-disable-next-line import/no-mutable-exports
 export let setInternalValue: <T>(signal: ValueSignal<T>, value: T) => void;
@@ -47,7 +47,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
    */
   override set value(value: T) {
     const id = crypto.randomUUID();
-    this.#publish({ id, type: 'set', value } as SetEvent).catch((error) => {
+    this.#publish({ id, type: StateEventType.SET, value }).catch((error) => {
       throw error;
     });
   }

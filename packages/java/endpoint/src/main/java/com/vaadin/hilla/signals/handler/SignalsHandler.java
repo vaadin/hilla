@@ -1,11 +1,10 @@
 package com.vaadin.hilla.signals.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.core.JsonEventMapper;
 import com.vaadin.hilla.signals.core.SignalsRegistry;
 import reactor.core.publisher.Flux;
 
@@ -19,13 +18,10 @@ import java.util.UUID;
 public class SignalsHandler {
 
     private final SignalsRegistry registry;
-    private final JsonEventMapper jsonEventMapper;
     private final EndpointInvoker invoker;
 
-    public SignalsHandler(SignalsRegistry registry, EndpointInvoker invoker,
-            ObjectMapper mapper) {
+    public SignalsHandler(SignalsRegistry registry, EndpointInvoker invoker) {
         this.registry = registry;
-        this.jsonEventMapper = new JsonEventMapper(mapper);
         this.invoker = invoker;
     }
 
@@ -39,7 +35,7 @@ public class SignalsHandler {
      *
      * @return a Flux of JSON events
      */
-    public Flux<String> subscribe(String signalProviderEndpointMethod,
+    public Flux<ObjectNode> subscribe(String signalProviderEndpointMethod,
             UUID clientSignalId) {
         try {
             if (registry.contains(clientSignalId)) {
@@ -58,9 +54,8 @@ public class SignalsHandler {
         }
     }
 
-    private Flux<String> signalAsFlux(UUID clientSignalId) {
-        return registry.get(clientSignalId).subscribe()
-                .map(jsonEventMapper::toJson);
+    private Flux<ObjectNode> signalAsFlux(UUID clientSignalId) {
+        return registry.get(clientSignalId).subscribe();
     }
 
     /**
@@ -71,11 +66,11 @@ public class SignalsHandler {
      * @param event
      *            the event to update with
      */
-    public void update(UUID clientSignalId, String event) {
+    public void update(UUID clientSignalId, ObjectNode event) {
         if (!registry.contains(clientSignalId)) {
             throw new IllegalStateException(String.format(
                     "Signal not found for client signal: %s", clientSignalId));
         }
-        registry.get(clientSignalId).submit(jsonEventMapper.fromJson(event));
+        registry.get(clientSignalId).submit(event);
     }
 }
