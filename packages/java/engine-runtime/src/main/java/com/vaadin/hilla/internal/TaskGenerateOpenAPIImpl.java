@@ -36,6 +36,7 @@ import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.Endpoint;
 import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.ParserConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -95,54 +96,82 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        var json = Path.of(System.getProperty("user.dir"),
-                "target/spring-aot/main/resources/META-INF/native-image/com.example.application/skeleton-starter-hilla-react/reflect-config.json");
-        if (isProductionMode && Files.isRegularFile(json)) {
-            try {
-                String jsonContent = Files.readString(json);
-                var objectMapper = new ObjectMapper();
-                var rootNode = objectMapper.readTree(jsonContent);
+        try {
+            var root = Path.of(System.getProperty("user.dir"));
+            var settings = List.of("org.vaadin.example.Application",
+                    root.resolve("target/spring-aot/main/sources").toString(),
+                    root.resolve("target/spring-aot/main/resources").toString(),
+                    root.resolve("target/spring-aot/main/classes").toString(),
+                    "com.example.application", "skeleton-starter-hilla-react");
+            var javaExe = ProcessHandle.current().info().command()
+                    .orElse(Path.of(System.getProperty("java.home", "bin/java"))
+                            .toString());
+            var classPath = String.join(File.pathSeparator,
+                    ParserConfiguration.CLASSPATH);
 
-                if (rootNode.isArray()) {
-                    var candidates = new ArrayList<String>();
+            var processBuilder = new ProcessBuilder();
+            processBuilder.inheritIO();
+            processBuilder.command(javaExe, "-cp", classPath,
+                    "org.springframework.boot.SpringApplicationAotProcessor");
+            processBuilder.command().addAll(settings);
 
-                    for (var node : rootNode) {
-                        String name = node.get("name").asText();
-                        candidates.add(name);
-                    }
+            Process process = processBuilder.start();
+            process.waitFor();
 
-                    List<Class<?>> endpoints = candidates.stream().map(name -> {
-                        try {
-                            return Class.forName(name);
-                        } catch (Throwable t) { // must also catch
-                                                // NoClassDefFoundError
-                            return null;
+            var json = Path.of(System.getProperty("user.dir"),
+                    "target/spring-aot/main/resources/META-INF/native-image/com.example.application/skeleton-starter-hilla-react/reflect-config.json");
+            if (isProductionMode && Files.isRegularFile(json)) {
+                try {
+                    String jsonContent = Files.readString(json);
+                    var objectMapper = new ObjectMapper();
+                    var rootNode = objectMapper.readTree(jsonContent);
+
+                    if (rootNode.isArray()) {
+                        var candidates = new ArrayList<String>();
+
+                        for (var node : rootNode) {
+                            String name = node.get("name").asText();
+                            candidates.add(name);
                         }
-                    }).filter(Objects::nonNull).filter(cls -> cls
-                            .isAnnotationPresent(Endpoint.class)
-                            || cls.isAnnotationPresent(BrowserCallable.class))
+
+                        List<Class<?>> endpoints = candidates.stream()
+                                .map(name -> {
+                                    try {
+                                        return Class.forName(name);
+                                    } catch (Throwable t) { // must also catch
+                                                            // NoClassDefFoundError
+                                        return null;
+                                    }
+                                }).filter(Objects::nonNull)
+                                .filter(cls -> cls
+                                        .isAnnotationPresent(Endpoint.class)
+                                        || cls.isAnnotationPresent(
+                                                BrowserCallable.class))
+                                .collect(Collectors.toList());
+                        var engineConfiguration = new EngineConfiguration();
+                        var processor = new ParserProcessor(engineConfiguration,
+                                classLoader, isProductionMode);
+                        processor.process(endpoints);
+                    }
+                } catch (IOException e) {
+                    throw new ExecutionFailedException(e);
+                }
+            } else {
+                ApplicationContextProvider.runOnContext(applicationContext -> {
+                    List<Class<?>> endpoints = Stream
+                            .of(BrowserCallable.class, Endpoint.class)
+                            .map(applicationContext::getBeansWithAnnotation)
+                            .map(Map::values).flatMap(Collection::stream)
+                            .map(Object::getClass).distinct()
                             .collect(Collectors.toList());
                     var engineConfiguration = new EngineConfiguration();
                     var processor = new ParserProcessor(engineConfiguration,
                             classLoader, isProductionMode);
                     processor.process(endpoints);
-                }
-            } catch (IOException e) {
-                throw new ExecutionFailedException(e);
+                });
             }
-        } else {
-            ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> endpoints = Stream
-                        .of(BrowserCallable.class, Endpoint.class)
-                        .map(applicationContext::getBeansWithAnnotation)
-                        .map(Map::values).flatMap(Collection::stream)
-                        .map(Object::getClass).distinct()
-                        .collect(Collectors.toList());
-                var engineConfiguration = new EngineConfiguration();
-                var processor = new ParserProcessor(engineConfiguration,
-                        classLoader, isProductionMode);
-                processor.process(endpoints);
-            });
+        } catch (Exception e) {
+            throw new ExecutionFailedException(e);
         }
     }
 }

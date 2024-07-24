@@ -1,8 +1,12 @@
 package com.vaadin.hilla.maven;
 
-import org.apache.maven.plugins.annotations.Execute;
+import java.util.List;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -11,6 +15,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.theme.Theme;
+import com.vaadin.hilla.engine.ParserConfiguration;
 
 /**
  * Goal that builds the frontend bundle.
@@ -33,4 +38,12 @@ import com.vaadin.flow.theme.Theme;
 @Mojo(name = "build-frontend", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class BuildFrontendMojo
         extends com.vaadin.flow.plugin.maven.BuildFrontendMojo {
+    @Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
+    private List<String> classpathElements;
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        ParserConfiguration.CLASSPATH = classpathElements;
+        super.execute();
+    }
 }

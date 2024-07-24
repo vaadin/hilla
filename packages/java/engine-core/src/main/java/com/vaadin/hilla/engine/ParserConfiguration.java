@@ -17,6 +17,7 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
+    public static List<String> CLASSPATH;
     private String endpointAnnotation;
     private String endpointExposedAnnotation;
     private String openAPIBasePath;
