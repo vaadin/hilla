@@ -109,12 +109,10 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var javaExe = ProcessHandle.current().info().command()
                     .orElse(Path.of(System.getProperty("java.home", "bin/java"))
                             .toString());
-            var classPath = String.join(File.pathSeparator,
-                    ParserConfiguration.CLASSPATH);
-
             var processBuilder = new ProcessBuilder();
             processBuilder.inheritIO();
-            processBuilder.command(javaExe, "-cp", classPath,
+            processBuilder.command(javaExe, "-cp",
+                    ParserConfiguration.CLASSPATH,
                     "org.springframework.boot.SpringApplicationAotProcessor");
             processBuilder.command().addAll(settings);
 

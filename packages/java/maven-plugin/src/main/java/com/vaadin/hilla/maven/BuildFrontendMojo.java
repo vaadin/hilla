@@ -1,5 +1,6 @@
 package com.vaadin.hilla.maven;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -43,7 +44,8 @@ public class BuildFrontendMojo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        ParserConfiguration.CLASSPATH = classpathElements;
+        ParserConfiguration.CLASSPATH = String.join(File.pathSeparator,
+                classpathElements);
         super.execute();
     }
 }
