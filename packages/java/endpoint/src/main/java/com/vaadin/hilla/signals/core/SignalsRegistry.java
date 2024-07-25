@@ -19,8 +19,8 @@ public class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
-    private final WeakHashMap<UUID, NumberSignal> signals = new WeakHashMap<>();
-    private final HashMap<UUID, UUID> clientSignalToSignalMapping = new HashMap<>();
+    private final Map<UUID, NumberSignal> signals = new WeakHashMap<>();
+    private final Map<UUID, UUID> clientSignalToSignalMapping = new HashMap<>();
 
     /**
      * Registers a signal instance and creates an association between the

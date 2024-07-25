@@ -1,10 +1,7 @@
 package com.vaadin.hilla.signals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.vaadin.hilla.signals.core.StateEvent;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -13,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
@@ -26,8 +24,6 @@ public class NumberSignal {
             .getLogger(NumberSignal.class);
 
     private final ReentrantLock lock = new ReentrantLock();
-
-    private final ObjectMapper mapper;
 
     private final UUID id = UUID.randomUUID();
 
@@ -43,7 +39,6 @@ public class NumberSignal {
      */
     public NumberSignal(@Nullable Double defaultValue) {
         this.value = defaultValue;
-        this.mapper = new ObjectMapper();
     }
 
     /**
@@ -150,5 +145,19 @@ public class NumberSignal {
 
     private boolean isSetEvent(StateEvent<?> event) {
         return StateEvent.EventType.SET.equals(event.getEventType());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof NumberSignal signal))
+            return false;
+        return Objects.equals(getId(), signal.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
     }
 }
