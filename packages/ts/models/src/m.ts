@@ -169,6 +169,7 @@ export function value(...args: [Model, unknown?]): unknown {
   // the value of the target object the given model represents
   if (args.length === 1) {
     if (target.value === $nothing) {
+      // If the model is detached, we return the default value of the model.
       return model[$defaultValue];
     }
 
@@ -187,7 +188,6 @@ export function value(...args: [Model, unknown?]): unknown {
       current = current[keys[i]];
     }
 
-    // If the model is detached, we return the default value of the model.
     return current;
   }
 
