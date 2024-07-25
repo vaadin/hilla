@@ -34,6 +34,19 @@
         {
           "configuration": null,
           "name": "parser-jvm-plugin-use"
+        },
+        {
+          "configuration": {
+            "class": "com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig",
+            "disable": [],
+            "use": [
+              {
+                "name": "com.example.application.annotations.NeverNull",
+                "score": 50
+              }
+            ]
+          },
+          "name": "parser-jvm-plugin-nonnull"
         }
       ]
     },
