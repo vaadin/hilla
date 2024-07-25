@@ -8,19 +8,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class EngineConfiguration {
     public static final String OPEN_API_PATH = "hilla-openapi.json";
-    static final ObjectMapper MAPPER = new ObjectMapper()
-            .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-            .setVisibility(PropertyAccessor.FIELD,
-                    JsonAutoDetect.Visibility.ANY);
     private Path baseDir;
     private Path buildDir;
     @JsonDeserialize(as = LinkedHashSet.class)

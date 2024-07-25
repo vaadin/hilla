@@ -7,9 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -18,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
 
 public class TaskTest {
     private Path temporaryDirectory;

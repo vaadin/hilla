@@ -27,8 +27,6 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 
-import java.util.List;
-
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
  * content of the generator, they are tested in other package

@@ -3,14 +3,15 @@ package com.vaadin.hilla;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.ParserProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

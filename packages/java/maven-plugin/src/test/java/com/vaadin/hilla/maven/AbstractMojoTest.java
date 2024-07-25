@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
 
 /**
  * Base class for Engine Maven plugin tests. Delegates to

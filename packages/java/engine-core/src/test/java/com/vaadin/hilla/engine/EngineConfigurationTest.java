@@ -1,13 +1,9 @@
 package com.vaadin.hilla.engine;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -19,13 +15,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.hilla.parser.testutils.JsonAssertions;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
-
 public class EngineConfigurationTest {
     private static final String CONFIG_FILE_NAME = "hilla-engine-configuration.json";
-    private static final URL TEST_CONFIG_URL = EngineConfigurationTest.class
-            .getResource(CONFIG_FILE_NAME);
     private Path baseDirectory;
     private File configFile;
     private EngineConfiguration.Builder configurationBuilder;

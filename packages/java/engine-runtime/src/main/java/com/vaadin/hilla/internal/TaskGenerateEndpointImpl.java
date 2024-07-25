@@ -19,25 +19,17 @@ import java.io.File;
 import java.net.URL;
 import java.util.function.Function;
 
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.engine.GeneratorException;
-import com.vaadin.hilla.engine.GeneratorProcessor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.GeneratorProcessor;
 
 /**
  * Starts the generation of TS files for endpoints.
  */
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(TaskGenerateEndpointImpl.class);
 
     private final String nodeCommand;
     private final boolean productionMode;

@@ -16,38 +16,20 @@
 package com.vaadin.hilla.internal;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FallibleCommand;
-
-import com.vaadin.hilla.engine.ConfigurationException;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.commandrunner.GradleRunner;
-import com.vaadin.hilla.engine.commandrunner.MavenRunner;
-import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
 
 /**
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(AbstractTaskEndpointGenerator.class);
     private static boolean firstRun = true;
 
     private final String buildDirectoryName;
-    private final Logger logger = LoggerFactory.getLogger(getClass());
     protected final File outputDirectory;
     private final File projectDirectory;
     private final Function<String, URL> resourceFinder;
