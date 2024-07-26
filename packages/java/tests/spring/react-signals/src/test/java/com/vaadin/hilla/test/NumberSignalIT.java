@@ -23,7 +23,9 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
     @Test
     public void shouldHaveDefaultValueLoadedFromServer() {
-        Assert.assertEquals("Shared value: 0.5", $("span").id("sharedValue").getText());
-        Assert.assertEquals("Counter value: 0", $("span").id("counter").getText());
+        Assert.assertEquals("Shared value: 0.5",
+                $("span").id("sharedValue").getText());
+        Assert.assertEquals("Counter value: 0",
+                $("span").id("counter").getText());
     }
 }
