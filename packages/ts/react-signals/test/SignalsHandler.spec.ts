@@ -3,6 +3,7 @@ import { expect, use } from '@esm-bundle/chai';
 import { ConnectClient } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { type StateEvent, StateEventType } from '../src/index.js';
 import SignalsHandler from '../src/SignalsHandler.js';
 
 use(sinonChai);
@@ -35,7 +36,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('update should call client.call', async () => {
       const clientSignalId = 'testSignalId';
-      const event = 'testEvent';
+      const event: StateEvent = { id: 'testEvent', type: StateEventType.SET, value: 10 };
       const init = {};
 
       await signalsHandler.update(clientSignalId, event, init);
