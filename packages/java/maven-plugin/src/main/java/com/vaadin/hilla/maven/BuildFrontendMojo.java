@@ -3,6 +3,7 @@ package com.vaadin.hilla.maven;
 import java.io.File;
 import java.util.List;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -16,7 +17,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.theme.Theme;
-import com.vaadin.hilla.engine.ParserConfiguration;
 
 /**
  * Goal that builds the frontend bundle.
@@ -44,7 +44,7 @@ public class BuildFrontendMojo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        ParserConfiguration.CLASSPATH = String.join(File.pathSeparator,
+        EngineConfiguration.classpath = String.join(File.pathSeparator,
                 classpathElements);
         super.execute();
     }

@@ -36,7 +36,6 @@ import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.Endpoint;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.ParserConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -112,7 +111,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var processBuilder = new ProcessBuilder();
             processBuilder.inheritIO();
             processBuilder.command(javaExe, "-cp",
-                    ParserConfiguration.CLASSPATH,
+                    EngineConfiguration.classpath,
                     "org.springframework.boot.SpringApplicationAotProcessor");
             processBuilder.command().addAll(settings);
 

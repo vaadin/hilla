@@ -14,6 +14,7 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class EngineConfiguration {
     public static final String OPEN_API_PATH = "hilla-openapi.json";
+    public static String classpath = System.getProperty("java.class.path");
     private Path baseDir;
     private Path buildDir;
     @JsonDeserialize(as = LinkedHashSet.class)

@@ -17,12 +17,10 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    public static String CLASSPATH = System.getProperty("java.class.path");
     private String endpointAnnotation;
     private String endpointExposedAnnotation;
     private String openAPIBasePath;
     private Plugins plugins;
-    private List<String> packages;
 
     public Optional<String> getEndpointAnnotation() {
         return Optional.ofNullable(endpointAnnotation);
@@ -53,18 +51,13 @@ public final class ParserConfiguration {
                 && Objects.equals(endpointExposedAnnotation,
                         that.endpointExposedAnnotation)
                 && Objects.equals(openAPIBasePath, that.openAPIBasePath)
-                && Objects.equals(plugins, that.plugins)
-                && Objects.equals(packages, that.packages);
+                && Objects.equals(plugins, that.plugins);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(endpointAnnotation, endpointExposedAnnotation,
-                openAPIBasePath, plugins, packages);
-    }
-
-    public Optional<List<String>> getPackages() {
-        return Optional.ofNullable(packages);
+                openAPIBasePath, plugins);
     }
 
     void setEndpointAnnotation(String endpointAnnotation) {
@@ -81,10 +74,6 @@ public final class ParserConfiguration {
 
     void setPlugins(Plugins plugins) {
         this.plugins = plugins;
-    }
-
-    public void setPackages(List<String> packages) {
-        this.packages = packages;
     }
 
     public static class Plugin {
