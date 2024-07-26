@@ -21,7 +21,7 @@ const root = pathToFileURL(`${__dirname}/`)
 
 function loadMockConfig() {
   try {
-    const content = readFileSync(new URL('test/mocks/config.js', cwd), 'utf8');
+    const content = readFileSync(new URL('test/mocks/config.json', cwd), 'utf8');
     return JSON.parse(content);
   } catch {
     console.log(`No mock files found for ${basename(fileURLToPath(cwd))}. Skipping...`);
