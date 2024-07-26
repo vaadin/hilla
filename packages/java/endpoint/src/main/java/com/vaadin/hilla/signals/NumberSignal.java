@@ -54,7 +54,7 @@ public class NumberSignal {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe() {
-        Sinks.Many<ObjectNode> sink = Sinks.many().multicast()
+        Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
                 .onBackpressureBuffer();
 
         return sink.asFlux().doOnSubscribe(ignore -> {

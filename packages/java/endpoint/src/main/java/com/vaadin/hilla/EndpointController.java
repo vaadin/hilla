@@ -142,17 +142,18 @@ public class EndpointController {
                     .registerEndpoint(endpointBean));
         }
 
-        // make sure that signalsHandler endpoint is always registered:
+        if (!endpointRegistry.isEmpty()) {
+            HillaStats.reportHasEndpoint();
+        }
+
+        // make sure that signalsHandler endpoint is always registered, but not
+        // counted as a regular endpoint in stats:
         if (endpointRegistry.get(SIGNALS_HANDLER_BEAN_NAME) == null) {
             var signalHandlerBean = endpointBeans
                     .get(SIGNALS_HANDLER_BEAN_NAME);
             if (signalHandlerBean != null) {
                 endpointRegistry.registerEndpoint(signalHandlerBean);
             }
-        }
-
-        if (!endpointRegistry.isEmpty()) {
-            HillaStats.reportHasEndpoint();
         }
     }
 
