@@ -85,6 +85,8 @@ public class EndpointController {
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
+    private static final String SIGNALS_HANDLER_BEAN_NAME = "signalsHandler";
+
     private final ApplicationContext context;
 
     EndpointRegistry endpointRegistry;
@@ -142,6 +144,16 @@ public class EndpointController {
 
         if (!endpointRegistry.isEmpty()) {
             HillaStats.reportHasEndpoint();
+        }
+
+        // make sure that signalsHandler endpoint is always registered, but not
+        // counted as a regular endpoint in stats:
+        if (endpointRegistry.get(SIGNALS_HANDLER_BEAN_NAME) == null) {
+            var signalHandlerBean = endpointBeans
+                    .get(SIGNALS_HANDLER_BEAN_NAME);
+            if (signalHandlerBean != null) {
+                endpointRegistry.registerEndpoint(signalHandlerBean);
+            }
         }
     }
 
