@@ -17,14 +17,11 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class NumberSignalIT extends ChromeBrowserTest {
 
-    private String firstWindowHandle;
-
     @Override
     @Before
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getRootURL() + "/number-signal");
-        firstWindowHandle = getDriver().getWindowHandle();
         waitForPageToLoad();
     }
 
@@ -56,6 +53,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
     public void shouldUpdateValue_forOtherClients() {
         var currentSharedValue = getSharedValue();
         var currentCounterValue = getCounterValue();
+        var firstWindowHandle = getDriver().getWindowHandle();
 
         var secondWindowDriver = getDriver().switchTo()
                 .newWindow(WindowType.WINDOW);
@@ -119,9 +117,5 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
     private void clickButton(String id) {
         $(ButtonElement.class).id(id).click();
-    }
-
-    private void resetValues() {
-        clickButton("reset");
     }
 }
