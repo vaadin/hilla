@@ -42,10 +42,22 @@ public class BuildFrontendMojo
     @Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
     private List<String> classpathElements;
 
+    @Parameter(defaultValue = "${project.groupId}", readonly = true, required = true)
+    private String groupId;
+
+    @Parameter(defaultValue = "${project.artifactId}", readonly = true, required = true)
+    private String artifactId;
+
+    @Parameter(property = "spring-boot.aot.main-class")
+    private String mainClass;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         EngineConfiguration.classpath = String.join(File.pathSeparator,
                 classpathElements);
+        EngineConfiguration.groupId = groupId;
+        EngineConfiguration.artifactId = artifactId;
+        EngineConfiguration.mainClass = mainClass;
         super.execute();
     }
 }

@@ -43,6 +43,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.loader.tools.MainClassFinder;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
@@ -52,6 +53,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(TaskGenerateOpenAPIImpl.class);
+    private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
 
     private final ClassLoader classLoader;
     private final boolean isProductionMode;
@@ -96,21 +98,24 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     @Override
     public void execute() throws ExecutionFailedException {
         try {
-            var aotOutput = Path.of(System.getProperty("user.dir"),
-                    "target/spring-aot/main");
-            String groupId = "com.example.application";
-            String artifactId = "skeleton-starter-hilla-react";
-            var settings = List.of("org.vaadin.example.Application",
+            var aotOutput = Path.of(System.getProperty("user.dir"), "target",
+                    "spring-aot", "main");
+            var classesDirectory = aotOutput.resolve("classes");
+            var applicationClass = (EngineConfiguration.mainClass != null)
+                    ? EngineConfiguration.mainClass
+                    : findSingleClass(classesDirectory.toFile());
+            var settings = List.of(applicationClass,
                     aotOutput.resolve("sources").toString(),
                     aotOutput.resolve("resources").toString(),
-                    aotOutput.resolve("classes").toString(), groupId,
-                    artifactId);
-            var javaExe = ProcessHandle.current().info().command()
-                    .orElse(Path.of(System.getProperty("java.home", "bin/java"))
+                    classesDirectory.toString(), EngineConfiguration.groupId,
+                    EngineConfiguration.artifactId);
+            var javaExecutable = ProcessHandle.current().info().command()
+                    .orElse(Path
+                            .of(System.getProperty("java.home"), "bin", "java")
                             .toString());
             var processBuilder = new ProcessBuilder();
             processBuilder.inheritIO();
-            processBuilder.command(javaExe, "-cp",
+            processBuilder.command(javaExecutable, "-cp",
                     EngineConfiguration.classpath,
                     "org.springframework.boot.SpringApplicationAotProcessor");
             processBuilder.command().addAll(settings);
@@ -118,9 +123,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             Process process = processBuilder.start();
             process.waitFor();
 
-            var json = aotOutput
-                    .resolve(Path.of("resources/META-INF/native-image/",
-                            groupId, artifactId, "/reflect-config.json"));
+            var json = aotOutput.resolve(Path.of("resources", "META-INF",
+                    "native-image", EngineConfiguration.groupId,
+                    EngineConfiguration.artifactId, "reflect-config.json"));
             if (isProductionMode && Files.isRegularFile(json)) {
                 try {
                     String jsonContent = Files.readString(json);
@@ -172,6 +177,21 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                 });
             }
         } catch (Exception e) {
+            throw new ExecutionFailedException(e);
+        }
+    }
+
+    static String findSingleClass(File classesDirectory)
+            throws ExecutionFailedException {
+        try {
+            String mainClass = MainClassFinder.findSingleMainClass(
+                    classesDirectory, SPRING_BOOT_APPLICATION_CLASS_NAME);
+            if (mainClass != null) {
+                return mainClass;
+            }
+            throw new ExecutionFailedException(
+                    "Failed to find a single main class");
+        } catch (IOException e) {
             throw new ExecutionFailedException(e);
         }
     }
