@@ -59,5 +59,16 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
     });
+
+    it('should set local value when signal value is updated', () => {
+      const numberSignal = new NumberSignal(publishSpy);
+      expect(numberSignal.value).to.equal(undefined);
+      numberSignal.value = 42;
+      expect(numberSignal.value).to.equal(42);
+
+      const anotherNumberSignal = new NumberSignal(publishSpy, 42);
+      anotherNumberSignal.value += 1;
+      expect(anotherNumberSignal.value).to.equal(43);
+    });
   });
 });

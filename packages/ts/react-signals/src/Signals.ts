@@ -47,6 +47,9 @@ export abstract class ValueSignal<T> extends Signal<T> {
    */
   override set value(value: T) {
     const id = crypto.randomUUID();
+    // first set the local value:
+    this.#setInternalValue(value);
+    // then publish the value to the server:
     this.#publish({ id, type: StateEventType.SET, value }).catch((error) => {
       throw error;
     });
