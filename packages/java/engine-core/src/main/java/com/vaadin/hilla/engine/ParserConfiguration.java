@@ -1,10 +1,12 @@
 package com.vaadin.hilla.engine;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
 
@@ -26,6 +28,16 @@ public final class ParserConfiguration {
 
     public List<String> getEndpointAnnotations() {
         return endpointAnnotations;
+    }
+
+    public List<Class<? extends Annotation>> getEndpointAnnotationClasses() {
+        return endpointAnnotations.stream().map(name -> {
+            try {
+                return (Class<? extends Annotation>) Class.forName(name);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
     }
 
     public List<String> getEndpointExposedAnnotations() {

@@ -87,12 +87,12 @@ public class EndpointCodeGenerator {
         }
 
         ApplicationContextProvider.runOnContext(applicationContext -> {
-            List<Class<?>> endpoints = Stream
-                    .of(BrowserCallable.class, Endpoint.class)
+            EngineConfiguration engineConfiguration = new EngineConfiguration();
+            List<Class<?>> endpoints = engineConfiguration.getParser()
+                    .getEndpointAnnotationClasses().stream()
                     .map(applicationContext::getBeansWithAnnotation)
                     .map(Map::values).flatMap(Collection::stream)
                     .map(Object::getClass).distinct().toList();
-            EngineConfiguration engineConfiguration = new EngineConfiguration();
             ParserProcessor parser = new ParserProcessor(engineConfiguration,
                     getClass().getClassLoader(), false);
             parser.process(endpoints);

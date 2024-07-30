@@ -126,6 +126,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var json = aotOutput.resolve(Path.of("resources", "META-INF",
                     "native-image", EngineConfiguration.groupId,
                     EngineConfiguration.artifactId, "reflect-config.json"));
+            var engineConfiguration = new EngineConfiguration();
+
             if (isProductionMode && Files.isRegularFile(json)) {
                 try {
                     String jsonContent = Files.readString(json);
@@ -149,12 +151,10 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                                         return null;
                                     }
                                 }).filter(Objects::nonNull)
-                                .filter(cls -> cls
-                                        .isAnnotationPresent(Endpoint.class)
-                                        || cls.isAnnotationPresent(
-                                                BrowserCallable.class))
+                                .filter(cls -> engineConfiguration.getParser()
+                                        .getEndpointAnnotationClasses().stream()
+                                        .anyMatch(cls::isAnnotationPresent))
                                 .collect(Collectors.toList());
-                        var engineConfiguration = new EngineConfiguration();
                         var processor = new ParserProcessor(engineConfiguration,
                                 classLoader, isProductionMode);
                         processor.process(endpoints);
@@ -164,13 +164,12 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                 }
             } else {
                 ApplicationContextProvider.runOnContext(applicationContext -> {
-                    List<Class<?>> endpoints = Stream
-                            .of(BrowserCallable.class, Endpoint.class)
+                    List<Class<?>> endpoints = engineConfiguration.getParser()
+                            .getEndpointAnnotationClasses().stream()
                             .map(applicationContext::getBeansWithAnnotation)
                             .map(Map::values).flatMap(Collection::stream)
                             .map(Object::getClass).distinct()
                             .collect(Collectors.toList());
-                    var engineConfiguration = new EngineConfiguration();
                     var processor = new ParserProcessor(engineConfiguration,
                             classLoader, isProductionMode);
                     processor.process(endpoints);
