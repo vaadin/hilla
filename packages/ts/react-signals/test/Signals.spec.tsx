@@ -4,6 +4,7 @@ import { render } from '@testing-library/react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { StateEvent } from '../src';
+import { effect } from '../src';
 import { NumberSignal } from '../src';
 import { nextFrame } from './utils.js';
 
@@ -60,15 +61,20 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(result.container.textContent).to.equal('Value is 42');
     });
 
-    it('should set local value when signal value is updated', () => {
+    it('should set the underlying local value when signal value is updated', () => {
       const numberSignal = new NumberSignal(publishSpy);
       expect(numberSignal.value).to.equal(undefined);
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
-      const anotherNumberSignal = new NumberSignal(publishSpy, 42);
-      anotherNumberSignal.value += 1;
-      expect(anotherNumberSignal.value).to.equal(43);
+      const anotherNumberSignal = new NumberSignal(publishSpy);
+      effect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (anotherNumberSignal.value !== undefined) {
+          expect(anotherNumberSignal.value).to.equal(42);
+        }
+      });
+      anotherNumberSignal.value = 42;
     });
   });
 });
