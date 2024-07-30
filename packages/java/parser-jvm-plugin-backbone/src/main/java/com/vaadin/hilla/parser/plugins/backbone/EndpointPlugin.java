@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import org.slf4j.Logger;
@@ -65,8 +65,6 @@ public final class EndpointPlugin
     public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof RootNode) {
             var rootNode = (RootNode) nodeDependencies.getNode();
-            var endpointAnnotationName = getStorage().getParserConfig()
-                    .getEndpointAnnotationName();
             var endpoints = rootNode.getSource().stream()
                     .map(ClassInfoModel::of).toList();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
@@ -78,11 +76,11 @@ public final class EndpointPlugin
     }
 
     private String getEndpointName(ClassInfoModel endpointCls) {
-        var endpointAnnotationName = getStorage().getParserConfig()
-                .getEndpointAnnotationName();
+        var endpointAnnotationNames = getStorage().getParserConfig()
+                .getEndpointAnnotationNames();
         var endpointAnnotation = endpointCls.getAnnotations().stream()
-                .filter(annotation -> annotation.getName()
-                        .equals(endpointAnnotationName))
+                .filter(annotation -> endpointAnnotationNames
+                        .contains(annotation.getName()))
                 .findFirst();
         return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
                 .filter(name -> !name.isEmpty())

@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,14 +197,14 @@ public final class Parser {
      * <p>
      * If the annotation name is already set, it will be overridden.
      *
-     * @param annotationFullyQualifiedName
-     *            The fully qualified name of the annotation
+     * @param annotationFullyQualifiedNames
+     *            The fully qualified names of the annotations
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointAnnotation(
-            @Nonnull String annotationFullyQualifiedName) {
-        return endpointAnnotation(annotationFullyQualifiedName, true);
+    public Parser endpointAnnotations(
+            @Nonnull List<String> annotationFullyQualifiedNames) {
+        return endpointAnnotations(annotationFullyQualifiedNames, true);
     }
 
     /**
@@ -212,19 +212,20 @@ public final class Parser {
      * search for the endpoints. Only classes with this annotation will be
      * chosen.
      *
-     * @param annotationFullyQualifiedName
-     *            The fully qualified name of the annotation
+     * @param annotationFullyQualifiedNames
+     *            The fully qualified names of the annotations
      * @param override
      *            specifies if the parser should override the annotation name if
      *            it is already specified.
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointAnnotation(
-            @Nonnull String annotationFullyQualifiedName, boolean override) {
-        if (override || config.endpointAnnotationName == null) {
-            config.endpointAnnotationName = Objects
-                    .requireNonNull(annotationFullyQualifiedName);
+    public Parser endpointAnnotations(
+            @Nonnull List<String> annotationFullyQualifiedNames,
+            boolean override) {
+        if (override || config.endpointAnnotationNames == null) {
+            config.endpointAnnotationNames = Objects
+                    .requireNonNull(annotationFullyQualifiedNames);
         }
         return this;
     }
@@ -238,14 +239,14 @@ public final class Parser {
      * <p>
      * If the annotation name is already set, it will be overridden.
      *
-     * @param annotationFullyQualifiedName
-     *            The fully qualified name of the annotation
+     * @param annotationFullyQualifiedNames
+     *            The fully qualified names of the annotations
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointExposedAnnotation(
-            @Nonnull String annotationFullyQualifiedName) {
-        return endpointExposedAnnotation(annotationFullyQualifiedName, true);
+    public Parser endpointExposedAnnotations(
+            @Nonnull List<String> annotationFullyQualifiedNames) {
+        return endpointExposedAnnotations(annotationFullyQualifiedNames, true);
     }
 
     /**
@@ -254,19 +255,20 @@ public final class Parser {
      * part of the endpoint. Any superclass in the endpoint's inheritance chain
      * will be skipped if it doesn't have this annotation.
      *
-     * @param annotationFullyQualifiedName
-     *            The fully qualified name of the annotation
+     * @param annotationFullyQualifiedNames
+     *            The fully qualified names of the annotations
      * @param override
      *            specifies if the parser should override the annotation name if
      *            it is already specified.
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointExposedAnnotation(
-            @Nonnull String annotationFullyQualifiedName, boolean override) {
-        if (override || config.endpointExposedAnnotationName == null) {
-            config.endpointExposedAnnotationName = Objects
-                    .requireNonNull(annotationFullyQualifiedName);
+    public Parser endpointExposedAnnotations(
+            @Nonnull List<String> annotationFullyQualifiedNames,
+            boolean override) {
+        if (override || config.endpointExposedAnnotationNames == null) {
+            config.endpointExposedAnnotationNames = Objects
+                    .requireNonNull(annotationFullyQualifiedNames);
         }
         return this;
     }
@@ -296,8 +298,8 @@ public final class Parser {
                 "[JVM Parser] classLoader is not provided.");
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
-        Objects.requireNonNull(config.endpointAnnotationName,
-                "[JVM Parser] endpointAnnotationName is not provided.");
+        Objects.requireNonNull(config.endpointAnnotationNames,
+                "[JVM Parser] endpointAnnotationNames is not provided.");
 
         logger.debug("JVM Parser started");
 
@@ -437,8 +439,8 @@ public final class Parser {
     public static final class Config {
         private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
-        private String endpointAnnotationName;
-        private String endpointExposedAnnotationName;
+        private List<String> endpointAnnotationNames;
+        private List<String> endpointExposedAnnotationNames;
         private Collection<String> exposedPackages;
         private OpenAPI openAPI;
         private ClassLoader classLoader;
@@ -473,8 +475,8 @@ public final class Parser {
          * @return the annotation name.
          */
         @Nonnull
-        public String getEndpointAnnotationName() {
-            return endpointAnnotationName;
+        public List<String> getEndpointAnnotationNames() {
+            return endpointAnnotationNames;
         }
 
         /**
@@ -483,13 +485,8 @@ public final class Parser {
          * @return the annotation name.
          */
         @Nonnull
-        public String getEndpointExposedAnnotationName() {
-            return endpointExposedAnnotationName;
-        }
-
-        @Nonnull
-        public Collection<String> getExposedPackages() {
-            return exposedPackages;
+        public List<String> getEndpointExposedAnnotationNames() {
+            return endpointExposedAnnotationNames;
         }
 
         /**

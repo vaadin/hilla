@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -17,17 +17,19 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    private String endpointAnnotation;
-    private String endpointExposedAnnotation;
+    private List<String> endpointAnnotations = List.of(
+            "com.vaadin.hilla.BrowserCallable", "com.vaadin.hilla.Endpoint");
+    private List<String> endpointExposedAnnotations = List
+            .of("com.vaadin.hilla.EndpointExposed");
     private String openAPIBasePath;
     private Plugins plugins;
 
-    public Optional<String> getEndpointAnnotation() {
-        return Optional.ofNullable(endpointAnnotation);
+    public List<String> getEndpointAnnotations() {
+        return endpointAnnotations;
     }
 
-    public Optional<String> getEndpointExposedAnnotation() {
-        return Optional.ofNullable(endpointExposedAnnotation);
+    public List<String> getEndpointExposedAnnotations() {
+        return endpointExposedAnnotations;
     }
 
     public Optional<String> getOpenAPIBasePath() {
@@ -47,25 +49,26 @@ public final class ParserConfiguration {
             return false;
         }
         var that = (ParserConfiguration) o;
-        return Objects.equals(endpointAnnotation, that.endpointAnnotation)
-                && Objects.equals(endpointExposedAnnotation,
-                        that.endpointExposedAnnotation)
+        return Objects.equals(endpointAnnotations, that.endpointAnnotations)
+                && Objects.equals(endpointExposedAnnotations,
+                        that.endpointExposedAnnotations)
                 && Objects.equals(openAPIBasePath, that.openAPIBasePath)
                 && Objects.equals(plugins, that.plugins);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpointAnnotation, endpointExposedAnnotation,
+        return Objects.hash(endpointAnnotations, endpointExposedAnnotations,
                 openAPIBasePath, plugins);
     }
 
-    void setEndpointAnnotation(String endpointAnnotation) {
-        this.endpointAnnotation = endpointAnnotation;
+    void setEndpointAnnotations(@Nonnull List<String> endpointAnnotations) {
+        this.endpointAnnotations = endpointAnnotations;
     }
 
-    void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
-        this.endpointExposedAnnotation = endpointExposedAnnotation;
+    void setEndpointExposedAnnotations(
+            @Nonnull List<String> endpointExposedAnnotations) {
+        this.endpointExposedAnnotations = endpointExposedAnnotations;
     }
 
     void setOpenAPIBasePath(String openAPIBasePath) {

@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * A converter for relative paths of

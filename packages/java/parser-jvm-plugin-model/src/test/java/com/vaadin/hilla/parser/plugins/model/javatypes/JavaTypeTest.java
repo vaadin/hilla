@@ -23,8 +23,9 @@ public class JavaTypeTest {
                 .exposedPackages(Set
                         .of("com.vaadin.hilla.parser.plugins.model.javatypes"))
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointExposedAnnotations(
+                        List.of(EndpointExposed.class.getName()))
                 .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
                 .execute(List.of(JavaTypeEndpoint.class));
 

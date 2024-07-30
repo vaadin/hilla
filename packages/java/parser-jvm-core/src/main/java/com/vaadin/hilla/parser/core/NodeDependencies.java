@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public final class NodeDependencies {
     private final Stream<Node<?, ?>> childNodes;

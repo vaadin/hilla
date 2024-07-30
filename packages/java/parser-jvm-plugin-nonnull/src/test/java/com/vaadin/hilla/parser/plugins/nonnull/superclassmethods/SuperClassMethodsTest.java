@@ -27,8 +27,9 @@ public class SuperClassMethodsTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointExposedAnnotations(
+                        List.of(EndpointExposed.class.getName()))
                 .addPlugin(new BackbonePlugin()).addPlugin(plugin)
                 .execute(List.of(PersonEndpoint.class));
 

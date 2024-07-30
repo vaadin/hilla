@@ -71,18 +71,18 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     @Override
     public void execute() throws ExecutionFailedException {
         if (productionMode) {
-            var engineConfiguration = new EngineConfiguration();
-            var processor = new GeneratorProcessor(engineConfiguration,
-                    nodeCommand, productionMode);
-            processor.process();
+            runProcessor();
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                var engineConfiguration = new EngineConfiguration();
-                var processor = new GeneratorProcessor(engineConfiguration,
-                        nodeCommand, productionMode);
-                processor.process();
+                runProcessor();
             });
         }
     }
 
+    private void runProcessor() {
+        var engineConfiguration = new EngineConfiguration();
+        var processor = new GeneratorProcessor(engineConfiguration, nodeCommand,
+                productionMode);
+        processor.process();
+    }
 }

@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import java.io.File;
 import java.io.IOException;

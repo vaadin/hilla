@@ -27,7 +27,7 @@ public class CustomConfigTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class.getName()))
                 .addPlugin(backbonePlugin)
                 .execute(List.of(CustomConfigEndpoint.class));
 

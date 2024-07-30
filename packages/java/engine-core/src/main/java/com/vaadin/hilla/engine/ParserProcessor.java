@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +30,10 @@ public final class ParserProcessor {
     private final Set<Path> classPath;
     private final Path openAPIFile;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
-    private String endpointAnnotationName = "com.vaadin.hilla.Endpoint";
-    private String endpointExposedAnnotationName = "com.vaadin.hilla.EndpointExposed";
+    private List<String> endpointAnnotationNames = List
+            .of("com.vaadin.hilla.Endpoint");
+    private List<String> endpointExposedAnnotationNames = List
+            .of("com.vaadin.hilla.EndpointExposed");
     private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
@@ -48,8 +50,8 @@ public final class ParserProcessor {
         var parser = new Parser().classLoader(classLoader)
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
-                .endpointAnnotation(endpointAnnotationName)
-                .endpointExposedAnnotation(endpointExposedAnnotationName)
+                .endpointAnnotations(endpointAnnotationNames)
+                .endpointExposedAnnotations(endpointExposedAnnotationNames)
                 .exposedPackages(exposedPackages);
 
         preparePlugins(parser);
@@ -94,30 +96,24 @@ public final class ParserProcessor {
             return;
         }
 
-        parserConfiguration.getEndpointAnnotation()
-                .ifPresent(this::applyEndpointAnnotation);
-        parserConfiguration.getEndpointExposedAnnotation()
-                .ifPresent(this::applyEndpointExposedAnnotation);
+        applyEndpointAnnotations(parserConfiguration.getEndpointAnnotations());
+        applyEndpointExposedAnnotations(
+                parserConfiguration.getEndpointExposedAnnotations());
         parserConfiguration.getOpenAPIBasePath()
                 .ifPresent(this::applyOpenAPIBase);
         parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
-        parserConfiguration.getPackages().ifPresent(this::applyExposedPackages);
     }
 
-    private void applyEndpointAnnotation(
-            @Nonnull String endpointAnnotationName) {
-        this.endpointAnnotationName = Objects
-                .requireNonNull(endpointAnnotationName);
+    private void applyEndpointAnnotations(
+            @Nonnull List<String> endpointAnnotationNames) {
+        this.endpointAnnotationNames = Objects
+                .requireNonNull(endpointAnnotationNames);
     }
 
-    private void applyEndpointExposedAnnotation(
-            @Nonnull String endpointExposedAnnotationName) {
-        this.endpointExposedAnnotationName = Objects
-                .requireNonNull(endpointExposedAnnotationName);
-    }
-
-    private void applyExposedPackages(@Nonnull List<String> exposedPackages) {
-        this.exposedPackages = exposedPackages;
+    private void applyEndpointExposedAnnotations(
+            @Nonnull List<String> endpointExposedAnnotationNames) {
+        this.endpointExposedAnnotationNames = Objects
+                .requireNonNull(endpointExposedAnnotationNames);
     }
 
     private void applyOpenAPIBase(@Nonnull String openAPIBasePath) {

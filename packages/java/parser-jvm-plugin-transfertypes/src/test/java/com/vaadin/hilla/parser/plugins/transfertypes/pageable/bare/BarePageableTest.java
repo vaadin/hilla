@@ -25,8 +25,9 @@ public class BarePageableTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointExposedAnnotations(
+                        List.of(EndpointExposed.class.getName()))
                 .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin()).execute(endpoints);
 
@@ -40,8 +41,9 @@ public class BarePageableTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointExposedAnnotations(
+                        List.of(EndpointExposed.class.getName()))
                 .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin()).execute(endpoints);
 

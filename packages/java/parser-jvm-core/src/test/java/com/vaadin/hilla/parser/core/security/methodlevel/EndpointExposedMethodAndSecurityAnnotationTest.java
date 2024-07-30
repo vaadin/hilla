@@ -35,8 +35,9 @@ public class EndpointExposedMethodAndSecurityAnnotationTest {
                 .classLoader(getClass().getClassLoader()).classPath(classPath)
                 .exposedPackages(Set.of(
                         "com.vaadin.hilla.parser.core.security.methodlevel"))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointExposedAnnotations(
+                        List.of(EndpointExposed.class.getName()))
                 .execute(endpoints));
 
         assertTrue(exception.getMessage().startsWith(
