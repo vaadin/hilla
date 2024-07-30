@@ -92,8 +92,7 @@ export class CoreModelBuilder<
    * @returns The current builder instance.
    */
   meta(value: ModelMetadata): this {
-    this.define($meta, { value });
-    return this;
+    return this.define($meta, { value }) as any;
   }
 
   /**
@@ -113,8 +112,7 @@ export class CoreModelBuilder<
     key: DK,
     value: TypedPropertyDescriptor<DV>,
   ): CoreModelBuilder<V, DK extends keyof Model ? EX : EX & Readonly<Record<DK, DV>>, F> {
-    defineProperty(this[$model], key, value);
-    return this as any;
+    return defineProperty(this[$model], key, value) as any;
   }
 
   /**
@@ -127,12 +125,11 @@ export class CoreModelBuilder<
    * @returns The current builder instance.
    */
   defaultValueProvider(defaultValueProvider: DefaultValueProvider<V, EX, F['selfRefKeys']>): this {
-    this.define($defaultValue, {
+    return this.define($defaultValue, {
       get(this: Model<V, EX, F['selfRefKeys']>) {
         return defaultValueProvider(this);
       },
-    });
-    return this;
+    }) as any;
   }
 
   /**
@@ -154,11 +151,10 @@ export class CoreModelBuilder<
    * Adds a validator to the model. The validator is a function that checks if
    * the value is valid according to some criteria.
    */
-  validator(validator: Validator<V>): this {
-    this.define($validators, {
+  validator(validator: Validator): this {
+    return this.define($validators, {
       value: [...this[$model][$validators], validator],
-    });
-    return this;
+    }) as any;
   }
 
   /**
@@ -291,7 +287,7 @@ export class ObjectModelBuilder<
           selfRefKeys: F['selfRefKeys'] | PK;
         }
       > {
-    defineProperty(this[$model], key, {
+    return defineProperty(this[$model], key, {
       enumerable: true,
       get(this: Model<V, EX & Readonly<Record<PK, Model<V[PK], EXK>>>>) {
         if (!propertyRegistry.has(this)) {
@@ -314,9 +310,7 @@ export class ObjectModelBuilder<
 
         return props[key];
       },
-    });
-
-    return this as any;
+    }) as any;
   }
 
   /**

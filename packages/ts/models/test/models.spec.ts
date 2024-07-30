@@ -22,7 +22,7 @@ import m, {
   type Value,
   type Extensions,
   type References,
-} from '../src/index.js';
+} from '../src/models.js';
 
 use(chaiLike);
 
@@ -73,7 +73,7 @@ describe('@vaadin/hilla-form-models', () => {
   >;
 
   beforeEach(() => {
-    RoleModel = m.enumeration(Role, 'Role');
+    RoleModel = m.enum(Role, 'Role');
     NamedModel = m.object<Named>('Named').property('name', StringModel).build();
     StreetModel = m.extend(NamedModel).object<Street>('Street').property('building', NumberModel).build();
     AddressModel = m.object<Address>('Address').property('street', StreetModel).build();

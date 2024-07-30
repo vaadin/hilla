@@ -1,7 +1,6 @@
 import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder } from './builders.js';
 import { $enum, $itemModel, type $members, type AnyObject, type Enum, Model, type Value } from './model.js';
-import { ValidationError } from './validators.js';
 
 /* eslint-disable tsdoc/syntax */
 
@@ -40,7 +39,6 @@ export const NumberModel = CoreModelBuilder.create(PrimitiveModel, () => 0)
   .define($parse, {
     value: (value: string) => Number(value),
   })
-  .validator((value) => !isFinite(value) && new ValidationError(value, 'Must be a number'))
   .build();
 
 /**
@@ -72,11 +70,13 @@ export const ArrayModel = CoreModelBuilder.create(Model, (): unknown[] => [])
 /**
  * The model of an object data.
  */
-export type ObjectModel<V extends AnyObject, EX extends AnyObject = EmptyObject, R extends keyof any = never> = Model<
-  V,
-  EX,
-  R
->;
+export type ObjectModel<
+  V extends AnyObject = Record<keyof any, unknown>,
+  EX extends AnyObject = Readonly<{
+    [P in keyof V]: Model<V[P]>;
+  }>,
+  R extends keyof any = never,
+> = Model<V, EX, R>;
 
 export const ObjectModel = CoreModelBuilder.create(Model, (): AnyObject => ({}))
   .name('Object')

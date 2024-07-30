@@ -12,12 +12,14 @@ import {
   $nothing,
   $optional,
   $owner,
+  $validators,
   type AnyObject,
   type Enum,
   Model,
   type Target,
   type Value,
 } from './model.js';
+import type { Validator } from './validators.js';
 
 /**
  * Creates a new model that represents an array of items.
@@ -89,9 +91,11 @@ export function optional<M extends Model>(base: M): M {
  * @param obj - The enum object to represent.
  * @param name - The name of the model.
  */
-export function enumeration<T extends typeof Enum>(obj: T, name: string): EnumModel<T> {
+function enumeration<T extends typeof Enum>(obj: T, name: string): EnumModel<T> {
   return CoreModelBuilder.create(EnumModel).define($enum, { value: obj }).name(name).build() as EnumModel<T>;
 }
+
+export { enumeration as enum };
 
 /**
  * Creates a new model that represents a union of the values of the given
@@ -106,12 +110,16 @@ export function union<MM extends Model[]>(...members: MM): UnionModel<MM> {
     .build();
 }
 
+function hasCorrectShape(value: unknown): value is Record<keyof any, unknown> {
+  return !!value && typeof value === 'object';
+}
+
 export function parse<V>(model: PrimitiveModel<V>, value: string): V {
   return model[$parse](value);
 }
 
-function hasCorrectShape(value: unknown): value is Record<keyof any, unknown> {
-  return !!value && typeof value === 'object';
+export function validators(model: Model): readonly Validator[] {
+  return model[$validators];
 }
 
 /**
