@@ -68,13 +68,19 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(42);
 
       const anotherNumberSignal = new NumberSignal(publishSpy);
+      let counter = 0;
       effect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (anotherNumberSignal.value !== undefined) {
+        if (counter === 0) {
+          expect(anotherNumberSignal.value).to.be.undefined;
+        } else if (counter === 1) {
           expect(anotherNumberSignal.value).to.equal(42);
+        } else {
+          expect(anotherNumberSignal.value).to.equal(43);
         }
+        counter += 1;
       });
       anotherNumberSignal.value = 42;
+      anotherNumberSignal.value += 1;
     });
   });
 });
