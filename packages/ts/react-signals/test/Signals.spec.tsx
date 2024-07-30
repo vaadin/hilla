@@ -61,7 +61,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(result.container.textContent).to.equal('Value is 42');
     });
 
-    it('should set the underlying local value when signal value is updated', () => {
+    it('should set the underlying value locally without waiting for server confirmation', () => {
       const numberSignal = new NumberSignal(publishSpy);
       expect(numberSignal.value).to.equal(undefined);
       numberSignal.value = 42;
