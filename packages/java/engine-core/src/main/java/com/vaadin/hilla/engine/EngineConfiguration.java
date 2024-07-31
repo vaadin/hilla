@@ -18,8 +18,8 @@ public class EngineConfiguration {
     public static String groupId;
     public static String artifactId;
     public static String mainClass;
+    public static Path buildDir;
     private Path baseDir;
-    private Path buildDir;
     @JsonDeserialize(as = LinkedHashSet.class)
     private Set<Path> classPath;
     private Path classesDir;
@@ -57,7 +57,6 @@ public class EngineConfiguration {
                 && Objects.equals(classPath, that.classPath)
                 && Objects.equals(generator, that.generator)
                 && Objects.equals(parser, that.parser)
-                && Objects.equals(buildDir, that.buildDir)
                 && Objects.equals(classesDir, that.classesDir)
                 && Objects.equals(outputDir, that.outputDir);
     }
@@ -92,8 +91,8 @@ public class EngineConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(baseDir, classPath, generator, parser, buildDir,
-                classesDir, outputDir);
+        return Objects.hash(baseDir, classPath, generator, parser, classesDir,
+                outputDir);
     }
 
     @JsonIgnore
@@ -122,7 +121,6 @@ public class EngineConfiguration {
             this.configuration.classPath = configuration.classPath;
             this.configuration.generator = configuration.generator;
             this.configuration.parser = configuration.parser;
-            this.configuration.buildDir = configuration.buildDir;
             this.configuration.classesDir = configuration.classesDir;
             this.configuration.outputDir = configuration.outputDir;
         }
@@ -137,7 +135,7 @@ public class EngineConfiguration {
         }
 
         public Builder buildDir(Path value) {
-            configuration.buildDir = resolve(value);
+            buildDir = resolve(value);
             return this;
         }
 

@@ -48,6 +48,9 @@ public class BuildFrontendMojo
     @Parameter(defaultValue = "${project.artifactId}", readonly = true, required = true)
     private String artifactId;
 
+    @Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
+    private File buildDir;
+
     @Parameter(property = "spring-boot.aot.main-class")
     private String mainClass;
 
@@ -58,6 +61,7 @@ public class BuildFrontendMojo
         EngineConfiguration.groupId = groupId;
         EngineConfiguration.artifactId = artifactId;
         EngineConfiguration.mainClass = mainClass;
+        EngineConfiguration.buildDir = buildDir.toPath();
         super.execute();
     }
 }

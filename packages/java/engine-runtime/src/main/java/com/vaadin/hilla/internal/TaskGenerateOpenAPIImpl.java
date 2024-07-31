@@ -98,8 +98,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     @Override
     public void execute() throws ExecutionFailedException {
         try {
-            var aotOutput = Path.of(System.getProperty("user.dir"), "target",
-                    "spring-aot", "main");
+            var engineConfiguration = new EngineConfiguration();
+            var aotOutput = engineConfiguration.getBuildDir()
+                    .resolve("spring-aot/main");
             var classesDirectory = aotOutput.resolve("classes");
             var applicationClass = (EngineConfiguration.mainClass != null)
                     ? EngineConfiguration.mainClass
@@ -126,9 +127,13 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var json = aotOutput.resolve(Path.of("resources", "META-INF",
                     "native-image", EngineConfiguration.groupId,
                     EngineConfiguration.artifactId, "reflect-config.json"));
-            var engineConfiguration = new EngineConfiguration();
 
-            if (isProductionMode && Files.isRegularFile(json)) {
+            if (isProductionMode) {
+                if (!Files.isRegularFile(json)) {
+                    throw new ExecutionFailedException(
+                            "AOT file `reflect-config.json` not found");
+                }
+
                 try {
                     String jsonContent = Files.readString(json);
                     var objectMapper = new ObjectMapper();
@@ -156,7 +161,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                                         .anyMatch(cls::isAnnotationPresent))
                                 .collect(Collectors.toList());
                         var processor = new ParserProcessor(engineConfiguration,
-                                classLoader, isProductionMode);
+                                classLoader, true);
                         processor.process(endpoints);
                     }
                 } catch (IOException e) {
@@ -171,7 +176,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                             .map(Object::getClass).distinct()
                             .collect(Collectors.toList());
                     var processor = new ParserProcessor(engineConfiguration,
-                            classLoader, isProductionMode);
+                            classLoader, false);
                     processor.process(endpoints);
                 });
             }
