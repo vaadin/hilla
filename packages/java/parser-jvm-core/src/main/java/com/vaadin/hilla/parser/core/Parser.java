@@ -9,10 +9,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
 
@@ -197,14 +195,13 @@ public final class Parser {
      * <p>
      * If the annotation name is already set, it will be overridden.
      *
-     * @param annotationFullyQualifiedNames
+     * @param annotations
      *            The fully qualified names of the annotations
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointAnnotations(
-            @Nonnull List<String> annotationFullyQualifiedNames) {
-        return endpointAnnotations(annotationFullyQualifiedNames, true);
+    public Parser endpointAnnotations(@Nonnull List<Class<?>> annotations) {
+        return endpointAnnotations(annotations, true);
     }
 
     /**
@@ -212,7 +209,7 @@ public final class Parser {
      * search for the endpoints. Only classes with this annotation will be
      * chosen.
      *
-     * @param annotationFullyQualifiedNames
+     * @param annotations
      *            The fully qualified names of the annotations
      * @param override
      *            specifies if the parser should override the annotation name if
@@ -220,12 +217,10 @@ public final class Parser {
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointAnnotations(
-            @Nonnull List<String> annotationFullyQualifiedNames,
+    public Parser endpointAnnotations(@Nonnull List<Class<?>> annotations,
             boolean override) {
-        if (override || config.endpointAnnotationNames == null) {
-            config.endpointAnnotationNames = Objects
-                    .requireNonNull(annotationFullyQualifiedNames);
+        if (override || config.endpointAnnotations == null) {
+            config.endpointAnnotations = Objects.requireNonNull(annotations);
         }
         return this;
     }
@@ -239,14 +234,14 @@ public final class Parser {
      * <p>
      * If the annotation name is already set, it will be overridden.
      *
-     * @param annotationFullyQualifiedNames
+     * @param annotations
      *            The fully qualified names of the annotations
      * @return this (for method chaining).
      */
     @Nonnull
     public Parser endpointExposedAnnotations(
-            @Nonnull List<String> annotationFullyQualifiedNames) {
-        return endpointExposedAnnotations(annotationFullyQualifiedNames, true);
+            @Nonnull List<Class<?>> annotations) {
+        return endpointExposedAnnotations(annotations, true);
     }
 
     /**
@@ -255,7 +250,7 @@ public final class Parser {
      * part of the endpoint. Any superclass in the endpoint's inheritance chain
      * will be skipped if it doesn't have this annotation.
      *
-     * @param annotationFullyQualifiedNames
+     * @param annotations
      *            The fully qualified names of the annotations
      * @param override
      *            specifies if the parser should override the annotation name if
@@ -264,11 +259,10 @@ public final class Parser {
      */
     @Nonnull
     public Parser endpointExposedAnnotations(
-            @Nonnull List<String> annotationFullyQualifiedNames,
-            boolean override) {
-        if (override || config.endpointExposedAnnotationNames == null) {
-            config.endpointExposedAnnotationNames = Objects
-                    .requireNonNull(annotationFullyQualifiedNames);
+            @Nonnull List<Class<?>> annotations, boolean override) {
+        if (override || config.endpointExposedAnnotations == null) {
+            config.endpointExposedAnnotations = Objects
+                    .requireNonNull(annotations);
         }
         return this;
     }
@@ -298,14 +292,14 @@ public final class Parser {
                 "[JVM Parser] classLoader is not provided.");
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
-        Objects.requireNonNull(config.endpointAnnotationNames,
-                "[JVM Parser] endpointAnnotationNames is not provided.");
+        Objects.requireNonNull(config.endpointAnnotations,
+                "[JVM Parser] endpointAnnotations is not provided.");
 
         logger.debug("JVM Parser started");
 
         var storage = new SharedStorage(config);
 
-        // validateEndpointExposedClassesForAclAnnotations(scanResult);
+        validateEndpointExposedClassesForAclAnnotations(endpoints);
         var rootNode = new RootNode(endpoints, storage.getOpenAPI());
         var pluginManager = new PluginManager(
                 storage.getParserConfig().getPlugins());
@@ -318,46 +312,49 @@ public final class Parser {
         return storage.getOpenAPI();
     }
 
-    // private void validateEndpointExposedClassesForAclAnnotations(
-    // io.github.classgraph.ScanResult scanResult) {
+    private void validateEndpointExposedClassesForAclAnnotations(
+            List<Class<?>> endpoints) {
 
-    // Optional.ofNullable(config.getEndpointExposedAnnotationName())
-    // .ifPresent(endpointExposedAnnotation -> scanResult
-    // .getClassesWithAnnotation(endpointExposedAnnotation)
-    // .forEach(classInfo -> {
-    // checkClassLevelAnnotation(classInfo);
-    // checkMethodLevelAnnotation(classInfo);
-    // }));
-    // }
+        endpoints.stream()
+                .flatMap(endpoint -> config.getEndpointExposedAnnotations()
+                        .stream().map(ann -> List.of(endpoint, ann)))
+                .filter(pair -> pair.getFirst().isAnnotationPresent(
+                        (Class<? extends Annotation>) pair.getLast()))
+                .forEach(pair -> {
+                    checkClassLevelAnnotation(pair.getFirst(), pair.getLast());
+                    checkMethodLevelAnnotation(pair.getFirst(), pair.getLast());
+                });
+    }
 
-    // private void checkClassLevelAnnotation(ClassInfo classInfo) {
-    // classInfo.getAnnotationInfo()
-    // .forEach(annotationInfo -> throwIfAnnotationIsAclAnnotation(
-    // annotationInfo.getName(), classInfo));
-    // }
+    private void checkClassLevelAnnotation(Class<?> endpoint,
+            Class<?> exposedAnnotation) {
+        Arrays.stream(endpoint.getAnnotations())
+                .forEach(annotationInfo -> throwIfAnnotationIsAclAnnotation(
+                        annotationInfo.annotationType().getName(), endpoint,
+                        exposedAnnotation));
+    }
 
-    // private void checkMethodLevelAnnotation(ClassInfo classInfo) {
-    // for (Method method : classInfo.loadClass().getMethods()) {
-    // var annotations = method.getDeclaredAnnotations();
-    // for (Annotation annotation : annotations) {
-    // throwIfAnnotationIsAclAnnotation(
-    // annotation.annotationType().getName(), classInfo);
-    // }
-    // }
-    // }
+    private void checkMethodLevelAnnotation(Class<?> endpoint,
+            Class<?> exposedAnnotation) {
+        for (Method method : endpoint.getMethods()) {
+            var annotations = method.getDeclaredAnnotations();
+            for (Annotation annotation : annotations) {
+                throwIfAnnotationIsAclAnnotation(
+                        annotation.annotationType().getName(), endpoint,
+                        exposedAnnotation);
+            }
+        }
+    }
 
-    // private void throwIfAnnotationIsAclAnnotation(String annotationName,
-    // ClassInfo classInfo) {
-    // var endpointExposedAnnotation = config
-    // .getEndpointExposedAnnotationName();
-
-    // if (ACL_ANNOTATIONS.contains(annotationName)) {
-    // throw new ParserException(String.format(
-    // ENDPOINT_EXPOSED_AND_ACL_ANNOTATIONS_ERROR_TEMPLATE,
-    // classInfo.getName(), endpointExposedAnnotation,
-    // annotationName, endpointExposedAnnotation));
-    // }
-    // }
+    private void throwIfAnnotationIsAclAnnotation(String annotationName,
+            Class<?> endpoint, Class<?> exposedAnnotation) {
+        if (ACL_ANNOTATIONS.contains(annotationName)) {
+            throw new ParserException(String.format(
+                    ENDPOINT_EXPOSED_AND_ACL_ANNOTATIONS_ERROR_TEMPLATE,
+                    endpoint.getName(), exposedAnnotation.getName(),
+                    annotationName, exposedAnnotation.getName()));
+        }
+    }
 
     /**
      * Gets the internal configuration object.
@@ -439,8 +436,8 @@ public final class Parser {
     public static final class Config {
         private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
-        private List<String> endpointAnnotationNames;
-        private List<String> endpointExposedAnnotationNames;
+        private List<Class<?>> endpointAnnotations;
+        private List<Class<?>> endpointExposedAnnotations;
         private Collection<String> exposedPackages;
         private OpenAPI openAPI;
         private ClassLoader classLoader;
@@ -475,8 +472,8 @@ public final class Parser {
          * @return the annotation name.
          */
         @Nonnull
-        public List<String> getEndpointAnnotationNames() {
-            return endpointAnnotationNames;
+        public List<Class<?>> getEndpointAnnotations() {
+            return endpointAnnotations;
         }
 
         /**
@@ -485,8 +482,8 @@ public final class Parser {
          * @return the annotation name.
          */
         @Nonnull
-        public List<String> getEndpointExposedAnnotationNames() {
-            return endpointExposedAnnotationNames;
+        public List<Class<?>> getEndpointExposedAnnotations() {
+            return endpointExposedAnnotations;
         }
 
         /**
