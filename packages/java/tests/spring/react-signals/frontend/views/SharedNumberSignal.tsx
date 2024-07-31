@@ -1,4 +1,4 @@
-import { NumberSignalServiceWrapper } from '../helper/NumberSignalServiceWrapper.js';
+import * as NumberSignalServiceWrapper from '../helper/NumberSignalServiceWrapper.js';
 import { Button } from '@vaadin/react-components';
 import { useSignal } from '@vaadin/hilla-react-signals';
 import { NumberSignalProviderService } from 'Frontend/generated/endpoints.js';
