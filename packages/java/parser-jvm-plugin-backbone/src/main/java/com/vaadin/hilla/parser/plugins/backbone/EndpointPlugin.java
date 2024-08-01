@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -77,10 +78,10 @@ public final class EndpointPlugin
 
     private String getEndpointName(ClassInfoModel endpointCls) {
         var endpointAnnotationNames = getStorage().getParserConfig()
-                .getEndpointAnnotationNames();
+                .getEndpointAnnotations();
         var endpointAnnotation = endpointCls.getAnnotations().stream()
                 .filter(annotation -> endpointAnnotationNames
-                        .contains(annotation.getName()))
+                        .contains(((Annotation) annotation.get()).getClass()))
                 .findFirst();
         return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
                 .filter(name -> !name.isEmpty())

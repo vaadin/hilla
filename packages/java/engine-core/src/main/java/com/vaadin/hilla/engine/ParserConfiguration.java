@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
 
@@ -19,28 +18,17 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    private List<String> endpointAnnotations = List.of(
-            "com.vaadin.hilla.BrowserCallable", "com.vaadin.hilla.Endpoint");
-    private List<String> endpointExposedAnnotations = List
-            .of("com.vaadin.hilla.EndpointExposed");
+    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
+    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
+            .of();
     private String openAPIBasePath;
     private Plugins plugins;
 
-    public List<String> getEndpointAnnotations() {
+    public List<Class<? extends Annotation>> getEndpointAnnotations() {
         return endpointAnnotations;
     }
 
-    public List<Class<? extends Annotation>> getEndpointAnnotationClasses() {
-        return endpointAnnotations.stream().map(name -> {
-            try {
-                return (Class<? extends Annotation>) Class.forName(name);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toList());
-    }
-
-    public List<String> getEndpointExposedAnnotations() {
+    public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
         return endpointExposedAnnotations;
     }
 
@@ -74,12 +62,13 @@ public final class ParserConfiguration {
                 openAPIBasePath, plugins);
     }
 
-    void setEndpointAnnotations(@Nonnull List<String> endpointAnnotations) {
+    void setEndpointAnnotations(
+            @Nonnull List<Class<? extends Annotation>> endpointAnnotations) {
         this.endpointAnnotations = endpointAnnotations;
     }
 
     void setEndpointExposedAnnotations(
-            @Nonnull List<String> endpointExposedAnnotations) {
+            @Nonnull List<Class<? extends Annotation>> endpointExposedAnnotations) {
         this.endpointExposedAnnotations = endpointExposedAnnotations;
     }
 

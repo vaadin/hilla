@@ -200,7 +200,8 @@ public final class Parser {
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointAnnotations(@Nonnull List<Class<?>> annotations) {
+    public Parser endpointAnnotations(
+            @Nonnull List<Class<? extends Annotation>> annotations) {
         return endpointAnnotations(annotations, true);
     }
 
@@ -217,7 +218,8 @@ public final class Parser {
      * @return this (for method chaining).
      */
     @Nonnull
-    public Parser endpointAnnotations(@Nonnull List<Class<?>> annotations,
+    public Parser endpointAnnotations(
+            @Nonnull List<Class<? extends Annotation>> annotations,
             boolean override) {
         if (override || config.endpointAnnotations == null) {
             config.endpointAnnotations = Objects.requireNonNull(annotations);
@@ -240,7 +242,7 @@ public final class Parser {
      */
     @Nonnull
     public Parser endpointExposedAnnotations(
-            @Nonnull List<Class<?>> annotations) {
+            @Nonnull List<Class<? extends Annotation>> annotations) {
         return endpointExposedAnnotations(annotations, true);
     }
 
@@ -259,7 +261,8 @@ public final class Parser {
      */
     @Nonnull
     public Parser endpointExposedAnnotations(
-            @Nonnull List<Class<?>> annotations, boolean override) {
+            @Nonnull List<Class<? extends Annotation>> annotations,
+            boolean override) {
         if (override || config.endpointExposedAnnotations == null) {
             config.endpointExposedAnnotations = Objects
                     .requireNonNull(annotations);
@@ -318,11 +321,11 @@ public final class Parser {
         endpoints.stream()
                 .flatMap(endpoint -> config.getEndpointExposedAnnotations()
                         .stream().map(ann -> List.of(endpoint, ann)))
-                .filter(pair -> pair.getFirst().isAnnotationPresent(
-                        (Class<? extends Annotation>) pair.getLast()))
+                .filter(pair -> pair.get(0).isAnnotationPresent(
+                        (Class<? extends Annotation>) pair.get(1)))
                 .forEach(pair -> {
-                    checkClassLevelAnnotation(pair.getFirst(), pair.getLast());
-                    checkMethodLevelAnnotation(pair.getFirst(), pair.getLast());
+                    checkClassLevelAnnotation(pair.get(0), pair.get(1));
+                    checkMethodLevelAnnotation(pair.get(0), pair.get(1));
                 });
     }
 
@@ -436,8 +439,8 @@ public final class Parser {
     public static final class Config {
         private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
-        private List<Class<?>> endpointAnnotations;
-        private List<Class<?>> endpointExposedAnnotations;
+        private List<Class<? extends Annotation>> endpointAnnotations;
+        private List<Class<? extends Annotation>> endpointExposedAnnotations;
         private Collection<String> exposedPackages;
         private OpenAPI openAPI;
         private ClassLoader classLoader;
@@ -472,7 +475,7 @@ public final class Parser {
          * @return the annotation name.
          */
         @Nonnull
-        public List<Class<?>> getEndpointAnnotations() {
+        public List<Class<? extends Annotation>> getEndpointAnnotations() {
             return endpointAnnotations;
         }
 
@@ -482,7 +485,7 @@ public final class Parser {
          * @return the annotation name.
          */
         @Nonnull
-        public List<Class<?>> getEndpointExposedAnnotations() {
+        public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
             return endpointExposedAnnotations;
         }
 

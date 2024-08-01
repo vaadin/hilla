@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,25 +31,38 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 
 public class ParserConfigTests {
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface BrowserCallable {
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Endpoint {
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface EndpointExposed {
+    }
+
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
     private Set<String> defaultClassPathElements;
-    private List<String> defaultEndpointAnnotationNames;
-    private List<String> defaultEndpointExposedAnnotationNames;
+    private List<Class<? extends Annotation>> defaultEndpointAnnotations;
+    private List<Class<? extends Annotation>> defaultEndpointExposedAnnotations;
     private OpenAPI defaultOpenAPI;
     private Parser parser;
     private Path targetDir;
 
     @BeforeEach
     public void setup() throws URISyntaxException {
-        defaultEndpointAnnotationNames = List.of(
-                "com.vaadin.hilla.BrowserCallable",
-                "com.vaadin.hilla.Endpoint");
+        defaultEndpointAnnotations = List.of(BrowserCallable.class,
+                Endpoint.class);
 
         targetDir = resourceLoader.findTargetDirPath();
         defaultClassPathElements = Set.of(targetDir.toString());
-        defaultEndpointExposedAnnotationNames = List
-                .of("com.vaadin.hilla.EndpointExposed");
+        defaultEndpointExposedAnnotations = List.of(EndpointExposed.class);
         defaultOpenAPI = new OpenAPI()
                 .info(new Info().title("Hilla Application").version("1.0.0"))
                 .servers(List
@@ -53,9 +71,8 @@ public class ParserConfigTests {
                 .paths(new Paths());
         parser = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(defaultClassPathElements)
-                .endpointAnnotations(defaultEndpointAnnotationNames)
-                .endpointExposedAnnotations(
-                        defaultEndpointExposedAnnotationNames);
+                .endpointAnnotations(defaultEndpointAnnotations)
+                .endpointExposedAnnotations(defaultEndpointExposedAnnotations);
     }
 
     @Test
@@ -108,7 +125,7 @@ public class ParserConfigTests {
     @Test
     public void should_AllowPreservingAlreadySetProperties() {
         var config = parser.classPath(List.of("somepath"), false)
-                .endpointAnnotations(List.of("com.example.Endpoint"), false)
+                .endpointAnnotations(List.of(Endpoint.class), false)
                 .getConfig();
 
         assertEquals(defaultClassPathElements, config.getClassPathElements());
@@ -119,10 +136,10 @@ public class ParserConfigTests {
         var config = parser.getConfig();
 
         assertEquals(defaultClassPathElements, config.getClassPathElements());
-        assertEquals(defaultEndpointAnnotationNames,
-                config.getEndpointAnnotationNames());
-        assertEquals(defaultEndpointExposedAnnotationNames,
-                config.getEndpointExposedAnnotationNames());
+        assertEquals(defaultEndpointAnnotations,
+                config.getEndpointAnnotations());
+        assertEquals(defaultEndpointExposedAnnotations,
+                config.getEndpointExposedAnnotations());
         assertEquals(defaultOpenAPI, config.getOpenAPI());
         assertEquals(List.of(), new ArrayList<>(config.getPlugins()));
     }
@@ -143,7 +160,7 @@ public class ParserConfigTests {
     public void should_ThrowError_When_ClassLoaderIsNotSet() {
         var e = assertThrows(NullPointerException.class,
                 () -> new Parser().classPath(defaultClassPathElements)
-                        .endpointAnnotations(defaultEndpointAnnotationNames)
+                        .endpointAnnotations(defaultEndpointAnnotations)
                         .execute(List.of()));
         assertEquals("[JVM Parser] classLoader is not provided.",
                 e.getMessage());
@@ -153,7 +170,7 @@ public class ParserConfigTests {
     public void should_ThrowError_When_ClassPathIsNotSet() {
         var e = assertThrows(NullPointerException.class,
                 () -> new Parser().classLoader(getClass().getClassLoader())
-                        .endpointAnnotations(defaultEndpointAnnotationNames)
+                        .endpointAnnotations(defaultEndpointAnnotations)
                         .execute(List.of()));
         assertEquals("[JVM Parser] classPath is not provided.", e.getMessage());
     }

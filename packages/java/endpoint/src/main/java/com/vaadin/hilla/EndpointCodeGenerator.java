@@ -16,6 +16,7 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -89,7 +90,7 @@ public class EndpointCodeGenerator {
         ApplicationContextProvider.runOnContext(applicationContext -> {
             EngineConfiguration engineConfiguration = new EngineConfiguration();
             List<Class<?>> endpoints = engineConfiguration.getParser()
-                    .getEndpointAnnotationClasses().stream()
+                    .getEndpointAnnotations().stream()
                     .map(applicationContext::getBeansWithAnnotation)
                     .map(Map::values).flatMap(Collection::stream)
                     .map(Object::getClass).distinct().toList();

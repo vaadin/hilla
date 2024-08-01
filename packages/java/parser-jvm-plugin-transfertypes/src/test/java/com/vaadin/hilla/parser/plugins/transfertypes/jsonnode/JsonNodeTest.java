@@ -19,7 +19,7 @@ public class JsonNodeTest {
             throws IOException, URISyntaxException {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin())
                 .execute(List.of(JsonNodeEndpoint.class));

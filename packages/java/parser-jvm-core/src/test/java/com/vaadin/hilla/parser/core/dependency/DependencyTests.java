@@ -35,7 +35,7 @@ public class DependencyTests {
         openApi = new Parser()
                 .classLoader(DependencyTests.class.getClassLoader())
                 .classPath(classPath)
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new DependencyPlugin()).execute(endpoints);
     }
 

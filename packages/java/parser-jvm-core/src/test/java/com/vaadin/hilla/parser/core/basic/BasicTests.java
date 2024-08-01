@@ -54,7 +54,7 @@ public class BasicTests {
     public void should_TraverseInConsistentOrder() {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classPath)
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new BasicPlugin()).execute(endpoints);
 
         assertEquals(String.join("\n", STEPS),
@@ -65,7 +65,7 @@ public class BasicTests {
     public void should_UpdateNodesAndCollectNames() {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classPath)
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new BasicPlugin()).execute(endpoints);
 
         assertEquals(String.join(", ",

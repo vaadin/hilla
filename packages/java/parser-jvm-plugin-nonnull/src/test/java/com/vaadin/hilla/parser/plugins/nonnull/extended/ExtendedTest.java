@@ -27,9 +27,8 @@ public class ExtendedTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
-                .endpointExposedAnnotations(
-                        List.of(EndpointExposed.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin()).addPlugin(plugin)
                 .execute(List.of(ExtendedEndpoint.class));
 

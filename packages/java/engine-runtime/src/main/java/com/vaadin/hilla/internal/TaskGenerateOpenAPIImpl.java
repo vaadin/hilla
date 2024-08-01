@@ -157,7 +157,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                                     }
                                 }).filter(Objects::nonNull)
                                 .filter(cls -> engineConfiguration.getParser()
-                                        .getEndpointAnnotationClasses().stream()
+                                        .getEndpointAnnotations().stream()
                                         .anyMatch(cls::isAnnotationPresent))
                                 .collect(Collectors.toList());
                         var processor = new ParserProcessor(engineConfiguration,
@@ -170,7 +170,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             } else {
                 ApplicationContextProvider.runOnContext(applicationContext -> {
                     List<Class<?>> endpoints = engineConfiguration.getParser()
-                            .getEndpointAnnotationClasses().stream()
+                            .getEndpointAnnotations().stream()
                             .map(applicationContext::getBeansWithAnnotation)
                             .map(Map::values).flatMap(Collection::stream)
                             .map(Object::getClass).distinct()

@@ -24,9 +24,8 @@ public class ValidationTest {
                 .exposedPackages(Set
                         .of("com.vaadin.hilla.parser.plugins.model.validation"))
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
-                .endpointExposedAnnotations(
-                        List.of(EndpointExposed.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin()).addPlugin(new ModelPlugin())
                 .execute(List.of(ValidationEndpoint.class));
 

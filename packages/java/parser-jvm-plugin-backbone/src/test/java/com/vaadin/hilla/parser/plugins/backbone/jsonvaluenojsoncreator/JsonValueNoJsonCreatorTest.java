@@ -19,7 +19,7 @@ public class JsonValueNoJsonCreatorTest {
         assertThrows(MalformedValueTypeException.class, () -> {
             new Parser().classLoader(getClass().getClassLoader())
                     .classPath(Set.of(helper.getTargetDir().toString()))
-                    .endpointAnnotations(List.of(Endpoint.class.getName()))
+                    .endpointAnnotations(List.of(Endpoint.class))
                     .addPlugin(new BackbonePlugin())
                     .execute(List.of(JsonValueNoJsonCreatorTest.class));
         });

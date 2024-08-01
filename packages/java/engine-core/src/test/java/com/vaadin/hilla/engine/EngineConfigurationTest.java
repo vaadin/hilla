@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -22,6 +26,16 @@ public class EngineConfigurationTest {
     private EngineConfiguration.Builder configurationBuilder;
     private Path temporaryDirectory;
 
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Endpoint {
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface EndpointExposed {
+    }
+
     @BeforeEach
     public void setUp() throws IOException {
         this.temporaryDirectory = Files
@@ -32,10 +46,9 @@ public class EngineConfigurationTest {
         this.baseDirectory = this.temporaryDirectory.resolve("base");
 
         var parserConfiguration = new ParserConfiguration();
-        parserConfiguration.setEndpointAnnotations(
-                List.of("com.vaadin.hilla.test.Endpoint"));
-        parserConfiguration.setEndpointExposedAnnotations(
-                List.of("com.vaadin.hilla.test.EndpointExposed"));
+        parserConfiguration.setEndpointAnnotations(List.of(Endpoint.class));
+        parserConfiguration
+                .setEndpointExposedAnnotations(List.of(EndpointExposed.class));
         parserConfiguration.setPlugins(new ParserConfiguration.Plugins(List.of(
                 new ParserConfiguration.Plugin("parser-jvm-plugin-use"),
                 new ParserConfiguration.Plugin("parser-jvm-plugin-nonnull",

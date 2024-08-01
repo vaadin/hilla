@@ -19,9 +19,8 @@ public class GenericsTest {
             throws IOException, URISyntaxException {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
-                .endpointExposedAnnotations(
-                        List.of(EndpointExposed.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
                 .execute(List.of(GenericsBareEndpoint.class,
                         GenericsExtendedEndpoint.class,

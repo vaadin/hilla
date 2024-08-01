@@ -19,7 +19,7 @@ public class TransientTest {
             throws IOException, URISyntaxException {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotations(List.of(Endpoint.class.getName()))
+                .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new BackbonePlugin())
                 .execute(List.of(TransientEndpoint.class));
 

@@ -1,6 +1,7 @@
 package com.vaadin.hilla.engine;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -30,10 +31,9 @@ public final class ParserProcessor {
     private final Set<Path> classPath;
     private final Path openAPIFile;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
-    private List<String> endpointAnnotationNames = List
-            .of("com.vaadin.hilla.Endpoint");
-    private List<String> endpointExposedAnnotationNames = List
-            .of("com.vaadin.hilla.EndpointExposed");
+    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
+    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
+            .of();
     private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
@@ -50,8 +50,8 @@ public final class ParserProcessor {
         var parser = new Parser().classLoader(classLoader)
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
-                .endpointAnnotations(endpointAnnotationNames)
-                .endpointExposedAnnotations(endpointExposedAnnotationNames)
+                .endpointAnnotations(endpointAnnotations)
+                .endpointExposedAnnotations(endpointExposedAnnotations)
                 .exposedPackages(exposedPackages);
 
         preparePlugins(parser);
@@ -105,15 +105,14 @@ public final class ParserProcessor {
     }
 
     private void applyEndpointAnnotations(
-            @Nonnull List<String> endpointAnnotationNames) {
-        this.endpointAnnotationNames = Objects
-                .requireNonNull(endpointAnnotationNames);
+            @Nonnull List<Class<? extends Annotation>> endpointAnnotations) {
+        this.endpointAnnotations = Objects.requireNonNull(endpointAnnotations);
     }
 
     private void applyEndpointExposedAnnotations(
-            @Nonnull List<String> endpointExposedAnnotationNames) {
-        this.endpointExposedAnnotationNames = Objects
-                .requireNonNull(endpointExposedAnnotationNames);
+            @Nonnull List<Class<? extends Annotation>> endpointExposedAnnotations) {
+        this.endpointExposedAnnotations = Objects
+                .requireNonNull(endpointExposedAnnotations);
     }
 
     private void applyOpenAPIBase(@Nonnull String openAPIBasePath) {
