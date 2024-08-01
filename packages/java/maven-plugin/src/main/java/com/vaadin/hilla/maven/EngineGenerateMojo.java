@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.List;
 
+import com.vaadin.hilla.engine.AotEndpointFinder;
 import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -44,8 +44,6 @@ public final class EngineGenerateMojo extends AbstractMojo {
             return;
         }
         try {
-            var baseDir = project.getBasedir().toPath();
-            var buildDir = baseDir.resolve(project.getBuild().getDirectory());
             var conf = new EngineConfiguration();
             var classPath = conf.getClassPath();
             var urls = new ArrayList<URL>(classPath.size());
@@ -61,11 +59,12 @@ public final class EngineGenerateMojo extends AbstractMojo {
             var generatorProcessor = new GeneratorProcessor(conf, nodeCommand,
                     isProduction);
 
-            parserProcessor.process(List.of());
+            var endpoints = new AotEndpointFinder(conf).findEndpointClasses();
+            parserProcessor.process(endpoints);
             generatorProcessor.process();
-        } catch (IOException e) {
-            throw new EngineGenerateMojoException(
-                    "Loading saved configuration failed", e);
+        } catch (IOException | InterruptedException e) {
+            throw new EngineGenerateMojoException("Endpoint collection failed",
+                    e);
         } catch (GeneratorException | ParserException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }
