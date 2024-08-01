@@ -81,6 +81,42 @@
         }
       }
     },
+    "/NumberSignalService/sayHello" : {
+      "post" : {
+        "tags" : [
+          "NumberSignalService"
+        ],
+        "operationId" : "NumberSignalService_sayHello_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "x-java-type" : "java.lang.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/NumberSignalService/sharedValue" : {
       "post" : {
         "tags" : [

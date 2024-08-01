@@ -138,6 +138,21 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
     return this.#map.get(path)?.id;
   }
 
+  remove(path: string): void {
+    if (this.#map.has(path)) {
+      this.#map.delete(path);
+    }
+  }
+
+  find(predicate: (path: string) => boolean): [string, boolean, Identifier] | undefined {
+    for (const [path, { id, isType }] of this.#map) {
+      if (predicate(path)) {
+        return [path, isType, id];
+      }
+    }
+    return undefined;
+  }
+
   override clear(): void {
     this.#map.clear();
   }

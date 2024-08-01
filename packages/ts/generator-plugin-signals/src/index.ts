@@ -1,11 +1,13 @@
-import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
+import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
 import SignalProcessor, { type MethodInfo } from './SignalProcessor.js';
 
 export type PathSignalType = Readonly<{
   path: string;
   signalType: string;
 }>;
+
+const SIGNAL_CLASSES = ['#/components/schemas/com.vaadin.hilla.signals.NumberSignal'];
 
 function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): PathSignalType[] {
   const pathSignalTypes: PathSignalType[] = [];
@@ -16,8 +18,9 @@ function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): 
       const responseSchema = response200.content?.['application/json'].schema;
       if (responseSchema && 'anyOf' in responseSchema) {
         // OpenAPIV3.SchemaObject
+        // eslint-disable-next-line array-callback-return
         responseSchema.anyOf?.some((c) => {
-          const isSignal = '$ref' in c && c.$ref && SignalsPlugin.SIGNAL_CLASSES.includes(c.$ref);
+          const isSignal = '$ref' in c && c.$ref && SIGNAL_CLASSES.includes(c.$ref);
           if (isSignal) {
             pathSignalTypes.push({ path, signalType: c.$ref });
           }
@@ -48,13 +51,12 @@ function groupByService(signals: PathSignalType[]): Map<string, MethodInfo[]> {
 }
 
 export default class SignalsPlugin extends Plugin {
-  static readonly SIGNAL_CLASSES = ['#/components/schemas/com.vaadin.hilla.signals.NumberSignal'];
-
+  // eslint-disable-next-line @typescript-eslint/require-await
   override async execute(sharedStorage: SharedStorage): Promise<void> {
     const methodsWithSignals = extractEndpointMethodsWithSignalsAsReturnType(sharedStorage);
     const services = groupByService(methodsWithSignals);
     services.forEach((methods, service) => {
-      let index = sharedStorage.sources.findIndex((source) => source.fileName === `${service}.ts`);
+      const index = sharedStorage.sources.findIndex((source) => source.fileName === `${service}.ts`);
       if (index >= 0) {
         sharedStorage.sources[index] = new SignalProcessor(
           service,
