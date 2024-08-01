@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
+import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { StateEvent } from '../src';
+import { effect } from '../src';
 import { NumberSignal } from '../src';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
+use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('NumberSignal', () => {
@@ -58,6 +61,24 @@ describe('@vaadin/hilla-react-signals', () => {
       const result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
+    });
+
+    it('should set the underlying value locally without waiting for server confirmation', () => {
+      const numberSignal = new NumberSignal(publishSpy);
+      expect(numberSignal.value).to.equal(undefined);
+      numberSignal.value = 42;
+      expect(numberSignal.value).to.equal(42);
+
+      const anotherNumberSignal = new NumberSignal(publishSpy);
+      const results: Array<number | undefined> = [];
+
+      effect(() => {
+        results.push(anotherNumberSignal.value);
+      });
+      anotherNumberSignal.value = 42;
+      anotherNumberSignal.value += 1;
+
+      expect(results).to.be.like([undefined, 42, 43]);
     });
   });
 });

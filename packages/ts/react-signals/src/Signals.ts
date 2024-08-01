@@ -47,6 +47,9 @@ export abstract class ValueSignal<T> extends Signal<T> {
    */
   override set value(value: T) {
     const id = crypto.randomUUID();
+    // set the local value to be used for latency compensation and offline support:
+    this.#setInternalValue(value);
+    // publish the update to the server:
     this.#publish({ id, type: StateEventType.SET, value }).catch((error) => {
       throw error;
     });

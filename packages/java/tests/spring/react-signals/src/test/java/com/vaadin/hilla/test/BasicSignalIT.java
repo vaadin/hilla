@@ -13,7 +13,7 @@ public class BasicSignalIT extends ChromeBrowserTest {
     @Before
     public void setup() throws Exception {
         super.setup();
-        getDriver().get(getRootURL() + "/basic-signal");
+        getDriver().get(getRootURL() + "/BasicSignalView");
     }
 
     @Test
