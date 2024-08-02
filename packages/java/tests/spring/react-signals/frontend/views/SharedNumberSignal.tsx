@@ -1,10 +1,9 @@
-import * as NumberSignalServiceWrapper from '../helper/NumberSignalServiceWrapper.js';
 import { Button } from '@vaadin/react-components';
 import { useSignal } from '@vaadin/hilla-react-signals';
 import { NumberSignalProviderService } from 'Frontend/generated/endpoints.js';
 
-const counter = NumberSignalServiceWrapper.counter();
-const sharedValue = NumberSignalServiceWrapper.sharedValue();
+const counter = NumberSignalProviderService.counter();
+const sharedValue = NumberSignalProviderService.sharedValue();
 
 export default function SharedNumberSignal() {
   const sharedValueFromServer = useSignal<number | undefined>(0.0);
