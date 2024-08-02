@@ -41,7 +41,6 @@ public class HillaPlugin : Plugin<Project> {
         project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
 
         project.tasks.apply {
-            register("hillaConfigure", EngineConfigureTask::class.java)
             register("hillaGenerate", EngineGenerateTask::class.java)
         }
 

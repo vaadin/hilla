@@ -16,6 +16,7 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.AotEndpointFinder
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -35,9 +36,6 @@ public open class EngineGenerateTask : DefaultTask() {
     init {
         group = "Vaadin"
         description = "Hilla Generate Task"
-
-        // we need the build/hilla-engine-configuration.json and the compiled classes:
-        dependsOn("classes", "hillaConfigure")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
@@ -75,11 +73,14 @@ public open class EngineGenerateTask : DefaultTask() {
             val parserProcessor = ParserProcessor(conf, classLoader, isProductionMode)
             val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand, isProductionMode)
 
-            parserProcessor.process()
+            val endpoints = AotEndpointFinder(conf).findEndpointClasses()
+            parserProcessor.process(endpoints)
             generatorProcessor.process()
 
         } catch (e: IOException) {
-            throw GradleException("Loading saved configuration failed", e)
+            throw GradleException("Endpoint collection failed", e)
+        } catch (e: InterruptedException) {
+            throw GradleException("Endpoint collection failed", e)
         } catch (e: GeneratorException) {
             throw GradleException("Execution failed", e)
         } catch (e: ParserException) {

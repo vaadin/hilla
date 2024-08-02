@@ -15,8 +15,40 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
+import java.io.File
+
 /**
  * Extend the VaadinBuildFrontendTask so that frontend files are not cleaned after build.
  */
 public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
+    @Input
+    val classpathElements: List<String> = project.configurations.getByName("compileClasspath").files.map { it.absolutePath }
+
+    @Input
+    val groupId: String = project.group.toString()
+
+    @Input
+    val artifactId: String = project.name
+
+    @InputFile
+    val buildDir: File = project.buildDir
+
+    @Input
+    @Optional
+    var mainClass: String? = project.findProperty("spring-boot.aot.main-class") as String?
+
+    @TaskAction
+    override fun exec() {
+        EngineConfiguration.classpath = classpathElements.joinToString(File.pathSeparator)
+        EngineConfiguration.groupId = groupId
+        EngineConfiguration.artifactId = artifactId
+        EngineConfiguration.mainClass = mainClass
+        EngineConfiguration.buildDir = buildDir.toPath()
+
+        super.exec()
+    }
 }
