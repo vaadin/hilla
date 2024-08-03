@@ -1,11 +1,8 @@
 package com.vaadin.hilla.internal.fixtures;
 
-import com.vaadin.hilla.internal.Endpoint;
-
 /**
  * A test class.
  */
-@Endpoint(value = "CustomEndpointName")
 public class CustomEndpoint {
 
     /**

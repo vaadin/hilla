@@ -80,7 +80,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     }
 
     private void runProcessor() {
-        var engineConfiguration = new EngineConfiguration();
+        var engineConfiguration = EngineConfiguration.getDefault();
         var processor = new GeneratorProcessor(engineConfiguration, nodeCommand,
                 productionMode);
         processor.process();

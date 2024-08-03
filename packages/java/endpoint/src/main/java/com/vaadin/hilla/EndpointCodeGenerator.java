@@ -88,7 +88,7 @@ public class EndpointCodeGenerator {
         }
 
         ApplicationContextProvider.runOnContext(applicationContext -> {
-            EngineConfiguration engineConfiguration = new EngineConfiguration();
+            EngineConfiguration engineConfiguration = EngineConfiguration.getDefault();
             List<Class<?>> endpoints = engineConfiguration.getParser()
                     .getEndpointAnnotations().stream()
                     .map(applicationContext::getBeansWithAnnotation)

@@ -1,8 +1,6 @@
 package com.vaadin.hilla.crud;
 
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.push.PushConfigurer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

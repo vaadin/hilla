@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.Nullable;
-import com.vaadin.hilla.crud.filter.Filter;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 

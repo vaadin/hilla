@@ -69,6 +69,11 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>hilla-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>hilla-parser-jvm-plugin-nonnull</artifactId>
       <version>${project.version}</version>
     </dependency>

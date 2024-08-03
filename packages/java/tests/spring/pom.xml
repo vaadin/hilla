@@ -67,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>hilla-endpoint</artifactId>
+            <artifactId>hilla-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

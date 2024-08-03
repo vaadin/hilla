@@ -89,7 +89,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     @Override
     public void execute() throws ExecutionFailedException {
         try {
-            var engineConfiguration = new EngineConfiguration();
+            var engineConfiguration = EngineConfiguration.getDefault();
             if (isProductionMode) {
                 var endpoints = new AotEndpointFinder(engineConfiguration)
                         .findEndpointClasses();

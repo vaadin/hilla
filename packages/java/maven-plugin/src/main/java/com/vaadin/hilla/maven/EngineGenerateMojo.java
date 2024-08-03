@@ -44,8 +44,8 @@ public final class EngineGenerateMojo extends AbstractMojo {
             return;
         }
         try {
-            var conf = new EngineConfiguration();
-            var classPath = conf.getClassPath();
+            var conf = EngineConfiguration.getDefault();
+            var classPath = conf.getClasspath();
             var urls = new ArrayList<URL>(classPath.size());
             for (var classPathItem : classPath) {
                 urls.add(classPathItem.toUri().toURL());

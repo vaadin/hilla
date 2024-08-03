@@ -42,7 +42,7 @@ public final class ParserProcessor {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
         this.classLoader = classLoader;
-        this.classPath = conf.getClassPath();
+        this.classPath = conf.getClasspath();
         applyConfiguration(conf.getParser());
     }
 

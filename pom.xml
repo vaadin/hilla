@@ -15,7 +15,7 @@
   </parent>
 
   <modules>
-    <module>packages/java/endpoint</module>
+    <module>packages/java/annotations</module>
     <module>packages/java/engine-core</module>
     <module>packages/java/engine-runtime</module>
     <module>packages/java/maven-plugin</module>

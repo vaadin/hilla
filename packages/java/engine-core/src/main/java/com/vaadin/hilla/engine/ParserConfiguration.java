@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
@@ -18,9 +21,10 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
+    private List<Class<? extends Annotation>> endpointAnnotations = List
+            .of(BrowserCallable.class, Endpoint.class);
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
-            .of();
+            .of(EndpointExposed.class);
     private String openAPIBasePath;
     private Plugins plugins;
 
@@ -38,28 +42,6 @@ public final class ParserConfiguration {
 
     public Optional<Plugins> getPlugins() {
         return Optional.ofNullable(plugins);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        var that = (ParserConfiguration) o;
-        return Objects.equals(endpointAnnotations, that.endpointAnnotations)
-                && Objects.equals(endpointExposedAnnotations,
-                        that.endpointExposedAnnotations)
-                && Objects.equals(openAPIBasePath, that.openAPIBasePath)
-                && Objects.equals(plugins, that.plugins);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(endpointAnnotations, endpointExposedAnnotations,
-                openAPIBasePath, plugins);
     }
 
     void setEndpointAnnotations(

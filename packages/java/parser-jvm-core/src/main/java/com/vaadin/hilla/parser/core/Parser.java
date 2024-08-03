@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import jakarta.annotation.Nonnull;
 
@@ -318,7 +319,7 @@ public final class Parser {
     private void validateEndpointExposedClassesForAclAnnotations(
             List<Class<?>> endpoints) {
 
-        endpoints.stream()
+        endpoints.stream().flatMap(Parser::getSuperclasses)
                 .flatMap(endpoint -> config.getEndpointExposedAnnotations()
                         .stream().map(ann -> List.of(endpoint, ann)))
                 .filter(pair -> pair.get(0).isAnnotationPresent(
@@ -327,6 +328,11 @@ public final class Parser {
                     checkClassLevelAnnotation(pair.get(0), pair.get(1));
                     checkMethodLevelAnnotation(pair.get(0), pair.get(1));
                 });
+    }
+
+    private static Stream<Class<?>> getSuperclasses(Class<?> clazz) {
+        return Stream.iterate(clazz.getSuperclass(), Objects::nonNull,
+                Class::getSuperclass);
     }
 
     private void checkClassLevelAnnotation(Class<?> endpoint,

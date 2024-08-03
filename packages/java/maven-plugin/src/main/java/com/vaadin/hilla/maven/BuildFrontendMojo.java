@@ -1,7 +1,9 @@
 package com.vaadin.hilla.maven;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -56,12 +58,13 @@ public class BuildFrontendMojo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        EngineConfiguration.classpath = String.join(File.pathSeparator,
-                classpathElements);
-        EngineConfiguration.groupId = groupId;
-        EngineConfiguration.artifactId = artifactId;
-        EngineConfiguration.mainClass = mainClass;
-        EngineConfiguration.buildDir = buildDir.toPath();
+        var conf = EngineConfiguration.getDefault();
+        conf.setClasspath(classpathElements.stream().map(Path::of)
+                .collect(Collectors.toSet()));
+        conf.setGroupId(groupId);
+        conf.setArtifactId(artifactId);
+        conf.setMainClass(mainClass);
+        conf.setBuildDir(buildDir.toPath());
         super.execute();
     }
 }

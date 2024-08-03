@@ -28,7 +28,7 @@ import com.vaadin.hilla.engine.EngineConfiguration;
 public class AbstractMojoTest {
     private final DelegateMojoTestCase testCase = new DelegateMojoTestCase();
     private Path buildDirectory;
-    private EngineConfiguration.Builder configurationBuilder;
+    private EngineConfiguration engineConfiguration;
     private Path outputDirectory;
     private MavenProject project;
     private Path temporaryDirectory;
@@ -64,11 +64,8 @@ public class AbstractMojoTest {
                 .getOutputDirectory();
         Mockito.doReturn(mockBuild).when(project).getBuild();
 
-        var config = new EngineConfiguration();
-        assertNotNull(config, "expected reference "
-                + "EngineConfiguration to load from json");
-        configurationBuilder = new EngineConfiguration.Builder(config)
-                .baseDir(getTemporaryDirectory());
+        engineConfiguration = new EngineConfiguration();
+        engineConfiguration.setBaseDir(getTemporaryDirectory());
     }
 
     @AfterEach
@@ -88,7 +85,7 @@ public class AbstractMojoTest {
     }
 
     protected EngineConfiguration getEngineConfiguration() {
-        return configurationBuilder.create();
+        return engineConfiguration;
     }
 
     protected MavenProject getMavenProject() {

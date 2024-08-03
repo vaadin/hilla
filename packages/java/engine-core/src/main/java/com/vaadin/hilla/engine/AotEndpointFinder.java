@@ -25,21 +25,22 @@ public class AotEndpointFinder {
         var aotOutput = engineConfiguration.getBuildDir()
                 .resolve("spring-aot/main");
         var classesDirectory = aotOutput.resolve("classes");
-        var applicationClass = (EngineConfiguration.mainClass != null)
-                ? EngineConfiguration.mainClass
+        var applicationClass = (engineConfiguration.getMainClass() != null)
+                ? engineConfiguration.getMainClass()
                 : findSingleClass(classesDirectory.toFile());
         var settings = List.of(applicationClass,
                 aotOutput.resolve("sources").toString(),
                 aotOutput.resolve("resources").toString(),
-                classesDirectory.toString(), EngineConfiguration.groupId,
-                EngineConfiguration.artifactId);
+                classesDirectory.toString(), engineConfiguration.getGroupId(),
+                engineConfiguration.getArtifactId());
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
         var processBuilder = new ProcessBuilder();
         processBuilder.inheritIO();
         processBuilder.command(javaExecutable, "-cp",
-                EngineConfiguration.classpath,
+                engineConfiguration.getClasspath().stream().map(Path::toString)
+                        .collect(Collectors.joining(File.pathSeparator)),
                 "org.springframework.boot.SpringApplicationAotProcessor");
         processBuilder.command().addAll(settings);
 
@@ -47,8 +48,8 @@ public class AotEndpointFinder {
         process.waitFor();
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
-                "native-image", EngineConfiguration.groupId,
-                EngineConfiguration.artifactId, "reflect-config.json"));
+                "native-image", engineConfiguration.getGroupId(),
+                engineConfiguration.getArtifactId(), "reflect-config.json"));
 
         if (!Files.isRegularFile(json)) {
             throw new ParserException("Aot file reflect-config.json not found");

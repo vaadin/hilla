@@ -5,13 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
@@ -19,13 +22,19 @@ import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
 import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 public class NodeTasksEndpointTest extends TaskTest {
     private Options options;
 
-    @Endpoint
     public static class ConnectEndpointsForTesting {
+    }
+
+    public static class MyEndpoint {
     }
 
     @BeforeEach
@@ -52,6 +61,8 @@ public class NodeTasksEndpointTest extends TaskTest {
                         getTemporaryDirectory().resolve("api").toFile())
                 .withJarFrontendResourcesFolder(getTemporaryDirectory()
                         .resolve("jar-resources").toFile());
+
+        EngineConfiguration.getDefault().setBuildDir(getBuildDirectory());
 
         createIndexFile();
     }
@@ -81,8 +92,18 @@ public class NodeTasksEndpointTest extends TaskTest {
 
     @Test
     public void should_GenerateEndpointFilesInDevServerTask() throws Exception {
-        options = options.withRunNpmInstall(true);
+        var mockApplicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(Map.of("MyEndpoint", new MyEndpoint()))
+                .when(mockApplicationContext)
+                .getBeansWithAnnotation(Endpoint.class);
+        Mockito.doReturn(Map.of()).when(mockApplicationContext)
+                .getBeansWithAnnotation(BrowserCallable.class);
+        var applicationContextField = ApplicationContextProvider.class
+                .getDeclaredField("applicationContext");
+        applicationContextField.setAccessible(true);
+        applicationContextField.set(null, mockApplicationContext);
 
+        options = options.withRunNpmInstall(true);
         new NodeTasks(options).execute();
         assertEndpointFiles(true);
     }

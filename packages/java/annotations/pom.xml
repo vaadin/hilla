@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>hilla-project</artifactId>
+    <version>24.5-SNAPSHOT</version>
+    <relativePath>../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>hilla-annotations</artifactId>
+  <packaging>jar</packaging>
+  <name>Hilla Annotations</name>
+
+  <properties>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>vaadin-prereleases</id>
+      <url>
+        https://maven.vaadin.com/vaadin-prereleases/
+      </url>
+    </repository>
+  </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>
