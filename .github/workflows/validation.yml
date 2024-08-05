@@ -31,7 +31,7 @@ jobs:
   init:
     name: Build Java and TypeScript for other tasks
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       NX_SKIP_NX_CACHE: true
 
