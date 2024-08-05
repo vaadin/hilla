@@ -25,6 +25,18 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return record.id;
   }
 
+  remove(path: string, specifier: string): void {
+    const specifiers = this.#map.get(path);
+
+    if (specifiers) {
+      specifiers.delete(specifier);
+
+      if (specifiers.size === 0) {
+        this.#map.delete(path);
+      }
+    }
+  }
+
   override clear(): void {
     this.#map.clear();
   }

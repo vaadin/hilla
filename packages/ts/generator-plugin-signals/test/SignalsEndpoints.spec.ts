@@ -30,7 +30,7 @@ describe('SignalsPlugin', () => {
       await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService`, import.meta.url);
     });
 
-    it('removes init import if not needed', async () => {
+    it('removes unused request init import', async () => {
       const generator = new Generator([BackbonePlugin, SignalsPlugin], {
         logger: new LoggerFactory({ name: 'model-plugin-test', verbose: true }),
       });

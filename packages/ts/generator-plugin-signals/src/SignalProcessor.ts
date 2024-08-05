@@ -94,6 +94,8 @@ function dummy() {
       ),
     ]).transformed;
 
+    this.#removeUnusedRequestInitImports(file);
+
     return createSourceFile(
       [
         ...this.#dependencyManager.imports.toCode(),
@@ -115,5 +117,16 @@ function dummy() {
         imports.named.add(HILLA_REACT_SIGNALS, id.text, true, id);
       }
     });
+  }
+
+  #removeUnusedRequestInitImports(file: SourceFile) {
+    const transformedFileText = ts.createPrinter().printFile(file);
+
+    const hasNormalEndpointCalls =
+      transformedFileText.includes('init?: EndpointRequestInit') && transformedFileText.includes('.call(');
+
+    if (!hasNormalEndpointCalls) {
+      this.#dependencyManager.imports.named.remove('@vaadin/hilla-frontend', 'EndpointRequestInit');
+    }
   }
 }
