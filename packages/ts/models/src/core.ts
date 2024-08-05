@@ -1,6 +1,16 @@
 import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder } from './builders.js';
-import { $enum, $itemModel, type $members, type AnyObject, type Enum, Model, type Value } from './model.js';
+import {
+  type $defaultValue,
+  $enum,
+  $itemModel,
+  type $members,
+  type $optional,
+  type AnyObject,
+  type Enum,
+  Model,
+  type Value,
+} from './model.js';
 
 /* eslint-disable tsdoc/syntax */
 
@@ -14,11 +24,11 @@ export const $parse = Symbol('parse');
 /**
  * The model of a primitive value, like `string`, `number` or `boolean`.
  */
-export type PrimitiveModel<V = unknown> = Model<V, Readonly<{ [$parse](value: string): V }>>;
+export type PrimitiveModel<V = unknown> = Model<V, Readonly<{ [$parse](value: unknown): V }>>;
 export const PrimitiveModel = CoreModelBuilder.create(Model, (): unknown => undefined)
   .name('primitive')
   .define($parse, {
-    value: (value: string) => value,
+    value: (value: unknown) => String(value),
   })
   .build();
 
@@ -37,7 +47,7 @@ export type NumberModel = PrimitiveModel<number>;
 export const NumberModel = CoreModelBuilder.create(PrimitiveModel, () => 0)
   .name('number')
   .define($parse, {
-    value: (value: string) => Number(value),
+    value: (value: unknown) => Number(String(value)),
   })
   .build();
 
@@ -48,7 +58,7 @@ export type BooleanModel = PrimitiveModel<boolean>;
 export const BooleanModel = CoreModelBuilder.create(PrimitiveModel, () => false)
   .name('boolean')
   .define($parse, {
-    value: (value: string) => value !== '',
+    value: (value: unknown) => String(value) !== '',
   })
   .build();
 
@@ -98,6 +108,11 @@ export const EnumModel = CoreModelBuilder.create(Model)
   .define($enum, { value: {} as typeof Enum })
   .defaultValueProvider((self) => Object.values(self[$enum])[0])
   .build();
+
+export type OptionalModel<T = unknown, EX extends AnyObject = EmptyObject, R extends string = never> =
+  Extract<T, undefined> extends never
+    ? Model<T, EX, R>
+    : Model<T, EX & Readonly<{ [$defaultValue]: undefined; [$optional]: true }>, R>;
 
 /**
  * The model of a union data.

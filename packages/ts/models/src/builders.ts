@@ -112,7 +112,8 @@ export class CoreModelBuilder<
     key: DK,
     value: TypedPropertyDescriptor<DV>,
   ): CoreModelBuilder<V, DK extends keyof Model ? EX : EX & Readonly<Record<DK, DV>>, F> {
-    return defineProperty(this[$model], key, value) as any;
+    defineProperty(this[$model], key, value);
+    return this as any;
   }
 
   /**
@@ -287,7 +288,7 @@ export class ObjectModelBuilder<
           selfRefKeys: F['selfRefKeys'] | PK;
         }
       > {
-    return defineProperty(this[$model], key, {
+    defineProperty(this[$model], key, {
       enumerable: true,
       get(this: Model<V, EX & Readonly<Record<PK, Model<V[PK], EXK>>>>) {
         if (!propertyRegistry.has(this)) {
@@ -310,7 +311,8 @@ export class ObjectModelBuilder<
 
         return props[key];
       },
-    }) as any;
+    });
+    return this as any;
   }
 
   /**

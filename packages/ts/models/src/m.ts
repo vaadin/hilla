@@ -1,6 +1,14 @@
-import type { EmptyObject } from 'type-fest';
+import type { EmptyObject, SetOptional } from 'type-fest';
 import { CoreModelBuilder, ObjectModelBuilder } from './builders.js';
-import { $parse, ArrayModel, EnumModel, ObjectModel, type PrimitiveModel, type UnionModel } from './core.js';
+import {
+  $parse,
+  ArrayModel,
+  EnumModel,
+  ObjectModel,
+  type OptionalModel,
+  type PrimitiveModel,
+  type UnionModel,
+} from './core.js';
 import {
   $defaultValue,
   $enum,
@@ -79,10 +87,24 @@ export function object<T extends AnyObject>(
  *
  * @param base - The base model to extend.
  */
-export function optional<M extends Model>(base: M): M {
-  return (CoreModelBuilder.create(base) as CoreModelBuilder<unknown, EmptyObject, { named: true; selfRefKeys: never }>)
+export function optional<T, EX extends AnyObject, R extends string>(
+  base: Model<NonNullable<T>, EX, R>,
+): OptionalModel<NonNullable<T> | undefined, EX, R> {
+  return (CoreModelBuilder.create(base) as CoreModelBuilder<T | undefined, EX, { named: true; selfRefKeys: R }>)
     .define($optional, { value: true })
-    .build() as M;
+    .defaultValueProvider(() => undefined)
+    .build() as any;
+}
+
+/**
+ * Checks if the given model is an optional model.
+ *
+ * @param model - The model to check.
+ */
+export function isOptional<T, EX extends AnyObject, R extends string>(
+  model: Model<T, EX, R>,
+): model is OptionalModel<T, EX, R> {
+  return model[$optional];
 }
 
 /**
@@ -122,6 +144,10 @@ export function validators(model: Model): readonly Validator[] {
   return model[$validators];
 }
 
+export function defaultValue<T>(model: Model<T>): T {
+  return model[$defaultValue];
+}
+
 /**
  * Provides the value the given model represents. For attached models it will
  * be the owner value or its part, for detached models or in case the value
@@ -144,7 +170,8 @@ export function value<T>(model: Model<T>): T;
 export function value<T>(model: Model<T>, newValue: T): void;
 // eslint-disable-next-line consistent-return
 export function value(...args: [Model, unknown?]): unknown {
-  const [model] = args;
+  const isSetter = args.length > 1;
+  const [model, newValue] = args;
 
   const keys: Array<keyof any> = [];
   let target: Target;
@@ -175,69 +202,53 @@ export function value(...args: [Model, unknown?]): unknown {
 
   // If the method is called with a single argument, it means we need to get
   // the value of the target object the given model represents
-  if (args.length === 1) {
-    if (target.value === $nothing) {
+  if (target.value === $nothing) {
+    if (!isSetter) {
       // If the model is detached, we return the default value of the model.
       return model[$defaultValue];
     }
+  }
 
-    let current = target.value;
+  if (!keys.length) {
+    if (isSetter) {
+      // If we are at the root level, we just set the whole value.
+      target.value = newValue;
+    } else {
+      return target.value;
+    }
+  }
 
-    // We execute the collected keys in reverse order to get the value of the
-    // nested property the model represents.
-    for (let i = keys.length - 1; i >= 0; i--) {
-      // If we are not at the model's level, and the current value is not an
-      // object we can take a key of, we throw an error.
-      if (!hasCorrectShape(current)) {
-        throw new Error('The value shape does not fit the model.');
+  let current = target.value;
+
+  // We execute the collected keys in reverse order to get the value of the
+  // nested property the model represents.
+  for (let i = keys.length - 1; i >= 0; i--) {
+    // If we are not at the model's level, and the current value is not an
+    // object we can take a key of, we throw an error.
+    if (!hasCorrectShape(current)) {
+      throw new Error('The value shape does not fit the model.');
+    }
+
+    if (i === 0) {
+      // We are at the end of the loop.
+      if (isSetter) {
+        // If it is a setter, we assign the new value to a property the model
+        // describes.
+        current[keys[i]] = newValue;
+
+        // Then we have to trigger a setter of the target value. E.g., it's
+        // needed for the Signal to update.
+        // eslint-disable-next-line no-self-assign
+        target.value = target.value;
+      } else {
+        // If it is a getter, we return the value of the property the model
+        // describes.
+        return current[keys[i]];
       }
-
+    } else {
       // Otherwise, we take a key of the current value and continue the loop.
       current = current[keys[i]];
     }
-
-    return current;
-  }
-
-  // If the method is called with two arguments, it means we need to set the
-  // value of the nested property the model represents.
-  const [, newValue] = args;
-
-  // Here we check if we are at the root (top) level of the model structure, and
-  // the model represents the whole `value` of the target.
-  if (keys.length) {
-    // In case we collected some keys, it means that we are working with the
-    // nested properties of the target object.
-    let current = target.value;
-
-    // We execute the collected keys in reverse order to get the nested property
-    // the model represents. Since we have to stop one step before the last key,
-    // the condition is `i > 0`, not `i >= 0` like it was in previous case.
-    for (let i = keys.length - 1; i >= 0; i--) {
-      // If we are not at the model's level, and the current value is not an
-      // object we can take a key of, we throw an error.
-      if (!hasCorrectShape(current)) {
-        // eslint-disable-next-line consistent-return
-        throw new Error('The value shape does not fit the model.');
-      }
-
-      if (i === 0) {
-        // We are at the end of the loop, so we have to assign the new value to
-        // a property the model describes.
-        current[keys[i]] = newValue;
-      } else {
-        // Otherwise, we take a key of the current value and continue the loop.
-        current = current[keys[i]];
-      }
-    }
-
-    // Then we have to trigger a setter of the target value. E.g., it's needed
-    // for the Signal to update.
-    // eslint-disable-next-line no-self-assign
-    target.value = target.value;
-  } else {
-    // If we are at the root level, we just set the whole value.
-    target.value = newValue;
   }
 }
 

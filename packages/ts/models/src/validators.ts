@@ -1,6 +1,4 @@
-const { create, defineProperty, getPrototypeOf } = Object;
-
-const $validator = Symbol('validator');
+const { create, entries, getPrototypeOf, getOwnPropertyDescriptors } = Object;
 
 export class ValidationError extends Error {
   readonly value: unknown;
@@ -11,29 +9,50 @@ export class ValidationError extends Error {
   }
 }
 
-export type ConstrainedHTMLElement = HTMLElement &
-  Pick<HTMLInputElement, 'max' | 'maxLength' | 'min' | 'minLength' | 'pattern' | 'required'>;
+export type ValidatableHTMLElement = HTMLElement &
+  Pick<
+    HTMLInputElement,
+    | 'checkValidity'
+    | 'max'
+    | 'maxLength'
+    | 'min'
+    | 'minLength'
+    | 'pattern'
+    | 'required'
+    | 'setCustomValidity'
+    | 'type'
+    | 'validity'
+  >;
 
 export interface Validator {
-  brand: typeof $validator;
   name: string;
+  super: Validator;
   error(value: unknown): ValidationError;
-  validate(value: unknown): boolean;
-  applyToElement(element: ConstrainedHTMLElement): void;
+  validate(value: unknown, state?: ValidityState): boolean;
+  bind(element: ValidatableHTMLElement): void;
 }
 
-export function isValidator(obj: unknown): obj is Validator {
-  return typeof obj === 'object' && !!obj && 'brand' in obj && obj.brand === $validator;
+export type ValidatorProps = Partial<Omit<Validator, 'error'> & { error: string }>;
+
+export function createValidator(name: string, base: Validator, props: ValidatorProps): Validator {
+  return create(
+    base,
+    entries(getOwnPropertyDescriptors(props)).reduce<Record<string, PropertyDescriptor>>(
+      (acc, [key, { value, get, set }]) => {
+        acc[key] =
+          key === 'error' ? { value: (v: unknown) => new ValidationError(name, v, value) } : { value, get, set };
+        return acc;
+      },
+      { name: { value: name } },
+    ),
+  );
 }
 
 export const Validator = create(null, {
-  brand: {
-    value: $validator,
-  },
   name: {
     value: 'Validator',
   },
-  applyToElement: {
+  bind: {
     value: () => {},
   },
   error: {
@@ -44,116 +63,88 @@ export const Validator = create(null, {
   validate: {
     value: () => true,
   },
+  super: {
+    get(this: Validator) {
+      return getPrototypeOf(this);
+    },
+  },
+  [Symbol.hasInstance]: {
+    value(this: Validator, o: unknown) {
+      return typeof o === 'object' && o != null && (this === o || Object.prototype.isPrototypeOf.call(this, o));
+    },
+  },
 });
 
-export class ValidatorBuilder {
-  readonly #validator: Validator;
-
-  constructor(name: string, base: Validator) {
-    this.#validator = create(base, {
-      name: {
-        value: name,
-      },
-    });
-  }
-
-  define<K extends keyof Validator>(property: K, descriptor: PropertyDescriptor): this {
-    defineProperty(this.#validator, property, descriptor);
-    return this;
-  }
-
-  error(error: string): this {
-    return this.define('error', {
-      value(this: Validator, value: unknown) {
-        return new ValidationError(this.name, value, error);
-      },
-    });
-  }
-
-  validate(validate: (value: unknown, super_: Validator) => boolean): this {
-    return this.define('validate', {
-      value(this: Validator, value: unknown) {
-        return validate(value, getPrototypeOf(this));
-      },
-    });
-  }
-
-  applyToElement(applyToElement: (element: ConstrainedHTMLElement, base: Validator) => void): this {
-    return this.define('applyToElement', {
-      value(this: Validator, element: ConstrainedHTMLElement) {
-        applyToElement(element, getPrototypeOf(this));
-      },
-    });
-  }
-
-  build(): Validator {
-    return this.#validator;
-  }
-}
-
-export const Required = new ValidatorBuilder('Required', Validator)
-  .applyToElement((element) => {
+export const Required = createValidator('Required', Validator, {
+  bind(element) {
     element.required = true;
-  })
-  .validate((value) => value != null)
-  .build();
+  },
+  validate: (value, state) => !state?.valueMissing && value != null,
+});
 
 export function Pattern(pattern: RegExp | string): Validator {
   const _pattern = pattern instanceof RegExp ? pattern : new RegExp(pattern, 'u');
-  return new ValidatorBuilder('Pattern', Validator)
-    .error(`Must match the following regular expression: ${String(pattern)}`)
-    .validate((value) => _pattern.test(String(value)))
-    .applyToElement((element) => {
+
+  return createValidator('Pattern', Validator, {
+    bind(element) {
       element.pattern = _pattern.source;
-    })
-    .build();
+    },
+    validate: (value, state) => !state?.patternMismatch && _pattern.test(String(value)),
+  });
 }
 
-export const IsNumber = new ValidatorBuilder('IsNumber', Pattern('^[0-9]*$'))
-  .validate((value, super_) => super_.validate(value) && isFinite(Number(value)))
-  .error('Must be a number')
-  .build();
+export const IsNumber = createValidator('IsNumber', Pattern(/^[0-9]*$/u), {
+  bind(element) {
+    element.type = 'number';
+  },
+  validate(this: Validator, value, state) {
+    return !state?.typeMismatch && this.super.validate(value) && isFinite(Number(value));
+  },
+});
 
-export const Email = new ValidatorBuilder('Email', Pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'))
-  .error('Must be a well-formed email address')
-  .build();
+export const Email = createValidator('Email', Pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u), {
+  error: 'Must be a well-formed email address',
+});
 
-export const Null = new ValidatorBuilder('Null', Validator)
-  .validate((value) => value == null)
-  .error('Must be null')
-  .build();
+export const Null = createValidator('Null', Validator, {
+  validate: (value) => value == null,
+  error: 'Must be null',
+});
 
-export const NotNull = new ValidatorBuilder('NotNull', Required).error('Must not be null').build();
+export const NotNull = createValidator('NotNull', Required, {
+  error: 'Must not be null',
+});
 
-export const NotEmpty = new ValidatorBuilder('NotEmpty', Required)
-  .validate(
-    (value, super_) =>
-      super_.validate(value) && (typeof value === 'string' || Array.isArray(value)) && value.length > 0,
-  )
-  .error('Must not be empty')
-  .build();
+export const NotEmpty = createValidator('NotEmpty', Required, {
+  validate(this: Validator, value) {
+    return this.super.validate(value) && (typeof value === 'string' || Array.isArray(value)) && value.length > 0;
+  },
+  error: 'Must not be empty',
+});
 
-export const NotBlank = new ValidatorBuilder('NotBlank', Required)
-  .validate((value, super_) => super_.validate(value) && typeof value === 'string' && /\S/u.test(value))
-  .error('Must not be blank')
-  .build();
+export const NotBlank = createValidator('NotBlank', Required, {
+  validate(this: Validator, value) {
+    return this.super.validate(value) && typeof value === 'string' && /\S/u.test(value);
+  },
+  error: 'Must not be blank',
+});
 
 export function Min(min: number): Validator {
-  return new ValidatorBuilder('Min', IsNumber)
-    .validate((value, super_) => super_.validate(value) && Number(value) >= min)
-    .applyToElement((element) => {
-      element.minLength = min;
-    })
-    .error(`Must be greater than or equal to ${min}`)
-    .build();
+  return createValidator('Min', IsNumber, {
+    validate: (value, state) => !state?.rangeUnderflow && IsNumber.validate(value) && Number(value) >= min,
+    bind(element) {
+      element.min = String(min);
+    },
+    error: `Must be greater than or equal to ${min}`,
+  });
 }
 
 export function Max(max: number): Validator {
-  return new ValidatorBuilder('Max', IsNumber)
-    .validate((value, super_) => super_.validate(value) && Number(value) <= max)
-    .applyToElement((element) => {
-      element.maxLength = max;
-    })
-    .error(`Must be less than or equal to ${max}`)
-    .build();
+  return createValidator('Max', IsNumber, {
+    validate: (value, state) => !state?.rangeOverflow && IsNumber.validate(value) && Number(value) <= max,
+    bind(element) {
+      element.max = String(max);
+    },
+    error: `Must be less than or equal to ${max}`,
+  });
 }

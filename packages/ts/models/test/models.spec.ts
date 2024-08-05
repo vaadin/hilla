@@ -26,7 +26,7 @@ import m, {
 
 use(chaiLike);
 
-describe('@vaadin/hilla-form-models', () => {
+describe('@vaadin/hilla-models', () => {
   enum Role {
     Guest = 'guest',
     User = 'user',
@@ -210,6 +210,16 @@ describe('@vaadin/hilla-form-models', () => {
     expect(OptionalModel).to.have.property('name').which.is.instanceof(StringModel);
     expect(OptionalModel.name).to.have.property($optional).which.is.true;
     expect(OptionalModel.name.toString()).to.be.equal('[[:detached: / Symbol(nothing)] Optional / name?] string');
+  });
+
+  it('should check if a model is optional', () => {
+    interface Optional {
+      name?: string;
+    }
+
+    const OptionalModel = m.object<Optional>('Optional').property('name', m.optional(StringModel)).build();
+
+    expect(m.isOptional(OptionalModel.name)).to.be.true;
   });
 
   describe('m.value', () => {
