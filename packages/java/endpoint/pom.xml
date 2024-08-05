@@ -116,7 +116,7 @@
         <dependency>
             <groupId>com.vaadin.external.atmosphere</groupId>
             <artifactId>atmosphere-runtime</artifactId>
-            <version>3.0.5.slf4jvaadin1</version>
+            <version>${atmosphere.runtime.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.external.google</groupId>
