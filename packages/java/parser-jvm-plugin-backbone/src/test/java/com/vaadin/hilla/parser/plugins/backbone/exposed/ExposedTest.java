@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;

@@ -36,6 +36,7 @@ public class DependencyTests {
                 .classLoader(DependencyTests.class.getClassLoader())
                 .classPath(classPath)
                 .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new DependencyPlugin()).execute(endpoints);
     }
 

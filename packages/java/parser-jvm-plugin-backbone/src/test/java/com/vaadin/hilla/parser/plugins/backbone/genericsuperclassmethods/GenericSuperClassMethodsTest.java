@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;

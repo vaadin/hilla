@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.JsonValuePlugin.MalformedValueTypeException;
@@ -20,8 +22,9 @@ public class JsonValueNoJsonCreatorTest {
             new Parser().classLoader(getClass().getClassLoader())
                     .classPath(Set.of(helper.getTargetDir().toString()))
                     .endpointAnnotations(List.of(Endpoint.class))
+                    .endpointExposedAnnotations(List.of(EndpointExposed.class))
                     .addPlugin(new BackbonePlugin())
-                    .execute(List.of(JsonValueNoJsonCreatorTest.class));
+                    .execute(List.of(JsonValueNoJsonCreatorEndpoint.class));
         });
     }
 }

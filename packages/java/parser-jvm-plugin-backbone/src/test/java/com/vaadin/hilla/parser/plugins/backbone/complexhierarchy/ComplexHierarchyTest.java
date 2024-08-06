@@ -5,6 +5,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
+import com.vaadin.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentEndpoint;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;
@@ -22,7 +25,8 @@ public class ComplexHierarchyTest {
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
-                .execute(List.of(ComplexHierarchyEndpoint.class));
+                .execute(List.of(ComplexHierarchyEndpoint.class,
+                        ComplexHierarchyGrandParentEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

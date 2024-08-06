@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,11 +35,39 @@ public class NodeTasksEndpointTest extends TaskTest {
     public static class ConnectEndpointsForTesting {
     }
 
-    public static class MyEndpoint {
+    @Endpoint
+    public class MyEndpoint {
+        public void foo(String bar) {
+        }
+
+        public String bar(String baz) {
+            return baz;
+        }
+    }
+
+    @Endpoint(value = "CustomEndpointName")
+    public class CustomEndpoint {
+        public void foo(String bar) {
+        }
+
+        public String bar(String baz) {
+            return baz;
+        }
+    }
+
+    @Endpoint("WithoutValueEqual")
+    public class EndpointNoValue {
+        public void foo(String bar) {
+        }
+
+        public String bar(String baz) {
+            return baz;
+        }
     }
 
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp()
+            throws IOException, NoSuchFieldException, IllegalAccessException {
         Lookup mockLookup = Mockito.mock(Lookup.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
                 .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
@@ -48,6 +77,18 @@ public class NodeTasksEndpointTest extends TaskTest {
                 // .isHillaAvailable(com.vaadin.flow.server.frontend.scanner.ClassFinder)
                 EndpointController.class, ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
+
+        var mockApplicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(Map.of("MyEndpoint", new MyEndpoint(),
+                "CustomEndpointName", CustomEndpoint.class, "WithoutValueEqual",
+                EndpointNoValue.class)).when(mockApplicationContext)
+                .getBeansWithAnnotation(Endpoint.class);
+        Mockito.doReturn(Map.of()).when(mockApplicationContext)
+                .getBeansWithAnnotation(BrowserCallable.class);
+        var applicationContextField = ApplicationContextProvider.class
+                .getDeclaredField("applicationContext");
+        applicationContextField.setAccessible(true);
+        applicationContextField.set(null, mockApplicationContext);
 
         options = new Options(mockLookup, getTemporaryDirectory().toFile())
                 .withFrontendDirectory(getTemporaryDirectory()
@@ -85,24 +126,16 @@ public class NodeTasksEndpointTest extends TaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
+        EngineConfiguration.getDefault()
+                .setOfflineEndpointProvider(() -> List.of(MyEndpoint.class));
 
         new NodeTasks(options).execute();
+        EngineConfiguration.getDefault().setOfflineEndpointProvider(null);
         assertEndpointFilesInProductionMode(true);
     }
 
     @Test
     public void should_GenerateEndpointFilesInDevServerTask() throws Exception {
-        var mockApplicationContext = Mockito.mock(ApplicationContext.class);
-        Mockito.doReturn(Map.of("MyEndpoint", new MyEndpoint()))
-                .when(mockApplicationContext)
-                .getBeansWithAnnotation(Endpoint.class);
-        Mockito.doReturn(Map.of()).when(mockApplicationContext)
-                .getBeansWithAnnotation(BrowserCallable.class);
-        var applicationContextField = ApplicationContextProvider.class
-                .getDeclaredField("applicationContext");
-        applicationContextField.setAccessible(true);
-        applicationContextField.set(null, mockApplicationContext);
-
         options = options.withRunNpmInstall(true);
         new NodeTasks(options).execute();
         assertEndpointFiles(true);

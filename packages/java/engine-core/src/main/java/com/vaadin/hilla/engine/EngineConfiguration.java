@@ -1,12 +1,16 @@
 package com.vaadin.hilla.engine;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class EngineConfiguration {
@@ -25,6 +29,7 @@ public class EngineConfiguration {
     private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
+    private EndpointProvider offlineEndpointProvider;
 
     public EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -133,5 +138,29 @@ public class EngineConfiguration {
     public Path getOpenAPIFile(boolean isProductionMode) {
         return isProductionMode ? classesDir.resolve(OPEN_API_PATH)
                 : buildDir.resolve(OPEN_API_PATH);
+    }
+
+    public EndpointProvider getOfflineEndpointProvider() {
+        if (offlineEndpointProvider != null) {
+            return offlineEndpointProvider;
+        }
+
+        return () -> {
+            try {
+                return new AotEndpointFinder(this).findEndpointClasses();
+            } catch (IOException | InterruptedException e) {
+                throw new ExecutionFailedException(e);
+            }
+        };
+    }
+
+    public void setOfflineEndpointProvider(
+            EndpointProvider offlineEndpointProvider) {
+        this.offlineEndpointProvider = offlineEndpointProvider;
+    }
+
+    @FunctionalInterface
+    public interface EndpointProvider {
+        List<Class<?>> findEndpoints() throws ExecutionFailedException;
     }
 }

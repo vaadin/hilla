@@ -88,30 +88,25 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        try {
-            var engineConfiguration = EngineConfiguration.getDefault();
-            if (isProductionMode) {
-                var endpoints = new AotEndpointFinder(engineConfiguration)
-                        .findEndpointClasses();
+        var engineConfiguration = EngineConfiguration.getDefault();
+        if (isProductionMode) {
+            var endpoints = engineConfiguration.getOfflineEndpointProvider()
+                    .findEndpoints();
+            var processor = new ParserProcessor(engineConfiguration,
+                    classLoader, true);
+            processor.process(endpoints);
+        } else {
+            ApplicationContextProvider.runOnContext(applicationContext -> {
+                List<Class<?>> endpoints = engineConfiguration.getParser()
+                        .getEndpointAnnotations().stream()
+                        .map(applicationContext::getBeansWithAnnotation)
+                        .map(Map::values).flatMap(Collection::stream)
+                        .map(Object::getClass).distinct()
+                        .collect(Collectors.toList());
                 var processor = new ParserProcessor(engineConfiguration,
-                        classLoader, true);
+                        classLoader, false);
                 processor.process(endpoints);
-            } else {
-                ApplicationContextProvider.runOnContext(applicationContext -> {
-                    List<Class<?>> endpoints = engineConfiguration.getParser()
-                            .getEndpointAnnotations().stream()
-                            .map(applicationContext::getBeansWithAnnotation)
-                            .map(Map::values).flatMap(Collection::stream)
-                            .map(Object::getClass).distinct()
-                            .collect(Collectors.toList());
-                    var processor = new ParserProcessor(engineConfiguration,
-                            classLoader, false);
-                    processor.process(endpoints);
-                });
-            }
-
-        } catch (Exception e) {
-            throw new ExecutionFailedException(e);
+            });
         }
     }
 }

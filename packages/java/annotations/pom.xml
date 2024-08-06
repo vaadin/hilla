@@ -33,6 +33,9 @@
             <artifactId>spring-context</artifactId>
             <scope>provided</scope>
         </dependency>
-    </dependencies>
-
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+  </dependencies>
 </project>

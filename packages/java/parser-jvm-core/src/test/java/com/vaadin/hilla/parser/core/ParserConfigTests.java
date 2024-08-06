@@ -176,12 +176,12 @@ public class ParserConfigTests {
     }
 
     @Test
-    public void should_ThrowError_When_EndpointAnnotationNameIsNotSet() {
+    public void should_ThrowError_When_EndpointAnnotationsIsNotSet() {
         var e = assertThrows(NullPointerException.class,
                 () -> new Parser().classLoader(getClass().getClassLoader())
                         .classPath(defaultClassPathElements)
                         .execute(List.of()));
-        assertEquals("[JVM Parser] endpointAnnotationName is not provided.",
+        assertEquals("[JVM Parser] endpointAnnotations is not provided.",
                 e.getMessage());
     }
 
