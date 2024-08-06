@@ -83,7 +83,7 @@ function dummy() {
               tsNode.asteriskToken,
               tsNode.name,
               tsNode.typeParameters,
-              [],
+              tsNode.parameters.filter(({ name }) => !(ts.isIdentifier(name) && name.text === 'init')),
               returnType,
               ts.factory.createBlock(body ?? [], false),
             );
