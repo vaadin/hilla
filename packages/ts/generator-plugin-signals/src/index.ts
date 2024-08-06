@@ -1,7 +1,7 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import SignalProcessor, { type MethodInfo } from './SignalProcessor.js';
+import SignalProcessor from './SignalProcessor.js';
 
 export type PathSignalType = Readonly<{
   path: string;
@@ -33,17 +33,14 @@ function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): 
     .reduce<PathSignalType[]>((acc, current) => acc.concat(current), []);
 }
 
-function groupByService(signals: readonly PathSignalType[]): Map<string, MethodInfo[]> {
+function groupByService(signals: readonly PathSignalType[]): Map<string, Map<string, string>> {
   return signals.reduce((serviceMap, signal) => {
     const [_, service, method] = signal.path.split('/');
-    const serviceMethods = serviceMap.get(service) ?? [];
-    serviceMethods.push({
-      name: method,
-      signalType: signal.signalType,
-    });
+    const serviceMethods = serviceMap.get(service) ?? new Map<string, string>();
+    serviceMethods.set(method, signal.signalType);
     serviceMap.set(service, serviceMethods);
     return serviceMap;
-  }, new Map<string, MethodInfo[]>());
+  }, new Map<string, Map<string, string>>());
 }
 
 export default class SignalsPlugin extends Plugin {
