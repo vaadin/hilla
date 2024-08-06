@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.jsonnode;
 
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
@@ -20,6 +21,7 @@ public class JsonNodeTest {
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin())
                 .execute(List.of(JsonNodeEndpoint.class));

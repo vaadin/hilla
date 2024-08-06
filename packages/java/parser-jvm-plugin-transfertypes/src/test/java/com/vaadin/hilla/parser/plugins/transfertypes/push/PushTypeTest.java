@@ -29,7 +29,7 @@ public class PushTypeTest {
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin())
-                .execute(List.of(PushTypeEndpoint.class));
+                .execute(List.of(OtherEndpoint.class, PushTypeEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

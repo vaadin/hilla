@@ -80,8 +80,8 @@ public final class EndpointPlugin
         var endpointAnnotations = getStorage().getParserConfig()
                 .getEndpointAnnotations();
         var endpointAnnotation = endpointCls.getAnnotations().stream()
-                .filter(annotation -> endpointAnnotations
-                        .contains(((Annotation) annotation.get()).getClass()))
+                .filter(annotation -> endpointAnnotations.contains(
+                        ((Annotation) annotation.get()).annotationType()))
                 .findFirst();
         return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
                 .filter(name -> !name.isEmpty())

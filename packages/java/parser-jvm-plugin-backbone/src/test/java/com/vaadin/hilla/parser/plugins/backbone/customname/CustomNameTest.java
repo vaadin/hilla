@@ -23,8 +23,8 @@ public class CustomNameTest {
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
-                .execute(List.of(CustomNameEndpoint.class,
-                        CustomExplicitValueEndpoint.class));
+                .execute(List.of(CustomExplicitValueEndpoint.class,
+                        CustomNameEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
