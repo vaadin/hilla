@@ -37,6 +37,17 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     }
   }
 
+  find(predicate: (path: string, specifier: string) => boolean): [string, string, boolean, Identifier] | undefined {
+    for (const [path, specifiers] of this.#map) {
+      for (const [specifier, { id, isType }] of specifiers) {
+        if (predicate(path, specifier)) {
+          return [path, specifier, isType, id];
+        }
+      }
+    }
+    return undefined;
+  }
+
   override clear(): void {
     this.#map.clear();
   }
@@ -103,6 +114,21 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
     const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, id);
     return id;
+  }
+
+  remove(path: string): void {
+    if (this.#map.has(path)) {
+      this.#map.delete(path);
+    }
+  }
+
+  find(predicate: (id: Identifier) => boolean): string | undefined {
+    for (const [path, id] of this.#map) {
+      if (predicate(id)) {
+        return path;
+      }
+    }
+    return undefined;
   }
 
   override clear(): void {

@@ -1,5 +1,6 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
+import type { OpenAPIV3 } from 'openapi-types';
 import SignalProcessor, { type MethodInfo } from './SignalProcessor.js';
 
 export type PathSignalType = Readonly<{
@@ -10,44 +11,39 @@ export type PathSignalType = Readonly<{
 const SIGNAL_CLASSES = ['#/components/schemas/com.vaadin.hilla.signals.NumberSignal'];
 
 function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): PathSignalType[] {
-  const pathSignalTypes: PathSignalType[] = [];
-  Object.entries(storage.api.paths).forEach(([path, pathObject]) => {
-    const response200 = pathObject?.post?.responses['200'];
-    if (response200 && !('$ref' in response200)) {
-      // OpenAPIV3.ResponseObject
-      const responseSchema = response200.content?.['application/json'].schema;
-      if (responseSchema && 'anyOf' in responseSchema) {
-        // OpenAPIV3.SchemaObject
-        // eslint-disable-next-line array-callback-return
-        responseSchema.anyOf?.some((c) => {
-          const isSignal = '$ref' in c && c.$ref && SIGNAL_CLASSES.includes(c.$ref);
-          if (isSignal) {
-            pathSignalTypes.push({ path, signalType: c.$ref });
-          }
-        });
-      }
-    }
-  });
-  return pathSignalTypes;
+  return Object.entries(storage.api.paths)
+    .filter(([_, pathObject]) => {
+      const response200 = pathObject?.post?.responses['200'];
+      return response200 && !('$ref' in response200);
+    })
+    .map(([path, pathObject]) => {
+      const response200 = pathObject?.post?.responses['200'];
+      const responseSchema = (response200 as OpenAPIV3.ResponseObject).content?.['application/json']?.schema;
+
+      return responseSchema && 'anyOf' in responseSchema
+        ? responseSchema.anyOf
+            ?.filter((c) => '$ref' in c && c.$ref && SIGNAL_CLASSES.includes(c.$ref))
+            .map((c: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => ({
+              path,
+              signalType: '$ref' in c ? c.$ref : '',
+            }))
+        : [];
+    })
+    .filter((signalArray) => signalArray !== undefined)
+    .reduce<PathSignalType[]>((acc, current) => acc.concat(current), []);
 }
 
-function groupByService(signals: PathSignalType[]): Map<string, MethodInfo[]> {
-  const serviceMap = new Map<string, MethodInfo[]>();
-
-  signals.forEach((signal) => {
+function groupByService(signals: readonly PathSignalType[]): Map<string, MethodInfo[]> {
+  return signals.reduce((serviceMap, signal) => {
     const [_, service, method] = signal.path.split('/');
-
     const serviceMethods = serviceMap.get(service) ?? [];
-
     serviceMethods.push({
       name: method,
       signalType: signal.signalType,
     });
-
     serviceMap.set(service, serviceMethods);
-  });
-
-  return serviceMap;
+    return serviceMap;
+  }, new Map<string, MethodInfo[]>());
 }
 
 export default class SignalsPlugin extends Plugin {

@@ -14,7 +14,6 @@ const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
 
 const NUMBER_SIGNAL_CHANNEL = '$NUMBER_SIGNAL_CHANNEL$';
 const CONNECT_CLIENT = '$CONNECT_CLIENT$';
-const ENDPOINT_AND_METHOD_NAME = '$ENDPOINT_AND_METHOD_NAME$';
 
 const signalImportPaths = ['com/vaadin/hilla/signals/NumberSignal'];
 
@@ -47,17 +46,13 @@ export default class SignalProcessor {
       ...this.#methods.map((method) =>
         transform<SourceFile>((tsNode) => {
           if (ts.isFunctionDeclaration(tsNode) && tsNode.name?.text === method.name) {
-            const endpointAndMethodName = ts.factory.createStringLiteral(`${this.#service}.${method.name}`);
             const body = template(
               `
 function dummy() {
-  return new ${NUMBER_SIGNAL_CHANNEL}(${ENDPOINT_AND_METHOD_NAME}, ${CONNECT_CLIENT}).signal;
+  return new ${NUMBER_SIGNAL_CHANNEL}('${this.#service}.${method.name}', ${CONNECT_CLIENT}).signal;
 }`,
               (statements) => (statements[0] as FunctionDeclaration).body?.statements,
               [
-                transform((node) =>
-                  ts.isIdentifier(node) && node.text === ENDPOINT_AND_METHOD_NAME ? endpointAndMethodName : node,
-                ),
                 transform((node) =>
                   ts.isIdentifier(node) && node.text === NUMBER_SIGNAL_CHANNEL ? numberSignalChannelId : node,
                 ),
@@ -70,8 +65,7 @@ function dummy() {
               returnType &&
               ts.isTypeReferenceNode(returnType) &&
               'text' in returnType.typeName &&
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-              returnType.typeName.escapedText === 'Promise'
+              returnType.typeName.text === 'Promise'
             ) {
               if (returnType.typeArguments && returnType.typeArguments.length > 0) {
                 returnType = returnType.typeArguments[0];
@@ -105,7 +99,7 @@ function dummy() {
     );
   }
 
-  #processSignalImports(signalImports: string[]) {
+  #processSignalImports(signalImports: readonly string[]) {
     const { imports } = this.#dependencyManager;
 
     signalImports.forEach((signalImport) => {
