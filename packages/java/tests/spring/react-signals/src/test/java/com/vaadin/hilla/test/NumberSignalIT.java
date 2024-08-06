@@ -6,14 +6,11 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WindowType;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-@RunWith(BlockJUnit4ClassRunner.class)
 @NotThreadSafe
 public class NumberSignalIT extends ChromeBrowserTest {
 
@@ -26,8 +23,9 @@ public class NumberSignalIT extends ChromeBrowserTest {
     }
 
     private void waitForPageToLoad() {
-        waitForElementPresent(By.ById.id("sharedValue"));
-        waitForElementPresent(By.ById.id("counter"));
+        waitUntil(driver -> findElement(By.id("sharedValue")).isDisplayed(), 20);
+        waitUntil(driver -> findElement(By.id("counter")).isDisplayed(), 20);
+
         waitUntil(driver -> $("span").id("sharedValue").getText() != null);
         waitUntil(driver -> $("span").id("counter").getText() != null);
     }
