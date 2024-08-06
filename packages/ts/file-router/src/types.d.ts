@@ -1,6 +1,16 @@
 import type { createBrowserRouter, RouteObject } from 'react-router-dom';
 
-export type ViewConfig = Readonly<{
+export type ViewConfig<T = unknown> = Readonly<{
+  /**
+   * Loader function that is called when the view is accessed. The loader
+   * function is expected to return a Promise that resolves to the component
+   * to render. The loader function is called with the parameters passed to
+   * the view, in the order they are present in the URL. The params will hence
+   * be strings and will be deserialized on the server side, so the function
+   * should accept simple types like strings and numbers.
+   */
+  loader?(...params: unknown[]): Promise<T>;
+
   /**
    * View title used in the main layout header, as <title> and as the default
    * for the menu entry. If not defined, the component name will be taken,
