@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-plugin-subtypes",
-  "version": "24.5.0-alpha5",
+  "version": "24.5.0-alpha7",
   "description": "A Hilla TypeScript Generator plugin to support JsonSubTypes",
   "main": "index.js",
   "type": "module",
@@ -50,12 +50,12 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@vaadin/hilla-generator-core": "24.5.0-alpha5",
-    "@vaadin/hilla-generator-plugin-client": "24.5.0-alpha5",
-    "@vaadin/hilla-generator-plugin-model": "24.5.0-alpha5"
+    "@vaadin/hilla-generator-core": "24.5.0-alpha7",
+    "@vaadin/hilla-generator-plugin-client": "24.5.0-alpha7",
+    "@vaadin/hilla-generator-plugin-model": "24.5.0-alpha7"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "24.5.0-alpha5",
+    "@vaadin/hilla-generator-utils": "24.5.0-alpha7",
     "fast-deep-equal": "^3.1.3",
     "openapi-types": "^12.1.3",
     "typescript": "5.5.2"
@@ -66,9 +66,9 @@
     "@types/node": "^20.7.1",
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
-    "@vaadin/hilla-generator-core": "24.5.0-alpha5",
-    "@vaadin/hilla-generator-plugin-client": "24.5.0-alpha5",
-    "@vaadin/hilla-generator-plugin-model": "24.5.0-alpha5",
+    "@vaadin/hilla-generator-core": "24.5.0-alpha7",
+    "@vaadin/hilla-generator-plugin-client": "24.5.0-alpha7",
+    "@vaadin/hilla-generator-plugin-model": "24.5.0-alpha7",
     "c8": "^10.1.2",
     "chai": "^4.3.10",
     "concurrently": "^8.2.1",
