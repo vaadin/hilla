@@ -42,14 +42,14 @@ export function bindStrategy<T, V>(
 
   effect(() => {
     if (!paused) {
-      value.value = m.value(model);
-      setValue(element, value.value);
+      m.value(model, value.value);
     }
   });
 
   effect(() => {
     paused = true;
-    m.value(model, value.value);
+    value.value = m.value(model);
+    setValue(element, value.value);
     paused = false;
   });
 
