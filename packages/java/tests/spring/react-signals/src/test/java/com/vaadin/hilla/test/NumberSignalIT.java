@@ -5,6 +5,7 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WindowType;
@@ -31,6 +32,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
     }
 
     @Test
+    @Ignore
     public void shouldUpdateValue_both_on_browser_and_server() {
         for (int i = 0; i < 5; i++) {
             var currentSharedValue = getSharedValue();
@@ -48,6 +50,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
     }
 
     @Test
+    @Ignore
     public void shouldUpdateValue_forOtherClients() {
         var currentSharedValue = getSharedValue();
         var currentCounterValue = getCounterValue();

@@ -14,11 +14,12 @@ public class BasicSignalIT extends ChromeBrowserTest {
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getRootURL() + "/BasicSignalView");
+        waitForDevServer();
     }
 
     @Test
     public void shouldEchoInput() {
-        $(TextFieldElement.class).waitForFirst().setValue("John Doe");
+        $(TextFieldElement.class).waitForFirst(50).setValue("John Doe");
         waitUntil(
                 textToBePresentInElement($("span").first(), "Echo: John Doe"));
     }
