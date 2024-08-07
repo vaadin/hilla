@@ -46,9 +46,21 @@ public final class TypeSignaturePlugin
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypedNode) {
             var typedNode = (TypedNode) nodePath.getNode();
-            typedNode.setTarget(
-                    new SchemaProcessor(typedNode.getType(), inEntity(nodePath))
-                            .process());
+            var schema = new SchemaProcessor(typedNode.getType(),
+                    inEntity(nodePath)).process();
+
+            if (typedNode.getType() instanceof ClassRefSignatureModel) {
+                var signature = ((ClassRefSignatureModel) typedNode.getType());
+
+                if (!(signature.isIterable() || signature.isMap()
+                        || signature.isOptional()
+                        || signature.getTypeArguments().isEmpty())) {
+                    schema.addExtension("x-type-parameters",
+                            new ComposedSchema());
+                }
+            }
+
+            typedNode.setTarget(schema);
         }
     }
 
@@ -143,6 +155,10 @@ public final class TypeSignaturePlugin
             ((ArraySchema) parentSchema).setItems(schema);
         } else if (parentSchema instanceof MapSchema) {
             parentSchema.additionalProperties(schema);
+        } else if (parentSchema.getExtensions() != null && parentSchema
+                .getExtensions().get("x-type-parameters") != null) {
+            ((ComposedSchema) parentSchema.getExtensions()
+                    .get("x-type-parameters")).addAllOfItem(schema);
         } else {
             // The nested schema replaces parent for type argument, type
             // parameter, type variable, and optional signatures
@@ -319,8 +335,8 @@ public final class TypeSignaturePlugin
         if (signature instanceof ClassRefSignatureModel) {
             var classModel = (ClassRefSignatureModel) signature;
             nodeDependencies = nodeDependencies
-                    .appendRelatedNodes(classModel.getTypeArguments().stream()
-                            .filter(SpecializedModel::isNonJDKClass)
+                    .appendChildNodes(classModel.getTypeArguments().stream()
+                            // .filter(SpecializedModel::isNonJDKClass)
                             .map(TypeSignatureNode::of));
         }
 

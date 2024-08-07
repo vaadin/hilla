@@ -16,10 +16,6 @@
       "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEndpoint"
     },
     {
-      "name": "GenericsBareEntityEndpoint",
-      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint"
-    },
-    {
       "name": "GenericsExtendedEndpoint",
       "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedEndpoint"
     },
@@ -69,211 +65,9 @@
         }
       }
     },
-    "/GenericsBareEntityEndpoint/getBareEntity": {
-      "post": {
-        "tags": [
-          "GenericsBareEntityEndpoint"
-        ],
-        "operationId": "GenericsBareEntityEndpoint_getBareEntity_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "ref": {
-                    "nullable": true,
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "nullable": true,
-                            "anyOf": [
-                              {
-                                "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint$GenericsBareEntity"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "nullable": true,
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "nullable": true,
-                          "anyOf": [
-                            {
-                              "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint$GenericsBareEntity"
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/GenericsBareEntityEndpoint/getBareEntityList": {
-      "post": {
-        "tags": ["GenericsBareEntityEndpoint"],
-        "operationId": "GenericsBareEntityEndpoint_getBareEntityList_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "ref": {
-                    "nullable": true,
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type": "array",
-                            "nullable": true,
-                            "items": {
-                              "type": "string",
-                              "nullable": true
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "nullable": true,
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type": "array",
-                          "nullable": true,
-                          "items": {
-                            "type": "string",
-                            "nullable": true
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/GenericsBareEntityEndpoint/getBareReference": {
-      "post": {
-        "tags": [
-          "GenericsBareEntityEndpoint"
-        ],
-        "operationId": "GenericsBareEntityEndpoint_getBareReference_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "ref": {
-                    "nullable": true,
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type": "string",
-                            "nullable": true
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "nullable": true,
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/GenericsExtendedEndpoint/getMap": {
       "post": {
-        "tags": [
-          "GenericsExtendedEndpoint"
-        ],
+        "tags": ["GenericsExtendedEndpoint"],
         "operationId": "GenericsExtendedEndpoint_getMap_POST",
         "requestBody": {
           "content": {
@@ -368,15 +162,6 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type": "string",
-                            "nullable": true
-                          }
-                        ]
                       }
                     ]
                   }
@@ -395,15 +180,6 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      ]
                     }
                   ]
                 }
@@ -460,15 +236,6 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type": "string",
-                            "nullable": true
-                          }
-                        ]
                       }
                     ]
                   }
@@ -487,15 +254,6 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      ]
                     }
                   ]
                 }
@@ -520,28 +278,6 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "nullable": true,
-                            "anyOf": [
-                              {
-                                "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                              },
-                              {
-                                "type": "object",
-                                "x-type-parameters": [
-                                  {
-                                    "type": "string",
-                                    "nullable": true
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
                       }
                     ]
                   }
@@ -560,28 +296,6 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "nullable": true,
-                          "anyOf": [
-                            {
-                              "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                            },
-                            {
-                              "type": "object",
-                              "x-type-parameters": [
-                                {
-                                  "type": "string",
-                                  "nullable": true
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
                     }
                   ]
                 }
@@ -724,14 +438,9 @@
         "type": "object",
         "properties": {
           "bareGenericTypeProperty": {
-            "type": "object",
-            "nullable": true,
-            "x-type-argument": "T"
+            "type": "object"
           }
-        },
-        "x-type-parameters": [
-          "T"
-        ]
+        }
       },
       "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
         "type": "object",
@@ -741,15 +450,6 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-              },
-              {
-                "type": "object",
-                "x-type-parameters": [
-                  {
-                    "type": "string",
-                    "nullable": true
-                  }
-                ]
               }
             ]
           }
@@ -757,15 +457,6 @@
       },
       "com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType" : {
         "type": "object"
-      },
-      "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint$GenericsBareEntity": {
-        "type": "object",
-        "properties": {
-          "bareEntityProperty": {
-            "type": "string",
-            "nullable": true
-          }
-        }
       }
     }
   }

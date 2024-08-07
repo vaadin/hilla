@@ -2,7 +2,6 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 
-import java.lang.reflect.AnnotatedType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,21 +135,9 @@ final class SchemaProcessor {
         var _type = (ClassRefSignatureModel) type;
         var fullyQualifiedName = _type.getClassInfo().getName();
 
-        var ref = new Schema<>()
-                .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName);
-        var args = _type.getTypeArguments().stream()
-                .map(arg -> (AnnotatedType) arg.get()).map(SignatureModel::of)
-                .map(arg -> new SchemaProcessor(arg, false).process())
-                .toArray(Schema[]::new);
-
-        ObjectSchema gen = null;
-        if (args.length > 0) {
-            gen = new ObjectSchema();
-            gen.addExtension("x-type-parameters", args);
-        }
-
-        return nullify(new ComposedSchema(), true).anyOf(new ArrayList<>(
-                gen == null ? List.of(ref) : List.of(ref, gen)));
+        return nullify(new ComposedSchema(), true)
+                .anyOf(new ArrayList<>(List.of(new Schema<>()
+                        .$ref(COMPONENTS_SCHEMAS_REF + fullyQualifiedName))));
     }
 
     private Schema<?> stringSchema() {

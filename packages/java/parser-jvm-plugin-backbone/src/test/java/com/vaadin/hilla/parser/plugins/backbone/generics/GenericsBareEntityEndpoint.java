@@ -17,8 +17,8 @@ public class GenericsBareEntityEndpoint {
         return ref;
     }
 
-    public GenericsBareRefEntity<List<String>> getBareEntityList(
-            GenericsBareRefEntity<List<String>> ref) {
+    public GenericsBareRefEntity<List<Float>> getBareEntityList(
+            GenericsBareRefEntity<List<Float>> ref) {
         return ref;
     }
 }
