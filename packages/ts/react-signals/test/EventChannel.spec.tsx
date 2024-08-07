@@ -4,19 +4,23 @@ import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { NumberSignal, NumberSignalChannel, type StateEvent, StateEventType } from '../src/index.js';
+import { NumberSignal, SignalChannel, type StateEvent, StateEventType } from '../src/index.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
 
-function simulateReceivedEvent(connectSubscriptionMock: Subscription<string>, event: StateEvent) {
-  const onNextCallback = (connectSubscriptionMock.onNext as sinon.SinonStub).getCall(0).args[0];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  onNextCallback(event);
-}
-
 describe('@vaadin/hilla-react-signals', () => {
-  describe('NumberSignalChannel', () => {
+  describe('SignalChannel', () => {
+    function simulateReceivedEvent(connectSubscriptionMock: Subscription<string>, event: StateEvent) {
+      const onNextCallback = (connectSubscriptionMock.onNext as sinon.SinonStub).getCall(0).args[0];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      onNextCallback(event);
+    }
+
+    function createNumberSignal() {
+      return new NumberSignal();
+    }
+
     let connectClientMock: sinon.SinonStubbedInstance<ConnectClient>;
     let connectSubscriptionMock: Subscription<string>;
 
@@ -39,13 +43,13 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should create signal instance of type NumberSignal', () => {
-      const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
+      const numberSignalChannel = new SignalChannel(createNumberSignal, 'testEndpoint', connectClientMock);
       expect(numberSignalChannel.signal).to.be.instanceOf(NumberSignal);
       expect(numberSignalChannel.signal.value).to.be.undefined;
     });
 
     it('should subscribe to signal provider endpoint', () => {
-      const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
+      const numberSignalChannel = new SignalChannel(createNumberSignal, 'testEndpoint', connectClientMock);
       expect(connectClientMock.subscribe).to.be.have.been.calledOnce;
       expect(connectClientMock.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
         clientSignalId: numberSignalChannel.id,
@@ -54,7 +58,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should publish updates to signals handler endpoint', () => {
-      const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
+      const numberSignalChannel = new SignalChannel(createNumberSignal, 'testEndpoint', connectClientMock);
       numberSignalChannel.signal.value = 42;
 
       expect(connectClientMock.call).to.be.have.been.calledOnce;
@@ -70,7 +74,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it("should update signal's value based on the received event", () => {
-      const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
+      const numberSignalChannel = new SignalChannel(createNumberSignal, 'testEndpoint', connectClientMock);
       expect(numberSignalChannel.signal.value).to.be.undefined;
 
       // Simulate the event received from the server:
@@ -82,7 +86,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it("should render signal's the updated value", async () => {
-      const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
+      const numberSignalChannel = new SignalChannel(createNumberSignal, 'testEndpoint', connectClientMock);
       const numberSignal = numberSignalChannel.signal;
       simulateReceivedEvent(connectSubscriptionMock, { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 });
 
