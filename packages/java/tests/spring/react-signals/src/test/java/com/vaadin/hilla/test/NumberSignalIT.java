@@ -3,36 +3,35 @@ package com.vaadin.hilla.test;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WindowType;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
-@NotThreadSafe
+@RunWith(BlockJUnit4ClassRunner.class)
 public class NumberSignalIT extends ChromeBrowserTest {
 
     @Override
     @Before
     public void setup() throws Exception {
+        setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
         super.setup();
         getDriver().get(getRootURL() + "/SharedNumberSignal");
         waitForPageToLoad();
     }
 
     private void waitForPageToLoad() {
-        waitUntil(driver -> findElement(By.id("sharedValue")).isDisplayed(), 20);
-        waitUntil(driver -> findElement(By.id("counter")).isDisplayed(), 20);
-
+        waitForElementPresent(By.ById.id("sharedValue"));
+        waitForElementPresent(By.ById.id("counter"));
         waitUntil(driver -> $("span").id("sharedValue").getText() != null);
         waitUntil(driver -> $("span").id("counter").getText() != null);
     }
 
     @Test
-    @Ignore
     public void shouldUpdateValue_both_on_browser_and_server() {
         for (int i = 0; i < 5; i++) {
             var currentSharedValue = getSharedValue();
@@ -50,7 +49,6 @@ public class NumberSignalIT extends ChromeBrowserTest {
     }
 
     @Test
-    @Ignore
     public void shouldUpdateValue_forOtherClients() {
         var currentSharedValue = getSharedValue();
         var currentCounterValue = getCounterValue();
@@ -84,8 +82,6 @@ public class NumberSignalIT extends ChromeBrowserTest {
             secondWindowCounterValue = Long.parseLong(
                     secondWindowDriver.findElement(By.id("counter")).getText());
             Assert.assertEquals(0, secondWindowCounterValue);
-
-            secondWindowDriver.close();
 
             // check that the first window is also updated:
             getDriver().switchTo().window(firstWindowHandle);
