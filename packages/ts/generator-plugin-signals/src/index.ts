@@ -16,7 +16,7 @@ function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): 
       const response200 = pathObject?.post?.responses['200'];
       return response200 && !('$ref' in response200);
     })
-    .map(([path, pathObject]) => {
+    .flatMap(([path, pathObject]) => {
       const response200 = pathObject?.post?.responses['200'];
       const responseSchema = (response200 as OpenAPIV3.ResponseObject).content?.['application/json']?.schema;
 
@@ -29,8 +29,7 @@ function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): 
             }))
         : [];
     })
-    .filter((signalArray) => signalArray !== undefined)
-    .reduce<PathSignalType[]>((acc, current) => acc.concat(current), []);
+    .filter((signalArray) => signalArray !== undefined);
 }
 
 function groupByService(signals: readonly PathSignalType[]): Map<string, Map<string, string>> {
