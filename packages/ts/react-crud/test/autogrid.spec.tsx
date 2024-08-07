@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import { render, waitFor } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
@@ -567,32 +567,29 @@ describe('@vaadin/hilla-react-crud', () => {
           );
           // Number type
           await user.click(grid.getHeaderCellContent(1, 0).querySelector('vaadin-select-value-button')!);
-          await nextFrame();
-          let filterOptions = await waitFor(() =>
-            document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item'),
-          );
+          let findResult = await screen.findByText('> Greater than');
+          let filterOptions = findResult.closest('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
-          expect(filterOptions[0]).to.have.rendered.text('> Greater than');
+          expect(filterOptions[1]).to.have.rendered.text('< Less than');
 
           await user.keyboard('{Escape}');
 
           // Date type
           await user.click(grid.getHeaderCellContent(1, 2).querySelector('vaadin-select-value-button')!);
-          await nextFrame();
-          filterOptions = await waitFor(() =>
-            document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item'),
-          );
+          // When the previous filter options is closing, for a short period of time there are two overlays in the DOM
+          // (because of animation), and to avoid selecting the wrong one, we need to first find the correct text and
+          // go up in the DOM to find the correct overlay.
+          findResult = await screen.findByText('> After');
+          filterOptions = findResult.closest('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
-          expect(filterOptions[0]).to.have.rendered.text('> After');
+          expect(filterOptions[1]).to.have.rendered.text('< Before');
 
           await user.keyboard('{Escape}');
 
           // Time type
           await user.click(grid.getHeaderCellContent(1, 3).querySelector('vaadin-select-value-button')!);
-          await nextFrame();
-          filterOptions = await waitFor(() =>
-            document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item'),
-          );
+          findResult = await screen.findByText('> After');
+          filterOptions = findResult.closest('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
           expect(filterOptions[1]).to.have.rendered.text('< Before');
         });
