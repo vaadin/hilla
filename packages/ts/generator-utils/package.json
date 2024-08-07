@@ -69,6 +69,7 @@
     "@types/sinon-chai": "^3.2.10",
     "c8": "^10.1.2",
     "chai": "^4.3.10",
+    "chai-like": "^1.1.1",
     "concurrently": "^8.2.1",
     "copyfiles": "^2.4.1",
     "mocha": "^10.2.0",
