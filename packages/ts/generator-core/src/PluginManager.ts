@@ -15,6 +15,7 @@ export default class PluginManager {
       'ModelPlugin',
       'PushPlugin',
       'SubTypesPlugin',
+      'SignalsPlugin',
     ];
     const customPlugins = plugins.filter((p) => !standardPlugins.includes(p.name));
     if (customPlugins.length > 0) {

@@ -1,0 +1,164 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "HelloWorldService",
+      "x-class-name" : "com.github.taefi.services.HelloWorldService"
+    },
+    {
+      "name" : "NumberSignalService",
+      "x-class-name" : "com.github.taefi.services.NumberSignalService"
+    }
+  ],
+  "paths" : {
+    "/HelloWorldService/sayHello" : {
+      "post" : {
+        "tags" : [
+          "HelloWorldService"
+        ],
+        "operationId" : "HelloWorldService_sayHello_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "x-java-type" : "java.lang.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NumberSignalService/counter" : {
+      "post" : {
+        "tags" : [
+          "NumberSignalService"
+        ],
+        "operationId" : "NumberSignalService_counter_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NumberSignalService/sayHello" : {
+      "post" : {
+        "tags" : [
+          "NumberSignalService"
+        ],
+        "operationId" : "NumberSignalService_sayHello_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "x-java-type" : "java.lang.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NumberSignalService/sharedValue" : {
+      "post" : {
+        "tags" : [
+          "NumberSignalService"
+        ],
+        "operationId" : "NumberSignalService_sharedValue_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.signals.NumberSignal" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
+          },
+          "value" : {
+            "type" : "number",
+            "format" : "double",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Double"
+          }
+        }
+      }
+    }
+  }
+}
