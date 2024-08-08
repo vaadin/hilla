@@ -21,14 +21,6 @@
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>hilla-annotations</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>

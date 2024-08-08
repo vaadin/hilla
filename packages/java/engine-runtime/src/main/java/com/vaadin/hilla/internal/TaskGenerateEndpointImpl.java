@@ -73,6 +73,9 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         if (productionMode) {
             runProcessor();
         } else {
+            // Even if we don't need the application context here, we have to
+            // wait for the parser to complete its job, so we add this the
+            // context queue.
             ApplicationContextProvider.runOnContext(applicationContext -> {
                 runProcessor();
             });
