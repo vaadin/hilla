@@ -67,17 +67,16 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type": "string"
-                          }
-                        ]
                       }
-                    ]
-                  }
+                    ],
+                    "x-type-arguments": {
+                      "allOf": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                    }
                 }
               }
             }
@@ -92,16 +91,15 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type": "string"
-                        }
-                      ]
                     }
-                  ]
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -123,18 +121,17 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type": "string",
-                            "nullable": true
-                          }
-                        ]
                       }
-                    ]
-                  }
+                    ],
+                    "x-type-arguments": {
+                      "allOf": [
+                        {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      ]
+                    }
+                    }
                 }
               }
             }
@@ -149,17 +146,16 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nonnullapi.NonNullApiEndpoint$Generic"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type": "string",
-                          "nullable": true
-                        }
-                      ]
                     }
-                  ]
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -442,7 +438,7 @@
         "properties": {
           "genericField": {
             "type": "object",
-            "x-type-argument": "T"
+            "x-type-variable": "T"
           }
         },
         "x-type-parameters": [

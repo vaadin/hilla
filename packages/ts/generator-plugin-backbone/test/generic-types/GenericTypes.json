@@ -33,17 +33,16 @@
                     "anyOf": [
                       {
                         "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity"
-                      },
-                      {
-                        "type": "object",
-                        "x-type-parameters": [
-                          {
-                            "type" : "string",
-                            "nullable" : true
-                          }
-                        ]
                       }
-                    ]
+                    ],
+                    "x-type-arguments": {
+                      "allOf": [
+                        {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      ]
+                    }
                   }
                 }
               }
@@ -95,16 +94,15 @@
                   "anyOf": [
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity"
-                    },
-                    {
-                      "type": "object",
-                      "x-type-parameters": [
-                        {
-                          "type" : "string"
-                        }
-                      ]
                     }
-                  ]
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -123,7 +121,7 @@
         "properties": {
           "value": {
             "type": "object",
-            "x-type-argument": "T"
+            "x-type-variable": "T"
           }
         }
       }

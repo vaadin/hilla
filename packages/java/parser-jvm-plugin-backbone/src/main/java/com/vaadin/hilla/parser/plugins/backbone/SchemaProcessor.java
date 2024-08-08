@@ -147,14 +147,14 @@ final class SchemaProcessor {
     private Schema<?> typeVariableSchema() {
         var _type = (TypeVariableModel) type;
         var schema = nullify(new ObjectSchema(), true);
-        schema.addExtension("x-type-argument", _type.getName());
+        schema.addExtension("x-type-variable", _type.getName());
         return schema;
     }
 
     private Schema<?> typeParameterSchema() {
         var _type = (TypeParameterModel) type;
         var schema = nullify(new ObjectSchema(), true);
-        schema.addExtension("x-type-argument", _type.getName());
+        schema.addExtension("x-type-variable", _type.getName());
         return schema;
     }
 }

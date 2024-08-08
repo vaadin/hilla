@@ -55,7 +55,7 @@ public final class TypeSignaturePlugin
                 if (!(signature.isIterable() || signature.isMap()
                         || signature.isOptional()
                         || signature.getTypeArguments().isEmpty())) {
-                    schema.addExtension("x-type-parameters",
+                    schema.addExtension("x-type-arguments",
                             new ComposedSchema());
                 }
             }
@@ -156,9 +156,9 @@ public final class TypeSignaturePlugin
         } else if (parentSchema instanceof MapSchema) {
             parentSchema.additionalProperties(schema);
         } else if (parentSchema.getExtensions() != null && parentSchema
-                .getExtensions().get("x-type-parameters") != null) {
+                .getExtensions().get("x-type-arguments") != null) {
             ((ComposedSchema) parentSchema.getExtensions()
-                    .get("x-type-parameters")).addAllOfItem(schema);
+                    .get("x-type-arguments")).addAllOfItem(schema);
         } else {
             // The nested schema replaces parent for type argument, type
             // parameter, type variable, and optional signatures

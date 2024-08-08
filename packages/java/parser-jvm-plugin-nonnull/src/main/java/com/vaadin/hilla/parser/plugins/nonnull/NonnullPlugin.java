@@ -91,41 +91,40 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                             .getTypeArguments();
 
                     if (!args.isEmpty()) {
-                        var anyOf = schema.getAnyOf();
+                        Optional.ofNullable(schema.getExtensions())
+                                .map(ext -> ext.get("x-type-arguments"))
+                                .map(ext -> (Schema<?>) ext)
+                                .map(Schema::getAllOf).ifPresent(schemas -> {
+                                    if (schemas.size() != args.size()) {
+                                        throw new IllegalStateException(
+                                                "Number of parameters mismatch for "
+                                                        + nodePath);
+                                    }
 
-                        if (anyOf != null) {
-                            var schemas = anyOf.stream()
-                                    .map(Schema::getExtensions)
-                                    .filter(Objects::nonNull)
-                                    .map(e -> (Schema<?>[]) e
-                                            .get("x-type-parameters"))
-                                    .filter(Objects::nonNull)
-                                    .flatMap(Arrays::stream).toList();
+                                    var nullables = args.stream()
+                                            .map(param -> Stream.concat(
+                                                    getPackageAnnotationsStream(
+                                                            nodePath),
+                                                    param.getAnnotations()
+                                                            .stream())
+                                                    .map(annotation -> annotationsMap
+                                                            .get(annotation
+                                                                    .getName()))
+                                                    .filter(Objects::nonNull)
+                                                    .max(Comparator
+                                                            .comparingInt(
+                                                                    AnnotationMatcher::getScore))
+                                                    .map(AnnotationMatcher::doesMakeNullable))
+                                            .toList();
 
-                            if (schemas.size() != args.size()) {
-                                throw new IllegalStateException(
-                                        "Number of parameters mismatch for "
-                                                + nodePath);
-                            }
-
-                            var nullables = args.stream().map(param -> Stream
-                                    .concat(getPackageAnnotationsStream(
-                                            nodePath),
-                                            param.getAnnotations().stream())
-                                    .map(annotation -> annotationsMap
-                                            .get(annotation.getName()))
-                                    .filter(Objects::nonNull)
-                                    .max(Comparator.comparingInt(
-                                            AnnotationMatcher::getScore))
-                                    .map(AnnotationMatcher::doesMakeNullable))
-                                    .toList();
-
-                            for (var i = 0; i < nullables.size(); i++) {
-                                var sch = schemas.get(i);
-                                nullables.get(i).ifPresent(nullable -> sch
-                                        .setNullable(nullable ? true : null));
-                            }
-                        }
+                                    for (var i = 0; i < nullables.size(); i++) {
+                                        var sch = schemas.get(i);
+                                        nullables.get(i).ifPresent(
+                                                nullable -> sch.setNullable(
+                                                        nullable ? true
+                                                                : null));
+                                    }
+                                });
                     }
                 }
             }

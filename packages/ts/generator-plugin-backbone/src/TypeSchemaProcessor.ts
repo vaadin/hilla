@@ -19,7 +19,7 @@ import {
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import ts, { type TypeNode } from 'typescript';
-import { findTypeArgument, findTypeParameters } from './utils.js';
+import { findTypeArguments, findTypeVariable } from './utils.js';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -66,13 +66,13 @@ export default class TypeSchemaProcessor {
 
     const unwrappedSchema = unwrapPossiblyNullableSchema(this.#schema);
 
-    const typeArg = findTypeArgument(this.#schema);
-    if (typeArg) {
-      return [ts.factory.createTypeReferenceNode(typeArg)];
+    const typeVariable = findTypeVariable(this.#schema);
+    if (typeVariable) {
+      return [ts.factory.createTypeReferenceNode(typeVariable)];
     }
 
     if (isReferenceSchema(unwrappedSchema)) {
-      const typeArguments = this.#processTypeParameters(this.#schema);
+      const typeArguments = this.#processTypeArguments(this.#schema);
       node = this.#processReference(unwrappedSchema, typeArguments);
     } else if (isArraySchema(unwrappedSchema)) {
       node = this.#processArray(unwrappedSchema);
@@ -113,9 +113,9 @@ export default class TypeSchemaProcessor {
     ]);
   }
 
-  #processTypeParameters(schema: Schema): readonly ts.TypeNode[] | undefined {
-    return findTypeParameters(schema)
-      ?.map((s) => new TypeSchemaProcessor(s, this.#dependencies).process())
+  #processTypeArguments(schema: Schema): readonly ts.TypeNode[] | undefined {
+    return findTypeArguments(schema)
+      ?.allOf.map((s) => new TypeSchemaProcessor(s, this.#dependencies).process())
       .map((t) => ts.factory.createUnionTypeNode(t));
   }
 
