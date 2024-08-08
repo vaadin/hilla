@@ -23,4 +23,9 @@ public class BasicSignalIT extends ChromeBrowserTest {
         waitUntil(
                 textToBePresentInElement($("span").first(), "Echo: John Doe"));
     }
+
+    @Test
+    public void openPageNoClientSideError() {
+        checkLogsForErrors();
+    }
 }
