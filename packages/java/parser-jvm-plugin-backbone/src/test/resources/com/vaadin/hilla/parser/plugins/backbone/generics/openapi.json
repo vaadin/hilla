@@ -733,7 +733,8 @@
               {
                 "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
               }
-            ]
+            ],
+            "x-type-parameters" : { }
           }
         }
       },
