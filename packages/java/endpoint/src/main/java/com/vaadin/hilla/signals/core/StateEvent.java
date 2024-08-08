@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * A utility class for representing state events out of an ObjectNode. This
@@ -52,7 +51,7 @@ public class StateEvent<T> {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private final UUID id;
+    private final String id;
     private final EventType eventType;
     private final T value;
 
@@ -66,7 +65,7 @@ public class StateEvent<T> {
      * @param value
      *            The value of the event.
      */
-    public StateEvent(UUID id, EventType eventType, T value) {
+    public StateEvent(String id, EventType eventType, T value) {
         this.id = id;
         this.eventType = eventType;
         this.value = value;
@@ -79,7 +78,7 @@ public class StateEvent<T> {
      *            The JSON representation of the event.
      */
     public StateEvent(ObjectNode json) {
-        this.id = UUID.fromString(json.get(Field.ID).asText());
+        this.id = json.get(Field.ID).asText();
         this.eventType = extractEventType(json);
         JsonNode value = json.get(Field.VALUE);
         if (value.isTextual()) {
@@ -132,7 +131,7 @@ public class StateEvent<T> {
      */
     public ObjectNode toJson() {
         ObjectNode json = mapper.createObjectNode();
-        json.put(Field.ID, id.toString());
+        json.put(Field.ID, id);
         json.put(Field.TYPE, eventType.name().toLowerCase());
         json.set(Field.VALUE, getValueAsJson());
         return json;
@@ -143,7 +142,7 @@ public class StateEvent<T> {
      *
      * @return The unique identifier of the event.
      */
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
@@ -167,15 +166,17 @@ public class StateEvent<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof StateEvent<?> that))
+        }
+        if (!(o instanceof StateEvent<?> that)) {
             return false;
+        }
         return Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hash(getId());
     }
 }

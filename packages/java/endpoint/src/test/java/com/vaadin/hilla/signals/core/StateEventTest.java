@@ -16,7 +16,7 @@ public class StateEventTest {
 
     @Test
     public void constructor_withParameters_shouldCreateStateEvent() {
-        UUID id = UUID.randomUUID();
+        String id = UUID.randomUUID().toString();
         StateEvent.EventType eventType = StateEvent.EventType.SET;
         String value = "testValue";
 
@@ -29,32 +29,32 @@ public class StateEventTest {
 
     @Test
     public void constructor_withJson_shouldCreateStateEvent() {
-        UUID id = UUID.randomUUID();
+        String clientId = UUID.randomUUID().toString();
         StateEvent.EventType eventType = StateEvent.EventType.SET;
         String value = "testValue";
 
         ObjectNode json = mapper.createObjectNode();
-        json.put(StateEvent.Field.ID, id.toString());
+        json.put(StateEvent.Field.ID, clientId);
         json.put(StateEvent.Field.TYPE, eventType.name().toLowerCase());
         json.put(StateEvent.Field.VALUE, value);
 
         StateEvent<String> event = new StateEvent<>(json);
 
-        assertEquals(id, event.getId());
+        assertEquals(clientId, event.getId());
         assertEquals(eventType, event.getEventType());
         assertEquals(value, event.getValue());
     }
 
     @Test
     public void toJson_whenCalled_shouldReturnCorrectJson() {
-        UUID id = UUID.randomUUID();
+        String id = UUID.randomUUID().toString();
         StateEvent.EventType eventType = StateEvent.EventType.SNAPSHOT;
         String value = "testValue";
 
         StateEvent<String> event = new StateEvent<>(id, eventType, value);
         ObjectNode json = event.toJson();
 
-        assertEquals(id.toString(), json.get(StateEvent.Field.ID).asText());
+        assertEquals(id, json.get(StateEvent.Field.ID).asText());
         assertEquals(eventType.name().toLowerCase(),
                 json.get(StateEvent.Field.TYPE).asText());
         assertEquals(value, json.get(StateEvent.Field.VALUE).asText());
@@ -62,11 +62,11 @@ public class StateEventTest {
 
     @Test
     public void constructor_withJsonInvalidEventType_shouldThrowInvalidEventTypeException() {
-        UUID id = UUID.randomUUID();
+        String clientId = UUID.randomUUID().toString();
         String value = "testValue";
 
         ObjectNode json = mapper.createObjectNode();
-        json.put(StateEvent.Field.ID, id.toString());
+        json.put(StateEvent.Field.ID, clientId);
         json.put(StateEvent.Field.TYPE, "invalidType");
         json.put(StateEvent.Field.VALUE, value);
 
@@ -82,11 +82,11 @@ public class StateEventTest {
 
     @Test
     public void constructor_withJsonMissingEventType_shouldThrowInvalidEventTypeException() {
-        UUID id = UUID.randomUUID();
+        String clientId = UUID.randomUUID().toString();
         String value = "testValue";
 
         ObjectNode json = mapper.createObjectNode();
-        json.put(StateEvent.Field.ID, id.toString());
+        json.put(StateEvent.Field.ID, clientId);
         json.put(StateEvent.Field.VALUE, value);
 
         Exception exception = assertThrows(
@@ -101,9 +101,9 @@ public class StateEventTest {
 
     @Test
     public void constructor_withJsonUnsupportedValueType_shouldThrowIllegalArgumentException() {
-        UUID id = UUID.randomUUID();
+        String clientId = UUID.randomUUID().toString();
         ObjectNode json = mapper.createObjectNode();
-        json.put(StateEvent.Field.ID, id.toString());
+        json.put(StateEvent.Field.ID, clientId);
         json.put(StateEvent.Field.TYPE,
                 StateEvent.EventType.SET.name().toLowerCase());
         json.set(StateEvent.Field.VALUE, mapper.createArrayNode()); // Unsupported

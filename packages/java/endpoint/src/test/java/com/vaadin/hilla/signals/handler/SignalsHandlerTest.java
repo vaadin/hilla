@@ -20,10 +20,8 @@ import static org.mockito.Mockito.when;
 
 public class SignalsHandlerTest {
 
-    private static final UUID CLIENT_SIGNAL_ID_1 = UUID
-            .fromString("90000000-9000-9000-9000-900000000000");
-    private static final UUID CLIENT_SIGNAL_ID_2 = UUID
-            .fromString("80000000-8000-8000-8000-800000000000");
+    private static final String CLIENT_SIGNAL_ID_1 = "90000000-9000-9000-9000-900000000000";
+    private static final String CLIENT_SIGNAL_ID_2 = "80000000-8000-8000-8000-800000000000";
 
     private final ObjectMapper mapper = new ObjectMapper();
     private SignalsHandler signalsHandler;
