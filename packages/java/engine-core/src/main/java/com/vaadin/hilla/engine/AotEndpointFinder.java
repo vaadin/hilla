@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class to find endpoints in a non-running Hilla application.
+ */
 public class AotEndpointFinder {
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private final EngineConfiguration engineConfiguration;
@@ -22,6 +25,7 @@ public class AotEndpointFinder {
 
     public List<Class<?>> findEndpointClasses()
             throws IOException, InterruptedException {
+        // Prepares all variables based on the provided configuration
         var aotOutput = engineConfiguration.getBuildDir()
                 .resolve("spring-aot/main");
         var classesDirectory = aotOutput.resolve("classes");
@@ -36,6 +40,9 @@ public class AotEndpointFinder {
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
+
+        // Runs the SpringApplicationAotProcessor to generate the
+        // reflect-config.json file. This comes from the `process-aot` goal.
         var processBuilder = new ProcessBuilder();
         processBuilder.inheritIO();
         processBuilder.command(javaExecutable, "-cp",
@@ -55,6 +62,8 @@ public class AotEndpointFinder {
             throw new ParserException("Aot file reflect-config.json not found");
         }
 
+        // The file simply contains a list of beans, we just need their names,
+        // which are class names.
         String jsonContent = Files.readString(json);
         var objectMapper = new ObjectMapper();
         var rootNode = objectMapper.readTree(jsonContent);
@@ -71,11 +80,14 @@ public class AotEndpointFinder {
                 try {
                     return Class.forName(name);
                 }
-                // Must also catch NoClassDefFoundError
+                // Must also catch NoClassDefFoundError here, exceptions are not
+                // enough.
                 catch (Throwable t) {
                     return null;
                 }
             }).filter(Objects::nonNull)
+                    // Filter out classes that are not annotated with any of the
+                    // endpoint annotations.
                     .filter(cls -> engineConfiguration.getParser()
                             .getEndpointAnnotations().stream()
                             .anyMatch(cls::isAnnotationPresent))
