@@ -85,11 +85,11 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
         try (var staticMock = mockStatic(MavenRunner.class)) {
             staticMock
                     .when(() -> MavenRunner.forProject(any(), eq("-q"),
-                            eq("vaadin:configure")))
+                            eq("hilla:configure")))
                     .thenReturn(Optional.of(mockConfigureNotFound));
             staticMock
                     .when(() -> MavenRunner.forProject(any(), eq("-q"), eq(
-                            "com.vaadin:vaadin-maven-plugin:1.0.0:configure")))
+                            "com.vaadin:hilla-maven-plugin:1.0.0:configure")))
                     .thenReturn(Optional.of(mockConfigureFound));
             var task = new MockedTaskEndpointGenerator(
                     getTemporaryDirectory().toFile(), getBuildDirectory(),
