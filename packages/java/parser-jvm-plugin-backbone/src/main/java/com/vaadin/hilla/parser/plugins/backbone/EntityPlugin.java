@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.plugins.backbone;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;

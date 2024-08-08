@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -70,8 +70,6 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
             return nodeDependencies.appendChildNodes(rootNode.getSource()
-                    .getClassesWithAnnotation(getStorage().getParserConfig()
-                            .getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of).map(EndpointNode::of));
         } else if ((node instanceof EndpointNode)) {
             var cls = (ClassInfoModel) node.getSource();

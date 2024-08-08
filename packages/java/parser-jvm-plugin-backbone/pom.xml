@@ -42,6 +42,11 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>hilla-annotations</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>hilla-parser-jvm-utils</artifactId>
             <version>${project.version}</version>
         </dependency>

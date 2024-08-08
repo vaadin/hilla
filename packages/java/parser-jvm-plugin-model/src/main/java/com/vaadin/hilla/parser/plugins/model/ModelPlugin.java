@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;

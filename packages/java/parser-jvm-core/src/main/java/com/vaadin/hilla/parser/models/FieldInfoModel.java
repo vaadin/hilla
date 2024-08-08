@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.models;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
