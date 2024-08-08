@@ -1,4 +1,5 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
+import { nanoid } from 'nanoid';
 import { NumberSignal, setInternalValue, type ValueSignal } from './Signals.js';
 import SignalsHandler from './SignalsHandler';
 import { type StateEvent, StateEventType } from './types.js';
@@ -33,7 +34,7 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
   readonly #internalSignal: S;
 
   constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
-    this.#id = crypto.randomUUID();
+    this.#id = nanoid();
     this.#signalsHandler = new SignalsHandler(connectClient);
     this.#channelDescriptor = {
       signalProviderEndpointMethod: signalProviderServiceMethod,

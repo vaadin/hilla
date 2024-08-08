@@ -20,8 +20,8 @@ public class SignalsRegistryTest {
 
         assertThrows(NullPointerException.class,
                 () -> signalsRegistry.register(null, new NumberSignal()));
-        assertThrows(NullPointerException.class,
-                () -> signalsRegistry.register(UUID.randomUUID(), null));
+        assertThrows(NullPointerException.class, () -> signalsRegistry
+                .register(UUID.randomUUID().toString(), null));
         assertThrows(NullPointerException.class,
                 () -> signalsRegistry.register(null, null));
     }
@@ -31,7 +31,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -50,7 +50,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -59,7 +59,7 @@ public class SignalsRegistryTest {
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
         assertEquals(signal, signalsRegistry.get(clientSignalId));
 
-        UUID anotherClientSignalId = UUID.randomUUID();
+        String anotherClientSignalId = UUID.randomUUID().toString();
         signalsRegistry.register(anotherClientSignalId, signal);
 
         assertEquals(1, signalsRegistry.size());
@@ -81,7 +81,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -90,7 +90,7 @@ public class SignalsRegistryTest {
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
         assertEquals(signal, signalsRegistry.get(clientSignalId));
 
-        UUID anotherClientSignalId = UUID.randomUUID();
+        String anotherClientSignalId = UUID.randomUUID().toString();
         assertNull(signalsRegistry.get(anotherClientSignalId));
     }
 
@@ -106,7 +106,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -130,7 +130,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -146,9 +146,9 @@ public class SignalsRegistryTest {
     public void when_signalIsNotRegistered_contains_returnsFalse() {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
-        assertFalse(signalsRegistry.contains(UUID.randomUUID()));
+        assertFalse(signalsRegistry.contains(UUID.randomUUID().toString()));
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -157,7 +157,7 @@ public class SignalsRegistryTest {
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
         assertEquals(signal, signalsRegistry.get(clientSignalId));
 
-        assertFalse(signalsRegistry.contains(UUID.randomUUID()));
+        assertFalse(signalsRegistry.contains(UUID.randomUUID().toString()));
     }
 
     @Test
@@ -165,7 +165,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -187,7 +187,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);
@@ -211,7 +211,7 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        UUID clientSignalId = UUID.randomUUID();
+        String clientSignalId = UUID.randomUUID().toString();
         NumberSignal signal = new NumberSignal();
 
         signalsRegistry.register(clientSignalId, signal);

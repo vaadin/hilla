@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { Signal } from './core.js';
 import { type StateEvent, StateEventType } from './types';
 
@@ -46,7 +47,7 @@ export abstract class ValueSignal<T> extends Signal<T> {
    * to be published to the server.
    */
   override set value(value: T) {
-    const id = crypto.randomUUID();
+    const id = nanoid();
     // set the local value to be used for latency compensation and offline support:
     this.#setInternalValue(value);
     // publish the update to the server:
