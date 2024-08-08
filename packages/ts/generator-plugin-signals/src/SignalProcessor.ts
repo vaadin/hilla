@@ -33,7 +33,7 @@ export default class SignalProcessor {
     const { imports } = this.#dependencyManager;
     const numberSignalChannelId = imports.named.add(HILLA_REACT_SIGNALS, 'NumberSignalChannel');
 
-    const [, connectClientId] = imports.default.iter().find((p) => p.includes('connect-client'))!;
+    const [, connectClientId] = imports.default.iter().find(([path]) => path.includes('connect-client'))!;
 
     this.#processSignalImports(signalImportPaths);
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
@@ -112,7 +112,7 @@ function dummy() {
     const { imports } = this.#dependencyManager;
 
     signalImports.forEach((signalImport) => {
-      const result = imports.default.iter().find((p) => p.includes(signalImport));
+      const result = imports.default.iter().find(([path]) => path.includes(signalImport));
 
       if (result) {
         const [path, id] = result;
