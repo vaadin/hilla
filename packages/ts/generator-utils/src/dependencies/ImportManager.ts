@@ -25,6 +25,18 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return record.id;
   }
 
+  remove(path: string, specifier: string): void {
+    const specifiers = this.#map.get(path);
+
+    if (specifiers) {
+      specifiers.delete(specifier);
+
+      if (specifiers.size === 0) {
+        this.#map.delete(path);
+      }
+    }
+  }
+
   override clear(): void {
     this.#map.clear();
   }
@@ -136,6 +148,21 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 
   getIdentifier(path: string): Identifier | undefined {
     return this.#map.get(path)?.id;
+  }
+
+  remove(path: string): void {
+    if (this.#map.has(path)) {
+      this.#map.delete(path);
+    }
+  }
+
+  find(predicate: (path: string) => boolean): [string, boolean, Identifier] | undefined {
+    for (const [path, { id, isType }] of this.#map) {
+      if (predicate(path)) {
+        return [path, isType, id];
+      }
+    }
+    return undefined;
   }
 
   override clear(): void {

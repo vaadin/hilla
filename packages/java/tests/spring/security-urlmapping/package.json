@@ -98,6 +98,7 @@
     "@vaadin/hilla-generator-plugin-client": "file:../../../../ts/generator-plugin-client",
     "@vaadin/hilla-generator-plugin-model": "file:../../../../ts/generator-plugin-model",
     "@vaadin/hilla-generator-plugin-push": "file:../../../../ts/generator-plugin-push",
+    "@vaadin/hilla-generator-plugin-signals": "file:../../../../ts/generator-plugin-signals",
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "4.3.1",
@@ -206,6 +207,7 @@
       "@vaadin/hilla-generator-plugin-client": "24.5.0-alpha5",
       "@vaadin/hilla-generator-plugin-model": "24.5.0-alpha5",
       "@vaadin/hilla-generator-plugin-push": "24.5.0-alpha5",
+      "@vaadin/hilla-generator-plugin-signals": "24.5.0-alpha5",
       "@vaadin/hilla-generator-plugin-subtypes": "24.5.0-alpha5",
       "@vaadin/hilla-generator-utils": "24.5.0-alpha5",
       "@vitejs/plugin-react": "4.3.1",
@@ -222,7 +224,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "732274d6c88babd2af8a23edef68d1391d902aab28a595bf9a2cf0a23767d472"
+    "hash": "b3fd348294c6f6350dabd38feab88980abef6e326955be455cfdb98f190c3879"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -306,6 +308,7 @@
     "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
     "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
     "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
+    "@vaadin/hilla-generator-plugin-signals": "$@vaadin/hilla-generator-plugin-signals",
     "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/multi-select-combo-box": "$@vaadin/multi-select-combo-box",
     "@vaadin/tabsheet": "$@vaadin/tabsheet",

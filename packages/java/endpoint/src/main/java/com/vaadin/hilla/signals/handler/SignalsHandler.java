@@ -8,8 +8,6 @@ import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.core.SignalsRegistry;
 import reactor.core.publisher.Flux;
 
-import java.util.UUID;
-
 /**
  * Handler Endpoint for Fullstack Signals' subscription and update events.
  */
@@ -36,7 +34,7 @@ public class SignalsHandler {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String signalProviderEndpointMethod,
-            UUID clientSignalId) {
+            String clientSignalId) {
         try {
             if (registry.contains(clientSignalId)) {
                 return signalAsFlux(clientSignalId);
@@ -54,7 +52,7 @@ public class SignalsHandler {
         }
     }
 
-    private Flux<ObjectNode> signalAsFlux(UUID clientSignalId) {
+    private Flux<ObjectNode> signalAsFlux(String clientSignalId) {
         return registry.get(clientSignalId).subscribe();
     }
 
@@ -66,7 +64,7 @@ public class SignalsHandler {
      * @param event
      *            the event to update with
      */
-    public void update(UUID clientSignalId, ObjectNode event) {
+    public void update(String clientSignalId, ObjectNode event) {
         if (!registry.contains(clientSignalId)) {
             throw new IllegalStateException(String.format(
                     "Signal not found for client signal: %s", clientSignalId));
