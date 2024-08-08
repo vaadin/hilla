@@ -3,7 +3,6 @@ package com.vaadin.hilla.test;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,9 +17,8 @@ public class NumberSignalIT extends ChromeBrowserTest {
     @Override
     @Before
     public void setup() throws Exception {
-        setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
         super.setup();
-        getDriver().get(getRootURL() + "/SharedNumberSignal");
+        getDriver().get(getRootURL() + "/number-signal");
         waitForPageToLoad();
     }
 
@@ -61,7 +59,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             Assert.assertNotEquals(firstWindowHandle, secondWindowHandle);
 
-            secondWindowDriver.get(getRootURL() + "/SharedNumberSignal");
+            secondWindowDriver.get(getRootURL() + "/number-signal");
 
             var secondWindowSharedValue = Double.parseDouble(secondWindowDriver
                     .findElement(By.id("sharedValue")).getText());
