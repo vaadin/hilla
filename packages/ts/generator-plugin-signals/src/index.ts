@@ -3,6 +3,12 @@ import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import SignalProcessor from './SignalProcessor.js';
 
+// Polyfill for iterator helpers (Stage 3 proposal)
+if (!('Iterator' in globalThis)) {
+  const { installIntoGlobal } = await import('iterator-helpers-polyfill');
+  installIntoGlobal();
+}
+
 export type PathSignalType = Readonly<{
   path: string;
   signalType: string;
@@ -29,7 +35,7 @@ function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): 
             }))
         : [];
     })
-    .filter((signalArray) => signalArray !== undefined);
+    .filter((signalArray) => signalArray != null);
 }
 
 function groupByService(signals: readonly PathSignalType[]): Map<string, Map<string, string>> {
