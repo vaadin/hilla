@@ -17,6 +17,11 @@ public class BasicSignalIT extends ChromeBrowserTest {
         waitForDevServer();
     }
 
+    @Override
+    protected String getRootURL() {
+        return "https://" + getDeploymentHostname() + ":" + getDeploymentPort();
+    }
+
     @Test
     public void shouldEchoInput() {
         $(TextFieldElement.class).waitForFirst(50).setValue("John Doe");
