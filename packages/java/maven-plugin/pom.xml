@@ -100,7 +100,7 @@
           <artifactId>maven-plugin-plugin</artifactId>
           <version>3.11.0</version>
           <configuration>
-            <goalPrefix>hilla</goalPrefix>
+            <goalPrefix>vaadin</goalPrefix>
           </configuration>
         </plugin>
       </plugins>

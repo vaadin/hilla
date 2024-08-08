@@ -83,10 +83,10 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
             logger.debug("Configure Hilla engine using build system plugin");
 
             var mavenConfigure = MavenRunner.forProject(projectDirectory, "-q",
-                    "hilla:configure");
+                    "vaadin:configure");
             var mavenConfigureVersion = getVaadinVersion()
                     .flatMap(version -> MavenRunner.forProject(projectDirectory,
-                            "-q", "com.vaadin:hilla-maven-plugin:" + version
+                            "-q", "com.vaadin:vaadin-maven-plugin:" + version
                                     + ":configure"));
             var gradleConfigure = GradleRunner.forProject(projectDirectory,
                     "-q", "hillaConfigure");
