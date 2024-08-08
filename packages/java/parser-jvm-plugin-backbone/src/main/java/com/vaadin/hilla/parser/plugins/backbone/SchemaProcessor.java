@@ -24,6 +24,8 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
     private final SignatureModel type;
+    // indicates if this processor must deal with generic type variables and
+    // parameters
     private final boolean generics;
 
     public SchemaProcessor(SignatureModel type, boolean generics) {

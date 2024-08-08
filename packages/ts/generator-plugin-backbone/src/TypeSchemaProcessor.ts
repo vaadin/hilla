@@ -68,6 +68,7 @@ export default class TypeSchemaProcessor {
 
     const typeVariable = findTypeVariable(this.#schema);
     if (typeVariable) {
+      // Type variables are returned directly as they are, no further processing is needed
       return [ts.factory.createTypeReferenceNode(typeVariable)];
     }
 
@@ -114,6 +115,7 @@ export default class TypeSchemaProcessor {
   }
 
   #processTypeArguments(schema: Schema): readonly ts.TypeNode[] | undefined {
+    // Type arguments are processed recursively
     return findTypeArguments(schema)
       ?.allOf.map((s) => new TypeSchemaProcessor(s, this.#dependencies).process())
       .map((t) => ts.factory.createUnionTypeNode(t));

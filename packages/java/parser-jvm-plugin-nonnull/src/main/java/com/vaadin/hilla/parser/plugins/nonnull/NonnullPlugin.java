@@ -86,6 +86,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                         .ifPresent(nullable -> schema
                                 .setNullable(nullable ? true : null));
 
+                // For type arguments, it is necessary to apply the same
+                // processing
                 if (nodeSource instanceof ClassRefSignatureModel) {
                     var args = ((ClassRefSignatureModel) nodeSource)
                             .getTypeArguments();
@@ -101,6 +103,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                                                         + nodePath);
                                     }
 
+                                    // TODO: extract the common logic at line 79
+                                    // to a method
                                     var nullables = args.stream()
                                             .map(param -> Stream.concat(
                                                     getPackageAnnotationsStream(

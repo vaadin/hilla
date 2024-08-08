@@ -6,6 +6,7 @@ import {
 
 export const defaultMediaType = 'application/json';
 
+// TODO: check if this is a good place for these types and related functions
 export type SchemaWithTypeArguments = Readonly<{ 'x-type-arguments': AllOfRuleComposedSchema }> & Schema;
 export type SchemaWithTypeParameters = Readonly<{ 'x-type-parameters': Schema[] }> & Schema;
 export type SchemaWithTypeVariable = Readonly<{ 'x-type-variable': string }> & Schema;
@@ -27,6 +28,7 @@ export function findTypeArguments(schema: Schema): AllOfRuleComposedSchema | und
     return schema['x-type-arguments'];
   }
 
+  // Type arguments are defined as part of anyOf schemas
   if (isAnyOfRuleComposedSchema(schema)) {
     return schema.anyOf.find(isSchemaWithTypeArguments)?.['x-type-arguments'];
   }

@@ -47,8 +47,13 @@ public final class TypeSignaturePlugin
         if (nodePath.getNode() instanceof TypedNode) {
             var typedNode = (TypedNode) nodePath.getNode();
             var schema = new SchemaProcessor(typedNode.getType(),
+                    // Only deal with generics in entities: endpoint methods are
+                    // not allowed to emit generic type parameters and arguments
                     inEntity(nodePath)).process();
 
+            // Prepare a schema for type arguments if the current node is a
+            // class reference and if its type arguments are not processed
+            // differently
             if (typedNode.getType() instanceof ClassRefSignatureModel) {
                 var signature = ((ClassRefSignatureModel) typedNode.getType());
 
@@ -64,6 +69,7 @@ public final class TypeSignaturePlugin
         }
     }
 
+    // Checks if the current node is inside an entity
     private boolean inEntity(NodePath<?> nodePath) {
         while (true) {
             if (nodePath.getNode() instanceof EntityNode) {
@@ -157,6 +163,7 @@ public final class TypeSignaturePlugin
             parentSchema.additionalProperties(schema);
         } else if (parentSchema.getExtensions() != null && parentSchema
                 .getExtensions().get("x-type-arguments") != null) {
+            // The nested schema is added to the type arguments of the parent
             ((ComposedSchema) parentSchema.getExtensions()
                     .get("x-type-arguments")).addAllOfItem(schema);
         } else {
@@ -334,10 +341,9 @@ public final class TypeSignaturePlugin
 
         if (signature instanceof ClassRefSignatureModel) {
             var classModel = (ClassRefSignatureModel) signature;
-            nodeDependencies = nodeDependencies
-                    .appendChildNodes(classModel.getTypeArguments().stream()
-                            // .filter(SpecializedModel::isNonJDKClass)
-                            .map(TypeSignatureNode::of));
+            // Create dependencies for type arguments
+            nodeDependencies = nodeDependencies.appendChildNodes(classModel
+                    .getTypeArguments().stream().map(TypeSignatureNode::of));
         }
 
         var referredTypes = getReferredTypes(signature);

@@ -36,6 +36,7 @@ public final class EntityPlugin
                     : new ObjectSchema();
             entityNode.setTarget(schema);
 
+            // Create an array of schemas for the type parameters
             var generics = entityNode.getSource().getTypeParameters().stream()
                     .filter(tp -> tp.getBounds().stream()
                             .filter(Objects::nonNull)
