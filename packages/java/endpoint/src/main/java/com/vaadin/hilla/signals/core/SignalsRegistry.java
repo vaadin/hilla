@@ -20,7 +20,7 @@ public class SignalsRegistry {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
     private final Map<UUID, NumberSignal> signals = new WeakHashMap<>();
-    private final Map<UUID, UUID> clientSignalToSignalMapping = new HashMap<>();
+    private final Map<String, UUID> clientSignalToSignalMapping = new HashMap<>();
 
     /**
      * Registers a signal instance and creates an association between the
@@ -37,7 +37,7 @@ public class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} or {@code signal} is null
      */
-    public synchronized void register(UUID clientSignalId,
+    public synchronized void register(String clientSignalId,
             NumberSignal signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
@@ -64,7 +64,7 @@ public class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} is null
      */
-    public synchronized NumberSignal get(UUID clientSignalId) {
+    public synchronized NumberSignal get(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         UUID signalId = clientSignalToSignalMapping.get(clientSignalId);
@@ -103,7 +103,7 @@ public class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized boolean contains(UUID clientSignalId) {
+    public synchronized boolean contains(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         if (!clientSignalToSignalMapping.containsKey(clientSignalId)) {
@@ -148,7 +148,7 @@ public class SignalsRegistry {
      *             if {@code clientSignalId} is null
      */
     public synchronized void removeClientSignalToSignalMapping(
-            UUID clientSignalId) {
+            String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id to remove must not be null");
         clientSignalToSignalMapping.remove(clientSignalId);
@@ -194,7 +194,7 @@ public class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized Set<UUID> getAllClientSignalIdsFor(UUID signalId) {
+    public synchronized Set<String> getAllClientSignalIdsFor(UUID signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
         if (!signals.containsKey(signalId)) {
             return Set.of();
