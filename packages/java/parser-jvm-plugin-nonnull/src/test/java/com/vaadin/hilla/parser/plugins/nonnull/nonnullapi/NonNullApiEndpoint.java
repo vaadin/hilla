@@ -47,4 +47,17 @@ public class NonNullApiEndpoint {
     public SubPackageDependency subPackageMethod(SubPackageDependency entity) {
         return entity;
     }
+
+    public static class Generic<T> {
+        public T genericField;
+    }
+
+    public Generic<String> genericMethod(Generic<String> generic) {
+        return generic;
+    }
+
+    public Generic<@NullableSignature String> genericNullableMethod(
+            Generic<@NullableSignature String> generic) {
+        return generic;
+    }
 }

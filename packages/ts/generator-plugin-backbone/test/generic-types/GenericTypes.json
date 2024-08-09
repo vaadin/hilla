@@ -1,0 +1,130 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "GenericTypesEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEndpoint"
+    }
+  ],
+  "paths": {
+    "/GenericTypesEndpoint/unwrap": {
+      "post": {
+        "tags": [
+          "GenericTypesEndpoint"
+        ],
+        "operationId": "GenericTypesEndpoint_unwrap_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity"
+                      }
+                    ],
+                    "x-type-arguments": {
+                      "allOf": [
+                        {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "x-java-type": "java.lang.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GenericTypesEndpoint/wrap": {
+      "post": {
+        "tags": [
+          "GenericTypesEndpoint"
+        ],
+        "operationId": "GenericTypesEndpoint_wrap_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "x-java-type": "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.generictypes.GenericTypesEntity": {
+        "type": "object",
+        "x-type-parameters": [
+          "T"
+        ],
+        "properties": {
+          "value": {
+            "type": "object",
+            "x-type-variable": "T"
+          }
+        }
+      }
+    }
+  }
+}

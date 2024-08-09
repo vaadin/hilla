@@ -19,6 +19,7 @@ import {
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import ts, { type TypeNode } from 'typescript';
+import { findTypeArguments, findTypeVariable } from './utils.js';
 
 function createBoolean(): TypeNode {
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
@@ -65,8 +66,15 @@ export default class TypeSchemaProcessor {
 
     const unwrappedSchema = unwrapPossiblyNullableSchema(this.#schema);
 
+    const typeVariable = findTypeVariable(this.#schema);
+    if (typeVariable) {
+      // Type variables are returned directly as they are, no further processing is needed
+      return [ts.factory.createTypeReferenceNode(typeVariable)];
+    }
+
     if (isReferenceSchema(unwrappedSchema)) {
-      node = this.#processReference(unwrappedSchema);
+      const typeArguments = this.#processTypeArguments(this.#schema);
+      node = this.#processReference(unwrappedSchema, typeArguments);
     } else if (isArraySchema(unwrappedSchema)) {
       node = this.#processArray(unwrappedSchema);
     } else if (isMapSchema(unwrappedSchema)) {
@@ -106,7 +114,14 @@ export default class TypeSchemaProcessor {
     ]);
   }
 
-  #processReference(schema: ReferenceSchema): TypeNode {
+  #processTypeArguments(schema: Schema): readonly ts.TypeNode[] | undefined {
+    // Type arguments are processed recursively
+    return findTypeArguments(schema)
+      ?.allOf.map((s) => new TypeSchemaProcessor(s, this.#dependencies).process())
+      .map((t) => ts.factory.createUnionTypeNode(t));
+  }
+
+  #processReference(schema: ReferenceSchema, typeArguments: readonly ts.TypeNode[] | undefined): TypeNode {
     const { imports, paths } = this.#dependencies;
 
     const specifier = convertReferenceSchemaToSpecifier(schema);
@@ -114,6 +129,6 @@ export default class TypeSchemaProcessor {
 
     const identifier = imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
 
-    return ts.factory.createTypeReferenceNode(identifier);
+    return ts.factory.createTypeReferenceNode(identifier, typeArguments);
   }
 }
