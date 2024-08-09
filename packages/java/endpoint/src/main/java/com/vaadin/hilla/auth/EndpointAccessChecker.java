@@ -74,7 +74,7 @@ public class EndpointAccessChecker {
 
     public static final String ACCESS_DENIED_MSG = "Access denied";
 
-    public static final String ACCESS_DENIED_MSG_DEV_MODE = "Unauthorized access to Vaadin endpoint; "
+    public static final String ACCESS_DENIED_MSG_DEV_MODE = "Access denied to Vaadin endpoint; "
             + "to enable endpoint access use one of the following annotations: @AnonymousAllowed, @PermitAll, @RolesAllowed";
 
     private final AccessAnnotationChecker accessAnnotationChecker;
