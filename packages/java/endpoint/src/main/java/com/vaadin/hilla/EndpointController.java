@@ -51,6 +51,7 @@ import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.dau.DAUUtils;
 import com.vaadin.flow.server.dau.DauEnforcementException;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
+import com.vaadin.flow.server.dau.FlowDauIntegration;
 import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
@@ -227,7 +228,10 @@ public class EndpointController {
             if (service != null) {
                 DAUUtils.TrackableOperation.INSTANCE.execute(() -> {
                     service.requestStart(vaadinRequest, vaadinResponse);
-                    DAUUtils.applyEnforcement(vaadinRequest, unused -> true);
+                    if (DAUUtils.isDauEnabled(service)) {
+                        FlowDauIntegration.applyEnforcement(vaadinRequest,
+                                unused -> true);
+                    }
                 });
             }
             Object returnValue = endpointInvoker.invoke(endpointName,
