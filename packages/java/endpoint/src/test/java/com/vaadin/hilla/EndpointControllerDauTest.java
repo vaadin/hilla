@@ -4,10 +4,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +18,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinRequestInterceptor;
@@ -29,7 +29,6 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.dau.DauEnforcementException;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
 import com.vaadin.hilla.auth.CsrfChecker;
-import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.pro.licensechecker.dau.EnforcementException;
 
@@ -69,6 +68,11 @@ public class EndpointControllerDauTest {
     @Test
     public void serveEndpoint_vaadinRequestStartEndHooksInvoked() {
         MockVaadinService vaadinService = new MockVaadinService();
+        when(vaadinService.getDeploymentConfiguration().isProductionMode())
+                .thenReturn(true);
+        when(vaadinService.getDeploymentConfiguration()
+                .getBooleanProperty(Constants.DAU_TOKEN, false))
+                .thenReturn(true);
         controller.vaadinService = vaadinService;
 
         controller.httpServletResponse = Mockito
@@ -88,6 +92,11 @@ public class EndpointControllerDauTest {
     public void serveEndpoint_dauEnforcement_serviceUnavailableResponse()
             throws JsonProcessingException {
         MockVaadinService vaadinService = new MockVaadinService();
+        when(vaadinService.getDeploymentConfiguration().isProductionMode())
+                .thenReturn(true);
+        when(vaadinService.getDeploymentConfiguration()
+                .getBooleanProperty(Constants.DAU_TOKEN, false))
+                .thenReturn(true);
         controller.vaadinService = vaadinService;
 
         controller.httpServletResponse = Mockito
@@ -150,6 +159,8 @@ public class EndpointControllerDauTest {
                 .mock(VaadinRequestInterceptor.class);
         private final VaadinContext vaadinContext = Mockito
                 .mock(VaadinContext.class);
+        private final DeploymentConfiguration deploymentConfiguration = Mockito
+                .mock(DeploymentConfiguration.class);
 
         @Override
         public void requestStart(VaadinRequest request,
@@ -166,6 +177,11 @@ public class EndpointControllerDauTest {
         @Override
         public VaadinContext getContext() {
             return vaadinContext;
+        }
+
+        @Override
+        public DeploymentConfiguration getDeploymentConfiguration() {
+            return deploymentConfiguration;
         }
     }
 }
