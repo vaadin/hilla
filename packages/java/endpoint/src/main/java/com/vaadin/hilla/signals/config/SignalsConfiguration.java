@@ -4,7 +4,6 @@ import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
-import com.vaadin.hilla.signals.core.registry.SignalsRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
