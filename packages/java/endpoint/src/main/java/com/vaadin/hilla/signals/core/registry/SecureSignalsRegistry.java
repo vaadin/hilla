@@ -20,7 +20,7 @@ import java.util.function.Function;
 @Component
 public class SecureSignalsRegistry {
 
-    private record EndpointMethod(String endpoint, String method) {
+    record EndpointMethod(String endpoint, String method) {
     }
 
     private final Map<String, EndpointMethod> endpointMethods = new HashMap<>();
@@ -38,11 +38,12 @@ public class SecureSignalsRegistry {
             EndpointInvocationException.EndpointNotFoundException,
             EndpointInvocationException.EndpointBadRequestException,
             EndpointInvocationException.EndpointInternalException {
-        checkAccess(endpointName, methodName);
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil
                 .getSecurityHolderRoleChecker();
+        checkAccess(endpointName, methodName, principal, isInRole);
+
         NumberSignal signal = (NumberSignal) invoker.invoke(endpointName,
                 methodName, null, principal, isInRole);
         endpointMethods.put(clientSignalId,
@@ -68,7 +69,13 @@ public class SecureSignalsRegistry {
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil
                 .getSecurityHolderRoleChecker();
+        checkAccess(endpointName, methodName, principal, isInRole);
+    }
 
+    private void checkAccess(String endpointName, String methodName,
+            Principal principal, Function<String, Boolean> isInRole)
+            throws EndpointInvocationException.EndpointNotFoundException,
+            EndpointInvocationException.EndpointAccessDeniedException {
         EndpointRegistry.VaadinEndpointData endpointData = invoker
                 .getVaadinEndpointData(endpointName);
         Method method = getMethod(endpointData, methodName);
