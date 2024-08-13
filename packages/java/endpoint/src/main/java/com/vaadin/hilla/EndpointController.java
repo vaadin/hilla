@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -43,15 +42,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinServletResponse;
-import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.dau.DAUUtils;
-import com.vaadin.flow.server.dau.DauEnforcementException;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
-import com.vaadin.flow.server.dau.FlowDauIntegration;
 import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
@@ -248,24 +241,12 @@ public class EndpointController {
                             EndpointAccessChecker.ACCESS_DENIED_MSG));
         }
 
-        // Put a VaadinRequest in the instances object so as the request is
-        // available in the endpoint method
-        VaadinRequest vaadinRequest = createVaadinRequest(request);
-        VaadinService service = vaadinRequest.getService();
-        VaadinResponse vaadinResponse = (response != null)
-                ? new VaadinServletResponse(response,
-                        (VaadinServletService) service)
-                : null;
-
+        DAUUtils.EnforcementResult enforcementResult = null;
         try {
-            if (service != null) {
-                DAUUtils.TrackableOperation.INSTANCE.execute(() -> {
-                    service.requestStart(vaadinRequest, vaadinResponse);
-                    if (DAUUtils.isDauEnabled(service)) {
-                        FlowDauIntegration.applyEnforcement(vaadinRequest,
-                                unused -> true);
-                    }
-                });
+            enforcementResult = DAUUtils.trackDAU(this.vaadinService, request,
+                    response);
+            if (enforcementResult.isEnforcementNeeded()) {
+                return buildEnforcementResponseEntity(enforcementResult);
             }
             Object returnValue = endpointInvoker.invoke(endpointName,
                     methodName, body, request.getUserPrincipal(),
@@ -302,48 +283,31 @@ public class EndpointController {
         } catch (EndpointInternalException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     endpointInvoker.createResponseErrorObject(e.getMessage()));
-        } catch (DauEnforcementException e) {
-            EnforcementNotificationMessages messages = DAUUtils
-                    .getEnforcementNotificationMessages(vaadinRequest);
-            EndpointException endpointException = new EndpointException(
-                    messages.caption(), e, messages);
-            try {
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                        .body(endpointInvoker.createResponseErrorObject(
-                                endpointException.getSerializationData()));
-            } catch (JsonProcessingException ee) {
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                        .body(endpointInvoker
-                                .createResponseErrorObject(messages.caption()
-                                        + ". " + messages.message()));
-            }
         } finally {
-            if (service != null) {
-                // Do not provide VaadinResponse to prevent interceptor to alter
-                // the http response
-                service.requestEnd(vaadinRequest, null, null);
+
+            if (enforcementResult != null
+                    && enforcementResult.endRequestAction() != null) {
+                enforcementResult.endRequestAction().run();
             } else {
                 CurrentInstance.set(VaadinRequest.class, null);
             }
         }
     }
 
-    private record RequestResponseHolder(VaadinRequest request,
-            VaadinResponse response) {
-    }
-
-    private VaadinRequest createVaadinRequest(HttpServletRequest request) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            service = this.vaadinService;
+    private ResponseEntity<String> buildEnforcementResponseEntity(
+            DAUUtils.EnforcementResult enforcementResult) {
+        EnforcementNotificationMessages messages = enforcementResult.messages();
+        EndpointException endpointException = new EndpointException(
+                messages.caption(), enforcementResult.origin(), messages);
+        try {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(endpointInvoker.createResponseErrorObject(
+                            endpointException.getSerializationData()));
+        } catch (JsonProcessingException ee) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(endpointInvoker.createResponseErrorObject(
+                            messages.caption() + ". " + messages.message()));
         }
-        if (!(service instanceof VaadinServletService)) {
-            // Should never happen, but will prevent a class cast exception on
-            // request creation
-            service = null;
-        }
-        return new VaadinServletRequest(request,
-                (VaadinServletService) service);
     }
 
     /**
