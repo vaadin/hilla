@@ -75,12 +75,10 @@ public class EndpointControllerDauTest {
                 .thenReturn(true);
         controller.vaadinService = vaadinService;
 
-        controller.httpServletResponse = Mockito
-                .mock(HttpServletResponse.class);
-
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
         when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
-        controller.serveEndpoint("TEST", "test", null, request);
+        controller.serveEndpoint("TEST", "test", null, request, response);
 
         Mockito.verify(vaadinService.testInterceptor).requestStart(
                 any(VaadinRequest.class), any(VaadinResponse.class));
@@ -99,11 +97,9 @@ public class EndpointControllerDauTest {
                 .thenReturn(true);
         controller.vaadinService = vaadinService;
 
-        controller.httpServletResponse = Mockito
-                .mock(HttpServletResponse.class);
-
         Map<String, Object> attributes = new HashMap<>();
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
         when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
         doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1)))
                 .when(request).setAttribute(anyString(), any());
@@ -117,8 +113,8 @@ public class EndpointControllerDauTest {
         }).when(vaadinService.testInterceptor).requestStart(
                 any(VaadinRequest.class), any(VaadinResponse.class));
 
-        ResponseEntity<String> response = controller.serveEndpoint("TEST",
-                "test", null, request);
+        ResponseEntity<String> responseEntity = controller.serveEndpoint("TEST",
+                "test", null, request, response);
 
         Mockito.verify(vaadinService.testInterceptor).requestStart(
                 any(VaadinRequest.class), any(VaadinResponse.class));
@@ -126,9 +122,9 @@ public class EndpointControllerDauTest {
                 .requestEnd(any(VaadinRequest.class), isNull(), isNull());
 
         Assert.assertEquals("Expected 503 response for blocked request",
-                HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
-        ObjectNode jsonNodes = new ObjectMapper().readValue(response.getBody(),
-                ObjectNode.class);
+                HttpStatus.SERVICE_UNAVAILABLE, responseEntity.getStatusCode());
+        ObjectNode jsonNodes = new ObjectMapper()
+                .readValue(responseEntity.getBody(), ObjectNode.class);
         EnforcementNotificationMessages expectedError = EnforcementNotificationMessages.DEFAULT;
         assertEquals(DauEnforcementException.class.getName(),
                 jsonNodes.get("type").asText());

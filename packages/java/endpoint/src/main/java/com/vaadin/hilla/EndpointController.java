@@ -102,11 +102,6 @@ public class EndpointController {
 
     VaadinService vaadinService;
 
-    // Temporary workaround to avoid adding response to the serveEndpoint method
-    // Spring will inject a request scoped bean
-    @Autowired
-    HttpServletResponse httpServletResponse;
-
     /**
      * A constructor used to initialize the controller.
      *
@@ -198,6 +193,8 @@ public class EndpointController {
      *            called has parameters
      * @param request
      *            the current request which triggers the endpoint call
+     * @param response
+     *            the current response
      * @return execution result as a JSON string or an error message string
      */
     @PostMapping(path = ENDPOINT_METHODS, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -205,7 +202,43 @@ public class EndpointController {
             @PathVariable("endpoint") String endpointName,
             @PathVariable("method") String methodName,
             @RequestBody(required = false) ObjectNode body,
-            HttpServletRequest request) {
+            HttpServletRequest request, HttpServletResponse response) {
+        return doServeEndpoint(endpointName, methodName, body, request,
+                response);
+    }
+
+    /**
+     * Captures and processes the Vaadin endpoint requests.
+     * <p>
+     * Matches the endpoint name and a method name with the corresponding Java
+     * class and a public method in the class. Extracts parameters from a
+     * request body if the Java method requires any and applies in the same
+     * order. After the method call, serializes the Java method execution result
+     * and sends it back.
+     * <p>
+     * If an issue occurs during the request processing, an error response is
+     * returned instead of the serialized Java method return value.
+     *
+     * @param endpointName
+     *            the name of an endpoint to address the calls to, not case
+     *            sensitive
+     * @param methodName
+     *            the method name to execute on an endpoint, not case sensitive
+     * @param body
+     *            optional request body, that should be specified if the method
+     *            called has parameters
+     * @param request
+     *            the current request which triggers the endpoint call
+     * @return execution result as a JSON string or an error message string
+     */
+    public ResponseEntity<String> serveEndpoint(String endpointName,
+            String methodName, ObjectNode body, HttpServletRequest request) {
+        return doServeEndpoint(endpointName, methodName, body, request, null);
+    }
+
+    private ResponseEntity<String> doServeEndpoint(String endpointName,
+            String methodName, ObjectNode body, HttpServletRequest request,
+            HttpServletResponse response) {
         LOGGER.debug("Endpoint: {}, method: {}, request body: {}", endpointName,
                 methodName, body);
 
@@ -219,8 +252,8 @@ public class EndpointController {
         // available in the endpoint method
         VaadinRequest vaadinRequest = createVaadinRequest(request);
         VaadinService service = vaadinRequest.getService();
-        VaadinResponse vaadinResponse = (httpServletResponse != null)
-                ? new VaadinServletResponse(httpServletResponse,
+        VaadinResponse vaadinResponse = (response != null)
+                ? new VaadinServletResponse(response,
                         (VaadinServletService) service)
                 : null;
 
