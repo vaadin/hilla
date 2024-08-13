@@ -121,10 +121,13 @@ public class SecureSignalsRegistryTest {
             throws Exception {
         EndpointRegistry.VaadinEndpointData mockVaadinEndpointData = Mockito
                 .mock(EndpointRegistry.VaadinEndpointData.class);
-        Method mockMethod = Mockito.mock(Method.class);
+        Method mockMethod = this.getClass().getMethod("aFakeMethod");
         when(mockVaadinEndpointData.getMethod(Mockito.anyString()))
                 .thenReturn(Optional.of(mockMethod));
         when(invoker.getVaadinEndpointData(Mockito.anyString()))
                 .thenReturn(mockVaadinEndpointData);
+    }
+
+    public void aFakeMethod() {
     }
 }
