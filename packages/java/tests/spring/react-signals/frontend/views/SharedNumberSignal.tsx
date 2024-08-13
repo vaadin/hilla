@@ -1,9 +1,9 @@
 import { Button } from '@vaadin/react-components';
 import { useSignal } from '@vaadin/hilla-react-signals';
-import { NumberSignalProviderService } from 'Frontend/generated/endpoints.js';
+import { NumberSignalService } from 'Frontend/generated/endpoints.js';
 
-const counter = NumberSignalProviderService.counter();
-const sharedValue = NumberSignalProviderService.sharedValue();
+const counter = NumberSignalService.counter();
+const sharedValue = NumberSignalService.sharedValue();
 
 export default function SharedNumberSignal() {
   const sharedValueFromServer = useSignal<number | undefined>(0.0);
@@ -35,7 +35,7 @@ export default function SharedNumberSignal() {
       <Button
         id="fetchSharedValue"
         onClick={async () => {
-          sharedValueFromServer.value = await NumberSignalProviderService.fetchSharedValue();
+          sharedValueFromServer.value = await NumberSignalService.fetchSharedValue();
         }}
       >
         Fetch shared value from server
@@ -45,7 +45,7 @@ export default function SharedNumberSignal() {
       <Button
         id="fetchCounterValue"
         onClick={async () => {
-          counterValueFromServer.value = await NumberSignalProviderService.fetchCounterValue();
+          counterValueFromServer.value = await NumberSignalService.fetchCounterValue();
         }}
       >
         Fetch counter value from server
