@@ -2,6 +2,56 @@ import { nanoid } from 'nanoid';
 import { Signal } from './core.js';
 import { type StateEvent, StateEventType } from './types';
 
+declare module '@preact/signals-core' {
+  // https://github.com/preactjs/signals/issues/351#issuecomment-1515488634
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  class Signal {
+    protected S(node: any): void;
+    protected U(node: any): void;
+  }
+}
+
+class DependencyTrackSignal<T> extends Signal<T> {
+  readonly #onSubscribe: () => void;
+  readonly #onUnsubscribe: () => void;
+
+  #subscribeCount = 0;
+
+  constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
+    super(value);
+    this.#onSubscribe = onSubscribe;
+    this.#onUnsubscribe = onUnsubscribe;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  protected override S(node: any): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super.S(node);
+    if (this.#subscribeCount === 0) {
+      this.#onSubscribe.call(null);
+    }
+    this.#subscribeCount += 1;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  protected override U(node: any): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super.U(node);
+    this.#subscribeCount -= 1;
+    if (this.#subscribeCount === 0) {
+      this.#onUnsubscribe.call(null);
+    }
+  }
+}
+
 // eslint-disable-next-line import/no-mutable-exports
 export let setInternalValue: <T>(signal: ValueSignal<T>, value: T) => void;
 
@@ -12,7 +62,7 @@ export let setInternalValue: <T>(signal: ValueSignal<T>, value: T) => void;
  *
  * @internal
  */
-export abstract class ValueSignal<T> extends Signal<T> {
+export abstract class ValueSignal<T> extends DependencyTrackSignal<T> {
   static {
     setInternalValue = (signal: ValueSignal<unknown>, value: unknown): void => signal.#setInternalValue(value);
   }
@@ -24,10 +74,19 @@ export abstract class ValueSignal<T> extends Signal<T> {
    * @param publish - The function that publishes the
    * value of the signal to the server.
    * @param value - The initial value of the signal
+   * @param onSubscribe - The function that is called
+   * when the signal is subscribed to.
+   * @param onUnsubscribe - The function that is called
+   * when the signal is unsubscribed from.
    * @defaultValue undefined
    */
-  constructor(publish: (event: StateEvent) => Promise<boolean>, value?: T) {
-    super(value);
+  constructor(
+    publish: (event: StateEvent) => Promise<boolean>,
+    value: T | undefined,
+    onSubscribe: () => void,
+    onUnsubscribe: () => void,
+  ) {
+    super(value, onSubscribe, onUnsubscribe);
     this.#publish = publish;
   }
 
@@ -79,13 +138,15 @@ export abstract class ValueSignal<T> extends Signal<T> {
  *
  * @example
  * ```tsx
- *  const counter = CounterService.counter();
+ * const counter = CounterService.counter();
  *
  * return (
- *    <Button onClick={() => counter++)}>
- *      Click count: { counter }
- *    </Button>
- *    <Button onClick={() => counter.value = 0}>Reset</Button>
+ *   <>
+ *     <Button onClick={() => counter++)}>
+ *       Click count: { counter }
+ *     </Button>
+ *     <Button onClick={() => counter.value = 0}>Reset</Button>
+ *   </>
  * );
  * ```
  */

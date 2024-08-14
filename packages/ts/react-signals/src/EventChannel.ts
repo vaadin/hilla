@@ -1,5 +1,6 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
+import { signal, effect } from './core.js';
 import { NumberSignal, setInternalValue, type ValueSignal } from './Signals.js';
 import SignalsHandler from './SignalsHandler';
 import { type StateEvent, StateEventType } from './types.js';
@@ -33,6 +34,23 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
 
   readonly #internalSignal: S;
 
+  readonly #subscribeCount = signal(0);
+  #subscription?: Subscription<StateEvent>;
+
+  #subscribe(): void {
+    // Update asynchronously to avoid side effects when this is run inside compute()
+    setTimeout(() => {
+      this.#subscribeCount.value += 1;
+    }, 0);
+  }
+
+  #unsubscribe(): void {
+    // Update asynchronously to avoid side effects when this is run inside compute()
+    setTimeout(() => {
+      this.#subscribeCount.value -= 1;
+    }, 0);
+  }
+
   constructor(signalProviderServiceMethod: string, connectClient: ConnectClient) {
     this.#id = nanoid();
     this.#signalsHandler = new SignalsHandler(connectClient);
@@ -43,18 +61,44 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
       publish: async (signalId: string, event: StateEvent) => this.#signalsHandler.update(signalId, event),
     };
 
-    this.#internalSignal = this.createInternalSignal(async (event: StateEvent) => this.publish(event));
+    this.#internalSignal = this.createInternalSignal(
+      async (event: StateEvent) => this.publish(event),
+      undefined,
+      () => this.#subscribe(),
+      () => this.#unsubscribe(),
+    );
 
-    this.#connect();
+    effect(() => {
+      if (this.#subscribeCount.value > 0) {
+        this.#connect();
+      } else {
+        this.#disconnect();
+      }
+    });
   }
 
   #connect() {
-    this.#channelDescriptor
+    if (this.#subscription) {
+      return;
+    }
+
+    this.#subscription = this.#channelDescriptor
       .subscribe(this.#channelDescriptor.signalProviderEndpointMethod, this.#id)
       .onNext((stateEvent) => {
         // Update signals based on the new value from the event:
         this.#updateSignals(stateEvent);
       });
+  }
+
+  #disconnect() {
+    if (!this.#subscription) {
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.log('Cancelling subscription...');
+
+    this.#subscription.cancel();
+    this.#subscription = undefined;
   }
 
   #updateSignals(stateEvent: StateEvent): void {
@@ -82,7 +126,12 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
     return this.#id;
   }
 
-  abstract createInternalSignal(publish: (event: StateEvent) => Promise<boolean>, initialValue?: T): S;
+  abstract createInternalSignal(
+    publish: (event: StateEvent) => Promise<boolean>,
+    initialValue: T | undefined,
+    onSubscribe: () => void,
+    onUnsubscribe: () => void,
+  ): S;
 }
 
 /**
@@ -90,7 +139,12 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
  * server-side signal instance that holds a number value.
  */
 export class NumberSignalChannel extends SignalChannel<number, NumberSignal> {
-  override createInternalSignal(publish: (event: StateEvent) => Promise<boolean>, initialValue?: number): NumberSignal {
-    return new NumberSignal(publish, initialValue);
+  override createInternalSignal(
+    publish: (event: StateEvent) => Promise<boolean>,
+    initialValue: number | undefined,
+    onSubscribe: () => void,
+    onUnsubscribe: () => void,
+  ): NumberSignal {
+    return new NumberSignal(publish, initialValue, onSubscribe, onUnsubscribe);
   }
 }

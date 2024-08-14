@@ -15,9 +15,13 @@ use(chaiLike);
 describe('@vaadin/hilla-react-signals', () => {
   describe('NumberSignal', () => {
     let publishSpy: sinon.SinonSpy;
+    let subscribeSpy: sinon.SinonSpy;
+    let unsubscribeSpy: sinon.SinonSpy;
 
     beforeEach(() => {
       publishSpy = sinon.spy(async (_: StateEvent): Promise<boolean> => Promise.resolve(true));
+      subscribeSpy = sinon.spy();
+      unsubscribeSpy = sinon.spy();
     });
 
     afterEach(() => {
@@ -25,31 +29,31 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should retain default value as initialized', () => {
-      const numberSignal1 = new NumberSignal(publishSpy);
+      const numberSignal1 = new NumberSignal(publishSpy, undefined, subscribeSpy, unsubscribeSpy);
       expect(numberSignal1.value).to.be.undefined;
 
-      const numberSignal2 = new NumberSignal(publishSpy, undefined);
+      const numberSignal2 = new NumberSignal(publishSpy, undefined, subscribeSpy, unsubscribeSpy);
       expect(numberSignal2.value).to.be.undefined;
 
-      const numberSignal3 = new NumberSignal(publishSpy, 0);
+      const numberSignal3 = new NumberSignal(publishSpy, 0, subscribeSpy, unsubscribeSpy);
       expect(numberSignal3.value).to.equal(0);
 
-      const numberSignal4 = new NumberSignal(publishSpy, 42.424242);
+      const numberSignal4 = new NumberSignal(publishSpy, 42.424242, subscribeSpy, unsubscribeSpy);
       expect(numberSignal4.value).to.equal(42.424242);
 
-      const numberSignal5 = new NumberSignal(publishSpy, -42.424242);
+      const numberSignal5 = new NumberSignal(publishSpy, -42.424242, subscribeSpy, unsubscribeSpy);
       expect(numberSignal5.value).to.equal(-42.424242);
     });
 
     it('should publish the new value to the server when set', () => {
-      const numberSignal = new NumberSignal(publishSpy);
+      const numberSignal = new NumberSignal(publishSpy, undefined, subscribeSpy, unsubscribeSpy);
       numberSignal.value = 42;
       expect(publishSpy).to.have.been.calledOnce;
       expect(publishSpy).to.have.been.calledWithMatch({ type: 'set', value: 42 });
 
       publishSpy.resetHistory();
 
-      const numberSignal2 = new NumberSignal(publishSpy, 0);
+      const numberSignal2 = new NumberSignal(publishSpy, 0, subscribeSpy, unsubscribeSpy);
       // eslint-disable-next-line no-plusplus
       numberSignal2.value++;
       expect(publishSpy).to.have.been.calledOnce;
@@ -57,19 +61,19 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should render value when signal is rendered', async () => {
-      const numberSignal = new NumberSignal(publishSpy, 42);
+      const numberSignal = new NumberSignal(publishSpy, 42, subscribeSpy, unsubscribeSpy);
       const result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
     });
 
     it('should set the underlying value locally without waiting for server confirmation', () => {
-      const numberSignal = new NumberSignal(publishSpy);
+      const numberSignal = new NumberSignal(publishSpy, undefined, subscribeSpy, unsubscribeSpy);
       expect(numberSignal.value).to.equal(undefined);
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
-      const anotherNumberSignal = new NumberSignal(publishSpy);
+      const anotherNumberSignal = new NumberSignal(publishSpy, undefined, subscribeSpy, unsubscribeSpy);
       const results: Array<number | undefined> = [];
 
       effect(() => {
