@@ -1,17 +1,19 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
+import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type FunctionDeclaration, type Identifier, type SourceFile, type TypeNode } from 'typescript';
+import ts, { type FunctionDeclaration, type Identifier, type SourceFile } from 'typescript';
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
 
-const CREATE_SIGNAL_CHANNEL = '$CREATE_SIGNAL_CHANNEL$';
+const SIGNAL_CHANNEL = '$SIGNAL_CHANNEL$';
 const CONNECT_CLIENT = '$CONNECT_CLIENT$';
+const METHOD_NAME = '$METHOD_NAME$';
 const SIGNAL = '$SIGNAL$';
 
-const signals = ['NumberSignal', 'ValueSignal'];
+const signals = ['NumberSignal', 'RemoteSignal'];
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -33,7 +35,7 @@ export default class SignalProcessor {
     this.#owner.logger.debug(`Processing signals: ${this.#service}`);
     const { imports } = this.#dependencyManager;
 
-    const createSignalChannelId = imports.named.add(HILLA_REACT_SIGNALS, 'createSignalChannel');
+    const signalChannelId = imports.named.add(HILLA_REACT_SIGNALS, 'SignalChannel');
 
     const [, connectClientId] = imports.default.iter().find(([path]) => path.includes('connect-client'))!;
 
@@ -43,34 +45,19 @@ export default class SignalProcessor {
     const [file] = ts.transform<SourceFile>(this.#sourceFile, [
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
-          const methodName = tsNode.name.text;
           const signalId = this.#replaceSignalImport(tsNode);
 
-          const body = template(
-            `
-function dummy() {
-  const signal = new ${SIGNAL}();
-  ${CREATE_SIGNAL_CHANNEL}(signal, '${this.#service}.${methodName}', ${CONNECT_CLIENT});
-  return signal;
-}`,
-            (statements) => (statements[0] as FunctionDeclaration).body?.statements,
+          return template(
+            `(function ${METHOD_NAME}(this: ${SIGNAL_CHANNEL}) {
+  return new ${SIGNAL}(undefined, { channel: this });
+}).bind(new ${SIGNAL_CHANNEL}(${CONNECT_CLIENT}, '${this.#service}.${tsNode.name.text}'));`,
+            (statements) => statements,
             [
-              transform((node) =>
-                ts.isIdentifier(node) && node.text === CREATE_SIGNAL_CHANNEL ? createSignalChannelId : node,
-              ),
+              transform((node) => (ts.isIdentifier(node) && node.text === METHOD_NAME ? tsNode.name : node)),
+              transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL_CHANNEL ? signalChannelId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
             ],
-          );
-
-          return ts.factory.createFunctionDeclaration(
-            tsNode.modifiers?.filter((modifier) => modifier.kind !== ts.SyntaxKind.AsyncKeyword),
-            tsNode.asteriskToken,
-            tsNode.name,
-            tsNode.typeParameters,
-            tsNode.parameters.filter(({ name }) => !(ts.isIdentifier(name) && name.text === 'init')),
-            ts.factory.createTypeReferenceNode(signalId),
-            ts.factory.createBlock(body ?? [], true),
           );
         }
         return tsNode;
