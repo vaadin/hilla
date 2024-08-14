@@ -94,9 +94,8 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
     if (!this.#subscription) {
       return;
     }
-    // eslint-disable-next-line no-console
-    console.log('Cancelling subscription...');
 
+    this.#signalsHandler.unsubscribe(this.#id);
     this.#subscription.cancel();
     this.#subscription = undefined;
   }

@@ -18,6 +18,12 @@ export default class SignalsHandler {
     return this.#client.subscribe('SignalsHandler', 'subscribe', { signalProviderEndpointMethod, clientSignalId });
   }
 
+  unsubscribe(clientSignalId: string, init?: EndpointRequestInit): void {
+    this.#client.call('SignalsHandler', 'unsubscribe', { clientSignalId }, init).catch((error) => {
+      throw error;
+    });
+  }
+
   async update(clientSignalId: string, event: StateEvent, init?: EndpointRequestInit): Promise<void> {
     return this.#client.call('SignalsHandler', 'update', { clientSignalId, event }, init);
   }

@@ -51,6 +51,18 @@ public class SecureSignalsRegistry {
         delegate.register(clientSignalId, signal);
     }
 
+    public synchronized void unsubscribe(String clientSignalId)
+            throws EndpointInvocationException.EndpointAccessDeniedException,
+            EndpointInvocationException.EndpointNotFoundException {
+        var endpointMethodInfo = endpointMethods.get(clientSignalId);
+        if (endpointMethodInfo == null) {
+            return;
+        }
+        checkAccess(endpointMethodInfo.endpoint, endpointMethodInfo.method);
+        delegate.removeClientSignalToSignalMapping(clientSignalId);
+        endpointMethods.remove(clientSignalId);
+    }
+
     public synchronized NumberSignal get(String clientSignalId)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {

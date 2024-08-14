@@ -51,6 +51,18 @@ public class SignalsHandler {
     }
 
     /**
+     * Unsubscribes a client from a signal.
+     *
+     * @param clientSignalId
+     *            the client signal id
+     */
+    public void unsubscribe(String clientSignalId)
+            throws EndpointInvocationException.EndpointAccessDeniedException,
+            EndpointInvocationException.EndpointNotFoundException {
+        registry.unsubscribe(clientSignalId);
+    }
+
+    /**
      * Updates a signal with an event.
      *
      * @param clientSignalId
