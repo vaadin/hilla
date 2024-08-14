@@ -52,16 +52,11 @@ public class SignalBasicSecurityIT extends ChromeBrowserTest {
     public void userCounterSignalIsAccessibleForLoggedInUser() {
 
         loginAs("user");
-
-        Assert.assertEquals(20, fetchCounterValue("User")); // shows server and
-                                                            // related endpoint
-                                                            // are working
-        Assert.assertEquals(20, getCounterSignalValue("userCounter")); // user
-                                                                       // counter
-                                                                       // should
-                                                                       // be
-                                                                       // accessible
-        // Still admin counter should not be accessible:
+        // shows server and related endpoint are working:
+        Assert.assertEquals(20, fetchCounterValue("User"));
+        // user counter should be accessible:
+        Assert.assertEquals(20, getCounterSignalValue("userCounter"));
+        // Still admin counter should not be accessed:
         Assert.assertEquals(-1, getCounterSignalValue("adminCounter"));
 
         // Logged-in user can manipulate the user counter:
@@ -72,9 +67,8 @@ public class SignalBasicSecurityIT extends ChromeBrowserTest {
         // But cannot manipulate the admin counter:
         clickButton("incrementAdminCounter");
         Assert.assertEquals(-1, getCounterSignalValue("adminCounter"));
-        Assert.assertEquals(30, fetchCounterValue("Admin")); // shows server and
-                                                             // related endpoint
-                                                             // are working
+        // shows server and related endpoint are working:
+        Assert.assertEquals(30, fetchCounterValue("Admin"));
 
         clickButton("reset");
         logout();
@@ -85,16 +79,10 @@ public class SignalBasicSecurityIT extends ChromeBrowserTest {
 
         loginAs("admin");
 
-        Assert.assertEquals(20, getCounterSignalValue("userCounter")); // user
-                                                                       // counter
-                                                                       // should
-                                                                       // be
-                                                                       // accessible
-        Assert.assertEquals(30, getCounterSignalValue("adminCounter")); // admin
-                                                                        // counter
-                                                                        // should
-                                                                        // be
-                                                                        // accessible
+        // user counter should be accessible:
+        Assert.assertEquals(20, getCounterSignalValue("userCounter"));
+        // admin counter should be accessible:
+        Assert.assertEquals(30, getCounterSignalValue("adminCounter"));
 
         clickButton("increaseUserCounter");
         Assert.assertEquals(21, getCounterSignalValue("userCounter"));

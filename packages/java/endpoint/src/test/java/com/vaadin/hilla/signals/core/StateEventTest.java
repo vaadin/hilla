@@ -106,8 +106,8 @@ public class StateEventTest {
         json.put(StateEvent.Field.ID, clientId);
         json.put(StateEvent.Field.TYPE,
                 StateEvent.EventType.SET.name().toLowerCase());
-        json.set(StateEvent.Field.VALUE, mapper.createArrayNode()); // Unsupported
-                                                                    // type
+        // Unsupported type:
+        json.set(StateEvent.Field.VALUE, mapper.createArrayNode());
 
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> new StateEvent<>(json));
