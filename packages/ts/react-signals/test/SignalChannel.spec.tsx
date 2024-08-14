@@ -4,8 +4,8 @@ import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { NumberSignal, type SignalChannel } from '../src/index.js';
-import { createSignalChannel, type StateChange, StateChangeType } from '../src/SignalChannel.js';
+import { NumberSignal, SignalChannel } from '../src/index.js';
+import { StateEventType, type StateEvent } from '../src/SignalChannel.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
@@ -13,24 +13,24 @@ use(sinonChai);
 describe('@vaadin/hilla-react-signals', () => {
   describe('SignalChannel', () => {
     function simulateReceivedChange(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateChange<number>>>,
-      change: StateChange<number>,
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>,
+      event: StateEvent,
     ) {
       const onNextCallback = connectSubscriptionMock.onNext.getCall(0).args[0];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      onNextCallback(change);
+      onNextCallback(event);
     }
 
     let connectClientMock: sinon.SinonStubbedInstance<ConnectClient>;
-    let connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateChange<number>>>;
+    let connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
     let signal: NumberSignal;
-    let channel: SignalChannel<NumberSignal>;
+    let channel: SignalChannel;
 
     beforeEach(() => {
       connectClientMock = sinon.createStubInstance(ConnectClient);
       connectClientMock.call.resolves();
 
-      connectSubscriptionMock = sinon.spy<Subscription<StateChange<number>>>({
+      connectSubscriptionMock = sinon.spy<Subscription<StateEvent>>({
         cancel() {},
         context() {
           return this;
@@ -48,8 +48,8 @@ describe('@vaadin/hilla-react-signals', () => {
       // Mock the subscribe method
       connectClientMock.subscribe.returns(connectSubscriptionMock);
 
-      signal = new NumberSignal();
-      channel = createSignalChannel(signal, 'testEndpoint', connectClientMock);
+      channel = new SignalChannel(connectClientMock, 'testEndpoint');
+      signal = new NumberSignal(undefined, { channel });
       connectClientMock.call.resetHistory();
     });
 
@@ -76,7 +76,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(connectClientMock.call).to.be.have.been.calledOnce;
       expect(connectClientMock.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: channel.id,
-        change: { type: StateChangeType.SET, value: 42 },
+        event: { type: StateEventType.SET, value: 42 },
       });
     });
 
@@ -84,7 +84,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(signal.value).to.be.undefined;
 
       // Simulate the event received from the server:
-      const snapshotEvent: StateChange<number> = { id: 'someId', type: StateChangeType.SNAPSHOT, value: 42 };
+      const snapshotEvent: StateEvent = { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 };
       simulateReceivedChange(connectSubscriptionMock, snapshotEvent);
 
       // Check if the signal value is updated:
@@ -93,13 +93,13 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should render the updated value', async () => {
       const numberSignal = signal;
-      simulateReceivedChange(connectSubscriptionMock, { id: 'someId', type: StateChangeType.SNAPSHOT, value: 42 });
+      simulateReceivedChange(connectSubscriptionMock, { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 });
 
       const result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
-      simulateReceivedChange(connectSubscriptionMock, { id: 'someId', type: StateChangeType.SNAPSHOT, value: 99 });
+      simulateReceivedChange(connectSubscriptionMock, { id: 'someId', type: StateEventType.SNAPSHOT, value: 99 });
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 99');
     });
@@ -116,7 +116,7 @@ describe('@vaadin/hilla-react-signals', () => {
       signal.value = 42;
       expect(connectClientMock.call).to.have.been.calledOnce;
       expect(connectClientMock.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        change: { type: StateChangeType.SET, value: 42 },
+        event: { type: StateEventType.SET, value: 42 },
       });
 
       signal.value = 0;
@@ -126,11 +126,11 @@ describe('@vaadin/hilla-react-signals', () => {
       signal.value += 1;
       expect(connectClientMock.call).to.have.been.calledOnce;
       expect(connectClientMock.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        change: { type: StateChangeType.SET, value: 1 },
+        event: { type: StateEventType.SET, value: 1 },
       });
     });
 
-    it('should throw an error when the server call fails', async () => {
+    it('should throw an error when the server call fails', () => {
       connectClientMock.call.rejects(new Error('Server error'));
       signal.value = 42;
     });

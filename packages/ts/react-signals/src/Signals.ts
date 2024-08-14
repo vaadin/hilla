@@ -1,4 +1,10 @@
+import { signal } from '@preact/signals-react';
 import { Signal } from './core.js';
+import type { SignalChannel } from './SignalChannel.js';
+
+export type ValueSignalOptions = Readonly<{
+  channel?: SignalChannel;
+}>;
 
 /**
  * A signal that holds a value. The underlying
@@ -7,7 +13,43 @@ import { Signal } from './core.js';
  *
  * @internal
  */
-export abstract class ValueSignal<T> extends Signal<T> {}
+export class ValueSignal<T = unknown> extends Signal<T> {
+  readonly #pending = signal(false);
+  readonly #error = signal<Error | undefined>(undefined);
+
+  constructor(value?: T, options?: ValueSignalOptions) {
+    super(value);
+    options?.channel?.connect(this);
+  }
+
+  /**
+   * Defines whether the signal is currently pending server-side response.
+   */
+  get pending(): boolean {
+    return this.#pending.value;
+  }
+
+  /**
+   * Defines whether the signal has an error.
+   */
+  get error(): Error | undefined {
+    return this.#error.value;
+  }
+
+  override subscribe(connector: (value: T, done: (promise: Promise<void>) => void) => void): () => void {
+    return super.subscribe((value) => {
+      connector(value, (promise) => {
+        promise
+          .catch((error: unknown) => {
+            this.#error.value = error instanceof Error ? error : new Error(String(error));
+          })
+          .finally(() => {
+            this.#pending.value = false;
+          });
+      });
+    });
+  }
+}
 
 /**
  * A signal that holds a number value. The underlying
