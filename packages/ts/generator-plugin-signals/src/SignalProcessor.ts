@@ -8,6 +8,7 @@ import ts, { type FunctionDeclaration, type Identifier, type SourceFile } from '
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
 
+const CHANNEL = '$CHANNEL$';
 const SIGNAL_CHANNEL = '$SIGNAL_CHANNEL$';
 const CONNECT_CLIENT = '$CONNECT_CLIENT$';
 const METHOD_NAME = '$METHOD_NAME$';
@@ -46,13 +47,16 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
+          const channel = createFullyUniqueIdentifier('channel');
 
           return template(
-            `(function ${METHOD_NAME}(this: ${SIGNAL_CHANNEL}) {
-  return new ${SIGNAL}(undefined, { channel: this });
-}).bind(new ${SIGNAL_CHANNEL}(${CONNECT_CLIENT}, '${this.#service}.${tsNode.name.text}'));`,
+            `const ${CHANNEL} = new ${SIGNAL_CHANNEL}(${CONNECT_CLIENT}, '${this.#service}.${tsNode.name.text}')
+function ${METHOD_NAME}() {
+  return new ${SIGNAL}(undefined, { channel: ${CHANNEL} });
+}`,
             (statements) => statements,
             [
+              transform((node) => (ts.isIdentifier(node) && node.text === CHANNEL ? channel : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === METHOD_NAME ? tsNode.name : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL_CHANNEL ? signalChannelId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
