@@ -1,4 +1,4 @@
-package com.vaadin.hilla.signals.core;
+package com.vaadin.hilla.signals.core.registry;
 
 import com.vaadin.hilla.signals.NumberSignal;
 import org.junit.Test;

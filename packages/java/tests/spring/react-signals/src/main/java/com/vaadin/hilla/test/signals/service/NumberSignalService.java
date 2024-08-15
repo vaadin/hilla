@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @AnonymousAllowed
 @BrowserCallable
-public class NumberSignalProviderService {
+public class NumberSignalService {
     private final NumberSignal counter = new NumberSignal();
     private final NumberSignal sharedValue = new NumberSignal(0.5);
 
