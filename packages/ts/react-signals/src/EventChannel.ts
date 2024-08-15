@@ -95,9 +95,11 @@ abstract class SignalChannel<T, S extends ValueSignal<T>> {
       return;
     }
 
-    this.#signalsHandler.unsubscribe(this.#id);
     this.#subscription.cancel();
     this.#subscription = undefined;
+    this.#signalsHandler.unsubscribe(this.#id).catch((error) => {
+      console.error(error);
+    });
   }
 
   #updateSignals(stateEvent: StateEvent): void {

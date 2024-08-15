@@ -92,7 +92,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(42);
     });
 
-    it("should render signal's the updated value", async () => {
+    it("should render signal's updated value", async () => {
       const numberSignalChannel = new NumberSignalChannel('testEndpoint', connectClientMock);
       const numberSignal = numberSignalChannel.signal;
 

@@ -34,7 +34,7 @@ describe('@vaadin/hilla-react-signals', () => {
       });
     });
 
-    it('update should call client.call', async () => {
+    it("update should call client.call to invoke endpoint's update", async () => {
       const clientSignalId = 'testSignalId';
       const event: StateEvent = { id: 'testEvent', type: StateEventType.SET, value: 10 };
       const init = {};
@@ -48,6 +48,17 @@ describe('@vaadin/hilla-react-signals', () => {
         { clientSignalId, event },
         init,
       );
+    });
+
+    it("unsubscribe should call client.call to invoke endpoint's unsubscribe", async () => {
+      const clientSignalId = 'testSignalId';
+      const event: StateEvent = { id: 'testEvent', type: StateEventType.SET, value: 10 };
+      const init = {};
+
+      await signalsHandler.unsubscribe(clientSignalId, init);
+
+      expect(connectClientMock.call).to.be.have.been.calledOnce;
+      expect(connectClientMock.call).to.have.been.calledWith('SignalsHandler', 'unsubscribe', { clientSignalId }, init);
     });
   });
 });
