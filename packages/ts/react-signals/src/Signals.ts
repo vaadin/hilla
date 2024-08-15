@@ -1,50 +1,9 @@
-import { signal } from '@preact/signals-react';
-import { Signal } from './core.js';
-import type { SignalChannel } from './SignalChannel.js';
-
-export type ValueSignalOptions = Readonly<{
-  channel?: SignalChannel;
-}>;
+import { FullStackSignal } from './FullStackSignal.js';
 
 /**
- * A signal that holds a value. The underlying
- * value of this signal is stored and updated as a
- * shared value on the server.
- *
- * @internal
+ * A full-stack signal that holds an arbitrary value.
  */
-export class ValueSignal<T = unknown> extends Signal<T> {
-  readonly #pending = signal(false);
-  readonly #error = signal<Error | undefined>(undefined);
-
-  constructor(value?: T, options?: ValueSignalOptions) {
-    super(value);
-    options?.channel?.connect(this, (promise) => {
-      this.#pending.value = true;
-      promise
-        .catch((error: unknown) => {
-          this.#error.value = error instanceof Error ? error : new Error(String(error));
-        })
-        .finally(() => {
-          this.#pending.value = false;
-        });
-    });
-  }
-
-  /**
-   * Defines whether the signal is currently pending server-side response.
-   */
-  get pending(): boolean {
-    return this.#pending.value;
-  }
-
-  /**
-   * Defines whether the signal has an error.
-   */
-  get error(): Error | undefined {
-    return this.#error.value;
-  }
-}
+export class ValueSignal<T> extends FullStackSignal<T> {}
 
 /**
  * A signal that holds a number value. The underlying
