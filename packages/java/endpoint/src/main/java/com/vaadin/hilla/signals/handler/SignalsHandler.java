@@ -3,9 +3,8 @@ package com.vaadin.hilla.signals.handler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.core.SignalsRegistry;
+import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import reactor.core.publisher.Flux;
 
 /**
@@ -15,12 +14,10 @@ import reactor.core.publisher.Flux;
 @BrowserCallable
 public class SignalsHandler {
 
-    private final SignalsRegistry registry;
-    private final EndpointInvoker invoker;
+    private final SecureSignalsRegistry registry;
 
-    public SignalsHandler(SignalsRegistry registry, EndpointInvoker invoker) {
+    public SignalsHandler(SecureSignalsRegistry registry) {
         this.registry = registry;
-        this.invoker = invoker;
     }
 
     /**
@@ -36,24 +33,21 @@ public class SignalsHandler {
     public Flux<ObjectNode> subscribe(String signalProviderEndpointMethod,
             String clientSignalId) {
         try {
-            if (registry.contains(clientSignalId)) {
-                return signalAsFlux(clientSignalId);
-            }
-
             String[] endpointMethodParts = signalProviderEndpointMethod
                     .split("\\.");
-            NumberSignal signal = (NumberSignal) invoker.invoke(
-                    endpointMethodParts[0], endpointMethodParts[1], null, null,
-                    null);
-            registry.register(clientSignalId, signal);
-            return signalAsFlux(clientSignalId);
+            var endpointName = endpointMethodParts[0];
+            var methodName = endpointMethodParts[1];
+
+            var signal = registry.get(clientSignalId);
+            if (signal != null) {
+                return signal.subscribe();
+            }
+
+            registry.register(clientSignalId, endpointName, methodName);
+            return registry.get(clientSignalId).subscribe();
         } catch (Exception e) {
             return Flux.error(e);
         }
-    }
-
-    private Flux<ObjectNode> signalAsFlux(String clientSignalId) {
-        return registry.get(clientSignalId).subscribe();
     }
 
     /**
@@ -64,8 +58,10 @@ public class SignalsHandler {
      * @param event
      *            the event to update with
      */
-    public void update(String clientSignalId, ObjectNode event) {
-        if (!registry.contains(clientSignalId)) {
+    public void update(String clientSignalId, ObjectNode event)
+            throws EndpointInvocationException.EndpointAccessDeniedException,
+            EndpointInvocationException.EndpointNotFoundException {
+        if (registry.get(clientSignalId) == null) {
             throw new IllegalStateException(String.format(
                     "Signal not found for client signal: %s", clientSignalId));
         }
