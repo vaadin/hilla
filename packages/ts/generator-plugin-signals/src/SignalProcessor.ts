@@ -1,6 +1,5 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
-import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
@@ -8,8 +7,6 @@ import ts, { type FunctionDeclaration, type Identifier, type SourceFile } from '
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
 
-const CHANNEL = '$CHANNEL$';
-const SIGNAL_CHANNEL = '$SIGNAL_CHANNEL$';
 const CONNECT_CLIENT = '$CONNECT_CLIENT$';
 const METHOD_NAME = '$METHOD_NAME$';
 const SIGNAL = '$SIGNAL$';
@@ -36,8 +33,6 @@ export default class SignalProcessor {
     this.#owner.logger.debug(`Processing signals: ${this.#service}`);
     const { imports } = this.#dependencyManager;
 
-    const signalChannelId = imports.named.add(HILLA_REACT_SIGNALS, 'SignalChannel');
-
     const [, connectClientId] = imports.default.iter().find(([path]) => path.includes('connect-client'))!;
 
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
@@ -47,18 +42,14 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
-          const channel = createFullyUniqueIdentifier('channel');
 
           return template(
-            `const ${CHANNEL} = new ${SIGNAL_CHANNEL}(${CONNECT_CLIENT}, '${this.#service}.${tsNode.name.text}')
-function ${METHOD_NAME}() {
-  return new ${SIGNAL}(undefined, { channel: ${CHANNEL} });
+            `function ${METHOD_NAME}() {
+  return new ${SIGNAL}(undefined, { client: ${CONNECT_CLIENT}, method: '${this.#service}.${tsNode.name.text}' });
 }`,
             (statements) => statements,
             [
-              transform((node) => (ts.isIdentifier(node) && node.text === CHANNEL ? channel : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === METHOD_NAME ? tsNode.name : node)),
-              transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL_CHANNEL ? signalChannelId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
             ],
