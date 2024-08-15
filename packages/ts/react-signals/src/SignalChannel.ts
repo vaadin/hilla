@@ -1,6 +1,5 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
-import { effect } from './core.js';
 import type { ValueSignal } from './Signals.js';
 
 const ENDPOINT = 'SignalsHandler';
