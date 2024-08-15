@@ -19,7 +19,16 @@ export class ValueSignal<T = unknown> extends Signal<T> {
 
   constructor(value?: T, options?: ValueSignalOptions) {
     super(value);
-    options?.channel?.connect(this);
+    options?.channel?.connect(this, (promise) => {
+      this.#pending.value = true;
+      promise
+        .catch((error: unknown) => {
+          this.#error.value = error instanceof Error ? error : new Error(String(error));
+        })
+        .finally(() => {
+          this.#pending.value = false;
+        });
+    });
   }
 
   /**
@@ -34,20 +43,6 @@ export class ValueSignal<T = unknown> extends Signal<T> {
    */
   get error(): Error | undefined {
     return this.#error.value;
-  }
-
-  override subscribe(connector: (value: T, done: (promise: Promise<void>) => void) => void): () => void {
-    return super.subscribe((value) => {
-      connector(value, (promise) => {
-        promise
-          .catch((error: unknown) => {
-            this.#error.value = error instanceof Error ? error : new Error(String(error));
-          })
-          .finally(() => {
-            this.#pending.value = false;
-          });
-      });
-    });
   }
 }
 

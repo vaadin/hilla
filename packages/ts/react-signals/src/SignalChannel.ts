@@ -1,5 +1,6 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
+import { effect } from './core.js';
 import type { ValueSignal } from './Signals.js';
 
 const ENDPOINT = 'SignalsHandler';
@@ -52,14 +53,18 @@ export class SignalChannel {
 
   cancel(): void {
     this.#subscription?.cancel();
+    this.#subscription = undefined;
   }
 
   /**
    * Connects the local signal to the server.
    *
    * @param signal - The signal instance to be connected.
+   * @param onUpdate - The callback that will be called when the signal is
+   * updated.
    */
-  connect(signal: ValueSignal): void {
+  connect(signal: ValueSignal, onUpdate: (promise: Promise<void>) => void): void {
+    let paused = false;
     this.#subscription ??= this.#client
       .subscribe(ENDPOINT, 'subscribe', {
         signalProviderEndpointMethod: this.#method,
@@ -67,17 +72,21 @@ export class SignalChannel {
       })
       .onNext((event: StateEvent) => {
         if (event.type === StateEventType.SNAPSHOT) {
+          paused = true;
           signal.value = event.value;
+          paused = false;
         }
       });
 
-    signal.subscribe((value, done) => {
-      done(
-        this.#client.call(ENDPOINT, 'update', {
-          clientSignalId: this.#id,
-          event: { id: nanoid(), type: StateEventType.SET, value },
-        }),
-      );
+    signal.subscribe((value) => {
+      if (!paused) {
+        onUpdate(
+          this.#client.call(ENDPOINT, 'update', {
+            clientSignalId: this.#id,
+            event: { id: nanoid(), type: StateEventType.SET, value },
+          }),
+        );
+      }
     });
   }
 }
