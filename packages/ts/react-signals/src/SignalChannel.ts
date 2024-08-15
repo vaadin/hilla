@@ -1,5 +1,6 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
+import { batch } from './core.js';
 import type { ValueSignal } from './Signals.js';
 
 const ENDPOINT = 'SignalsHandler';
@@ -33,6 +34,7 @@ export class SignalChannel {
   readonly #id = nanoid();
   readonly #client: ConnectClient;
   readonly #method: string;
+  #dependencies: readonly ValueSignal[] = [];
   #subscription?: Subscription<StateEvent>;
 
   /**
@@ -64,6 +66,9 @@ export class SignalChannel {
    */
   connect(signal: ValueSignal, onUpdate: (promise: Promise<void>) => void): void {
     let paused = false;
+
+    this.#dependencies = [...this.#dependencies, signal];
+
     this.#subscription ??= this.#client
       .subscribe(ENDPOINT, 'subscribe', {
         signalProviderEndpointMethod: this.#method,
@@ -72,7 +77,11 @@ export class SignalChannel {
       .onNext((event: StateEvent) => {
         if (event.type === StateEventType.SNAPSHOT) {
           paused = true;
-          signal.value = event.value;
+          batch(() => {
+            for (const dependency of this.#dependencies) {
+              dependency.value = event.value;
+            }
+          });
           paused = false;
         }
       });
