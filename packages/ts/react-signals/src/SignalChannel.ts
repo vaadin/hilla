@@ -22,28 +22,6 @@ export type StateEvent = Readonly<{
 }>;
 
 /**
- * A simple timeout helper class.
- */
-class Timeout {
-  readonly #timeout: number;
-  readonly #callback: () => void;
-  #timeoutId?: ReturnType<typeof setTimeout>;
-
-  constructor(callback: () => void, timeout: number) {
-    this.#callback = callback;
-    this.#timeout = timeout;
-  }
-
-  restart() {
-    if (this.#timeoutId) {
-      clearTimeout(this.#timeoutId);
-    }
-
-    this.#timeoutId = setTimeout(this.#callback, this.#timeout);
-  }
-}
-
-/**
  * A signal channel that can be used to communicate with a server-side.
  *
  * The signal channel is responsible for subscribing to the server-side signal
@@ -53,7 +31,6 @@ class Timeout {
  */
 export class SignalChannel {
   readonly #id = nanoid();
-  readonly #timeout: Timeout;
   readonly #client: ConnectClient;
   readonly #method: string;
   #subscription?: Subscription<StateEvent>;
@@ -62,20 +39,19 @@ export class SignalChannel {
    * @param client - The client instance to be used for communication.
    * @param signalProviderEndpointMethod - The method name of the signal provider
    * service.
-   * @param timeout - The timeout in milliseconds after which the connection
-   * will be closed. The timeout is restarted every time a new signal is
-   * connected or a signal value is updated. Default is 2000 ms.
-   *
    * @returns The signal channel instance.
    */
-  constructor(client: ConnectClient, signalProviderEndpointMethod: string, timeout = 2000) {
+  constructor(client: ConnectClient, signalProviderEndpointMethod: string) {
     this.#client = client;
     this.#method = signalProviderEndpointMethod;
-    this.#timeout = new Timeout(() => this.#subscription?.cancel(), timeout);
   }
 
   get id(): string {
     return this.#id;
+  }
+
+  cancel(): void {
+    this.#subscription?.cancel();
   }
 
   /**
@@ -84,8 +60,6 @@ export class SignalChannel {
    * @param signal - The signal instance to be connected.
    */
   connect(signal: ValueSignal): void {
-    this.#timeout.restart();
-
     this.#subscription ??= this.#client
       .subscribe(ENDPOINT, 'subscribe', {
         signalProviderEndpointMethod: this.#method,
@@ -98,8 +72,6 @@ export class SignalChannel {
       });
 
     signal.subscribe((value, done) => {
-      this.#timeout.restart();
-
       done(
         this.#client.call(ENDPOINT, 'update', {
           clientSignalId: this.#id,
