@@ -47,7 +47,7 @@ describe('@vaadin/hilla-react-signals', () => {
       // Mock the subscribe method
       client.subscribe.returns(subscription);
 
-      signal = new NumberSignal(undefined, { client, method: 'testEndpoint' });
+      signal = new NumberSignal(undefined, { client, endpoint: 'TestEndpoint', method: 'testMethod' });
       client.call.resetHistory();
     });
 
@@ -64,7 +64,8 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
         clientSignalId: signal.id,
-        signalProviderEndpointMethod: 'testEndpoint',
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
       });
     });
 
@@ -105,8 +106,9 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should subscribe using client', () => {
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
-        signalProviderEndpointMethod: 'testEndpoint',
         clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
       });
     });
 

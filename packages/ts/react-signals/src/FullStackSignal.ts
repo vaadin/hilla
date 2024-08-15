@@ -27,28 +27,33 @@ export type StateEvent<T> = Readonly<{
   value: T;
 }>;
 /**
- * Options for creating a full-stack signal.
+ * An object that describes a data object to connect to the signal provider
+ * service.
  */
-export type FullStackSignalOptions = Readonly<{
+export type ConnectionData = Readonly<{
   /**
    * The client instance to be used for communication.
    */
   client: ConnectClient;
+
   /**
-   * The method name of the signal provider service.
+   * The name of the signal provider service endpoint.
+   */
+  endpoint: string;
+
+  /**
+   * The name of the signal provider service method.
    */
   method: string;
 }>;
 
 class SubscriptionManager<T> {
-  readonly #client;
-  readonly #method: string;
   readonly #id: string;
+  readonly #data: ConnectionData;
   #subscription?: Subscription<StateEvent<T>>;
 
-  constructor(client: ConnectClient, method: string, id: string) {
-    this.#client = client;
-    this.#method = method;
+  constructor(id: string, data: ConnectionData) {
+    this.#data = data;
     this.#id = id;
   }
 
@@ -57,8 +62,11 @@ class SubscriptionManager<T> {
   }
 
   subscribe() {
-    this.#subscription ??= this.#client.subscribe(ENDPOINT, 'subscribe', {
-      signalProviderEndpointMethod: this.#method,
+    const { client, endpoint, method } = this.#data;
+
+    this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
+      providerEndpoint: endpoint,
+      providerMethod: method,
       clientSignalId: this.#id,
     });
 
@@ -66,7 +74,7 @@ class SubscriptionManager<T> {
   }
 
   async call(event: SubscriptionEvent<T>): Promise<void> {
-    await this.#client.call(ENDPOINT, 'update', {
+    await this.#data.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
     });
@@ -92,9 +100,9 @@ export abstract class FullStackSignal<T> extends Signal<T> {
   readonly #error = signal<Error | undefined>(undefined);
   readonly #manager: SubscriptionManager<T>;
 
-  constructor(value: T | undefined, { client, method }: FullStackSignalOptions) {
+  constructor(value: T | undefined, data: ConnectionData) {
     super(value);
-    this.#manager = new SubscriptionManager(client, method, this.id);
+    this.#manager = new SubscriptionManager(this.id, data);
 
     let paused = false;
     this.#manager.subscribe().onNext((event: StateEvent<T>) => {
