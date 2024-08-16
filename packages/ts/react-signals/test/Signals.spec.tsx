@@ -37,7 +37,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
     // Mock the subscribe method
     client.subscribe.returns(subscription);
-    options = { client, method: 'testEndpoint' };
+    options = { client, endpoint: 'TestEndpoint', method: 'testMethod' };
   });
 
   describe('NumberSignal', () => {
