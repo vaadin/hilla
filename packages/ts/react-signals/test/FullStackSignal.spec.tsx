@@ -128,6 +128,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         event: { type: StateEventType.SET, value: 1 },
       });
+
+      const [, , params] = client.call.firstCall.args;
+
+      expect(params!.event).to.have.property('id');
     });
 
     it('should throw an error when the server call fails', () => {

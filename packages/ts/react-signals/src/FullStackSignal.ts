@@ -6,6 +6,7 @@ import { Signal } from './core.js';
 const ENDPOINT = 'SignalsHandler';
 
 type SubscriptionEvent<T> = Readonly<{
+  id: string;
   type: StateEventType;
   value: T;
 }>;
@@ -118,6 +119,7 @@ export abstract class FullStackSignal<T> extends Signal<T> {
         this.#pending.value = true;
         this.#manager
           .call({
+            id: nanoid(),
             type: StateEventType.SET,
             value: v,
           })
