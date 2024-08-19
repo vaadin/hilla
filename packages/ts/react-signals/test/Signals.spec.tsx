@@ -7,14 +7,14 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { effect } from '../src';
 import { NumberSignal } from '../src';
-import type { ConnectionData, StateEvent } from '../src/FullStackSignal.js';
+import type { ServerConnectionConfig, StateEvent } from '../src/FullStackSignal.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
 use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
-  let options: ConnectionData;
+  let options: ServerConnectionConfig;
 
   beforeEach(() => {
     const client = sinon.createStubInstance(ConnectClient);

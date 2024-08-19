@@ -134,6 +134,15 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(params!.event).to.have.property('id');
     });
 
+    it('should provide an internal server subscription', () => {
+      expect(signal.server.subscription).to.equal(subscription);
+    });
+
+    it('should disconnect from the server', () => {
+      signal.server.disconnect();
+      expect(subscription.cancel).to.have.been.calledOnce;
+    });
+
     it('should throw an error when the server call fails', () => {
       client.call.rejects(new Error('Server error'));
       signal.value = 42;

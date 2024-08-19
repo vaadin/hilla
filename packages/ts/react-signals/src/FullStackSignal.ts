@@ -5,12 +5,6 @@ import { Signal } from './core.js';
 
 const ENDPOINT = 'SignalsHandler';
 
-type SubscriptionEvent<T> = Readonly<{
-  id: string;
-  type: StateEventType;
-  value: T;
-}>;
-
 /**
  * Types of changes that can be produced or processed by a signal.
  */
@@ -27,11 +21,12 @@ export type StateEvent<T> = Readonly<{
   type: StateEventType;
   value: T;
 }>;
+
 /**
  * An object that describes a data object to connect to the signal provider
  * service.
  */
-export type ConnectionData = Readonly<{
+export type ServerConnectionConfig = Readonly<{
   /**
    * The client instance to be used for communication.
    */
@@ -48,13 +43,16 @@ export type ConnectionData = Readonly<{
   method: string;
 }>;
 
-class SubscriptionManager<T> {
+/**
+ * A server connection manager.
+ */
+class ServerConnection<T> {
   readonly #id: string;
-  readonly #data: ConnectionData;
+  readonly #config: ServerConnectionConfig;
   #subscription?: Subscription<StateEvent<T>>;
 
-  constructor(id: string, data: ConnectionData) {
-    this.#data = data;
+  constructor(id: string, config: ServerConnectionConfig) {
+    this.#config = config;
     this.#id = id;
   }
 
@@ -62,8 +60,8 @@ class SubscriptionManager<T> {
     return this.#subscription;
   }
 
-  subscribe() {
-    const { client, endpoint, method } = this.#data;
+  connect() {
+    const { client, endpoint, method } = this.#config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
@@ -74,14 +72,14 @@ class SubscriptionManager<T> {
     return this.#subscription;
   }
 
-  async call(event: SubscriptionEvent<T>): Promise<void> {
-    await this.#data.client.call(ENDPOINT, 'update', {
+  async update(event: StateEvent<T>): Promise<void> {
+    await this.#config.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
     });
   }
 
-  cancel() {
+  disconnect() {
     this.#subscription?.cancel();
     this.#subscription = undefined;
   }
@@ -96,17 +94,28 @@ class SubscriptionManager<T> {
  * @internal
  */
 export abstract class FullStackSignal<T> extends Signal<T> {
+  /**
+   * The unique identifier of the signal necessary to communicate with the
+   * server.
+   */
   readonly id = nanoid();
+
+  /**
+   * The server connection manager.
+   */
+  readonly server: ServerConnection<T>;
   readonly #pending = signal(false);
   readonly #error = signal<Error | undefined>(undefined);
-  readonly #manager: SubscriptionManager<T>;
 
-  constructor(value: T | undefined, data: ConnectionData) {
+  constructor(value: T | undefined, config: ServerConnectionConfig) {
     super(value);
-    this.#manager = new SubscriptionManager(this.id, data);
+    this.server = new ServerConnection(this.id, config);
 
-    let paused = false;
-    this.#manager.subscribe().onNext((event: StateEvent<T>) => {
+    // Paused at the very start to prevent the signal from sending the initial
+    // value to the server.
+    let paused = true;
+
+    this.server.connect().onNext((event: StateEvent<T>) => {
       if (event.type === StateEventType.SNAPSHOT) {
         paused = true;
         this.value = event.value;
@@ -117,8 +126,8 @@ export abstract class FullStackSignal<T> extends Signal<T> {
     this.subscribe((v) => {
       if (!paused) {
         this.#pending.value = true;
-        this.#manager
-          .call({
+        this.server
+          .update({
             id: nanoid(),
             type: StateEventType.SET,
             value: v,
@@ -131,6 +140,7 @@ export abstract class FullStackSignal<T> extends Signal<T> {
           });
       }
     });
+    paused = false;
   }
 
   /**
@@ -147,21 +157,22 @@ export abstract class FullStackSignal<T> extends Signal<T> {
     return this.#error.value;
   }
 
+  /**
+   * Waits the signal to receive the update from the server-side signal
+   * provider.
+   */
   get updating(): Promise<void> {
     return new Promise((resolve) => {
-      const unsubscribe = this.#pending.subscribe((value) => {
-        if (value) {
-          resolve();
-          unsubscribe();
-        }
-      });
+      if (this.#pending.value) {
+        const unsubscribe = this.#pending.subscribe((value) => {
+          if (value) {
+            resolve();
+            unsubscribe();
+          }
+        });
+      } else {
+        resolve();
+      }
     });
-  }
-
-  /**
-   * Cancels the subscription to the server-side signal provider.
-   */
-  cancel(): void {
-    this.#manager.cancel();
   }
 }
