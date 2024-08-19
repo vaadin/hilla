@@ -143,6 +143,11 @@ export class RouterConfigurationBuilder {
     return this;
   }
 
+  /**
+   * Adds the layoutComponent as the parent layout to views with the flowLayouts ViewConfiguration set.
+   *
+   * @param layoutComponent - layout component to use, usually Flow
+   */
   withLayouts(layoutComponent: ComponentType): this {
     function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
       const nestedRoutes = routes.map((route) => {
