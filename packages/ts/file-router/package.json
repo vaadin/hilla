@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.5.0-alpha8",
+  "version": "24.5.0-alpha9",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -79,8 +79,8 @@
     "type-fest": "^4.9.0"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "24.5.0-alpha8",
-    "@vaadin/hilla-react-auth": "24.5.0-alpha8",
+    "@vaadin/hilla-generator-utils": "24.5.0-alpha9",
+    "@vaadin/hilla-react-auth": "24.5.0-alpha9",
     "react": "^18.2.0",
     "rollup": "^4.12.0",
     "typescript": "5.5.2"
