@@ -22,6 +22,41 @@ export type StateEvent<T> = Readonly<{
   value: T;
 }>;
 
+abstract class DependencyTrackingSignal<T> extends Signal<T> {
+  readonly #onSubscribe: () => void;
+  readonly #onUnsubscribe: () => void;
+
+  // -1 means to ignore the first subscription that is created internally in the
+  // FullStackSignal constructor.
+  #subscribeCount = -1;
+
+  protected constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
+    super(value);
+    this.#onSubscribe = onSubscribe;
+    this.#onUnsubscribe = onUnsubscribe;
+  }
+
+  protected S(node: unknown): void {
+    // @ts-expect-error: We use the protected method from the base class.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super.S(node);
+    if (this.#subscribeCount === 0) {
+      this.#onSubscribe();
+    }
+    this.#subscribeCount += 1;
+  }
+
+  protected U(node: unknown): void {
+    // @ts-expect-error: We use the protected method from the base class.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super.U(node);
+    this.#subscribeCount -= 1;
+    if (this.#subscribeCount === 0) {
+      this.#onUnsubscribe();
+    }
+  }
+}
+
 /**
  * An object that describes a data object to connect to the signal provider
  * service.
@@ -93,7 +128,7 @@ class ServerConnection<T> {
  *
  * @internal
  */
-export abstract class FullStackSignal<T> extends Signal<T> {
+export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   /**
    * The unique identifier of the signal necessary to communicate with the
    * server.
@@ -118,24 +153,20 @@ export abstract class FullStackSignal<T> extends Signal<T> {
   readonly #pending = signal(false);
   readonly #error = signal<Error | undefined>(undefined);
 
+  // Paused at the very start to prevent the signal from sending the initial
+  // value to the server.
+  #paused = true;
+
   constructor(value: T | undefined, config: ServerConnectionConfig) {
-    super(value);
+    super(
+      value,
+      () => this.#connect(),
+      () => this.#disconnect(),
+    );
     this.server = new ServerConnection(this.id, config);
 
-    // Paused at the very start to prevent the signal from sending the initial
-    // value to the server.
-    let paused = true;
-
-    this.server.connect().onNext((event: StateEvent<T>) => {
-      if (event.type === StateEventType.SNAPSHOT) {
-        paused = true;
-        this.value = event.value;
-        paused = false;
-      }
-    });
-
     this.subscribe((v) => {
-      if (!paused) {
+      if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
         this.server
@@ -153,6 +184,26 @@ export abstract class FullStackSignal<T> extends Signal<T> {
       }
     });
 
-    paused = false;
+    this.#paused = false;
+  }
+
+  #connect() {
+    if (this.server.subscription !== undefined) {
+      return;
+    }
+    this.server.connect().onNext((event: StateEvent<T>) => {
+      if (event.type === StateEventType.SNAPSHOT) {
+        this.#paused = true;
+        this.value = event.value;
+        this.#paused = false;
+      }
+    });
+  }
+
+  #disconnect() {
+    if (this.server.subscription === undefined) {
+      return;
+    }
+    this.server.disconnect();
   }
 }

@@ -41,7 +41,8 @@ public class SignalsHandler {
             }
 
             registry.register(clientSignalId, providerEndpoint, providerMethod);
-            return registry.get(clientSignalId).subscribe();
+            return registry.get(clientSignalId).subscribe()
+                    .doFinally((event) -> registry.unsubscribe(clientSignalId));
         } catch (Exception e) {
             return Flux.error(e);
         }
