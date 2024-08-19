@@ -1,16 +1,17 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import { template, transform } from '@vaadin/hilla-generator-utils/ast.js';
+import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type FunctionDeclaration, type SourceFile } from 'typescript';
+import ts, { type FunctionDeclaration, type Identifier, type SourceFile } from 'typescript';
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
 
-const NUMBER_SIGNAL_CHANNEL = '$NUMBER_SIGNAL_CHANNEL$';
 const CONNECT_CLIENT = '$CONNECT_CLIENT$';
+const METHOD_NAME = '$METHOD_NAME$';
+const SIGNAL = '$SIGNAL$';
 
-const signalImportPaths = ['com/vaadin/hilla/signals/NumberSignal'];
+const signals = ['NumberSignal'];
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -31,53 +32,27 @@ export default class SignalProcessor {
   process(): SourceFile {
     this.#owner.logger.debug(`Processing signals: ${this.#service}`);
     const { imports } = this.#dependencyManager;
-    const numberSignalChannelId = imports.named.add(HILLA_REACT_SIGNALS, 'NumberSignalChannel');
 
     const [, connectClientId] = imports.default.iter().find(([path]) => path.includes('connect-client'))!;
 
-    this.#processSignalImports(signalImportPaths);
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
     let initTypeUsageCount = 0;
 
     const [file] = ts.transform<SourceFile>(this.#sourceFile, [
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
-          const methodName = tsNode.name.text;
+          const signalId = this.#replaceSignalImport(tsNode);
 
-          const body = template(
-            `
-function dummy() {
-  return new ${NUMBER_SIGNAL_CHANNEL}('${this.#service}.${methodName}', ${CONNECT_CLIENT}).signal;
+          return template(
+            `function ${METHOD_NAME}() {
+  return new ${SIGNAL}(undefined, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
 }`,
-            (statements) => (statements[0] as FunctionDeclaration).body?.statements,
+            (statements) => statements,
             [
-              transform((node) =>
-                ts.isIdentifier(node) && node.text === NUMBER_SIGNAL_CHANNEL ? numberSignalChannelId : node,
-              ),
+              transform((node) => (ts.isIdentifier(node) && node.text === METHOD_NAME ? tsNode.name : node)),
+              transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
             ],
-          );
-
-          let returnType = tsNode.type;
-          if (
-            returnType &&
-            ts.isTypeReferenceNode(returnType) &&
-            'text' in returnType.typeName &&
-            returnType.typeName.text === 'Promise'
-          ) {
-            if (returnType.typeArguments && returnType.typeArguments.length > 0) {
-              returnType = returnType.typeArguments[0];
-            }
-          }
-
-          return ts.factory.createFunctionDeclaration(
-            tsNode.modifiers?.filter((modifier) => modifier.kind !== ts.SyntaxKind.AsyncKeyword),
-            tsNode.asteriskToken,
-            tsNode.name,
-            tsNode.typeParameters,
-            tsNode.parameters.filter(({ name }) => !(ts.isIdentifier(name) && name.text === 'init')),
-            returnType,
-            ts.factory.createBlock(body ?? [], false),
           );
         }
         return tsNode;
@@ -108,17 +83,31 @@ function dummy() {
     );
   }
 
-  #processSignalImports(signalImports: readonly string[]) {
+  #replaceSignalImport(method: FunctionDeclaration): Identifier {
     const { imports } = this.#dependencyManager;
 
-    signalImports.forEach((signalImport) => {
-      const result = imports.default.iter().find(([path]) => path.includes(signalImport));
+    if (method.type) {
+      const type = traverse(method.type, (node) =>
+        ts.isIdentifier(node) && signals.includes(node.text) ? node : undefined,
+      );
 
-      if (result) {
-        const [path, id] = result;
-        imports.default.remove(path);
-        imports.named.add(HILLA_REACT_SIGNALS, id.text, true, id);
+      if (type) {
+        const signalId = imports.named.getIdentifier(HILLA_REACT_SIGNALS, type.text);
+
+        if (signalId) {
+          return signalId;
+        }
+
+        const result = imports.default.iter().find(([_p, id]) => id.text === type.text);
+
+        if (result) {
+          const [path] = result;
+          imports.default.remove(path);
+          return imports.named.add(HILLA_REACT_SIGNALS, type.text, false, type);
+        }
       }
-    });
+    }
+
+    throw new Error('Signal type not found');
   }
 }

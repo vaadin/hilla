@@ -49,8 +49,8 @@ public class SignalsHandlerTest {
                 .put("type", "snapshot");
 
         // first client subscribe to a signal, it registers the signal:
-        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint.method",
-                CLIENT_SIGNAL_ID_1);
+        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_1);
         firstFlux.subscribe(next -> {
             assertNotNull(next);
             assertEquals(expectedSignalEventJson, next);
@@ -59,8 +59,8 @@ public class SignalsHandlerTest {
         });
 
         // another client subscribes to the same signal:
-        Flux<ObjectNode> secondFlux = signalsHandler
-                .subscribe("endpoint.method", CLIENT_SIGNAL_ID_2);
+        Flux<ObjectNode> secondFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_2);
         secondFlux.subscribe(next -> {
             assertNotNull(next);
             assertEquals(expectedSignalEventJson, next);
@@ -84,8 +84,8 @@ public class SignalsHandlerTest {
         var signalId = numberSignal.getId();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1)).thenReturn(numberSignal);
 
-        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint.method",
-                CLIENT_SIGNAL_ID_1);
+        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_1);
 
         var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 42)
                 .put("id", UUID.randomUUID().toString()).put("type", "set");

@@ -23,27 +23,24 @@ public class SignalsHandler {
     /**
      * Subscribes to a signal.
      *
-     * @param signalProviderEndpointMethod
+     * @param providerEndpoint
+     *            the endpoint that provides the signal
+     * @param providerMethod
      *            the endpoint method that provides the signal
      * @param clientSignalId
      *            the client signal id
      *
      * @return a Flux of JSON events
      */
-    public Flux<ObjectNode> subscribe(String signalProviderEndpointMethod,
-            String clientSignalId) {
+    public Flux<ObjectNode> subscribe(String providerEndpoint,
+            String providerMethod, String clientSignalId) {
         try {
-            String[] endpointMethodParts = signalProviderEndpointMethod
-                    .split("\\.");
-            var endpointName = endpointMethodParts[0];
-            var methodName = endpointMethodParts[1];
-
             var signal = registry.get(clientSignalId);
             if (signal != null) {
                 return signal.subscribe();
             }
 
-            registry.register(clientSignalId, endpointName, methodName);
+            registry.register(clientSignalId, providerEndpoint, providerMethod);
             return registry.get(clientSignalId).subscribe();
         } catch (Exception e) {
             return Flux.error(e);
