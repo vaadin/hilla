@@ -1,7 +1,6 @@
-import { computed, signal } from '@preact/signals-react';
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
-import { Signal } from './core.js';
+import { computed, signal, Signal } from './core.js';
 
 const ENDPOINT = 'SignalsHandler';
 

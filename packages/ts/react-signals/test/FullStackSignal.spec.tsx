@@ -5,7 +5,7 @@ import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { type StateEvent, StateEventType } from '../src/FullStackSignal.js';
-import { NumberSignal } from '../src/index.js';
+import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
@@ -60,7 +60,11 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(signal.value).to.be.undefined;
     });
 
-    it('should subscribe to signal provider endpoint only after being rendered', async () => {
+    it('should not subscribe to signal provider endpoint before being subscribed to', () => {
+      expect(client.subscribe).not.to.have.been.called;
+    });
+
+    it('should subscribe to signal provider endpoint only after being subscribed to', async () => {
       expect(client.subscribe).not.to.have.been.called;
 
       render(<span>Value is {signal}</span>);
@@ -72,6 +76,25 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
       });
+    });
+
+    it('should not call client subscribe after being connected to the server instance', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+      });
+
+      const dependentSignal = computed(() => signal.value);
+      expect(client.subscribe).to.be.have.been.calledOnce;
+
+      render(<span>Value is {dependentSignal}</span>);
+      await nextFrame();
+      expect(client.subscribe).to.be.have.been.calledOnce;
     });
 
     it('should publish updates to signals handler endpoint', () => {
