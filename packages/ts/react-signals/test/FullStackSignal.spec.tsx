@@ -4,13 +4,50 @@ import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { type StateEvent, StateEventType } from '../src/FullStackSignal.js';
+import { DependencyTrackingSignal, type StateEvent, StateEventType } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
 
 describe('@vaadin/hilla-react-signals', () => {
+  describe('DependencyTrackingSignal', () => {
+    class TestSignal<T = unknown> extends DependencyTrackingSignal<T> {
+      constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
+        super(value, onSubscribe, onUnsubscribe);
+        this.subscribe(() => {}); // Ignores the internal subscription.
+      }
+    }
+
+    let onSubscribe: () => void;
+    let onUnsubscribe: () => void;
+    let signal: TestSignal;
+
+    beforeEach(() => {
+      onSubscribe = sinon.spy();
+      onUnsubscribe = sinon.spy();
+      signal = new TestSignal(undefined, onSubscribe, onUnsubscribe);
+    });
+
+    afterEach(() => {
+      sinon.resetHistory();
+    });
+
+    it('should call onSubscribe when the first subscription is created', () => {
+      expect(onSubscribe).not.to.have.been.called;
+      signal.subscribe(() => {});
+      expect(onSubscribe).to.have.been.calledOnce;
+    });
+
+    it('should call onUnsubscribe when the last subscription is removed', () => {
+      expect(onUnsubscribe).not.to.have.been.called;
+      const subscriptionDisposeFnc = signal.subscribe(() => {});
+      expect(onUnsubscribe).not.to.have.been.called;
+      subscriptionDisposeFnc();
+      expect(onUnsubscribe).to.have.been.calledOnce;
+    });
+  });
+
   describe('FullStackSignal', () => {
     function simulateReceivedChange(
       connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
@@ -92,7 +129,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const dependentSignal = computed(() => signal.value);
       expect(client.subscribe).to.be.have.been.calledOnce;
 
-      render(<span>Value is {dependentSignal}</span>);
+      render(<span>Value is {dependentSignal.value}</span>);
       await nextFrame();
       expect(client.subscribe).to.be.have.been.calledOnce;
     });

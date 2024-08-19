@@ -21,7 +21,13 @@ export type StateEvent<T> = Readonly<{
   value: T;
 }>;
 
-abstract class DependencyTrackingSignal<T> extends Signal<T> {
+/**
+ * An abstraction of a signal that tracks the number of subscribers, and calls
+ * the provided `onSubscribe` and `onUnsubscribe` callbacks for the first
+ * subscription and the last unsubscription, respectively.
+ * @internal
+ */
+export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   readonly #onSubscribe: () => void;
   readonly #onUnsubscribe: () => void;
 
