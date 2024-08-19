@@ -60,7 +60,12 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(signal.value).to.be.undefined;
     });
 
-    it('should subscribe to signal provider endpoint', () => {
+    it('should subscribe to signal provider endpoint only after being rendered', async () => {
+      expect(client.subscribe).not.to.have.been.called;
+
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
         clientSignalId: signal.id,
@@ -79,8 +84,11 @@ describe('@vaadin/hilla-react-signals', () => {
       });
     });
 
-    it("should update signal's value based on the received event", () => {
+    it("should update signal's value based on the received event", async () => {
       expect(signal.value).to.be.undefined;
+
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
 
       // Simulate the event received from the server:
       const snapshotEvent: StateEvent<number> = { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 };
@@ -92,9 +100,12 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should render the updated value', async () => {
       const numberSignal = signal;
+
+      let result = render(<span>Value is {numberSignal}</span>);
+      await nextFrame();
       simulateReceivedChange(subscription, { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 });
 
-      const result = render(<span>Value is {numberSignal}</span>);
+      result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
@@ -103,7 +114,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(result.container.textContent).to.equal('Value is 99');
     });
 
-    it('should subscribe using client', () => {
+    it('should subscribe using client', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
         clientSignalId: signal.id,
@@ -159,11 +173,16 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(signal.pending).to.be.like({ value: false });
     });
 
-    it('should provide an internal server subscription', () => {
+    it('should provide an internal server subscription', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
       expect(signal.server.subscription).to.equal(subscription);
     });
 
-    it('should disconnect from the server', () => {
+    it('should disconnect from the server', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
       signal.server.disconnect();
       expect(subscription.cancel).to.have.been.calledOnce;
     });
