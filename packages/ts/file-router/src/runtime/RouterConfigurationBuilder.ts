@@ -143,6 +143,44 @@ export class RouterConfigurationBuilder {
     return this;
   }
 
+  withLayouts(layoutComponent: ComponentType): this {
+    function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
+      const nestedRoutes = routes.map((route) => {
+        if (route.children === undefined) {
+          return route;
+        }
+
+        return {
+          ...route,
+          children: applyLayouts(route.children),
+        } as RouteObject;
+      });
+      return [
+        {
+          element: createElement(layoutComponent),
+          children: nestedRoutes,
+        },
+      ];
+    }
+
+    this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
+      if (!routes) {
+        return routes;
+      }
+      const withLayout = routes.filter(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        (route) => typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout,
+      );
+      const allRoutes = routes.filter((route) => !withLayout.includes(route));
+      withLayout.push(routes[routes.length - 1]); // Add * fallback to all child routes
+
+      allRoutes.unshift(...applyLayouts(withLayout));
+      return allRoutes;
+    });
+
+    return this;
+  }
+
   /**
    * Protects all the routes that require authentication. For more details see
    * {@link @vaadin/hilla-react-auth#protectRoutes} function.

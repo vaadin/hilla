@@ -26,10 +26,10 @@ export type ViewConfig = Readonly<{
   route?: string;
 
   /**
-   * Allows giving a layout identifier for using a server side parent layout
+   * Allows giving marking view as using server side parent layout
    * annotated with the Layout annotation.
    */
-  layout?: string;
+  flowLayout?: boolean;
 
   menu?: Readonly<{
     /**
