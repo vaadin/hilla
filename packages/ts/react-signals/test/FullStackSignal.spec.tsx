@@ -134,6 +134,25 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(params!.event).to.have.property('id');
     });
 
+    it('should provide a way to access connection errors', async () => {
+      const error = new Error('Server error');
+      client.call.rejects(error);
+
+      signal.value = 42;
+      // Waiting for the ConnectionClient#call promise to resolve.
+      await nextFrame();
+
+      expect(signal.error).to.have.property('value', error);
+    });
+
+    it('should provide a way to access the pending state', async () => {
+      expect(signal.pending).to.have.property('value', false);
+      signal.value = 42;
+      expect(signal.pending).to.have.property('value', true);
+      await nextFrame();
+      expect(signal.pending).to.have.property('value', false);
+    });
+
     it('should provide an internal server subscription', () => {
       expect(signal.server.subscription).to.equal(subscription);
     });

@@ -1,4 +1,4 @@
-import { signal } from '@preact/signals-react';
+import { computed, signal } from '@preact/signals-react';
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { Signal } from './core.js';
@@ -104,6 +104,17 @@ export abstract class FullStackSignal<T> extends Signal<T> {
    * The server connection manager.
    */
   readonly server: ServerConnection<T>;
+
+  /**
+   * Defines whether the signal is currently awaits a server-side response.
+   */
+  readonly pending = computed(() => this.#pending.value);
+
+  /**
+   * Defines whether the signal has an error.
+   */
+  readonly error = computed(() => this.#error.value);
+
   readonly #pending = signal(false);
   readonly #error = signal<Error | undefined>(undefined);
 
@@ -132,47 +143,15 @@ export abstract class FullStackSignal<T> extends Signal<T> {
             type: StateEventType.SET,
             value: v,
           })
-          .catch((error) => {
-            this.#error.value = error;
+          .catch((error: unknown) => {
+            this.#error.value = error instanceof Error ? error : new Error(String(error));
           })
           .finally(() => {
             this.#pending.value = false;
           });
       }
     });
+
     paused = false;
-  }
-
-  /**
-   * Defines whether the signal is currently awaits a server-side response.
-   */
-  get pending(): boolean {
-    return this.#pending.value;
-  }
-
-  /**
-   * Defines whether the signal has an error.
-   */
-  get error(): Error | undefined {
-    return this.#error.value;
-  }
-
-  /**
-   * Waits the signal to receive the update from the server-side signal
-   * provider.
-   */
-  get updating(): Promise<void> {
-    return new Promise((resolve) => {
-      if (this.#pending.value) {
-        const unsubscribe = this.#pending.subscribe((value) => {
-          if (value) {
-            resolve();
-            unsubscribe();
-          }
-        });
-      } else {
-        resolve();
-      }
-    });
   }
 }
