@@ -142,15 +142,21 @@ describe('@vaadin/hilla-react-signals', () => {
       // Waiting for the ConnectionClient#call promise to resolve.
       await nextFrame();
 
-      expect(signal.error).to.have.property('value', error);
+      expect(signal.error).to.be.like({ value: error });
+
+      // No error after the correct update
+      client.call.resolves();
+      signal.value = 50;
+      await nextFrame();
+      expect(signal.error).to.be.like({ value: undefined });
     });
 
     it('should provide a way to access the pending state', async () => {
-      expect(signal.pending).to.have.property('value', false);
+      expect(signal.pending).to.be.like({ value: false });
       signal.value = 42;
-      expect(signal.pending).to.have.property('value', true);
+      expect(signal.pending).to.be.like({ value: true });
       await nextFrame();
-      expect(signal.pending).to.have.property('value', false);
+      expect(signal.pending).to.be.like({ value: false });
     });
 
     it('should provide an internal server subscription', () => {

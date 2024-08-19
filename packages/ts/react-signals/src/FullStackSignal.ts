@@ -137,6 +137,7 @@ export abstract class FullStackSignal<T> extends Signal<T> {
     this.subscribe((v) => {
       if (!paused) {
         this.#pending.value = true;
+        this.#error.value = undefined;
         this.server
           .update({
             id: nanoid(),
