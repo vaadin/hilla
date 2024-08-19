@@ -14,7 +14,7 @@ use(sinonChai);
 use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
-  let options: ServerConnectionConfig;
+  let config: ServerConnectionConfig;
 
   beforeEach(() => {
     const client = sinon.createStubInstance(ConnectClient);
@@ -37,38 +37,38 @@ describe('@vaadin/hilla-react-signals', () => {
     });
     // Mock the subscribe method
     client.subscribe.returns(subscription);
-    options = { client, endpoint: 'TestEndpoint', method: 'testMethod' };
+    config = { client, endpoint: 'TestEndpoint', method: 'testMethod' };
   });
 
   describe('NumberSignal', () => {
     it('should retain default value as initialized', () => {
-      const numberSignal1 = new NumberSignal(undefined, options);
+      const numberSignal1 = new NumberSignal(undefined, config);
       expect(numberSignal1.value).to.be.undefined;
 
-      const numberSignal2 = new NumberSignal(0, options);
+      const numberSignal2 = new NumberSignal(0, config);
       expect(numberSignal2.value).to.equal(0);
 
-      const numberSignal3 = new NumberSignal(42.424242, options);
+      const numberSignal3 = new NumberSignal(42.424242, config);
       expect(numberSignal3.value).to.equal(42.424242);
 
-      const numberSignal4 = new NumberSignal(-42.424242, options);
+      const numberSignal4 = new NumberSignal(-42.424242, config);
       expect(numberSignal4.value).to.equal(-42.424242);
     });
 
     it('should render value when signal is rendered', async () => {
-      const numberSignal = new NumberSignal(42, options);
+      const numberSignal = new NumberSignal(42, config);
       const result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
     });
 
     it('should set the underlying value locally without waiting for server confirmation', () => {
-      const numberSignal = new NumberSignal(undefined, options);
+      const numberSignal = new NumberSignal(undefined, config);
       expect(numberSignal.value).to.equal(undefined);
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
-      const anotherNumberSignal = new NumberSignal(undefined, options);
+      const anotherNumberSignal = new NumberSignal(undefined, config);
       const results: Array<number | undefined> = [];
 
       effect(() => {
