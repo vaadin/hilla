@@ -19,13 +19,13 @@ describe('@vaadin/hilla-react-signals', () => {
       }
     }
 
-    let onFirstSubscribe: sinon.SinonSpy;
-    let onLastUnsubscribe: sinon.SinonSpy;
+    let onFirstSubscribe: sinon.SinonStub;
+    let onLastUnsubscribe: sinon.SinonStub;
     let signal: TestSignal;
 
     beforeEach(() => {
-      onFirstSubscribe = sinon.spy();
-      onLastUnsubscribe = sinon.spy();
+      onFirstSubscribe = sinon.stub();
+      onLastUnsubscribe = sinon.stub();
       signal = new TestSignal(undefined, onFirstSubscribe, onLastUnsubscribe);
     });
 
