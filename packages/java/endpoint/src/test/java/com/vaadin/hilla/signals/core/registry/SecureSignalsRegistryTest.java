@@ -43,6 +43,29 @@ public class SecureSignalsRegistryTest {
     }
 
     @Test
+    public void when_unsubscribedIsCalled_underlyingRegistryRemovesClientSignalToSignalMapping()
+            throws Exception {
+        NumberSignal signal = new NumberSignal();
+        EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
+
+        AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
+        try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
+                (mockSignalRegistry, context) -> {
+                    when(mockSignalRegistry.get("clientSignalId"))
+                            .thenReturn(signal);
+                    signalsRegistry.set(mockSignalRegistry);
+                })) {
+            SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
+                    invoker);
+            secureSignalsRegistry.register("clientSignalId", "endpoint",
+                    "method");
+            secureSignalsRegistry.unsubscribe("clientSignalId");
+            verify(signalsRegistry.get(), times(1))
+                    .removeClientSignalToSignalMapping("clientSignalId");
+        }
+    }
+
+    @Test
     public void when_accessToEndpointIsRejected_register_throws()
             throws Exception {
         EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();

@@ -26,7 +26,7 @@
     "lit": "3.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "^6.26.0"
+    "react-router-dom": "^6.26.1"
   },
   "devDependencies": {
     "@babel/preset-react": "7.24.7",
@@ -117,7 +117,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "380838fd2237f6d269693eac27d292fa25ba2920ad38b53d8ebcfb27a20b5ace"
+    "hash": "8587dd57f1366294a48aaf55834f4b03439212337f749df1d38ec198ca284dec"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
