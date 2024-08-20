@@ -28,17 +28,17 @@ export type StateEvent<T> = Readonly<{
  * @internal
  */
 export abstract class DependencyTrackingSignal<T> extends Signal<T> {
-  readonly #onSubscribe: () => void;
-  readonly #onUnsubscribe: () => void;
+  readonly #onFirstSubscribe: () => void;
+  readonly #onLastUnsubscribe: () => void;
 
   // -1 means to ignore the first subscription that is created internally in the
   // FullStackSignal constructor.
   #subscribeCount = -1;
 
-  protected constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
+  protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
     super(value);
-    this.#onSubscribe = onSubscribe;
-    this.#onUnsubscribe = onUnsubscribe;
+    this.#onFirstSubscribe = onFirstSubscribe;
+    this.#onLastUnsubscribe = onLastUnsubscribe;
   }
 
   protected S(node: unknown): void {
@@ -46,7 +46,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super.S(node);
     if (this.#subscribeCount === 0) {
-      this.#onSubscribe();
+      this.#onFirstSubscribe();
     }
     this.#subscribeCount += 1;
   }
@@ -57,7 +57,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
     super.U(node);
     this.#subscribeCount -= 1;
     if (this.#subscribeCount === 0) {
-      this.#onUnsubscribe();
+      this.#onLastUnsubscribe();
     }
   }
 }
@@ -193,9 +193,6 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   }
 
   #connect() {
-    if (this.server.subscription !== undefined) {
-      return;
-    }
     this.server.connect().onNext((event: StateEvent<T>) => {
       if (event.type === StateEventType.SNAPSHOT) {
         this.#paused = true;

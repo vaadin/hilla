@@ -19,14 +19,14 @@ describe('@vaadin/hilla-react-signals', () => {
       }
     }
 
-    let onSubscribe: () => void;
-    let onUnsubscribe: () => void;
+    let onFirstSubscribe: sinon.SinonSpy;
+    let onLastUnsubscribe: sinon.SinonSpy;
     let signal: TestSignal;
 
     beforeEach(() => {
-      onSubscribe = sinon.spy();
-      onUnsubscribe = sinon.spy();
-      signal = new TestSignal(undefined, onSubscribe, onUnsubscribe);
+      onFirstSubscribe = sinon.spy();
+      onLastUnsubscribe = sinon.spy();
+      signal = new TestSignal(undefined, onFirstSubscribe, onLastUnsubscribe);
     });
 
     afterEach(() => {
@@ -34,17 +34,17 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should call onSubscribe when the first subscription is created', () => {
-      expect(onSubscribe).not.to.have.been.called;
+      expect(onFirstSubscribe).not.to.have.been.called;
       signal.subscribe(() => {});
-      expect(onSubscribe).to.have.been.calledOnce;
+      expect(onFirstSubscribe).to.have.been.calledOnce;
     });
 
     it('should call onUnsubscribe when the last subscription is removed', () => {
-      expect(onUnsubscribe).not.to.have.been.called;
+      expect(onLastUnsubscribe).not.to.have.been.called;
       const subscriptionDisposeFnc = signal.subscribe(() => {});
-      expect(onUnsubscribe).not.to.have.been.called;
+      expect(onLastUnsubscribe).not.to.have.been.called;
       subscriptionDisposeFnc();
-      expect(onUnsubscribe).to.have.been.calledOnce;
+      expect(onLastUnsubscribe).to.have.been.calledOnce;
     });
   });
 
