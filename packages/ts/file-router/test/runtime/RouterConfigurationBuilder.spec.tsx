@@ -1,5 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
+import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
@@ -77,6 +78,68 @@ describe('RouterBuilder', () => {
             element: <div>NextTest</div>,
           },
         ],
+      },
+    ]);
+  });
+
+  it('should add layout routes under layout component', () => {
+    const serverWildcard = {
+      path: '*',
+      element: <Server />,
+      handle: { title: 'Server' },
+    };
+    const serverIndex = {
+      index: true,
+      element: <Server />,
+      handle: { title: 'Server' },
+    };
+
+    const serverRoutes = [serverWildcard, serverIndex];
+
+    const { routes } = builder
+      .withReactRoutes([
+        {
+          path: '',
+          handle: {
+            flowLayout: true,
+          },
+        },
+        {
+          path: '/test',
+          handle: {
+            flowLayout: true,
+          },
+        },
+      ])
+      .withLayouts(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        children: [
+          {
+            path: '',
+            handle: {
+              flowLayout: true,
+            },
+          },
+          {
+            path: '/test',
+            handle: {
+              flowLayout: true,
+            },
+          },
+        ],
+        element: createElement(Server),
+      },
+      {
+        children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
+        ],
+        path: '',
       },
     ]);
   });

@@ -172,12 +172,16 @@ export class RouterConfigurationBuilder {
       if (!routes) {
         return routes;
       }
-      const withLayout = routes.filter(
+      const withLayout = routes.filter((route) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (route) => typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout,
-      );
+        const layout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
+        return layout;
+      });
       const allRoutes = routes.filter((route) => !withLayout.includes(route));
-      withLayout.push(routes[routes.length - 1]); // Add * fallback to all child routes
+      const catchAll = routes.filter((route) => route.path === '*');
+      if (catchAll.length > 0) {
+        withLayout.push(...catchAll); // Add * fallback to all child routes
+      }
 
       allRoutes.unshift(...applyLayouts(withLayout));
       return allRoutes;
