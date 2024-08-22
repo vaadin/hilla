@@ -1,9 +1,4 @@
-import { FullStackSignal } from './FullStackSignal.js';
-
-/**
- * A full-stack signal that holds an arbitrary value.
- */
-export class ValueSignal<T> extends FullStackSignal<T> {}
+import { ValueSignal } from './ValueSignal.js';
 
 /**
  * A signal that holds a number value. The underlying

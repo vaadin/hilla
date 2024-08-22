@@ -1,8 +1,41 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
+import type { Simplify } from 'type-fest';
 import { computed, signal, Signal } from './core.js';
 
 const ENDPOINT = 'SignalsHandler';
+
+type BaseStateEvent<V, T extends string, C extends Record<string, unknown> = Record<never, never>> = Simplify<
+  Readonly<{
+    id: string;
+    type: T;
+    value: V;
+  }> &
+    Readonly<C>
+>;
+
+export type SnapshotStateEvent<T> = BaseStateEvent<T, 'SNAPSHOT'>;
+
+export type SetStateEvent<T> = BaseStateEvent<T, 'SET'>;
+
+export function createSetStateEvent<T>(value: T): SetStateEvent<T> {
+  return {
+    id: nanoid(),
+    type: 'SET',
+    value,
+  };
+}
+
+export type ReplaceStateEvent<T> = BaseStateEvent<T, 'REPLACE', { expected: T }>;
+
+export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateEvent<T> {
+  return {
+    id: nanoid(),
+    type: 'REPLACE',
+    value,
+    expected,
+  };
+}
 
 /**
  * Types of changes that can be produced or processed by a signal.
@@ -15,11 +48,7 @@ export enum StateEventType {
 /**
  * An object that describes the change of the signal state.
  */
-export type StateEvent<T> = Readonly<{
-  id: string;
-  type: StateEventType;
-  value: T;
-}>;
+export type StateEvent<T> = ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
@@ -175,11 +204,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
         this.#pending.value = true;
         this.#error.value = undefined;
         this.server
-          .update({
-            id: nanoid(),
-            type: StateEventType.SET,
-            value: v,
-          })
+          .update(createSetStateEvent(v))
           .catch((error: unknown) => {
             this.#error.value = error instanceof Error ? error : new Error(String(error));
           })
@@ -194,7 +219,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
 
   #connect() {
     this.server.connect().onNext((event: StateEvent<T>) => {
-      if (event.type === StateEventType.SNAPSHOT) {
+      if (event.type === 'SNAPSHOT') {
         this.#paused = true;
         this.value = event.value;
         this.#paused = false;
