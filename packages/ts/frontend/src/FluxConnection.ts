@@ -36,6 +36,7 @@ export class FluxConnection extends EventTarget {
   readonly #onCompleteCallbacks = new Map<string, () => void>();
   readonly #onErrorCallbacks = new Map<string, () => void>();
   readonly #onNextCallbacks = new Map<string, (value: any) => void>();
+  readonly #onDisconnectCallbacks = new Map<string, () => void>();
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
 
@@ -92,6 +93,10 @@ export class FluxConnection extends EventTarget {
         this.#onNextCallbacks.set(id, callback);
         return hillaSubscription;
       },
+      onDisconnect: (callback: () => void): Subscription<any> => {
+        this.#onDisconnectCallbacks.set(id, callback);
+        return hillaSubscription;
+      },
     };
     return hillaSubscription;
   }
@@ -136,6 +141,17 @@ export class FluxConnection extends EventTarget {
           this.#sendPendingMessages();
         }
       },
+      onReconnect: (_request, response) => {
+        // eslint-disable-next-line no-console
+        console.info('trying to reconnect', response);
+      },
+      onFailureToReconnect: (_request, _response) => {
+        if (this.state === State.ACTIVE) {
+          this.state = State.INACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+          this.#onDisconnectCallbacks.forEach((callback) => callback());
+        }
+      },
       reconnectInterval: 5000,
       timeout: -1,
       trackMessageLength: true,
@@ -178,6 +194,7 @@ export class FluxConnection extends EventTarget {
     this.#onCompleteCallbacks.delete(id);
     this.#onErrorCallbacks.delete(id);
     this.#endpointInfos.delete(id);
+    this.#onDisconnectCallbacks.delete(id);
   }
 
   #send(message: ServerMessage) {
