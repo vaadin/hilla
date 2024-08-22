@@ -7,7 +7,8 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { effect } from '../src';
 import { NumberSignal } from '../src';
-import type { ServerConnectionConfig, StateEvent } from '../src/FullStackSignal.js';
+import type { StateEvent } from '../src/events.js';
+import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);

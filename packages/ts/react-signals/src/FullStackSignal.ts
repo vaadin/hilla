@@ -1,46 +1,9 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
-import type { Simplify } from 'type-fest';
 import { computed, signal, Signal } from './core.js';
+import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
-
-type BaseStateEvent<V, T extends string, C extends Record<string, unknown> = Record<never, never>> = Simplify<
-  Readonly<{
-    id: string;
-    type: T;
-    value: V;
-  }> &
-    Readonly<C>
->;
-
-export type SnapshotStateEvent<T> = BaseStateEvent<T, 'snapshot'>;
-
-export type SetStateEvent<T> = BaseStateEvent<T, 'set'>;
-
-function createSetStateEvent<T>(value: T): SetStateEvent<T> {
-  return {
-    id: nanoid(),
-    type: 'set',
-    value,
-  };
-}
-
-export type ReplaceStateEvent<T> = BaseStateEvent<T, 'replace', { expected: T }>;
-
-function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateEvent<T> {
-  return {
-    id: nanoid(),
-    type: 'replace',
-    value,
-    expected,
-  };
-}
-
-/**
- * An object that describes the change of the signal state.
- */
-export type StateEvent<T> = ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
@@ -62,9 +25,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
     this.#onLastUnsubscribe = onLastUnsubscribe;
   }
 
-  protected S(node: unknown): void {
-    // @ts-expect-error: We use the protected method from the base class.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  protected override S(node: unknown): void {
     super.S(node);
     if (this.#subscribeCount === 0) {
       this.#onFirstSubscribe();
@@ -72,9 +33,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
     this.#subscribeCount += 1;
   }
 
-  protected U(node: unknown): void {
-    // @ts-expect-error: We use the protected method from the base class.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  protected override U(node: unknown): void {
     super.U(node);
     this.#subscribeCount -= 1;
     if (this.#subscribeCount === 0) {
