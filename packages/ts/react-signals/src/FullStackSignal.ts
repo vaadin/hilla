@@ -1,7 +1,7 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
-import { createSetStateEvent, type StateEvent } from './events.js';
+import { createSetStateEvent, type SnapshotStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
 
@@ -105,6 +105,9 @@ class ServerConnection<T> {
   }
 }
 
+export const $update = Symbol('update');
+export const $processServerResponse = Symbol('processServerResponse');
+
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
  * the server-side signal provider. At the same time, each change received from
@@ -154,27 +157,42 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
-        this.server
-          .update(createSetStateEvent(v))
-          .catch((error: unknown) => {
-            this.#error.value = error instanceof Error ? error : new Error(String(error));
-          })
-          .finally(() => {
-            this.#pending.value = false;
-          });
+        this[$update](createSetStateEvent(v));
       }
     });
 
     this.#paused = false;
   }
 
+  /**
+   * A method to update the server with the new value.
+   *
+   * @param event - The event to update the server with.
+   */
+  protected [$update](event: StateEvent<T>): void {
+    this.server
+      .update(event)
+      .catch((error: unknown) => {
+        this.#error.value = error instanceof Error ? error : new Error(String(error));
+      })
+      .finally(() => {
+        this.#pending.value = false;
+      });
+  }
+
+  /**
+   * A method with to process the server response. The implementation is
+   * specific for each signal type.
+   *
+   * @param event - The server response event.
+   */
+  protected abstract [$processServerResponse](event: StateEvent<T>): void;
+
   #connect() {
     this.server.connect().onNext((event: StateEvent<T>) => {
-      if (event.type === 'snapshot') {
-        this.#paused = true;
-        this.value = event.value;
-        this.#paused = false;
-      }
+      this.#paused = true;
+      this[$processServerResponse](event);
+      this.#paused = false;
     });
   }
 

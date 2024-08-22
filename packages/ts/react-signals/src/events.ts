@@ -19,6 +19,8 @@ type CreateStateEventType<V, T extends string, C extends Record<string, unknown>
  */
 export type SnapshotStateEvent<T> = CreateStateEventType<T, 'snapshot'>;
 
+export type RejectStateEvent = CreateStateEventType<never, 'reject'>;
+
 /**
  * A state event defines a new value of the signal shared with the server. The
  *
@@ -47,4 +49,4 @@ export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateE
 /**
  * An object that describes the change of the signal state.
  */
-export type StateEvent<T> = ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;
+export type StateEvent<T> = RejectStateEvent | ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;
