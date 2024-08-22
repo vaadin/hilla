@@ -9,6 +9,7 @@ const cwd = new URL(`${pathToFileURL(process.cwd())}/`);
 
 export async function load(url, context, nextLoad) {
   const packageJson = JSON.parse(await readFile(new URL('package.json', cwd), 'utf8'));
+  console.log(String(url), context);
 
   const result = await nextLoad(url, context);
   let source = result.source?.toString('utf8');
