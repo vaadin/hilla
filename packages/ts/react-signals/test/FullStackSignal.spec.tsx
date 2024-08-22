@@ -2,9 +2,10 @@
 import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { DependencyTrackingSignal, type StateEvent, StateEventType } from '../src/FullStackSignal.js';
+import { DependencyTrackingSignal, type SnapshotStateEvent, type StateEvent } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
 
@@ -49,6 +50,10 @@ describe('@vaadin/hilla-react-signals', () => {
   });
 
   describe('FullStackSignal', () => {
+    function createSnapshotEvent(value: number): SnapshotStateEvent<number> {
+      return { id: nanoid(), type: 'snapshot', value };
+    }
+
     function simulateReceivedChange(
       connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
       event: StateEvent<number>,
@@ -140,7 +145,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.be.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: signal.id,
-        event: { type: StateEventType.SET, value: 42 },
+        event: { type: 'set', value: 42 },
       });
     });
 
@@ -151,7 +156,7 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
 
       // Simulate the event received from the server:
-      const snapshotEvent: StateEvent<number> = { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 };
+      const snapshotEvent = createSnapshotEvent(42);
       simulateReceivedChange(subscription, snapshotEvent);
 
       // Check if the signal value is updated:
@@ -163,13 +168,13 @@ describe('@vaadin/hilla-react-signals', () => {
 
       let result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
-      simulateReceivedChange(subscription, { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 });
+      simulateReceivedChange(subscription, createSnapshotEvent(42));
 
       result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
-      simulateReceivedChange(subscription, { id: 'someId', type: StateEventType.SNAPSHOT, value: 99 });
+      simulateReceivedChange(subscription, createSnapshotEvent(99));
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 99');
     });
@@ -190,7 +195,7 @@ describe('@vaadin/hilla-react-signals', () => {
       signal.value = 42;
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        event: { type: StateEventType.SET, value: 42 },
+        event: { type: 'set', value: 42 },
       });
 
       signal.value = 0;
@@ -200,7 +205,7 @@ describe('@vaadin/hilla-react-signals', () => {
       signal.value += 1;
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        event: { type: StateEventType.SET, value: 1 },
+        event: { type: 'set', value: 1 },
       });
 
       const [, , params] = client.call.firstCall.args;

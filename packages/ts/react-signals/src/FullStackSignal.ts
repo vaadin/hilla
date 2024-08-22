@@ -14,35 +14,27 @@ type BaseStateEvent<V, T extends string, C extends Record<string, unknown> = Rec
     Readonly<C>
 >;
 
-export type SnapshotStateEvent<T> = BaseStateEvent<T, 'SNAPSHOT'>;
+export type SnapshotStateEvent<T> = BaseStateEvent<T, 'snapshot'>;
 
-export type SetStateEvent<T> = BaseStateEvent<T, 'SET'>;
+export type SetStateEvent<T> = BaseStateEvent<T, 'set'>;
 
-export function createSetStateEvent<T>(value: T): SetStateEvent<T> {
+function createSetStateEvent<T>(value: T): SetStateEvent<T> {
   return {
     id: nanoid(),
-    type: 'SET',
+    type: 'set',
     value,
   };
 }
 
-export type ReplaceStateEvent<T> = BaseStateEvent<T, 'REPLACE', { expected: T }>;
+export type ReplaceStateEvent<T> = BaseStateEvent<T, 'replace', { expected: T }>;
 
-export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateEvent<T> {
+function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateEvent<T> {
   return {
     id: nanoid(),
-    type: 'REPLACE',
+    type: 'replace',
     value,
     expected,
   };
-}
-
-/**
- * Types of changes that can be produced or processed by a signal.
- */
-export enum StateEventType {
-  SET = 'set',
-  SNAPSHOT = 'snapshot',
 }
 
 /**
@@ -219,7 +211,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
 
   #connect() {
     this.server.connect().onNext((event: StateEvent<T>) => {
-      if (event.type === 'SNAPSHOT') {
+      if (event.type === 'snapshot') {
         this.#paused = true;
         this.value = event.value;
         this.#paused = false;
