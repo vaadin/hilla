@@ -1,70 +1,9 @@
-import { nanoid } from 'nanoid';
-import { Signal } from './core.js';
-import { type StateEvent, StateEventType } from './types';
-
-// eslint-disable-next-line import/no-mutable-exports
-export let setInternalValue: <T>(signal: ValueSignal<T>, value: T) => void;
+import { FullStackSignal } from './FullStackSignal.js';
 
 /**
- * A signal that holds a value. The underlying
- * value of this signal is stored and updated as a
- * shared value on the server.
- *
- * @internal
+ * A full-stack signal that holds an arbitrary value.
  */
-export abstract class ValueSignal<T> extends Signal<T> {
-  static {
-    setInternalValue = (signal: ValueSignal<unknown>, value: unknown): void => signal.#setInternalValue(value);
-  }
-
-  readonly #publish: (event: StateEvent) => Promise<boolean>;
-
-  /**
-   * Creates a new ValueSignal instance.
-   * @param publish - The function that publishes the
-   * value of the signal to the server.
-   * @param value - The initial value of the signal
-   * @defaultValue undefined
-   */
-  constructor(publish: (event: StateEvent) => Promise<boolean>, value?: T) {
-    super(value);
-    this.#publish = publish;
-  }
-
-  /**
-   * Returns the value of the signal.
-   */
-  override get value(): T {
-    return super.value;
-  }
-
-  /**
-   * Publishes the new value to the server.
-   * Note that this method is not setting
-   * the signal's value.
-   *
-   * @param value - The new value of the signal
-   * to be published to the server.
-   */
-  override set value(value: T) {
-    const id = nanoid();
-    // set the local value to be used for latency compensation and offline support:
-    this.#setInternalValue(value);
-    // publish the update to the server:
-    this.#publish({ id, type: StateEventType.SET, value }).catch((error) => {
-      throw error;
-    });
-  }
-
-  /**
-   * Sets the value of the signal.
-   * @param value - The new value of the signal.
-   * @internal
-   */
-  #setInternalValue(value: T): void {
-    super.value = value;
-  }
-}
+export class ValueSignal<T> extends FullStackSignal<T> {}
 
 /**
  * A signal that holds a number value. The underlying

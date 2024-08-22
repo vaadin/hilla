@@ -1,10 +1,9 @@
-package com.vaadin.hilla.signals.core;
+package com.vaadin.hilla.signals.core.registry;
 
 import com.vaadin.hilla.signals.NumberSignal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +13,18 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
-@Component
-public class SignalsRegistry {
+/**
+ * A registry for signal instances and their client signal id mappings.
+ */
+public final class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
     private final Map<UUID, NumberSignal> signals = new WeakHashMap<>();
     private final Map<String, UUID> clientSignalToSignalMapping = new HashMap<>();
+
+    SignalsRegistry() {
+    }
 
     /**
      * Registers a signal instance and creates an association between the

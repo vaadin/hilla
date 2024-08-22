@@ -15,12 +15,19 @@
  */
 package com.vaadin.hilla;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -33,18 +40,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinServletService;
-
+import com.vaadin.flow.server.dau.DAUUtils;
+import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
 import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
@@ -52,8 +52,6 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
@@ -94,6 +92,8 @@ public class EndpointController {
     private final CsrfChecker csrfChecker;
 
     private final EndpointInvoker endpointInvoker;
+
+    VaadinService vaadinService;
 
     /**
      * A constructor used to initialize the controller.
@@ -155,6 +155,49 @@ public class EndpointController {
                 endpointRegistry.registerEndpoint(signalHandlerBean);
             }
         }
+
+        // Temporary Hack
+        VaadinService vaadinService = VaadinService.getCurrent();
+        if (vaadinService != null) {
+            this.vaadinService = vaadinService;
+        }
+
+    }
+
+    /**
+     * Captures and processes the Vaadin endpoint requests.
+     * <p>
+     * Matches the endpoint name and a method name with the corresponding Java
+     * class and a public method in the class. Extracts parameters from a
+     * request body if the Java method requires any and applies in the same
+     * order. After the method call, serializes the Java method execution result
+     * and sends it back.
+     * <p>
+     * If an issue occurs during the request processing, an error response is
+     * returned instead of the serialized Java method return value.
+     *
+     * @param endpointName
+     *            the name of an endpoint to address the calls to, not case
+     *            sensitive
+     * @param methodName
+     *            the method name to execute on an endpoint, not case sensitive
+     * @param body
+     *            optional request body, that should be specified if the method
+     *            called has parameters
+     * @param request
+     *            the current request which triggers the endpoint call
+     * @param response
+     *            the current response
+     * @return execution result as a JSON string or an error message string
+     */
+    @PostMapping(path = ENDPOINT_METHODS, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> serveEndpoint(
+            @PathVariable("endpoint") String endpointName,
+            @PathVariable("method") String methodName,
+            @RequestBody(required = false) ObjectNode body,
+            HttpServletRequest request, HttpServletResponse response) {
+        return doServeEndpoint(endpointName, methodName, body, request,
+                response);
     }
 
     /**
@@ -181,12 +224,14 @@ public class EndpointController {
      *            the current request which triggers the endpoint call
      * @return execution result as a JSON string or an error message string
      */
-    @PostMapping(path = ENDPOINT_METHODS, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> serveEndpoint(
-            @PathVariable("endpoint") String endpointName,
-            @PathVariable("method") String methodName,
-            @RequestBody(required = false) ObjectNode body,
-            HttpServletRequest request) {
+    public ResponseEntity<String> serveEndpoint(String endpointName,
+            String methodName, ObjectNode body, HttpServletRequest request) {
+        return doServeEndpoint(endpointName, methodName, body, request, null);
+    }
+
+    private ResponseEntity<String> doServeEndpoint(String endpointName,
+            String methodName, ObjectNode body, HttpServletRequest request,
+            HttpServletResponse response) {
         LOGGER.debug("Endpoint: {}, method: {}, request body: {}", endpointName,
                 methodName, body);
 
@@ -196,13 +241,13 @@ public class EndpointController {
                             EndpointAccessChecker.ACCESS_DENIED_MSG));
         }
 
+        DAUUtils.EnforcementResult enforcementResult = null;
         try {
-            // Put a VaadinRequest in the instances object so as the request is
-            // available in the endpoint method
-            VaadinServletService service = (VaadinServletService) VaadinService
-                    .getCurrent();
-            CurrentInstance.set(VaadinRequest.class,
-                    new VaadinServletRequest(request, service));
+            enforcementResult = DAUUtils.trackDAU(this.vaadinService, request,
+                    response);
+            if (enforcementResult.isEnforcementNeeded()) {
+                return buildEnforcementResponseEntity(enforcementResult);
+            }
             Object returnValue = endpointInvoker.invoke(endpointName,
                     methodName, body, request.getUserPrincipal(),
                     request::isUserInRole);
@@ -239,9 +284,30 @@ public class EndpointController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     endpointInvoker.createResponseErrorObject(e.getMessage()));
         } finally {
-            CurrentInstance.set(VaadinRequest.class, null);
-        }
 
+            if (enforcementResult != null
+                    && enforcementResult.endRequestAction() != null) {
+                enforcementResult.endRequestAction().run();
+            } else {
+                CurrentInstance.set(VaadinRequest.class, null);
+            }
+        }
+    }
+
+    private ResponseEntity<String> buildEnforcementResponseEntity(
+            DAUUtils.EnforcementResult enforcementResult) {
+        EnforcementNotificationMessages messages = enforcementResult.messages();
+        EndpointException endpointException = new EndpointException(
+                messages.caption(), enforcementResult.origin(), messages);
+        try {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(endpointInvoker.createResponseErrorObject(
+                            endpointException.getSerializationData()));
+        } catch (JsonProcessingException ee) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(endpointInvoker.createResponseErrorObject(
+                            messages.caption() + ". " + messages.message()));
+        }
     }
 
     /**

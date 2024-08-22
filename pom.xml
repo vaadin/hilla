@@ -157,6 +157,13 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-bom</artifactId>
+            <version>${flow.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-bom</artifactId>
             <version>${testbench.version}</version>
             <type>pom</type>
@@ -166,13 +173,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring.boot.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.vaadin</groupId>
-        <artifactId>flow-bom</artifactId>
-        <version>${flow.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

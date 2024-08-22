@@ -190,12 +190,8 @@ public class EndpointInvoker {
             Function<String, Boolean> rolesChecker)
             throws EndpointNotFoundException, EndpointAccessDeniedException,
             EndpointBadRequestException, EndpointInternalException {
-        VaadinEndpointData vaadinEndpointData = endpointRegistry
-                .get(endpointName);
-        if (vaadinEndpointData == null) {
-            getLogger().debug("Endpoint '{}' not found", endpointName);
-            throw new EndpointNotFoundException();
-        }
+        VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
+                endpointName);
 
         Method methodToInvoke = getMethod(endpointName, methodName);
         if (methodToInvoke == null) {
@@ -208,6 +204,17 @@ public class EndpointInvoker {
                 methodToInvoke, body, vaadinEndpointData, principal,
                 rolesChecker);
 
+    }
+
+    public VaadinEndpointData getVaadinEndpointData(String endpointName)
+            throws EndpointNotFoundException {
+        VaadinEndpointData vaadinEndpointData = endpointRegistry
+                .get(endpointName);
+        if (vaadinEndpointData == null) {
+            getLogger().debug("Endpoint '{}' not found", endpointName);
+            throw new EndpointNotFoundException();
+        }
+        return vaadinEndpointData;
     }
 
     String createResponseErrorObject(String errorMessage) {
@@ -381,19 +388,13 @@ public class EndpointInvoker {
         }
     }
 
-    private Object invokeVaadinEndpointMethod(String endpointName,
-            String methodName, Method methodToInvoke, ObjectNode body,
-            VaadinEndpointData vaadinEndpointData, Principal principal,
-            Function<String, Boolean> rolesChecker)
-            throws EndpointAccessDeniedException, EndpointBadRequestException,
-            EndpointInternalException {
-        HillaStats.reportEndpointActive();
-        EndpointAccessChecker accessChecker = getAccessChecker();
-
+    public String checkAccess(EndpointRegistry.VaadinEndpointData endpointData,
+            Method methodToInvoke, Principal principal,
+            Function<String, Boolean> rolesChecker) {
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
         var invokedEndpointClass = ClassUtils
-                .getUserClass(vaadinEndpointData.getEndpointObject());
-
+                .getUserClass(endpointData.getEndpointObject());
+        EndpointAccessChecker accessChecker = getAccessChecker();
         String checkError;
         if (methodDeclaringClass.equals(invokedEndpointClass)) {
             checkError = accessChecker.check(methodToInvoke, principal,
@@ -402,6 +403,19 @@ public class EndpointInvoker {
             checkError = accessChecker.check(invokedEndpointClass, principal,
                     rolesChecker);
         }
+        return checkError;
+    }
+
+    private Object invokeVaadinEndpointMethod(String endpointName,
+            String methodName, Method methodToInvoke, ObjectNode body,
+            VaadinEndpointData vaadinEndpointData, Principal principal,
+            Function<String, Boolean> rolesChecker)
+            throws EndpointAccessDeniedException, EndpointBadRequestException,
+            EndpointInternalException {
+        HillaStats.reportEndpointActive();
+
+        var checkError = checkAccess(vaadinEndpointData, methodToInvoke,
+                principal, rolesChecker);
         if (checkError != null) {
             throw new EndpointAccessDeniedException(String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
