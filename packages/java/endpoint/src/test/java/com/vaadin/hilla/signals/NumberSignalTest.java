@@ -35,19 +35,14 @@ public class NumberSignalTest {
     }
 
     @Test
-    public void constructor_withoutValueArg_acceptsNull() {
-        NumberSignal signal = new NumberSignal(null);
-
-        assertNull(signal.getValue());
+    public void constructor_withValueArg_doesNotAcceptNull() {
+        assertThrows(NullPointerException.class, () -> new NumberSignal(null));
     }
 
     @Test
     public void getId_returns_not_null() {
         NumberSignal signal1 = new NumberSignal();
         assertNotNull(signal1.getId());
-
-        NumberSignal signal2 = new NumberSignal(null);
-        assertNotNull(signal2.getId());
 
         NumberSignal signal3 = new NumberSignal(42.0);
         assertNotNull(signal3.getId());

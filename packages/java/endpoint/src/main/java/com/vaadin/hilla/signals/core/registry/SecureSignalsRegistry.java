@@ -4,7 +4,7 @@ import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.hilla.signals.NumberSignal;
+import com.vaadin.hilla.signals.ValueSignal;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +44,7 @@ public class SecureSignalsRegistry {
                 .getSecurityHolderRoleChecker();
         checkAccess(endpointName, methodName, principal, isInRole);
 
-        NumberSignal signal = (NumberSignal) invoker.invoke(endpointName,
+        ValueSignal<?> signal = (ValueSignal<?>) invoker.invoke(endpointName,
                 methodName, null, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
@@ -60,7 +60,7 @@ public class SecureSignalsRegistry {
         endpointMethods.remove(clientSignalId);
     }
 
-    public synchronized NumberSignal get(String clientSignalId)
+    public synchronized ValueSignal<?> get(String clientSignalId)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {
         var endpointMethodInfo = endpointMethods.get(clientSignalId);
