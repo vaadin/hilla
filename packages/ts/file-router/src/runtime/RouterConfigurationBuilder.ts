@@ -178,10 +178,8 @@ export class RouterConfigurationBuilder {
         return layout;
       });
       const allRoutes = routes.filter((route) => !withLayout.includes(route));
-      const catchAll = routes.filter((route) => route.path === '*');
-      if (catchAll.length > 0) {
-        withLayout.push(...catchAll); // Add * fallback to all child routes
-      }
+      const catchAll = [routes.find((route) => route.path === '*')].filter((route) => route !== undefined);
+      withLayout.push(...catchAll); // Add * fallback to all child routes
 
       allRoutes.unshift(...applyLayouts(withLayout));
       return allRoutes;

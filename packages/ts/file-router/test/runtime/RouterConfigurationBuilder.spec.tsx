@@ -109,6 +109,11 @@ describe('RouterBuilder', () => {
           handle: {
             flowLayout: true,
           },
+          children: [
+            {
+              path: '/child',
+            },
+          ],
         },
       ])
       .withLayouts(Server)
@@ -124,6 +129,16 @@ describe('RouterBuilder', () => {
             },
           },
           {
+            children: [
+              {
+                children: [
+                  {
+                    path: '/child',
+                  },
+                ],
+                element: createElement(Server),
+              },
+            ],
             path: '/test',
             handle: {
               flowLayout: true,
