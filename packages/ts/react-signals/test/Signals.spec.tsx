@@ -5,10 +5,10 @@ import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { effect } from '../src';
-import { NumberSignal } from '../src';
 import type { StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
+import { effect } from '../src/index.js';
+import { NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
