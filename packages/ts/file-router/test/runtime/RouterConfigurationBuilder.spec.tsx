@@ -159,6 +159,12 @@ describe('RouterBuilder', () => {
     ]);
   });
 
+  it('no routes should not throw', () => {
+    const { routes } = new RouterConfigurationBuilder().withLayouts(Server).build();
+
+    expect(routes).to.be.like([]);
+  });
+
   it('should merge file routes deeply', () => {
     const { routes } = builder
       .withFileRoutes([
