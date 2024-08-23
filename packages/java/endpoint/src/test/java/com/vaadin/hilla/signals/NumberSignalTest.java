@@ -1,8 +1,9 @@
 package com.vaadin.hilla.signals;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.signals.core.StateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -75,7 +76,9 @@ public class NumberSignalTest {
         var counter = new AtomicInteger(0);
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new StateEvent<Double>(eventJson);
+            var stateEvent = new StateEvent<>(eventJson,
+                    new TypeReference<Double>() {
+                    });
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertEquals(0.0, stateEvent.getValue(), 0.0);

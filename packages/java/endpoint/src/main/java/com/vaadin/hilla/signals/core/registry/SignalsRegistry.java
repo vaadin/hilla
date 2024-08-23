@@ -41,7 +41,7 @@ public final class SignalsRegistry {
      *             if {@code clientSignalId} or {@code signal} is null
      */
     public synchronized void register(String clientSignalId,
-                                      ValueSignal<?> signal) {
+            ValueSignal<?> signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Objects.requireNonNull(signal, "Signal must not be null");

@@ -11,7 +11,8 @@ public class NumberSignal extends ValueSignal<Double> {
      * @param defaultValue
      *            the default value
      *
-     * @throws NullPointerException if the default value is null
+     * @throws NullPointerException
+     *             if the default value is null
      */
     public NumberSignal(Double defaultValue) {
         super(defaultValue);

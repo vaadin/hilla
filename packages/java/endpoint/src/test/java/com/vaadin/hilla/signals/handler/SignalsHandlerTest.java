@@ -37,8 +37,10 @@ public class SignalsHandlerTest {
             throws Exception {
 
         NumberSignal numberSignal = new NumberSignal();
-        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1)).thenAnswer(invocation -> numberSignal);
-        when(signalsRegistry.get(CLIENT_SIGNAL_ID_2)).thenAnswer(invocation -> numberSignal);
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
+                .thenAnswer(invocation -> numberSignal);
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_2))
+                .thenAnswer(invocation -> numberSignal);
 
         assertEquals(signalsRegistry.get(CLIENT_SIGNAL_ID_1).getId(),
                 signalsRegistry.get(CLIENT_SIGNAL_ID_2).getId());
@@ -82,7 +84,8 @@ public class SignalsHandlerTest {
             throws Exception {
         NumberSignal numberSignal = new NumberSignal(10.0);
         var signalId = numberSignal.getId();
-        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1)).thenAnswer(invocation -> numberSignal);
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
+                .thenAnswer(invocation -> numberSignal);
 
         Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
                 "method", CLIENT_SIGNAL_ID_1);

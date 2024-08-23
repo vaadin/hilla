@@ -1,7 +1,8 @@
 package com.vaadin.hilla.signals;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.signals.core.StateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ValueSignal<T> {
 
     private static final Logger LOGGER = LoggerFactory
-        .getLogger(ValueSignal.class);
+            .getLogger(ValueSignal.class);
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -32,7 +33,8 @@ public class ValueSignal<T> {
      *
      * @param defaultValue
      *            the default not null value
-     * @throws NullPointerException if the default value is null
+     * @throws NullPointerException
+     *             if the default value is null
      */
     public ValueSignal(T defaultValue) {
         Objects.requireNonNull(defaultValue);
@@ -52,7 +54,7 @@ public class ValueSignal<T> {
      */
     public Flux<ObjectNode> subscribe() {
         Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
-            .onBackpressureBuffer();
+                .onBackpressureBuffer();
 
         return sink.asFlux().doOnSubscribe(ignore -> {
             LOGGER.debug("New Flux subscription...");
@@ -121,22 +123,24 @@ public class ValueSignal<T> {
 
     private ObjectNode createSnapshot() {
         var snapshot = new StateEvent<>(this.id.toString(),
-            StateEvent.EventType.SNAPSHOT, this.value);
+                StateEvent.EventType.SNAPSHOT, this.value);
         return snapshot.toJson();
     }
 
     private void processEvent(ObjectNode event) {
         try {
-            var stateEvent = new StateEvent<T>(event);
+            TypeReference<T> typeRef = new TypeReference<>() {
+            };
+            var stateEvent = new StateEvent<>(event, typeRef);
             if (isSetEvent(stateEvent)) {
                 this.value = stateEvent.getValue();
             } else {
                 throw new UnsupportedOperationException(
-                    "Unsupported event: " + event);
+                        "Unsupported event: " + event);
             }
         } catch (StateEvent.InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
-                "Unsupported JSON: " + event, e);
+                    "Unsupported JSON: " + event, e);
         }
     }
 

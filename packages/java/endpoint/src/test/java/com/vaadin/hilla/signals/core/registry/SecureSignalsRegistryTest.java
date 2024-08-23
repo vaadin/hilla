@@ -53,7 +53,7 @@ public class SecureSignalsRegistryTest {
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                        .thenAnswer(invocation -> signal);
+                            .thenAnswer(invocation -> signal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
@@ -89,14 +89,15 @@ public class SecureSignalsRegistryTest {
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                        .thenAnswer(invocation -> signal);
+                            .thenAnswer(invocation -> signal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
                     "method");
-            NumberSignal result = (NumberSignal) secureSignalsRegistry.get("clientSignalId");
+            NumberSignal result = (NumberSignal) secureSignalsRegistry
+                    .get("clientSignalId");
             assertEquals(signal, result);
             verify(signalsRegistry.get(), times(1)).get("clientSignalId");
         }
