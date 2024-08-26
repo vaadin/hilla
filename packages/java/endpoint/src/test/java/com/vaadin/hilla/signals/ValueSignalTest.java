@@ -81,7 +81,6 @@ public class ValueSignalTest {
 
     @Test
     public void submit_notifies_subscribers() {
-
         var signal = new ValueSignal<>(Person.class);
         Flux<ObjectNode> flux = signal.subscribe();
 
@@ -110,9 +109,73 @@ public class ValueSignalTest {
         assertEquals(2, counter.get());
     }
 
+    @Test
+    public void submit_conditionIsMet_notifies_subscribers_with_snapshot_event() {
+        var signal = new ValueSignal<>(2.0, Double.class);
+        Flux<ObjectNode> flux = signal.subscribe();
+
+        var conditionalReplaceEvent = createReplaceEvent(2.0, 3.0);
+
+        var counter = new AtomicInteger(0);
+        flux.subscribe(eventJson -> {
+            assertNotNull(eventJson);
+            var stateEvent = new StateEvent<>(eventJson, Double.class);
+            if (counter.get() == 0) {
+                // notification for the initial value
+                assertEquals(2.0, stateEvent.getValue(), 0.0);
+            } else if (counter.get() == 1) {
+                assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
+                        .asText(), stateEvent.getId());
+                assertEquals(StateEvent.EventType.SNAPSHOT,
+                        stateEvent.getEventType());
+                assertEquals(3.0, stateEvent.getValue(), 0.0);
+            }
+            counter.incrementAndGet();
+        });
+
+        signal.submit(conditionalReplaceEvent);
+
+        assertEquals(2, counter.get());
+    }
+
+    @Test
+    public void submit_conditionIsNotMet_notifies_subscribers_with_reject_event() {
+        var signal = new ValueSignal<>(1.0, Double.class);
+        Flux<ObjectNode> flux = signal.subscribe();
+
+        var conditionalReplaceEvent = createReplaceEvent(2.0, 3.0);
+
+        var counter = new AtomicInteger(0);
+        flux.subscribe(eventJson -> {
+            assertNotNull(eventJson);
+            var stateEvent = new StateEvent<>(eventJson, Double.class);
+            if (counter.get() == 0) {
+                // notification for the initial value
+                assertEquals(1.0, stateEvent.getValue(), 0.0);
+            } else if (counter.get() == 1) {
+                assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
+                        .asText(), stateEvent.getId());
+                assertEquals(StateEvent.EventType.REJECT,
+                        stateEvent.getEventType());
+                assertEquals(1.0, stateEvent.getValue(), 0.0);
+            }
+            counter.incrementAndGet();
+        });
+
+        signal.submit(conditionalReplaceEvent);
+
+        assertEquals(2, counter.get());
+    }
+
     private <T> ObjectNode createSetEvent(T value) {
         var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
                 StateEvent.EventType.SET, value);
+        return setEvent.toJson();
+    }
+
+    private <T> ObjectNode createReplaceEvent(T expectedValue, T value) {
+        var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
+                StateEvent.EventType.REPLACE, value, expectedValue);
         return setEvent.toJson();
     }
 }

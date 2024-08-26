@@ -49,6 +49,12 @@ public class ValueSignal<T> {
     /**
      * Creates a new ValueSignal with provided valueType and <code>null</code>
      * as the default value.
+     *
+     * @param valueType
+     *            the value type class, not <code>null</code>
+     * @throws NullPointerException
+     *             if the default defaultValue or the valueType is
+     *             <code>null</code>
      */
     public ValueSignal(Class<T> valueType) {
         Objects.requireNonNull(valueType);
@@ -142,16 +148,15 @@ public class ValueSignal<T> {
     private boolean processEvent(ObjectNode event) {
         try {
             var stateEvent = new StateEvent<>(event, valueType);
-            switch (stateEvent.getEventType()) {
-            case SET:
-                this.value = stateEvent.getValue();
-                return true;
-            case REPLACE:
-                return compareAndSet(stateEvent);
-            default:
-                throw new UnsupportedOperationException(
-                        "Unsupported event: " + stateEvent.getEventType());
-            }
+            return switch (stateEvent.getEventType()) {
+                case SET -> {
+                    this.value = stateEvent.getValue();
+                    yield true;
+                }
+                case REPLACE -> compareAndSet(stateEvent);
+                default -> throw new UnsupportedOperationException(
+                    "Unsupported event: " + stateEvent.getEventType());
+            };
         } catch (StateEvent.InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
