@@ -116,7 +116,7 @@ public class Hotswapper implements VaadinHotswapper {
                 .getClassesUsedInOpenApi().orElse(Set.of());
         for (String classUsedInEndpoints : classesUsedInEndpoints) {
             if (changedClassesSet.contains(classUsedInEndpoints)) {
-                getLogger().debug("The changed class " + classesUsedInEndpoints
+                getLogger().debug("The changed class " + classUsedInEndpoints
                         + " is used in an endpoint");
                 return true;
             }
