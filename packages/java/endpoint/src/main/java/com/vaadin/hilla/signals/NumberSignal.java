@@ -15,7 +15,7 @@ public class NumberSignal extends ValueSignal<Double> {
      *             if the default value is null
      */
     public NumberSignal(Double defaultValue) {
-        super(defaultValue);
+        super(defaultValue, Double.class);
     }
 
     /**

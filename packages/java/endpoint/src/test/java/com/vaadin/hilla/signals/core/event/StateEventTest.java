@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import java.util.UUID;
 
+import com.vaadin.hilla.signals.Person;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -14,45 +16,6 @@ import static org.junit.Assert.assertTrue;
 import static com.vaadin.hilla.signals.core.event.StateEvent.MAPPER;
 
 public class StateEventTest {
-
-    private static class Person {
-        private String name;
-        private int age;
-        private boolean adult;
-
-        public Person(String name, int age, boolean adult) {
-            this.name = name;
-            this.age = age;
-            this.adult = adult;
-        }
-
-        public Person() {
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public boolean isAdult() {
-            return adult;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-
-        public void setAdult(boolean adult) {
-            this.adult = adult;
-        }
-    }
 
     @Test
     public void constructor_withoutExpected_shouldCreateStateEvent() {
@@ -95,9 +58,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.TYPE, eventType.name().toLowerCase());
         json.put(StateEvent.Field.VALUE, value);
 
-        StateEvent<String> event = new StateEvent<>(json,
-                new TypeReference<String>() {
-                });
+        StateEvent<String> event = new StateEvent<>(json, String.class);
 
         assertEquals(clientId, event.getId());
         assertEquals(eventType, event.getEventType());
@@ -118,9 +79,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.VALUE, value);
         json.put(StateEvent.Field.EXPECTED, expected);
 
-        StateEvent<String> event = new StateEvent<>(json,
-                new TypeReference<String>() {
-                });
+        StateEvent<String> event = new StateEvent<>(json, String.class);
 
         assertEquals(clientId, event.getId());
         assertEquals(eventType, event.getEventType());
@@ -173,8 +132,7 @@ public class StateEventTest {
 
         Exception exception = assertThrows(
                 StateEvent.InvalidEventTypeException.class,
-                () -> new StateEvent<>(json, new TypeReference<String>() {
-                }));
+                () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Invalid event type invalidType. Type should be either of: [SNAPSHOT, SET, REPLACE, REJECT]";
         String actualMessage = exception.getMessage();
@@ -193,8 +151,7 @@ public class StateEventTest {
 
         Exception exception = assertThrows(
                 StateEvent.InvalidEventTypeException.class,
-                () -> new StateEvent<>(json, new TypeReference<String>() {
-                }));
+                () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Missing event type. Type is required, and should be either of: [SNAPSHOT, SET, REPLACE, REJECT]";
         String actualMessage = exception.getMessage();
@@ -220,9 +177,7 @@ public class StateEventTest {
         assertEquals(value.getAge(), personJson.get("age").asInt());
         assertEquals(value.isAdult(), personJson.get("adult").asBoolean());
 
-        var deserializedEvent = new StateEvent<>(eventJson,
-                new TypeReference<Person>() {
-                });
+        var deserializedEvent = new StateEvent<>(eventJson, Person.class);
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getEventType(), deserializedEvent.getEventType());
         assertEquals(event.getValue().getName(),

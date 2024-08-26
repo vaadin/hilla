@@ -1,6 +1,5 @@
 package com.vaadin.hilla.signals;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
@@ -24,27 +23,36 @@ public class ValueSignal<T> {
 
     private final UUID id = UUID.randomUUID();
 
-    private T value;
+    private final Class<T> valueType;
 
     private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
+
+    private T value;
 
     /**
      * Creates a new ValueSignal with the provided default value.
      *
      * @param defaultValue
-     *            the default not null value
+     *            the default value, not <code>null</code>
+     * @param valueType
+     *            the value type class, not <code>null</code>
      * @throws NullPointerException
-     *             if the default value is null
+     *             if the default defaultValue or the valueType is
+     *             <code>null</code>
      */
-    public ValueSignal(T defaultValue) {
+    public ValueSignal(T defaultValue, Class<T> valueType) {
+        this(valueType);
         Objects.requireNonNull(defaultValue);
         this.value = defaultValue;
     }
 
     /**
-     * Creates a new NumberSignal with null as the default value.
+     * Creates a new ValueSignal with provided valueType and <code>null</code>
+     * as the default value.
      */
-    public ValueSignal() {
+    public ValueSignal(Class<T> valueType) {
+        Objects.requireNonNull(valueType);
+        this.valueType = valueType;
     }
 
     /**
@@ -60,7 +68,8 @@ public class ValueSignal<T> {
             LOGGER.debug("New Flux subscription...");
             lock.lock();
             try {
-                var currentValue = createSnapshot();
+                var currentValue = createStatusUpdateEvent(this.id.toString(),
+                        StateEvent.EventType.SNAPSHOT);
                 sink.tryEmitNext(currentValue);
                 subscribers.add(sink);
             } finally {
@@ -87,10 +96,13 @@ public class ValueSignal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            processEvent(event);
+            boolean success = processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
-                var updatedValue = createSnapshot();
+                var updatedValue = createStatusUpdateEvent(
+                        event.get("id").asText(),
+                        success ? StateEvent.EventType.SNAPSHOT
+                                : StateEvent.EventType.REJECT);
                 boolean failure = sink.tryEmitNext(updatedValue).isFailure();
                 if (failure) {
                     LOGGER.debug("Failed push");
@@ -121,22 +133,24 @@ public class ValueSignal<T> {
         return this.value;
     }
 
-    private ObjectNode createSnapshot() {
-        var snapshot = new StateEvent<>(this.id.toString(),
-                StateEvent.EventType.SNAPSHOT, this.value);
+    private ObjectNode createStatusUpdateEvent(String eventId,
+            StateEvent.EventType eventType) {
+        var snapshot = new StateEvent<>(eventId, eventType, this.value);
         return snapshot.toJson();
     }
 
-    private void processEvent(ObjectNode event) {
+    private boolean processEvent(ObjectNode event) {
         try {
-            TypeReference<T> typeRef = new TypeReference<>() {
-            };
-            var stateEvent = new StateEvent<>(event, typeRef);
-            if (isSetEvent(stateEvent)) {
+            var stateEvent = new StateEvent<>(event, valueType);
+            switch (stateEvent.getEventType()) {
+            case SET:
                 this.value = stateEvent.getValue();
-            } else {
+                return true;
+            case REPLACE:
+                return compareAndSet(stateEvent);
+            default:
                 throw new UnsupportedOperationException(
-                        "Unsupported event: " + event);
+                        "Unsupported event: " + stateEvent.getEventType());
             }
         } catch (StateEvent.InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
@@ -144,8 +158,12 @@ public class ValueSignal<T> {
         }
     }
 
-    private boolean isSetEvent(StateEvent<?> event) {
-        return StateEvent.EventType.SET.equals(event.getEventType());
+    private boolean compareAndSet(StateEvent<T> stateEvent) {
+        if (Objects.equals(this.value, stateEvent.getExpected())) {
+            this.value = stateEvent.getValue();
+            return true;
+        }
+        return false;
     }
 
     @Override

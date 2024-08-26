@@ -95,7 +95,7 @@ public class SignalsHandlerTest {
         signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent);
 
         var expectedUpdatedSignalEventJson = new ObjectNode(
-                mapper.getNodeFactory()).put("value", 42)
+                mapper.getNodeFactory()).put("value", 42.0)
                 .put("id", signalId.toString()).put("type", "snapshot");
         StepVerifier.create(firstFlux)
                 .expectNext(expectedUpdatedSignalEventJson).thenCancel()

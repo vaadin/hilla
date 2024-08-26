@@ -1,16 +1,9 @@
 package com.vaadin.hilla.signals.core.event;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.googlecode.gentyref.GenericTypeReflector;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -51,6 +44,12 @@ public class StateEvent<T> {
 
         public InvalidEventTypeException(String message, Throwable cause) {
             super(message, cause);
+        }
+    }
+
+    public static class MissingFieldException extends RuntimeException {
+        public MissingFieldException(String fieldName) {
+            super("Missing field: " + fieldName);
         }
     }
 
@@ -100,30 +99,36 @@ public class StateEvent<T> {
      * @param json
      *            The JSON representation of the event.
      */
-    public StateEvent(ObjectNode json, TypeReference<T> valueType) {
-        this.id = json.get(Field.ID).asText();
+    public StateEvent(ObjectNode json, Class<T> valueType) {
+        this.id = extractId(json);
         this.eventType = extractEventType(json);
-        JsonNode value = json.get(Field.VALUE);
-        if (value == null) {
-            throw new IllegalArgumentException(
-                    "Missing value field in the event: " + json);
-        }
-        this.value = extractValue(value, valueType);
+        this.value = convertValue(extractValue(json), valueType);
+
         JsonNode expected = json.get(Field.EXPECTED);
-        this.expected = expected == null ? null
-                : extractValue(expected, valueType);
+        this.expected = convertValue(expected, valueType);
     }
 
-    private T extractValue(JsonNode rawValue, TypeReference<T> valueType) {
-        // if (rawValue.isTextual()) {
-        // return (T) rawValue.asText();
-        // } else if (rawValue.isBoolean()) {
-        // return (T) Boolean.valueOf(rawValue.asBoolean());
-        // } else if (rawValue.isNumber()) {
-        // return (T) Double.valueOf(rawValue.asDouble());
-        // } else {
+    private T convertValue(JsonNode rawValue, Class<T> valueType) {
+        if (rawValue == null) {
+            return null;
+        }
         return MAPPER.convertValue(rawValue, valueType);
-        // }
+    }
+
+    private String extractId(JsonNode json) {
+        var id = json.get(Field.ID);
+        if (id == null) {
+            throw new MissingFieldException(Field.ID);
+        }
+        return id.asText();
+    }
+
+    private JsonNode extractValue(JsonNode json) {
+        var value = json.get(Field.VALUE);
+        if (value == null) {
+            throw new MissingFieldException(Field.VALUE);
+        }
+        return value;
     }
 
     private EventType extractEventType(JsonNode json) {
@@ -144,18 +149,6 @@ public class StateEvent<T> {
         }
     }
 
-    private JsonNode valueAsJsonNode(T value) {
-        // if (value instanceof String) {
-        // return new TextNode((String) value);
-        // } else if (value instanceof Boolean) {
-        // return BooleanNode.valueOf((Boolean) value);
-        // } else if (value instanceof Number) {
-        // return new DoubleNode((Double) value);
-        // } else {
-        return MAPPER.valueToTree(value);
-        // }
-    }
-
     /**
      * Returns the JSON representation of the event.
      *
@@ -170,6 +163,10 @@ public class StateEvent<T> {
             json.set(Field.EXPECTED, valueAsJsonNode(getExpected()));
         }
         return json;
+    }
+
+    private JsonNode valueAsJsonNode(T value) {
+        return MAPPER.valueToTree(value);
     }
 
     /**
