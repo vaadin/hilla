@@ -7,7 +7,8 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/profile": {
     "params": {},
@@ -20,7 +21,8 @@
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/": {
     "params": {},
@@ -30,7 +32,8 @@
     "route": "/",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/orders": {
     "params": {},
@@ -40,6 +43,7 @@
     "route": "/orders",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   }
 }
