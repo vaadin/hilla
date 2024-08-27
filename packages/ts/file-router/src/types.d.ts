@@ -26,7 +26,7 @@ export type ViewConfig = Readonly<{
   route?: string;
 
   /**
-   * Set to true to indicate that the view as using server side parent layout
+   * Set to true to indicate that the view is using server side parent layout
    * annotated with the Layout annotation.
    */
   flowLayout?: boolean;

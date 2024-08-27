@@ -159,7 +159,7 @@ describe('RouterBuilder', () => {
     ]);
   });
 
-  it('no routes should not throw', () => {
+  it('should not throw when no routes', () => {
     const { routes } = new RouterConfigurationBuilder().withLayouts(Server).build();
 
     expect(routes).to.be.like([]);
