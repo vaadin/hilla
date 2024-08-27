@@ -116,7 +116,7 @@ describe('RouterBuilder', () => {
           ],
         },
       ])
-      .withLayouts(Server)
+      .withLayout(Server)
       .build();
 
     expect(routes).to.be.like([
@@ -160,7 +160,7 @@ describe('RouterBuilder', () => {
   });
 
   it('should not throw when no routes', () => {
-    const { routes } = new RouterConfigurationBuilder().withLayouts(Server).build();
+    const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
 
     expect(routes).to.be.like([]);
   });

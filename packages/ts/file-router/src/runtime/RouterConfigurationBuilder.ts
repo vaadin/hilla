@@ -148,7 +148,7 @@ export class RouterConfigurationBuilder {
    *
    * @param layoutComponent - layout component to use, usually Flow
    */
-  withLayouts(layoutComponent: ComponentType): this {
+  withLayout(layoutComponent: ComponentType): this {
     function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
       const nestedRoutes = routes.map((route) => {
         if (route.children === undefined) {
