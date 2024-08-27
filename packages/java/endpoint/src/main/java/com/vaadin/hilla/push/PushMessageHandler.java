@@ -114,7 +114,7 @@ public class PushMessageHandler {
             SubscribeMessage message, Consumer<AbstractClientMessage> sender) {
         String fluxId = message.getId();
 
-        if(!fluxSubscriptionInfos.contains(connectionId)) {
+        if(!fluxSubscriptionInfos.containsKey(connectionId)) {
             String msg = "A connection with id " + connectionId
                 + " does not exist";
             getLogger().debug(msg);
