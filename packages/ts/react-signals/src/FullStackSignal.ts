@@ -1,7 +1,7 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
-import { createSetStateEvent, type SnapshotStateEvent, type StateEvent } from './events.js';
+import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
 
