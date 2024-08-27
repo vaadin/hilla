@@ -25,6 +25,12 @@ export type ViewConfig = Readonly<{
    */
   route?: string;
 
+  /**
+   * Set to true to indicate that the view is using server side parent layout
+   * annotated with the Layout annotation.
+   */
+  flowLayout?: boolean;
+
   menu?: Readonly<{
     /**
      * Title to use in the menu. Falls back the title property of the view
