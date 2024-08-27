@@ -114,6 +114,13 @@ public class PushMessageHandler {
             SubscribeMessage message, Consumer<AbstractClientMessage> sender) {
         String fluxId = message.getId();
 
+        if(!fluxSubscriptionInfos.contains(connectionId)) {
+            String msg = "A connection with id " + connectionId
+                + " does not exist";
+            getLogger().debug(msg);
+            handleBrowserConnect(connectionId);
+        }
+
         if (fluxSubscriptionInfos.get(connectionId).containsKey(fluxId)) {
             String msg = "A subscription for flux id " + fluxId
                     + " already exists";
@@ -217,6 +224,18 @@ public class PushMessageHandler {
      */
     public void handleBrowserConnect(String connectionId) {
         fluxSubscriptionInfos.put(connectionId, new ConcurrentHashMap<>());
+    }
+
+    /**
+     * Called when the browser establishes a new connection.
+     *
+     * Only ever called once for the same connectionId parameter.
+     *
+     * @param connectionId
+     *            the id of the connection
+     */
+    public void handleBrowserReconnect(String connectionId) {
+        fluxSubscriptionInfos.putIfAbsent(connectionId, new ConcurrentHashMap<>());
     }
 
     /**

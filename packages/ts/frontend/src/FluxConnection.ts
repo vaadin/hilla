@@ -12,6 +12,7 @@ import {
 export enum State {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
+  RECONNECTING = 'reconnecting',
 }
 
 type ActiveEvent = CustomEvent<{ active: boolean }>;
@@ -128,28 +129,29 @@ export class FluxConnection extends EventTarget {
         }
       },
       onOpen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
+        if (this.state === State.INACTIVE || this.state === State.RECONNECTING) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
       onReopen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
+        if (this.state === State.INACTIVE || this.state === State.RECONNECTING) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
-      onReconnect: (_request, response) => {
-        // eslint-disable-next-line no-console
-        console.info('trying to reconnect', response);
+      onReconnect: (_request, _response) => {
+        if (this.state === State.INACTIVE || this.state === State.ACTIVE) {
+          this.state = State.RECONNECTING;
+          this.#onDisconnectCallbacks.forEach((callback) => callback());
+        }
       },
       onFailureToReconnect: (_request, _response) => {
         if (this.state === State.ACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
-          this.#onDisconnectCallbacks.forEach((callback) => callback());
         }
       },
       reconnectInterval: 5000,
