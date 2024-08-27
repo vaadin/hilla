@@ -25,6 +25,6 @@ export async function initialize({ port: _port }) {
 
 export async function resolve(specifier, context, nextResolve) {
   return specifier in mockConfig
-    ? nextResolve(fileURLToPath(new URL(`test/mocks/${mockConfig[specifier]}`, cwd)))
+    ? nextResolve(new URL(`test/mocks/${mockConfig[specifier]}`, cwd).toString())
     : nextResolve(specifier);
 }

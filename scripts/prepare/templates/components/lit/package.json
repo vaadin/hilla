@@ -21,6 +21,7 @@
     "@vaadin/hilla-generator-plugin-barrel": "{{version}}",
     "@vaadin/hilla-generator-plugin-model": "{{version}}",
     "@vaadin/hilla-generator-plugin-push": "{{version}}",
+    "@vaadin/hilla-generator-plugin-signals": "{{version}}",
     "@vaadin/hilla-generator-plugin-subtypes": "{{version}}"
   }
 }

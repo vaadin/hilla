@@ -143,6 +143,7 @@ public final class GeneratorConfiguration {
                 new Plugin("@vaadin/hilla-generator-plugin-barrel"),
                 new Plugin("@vaadin/hilla-generator-plugin-model"),
                 new Plugin("@vaadin/hilla-generator-plugin-push"),
+                new Plugin("@vaadin/hilla-generator-plugin-signals"),
                 new Plugin("@vaadin/hilla-generator-plugin-subtypes"));
 
         PluginsProcessor() {

@@ -36,7 +36,7 @@ public class RouteUtilTest {
 
         AvailableViewInfo config = new AvailableViewInfo("Test",
                 new String[] { "ROLE_ADMIN" }, false, "/test", false, false,
-                null, null, null);
+                null, null, null, false);
         routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
         Assert.assertTrue("Route should be allowed for ADMIN role.",
@@ -52,7 +52,7 @@ public class RouteUtilTest {
 
         AvailableViewInfo config = new AvailableViewInfo("Test",
                 new String[] { "ROLE_ADMIN" }, false, "/test", false, false,
-                null, null, null);
+                null, null, null, false);
         routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
         Assert.assertFalse("USER role should not allow ADMIN route.",
@@ -67,7 +67,7 @@ public class RouteUtilTest {
         request.setUserPrincipal(Mockito.mock(Principal.class));
 
         AvailableViewInfo config = new AvailableViewInfo("Test", null, true,
-                "/test", false, false, null, null, null);
+                "/test", false, false, null, null, null, false);
         routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
         Assert.assertTrue("Request with user principal should be allowed",
@@ -82,7 +82,7 @@ public class RouteUtilTest {
         request.setUserPrincipal(null);
 
         AvailableViewInfo config = new AvailableViewInfo("Test", null, true,
-                "/test", false, false, null, null, null);
+                "/test", false, false, null, null, null, false);
         routeUtil.setRoutes(Collections.singletonMap("/test", config));
 
         Assert.assertFalse("No login should be denied access",
@@ -97,11 +97,11 @@ public class RouteUtilTest {
         request.setUserPrincipal(null);
 
         AvailableViewInfo pageWithoutLogin = new AvailableViewInfo("Test Page",
-                null, false, "/test", false, false, null, null, null);
+                null, false, "/test", false, false, null, null, null, false);
 
         AvailableViewInfo layoutWithLogin = new AvailableViewInfo("Test Layout",
                 null, true, "", false, false, null,
-                Collections.singletonList(pageWithoutLogin), null);
+                Collections.singletonList(pageWithoutLogin), null, false);
         routeUtil.setRoutes(Map.ofEntries(entry("/test", pageWithoutLogin),
                 entry("", layoutWithLogin)));
 
@@ -118,11 +118,11 @@ public class RouteUtilTest {
         request.setUserPrincipal(null);
 
         AvailableViewInfo pageWithLogin = new AvailableViewInfo("Test Page",
-                null, true, "/test", false, false, null, null, null);
+                null, true, "/test", false, false, null, null, null, false);
 
         AvailableViewInfo layoutWithoutLogin = new AvailableViewInfo(
                 "Test Layout", null, false, "", false, false, null,
-                Collections.singletonList(pageWithLogin), null);
+                Collections.singletonList(pageWithLogin), null, false);
         routeUtil.setRoutes(Map.ofEntries(entry("/test", pageWithLogin),
                 entry("", layoutWithoutLogin)));
 
@@ -142,7 +142,7 @@ public class RouteUtilTest {
         request.setUserPrincipal(null);
 
         AvailableViewInfo config = new AvailableViewInfo("Root", null, false,
-                "", false, false, null, null, null);
+                "", false, false, null, null, null, false);
         routeUtil.setRoutes(Collections.singletonMap("", config));
 
         Assert.assertTrue("Login no required should allow access",

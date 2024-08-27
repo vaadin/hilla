@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-form",
-  "version": "24.5.0-alpha5",
+  "version": "24.5.0-alpha9",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9878",
+    "test": "karma start ../../../karma.config.cjs --port 9874",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.5.0-alpha5"
+    "@vaadin/hilla-lit-form": "24.5.0-alpha9"
   },
   "peerDependencies": {
     "react": "^18"
