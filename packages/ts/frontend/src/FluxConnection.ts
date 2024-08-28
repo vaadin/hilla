@@ -109,12 +109,16 @@ export class FluxConnection extends EventTarget {
     this.#socket = atmosphere.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
-      fallbackTransport: 'long-polling',
+      transport: 'websocket',
+      fallbackTransport: 'websocket',
       headers: extraHeaders,
       maxReconnectOnClose: 10000000,
+      reconnectInterval: 5000,
+      timeout: -1,
+      trackMessageLength: true,
+      url,
       onClose: (_) => {
-        // https://socket.io/docs/v4/client-api/#event-disconnect
-        if (this.state === State.ACTIVE) {
+        if (this.state !== State.INACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
         }
@@ -128,37 +132,37 @@ export class FluxConnection extends EventTarget {
           this.#handleMessage(JSON.parse(response.responseBody));
         }
       },
+      onMessagePublished: (response) => {
+        if (response?.responseBody) {
+          this.#handleMessage(JSON.parse(response.responseBody));
+        }
+      },
       onOpen: (_response: any) => {
-        if (this.state === State.INACTIVE || this.state === State.RECONNECTING) {
+        if (this.state !== State.ACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
       onReopen: (_response: any) => {
-        if (this.state === State.INACTIVE || this.state === State.RECONNECTING) {
+        if (this.state !== State.ACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
       onReconnect: (_request, _response) => {
-        if (this.state === State.INACTIVE || this.state === State.ACTIVE) {
+        if (this.state !== State.RECONNECTING) {
           this.state = State.RECONNECTING;
           this.#onDisconnectCallbacks.forEach((callback) => callback());
         }
       },
       onFailureToReconnect: (_request, _response) => {
-        if (this.state === State.ACTIVE) {
+        if (this.state !== State.INACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
         }
       },
-      reconnectInterval: 5000,
-      timeout: -1,
-      trackMessageLength: true,
-      transport: 'websocket',
-      url,
       ...atmosphereOptions,
     } satisfies Atmosphere.Request);
   }
