@@ -45,7 +45,7 @@ export default class SignalProcessor {
 
           return template(
             `function ${METHOD_NAME}() {
-  return new ${SIGNAL}(undefined, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
+  return new ${SIGNAL}(null, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
 }`,
             (statements) => statements,
             [
