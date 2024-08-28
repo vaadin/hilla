@@ -43,8 +43,8 @@ describe('@vaadin/hilla-react-signals', () => {
 
   describe('NumberSignal', () => {
     it('should retain default value as initialized', () => {
-      const numberSignal1 = new NumberSignal(undefined, config);
-      expect(numberSignal1.value).to.be.undefined;
+      const numberSignal1 = new NumberSignal(null, config);
+      expect(numberSignal1.value).to.be.null;
 
       const numberSignal2 = new NumberSignal(0, config);
       expect(numberSignal2.value).to.equal(0);
@@ -64,21 +64,21 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should set the underlying value locally without waiting for server confirmation', () => {
-      const numberSignal = new NumberSignal(undefined, config);
-      expect(numberSignal.value).to.equal(undefined);
+      const numberSignal = new NumberSignal(null, config);
+      expect(numberSignal.value).to.be.null;
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
-      const anotherNumberSignal = new NumberSignal(undefined, config);
-      const results: Array<number | undefined> = [];
+      const anotherNumberSignal = new NumberSignal(null, config);
 
+      const results: Array<number | null> = [];
       effect(() => {
         results.push(anotherNumberSignal.value);
       });
       anotherNumberSignal.value = 42;
       anotherNumberSignal.value += 1;
 
-      expect(results).to.be.like([undefined, 42, 43]);
+      expect(results).to.be.like([null, 42, 43]);
     });
   });
 });
