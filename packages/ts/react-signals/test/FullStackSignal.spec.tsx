@@ -15,7 +15,7 @@ use(sinonChai);
 describe('@vaadin/hilla-react-signals', () => {
   describe('DependencyTrackingSignal', () => {
     class TestSignal<T = unknown> extends DependencyTrackingSignal<T> {
-      constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
+      constructor(value: T | null, onSubscribe: () => void, onUnsubscribe: () => void) {
         super(value, onSubscribe, onUnsubscribe);
         this.subscribe(() => {}); // Ignores the internal subscription.
       }
@@ -28,7 +28,7 @@ describe('@vaadin/hilla-react-signals', () => {
     beforeEach(() => {
       onFirstSubscribe = sinon.stub();
       onLastUnsubscribe = sinon.stub();
-      signal = new TestSignal(undefined, onFirstSubscribe, onLastUnsubscribe);
+      signal = new TestSignal(null, onFirstSubscribe, onLastUnsubscribe);
     });
 
     afterEach(() => {
@@ -90,7 +90,7 @@ describe('@vaadin/hilla-react-signals', () => {
       // Mock the subscribe method
       client.subscribe.returns(subscription);
 
-      signal = new NumberSignal(undefined, { client, endpoint: 'TestEndpoint', method: 'testMethod' });
+      signal = new NumberSignal(null, { client, endpoint: 'TestEndpoint', method: 'testMethod' });
       client.call.resetHistory();
     });
 
@@ -100,7 +100,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should create signal instance of type NumberSignal', () => {
       expect(signal).to.be.instanceOf(NumberSignal);
-      expect(signal.value).to.be.undefined;
+      expect(signal.value).to.be.null;
     });
 
     it('should not subscribe to signal provider endpoint before being subscribed to', () => {
@@ -151,7 +151,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it("should update signal's value based on the received event", async () => {
-      expect(signal.value).to.be.undefined;
+      expect(signal.value).to.be.null;
 
       render(<span>Value is {signal}</span>);
       await nextFrame();
