@@ -163,25 +163,60 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('bar');
     });
 
-    it('should not update the value when receive reject event after calling update', async () => {
+    it('should send correct subsequent events and not update the value when receiving reject event after calling update', async () => {
       const valueSignal = new ValueSignal<string>('a', config);
       expect(valueSignal.value).to.equal('a');
       render(<div>{valueSignal}</div>);
       await nextFrame();
 
-      const [onNextCallback] = subscription.onNext.firstCall.args;
       const updateOperation = valueSignal.update((currValue) => `${currValue}a`);
-      const [, , params] = client.call.firstCall.args;
+      expect(client.call).to.have.been.calledOnce;
+      const [, , params1] = client.call.firstCall.args;
+      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
+        clientSignalId: valueSignal.id,
+        // @ts-expect-error params.event type has id property
+        event: { id: params1?.event.id, type: 'replace', value: 'aa', expected: 'a' },
+      });
+
+      const [onNextCallback] = subscription.onNext.firstCall.args;
+
+      // Simulate a snapshot event representing a concurrent value change before the reject is received:
+      onNextCallback({ id: 'another-event-id', type: 'snapshot', value: 'b' });
+      expect(valueSignal.value).to.equal('b');
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'reject', value: undefined });
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'reject', value: undefined });
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'reject', value: undefined });
+      onNextCallback({ id: params1?.event.id, type: 'reject', value: 'dont care' });
+      // verify that the value is not updated after receiving a reject event:
+      expect(valueSignal.value).to.equal('b');
+      // verify that receiving reject event triggers another update call:
+      expect(client.call).to.have.been.calledTwice;
+      const [, , params2] = client.call.secondCall.args;
+      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
+        clientSignalId: valueSignal.id,
+        // @ts-expect-error params.event type has id property
+        event: { id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b' },
+      });
 
-      setTimeout(() => updateOperation.cancel(), 1000);
-      expect(valueSignal.value).to.equal('a');
+      // Simulate another concurrent value change before the reject is received:
+      onNextCallback({ id: 'another-event-id', type: 'snapshot', value: 'c' });
+      expect(valueSignal.value).to.equal('c');
+
+      // @ts-expect-error params.event type has id property
+      onNextCallback({ id: params2?.event.id, type: 'reject', value: 'dont care' });
+      expect(client.call).to.have.been.calledThrice;
+      const [, , params3] = client.call.thirdCall.args;
+      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
+        clientSignalId: valueSignal.id,
+        // @ts-expect-error params.event type has id property
+        event: { id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c' },
+      });
+
+      // @ts-expect-error params.event type has id property
+      onNextCallback({ id: params3?.event.id, type: 'reject', value: 'dont care' });
+      expect(client.call).to.have.been.callCount(4);
+
+      setTimeout(() => updateOperation.cancel(), 500);
+      expect(valueSignal.value).to.equal('c');
     });
 
     it('should update the value when receive snapshot event following reject events after calling update', async () => {
@@ -191,16 +226,22 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
-      const updateOperation = valueSignal.update((currValue) => `${currValue}bar`);
-      const [, , params] = client.call.firstCall.args;
+
+      valueSignal.update((currValue) => `${currValue}bar`);
+      const [, , params1] = client.call.firstCall.args;
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'reject', value: undefined });
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'reject', value: undefined });
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'snapshot', value: 'foobar' });
+      onNextCallback({ id: params1?.event.id, type: 'reject', value: 'dont care' });
+      expect(valueSignal.value).to.equal('foo');
 
+      const [, , params2] = client.call.secondCall.args;
+      // @ts-expect-error params.event type has id property
+      onNextCallback({ id: params2?.event.id, type: 'reject', value: 'dont care' });
+      expect(valueSignal.value).to.equal('foo');
+
+      const [, , params3] = client.call.thirdCall.args;
+      // @ts-expect-error params.event type has id property
+      onNextCallback({ id: params3?.event.id, type: 'snapshot', value: 'foobar' });
       expect(valueSignal.value).to.equal('foobar');
     });
   });

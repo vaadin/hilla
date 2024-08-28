@@ -76,23 +76,22 @@ export class ValueSignal<T> extends FullStackSignal<T> {
 
   protected override [$processServerResponse](event: StateEvent<T>): void {
     const record = this.#pendingRequests.get(event.id);
-
-    if (event.type === 'reject' && record) {
-      if (record.canceled) {
-        this.#pendingRequests.delete(event.id);
-        return;
-      }
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.update(record.callback);
+    if (record) {
+      this.#pendingRequests.delete(event.id);
     }
 
     if (event.type === 'snapshot') {
       if (record) {
         record.waiter.resolve();
-        this.#pendingRequests.delete(event.id);
       }
-
       this.value = event.value;
+    }
+
+    if (event.type === 'reject' && record) {
+      if (!record.canceled) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.update(record.callback);
+      }
     }
   }
 }
