@@ -11,7 +11,7 @@ const CONNECT_CLIENT = '$CONNECT_CLIENT$';
 const METHOD_NAME = '$METHOD_NAME$';
 const SIGNAL = '$SIGNAL$';
 
-const signals = ['NumberSignal'];
+const signals = ['NumberSignal', 'ValueSignal'];
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
