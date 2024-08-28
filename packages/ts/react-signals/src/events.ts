@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import type { Simplify } from 'type-fest';
+import type { Nullable } from './FullStackSignal.js';
 
 /**
  * Creates a new state event type.
@@ -17,7 +18,7 @@ type CreateStateEventType<V, T extends string, C extends Record<string, unknown>
  * A state event received from the server describing the current state of the
  * signal.
  */
-export type SnapshotStateEvent<T> = CreateStateEventType<T, 'snapshot'>;
+export type SnapshotStateEvent<T> = CreateStateEventType<Nullable<T>, 'snapshot'>;
 
 export type RejectStateEvent = CreateStateEventType<never, 'reject'>;
 
@@ -25,9 +26,9 @@ export type RejectStateEvent = CreateStateEventType<never, 'reject'>;
  * A state event defines a new value of the signal shared with the server. The
  *
  */
-export type SetStateEvent<T> = CreateStateEventType<T, 'set'>;
+export type SetStateEvent<T> = CreateStateEventType<Nullable<T>, 'set'>;
 
-export function createSetStateEvent<T>(value: T): SetStateEvent<T> {
+export function createSetStateEvent<T>(value: Nullable<T>): SetStateEvent<Nullable<T>> {
   return {
     id: nanoid(),
     type: 'set',
@@ -35,9 +36,9 @@ export function createSetStateEvent<T>(value: T): SetStateEvent<T> {
   };
 }
 
-export type ReplaceStateEvent<T> = CreateStateEventType<T, 'replace', { expected: T }>;
+export type ReplaceStateEvent<T> = CreateStateEventType<Nullable<T>, 'replace', { expected: Nullable<T> }>;
 
-export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateEvent<T> {
+export function createReplaceStateEvent<T>(expected: Nullable<T>, value: Nullable<T>): ReplaceStateEvent<Nullable<T>> {
   return {
     id: nanoid(),
     type: 'replace',
