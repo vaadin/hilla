@@ -23,12 +23,4 @@ import { ValueSignal } from './ValueSignal.js';
  * );
  * ```
  */
-export class NumberSignal extends ValueSignal<number> {
-  override get value(): number {
-    return super.value!;
-  }
-
-  override set value(value: number) {
-    super.value = value;
-  }
-}
+export class NumberSignal extends ValueSignal<number> {}

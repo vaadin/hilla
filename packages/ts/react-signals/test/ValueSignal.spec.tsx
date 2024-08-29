@@ -24,8 +24,8 @@ describe('@vaadin/hilla-react-signals', () => {
   let subscription: sinon.SinonStubbedInstance<Subscription<StateEvent<string>>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
-  function subscribeToSignalViaEffect<T>(signal: ValueSignal<T>): Array<T | null> {
-    const results: Array<T | null> = [];
+  function subscribeToSignalViaEffect<T>(signal: ValueSignal<T>): Array<T | undefined> {
+    const results: Array<T | undefined> = [];
     effect(() => {
       results.push(signal.value);
     });
@@ -43,8 +43,8 @@ describe('@vaadin/hilla-react-signals', () => {
 
   describe('ValueSignal', () => {
     it('should retain default value as initialized', () => {
-      const valueSignal1 = new ValueSignal<string>(null, config);
-      expect(valueSignal1.value).to.be.null;
+      const valueSignal1 = new ValueSignal<string>(undefined, config);
+      expect(valueSignal1.value).to.be.undefined;
 
       const valueSignal2 = new ValueSignal<string>('foo', config);
       expect(valueSignal2.value).to.equal('foo');
@@ -57,28 +57,6 @@ describe('@vaadin/hilla-react-signals', () => {
 
       const valueSignal5 = new ValueSignal<Person>({ name: 'Alice', age: 42, registered: true }, config);
       expect(valueSignal5.value).to.deep.equal({ name: 'Alice', age: 42, registered: true });
-    });
-
-    it('accepts null as initial and new values', () => {
-      const valueSignal = new ValueSignal<string>('foo', config);
-      subscribeToSignalViaEffect(valueSignal);
-      const [onNextCallback] = subscription.onNext.firstCall.args;
-
-      expect(valueSignal.value).to.equal('foo');
-      valueSignal.set(null);
-      expect(valueSignal.value).to.be.null;
-
-      valueSignal.set('bar');
-
-      valueSignal.replace('bar', null);
-      onNextCallback({ id: 'successful-event-id', type: 'snapshot', value: null });
-      expect(valueSignal.value).to.be.null;
-
-      valueSignal.value = 'baz';
-
-      valueSignal.update((_) => null);
-      onNextCallback({ id: 'successful-event-id', type: 'snapshot', value: null });
-      expect(valueSignal.value).to.be.null;
     });
 
     it('should render value when signal is rendered', async () => {
@@ -110,18 +88,15 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should not subscribe to signal provider endpoint before being subscribed to', () => {
-      const valueSignal = new ValueSignal<string>(null, config);
+      const _ = new ValueSignal<string>(undefined, config);
       expect(client.subscribe).not.to.have.been.called;
     });
 
     it('should subscribe to signal provider endpoint only after being subscribed to', () => {
-      const valueSignal = new ValueSignal<string>(null, config);
+      const valueSignal = new ValueSignal<string>(undefined, config);
       expect(client.subscribe).not.to.have.been.called;
 
-      const results: Array<string | null> = [];
-      effect(() => {
-        results.push(valueSignal.value);
-      });
+      subscribeToSignalViaEffect(valueSignal);
 
       expect(client.subscribe).to.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
@@ -133,10 +108,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should send correct event and set the value when receiving snapshot event after calling replace', () => {
       const valueSignal = new ValueSignal<string>('bar', config);
-      const results: Array<string | null> = [];
-      effect(() => {
-        results.push(valueSignal.value);
-      });
+      subscribeToSignalViaEffect(valueSignal);
 
       valueSignal.replace('bar', 'foo');
 
@@ -158,10 +130,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should not set the value when receiving reject event after calling replace', () => {
       const valueSignal = new ValueSignal<string>('baz', config);
-      const results: Array<string | null> = [];
-      effect(() => {
-        results.push(valueSignal.value);
-      });
+      subscribeToSignalViaEffect(valueSignal);
 
       valueSignal.replace('bar', 'barfoo');
 

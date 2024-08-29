@@ -5,15 +5,13 @@ import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
 
-export type Nullable<T> = T | null;
-
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
  * the provided `onSubscribe` and `onUnsubscribe` callbacks for the first
  * subscription and the last unsubscription, respectively.
  * @internal
  */
-export abstract class DependencyTrackingSignal<T> extends Signal<Nullable<T>> {
+export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   readonly #onFirstSubscribe: () => void;
   readonly #onLastUnsubscribe: () => void;
 
@@ -21,7 +19,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<Nullable<T>> {
   // FullStackSignal constructor.
   #subscribeCount = -1;
 
-  protected constructor(value: Nullable<T>, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
+  protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
     super(value);
     this.#onFirstSubscribe = onFirstSubscribe;
     this.#onLastUnsubscribe = onLastUnsubscribe;
@@ -71,7 +69,7 @@ export type ServerConnectionConfig = Readonly<{
 class ServerConnection<T> {
   readonly #id: string;
   readonly #config: ServerConnectionConfig;
-  #subscription?: Subscription<StateEvent<Nullable<T>>>;
+  #subscription?: Subscription<StateEvent<T>>;
 
   constructor(id: string, config: ServerConnectionConfig) {
     this.#config = config;
@@ -94,7 +92,7 @@ class ServerConnection<T> {
     return this.#subscription;
   }
 
-  async update(event: StateEvent<Nullable<T>>): Promise<void> {
+  async update(event: StateEvent<T>): Promise<void> {
     await this.#config.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
@@ -147,7 +145,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   // value to the server.
   #paused = true;
 
-  constructor(value: Nullable<T>, config: ServerConnectionConfig) {
+  constructor(value: T | undefined, config: ServerConnectionConfig) {
     super(
       value,
       () => this.#connect(),
@@ -171,7 +169,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The event to update the server with.
    */
-  protected [$update](event: StateEvent<Nullable<T>>): void {
+  protected [$update](event: StateEvent<T>): void {
     this.server
       .update(event)
       .catch((error: unknown) => {
@@ -188,10 +186,10 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The server response event.
    */
-  protected abstract [$processServerResponse](event: StateEvent<Nullable<T>>): void;
+  protected abstract [$processServerResponse](event: StateEvent<T>): void;
 
   #connect() {
-    this.server.connect().onNext((event: StateEvent<Nullable<T>>) => {
+    this.server.connect().onNext((event: StateEvent<T>) => {
       this.#paused = true;
       this[$processServerResponse](event);
       this.#paused = false;

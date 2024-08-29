@@ -1,5 +1,5 @@
 import { createReplaceStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $update, FullStackSignal, type Nullable } from './FullStackSignal.js';
+import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Readonly<{
@@ -19,7 +19,7 @@ export interface OperationSubscription {
  * A full-stack signal that holds an arbitrary value.
  */
 export class ValueSignal<T> extends FullStackSignal<T> {
-  readonly #pendingRequests = new Map<string, PendingRequestsRecord<Nullable<T>>>();
+  readonly #pendingRequests = new Map<string, PendingRequestsRecord<T>>();
 
   /**
    * Sets the value.
@@ -31,7 +31,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param value - The new value.
    */
-  set(value: Nullable<T>): void {
+  set(value: T): void {
     this.value = value;
   }
 
@@ -42,7 +42,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @param expected - The expected value.
    * @param newValue - The new value.
    */
-  replace(expected: Nullable<T>, newValue: Nullable<T>): void {
+  replace(expected: T, newValue: T): void {
     this[$update](createReplaceStateEvent(expected, newValue));
   }
 
@@ -59,7 +59,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *                   produce the new value.
    * @returns An operation subscription that can be canceled.
    */
-  update(callback: (value: Nullable<T>) => Nullable<T>): OperationSubscription {
+  update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
     const event = createReplaceStateEvent(this.value, newValue);
     this[$update](event);

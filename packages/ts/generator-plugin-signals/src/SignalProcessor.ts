@@ -42,10 +42,10 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
-
+          const INITIAL_VALUE = signalId.text.startsWith('NumberSignal') ? '0' : 'undefined';
           return template(
             `function ${METHOD_NAME}() {
-  return new ${SIGNAL}(null, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
+  return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
 }`,
             (statements) => statements,
             [

@@ -66,7 +66,7 @@ public class SignalBasicSecurityIT extends ChromeBrowserTest {
 
         // But cannot manipulate the admin counter:
         clickButton("incrementAdminCounter");
-        Assert.assertNotEquals(30, getCounterSignalValue("adminCounter"));
+        Assert.assertEquals(-1, getCounterSignalValue("adminCounter"));
         // shows server and related endpoint are working
         Assert.assertEquals(30, fetchCounterValue("Admin"));
 
