@@ -228,7 +228,8 @@ public class PushMessageHandler {
      *            the id of the connection
      */
     public void handleBrowserReconnect(String connectionId) {
-        fluxSubscriptionInfos.putIfAbsent(connectionId, new ConcurrentHashMap<>());
+        fluxSubscriptionInfos.putIfAbsent(connectionId,
+                new ConcurrentHashMap<>());
     }
 
     /**
