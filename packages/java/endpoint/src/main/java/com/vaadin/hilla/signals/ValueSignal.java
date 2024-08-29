@@ -84,7 +84,7 @@ public class ValueSignal<T> {
         }).doFinally(ignore -> {
             lock.lock();
             try {
-                LOGGER.debug("Unsubscribing from NumberSignal...");
+                LOGGER.debug("Unsubscribing from Signal...");
                 subscribers.remove(sink);
             } finally {
                 lock.unlock();
