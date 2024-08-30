@@ -344,6 +344,19 @@ describe('@vaadin/hilla-frontend', () => {
       expect(subscribeStub.lastCall.firstArg).to.have.property('url').which.equals('/custom/HILLA/push');
     });
 
+    it('should send event when failed to reconnect', () => {
+      fluxConnection.state = State.RECONNECTING;
+      let events = 0;
+      fluxConnection.addEventListener('state-changed', (e) => {
+        if (!e.detail.active) {
+          events += 1;
+        }
+      });
+      getSubscriptionEventSpies()?.onFailureToReconnect?.();
+      expect(events).to.equal(1);
+      expect(fluxConnection.state).to.equal(State.INACTIVE);
+    });
+
     it('should call disconnect callbacks on first', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
       const onDisconnect = sinon.stub();
