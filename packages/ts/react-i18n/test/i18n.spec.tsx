@@ -60,6 +60,38 @@ describe('@vaadin/hilla-react-i18n', () => {
           },
           status: 200,
         })
+        .get('/?v-r=i18n&langtag=chunked&chunks=city', {
+          body: {
+            'addresses.form.city.label': 'City Chunked',
+          },
+        })
+        .get('/?v-r=i18n&langtag=chunked&chunks=street', {
+          body: {
+            'addresses.form.street.label': 'Street Chunked',
+          },
+        })
+        .get('/?v-r=i18n&langtag=chunked&chunks=city&chunks=street', {
+          body: {
+            'addresses.form.city.label': 'City Chunked',
+            'addresses.form.street.label': 'Street Chunked',
+          },
+        })
+        .get('/?v-r=i18n&langtag=chunked-another&chunks=city', {
+          body: {
+            'addresses.form.city.label': 'City Chunked Another',
+          },
+        })
+        .get('/?v-r=i18n&langtag=chunked-another&chunks=street', {
+          body: {
+            'addresses.form.street.label': 'Street Chunked Another',
+          },
+        })
+        .get('/?v-r=i18n&langtag=chunked-another&chunks=city&chunks=street', {
+          body: {
+            'addresses.form.city.label': 'City Chunked Another',
+            'addresses.form.street.label': 'Street Chunked Another',
+          },
+        })
         .get('*', {
           body: {
             'addresses.form.city.label': 'City',
@@ -179,6 +211,114 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.language.value).to.equal('unknown');
         expect(i18n.resolvedLanguage.value).to.equal(undefined);
         verifyLoadTranslations('unknown');
+      });
+    });
+
+    describe('chunked loading', () => {
+      const language = 'chunked';
+
+      function getLastUrlParams() {
+        return new URLSearchParams(new URL(fetchMock.lastUrl() ?? '', document.baseURI).search);
+      }
+
+      it('should not load chunks unless configured', async () => {
+        await i18n.registerChunk('city');
+
+        // Neither chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(fetchMock.called()).to.be.false;
+      });
+
+      it('should load registered chunk after configured', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+
+        // City chunk is loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+
+        // Street chunk is not loaded yet
+        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
+      });
+
+      it('should load all chunks after configured', async () => {
+        await i18n.registerChunk('city');
+        await i18n.registerChunk('street');
+        await i18n.configure({ language });
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
+      });
+
+      it('should load additional chunks after configured', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        fetchMock.resetHistory();
+
+        await i18n.registerChunk('street');
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
+      });
+
+      it('should load registered chunk when switching language', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        fetchMock.resetHistory();
+
+        await i18n.setLanguage('chunked-another');
+
+        // City chunk is loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked Another');
+
+        // Street chunk is not loaded yet
+        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
+      });
+
+      it('should load all chunks when switching language', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        await i18n.registerChunk('street');
+        fetchMock.resetHistory();
+
+        await i18n.setLanguage('chunked-another');
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked Another');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked Another');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
+      });
+
+      it('should load additional chunks after switching language', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        await i18n.setLanguage('chunked-another');
+        fetchMock.resetHistory();
+
+        await i18n.registerChunk('street');
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked Another');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked Another');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
       });
     });
 
