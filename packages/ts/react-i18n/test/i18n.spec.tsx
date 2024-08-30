@@ -60,38 +60,6 @@ describe('@vaadin/hilla-react-i18n', () => {
           },
           status: 200,
         })
-        .get('/?v-r=i18n&langtag=chunked&chunks=city', {
-          body: {
-            'addresses.form.city.label': 'City Chunked',
-          },
-        })
-        .get('/?v-r=i18n&langtag=chunked&chunks=street', {
-          body: {
-            'addresses.form.street.label': 'Street Chunked',
-          },
-        })
-        .get('/?v-r=i18n&langtag=chunked&chunks=city&chunks=street', {
-          body: {
-            'addresses.form.city.label': 'City Chunked',
-            'addresses.form.street.label': 'Street Chunked',
-          },
-        })
-        .get('/?v-r=i18n&langtag=chunked-another&chunks=city', {
-          body: {
-            'addresses.form.city.label': 'City Chunked Another',
-          },
-        })
-        .get('/?v-r=i18n&langtag=chunked-another&chunks=street', {
-          body: {
-            'addresses.form.street.label': 'Street Chunked Another',
-          },
-        })
-        .get('/?v-r=i18n&langtag=chunked-another&chunks=city&chunks=street', {
-          body: {
-            'addresses.form.city.label': 'City Chunked Another',
-            'addresses.form.street.label': 'Street Chunked Another',
-          },
-        })
         .get('*', {
           body: {
             'addresses.form.city.label': 'City',
@@ -215,7 +183,44 @@ describe('@vaadin/hilla-react-i18n', () => {
     });
 
     describe('chunked loading', () => {
-      const language = 'chunked';
+      const language = 'en';
+
+      beforeEach(() => {
+        fetchMock
+          .reset()
+          .get('/?v-r=i18n&langtag=en&chunks=city', {
+            body: {
+              'addresses.form.city.label': 'City Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en&chunks=street', {
+            body: {
+              'addresses.form.street.label': 'Street Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en&chunks=city&chunks=street', {
+            body: {
+              'addresses.form.city.label': 'City Chunked',
+              'addresses.form.street.label': 'Street Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en-AU&chunks=city', {
+            body: {
+              'addresses.form.city.label': 'Australian City Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en-AU&chunks=street', {
+            body: {
+              'addresses.form.street.label': 'Australian Street Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en-AU&chunks=city&chunks=street', {
+            body: {
+              'addresses.form.city.label': 'Australian City Chunked',
+              'addresses.form.street.label': 'Australian Street Chunked',
+            },
+          });
+      });
 
       function getLastUrlParams() {
         return new URLSearchParams(new URL(fetchMock.lastUrl() ?? '', document.baseURI).search);
@@ -277,10 +282,10 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure({ language });
         fetchMock.resetHistory();
 
-        await i18n.setLanguage('chunked-another');
+        await i18n.setLanguage('en-AU');
 
         // City chunk is loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked Another');
+        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
 
         // Street chunk is not loaded yet
         expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
@@ -295,11 +300,11 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.registerChunk('street');
         fetchMock.resetHistory();
 
-        await i18n.setLanguage('chunked-another');
+        await i18n.setLanguage('en-AU');
 
         // Both chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked Another');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked Another');
+        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Australian Street Chunked');
         expect(fetchMock.called()).to.be.true;
         expect(fetchMock.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
@@ -308,14 +313,14 @@ describe('@vaadin/hilla-react-i18n', () => {
       it('should load additional chunks after switching language', async () => {
         await i18n.registerChunk('city');
         await i18n.configure({ language });
-        await i18n.setLanguage('chunked-another');
+        await i18n.setLanguage('en-AU');
         fetchMock.resetHistory();
 
         await i18n.registerChunk('street');
 
         // Both chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked Another');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked Another');
+        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Australian Street Chunked');
         expect(fetchMock.called()).to.be.true;
         expect(fetchMock.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
