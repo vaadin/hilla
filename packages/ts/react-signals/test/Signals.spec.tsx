@@ -9,6 +9,7 @@ import { effect } from '../src';
 import { NumberSignal } from '../src';
 import type { ServerConnectionConfig, StateEvent } from '../src/FullStackSignal.js';
 import { nextFrame } from './utils.js';
+import type { StateEvent } from "../FullStackSignal";
 
 use(sinonChai);
 use(chaiLike);
@@ -32,6 +33,9 @@ describe('@vaadin/hilla-react-signals', () => {
         return this;
       },
       onNext() {
+        return this;
+      },
+      onDisconnect() {
         return this;
       },
     });
