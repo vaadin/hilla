@@ -172,7 +172,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
-      const incrementSubscription = numberSignal.add(-2);
+      const incrementSubscription = numberSignal.add(-2, true);
       const [, , params1] = client.call.firstCall.args;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
