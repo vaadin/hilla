@@ -25,6 +25,8 @@ export class I18n {
   readonly #language: Signal<string | undefined> = signal(undefined);
   readonly #translations: Signal<Translations> = signal({});
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
+  readonly #chunks = new Set<string>();
+
   #formatCache: FormatCache = new FormatCache(navigator.language);
 
   constructor() {
@@ -123,14 +125,40 @@ export class I18n {
     await this.updateLanguage(newLanguage, true);
   }
 
-  private async updateLanguage(newLanguage: string, updateSettings = false) {
-    if (this.#language.value === newLanguage) {
+  /**
+   * Registers the chunk name for loading translations, and loads the
+   * translations for the specified chunk.
+   *
+   * @internal only for automatic internal calls from production JS bundles
+   *
+   * @param chunkName - the production JS bundle chunk name
+   */
+  async registerChunk(chunkName: string): Promise<void> {
+    if (this.#chunks.has(chunkName)) {
       return;
     }
 
+    this.#chunks.add(chunkName);
+
+    if (this.#language.value) {
+      await this.updateLanguage(this.#language.value, false, chunkName);
+    }
+  }
+
+  private async updateLanguage(newLanguage: string, updateSettings = false, newChunk?: string) {
+    if (this.#language.value === newLanguage && !newChunk) {
+      return;
+    }
+
+    const chunks = newChunk
+      ? [newChunk] // New chunk is registered, load only that
+      : this.#chunks.size > 0
+        ? [...this.#chunks.values()] // Load the new language for all chunks registered so far
+        : undefined; // Load the new language without specifying chunks, assuming dev. mode
+
     let translationsResult: TranslationsResult;
     try {
-      translationsResult = await this.#backend.loadTranslations(newLanguage);
+      translationsResult = await this.#backend.loadTranslations(newLanguage, chunks);
     } catch (e) {
       console.error(`Failed to load translations for language: ${newLanguage}`, e);
       return;
@@ -138,7 +166,9 @@ export class I18n {
 
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this.#translations.value = translationsResult.translations;
+      this.#translations.value = newChunk
+        ? { ...this.#translations.value, ...translationsResult.translations }
+        : translationsResult.translations;
       this.#language.value = newLanguage;
       this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
       this.#formatCache = new FormatCache(newLanguage);
