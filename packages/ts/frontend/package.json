@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-frontend",
-  "version": "24.4.6",
+  "version": "24.4.7",
   "description": "Hilla core frontend utils",
   "main": "index.js",
   "module": "index.js",
