@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import type { ReactiveControllerHost, ReactiveController } from '@lit/reactive-element';
+import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
 import sinon from 'sinon';
 import { FluxConnection, State } from '../src/FluxConnection.js';
 import type {
@@ -14,6 +14,10 @@ describe('@vaadin/hilla-frontend', () => {
   describe('FluxConnection', () => {
     function emitMessage(msg: AbstractMessage) {
       getSubscriptionEventSpies()?.onMessage?.({ responseBody: JSON.stringify(msg) });
+    }
+
+    function emitPublishedMessage(msg: AbstractMessage) {
+      getSubscriptionEventSpies()?.onMessagePublished?.({ responseBody: JSON.stringify(msg) });
     }
 
     function getLastEmittedMessage(): AbstractMessage | undefined {
@@ -89,6 +93,18 @@ describe('@vaadin/hilla-frontend', () => {
       });
       const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
       emitMessage(msg);
+      expect(receivedValues.length).to.equal(1);
+      expect(receivedValues[0]).to.eql({ foo: 'bar' });
+    });
+
+    it('should call onNext when receiving a server message if message is published (pushed)', () => {
+      const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+      const receivedValues: any[] = [];
+      sub.onNext((value: any) => {
+        receivedValues.push(value);
+      });
+      const msg: ClientUpdateMessage = { '@type': 'update', id: '0', item: { foo: 'bar' } };
+      emitPublishedMessage(msg);
       expect(receivedValues.length).to.equal(1);
       expect(receivedValues[0]).to.eql({ foo: 'bar' });
     });
@@ -326,6 +342,38 @@ describe('@vaadin/hilla-frontend', () => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/custom/connect');
       expect(subscribeStub.lastCall.firstArg).to.have.property('url').which.equals('/custom/HILLA/push');
+    });
+
+    it('should send event when failed to reconnect', () => {
+      fluxConnection.state = State.RECONNECTING;
+      let events = 0;
+      fluxConnection.addEventListener('state-changed', (e) => {
+        if (!e.detail.active) {
+          events += 1;
+        }
+      });
+      getSubscriptionEventSpies()?.onFailureToReconnect?.();
+      expect(events).to.equal(1);
+      expect(fluxConnection.state).to.equal(State.INACTIVE);
+    });
+
+    it('should call disconnect callbacks on reconnect', () => {
+      const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+      const onDisconnect = sinon.stub();
+
+      sub.onDisconnect(onDisconnect);
+
+      getSubscriptionEventSpies()?.onReconnect?.();
+      expect(onDisconnect).to.have.been.calledOnce;
+    });
+
+    it('should update state while reconnecting', () => {
+      const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+      fluxConnection.state = State.INACTIVE;
+      getSubscriptionEventSpies()?.onReconnect?.();
+      expect(fluxConnection.state).to.equal(State.RECONNECTING);
+      getSubscriptionEventSpies()?.onReopen?.();
+      expect(fluxConnection.state).to.equal(State.ACTIVE);
     });
   });
 });
