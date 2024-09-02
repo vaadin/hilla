@@ -103,7 +103,7 @@ public class NumberSignalTest {
     }
 
     private ObjectNode createSetEvent(String value) {
-        var setEvent = new StateEvent<>(UUID.randomUUID(),
+        var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
                 StateEvent.EventType.SET, Double.parseDouble(value));
         return setEvent.toJson();
     }

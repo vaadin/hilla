@@ -144,6 +144,51 @@ export class RouterConfigurationBuilder {
   }
 
   /**
+   * Adds the layoutComponent as the parent layout to views with the flowLayouts ViewConfiguration set.
+   *
+   * @param layoutComponent - layout component to use, usually Flow
+   */
+  withLayout(layoutComponent: ComponentType): this {
+    function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
+      const nestedRoutes = routes.map((route) => {
+        if (route.children === undefined) {
+          return route;
+        }
+
+        return {
+          ...route,
+          children: applyLayouts(route.children),
+        } as RouteObject;
+      });
+      return [
+        {
+          element: createElement(layoutComponent),
+          children: nestedRoutes,
+        },
+      ];
+    }
+
+    this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
+      if (!routes) {
+        return routes;
+      }
+      const withLayout = routes.filter((route) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const layout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
+        return layout;
+      });
+      const allRoutes = routes.filter((route) => !withLayout.includes(route));
+      const catchAll = [routes.find((route) => route.path === '*')].filter((route) => route !== undefined);
+      withLayout.push(...catchAll); // Add * fallback to all child routes
+
+      allRoutes.unshift(...applyLayouts(withLayout));
+      return allRoutes;
+    });
+
+    return this;
+  }
+
+  /**
    * Protects all the routes that require authentication. For more details see
    * {@link @vaadin/hilla-react-auth#protectRoutes} function.
    *
