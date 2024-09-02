@@ -141,7 +141,7 @@ describe('@vaadin/hilla-react-signals', () => {
       setTimeout(() => incrementSubscription.cancel(), 500);
     });
 
-    it('should not retry after receiving reject events when increment is called with true passed to retryOnFailure', () => {
+    it('should not retry after receiving reject events when increment is called with true as retryOnFailure', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
@@ -153,6 +153,14 @@ describe('@vaadin/hilla-react-signals', () => {
       simulateReceivingReject(params1?.event.id);
       // Verify that failure has not triggered the retry:
       expect(client.call).to.have.been.calledOnce;
+    });
+
+    it('should not send any event to the server when increment is called with zero as delta', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.increment(0);
+      expect(client.call).not.to.have.been.called;
     });
 
     it('should send the correct values in replace events when add is called', () => {
@@ -219,6 +227,14 @@ describe('@vaadin/hilla-react-signals', () => {
       // @ts-expect-error params.event type has id property
       simulateReceivingReject(params1?.event.id);
       expect(client.call).to.have.been.calledOnce;
+    });
+
+    it('should not send any event to the server when add is called with zero as delta', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.add(0);
+      expect(client.call).not.to.have.been.called;
     });
   });
 });
