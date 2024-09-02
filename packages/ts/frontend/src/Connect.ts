@@ -42,6 +42,9 @@ export interface Subscription<T> {
 
   /** Called when a new value is available. */
   onNext(callback: (value: T) => void): Subscription<T>;
+
+  /** Called when subscription disconnected */
+  onDisconnect(callback: () => void): Subscription<T>;
 }
 
 interface ConnectExceptionData {
