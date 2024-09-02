@@ -45,12 +45,8 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return this.#map.get(path)?.get(specifier)?.id;
   }
 
-  *identifiers(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
-    for (const [path, specifiers] of this.#map) {
-      for (const [specifier, { id, isType }] of specifiers) {
-        yield [path, specifier, id, isType];
-      }
-    }
+  iter(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
+    return this[Symbol.iterator]();
   }
 
   isType(path: string, specifier: string): boolean | undefined {
@@ -94,6 +90,14 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
       ];
     }
   }
+
+  *[Symbol.iterator](): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
+    for (const [path, specifiers] of this.#map) {
+      for (const [specifier, { id, isType }] of specifiers) {
+        yield [path, specifier, id, isType];
+      }
+    }
+  }
 }
 
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
@@ -113,10 +117,8 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
     return this.#map.get(path);
   }
 
-  *identifiers(): IterableIterator<Identifier> {
-    for (const id of this.#map.values()) {
-      yield id;
-    }
+  iter(): IterableIterator<readonly [path: string, id: Identifier]> {
+    return this[Symbol.iterator]();
   }
 
   paths(): IterableIterator<string> {
@@ -133,6 +135,16 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
           ts.factory.createStringLiteral(path),
         ),
       ];
+    }
+  }
+
+  remove(path: string): void {
+    this.#map.delete(path);
+  }
+
+  *[Symbol.iterator](): IterableIterator<readonly [path: string, id: Identifier]> {
+    for (const [path, id] of this.#map) {
+      yield [path, id];
     }
   }
 }
@@ -156,23 +168,12 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
     }
   }
 
-  find(predicate: (path: string) => boolean): [string, boolean, Identifier] | undefined {
-    for (const [path, { id, isType }] of this.#map) {
-      if (predicate(path)) {
-        return [path, isType, id];
-      }
-    }
-    return undefined;
-  }
-
   override clear(): void {
     this.#map.clear();
   }
 
-  *identifiers(): IterableIterator<readonly [id: Identifier, isType: boolean]> {
-    for (const { id, isType } of this.#map.values()) {
-      yield [id, isType];
-    }
+  iter(): IterableIterator<readonly [path: string, id: Identifier, isType: boolean]> {
+    return this[Symbol.iterator]();
   }
 
   isType(path: string): boolean | undefined {
@@ -193,6 +194,12 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
           ts.factory.createStringLiteral(path),
         ),
       ];
+    }
+  }
+
+  *[Symbol.iterator](): IterableIterator<readonly [path: string, id: Identifier, isType: boolean]> {
+    for (const [path, { id, isType }] of this.#map) {
+      yield [path, id, isType];
     }
   }
 }

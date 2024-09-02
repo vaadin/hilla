@@ -123,8 +123,8 @@ public class NumberSignal {
     }
 
     private ObjectNode createSnapshot() {
-        var snapshot = new StateEvent<>(this.id, StateEvent.EventType.SNAPSHOT,
-                this.value);
+        var snapshot = new StateEvent<>(this.id.toString(),
+                StateEvent.EventType.SNAPSHOT, this.value);
         return snapshot.toJson();
     }
 

@@ -12,6 +12,7 @@ import {
 export enum State {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
+  RECONNECTING = 'reconnecting',
 }
 
 type ActiveEvent = CustomEvent<{ active: boolean }>;
@@ -36,6 +37,7 @@ export class FluxConnection extends EventTarget {
   readonly #onCompleteCallbacks = new Map<string, () => void>();
   readonly #onErrorCallbacks = new Map<string, () => void>();
   readonly #onNextCallbacks = new Map<string, (value: any) => void>();
+  readonly #onDisconnectCallbacks = new Map<string, () => void>();
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
 
@@ -92,6 +94,10 @@ export class FluxConnection extends EventTarget {
         this.#onNextCallbacks.set(id, callback);
         return hillaSubscription;
       },
+      onDisconnect: (callback: () => void): Subscription<any> => {
+        this.#onDisconnectCallbacks.set(id, callback);
+        return hillaSubscription;
+      },
     };
     return hillaSubscription;
   }
@@ -103,12 +109,16 @@ export class FluxConnection extends EventTarget {
     this.#socket = atmosphere.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
-      fallbackTransport: 'long-polling',
+      transport: 'websocket',
+      fallbackTransport: 'websocket',
       headers: extraHeaders,
       maxReconnectOnClose: 10000000,
+      reconnectInterval: 5000,
+      timeout: -1,
+      trackMessageLength: true,
+      url,
       onClose: (_) => {
-        // https://socket.io/docs/v4/client-api/#event-disconnect
-        if (this.state === State.ACTIVE) {
+        if (this.state !== State.INACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
         }
@@ -122,25 +132,37 @@ export class FluxConnection extends EventTarget {
           this.#handleMessage(JSON.parse(response.responseBody));
         }
       },
+      onMessagePublished: (response) => {
+        if (response?.responseBody) {
+          this.#handleMessage(JSON.parse(response.responseBody));
+        }
+      },
       onOpen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
+        if (this.state !== State.ACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
       onReopen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
+        if (this.state !== State.ACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
-      reconnectInterval: 5000,
-      timeout: -1,
-      trackMessageLength: true,
-      transport: 'websocket',
-      url,
+      onReconnect: (_request, _response) => {
+        if (this.state !== State.RECONNECTING) {
+          this.state = State.RECONNECTING;
+          this.#onDisconnectCallbacks.forEach((callback) => callback());
+        }
+      },
+      onFailureToReconnect: (_request, _response) => {
+        if (this.state !== State.INACTIVE) {
+          this.state = State.INACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+        }
+      },
       ...atmosphereOptions,
     } satisfies Atmosphere.Request);
   }
@@ -178,6 +200,7 @@ export class FluxConnection extends EventTarget {
     this.#onCompleteCallbacks.delete(id);
     this.#onErrorCallbacks.delete(id);
     this.#endpointInfos.delete(id);
+    this.#onDisconnectCallbacks.delete(id);
   }
 
   #send(message: ServerMessage) {

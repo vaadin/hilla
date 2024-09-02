@@ -2,9 +2,8 @@ package com.vaadin.hilla.signals.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.core.SignalsRegistry;
+import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -20,21 +19,17 @@ import static org.mockito.Mockito.when;
 
 public class SignalsHandlerTest {
 
-    private static final UUID CLIENT_SIGNAL_ID_1 = UUID
-            .fromString("90000000-9000-9000-9000-900000000000");
-    private static final UUID CLIENT_SIGNAL_ID_2 = UUID
-            .fromString("80000000-8000-8000-8000-800000000000");
+    private static final String CLIENT_SIGNAL_ID_1 = "90000000-9000-9000-9000-900000000000";
+    private static final String CLIENT_SIGNAL_ID_2 = "80000000-8000-8000-8000-800000000000";
 
     private final ObjectMapper mapper = new ObjectMapper();
     private SignalsHandler signalsHandler;
-    private SignalsRegistry signalsRegistry;
-    private EndpointInvoker endpointInvoker;
+    private SecureSignalsRegistry signalsRegistry;
 
     @Before
     public void setUp() {
-        signalsRegistry = new SignalsRegistry();
-        endpointInvoker = Mockito.mock(EndpointInvoker.class);
-        signalsHandler = new SignalsHandler(signalsRegistry, endpointInvoker);
+        signalsRegistry = Mockito.mock(SecureSignalsRegistry.class);
+        signalsHandler = new SignalsHandler(signalsRegistry);
     }
 
     @Test
@@ -42,17 +37,20 @@ public class SignalsHandlerTest {
             throws Exception {
 
         NumberSignal numberSignal = new NumberSignal();
-        var signalId = numberSignal.getId();
-        when(endpointInvoker.invoke("endpoint", "method", null, null, null))
-                .thenReturn(numberSignal);
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1)).thenReturn(numberSignal);
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_2)).thenReturn(numberSignal);
 
+        assertEquals(signalsRegistry.get(CLIENT_SIGNAL_ID_1).getId(),
+                signalsRegistry.get(CLIENT_SIGNAL_ID_2).getId());
+
+        var signalId = numberSignal.getId();
         var expectedSignalEventJson = new ObjectNode(mapper.getNodeFactory())
                 .put("value", 0.0).put("id", signalId.toString())
                 .put("type", "snapshot");
 
         // first client subscribe to a signal, it registers the signal:
-        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint.method",
-                CLIENT_SIGNAL_ID_1);
+        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_1);
         firstFlux.subscribe(next -> {
             assertNotNull(next);
             assertEquals(expectedSignalEventJson, next);
@@ -61,17 +59,14 @@ public class SignalsHandlerTest {
         });
 
         // another client subscribes to the same signal:
-        Flux<ObjectNode> secondFlux = signalsHandler
-                .subscribe("endpoint.method", CLIENT_SIGNAL_ID_2);
+        Flux<ObjectNode> secondFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_2);
         secondFlux.subscribe(next -> {
             assertNotNull(next);
             assertEquals(expectedSignalEventJson, next);
         }, error -> {
             throw new RuntimeException(error);
         });
-
-        assertEquals(signalsRegistry.get(CLIENT_SIGNAL_ID_1).getId(),
-                signalsRegistry.get(CLIENT_SIGNAL_ID_2).getId());
     }
 
     @Test
@@ -87,11 +82,10 @@ public class SignalsHandlerTest {
             throws Exception {
         NumberSignal numberSignal = new NumberSignal(10.0);
         var signalId = numberSignal.getId();
-        when(endpointInvoker.invoke("endpoint", "method", null, null, null))
-                .thenReturn(numberSignal);
+        when(signalsRegistry.get(CLIENT_SIGNAL_ID_1)).thenReturn(numberSignal);
 
-        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint.method",
-                CLIENT_SIGNAL_ID_1);
+        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_1);
 
         var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 42)
                 .put("id", UUID.randomUUID().toString()).put("type", "set");

@@ -2,8 +2,8 @@ package com.vaadin.hilla.signals.config;
 
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
-import com.vaadin.hilla.signals.core.SignalsRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SignalsConfiguration {
 
-    private SignalsRegistry signalsRegistry;
+    private SecureSignalsRegistry signalsRegistry;
     private SignalsHandler signalsHandler;
     private final EndpointInvoker endpointInvoker;
 
@@ -29,9 +29,9 @@ public class SignalsConfiguration {
      */
     @ConditionalOnFeatureFlag("fullstackSignals")
     @Bean
-    public SignalsRegistry signalsRegistry() {
+    public SecureSignalsRegistry signalsRegistry() {
         if (signalsRegistry == null) {
-            signalsRegistry = new SignalsRegistry();
+            signalsRegistry = new SecureSignalsRegistry(endpointInvoker);
         }
         return signalsRegistry;
     }
@@ -46,8 +46,7 @@ public class SignalsConfiguration {
     @Bean
     public SignalsHandler signalsHandler() {
         if (signalsHandler == null) {
-            signalsHandler = new SignalsHandler(signalsRegistry(),
-                    endpointInvoker);
+            signalsHandler = new SignalsHandler(signalsRegistry());
         }
         return signalsHandler;
     }
