@@ -1,7 +1,7 @@
 import type { Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import type { StateEvent } from '../src/events.js';
-import { effect, ValueSignal } from '../src/index.js';
+import { effect, type ValueSignal } from '../src/index.js';
 
 export async function nextFrame(): Promise<void> {
   return new Promise<void>((resolve) => {

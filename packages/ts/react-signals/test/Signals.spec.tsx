@@ -117,7 +117,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(40);
     });
 
-    it('should retry after receiving reject events when increment is called', () => {
+    it('should retry after receiving reject events when increment is called by default', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
@@ -139,6 +139,20 @@ describe('@vaadin/hilla-react-signals', () => {
       });
 
       setTimeout(() => incrementSubscription.cancel(), 500);
+    });
+
+    it('should not retry after receiving reject events when increment is called with true passed to retryOnFailure', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.increment(1, false);
+      expect(client.call).to.have.been.calledOnce;
+      const [, , params1] = client.call.firstCall.args;
+
+      // @ts-expect-error params.event type has id property
+      simulateReceivingReject(params1?.event.id);
+      // Verify that failure has not triggered the retry:
+      expect(client.call).to.have.been.calledOnce;
     });
 
     it('should send the correct values in replace events when add is called', () => {
@@ -168,11 +182,12 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(37);
     });
 
-    it('should retry after receiving reject events when add is called', () => {
+    it('should retry after receiving reject events when add is called and retry on failure is true', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
       const incrementSubscription = numberSignal.add(-2, true);
+      expect(client.call).to.have.been.calledOnce;
       const [, , params1] = client.call.firstCall.args;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
@@ -182,6 +197,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
       // @ts-expect-error params.event type has id property
       simulateReceivingReject(params1?.event.id);
+      expect(client.call).to.have.been.calledTwice;
       const [, , params2] = client.call.secondCall.args;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
@@ -190,6 +206,19 @@ describe('@vaadin/hilla-react-signals', () => {
       });
 
       setTimeout(() => incrementSubscription.cancel(), 500);
+    });
+
+    it('should not retry after receiving reject events when add is called and retry on failure is false', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.add(-2);
+      expect(client.call).to.have.been.calledOnce;
+      const [, , params1] = client.call.firstCall.args;
+
+      // @ts-expect-error params.event type has id property
+      simulateReceivingReject(params1?.event.id);
+      expect(client.call).to.have.been.calledOnce;
     });
   });
 });
