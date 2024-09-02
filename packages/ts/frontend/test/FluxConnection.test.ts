@@ -357,7 +357,7 @@ describe('@vaadin/hilla-frontend', () => {
       expect(fluxConnection.state).to.equal(State.INACTIVE);
     });
 
-    it('should call disconnect callbacks on first', () => {
+    it('should call disconnect callbacks on reconnect', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
       const onDisconnect = sinon.stub();
 
