@@ -5,9 +5,10 @@ import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { effect } from '../src';
-import { NumberSignal } from '../src';
-import type { ServerConnectionConfig, StateEvent } from '../src/FullStackSignal.js';
+import type { StateEvent } from '../src/events.js';
+import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
+import { effect } from '../src/index.js';
+import { NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
 
 use(sinonChai);
@@ -67,13 +68,13 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should set the underlying value locally without waiting for server confirmation', () => {
       const numberSignal = new NumberSignal(undefined, config);
-      expect(numberSignal.value).to.equal(undefined);
+      expect(numberSignal.value).to.be.undefined;
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
       const anotherNumberSignal = new NumberSignal(undefined, config);
-      const results: Array<number | undefined> = [];
 
+      const results: Array<number | undefined> = [];
       effect(() => {
         results.push(anotherNumberSignal.value);
       });

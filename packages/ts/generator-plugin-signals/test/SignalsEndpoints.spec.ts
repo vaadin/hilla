@@ -48,5 +48,20 @@ describe('SignalsPlugin', () => {
       const generatedHelloWorldService = files.find((f) => f.name === 'HelloWorldService.ts')!;
       await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService`, import.meta.url);
     });
+
+    it('correctly generates service with mixture of normal and ValueSignal returning methods', async () => {
+      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
+        logger: new LoggerFactory({ name: 'model-plugin-test', verbose: true }),
+      });
+      const input = await readFile(new URL('./hilla-openapi-mix.json', import.meta.url), 'utf8');
+      const files = await generator.process(input);
+
+      const generatedValueSignalService = files.find((f) => f.name === 'PersonService.ts')!;
+      await expect(await generatedValueSignalService.text()).toMatchSnapshot(`ValueSignalServiceMix`, import.meta.url);
+
+      // Non-signal returning services should remain unchanged as before:
+      const generatedHelloWorldService = files.find((f) => f.name === 'HelloWorldService.ts')!;
+      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService`, import.meta.url);
+    });
   });
 });
