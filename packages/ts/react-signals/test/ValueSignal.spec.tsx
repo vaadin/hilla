@@ -8,7 +8,7 @@ import sinonChai from 'sinon-chai';
 import type { StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, ValueSignal } from '../src/index.js';
-import { createSubscriptionStub, nextFrame } from './utils.js';
+import { createSubscriptionStub, nextFrame, subscribeToSignalViaEffect } from './utils.js';
 
 use(sinonChai);
 use(chaiLike);
@@ -23,14 +23,6 @@ describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
   let subscription: sinon.SinonStubbedInstance<Subscription<StateEvent<string>>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
-
-  function subscribeToSignalViaEffect<T>(signal: ValueSignal<T>): Array<T | undefined> {
-    const results: Array<T | undefined> = [];
-    effect(() => {
-      results.push(signal.value);
-    });
-    return results;
-  }
 
   beforeEach(() => {
     client = sinon.createStubInstance(ConnectClient);
@@ -77,10 +69,8 @@ describe('@vaadin/hilla-react-signals', () => {
       const valueSignal = new ValueSignal<string>('foo', config);
       expect(valueSignal.value).to.equal('foo');
 
-      const results: Array<string | null> = [];
-      effect(() => {
-        results.push(valueSignal.value);
-      });
+      const results = subscribeToSignalViaEffect(valueSignal);
+
       valueSignal.value = 'bar';
       valueSignal.value += 'baz';
       valueSignal.set('qux');
@@ -202,7 +192,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('c');
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params2?.event.id, type: 'reject', value: 'dont care' });
+      onNextCallback({ id: params2?.event.id, type: 'reject' });
       expect(client.call).to.have.been.calledThrice;
       const [, , params3] = client.call.thirdCall.args;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
