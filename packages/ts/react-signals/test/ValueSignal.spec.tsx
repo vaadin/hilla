@@ -70,6 +70,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('foo');
 
       const results = subscribeToSignalViaEffect(valueSignal);
+
       valueSignal.value = 'bar';
       valueSignal.value += 'baz';
       valueSignal.set('qux');
