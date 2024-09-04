@@ -42,8 +42,7 @@ public final class EntityPlugin
                             .filter(Objects::nonNull)
                             .noneMatch(Predicate
                                     .not(SpecializedModel::isNativeObject)))
-                    .map(TypeParameterModel::getName)
-                    .collect(Collectors.toList());
+                    .map(TypeParameterModel::getName).toList();
 
             if (!generics.isEmpty()) {
                 schema.addExtension("x-type-parameters", generics);

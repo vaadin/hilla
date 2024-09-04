@@ -24,13 +24,20 @@ import io.swagger.v3.oas.models.media.StringSchema;
 
 final class SchemaProcessor {
     private final SignatureModel type;
-    // indicates if this processor must deal with generic type variables and
-    // parameters
-    private final boolean generics;
+    private final boolean shouldHandleGenerics;
 
-    public SchemaProcessor(SignatureModel type, boolean generics) {
+    /**
+     * Creates a new configured instance.
+     *
+     * @param type
+     *            the type to process
+     * @param shouldHandleGenerics
+     *            indicates if this processor must deal with generic type
+     *            variables and parameters
+     */
+    public SchemaProcessor(SignatureModel type, boolean shouldHandleGenerics) {
         this.type = type;
-        this.generics = generics;
+        this.shouldHandleGenerics = shouldHandleGenerics;
     }
 
     private static <T extends Schema<?>> T nullify(T schema,
@@ -61,9 +68,9 @@ final class SchemaProcessor {
             result = dateTimeSchema();
         } else if (type.isClassRef()) {
             result = refSchema();
-        } else if (generics && type.isTypeVariable()) {
+        } else if (shouldHandleGenerics && type.isTypeVariable()) {
             result = typeVariableSchema();
-        } else if (generics && type.isTypeParameter()) {
+        } else if (shouldHandleGenerics && type.isTypeParameter()) {
             result = typeParameterSchema();
         } else {
             result = anySchema();
@@ -147,16 +154,16 @@ final class SchemaProcessor {
     }
 
     private Schema<?> typeVariableSchema() {
-        var _type = (TypeVariableModel) type;
+        var typeVarModel = (TypeVariableModel) type;
         var schema = nullify(new ObjectSchema(), true);
-        schema.addExtension("x-type-variable", _type.getName());
+        schema.addExtension("x-type-variable", typeVarModel.getName());
         return schema;
     }
 
     private Schema<?> typeParameterSchema() {
-        var _type = (TypeParameterModel) type;
+        var typeParamModel = (TypeParameterModel) type;
         var schema = nullify(new ObjectSchema(), true);
-        schema.addExtension("x-type-variable", _type.getName());
+        schema.addExtension("x-type-variable", typeParamModel.getName());
         return schema;
     }
 }
