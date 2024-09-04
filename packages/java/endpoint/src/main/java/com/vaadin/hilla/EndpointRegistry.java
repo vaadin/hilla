@@ -55,6 +55,15 @@ public class EndpointRegistry {
         }
 
         /**
+         * Gets all the endpoint methods.
+         *
+         * @return the endpoint methods
+         */
+        public Map<String, Method> getMethods() {
+            return methods;
+        }
+
+        /**
          * Finds a method with the given name.
          *
          * @param methodName
@@ -124,6 +133,15 @@ public class EndpointRegistry {
                 new VaadinEndpointData(endpointBean, endpointPublicMethods));
         LOGGER.debug("Registered endpoint '{}' with class '{}'", endpointName,
                 beanType);
+    }
+
+    /**
+     * Gets all registered endpoints.
+     *
+     * @return a map of endpoint names to endpoint data
+     */
+    public Map<String, VaadinEndpointData> getEndpoints() {
+        return vaadinEndpoints;
     }
 
     VaadinEndpointData get(String endpointName) {

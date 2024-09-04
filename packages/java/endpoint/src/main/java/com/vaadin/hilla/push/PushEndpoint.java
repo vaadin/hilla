@@ -82,6 +82,8 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
         super.onStateChange(event);
         if (event.isCancelled() || event.isResumedOnTimeout()) {
             onDisconnect(event);
+        } else if (event.isResuming()) {
+            onReconnect(event);
         }
     }
 
@@ -166,6 +168,16 @@ public class PushEndpoint extends AtmosphereHandlerAdapter {
      */
     private void onDisconnect(AtmosphereResourceEvent event) {
         pushMessageHandler.handleBrowserDisconnect(event.getResource().uuid());
+    }
+
+    /**
+     * Called when the push channel is disconnected.
+     *
+     * @param event
+     *            the Atmosphere event
+     */
+    private void onReconnect(AtmosphereResourceEvent event) {
+        pushMessageHandler.handleBrowserReconnect(event.getResource().uuid());
     }
 
     private void onThrowable(AtmosphereResourceEvent event) {
