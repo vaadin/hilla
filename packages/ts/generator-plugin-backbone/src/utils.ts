@@ -6,7 +6,6 @@ import {
 
 export const defaultMediaType = 'application/json';
 
-// TODO: check if this is a good place for these types and related functions
 export type SchemaWithTypeArguments = Readonly<{ 'x-type-arguments': AllOfRuleComposedSchema }> & Schema;
 export type SchemaWithTypeParameters = Readonly<{ 'x-type-parameters': Schema[] }> & Schema;
 export type SchemaWithTypeVariable = Readonly<{ 'x-type-variable': string }> & Schema;

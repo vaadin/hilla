@@ -1,6 +1,5 @@
 package com.vaadin.hilla.parser.plugins.nonnull;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -76,15 +75,8 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 annotations = considerAscendantAnnotations(annotations,
                         nodePath);
 
-                annotations
-                        .map(annotation -> annotationsMap
-                                .get(annotation.getName()))
-                        .filter(Objects::nonNull)
-                        .max(Comparator
-                                .comparingInt(AnnotationMatcher::getScore))
-                        .map(AnnotationMatcher::doesMakeNullable)
-                        .ifPresent(nullable -> schema
-                                .setNullable(nullable ? true : null));
+                computeNullabilityFromAnnotations(annotations).ifPresent(
+                        nullable -> schema.setNullable(nullable ? true : null));
 
                 // For type arguments, it is necessary to apply the same
                 // processing
@@ -103,22 +95,13 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                                                         + nodePath);
                                     }
 
-                                    // TODO: extract the common logic at line 79
-                                    // to a method
                                     var nullables = args.stream()
                                             .map(param -> Stream.concat(
                                                     getPackageAnnotationsStream(
                                                             nodePath),
                                                     param.getAnnotations()
-                                                            .stream())
-                                                    .map(annotation -> annotationsMap
-                                                            .get(annotation
-                                                                    .getName()))
-                                                    .filter(Objects::nonNull)
-                                                    .max(Comparator
-                                                            .comparingInt(
-                                                                    AnnotationMatcher::getScore))
-                                                    .map(AnnotationMatcher::doesMakeNullable))
+                                                            .stream()))
+                                            .map(this::computeNullabilityFromAnnotations)
                                             .toList();
 
                                     for (var i = 0; i < nullables.size(); i++) {
@@ -133,6 +116,15 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 }
             }
         }
+    }
+
+    private Optional<Boolean> computeNullabilityFromAnnotations(
+            Stream<AnnotationInfoModel> annotations) {
+        return annotations
+                .map(annotation -> annotationsMap.get(annotation.getName()))
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+                .map(AnnotationMatcher::doesMakeNullable);
     }
 
     @Override
