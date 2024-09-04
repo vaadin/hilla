@@ -10,8 +10,10 @@ const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
 const CONNECT_CLIENT = '$CONNECT_CLIENT$';
 const METHOD_NAME = '$METHOD_NAME$';
 const SIGNAL = '$SIGNAL$';
+const RETURN_TYPE = '$RETURN_TYPE$';
 
 const signals = ['NumberSignal', 'ValueSignal'];
+const genericSignals = ['ValueSignal'];
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -42,15 +44,21 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
+          let genericReturnType;
+          if (genericSignals.includes(signalId.text)) {
+            genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
+          }
+          const returnType = genericReturnType ?? signalId;
           const INITIAL_VALUE = signalId.text.startsWith('NumberSignal') ? '0' : 'undefined';
           return template(
-            `function ${METHOD_NAME}() {
+            `function ${METHOD_NAME}(): ${RETURN_TYPE} {
   return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
 }`,
             (statements) => statements,
             [
               transform((node) => (ts.isIdentifier(node) && node.text === METHOD_NAME ? tsNode.name : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
+              transform((node) => (ts.isIdentifier(node) && node.text === RETURN_TYPE ? returnType : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
             ],
           );

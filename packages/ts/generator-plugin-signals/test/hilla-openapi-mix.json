@@ -186,7 +186,55 @@
                     {
                       "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
                     }
-                  ]
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": true,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/personSignalNonNull" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personSignalNonNull_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": false,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 }
               }
             }
