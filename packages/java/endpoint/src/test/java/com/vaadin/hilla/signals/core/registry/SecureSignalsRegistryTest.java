@@ -4,6 +4,7 @@ import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
 import com.vaadin.hilla.signals.NumberSignal;
+import com.vaadin.hilla.signals.ValueSignal;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -30,7 +31,7 @@ public class SecureSignalsRegistryTest {
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                            .thenReturn(signal);
+                            .thenAnswer(invocation -> signal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
@@ -52,7 +53,7 @@ public class SecureSignalsRegistryTest {
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                            .thenReturn(signal);
+                            .thenAnswer(invocation -> signal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
@@ -88,14 +89,15 @@ public class SecureSignalsRegistryTest {
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                            .thenReturn(signal);
+                            .thenAnswer(invocation -> signal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
                     "method");
-            NumberSignal result = secureSignalsRegistry.get("clientSignalId");
+            NumberSignal result = (NumberSignal) secureSignalsRegistry
+                    .get("clientSignalId");
             assertEquals(signal, result);
             verify(signalsRegistry.get(), times(1)).get("clientSignalId");
         }
@@ -122,7 +124,7 @@ public class SecureSignalsRegistryTest {
     }
 
     private EndpointInvoker mockEndpointInvokerThatGrantsAccess(
-            NumberSignal signal) throws Exception {
+            ValueSignal<?> signal) throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
         when(invoker.invoke(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any()))
@@ -152,5 +154,9 @@ public class SecureSignalsRegistryTest {
     }
 
     public void aFakeMethod() {
+    }
+
+    private static <T> ValueSignal<T> typedValueSignal(ValueSignal<T> signal) {
+        return signal;
     }
 }

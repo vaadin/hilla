@@ -2,7 +2,7 @@ package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.signals.core.StateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -35,19 +34,14 @@ public class NumberSignalTest {
     }
 
     @Test
-    public void constructor_withoutValueArg_acceptsNull() {
-        NumberSignal signal = new NumberSignal(null);
-
-        assertNull(signal.getValue());
+    public void constructor_withValueArg_doesNotAcceptNull() {
+        assertThrows(NullPointerException.class, () -> new NumberSignal(null));
     }
 
     @Test
     public void getId_returns_not_null() {
         NumberSignal signal1 = new NumberSignal();
         assertNotNull(signal1.getId());
-
-        NumberSignal signal2 = new NumberSignal(null);
-        assertNotNull(signal2.getId());
 
         NumberSignal signal3 = new NumberSignal(42.0);
         assertNotNull(signal3.getId());
@@ -80,7 +74,7 @@ public class NumberSignalTest {
         var counter = new AtomicInteger(0);
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new StateEvent<Double>(eventJson);
+            var stateEvent = new StateEvent<>(eventJson, Double.class);
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertEquals(0.0, stateEvent.getValue(), 0.0);
