@@ -1,4 +1,4 @@
-import { createIncrementStateEvent, createReplaceStateEvent } from './events.js';
+import { createIncrementStateEvent } from './events.js';
 import { $update } from './FullStackSignal.js';
 import { type OperationSubscription, ValueSignal } from './ValueSignal.js';
 
@@ -42,6 +42,7 @@ export class NumberSignal extends ValueSignal<number> {
     if (delta === 0) {
       return;
     }
+    this.setValueLocal(this.value + delta);
     const event = createIncrementStateEvent(delta);
     this[$update](event);
   }

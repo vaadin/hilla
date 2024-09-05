@@ -73,7 +73,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(results).to.be.like([undefined, 42, 43]);
     });
 
-    it('should send the correct values in increment events when increment is called', () => {
+    it('should send the correct values in increment events when incrementBy is called', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
@@ -111,7 +111,21 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(40);
     });
 
-    it('should not send any event to the server when increment is called with zero as delta', () => {
+    it('should update the underlying value locally without waiting for server confirmation when incrementBy is called', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(1);
+      expect(numberSignal.value).to.equal(43);
+
+      numberSignal.incrementBy(2);
+      expect(numberSignal.value).to.equal(45);
+
+      numberSignal.incrementBy(-5);
+      expect(numberSignal.value).to.equal(40);
+    });
+
+    it('should not send any event to the server when incrementBy is called with zero as delta', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
