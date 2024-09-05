@@ -1,8 +1,5 @@
-import { expect, use } from '@esm-bundle/chai';
-import chaiLike from 'chai-like';
+import { expect } from '@esm-bundle/chai';
 import { createIncrementStateEvent, createReplaceStateEvent, createSetStateEvent } from '../src/events.js';
-
-use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('CreateStateEventType', () => {
