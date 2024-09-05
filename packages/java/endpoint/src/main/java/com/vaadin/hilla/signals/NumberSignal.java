@@ -42,7 +42,8 @@ public class NumberSignal extends ValueSignal<Double> {
     protected boolean processEvent(ObjectNode event) {
         try {
             var stateEvent = new StateEvent<>(event, Double.class);
-            if (!StateEvent.EventType.INCREMENT.equals(stateEvent.getEventType())) {
+            if (!StateEvent.EventType.INCREMENT
+                    .equals(stateEvent.getEventType())) {
                 return super.processEvent(event);
             }
             Double expectedValue = getValue();
@@ -50,7 +51,7 @@ public class NumberSignal extends ValueSignal<Double> {
             return super.compareAndSet(newValue, expectedValue);
         } catch (StateEvent.InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
-                "Unsupported JSON: " + event, e);
+                    "Unsupported JSON: " + event, e);
         }
     }
 }

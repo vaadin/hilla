@@ -109,7 +109,7 @@ public class NumberSignalTest {
 
     private ObjectNode createIncrementEvent(String value) {
         var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
-            StateEvent.EventType.INCREMENT, Double.parseDouble(value));
+                StateEvent.EventType.INCREMENT, Double.parseDouble(value));
         return setEvent.toJson();
     }
 
