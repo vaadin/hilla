@@ -71,17 +71,14 @@ public final class TypeSignaturePlugin
 
     // Checks if the current node is inside an entity
     private boolean isInEntity(NodePath<?> nodePath) {
-        while (true) {
-            if (nodePath.getNode() instanceof EntityNode) {
+        for (var np = nodePath; !(np.getNode() instanceof RootNode); np = np
+                .getParentPath()) {
+            if (np.getNode() instanceof EntityNode) {
                 return true;
             }
-
-            nodePath = nodePath.getParentPath();
-
-            if (nodePath.getNode() instanceof RootNode) {
-                return false;
-            }
         }
+
+        return false;
     }
 
     @Override
