@@ -93,7 +93,15 @@
                     {
                       "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.shadowedname.subpackage.Collection"
                     }
-                  ]
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "string",
+                        "nullable" : true
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -128,14 +136,19 @@
             "type": "array",
             "nullable": true,
             "items": {
-              "type": "object"
+              "type": "object",
+              "nullable" : true,
+              "x-type-variable" : "T"
             }
           },
           "name": {
             "type": "string",
             "nullable": true
           }
-        }
+        },
+        "x-type-parameters" : [
+          "T"
+        ]
       }
     }
   }
