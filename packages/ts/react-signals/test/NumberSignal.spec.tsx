@@ -7,8 +7,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
-import { effect } from '../src/index.js';
-import { NumberSignal } from '../src/index.js';
+import { effect, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, subscribeToSignalViaEffect } from './utils.js';
 
 use(sinonChai);

@@ -1,6 +1,6 @@
 import { createIncrementStateEvent } from './events.js';
 import { $update } from './FullStackSignal.js';
-import { type OperationSubscription, ValueSignal } from './ValueSignal.js';
+import { ValueSignal } from './ValueSignal.js';
 
 /**
  * A signal that holds a number value. The underlying
