@@ -1,5 +1,7 @@
 package com.vaadin.hilla;
 
+import java.util.function.Consumer;
+
 import reactor.core.publisher.Flux;
 
 /**
@@ -14,10 +16,13 @@ public class EndpointSubscription<TT> {
 
     private Flux<TT> flux;
     private Runnable onUnsubscribe;
+    private Consumer<TT> onReceive;
 
-    private EndpointSubscription(Flux<TT> flux, Runnable onUnsubscribe) {
+    private EndpointSubscription(Flux<TT> flux, Runnable onUnsubscribe,
+            Consumer<TT> onReceive) {
         this.flux = flux;
         this.onUnsubscribe = onUnsubscribe;
+        this.onReceive = onReceive;
     }
 
     /**
@@ -33,6 +38,10 @@ public class EndpointSubscription<TT> {
      */
     public Runnable getOnUnsubscribe() {
         return onUnsubscribe;
+    }
+
+    public Consumer<TT> getOnReceive() {
+        return onReceive;
     }
 
     /**
@@ -52,7 +61,19 @@ public class EndpointSubscription<TT> {
      */
     public static <T> EndpointSubscription<T> of(Flux<T> flux,
             Runnable onDisconnect) {
-        return new EndpointSubscription<>(flux, onDisconnect);
+        return new EndpointSubscription<>(flux, onDisconnect, (msg) -> {
+        });
+    }
+
+    public static <T> EndpointSubscription<T> of(Flux<T> flux,
+            Consumer<T> onReceive) {
+        return new EndpointSubscription<>(flux, () -> {
+        }, onReceive);
+    }
+
+    public static <T> EndpointSubscription<T> of(Flux<T> flux,
+            Runnable onDisconnect, Consumer<T> onReceive) {
+        return new EndpointSubscription<>(flux, onDisconnect, onReceive);
     }
 
 }

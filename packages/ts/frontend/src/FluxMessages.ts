@@ -32,5 +32,10 @@ export interface ServerCloseMessage extends AbstractMessage {
   id: string;
   '@type': 'unsubscribe';
 }
+export interface ServerSendMessage extends AbstractMessage {
+  id: string;
+  '@type': 'send';
+  content: any;
+}
 
-export type ServerMessage = ServerCloseMessage | ServerConnectMessage;
+export type ServerMessage = ServerCloseMessage | ServerConnectMessage | ServerSendMessage;

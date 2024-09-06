@@ -98,6 +98,13 @@ export class FluxConnection extends EventTarget {
         this.#onDisconnectCallbacks.set(id, callback);
         return hillaSubscription;
       },
+      send: (message) => {
+        this.#send({
+          '@type': 'send',
+          id,
+          content: message,
+        });
+      },
     };
     return hillaSubscription;
   }

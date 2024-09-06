@@ -25,7 +25,7 @@ export type MaybePromise<T> = Promise<T> | T;
 /**
  * Represents the connection to and endpoint returning a subscription rather than a value.
  */
-export interface Subscription<T> {
+export interface Subscription<T, S = T> {
   /** Cancels the subscription.  No values are made available after calling this. */
   cancel(): void;
 
@@ -45,6 +45,8 @@ export interface Subscription<T> {
 
   /** Called when subscription disconnected */
   onDisconnect(callback: () => void): Subscription<T>;
+
+  send(value: S): void;
 }
 
 interface ConnectExceptionData {

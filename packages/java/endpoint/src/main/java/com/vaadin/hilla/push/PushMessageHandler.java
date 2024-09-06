@@ -10,8 +10,6 @@ import jakarta.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.server.VaadinServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vaadin.hilla.AuthenticationUtil;
-import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
@@ -27,12 +24,14 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
+import com.vaadin.hilla.push.messages.fromclient.SendMessage;
 import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
 import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
+
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
@@ -47,12 +46,14 @@ public class PushMessageHandler {
         private final Disposable fluxSubscriptionDisposable;
 
         private SubscriptionInfo(Disposable fluxSubscriptionDisposable,
-                Runnable unsubscribeHandler) {
+                Runnable unsubscribeHandler, Consumer<?> receiveHandler) {
             this.fluxSubscriptionDisposable = fluxSubscriptionDisposable;
             this.unsubscribeHandler = unsubscribeHandler;
+            this.receiveHandler = receiveHandler;
         }
 
         private final Runnable unsubscribeHandler;
+        private final Consumer<?> receiveHandler;
 
         private Disposable getFluxSubscriptionDisposable() {
             return fluxSubscriptionDisposable;
@@ -60,6 +61,10 @@ public class PushMessageHandler {
 
         private Runnable getUnsubscribeHandler() {
             return unsubscribeHandler;
+        }
+
+        private Consumer<?> getReceiveHandler() {
+            return receiveHandler;
         }
     }
 
@@ -104,6 +109,8 @@ public class PushMessageHandler {
         } else if (message instanceof UnsubscribeMessage) {
             handleBrowserUnsubscribe(connectionId,
                     (UnsubscribeMessage) message);
+        } else if (message instanceof SendMessage) {
+            handleBrowserMessage(connectionId, (SendMessage) message);
         } else {
             throw new IllegalArgumentException(
                     "Unknown message type: " + message.getClass().getName());
@@ -151,10 +158,12 @@ public class PushMessageHandler {
 
             Flux<?> flux;
             Runnable unsubscribeHandler = null;
+            Consumer<?> receiveHandler = null;
             if (returnValue instanceof EndpointSubscription) {
                 EndpointSubscription<?> endpointSubscription = (EndpointSubscription<?>) returnValue;
                 flux = endpointSubscription.getFlux();
                 unsubscribeHandler = endpointSubscription.getOnUnsubscribe();
+                receiveHandler = endpointSubscription.getOnReceive();
             } else {
                 flux = (Flux<?>) returnValue;
             }
@@ -186,7 +195,7 @@ public class PushMessageHandler {
 
             fluxSubscriptionInfos.get(connectionId).put(fluxId,
                     new SubscriptionInfo(endpointFluxSubscriber,
-                            unsubscribeHandler));
+                            unsubscribeHandler, receiveHandler));
             waitForSubscriptionData.complete(null);
 
             waitForSubscriptionData.complete(null);
@@ -205,6 +214,22 @@ public class PushMessageHandler {
             AbstractClientMessage message) {
         sender.accept(message);
 
+    }
+
+    public void handleBrowserMessage(String connectionId, SendMessage message) {
+        String subscriptionId = message.getId();
+        ConcurrentHashMap<String, SubscriptionInfo> fluxMap = fluxSubscriptionInfos
+                .get(connectionId);
+        if (fluxMap != null) {
+            SubscriptionInfo subscriptionInfo = fluxMap.get(subscriptionId);
+            if (subscriptionInfo != null) {
+                Consumer<Object> receiveHandler = (Consumer<Object>) subscriptionInfo
+                        .getReceiveHandler();
+                if (receiveHandler != null) {
+                    receiveHandler.accept(message.getContent());
+                }
+            }
+        }
     }
 
     /**

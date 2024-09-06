@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SubscribeMessage.class, name = "subscribe"),
-        @JsonSubTypes.Type(value = UnsubscribeMessage.class, name = "unsubscribe") })
+        @JsonSubTypes.Type(value = UnsubscribeMessage.class, name = "unsubscribe"),
+        @JsonSubTypes.Type(value = SendMessage.class, name = "send") })
 public abstract class AbstractServerMessage {
 
     private String id;
