@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
-import { render, screen, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   _getPropertyModel,
