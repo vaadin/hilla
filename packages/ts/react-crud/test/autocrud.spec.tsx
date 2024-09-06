@@ -1,8 +1,15 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 import { expect, use } from '@esm-bundle/chai';
-import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {
+  _getPropertyModel,
+  makeObjectEmptyValueCreator,
+  NumberModel,
+  ObjectModel,
+  StringModel,
+} from '@vaadin/hilla-lit-form';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
@@ -12,7 +19,7 @@ import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
 import FormController from './FormController';
 import GridController from './GridController';
-import { getItem, PersonModel, personService } from './test-models-and-services.js';
+import { createService, getItem, PersonModel, personService } from './test-models-and-services.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -323,6 +330,46 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(form.instance).to.exist;
         expect((await form.getField('First name')).value).to.equal('');
         expect((await form.getField('Last name')).value).to.equal('');
+      });
+
+      it('opens the form in a dialog when row has undefined value', async () => {
+        type PData = {
+          id: number;
+          name?: number;
+        };
+        const nullData: PData[] = [
+          {
+            id: 1,
+            name: undefined,
+          },
+        ];
+        class PDataModel<T extends PData = PData> extends ObjectModel<T> {
+          static override createEmptyValue = makeObjectEmptyValueCreator(PDataModel);
+          get id(): NumberModel {
+            return this[_getPropertyModel](
+              'id',
+              (parent, key) =>
+                new NumberModel(parent, key, true, {
+                  meta: { annotations: [{ name: 'jakarta.persistence.Id' }], javaType: 'java.lang.Long' },
+                }),
+            );
+          }
+
+          get name(): StringModel {
+            return this[_getPropertyModel](
+              'name',
+              (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.lang.String' } }),
+            );
+          }
+        }
+        const customService = createService(nullData);
+        const result = render(<AutoCrud service={customService} model={PDataModel} />);
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const form = await FormController.init(user);
+        expect(form.instance).to.exist;
+        expect((await form.getField('Name')).value).to.equal(undefined);
       });
 
       it('closes the dialog when clicking close button', async () => {
