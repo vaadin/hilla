@@ -37,7 +37,7 @@ public class SecureSignalsRegistryTest {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
-                    "method");
+                    "method", null);
             verify(signalsRegistry.get(), times(1)).register("clientSignalId",
                     signal);
         }
@@ -59,7 +59,7 @@ public class SecureSignalsRegistryTest {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
-                    "method");
+                    "method", null);
             secureSignalsRegistry.unsubscribe("clientSignalId");
             verify(signalsRegistry.get(), times(1))
                     .removeClientSignalToSignalMapping("clientSignalId");
@@ -76,7 +76,7 @@ public class SecureSignalsRegistryTest {
         assertThrows(
                 EndpointInvocationException.EndpointAccessDeniedException.class,
                 () -> secureSignalsRegistry.register("clientSignalId",
-                        "endpoint", "method"));
+                        "endpoint", "method", null));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class SecureSignalsRegistryTest {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
-                    "method");
+                    "method", null);
             NumberSignal result = (NumberSignal) secureSignalsRegistry
                     .get("clientSignalId");
             assertEquals(signal, result);
