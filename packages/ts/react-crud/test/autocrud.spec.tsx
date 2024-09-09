@@ -3,13 +3,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  _getPropertyModel,
-  makeObjectEmptyValueCreator,
-  NumberModel,
-  ObjectModel,
-  StringModel,
-} from '@vaadin/hilla-lit-form';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
@@ -19,7 +12,14 @@ import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
 import FormController from './FormController';
 import GridController from './GridController';
-import { createService, getItem, PersonModel, personService } from './test-models-and-services.js';
+import {
+  createService,
+  getItem,
+  PersonModel,
+  personService,
+  type UserData,
+  UserDataModel,
+} from './test-models-and-services.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -333,34 +333,14 @@ describe('@vaadin/hilla-react-crud', () => {
       });
 
       it('opens the form in a dialog when row has undefined value', async () => {
-        type PData = {
-          id: number;
-          name?: number;
-        };
-        const nullData: PData[] = [
+        const nullData: UserData[] = [
           {
             id: 1,
             name: undefined,
           },
         ];
-        class PDataModel<T extends PData = PData> extends ObjectModel<T> {
-          static override createEmptyValue = makeObjectEmptyValueCreator(PDataModel);
-          get id(): NumberModel {
-            return this[_getPropertyModel](
-              'id',
-              (parent, key) =>
-                new NumberModel(parent, key, true, {
-                  meta: { annotations: [{ name: 'jakarta.persistence.Id' }], javaType: 'java.lang.Long' },
-                }),
-            );
-          }
-
-          get name(): StringModel {
-            return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, true));
-          }
-        }
         const customService = createService(nullData);
-        const result = render(<AutoCrud service={customService} model={PDataModel} />);
+        const result = render(<AutoCrud service={customService} model={UserDataModel} />);
         const grid = await GridController.init(result, user);
         await grid.toggleRowSelected(0);
 
