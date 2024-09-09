@@ -356,7 +356,7 @@ describe('@vaadin/hilla-react-crud', () => {
           }
 
           get name(): StringModel {
-            return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, false));
+            return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, true));
           }
         }
         const customService = createService(nullData);
