@@ -5,7 +5,6 @@ import {
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
   isComposedSchema,
-  isEmptyObject,
   isEnumSchema,
   isObjectSchema,
   isReferenceSchema,
@@ -189,10 +188,6 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     if (!isObjectSchema(schema)) {
       logger.debug(schema, `Component is not an object: ${this.#fullyQualifiedName}`);
       return undefined;
-    }
-
-    if (isEmptyObject(schema)) {
-      logger.debug(`Component has no properties: ${this.#fullyQualifiedName}`);
     }
 
     const typeT = ts.factory.createIdentifier('T');
