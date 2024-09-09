@@ -192,7 +192,7 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     }
 
     if (isEmptyObject(schema)) {
-      logger.warn(`Component has no properties: ${this.#fullyQualifiedName}`);
+      logger.debug(`Component has no properties: ${this.#fullyQualifiedName}`);
     }
 
     const typeT = ts.factory.createIdentifier('T');
