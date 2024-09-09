@@ -37,9 +37,11 @@ public class SignalsHandler {
         try {
             var signal = registry.get(clientSignalId);
             if (signal != null) {
-                return signal.subscribe().doFinally((event) -> registry.unsubscribe(clientSignalId));
+                return signal.subscribe().doFinally(
+                        (event) -> registry.unsubscribe(clientSignalId));
             }
-            registry.register(clientSignalId, providerEndpoint, providerMethod, body);
+            registry.register(clientSignalId, providerEndpoint, providerMethod,
+                    body);
             return registry.get(clientSignalId).subscribe()
                     .doFinally((event) -> registry.unsubscribe(clientSignalId));
         } catch (Exception e) {
