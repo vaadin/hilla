@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
-import collectRoutesFromFS from './collectRoutesFromFS.js';
+import collectRoutesFromFS, { type RouteMeta } from './collectRoutesFromFS.js';
 import createRoutesFromMeta from './createRoutesFromMeta.js';
 import createViewConfigJson from './createViewConfigJson.js';
 
@@ -18,6 +18,10 @@ export type RuntimeFileUrls = Readonly<{
    * The URL of the module with the routes tree in a framework-agnostic format.
    */
   code: URL;
+  /**
+   * The URL of the JSON file containing server layout path information.
+   */
+  layouts: URL;
 }>;
 
 /**
@@ -43,6 +47,44 @@ async function generateRuntimeFile(url: URL, data: string): Promise<void> {
   }
 }
 
+async function applyLayouts(routeMeta: readonly RouteMeta[], layouts: URL): Promise<readonly RouteMeta[]> {
+  if (!existsSync(layouts)) {
+    return routeMeta;
+  }
+  const layoutContents = await readFile(layouts, 'utf-8');
+  const availableLayouts: any[] = JSON.parse(layoutContents);
+  function layoutExists(routePath: string) {
+    return (
+      availableLayouts.filter((layout: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+        const normalizedLayout = layout.path[0] === '/' ? layout.path.substring(1) : layout.path;
+        const normalizedRoute = routePath.startsWith('/') ? routePath.substring(1) : routePath;
+        return normalizedRoute.startsWith(normalizedLayout);
+      }).length > 0
+    );
+  }
+  function enableFlowLayout(route: RouteMeta) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    route.flowLayout = true;
+    if (route.children) {
+      // eslint-disable-next-line @typescript-eslint/no-for-in-array,no-restricted-syntax
+      for (const position in route.children) {
+        enableFlowLayout(route.children[position]);
+      }
+    }
+  }
+
+  routeMeta
+    .filter((route) => route.layout === undefined && layoutExists(route.path))
+    .map((route) => {
+      enableFlowLayout(route);
+      return route;
+    });
+
+  return routeMeta;
+}
+
 /**
  * Collects all file-based routes from the given directory, and based on them generates two files
  * described by {@link RuntimeFileUrls} type.
@@ -59,10 +101,11 @@ export async function generateRuntimeFiles(
   logger: Logger,
   debug: boolean,
 ): Promise<void> {
-  const routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
+  let routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
   if (debug) {
     logger.info('Collected file-based routes');
   }
+  routeMeta = await applyLayouts(routeMeta, urls.layouts);
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
 
