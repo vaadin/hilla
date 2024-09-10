@@ -6,7 +6,7 @@ import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src';
+import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src/index.js';
 import {
   type Contract,
   EntityModel,
