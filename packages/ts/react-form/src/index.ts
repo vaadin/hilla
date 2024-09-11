@@ -26,9 +26,16 @@ import type { Writable } from 'type-fest';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 __REGISTER__();
 
+let isRendering = false;
+
 function useUpdate() {
-  const [_, update] = useReducer((x: number) => x + 1, 0);
-  return update;
+  const [_, count] = useReducer((x: number) => x + 1, 0);
+  return () => {
+    if (isRendering) {
+      return;
+    }
+    count();
+  };
 }
 
 export type FieldDirectiveResult = Readonly<{
@@ -128,6 +135,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
     const registry = new WeakMap<AbstractModel, FieldState>();
 
     return ((model: AbstractModel) => {
+      isRendering = true;
       const n = getBinderNode(model);
 
       let fieldState = registry.get(model);
@@ -211,6 +219,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
         fieldState.strategy.invalid = n.invalid;
       }
 
+      isRendering = false;
       return {
         name: n.name,
         ref: fieldState.ref,
