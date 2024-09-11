@@ -266,8 +266,10 @@ export function useForm<M extends AbstractModel>(
 }
 
 export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
+  isRendering = true;
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
+  isRendering = false;
 
   return {
     ...getFormPart(binderNode),
@@ -283,7 +285,9 @@ export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResul
  * @returns The array model part of the form
  */
 export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
+  isRendering = true;
   const binderNode = getBinderNode(model);
+  isRendering = false;
   return {
     ...getFormPart(binderNode),
     items: Array.from(model, (item) => item.model as ArrayItemModel<M>),
