@@ -52,7 +52,7 @@
   },
   "peerDependencies": {
     "react": "^18",
-    "react-router-dom": "^6"
+    "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
