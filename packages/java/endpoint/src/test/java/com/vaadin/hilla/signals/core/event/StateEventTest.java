@@ -134,7 +134,7 @@ public class StateEventTest {
                 StateEvent.InvalidEventTypeException.class,
                 () -> new StateEvent<>(json, String.class));
 
-        String expectedMessage = "Invalid event type invalidType. Type should be either of: [SNAPSHOT, SET, REPLACE, REJECT]";
+        String expectedMessage = "Invalid event type invalidType. Type should be either of: [SNAPSHOT, SET, REPLACE, REJECT, INCREMENT]";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
@@ -153,7 +153,7 @@ public class StateEventTest {
                 StateEvent.InvalidEventTypeException.class,
                 () -> new StateEvent<>(json, String.class));
 
-        String expectedMessage = "Missing event type. Type is required, and should be either of: [SNAPSHOT, SET, REPLACE, REJECT]";
+        String expectedMessage = "Missing event type. Type is required, and should be either of: [SNAPSHOT, SET, REPLACE, REJECT, INCREMENT]";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));

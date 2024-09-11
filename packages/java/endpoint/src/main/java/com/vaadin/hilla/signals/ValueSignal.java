@@ -145,7 +145,17 @@ public class ValueSignal<T> {
         return snapshot.toJson();
     }
 
-    private boolean processEvent(ObjectNode event) {
+    /**
+     * Processes the event and updates the signal value if needed. Note that
+     * this method is not thread-safe and should be called from a synchronized
+     * context.
+     *
+     * @param event
+     *            the event to process
+     * @return <code>true</code> if the event was successfully processed and the
+     *         signal value was updated, <code>false</code> otherwise.
+     */
+    protected boolean processEvent(ObjectNode event) {
         try {
             var stateEvent = new StateEvent<>(event, valueType);
             return switch (stateEvent.getEventType()) {
@@ -153,7 +163,8 @@ public class ValueSignal<T> {
                     this.value = stateEvent.getValue();
                     yield true;
                 }
-                case REPLACE -> compareAndSet(stateEvent);
+                case REPLACE -> compareAndSet(stateEvent.getValue(),
+                    stateEvent.getExpected());
                 default -> throw new UnsupportedOperationException(
                     "Unsupported event: " + stateEvent.getEventType());
             };
@@ -163,9 +174,21 @@ public class ValueSignal<T> {
         }
     }
 
-    private boolean compareAndSet(StateEvent<T> stateEvent) {
-        if (Objects.equals(this.value, stateEvent.getExpected())) {
-            this.value = stateEvent.getValue();
+    /**
+     * Compares the current value with the expected value and updates the signal
+     * value if they match. Note that this method is not thread-safe and should
+     * be called from a synchronized context.
+     *
+     * @param newValue
+     *            the new value to set
+     * @param expectedValue
+     *            the expected value
+     * @return <code>true</code> if the value was successfully updated,
+     *         <code>false</code> otherwise
+     */
+    protected boolean compareAndSet(T newValue, T expectedValue) {
+        if (Objects.equals(this.value, expectedValue)) {
+            this.value = newValue;
             return true;
         }
         return false;

@@ -172,6 +172,17 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   }
 
   /**
+   * Sets the local value of the signal without sending any events to the server
+   * @param value - The new value.
+   * @internal
+   */
+  protected setValueLocal(value: T): void {
+    this.#paused = true;
+    this.value = value;
+    this.#paused = false;
+  }
+
+  /**
    * A method to update the server with the new value.
    *
    * @param event - The event to update the server with.
