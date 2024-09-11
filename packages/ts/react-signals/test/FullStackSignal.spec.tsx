@@ -121,7 +121,6 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
-        params: undefined,
       });
     });
 
@@ -134,7 +133,6 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
-        params: undefined,
       });
 
       const dependentSignal = computed(() => signal.value);
@@ -213,7 +211,6 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
-        params: undefined,
       });
     });
 

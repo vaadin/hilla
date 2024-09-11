@@ -15,7 +15,7 @@ export default function ServiceMethodParams() {
       <h3 id="valueH3">
         {isHigh.value ? 'High' : 'Low'} Value: <span id="valueSpan">{sharedValue.value}</span>
       </h3>
-      <Button id="increaseDecreaseBtn" onClick={() => sharedValue.increment(isHigh.value ? 1 : -1)}>
+      <Button id="increaseDecreaseBtn" onClick={() => sharedValue.incrementBy(isHigh.value ? 1 : -1)}>
         {isHigh.value ? 'Increase' : 'Decrease'}
       </Button>
       <br />

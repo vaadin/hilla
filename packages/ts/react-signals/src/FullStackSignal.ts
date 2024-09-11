@@ -93,7 +93,7 @@ class ServerConnection<T> {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
-      params,
+      ...(params && { params }),
     });
 
     return this.#subscription;

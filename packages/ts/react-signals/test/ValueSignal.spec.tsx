@@ -93,7 +93,6 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: valueSignal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
-        params: undefined,
       });
     });
 
