@@ -46,7 +46,22 @@ export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateE
   };
 }
 
+export type IncrementStateEvent = CreateStateEventType<number, 'increment'>;
+
+export function createIncrementStateEvent(delta: number): IncrementStateEvent {
+  return {
+    id: nanoid(),
+    type: 'increment',
+    value: delta,
+  };
+}
+
 /**
  * An object that describes the change of the signal state.
  */
-export type StateEvent<T> = RejectStateEvent | ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;
+export type StateEvent<T> =
+  | IncrementStateEvent
+  | RejectStateEvent
+  | ReplaceStateEvent<T>
+  | SetStateEvent<T>
+  | SnapshotStateEvent<T>;

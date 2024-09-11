@@ -31,7 +31,7 @@ public class StateEvent<T> {
      * Possible types of state events.
      */
     public enum EventType {
-        SNAPSHOT, SET, REPLACE, REJECT
+        SNAPSHOT, SET, REPLACE, REJECT, INCREMENT
     }
 
     /**
