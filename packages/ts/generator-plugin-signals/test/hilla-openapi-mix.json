@@ -127,6 +127,26 @@
           "NumberSignalService"
         ],
         "operationId" : "NumberSignalService_sharedValue_POST",
+        "requestBody" : {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "highOrLow": {
+                    "type": "boolean",
+                    "x-java-type": "java.lang.Boolean"
+                  },
+                  "date": {
+                    "type": "string",
+                    "x-java-type": "java.lang.String",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
             "description" : "",

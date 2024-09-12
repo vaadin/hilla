@@ -39,10 +39,18 @@ export default class SignalProcessor {
 
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
     let initTypeUsageCount = 0;
+    const functionParams: Map<string, ts.ParameterDeclaration[]> = new Map<string, ts.ParameterDeclaration[]>();
 
     const [file] = ts.transform<SourceFile>(this.#sourceFile, [
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
+          const filteredParams = tsNode.parameters.filter(
+            (p) => !p.type || !ts.isTypeReferenceNode(p.type) || p.type.typeName !== initTypeId,
+          );
+          if (filteredParams.length > 0) {
+            functionParams.set(tsNode.name.text, filteredParams);
+          }
+          const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
           const signalId = this.#replaceSignalImport(tsNode);
           let genericReturnType;
           if (genericSignals.includes(signalId.text)) {
@@ -52,7 +60,7 @@ export default class SignalProcessor {
           const INITIAL_VALUE = signalId.text.startsWith('NumberSignal') ? '0' : 'undefined';
           return template(
             `function ${METHOD_NAME}(): ${RETURN_TYPE} {
-  return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}' });
+  return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${filteredParams.length > 0 ? `, params: { ${paramNames} }` : ''} });
 }`,
             (statements) => statements,
             [
@@ -61,6 +69,26 @@ export default class SignalProcessor {
               transform((node) => (ts.isIdentifier(node) && node.text === RETURN_TYPE ? returnType : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
             ],
+          );
+        }
+        return tsNode;
+      }),
+      transform((tsNode) => {
+        if (
+          ts.isFunctionDeclaration(tsNode) &&
+          tsNode.name &&
+          this.#methods.has(tsNode.name.text) &&
+          functionParams.has(tsNode.name.text)
+        ) {
+          return ts.factory.updateFunctionDeclaration(
+            tsNode,
+            tsNode.modifiers,
+            tsNode.asteriskToken,
+            tsNode.name,
+            tsNode.typeParameters,
+            functionParams.get(tsNode.name.text)!,
+            tsNode.type,
+            tsNode.body,
           );
         }
         return tsNode;

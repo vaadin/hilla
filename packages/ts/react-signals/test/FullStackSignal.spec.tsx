@@ -121,6 +121,7 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
+        params: undefined,
       });
     });
 
@@ -133,6 +134,7 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
+        params: undefined,
       });
 
       const dependentSignal = computed(() => signal.value);
@@ -141,6 +143,25 @@ describe('@vaadin/hilla-react-signals', () => {
       render(<span>Value is {dependentSignal.value}</span>);
       await nextFrame();
       expect(client.subscribe).to.be.have.been.calledOnce;
+    });
+
+    it('should retain and send the params passed to the config at the time of creating the signal the server when subscribing', async () => {
+      signal = new NumberSignal(undefined, {
+        client,
+        endpoint: 'TestEndpoint',
+        method: 'testMethod',
+        params: { foo: 'bar', baz: true },
+      });
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: { foo: 'bar', baz: true },
+      });
     });
 
     it('should publish updates to signals handler endpoint', () => {
@@ -192,6 +213,7 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
+        params: undefined,
       });
     });
 
