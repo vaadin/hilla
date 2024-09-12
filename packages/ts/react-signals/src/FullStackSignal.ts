@@ -1,25 +1,9 @@
 import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
+import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
-
-/**
- * Types of changes that can be produced or processed by a signal.
- */
-export enum StateEventType {
-  SET = 'set',
-  SNAPSHOT = 'snapshot',
-}
-
-/**
- * An object that describes the change of the signal state.
- */
-export type StateEvent<T> = Readonly<{
-  id: string;
-  type: StateEventType;
-  value: T;
-}>;
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
@@ -41,9 +25,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
     this.#onLastUnsubscribe = onLastUnsubscribe;
   }
 
-  protected S(node: unknown): void {
-    // @ts-expect-error: We use the protected method from the base class.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  protected override S(node: unknown): void {
     super.S(node);
     if (this.#subscribeCount === 0) {
       this.#onFirstSubscribe();
@@ -51,9 +33,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
     this.#subscribeCount += 1;
   }
 
-  protected U(node: unknown): void {
-    // @ts-expect-error: We use the protected method from the base class.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  protected override U(node: unknown): void {
     super.U(node);
     this.#subscribeCount -= 1;
     if (this.#subscribeCount === 0) {
@@ -81,6 +61,12 @@ export type ServerConnectionConfig = Readonly<{
    * The name of the signal provider service method.
    */
   method: string;
+
+  /**
+   * Optional object with method call arguments to be sent to the endpoint
+   * method that provides the signal when subscribing to it.
+   */
+  params?: Record<string, unknown>;
 }>;
 
 /**
@@ -101,12 +87,13 @@ class ServerConnection<T> {
   }
 
   connect() {
-    const { client, endpoint, method } = this.#config;
+    const { client, endpoint, method, params } = this.#config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
+      params,
     });
 
     return this.#subscription;
@@ -124,6 +111,9 @@ class ServerConnection<T> {
     this.#subscription = undefined;
   }
 }
+
+export const $update = Symbol('update');
+export const $processServerResponse = Symbol('processServerResponse');
 
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
@@ -174,31 +164,53 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
-        this.server
-          .update({
-            id: nanoid(),
-            type: StateEventType.SET,
-            value: v,
-          })
-          .catch((error: unknown) => {
-            this.#error.value = error instanceof Error ? error : new Error(String(error));
-          })
-          .finally(() => {
-            this.#pending.value = false;
-          });
+        this[$update](createSetStateEvent(v));
       }
     });
 
     this.#paused = false;
   }
 
+  /**
+   * Sets the local value of the signal without sending any events to the server
+   * @param value - The new value.
+   * @internal
+   */
+  protected setValueLocal(value: T): void {
+    this.#paused = true;
+    this.value = value;
+    this.#paused = false;
+  }
+
+  /**
+   * A method to update the server with the new value.
+   *
+   * @param event - The event to update the server with.
+   */
+  protected [$update](event: StateEvent<T>): void {
+    this.server
+      .update(event)
+      .catch((error: unknown) => {
+        this.#error.value = error instanceof Error ? error : new Error(String(error));
+      })
+      .finally(() => {
+        this.#pending.value = false;
+      });
+  }
+
+  /**
+   * A method with to process the server response. The implementation is
+   * specific for each signal type.
+   *
+   * @param event - The server response event.
+   */
+  protected abstract [$processServerResponse](event: StateEvent<T>): void;
+
   #connect() {
     this.server.connect().onNext((event: StateEvent<T>) => {
-      if (event.type === StateEventType.SNAPSHOT) {
-        this.#paused = true;
-        this.value = event.value;
-        this.#paused = false;
-      }
+      this.#paused = true;
+      this[$processServerResponse](event);
+      this.#paused = false;
     });
   }
 

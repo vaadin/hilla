@@ -39,7 +39,7 @@ export interface Address {
 }
 
 export interface Department extends HasIdVersion {
-  name: string;
+  name?: string;
 }
 
 export interface Person extends HasIdVersion, Named {
@@ -72,6 +72,10 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   localTime?: string;
   localDateTime?: string;
   nested?: NestedTestValues;
+}
+
+export interface UserData extends HasIdVersion {
+  name?: string;
 }
 
 class GenderModel extends EnumModel<typeof Gender> {
@@ -346,6 +350,30 @@ export class ColumnRendererTestModel<
       (parent, key) =>
         new NestedTestModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.OneToOne' }] } }),
     );
+  }
+}
+
+export class UserDataModel<T extends UserData = UserData> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(UserDataModel);
+
+  get id(): NumberModel {
+    return this[_getPropertyModel](
+      'id',
+      (parent, key) =>
+        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
+    );
+  }
+
+  get version(): NumberModel {
+    return this[_getPropertyModel](
+      'version',
+      (parent, key) =>
+        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
+    );
+  }
+
+  get name(): StringModel {
+    return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, true));
   }
 }
 

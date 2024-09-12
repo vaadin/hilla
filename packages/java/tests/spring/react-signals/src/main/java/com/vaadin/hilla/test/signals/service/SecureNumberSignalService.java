@@ -3,7 +3,7 @@ package com.vaadin.hilla.test.signals.service;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.core.StateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 

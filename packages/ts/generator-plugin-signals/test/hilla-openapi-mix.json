@@ -18,6 +18,10 @@
     {
       "name" : "NumberSignalService",
       "x-class-name" : "com.github.taefi.services.NumberSignalService"
+    },
+    {
+      "name" : "PersonService",
+      "x-class-name" : "com.github.taefi.services.PersonService"
     }
   ],
   "paths" : {
@@ -123,6 +127,26 @@
           "NumberSignalService"
         ],
         "operationId" : "NumberSignalService_sharedValue_POST",
+        "requestBody" : {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "highOrLow": {
+                    "type": "boolean",
+                    "x-java-type": "java.lang.Boolean"
+                  },
+                  "date": {
+                    "type": "string",
+                    "x-java-type": "java.lang.String",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
             "description" : "",
@@ -134,6 +158,103 @@
                       "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
                     }
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/getPerson" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_getPerson_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.github.taefi.data.Person"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/personSignal" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": true,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/personSignalNonNull" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personSignalNonNull_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": false,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -156,6 +277,33 @@
             "format" : "double",
             "nullable" : true,
             "x-java-type" : "java.lang.Double"
+          }
+        }
+      },
+      "com.github.taefi.data.Person" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
+          },
+          "age" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-java-type" : "int"
+          }
+        }
+      },
+      "com.vaadin.hilla.signals.ValueSignal" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
+          },
+          "value" : {
+            "type" : "object",
+            "nullable" : true
           }
         }
       }
