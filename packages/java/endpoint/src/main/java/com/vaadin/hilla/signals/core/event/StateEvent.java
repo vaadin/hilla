@@ -3,6 +3,8 @@ package com.vaadin.hilla.signals.core.event;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.exception.MissingFieldException;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,25 +33,10 @@ public class StateEvent<T> {
      * Possible types of state events.
      */
     public enum EventType {
-        SNAPSHOT, SET, REPLACE, REJECT, INCREMENT
-    }
+        SNAPSHOT, SET, REPLACE, REJECT, INCREMENT;
 
-    /**
-     * An exception thrown when the event type is null or invalid.
-     */
-    public static class InvalidEventTypeException extends RuntimeException {
-        public InvalidEventTypeException(String message) {
-            super(message);
-        }
-
-        public InvalidEventTypeException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    public static class MissingFieldException extends RuntimeException {
-        public MissingFieldException(String fieldName) {
-            super("Missing field: " + fieldName);
+        public static EventType of(String type) {
+            return EventType.valueOf(type.toUpperCase());
         }
     }
 
@@ -108,14 +95,14 @@ public class StateEvent<T> {
         this.expected = convertValue(expected, valueType);
     }
 
-    private T convertValue(JsonNode rawValue, Class<T> valueType) {
+    static <X> X convertValue(JsonNode rawValue, Class<X> valueType) {
         if (rawValue == null) {
             return null;
         }
         return MAPPER.convertValue(rawValue, valueType);
     }
 
-    private String extractId(JsonNode json) {
+    static String extractId(JsonNode json) {
         var id = json.get(Field.ID);
         if (id == null) {
             throw new MissingFieldException(Field.ID);
@@ -123,7 +110,7 @@ public class StateEvent<T> {
         return id.asText();
     }
 
-    private JsonNode extractValue(JsonNode json) {
+    static JsonNode extractValue(JsonNode json) {
         var value = json.get(Field.VALUE);
         if (value == null) {
             throw new MissingFieldException(Field.VALUE);
@@ -131,7 +118,7 @@ public class StateEvent<T> {
         return value;
     }
 
-    private EventType extractEventType(JsonNode json) {
+    static EventType extractEventType(JsonNode json) {
         var rawType = json.get(Field.TYPE);
         if (rawType == null) {
             var message = String.format(
@@ -140,7 +127,7 @@ public class StateEvent<T> {
             throw new InvalidEventTypeException(message);
         }
         try {
-            return EventType.valueOf(rawType.asText().toUpperCase());
+            return EventType.of(rawType.asText());
         } catch (IllegalArgumentException e) {
             var message = String.format(
                     "Invalid event type %s. Type should be one of: %s",
@@ -165,7 +152,7 @@ public class StateEvent<T> {
         return json;
     }
 
-    private JsonNode valueAsJsonNode(T value) {
+    private static JsonNode valueAsJsonNode(Object value) {
         return MAPPER.valueToTree(value);
     }
 

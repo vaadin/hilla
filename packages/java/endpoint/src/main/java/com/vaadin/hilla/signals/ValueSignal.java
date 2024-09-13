@@ -1,31 +1,13 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 
-public class ValueSignal<T> {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(ValueSignal.class);
-
-    private final ReentrantLock lock = new ReentrantLock();
-
-    private final UUID id = UUID.randomUUID();
-
-    private final Class<T> valueType;
-
-    private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
+public class ValueSignal<T> extends Signal<T> {
 
     private T value;
 
@@ -57,76 +39,7 @@ public class ValueSignal<T> {
      *             <code>null</code>
      */
     public ValueSignal(Class<T> valueType) {
-        Objects.requireNonNull(valueType);
-        this.valueType = valueType;
-    }
-
-    /**
-     * Subscribes to the signal.
-     *
-     * @return a Flux of JSON events
-     */
-    public Flux<ObjectNode> subscribe() {
-        Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
-                .onBackpressureBuffer();
-
-        return sink.asFlux().doOnSubscribe(ignore -> {
-            LOGGER.debug("New Flux subscription...");
-            lock.lock();
-            try {
-                var currentValue = createStatusUpdateEvent(this.id.toString(),
-                        StateEvent.EventType.SNAPSHOT);
-                sink.tryEmitNext(currentValue);
-                subscribers.add(sink);
-            } finally {
-                lock.unlock();
-            }
-        }).doFinally(ignore -> {
-            lock.lock();
-            try {
-                LOGGER.debug("Unsubscribing from Signal...");
-                subscribers.remove(sink);
-            } finally {
-                lock.unlock();
-            }
-        });
-    }
-
-    /**
-     * Submits an event to the signal and notifies subscribers about the change
-     * of the signal value.
-     *
-     * @param event
-     *            the event to submit
-     */
-    public void submit(ObjectNode event) {
-        lock.lock();
-        try {
-            boolean success = processEvent(event);
-            // Notify subscribers
-            subscribers.removeIf(sink -> {
-                var updatedValue = createStatusUpdateEvent(
-                        event.get("id").asText(),
-                        success ? StateEvent.EventType.SNAPSHOT
-                                : StateEvent.EventType.REJECT);
-                boolean failure = sink.tryEmitNext(updatedValue).isFailure();
-                if (failure) {
-                    LOGGER.debug("Failed push");
-                }
-                return failure;
-            });
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Returns the signal UUID.
-     *
-     * @return the id
-     */
-    public UUID getId() {
-        return this.id;
+        super(valueType);
     }
 
     /**
@@ -139,7 +52,8 @@ public class ValueSignal<T> {
         return this.value;
     }
 
-    private ObjectNode createStatusUpdateEvent(String eventId,
+    @Override
+    protected ObjectNode createStatusUpdateEvent(String eventId,
             StateEvent.EventType eventType) {
         var snapshot = new StateEvent<>(eventId, eventType, this.value);
         return snapshot.toJson();
@@ -157,7 +71,7 @@ public class ValueSignal<T> {
      */
     protected boolean processEvent(ObjectNode event) {
         try {
-            var stateEvent = new StateEvent<>(event, valueType);
+            var stateEvent = new StateEvent<>(event, getValueType());
             return switch (stateEvent.getEventType()) {
                 case SET -> {
                     this.value = stateEvent.getValue();
@@ -168,7 +82,7 @@ public class ValueSignal<T> {
                 default -> throw new UnsupportedOperationException(
                     "Unsupported event: " + stateEvent.getEventType());
             };
-        } catch (StateEvent.InvalidEventTypeException e) {
+        } catch (InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
         }
@@ -192,21 +106,5 @@ public class ValueSignal<T> {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ValueSignal<?> signal)) {
-            return false;
-        }
-        return Objects.equals(getId(), signal.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
     }
 }

@@ -1,6 +1,7 @@
 package com.vaadin.hilla.signals.core.event;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
 import org.junit.Test;
 
 import java.util.UUID;
@@ -130,7 +131,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.VALUE, value);
 
         Exception exception = assertThrows(
-                StateEvent.InvalidEventTypeException.class,
+                InvalidEventTypeException.class,
                 () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Invalid event type invalidType. Type should be one of: [SNAPSHOT, SET, REPLACE, REJECT, INCREMENT]";
@@ -149,7 +150,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.VALUE, value);
 
         Exception exception = assertThrows(
-                StateEvent.InvalidEventTypeException.class,
+                InvalidEventTypeException.class,
                 () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Missing event type. Type is required, and should be one of: [SNAPSHOT, SET, REPLACE, REJECT, INCREMENT]";
