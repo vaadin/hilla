@@ -1,5 +1,6 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
+import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
@@ -11,6 +12,7 @@ const CONNECT_CLIENT = '$CONNECT_CLIENT$';
 const METHOD_NAME = '$METHOD_NAME$';
 const SIGNAL = '$SIGNAL$';
 const RETURN_TYPE = '$RETURN_TYPE$';
+const INITIAL_VALUE = '$INITIAL_VALUE$';
 
 const signals = ['NumberSignal', 'ValueSignal'];
 const genericSignals = ['ValueSignal'];
@@ -44,23 +46,40 @@ export default class SignalProcessor {
     const [file] = ts.transform<SourceFile>(this.#sourceFile, [
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
-          const filteredParams = tsNode.parameters.filter(
-            (p) => !p.type || !ts.isTypeReferenceNode(p.type) || p.type.typeName !== initTypeId,
-          );
-          if (filteredParams.length > 0) {
-            functionParams.set(tsNode.name.text, filteredParams);
-          }
-          const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
           const signalId = this.#replaceSignalImport(tsNode);
           let genericReturnType;
           if (genericSignals.includes(signalId.text)) {
             genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
           }
           const returnType = genericReturnType ?? signalId;
-          const INITIAL_VALUE = signalId.text.startsWith('NumberSignal') ? '0' : 'undefined';
+          let initialValue: ts.Expression = signalId.text.startsWith('NumberSignal')
+            ? ts.factory.createNumericLiteral('0')
+            : ts.factory.createIdentifier('undefined');
+          const filteredParams = tsNode.parameters.filter(
+            (p) => !p.type || !ts.isTypeReferenceNode(p.type) || p.type.typeName !== initTypeId,
+          );
+          // `filteredParams` can be altered after, need to store the param names now
+          const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
+          // Searching for a non-nullable signal like ValueSignal<SomeType>
+          if (
+            ts.isUnionTypeNode(returnType) &&
+            returnType.types.length &&
+            ts.isTypeReferenceNode(returnType.types[0]) &&
+            returnType.types[0].typeArguments?.length === 1 &&
+            ts.isUnionTypeNode(returnType.types[0].typeArguments[0]) &&
+            returnType.types[0].typeArguments[0].types.length === 1
+          ) {
+            const requiredDefaultType = returnType.types[0].typeArguments[0].types[0];
+            const { alias, param } = SignalProcessor.#createDefaultValueParameter(requiredDefaultType);
+            initialValue = alias;
+            filteredParams.splice(-1, 0, param);
+          }
+          if (filteredParams.length > 0) {
+            functionParams.set(tsNode.name.text, filteredParams);
+          }
           return template(
             `function ${METHOD_NAME}(): ${RETURN_TYPE} {
-  return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${filteredParams.length > 0 ? `, params: { ${paramNames} }` : ''} });
+  return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${paramNames.length ? `, params: { ${paramNames} }` : ''} });
 }`,
             (statements) => statements,
             [
@@ -68,6 +87,7 @@ export default class SignalProcessor {
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === RETURN_TYPE ? returnType : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
+              transform((node) => (ts.isIdentifier(node) && node.text === INITIAL_VALUE ? initialValue : node)),
             ],
           );
         }
@@ -117,6 +137,26 @@ export default class SignalProcessor {
       ],
       file.fileName,
     );
+  }
+
+  static #createDefaultValueParameter(requiredDefaultType: ts.TypeNode) {
+    const alias = createFullyUniqueIdentifier('defaultValue');
+    const bindingPattern = ts.factory.createObjectBindingPattern([
+      ts.factory.createBindingElement(undefined, ts.factory.createIdentifier('defaultValue'), alias, undefined),
+    ]);
+    const paramType = ts.factory.createTypeLiteralNode([
+      ts.factory.createPropertySignature(
+        undefined,
+        ts.factory.createIdentifier('defaultValue'),
+        undefined,
+        requiredDefaultType,
+      ),
+    ]);
+    // Return both the alias and the full parameter
+    return {
+      alias,
+      param: ts.factory.createParameterDeclaration(undefined, undefined, bindingPattern, undefined, paramType),
+    };
   }
 
   #replaceSignalImport(method: FunctionDeclaration): Identifier {
