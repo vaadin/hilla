@@ -91,11 +91,11 @@ public abstract class Signal<T> {
             boolean success = processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
-                var updatedValue = createStatusUpdateEvent(
+                var statusUpdate = createStatusUpdateEvent(
                         event.get("id").asText(),
                         success ? StateEvent.EventType.SNAPSHOT
                                 : StateEvent.EventType.REJECT);
-                boolean failure = sink.tryEmitNext(updatedValue).isFailure();
+                boolean failure = sink.tryEmitNext(statusUpdate).isFailure();
                 if (failure) {
                     LOGGER.debug("Failed push");
                 }

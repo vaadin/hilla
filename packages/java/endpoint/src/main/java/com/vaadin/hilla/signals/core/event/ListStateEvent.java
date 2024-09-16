@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.exception.MissingFieldException;
+import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,13 +17,15 @@ import java.util.UUID;
 public class ListStateEvent<T> {
 
     public interface ListEntry<T> {
-        UUID getId();
-        UUID getPrev();
-        void setPrev(UUID prev);
-        UUID getNext();
-        void setNext(UUID next);
-        T getValue();
-        void setValue(T value);
+        UUID id();
+
+        @Nullable
+        UUID previous();
+
+        @Nullable
+        UUID next();
+
+        T value();
     }
 
     @FunctionalInterface
@@ -65,8 +68,21 @@ public class ListStateEvent<T> {
     private final String id;
     private final EventType eventType;
     private final Collection<ListEntry<T>> entries;
+    // Only used for insert events:
     private final InsertPosition insertPosition;
 
+    public ListStateEvent(String id, EventType eventType,
+            Collection<ListEntry<T>> entries, InsertPosition insertPosition) {
+        this.id = id;
+        this.eventType = eventType;
+        this.entries = entries;
+        this.insertPosition = insertPosition;
+    }
+
+    public ListStateEvent(String id, EventType eventType,
+            Collection<ListEntry<T>> entries) {
+        this(id, eventType, entries, null);
+    }
 
     /**
      * Creates a new state event using the given JSON representation.
@@ -74,32 +90,36 @@ public class ListStateEvent<T> {
      * @param json
      *            The JSON representation of the event.
      */
-    public ListStateEvent(ObjectNode json, Class<T> valueType, ListEntryFactory<T> entryFactory) {
+    public ListStateEvent(ObjectNode json, Class<T> valueType,
+            ListEntryFactory<T> entryFactory) {
         this.id = StateEvent.extractId(json);
         this.eventType = extractEventType(json);
         this.entries = extractEntries(json, valueType, entryFactory);
-        this.insertPosition = this.eventType == EventType.INSERT ? extractDirection(json) : null;
+        this.insertPosition = this.eventType == EventType.INSERT
+                ? extractDirection(json)
+                : null;
     }
 
     private static EventType extractEventType(JsonNode json) {
         var rawType = json.get(StateEvent.Field.TYPE);
         if (rawType == null) {
             var message = String.format(
-                "Missing event type. Type is required, and should be one of: %s",
-                Arrays.toString(EventType.values()));
+                    "Missing event type. Type is required, and should be one of: %s",
+                    Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message);
         }
         try {
             return EventType.of(rawType.asText());
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                "Invalid event type %s. Type should be one of: %s",
-                rawType.asText(), Arrays.toString(EventType.values()));
+                    "Invalid event type %s. Type should be one of: %s",
+                    rawType.asText(), Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }
     }
 
-    private static <X> List<ListEntry<X>> extractEntries(JsonNode json, Class<X> valueType, ListEntryFactory<X> entryFactory) {
+    private static <X> List<ListEntry<X>> extractEntries(JsonNode json,
+            Class<X> valueType, ListEntryFactory<X> entryFactory) {
         var rawEntries = json.get(Field.ENTRIES);
         if (rawEntries == null) {
             throw new MissingFieldException(Field.ENTRIES);
@@ -109,8 +129,9 @@ public class ListStateEvent<T> {
             var id = extractEntryId(rawEntry);
             var next = extractUUIDOrNull(rawEntry, Field.NEXT);
             var prev = extractUUIDOrNull(rawEntry, Field.PREV);
-            var value = StateEvent.convertValue(StateEvent.extractValue(rawEntry), valueType);
-            entries.add(entryFactory.create(id, next, prev, value));
+            var value = StateEvent
+                    .convertValue(StateEvent.extractValue(rawEntry), valueType);
+            entries.add(entryFactory.create(id, prev, next, value));
         }
         return entries;
     }
@@ -132,21 +153,22 @@ public class ListStateEvent<T> {
         var rawDirection = json.get(Field.POSITION);
         if (rawDirection == null) {
             var message = String.format(
-                "Missing event direction. Direction is required, and should be one of: %s",
-                Arrays.toString(InsertPosition.values()));
+                    "Missing event direction. Direction is required, and should be one of: %s",
+                    Arrays.toString(InsertPosition.values()));
             throw new InvalidEventTypeException(message);
         }
         try {
-            return InsertPosition.valueOf(rawDirection.asText());
+            return InsertPosition.of(rawDirection.asText());
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                "Invalid event direction %s. Direction should be one of: %s",
-                rawDirection.asText(), Arrays.toString(InsertPosition.values()));
+                    "Invalid event direction %s. Direction should be one of: %s",
+                    rawDirection.asText(),
+                    Arrays.toString(InsertPosition.values()));
             throw new InvalidEventTypeException(message, e);
         }
     }
 
-    public static <X> ObjectNode toJson(String id, StateEvent.EventType eventType, Collection<ListEntry<X>> entries) {
+    public ObjectNode toJson() {
         ObjectNode snapshotData = StateEvent.MAPPER.createObjectNode();
         snapshotData.put(StateEvent.Field.ID, id);
         snapshotData.put(StateEvent.Field.TYPE, eventType.name().toLowerCase());
@@ -154,12 +176,23 @@ public class ListStateEvent<T> {
             ArrayNode snapshotEntries = StateEvent.MAPPER.createArrayNode();
             entries.forEach(entry -> {
                 ObjectNode entryNode = snapshotEntries.addObject();
-                entryNode.put(StateEvent.Field.ID, entry.getId().toString());
-                entryNode.put(Field.NEXT, toStringOrNull(entry.getNext()));
-                entryNode.put(Field.PREV, toStringOrNull(entry.getPrev()));
-                entryNode.set(StateEvent.Field.VALUE, StateEvent.MAPPER.valueToTree(entry.getValue()));
+                entryNode.put(StateEvent.Field.ID, entry.id().toString());
+                if (entry.next() != null) {
+                    entryNode.put(Field.NEXT, entry.next().toString());
+                }
+                if (entry.previous() != null) {
+                    entryNode.put(Field.PREV, entry.previous().toString());
+                }
+                if (entry.value() != null) {
+                    entryNode.set(StateEvent.Field.VALUE,
+                            StateEvent.MAPPER.valueToTree(entry.value()));
+                }
             });
             snapshotData.set(Field.ENTRIES, snapshotEntries);
+        }
+        if (insertPosition != null) {
+            snapshotData.put(Field.POSITION,
+                    insertPosition.name().toLowerCase());
         }
         return snapshotData;
     }

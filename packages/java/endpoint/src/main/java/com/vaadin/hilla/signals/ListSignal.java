@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
+import jakarta.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +15,14 @@ import static com.vaadin.hilla.signals.core.event.ListStateEvent.ListEntry;
 
 public class ListSignal<T> extends Signal<T> {
 
-    public static final class Entry<T> implements ListEntry<T> {
+    private static final class Entry<V> implements ListEntry<V> {
         private final UUID id;
         private UUID prev;
         private UUID next;
-        private T value;
+        private V value;
 
-        public Entry(UUID id, UUID prev, UUID next, T value) {
+        public Entry(UUID id, @Nullable UUID prev, @Nullable UUID next,
+                V value) {
             this.id = id;
             this.prev = prev;
             this.next = next;
@@ -28,35 +30,23 @@ public class ListSignal<T> extends Signal<T> {
         }
 
         @Override
-        public UUID getId() {
+        public UUID id() {
             return id;
         }
 
         @Override
-        public UUID getPrev() {
+        public UUID previous() {
             return prev;
         }
 
         @Override
-        public UUID getNext() {
+        public UUID next() {
             return next;
         }
 
         @Override
-        public T getValue() {
+        public V value() {
             return value;
-        }
-
-        public void setPrev(UUID prev) {
-            this.prev = prev;
-        }
-
-        public void setNext(UUID next) {
-            this.next = next;
-        }
-
-        public void setValue(T value) {
-            this.value = value;
         }
 
         @Override
@@ -65,7 +55,7 @@ public class ListSignal<T> extends Signal<T> {
                 return true;
             if (!(o instanceof ListEntry<?> entry))
                 return false;
-            return Objects.equals(id, entry.getId());
+            return Objects.equals(id, entry.id());
         }
 
         @Override
@@ -74,7 +64,7 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
-    private final Map<UUID, ListEntry<T>> entries = new HashMap<>();
+    private final Map<UUID, Entry<T>> entries = new HashMap<>();
 
     private UUID head;
     private UUID tail;
@@ -86,22 +76,27 @@ public class ListSignal<T> extends Signal<T> {
     @Override
     protected ObjectNode createStatusUpdateEvent(String eventId,
             StateEvent.EventType eventType) {
-        return ListStateEvent.toJson(eventId, eventType, entries.values());
+        var entries = this.entries.values().stream()
+                .map(entry -> (ListEntry<T>) entry).toList();
+        var listEventType = ListStateEvent.EventType.of(eventType.name());
+        var event = new ListStateEvent<>(eventId, listEventType, entries);
+        return event.toJson();
     }
 
     @Override
     protected boolean processEvent(ObjectNode event) {
         try {
-            var stateEvent = new ListStateEvent<>(event, getValueType(), Entry::new);
+            var stateEvent = new ListStateEvent<>(event, getValueType(),
+                    Entry::new);
             return switch (stateEvent.getEventType()) {
-                case INSERT -> handleInsert(stateEvent);
-                case REMOVE -> handleRemoval(stateEvent);
-                default -> throw new UnsupportedOperationException(
+            case INSERT -> handleInsert(stateEvent);
+            case REMOVE -> handleRemoval(stateEvent);
+            default -> throw new UnsupportedOperationException(
                     "Unsupported event: " + stateEvent.getEventType());
             };
         } catch (InvalidEventTypeException e) {
             throw new UnsupportedOperationException(
-                "Unsupported JSON: " + event, e);
+                    "Unsupported JSON: " + event, e);
         }
     }
 
@@ -110,52 +105,41 @@ public class ListSignal<T> extends Signal<T> {
             return false;
         }
         if (event.getEntries().size() > 1) {
-            throw new UnsupportedOperationException("Batch insert is not supported");
+            throw new UnsupportedOperationException(
+                    "Batch insert is not supported");
         }
-        var toBeInserted = event.getEntries().iterator().next();
-        if (entries.containsKey(toBeInserted.getId())) {
+        var toBeInserted = getAsEntry(event.getEntries().iterator().next());
+        if (entries.containsKey(toBeInserted.id())) {
             return false;
         }
         switch (event.getDirection()) {
-            case FIRST -> throw new UnsupportedOperationException("Insert first is not supported");
-            case BEFORE -> throw new UnsupportedOperationException("Insert before is not supported");
-            case AFTER -> {
-                if (head == null) {
-                    // first entry being added:
-                    head = tail = toBeInserted.getId();
-                    entries.put(toBeInserted.getId(), toBeInserted);
-                    return true;
-                }
-                var refEntry = entries.get(toBeInserted.getPrev());
-                if (refEntry == null) {
-                    throw new RuntimeException("Insert after non-existing entry is not supported");
-                }
-                var next = entries.get(refEntry.getNext());
-                refEntry.setNext(toBeInserted.getId());
-                toBeInserted.setPrev(refEntry.getId());
-                if (next != null) {
-                    toBeInserted.setNext(next.getId());
-                    next.setPrev(toBeInserted.getId());
-                }
-                entries.put(toBeInserted.getId(), toBeInserted);
+        case FIRST -> throw new UnsupportedOperationException(
+                "Insert first is not supported");
+        case BEFORE -> throw new UnsupportedOperationException(
+                "Insert before is not supported");
+        case AFTER -> throw new UnsupportedOperationException(
+                "Insert after is not supported");
+        case LAST -> {
+            if (tail == null) {
+                // first entry being added:
+                head = tail = toBeInserted.id();
+                entries.put(toBeInserted.id(), toBeInserted);
                 return true;
             }
-            case LAST -> {
-                if (tail == null) {
-                    // first entry being added:
-                    head = tail = toBeInserted.getId();
-                    entries.put(toBeInserted.getId(), toBeInserted);
-                    return true;
-                }
-                var currentTail = entries.get(tail);
-                currentTail.setNext(toBeInserted.getId());
-                toBeInserted.setPrev(tail);
-                tail = toBeInserted.getId();
-                entries.put(toBeInserted.getId(), toBeInserted);
-                return true;
-            }
+            var currentTail = entries.get(tail);
+            currentTail.next = toBeInserted.id();
+            toBeInserted.prev = currentTail.id();
+            tail = toBeInserted.id();
+            entries.put(toBeInserted.id(), toBeInserted);
+            return true;
+        }
         }
         return false;
+    }
+
+    private Entry<T> getAsEntry(ListEntry<T> entry) {
+        return new Entry<>(entry.id(), entry.previous(), entry.next(),
+                entry.value());
     }
 
     private boolean handleRemoval(ListStateEvent<T> event) {
@@ -163,26 +147,38 @@ public class ListSignal<T> extends Signal<T> {
             return false;
         }
         if (event.getEntries().size() > 1) {
-            throw new UnsupportedOperationException("Batch removal is not supported");
+            throw new UnsupportedOperationException(
+                    "Batch removal is not supported");
         }
         var toBeRemoved = event.getEntries().iterator().next();
-        var toBeRemovedEntry = entries.get(toBeRemoved.getId());
+        var toBeRemovedEntry = entries.get(toBeRemoved.id());
         if (toBeRemovedEntry == null) {
-            return false;
+            // no longer exists anyway
+            return true;
         }
 
-        entries.remove(toBeRemovedEntry.getId());
-        if (head.equals(toBeRemovedEntry.getId())) {
-            head = toBeRemovedEntry.getNext();
-        } else {
-            var prev = entries.get(toBeRemovedEntry.getPrev());
-            var next = entries.get(toBeRemovedEntry.getNext());
-            if (next == null) {
-                prev.setNext(null);
+        entries.remove(toBeRemovedEntry.id());
+        if (head.equals(toBeRemovedEntry.id())) {
+            // removing head
+            if (toBeRemovedEntry.next() == null) {
+                // removing the only entry
+                head = tail = null;
                 return true;
             }
-            prev.setNext(next.getId());
-            next.setPrev(prev.getId());
+            var newHead = entries.get(toBeRemovedEntry.next());
+            head = newHead.id();
+            newHead.prev = null;
+        } else {
+            var prev = entries.get(toBeRemovedEntry.previous());
+            var next = entries.get(toBeRemovedEntry.next());
+            if (next == null) {
+                // removing tail
+                tail = prev.id();
+                prev.next = null;
+                return true;
+            }
+            prev.next = next.id();
+            next.prev = prev.id();
         }
         return true;
     }
