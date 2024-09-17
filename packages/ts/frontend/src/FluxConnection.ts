@@ -30,7 +30,8 @@ type ListenerType<T extends keyof EventMap> =
 type EndpointInfo = {
   endpointName: string;
   methodName: string;
-  params?: unknown[];
+  params: unknown[] | undefined;
+  reconnect?: boolean | (() => void);
 };
 
 /**
@@ -103,6 +104,14 @@ export class FluxConnection extends EventTarget {
         this.#onDisconnectCallbacks.set(id, callback);
         return hillaSubscription;
       },
+      autoResubscribe: (reconnection: boolean | (() => void)): Subscription<any> => {
+        if (this.#endpointInfos.has(id)) {
+          this.#endpointInfos.get(id)!.reconnect = reconnection;
+        } else {
+          console.warn(`"onReconnect" value not set for subscription "${id}" because it was already canceled`);
+        }
+        return hillaSubscription;
+      },
     };
     return hillaSubscription;
   }
@@ -152,14 +161,20 @@ export class FluxConnection extends EventTarget {
       onReopen: (_response: any) => {
         if (this.state !== State.ACTIVE) {
           this.#endpointInfos.forEach((endpointInfo, id) => {
-            const msg: ServerConnectMessage = {
-              '@type': 'subscribe',
-              endpointName: endpointInfo.endpointName,
-              id,
-              methodName: endpointInfo.methodName,
-              params: endpointInfo.params,
-            };
-            this.#send(msg);
+            if (endpointInfo.reconnect === undefined || endpointInfo.reconnect === false) {
+              // Do nothing
+            } else if (endpointInfo.reconnect === true) {
+              const msg: ServerConnectMessage = {
+                '@type': 'subscribe',
+                endpointName: endpointInfo.endpointName,
+                id,
+                methodName: endpointInfo.methodName,
+                params: endpointInfo.params,
+              };
+              this.#send(msg);
+            } else {
+              endpointInfo.reconnect();
+            }
           });
 
           this.state = State.ACTIVE;
