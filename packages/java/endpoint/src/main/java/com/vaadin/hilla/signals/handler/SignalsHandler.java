@@ -33,14 +33,15 @@ public class SignalsHandler {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String providerEndpoint,
-            String providerMethod, String clientSignalId) {
+            String providerMethod, String clientSignalId, ObjectNode body) {
         try {
             var signal = registry.get(clientSignalId);
             if (signal != null) {
-                return signal.subscribe();
+                return signal.subscribe().doFinally(
+                        (event) -> registry.unsubscribe(clientSignalId));
             }
-
-            registry.register(clientSignalId, providerEndpoint, providerMethod);
+            registry.register(clientSignalId, providerEndpoint, providerMethod,
+                    body);
             return registry.get(clientSignalId).subscribe()
                     .doFinally((event) -> registry.unsubscribe(clientSignalId));
         } catch (Exception e) {
