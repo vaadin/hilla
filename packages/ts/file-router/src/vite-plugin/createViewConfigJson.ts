@@ -32,7 +32,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
     views,
     async (routes, next) =>
       await Promise.all(
-        routes.map(async ({ path, file, layout, children }) => {
+        routes.map(async ({ path, file, layout, children, flowLayout }) => {
           const newChildren = children ? await next(...children) : undefined;
 
           if (!file && !layout) {
@@ -59,6 +59,12 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
                 const code = node.initializer.getText(sourceFile);
                 const script = new Script(`(${code})`);
                 config = script.runInThisContext() as ViewConfig;
+                if (config.flowLayout === undefined) {
+                  const copy = JSON.parse(JSON.stringify(config));
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  copy.flowLayout = flowLayout ?? false;
+                  config = copy;
+                }
               }
             } else if (node.getText(sourceFile).startsWith('export default')) {
               waitingForIdentifier = true;
