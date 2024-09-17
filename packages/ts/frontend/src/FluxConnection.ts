@@ -27,12 +27,18 @@ type ListenerType<T extends keyof EventMap> =
     }
   | null;
 
+type EndpointInfo = {
+  endpointName: string;
+  methodName: string;
+  params?: unknown[];
+};
+
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
 export class FluxConnection extends EventTarget {
   state: State = State.INACTIVE;
-  readonly #endpointInfos = new Map<string, string>();
+  readonly #endpointInfos = new Map<string, EndpointInfo>();
   #nextId = 0;
   readonly #onCompleteCallbacks = new Map<string, () => void>();
   readonly #onErrorCallbacks = new Map<string, () => void>();
@@ -60,9 +66,8 @@ export class FluxConnection extends EventTarget {
     const params = parameters ?? [];
 
     const msg: ServerConnectMessage = { '@type': 'subscribe', endpointName, id, methodName, params };
-    const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
     this.#send(msg);
-    this.#endpointInfos.set(id, endpointInfo);
+    this.#endpointInfos.set(id, { endpointName, methodName, params });
     const hillaSubscription: Subscription<any> = {
       cancel: () => {
         if (!this.#endpointInfos.has(id)) {
@@ -146,6 +151,17 @@ export class FluxConnection extends EventTarget {
       },
       onReopen: (_response: any) => {
         if (this.state !== State.ACTIVE) {
+          this.#endpointInfos.forEach((endpointInfo, id) => {
+            const msg: ServerConnectMessage = {
+              '@type': 'subscribe',
+              endpointName: endpointInfo.endpointName,
+              id,
+              methodName: endpointInfo.methodName,
+              params: endpointInfo.params,
+            };
+            this.#send(msg);
+          });
+
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
@@ -170,7 +186,7 @@ export class FluxConnection extends EventTarget {
   #handleMessage(message: unknown) {
     if (isClientMessage(message)) {
       const { id } = message;
-      const endpointInfo = this.#endpointInfos.get(id) ?? 'unknown';
+      const endpointInfo = this.#endpointInfos.get(id);
 
       if (message['@type'] === 'update') {
         const callback = this.#onNextCallbacks.get(id);
@@ -187,7 +203,11 @@ export class FluxConnection extends EventTarget {
         }
         this.#removeSubscription(id);
         if (!callback) {
-          throw new Error(`Error in ${endpointInfo}: ${message.message}`);
+          throw new Error(
+            endpointInfo
+              ? `Error in ${endpointInfo.endpointName}.${endpointInfo.methodName}(${JSON.stringify(endpointInfo.params)}): ${message.message}`
+              : `Error in unknown subscription: ${message.message}`,
+          );
         }
       }
     } else {
