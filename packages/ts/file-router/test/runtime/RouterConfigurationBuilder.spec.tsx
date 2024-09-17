@@ -141,6 +141,23 @@ describe('RouterBuilder', () => {
     ]);
   });
 
+  it('empty flowLayout array should not generate element', () => {
+    const { routes } = new RouterConfigurationBuilder()
+      .withReactRoutes([
+        {
+          path: '',
+        },
+      ])
+      .withLayout(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        path: '',
+      },
+    ]);
+  });
+
   it('should add layout routes for nested folder layout component', () => {
     const { routes } = builder
       .withReactRoutes([
