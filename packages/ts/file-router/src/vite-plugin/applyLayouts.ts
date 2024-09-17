@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import type { RouteMeta } from './collectRoutesFromFS';
+import type { RouteMeta } from './collectRoutesFromFS.js';
 
 /**
  * The information about a particular server-side layout.

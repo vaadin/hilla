@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
-import applyLayouts from './applyLayouts';
-import collectRoutesFromFS, { type RouteMeta } from './collectRoutesFromFS.js';
+import applyLayouts from './applyLayouts.js';
+import collectRoutesFromFS from './collectRoutesFromFS.js';
 import createRoutesFromMeta from './createRoutesFromMeta.js';
 import createViewConfigJson from './createViewConfigJson.js';
 
