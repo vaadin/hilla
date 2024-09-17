@@ -152,6 +152,9 @@ export class RouterConfigurationBuilder {
    */
   withLayout(layoutComponent: ComponentType): this {
     function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
+      if (routes.length === 0) {
+        return routes;
+      }
       const nestedRoutes = routes.map((route) => route);
       return [
         {
