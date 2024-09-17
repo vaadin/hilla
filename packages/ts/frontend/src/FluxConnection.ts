@@ -31,8 +31,13 @@ type EndpointInfo = {
   endpointName: string;
   methodName: string;
   params: unknown[] | undefined;
-  reconnect?: boolean | (() => void);
+  reconnect?(): void;
 };
+
+/**
+ * A default handler for `onSubscriptionLost` that will resubscribe to the original server method.
+ */
+export function resubscribe(): void {}
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
@@ -104,9 +109,9 @@ export class FluxConnection extends EventTarget {
         this.#onDisconnectCallbacks.set(id, callback);
         return hillaSubscription;
       },
-      autoResubscribe: (reconnection: boolean | (() => void)): Subscription<any> => {
+      onSubscriptionLost: (callback: () => void): Subscription<any> => {
         if (this.#endpointInfos.has(id)) {
-          this.#endpointInfos.get(id)!.reconnect = reconnection;
+          this.#endpointInfos.get(id)!.reconnect = callback;
         } else {
           console.warn(`"onReconnect" value not set for subscription "${id}" because it was already canceled`);
         }
@@ -131,7 +136,7 @@ export class FluxConnection extends EventTarget {
       timeout: -1,
       trackMessageLength: true,
       url,
-      onClose: (_) => {
+      onClose: () => {
         if (this.state !== State.INACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
@@ -151,19 +156,19 @@ export class FluxConnection extends EventTarget {
           this.#handleMessage(JSON.parse(response.responseBody));
         }
       },
-      onOpen: (_response: any) => {
+      onOpen: () => {
         if (this.state !== State.ACTIVE) {
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
-      onReopen: (_response: any) => {
+      onReopen: () => {
         if (this.state !== State.ACTIVE) {
           this.#endpointInfos.forEach((endpointInfo, id) => {
-            if (endpointInfo.reconnect === undefined || endpointInfo.reconnect === false) {
+            if (endpointInfo.reconnect === undefined) {
               // Do nothing
-            } else if (endpointInfo.reconnect === true) {
+            } else if (endpointInfo.reconnect === resubscribe) {
               const msg: ServerConnectMessage = {
                 '@type': 'subscribe',
                 endpointName: endpointInfo.endpointName,
@@ -182,13 +187,13 @@ export class FluxConnection extends EventTarget {
           this.#sendPendingMessages();
         }
       },
-      onReconnect: (_request, _response) => {
+      onReconnect: () => {
         if (this.state !== State.RECONNECTING) {
           this.state = State.RECONNECTING;
           this.#onDisconnectCallbacks.forEach((callback) => callback());
         }
       },
-      onFailureToReconnect: (_request, _response) => {
+      onFailureToReconnect: () => {
         if (this.state !== State.INACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));

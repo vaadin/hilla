@@ -50,7 +50,7 @@ export interface Subscription<T> {
    * Defines what to do when the connection is lost and reconnected: can be either a boolean to
    * trigger automatic resubscription or a callback to be called when reconnected.
    */
-  autoResubscribe(reconnection: boolean | (() => void)): Subscription<T>;
+  onSubscriptionLost(callback: () => void): Subscription<T>;
 }
 
 interface ConnectExceptionData {
