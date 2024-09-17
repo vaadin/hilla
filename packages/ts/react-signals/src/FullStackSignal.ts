@@ -61,6 +61,12 @@ export type ServerConnectionConfig = Readonly<{
    * The name of the signal provider service method.
    */
   method: string;
+
+  /**
+   * Optional object with method call arguments to be sent to the endpoint
+   * method that provides the signal when subscribing to it.
+   */
+  params?: Record<string, unknown>;
 }>;
 
 /**
@@ -81,12 +87,13 @@ class ServerConnection<T> {
   }
 
   connect() {
-    const { client, endpoint, method } = this.#config;
+    const { client, endpoint, method, params } = this.#config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
+      params,
     });
 
     return this.#subscription;
@@ -161,6 +168,17 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       }
     });
 
+    this.#paused = false;
+  }
+
+  /**
+   * Sets the local value of the signal without sending any events to the server
+   * @param value - The new value.
+   * @internal
+   */
+  protected setValueLocal(value: T): void {
+    this.#paused = true;
+    this.value = value;
     this.#paused = false;
   }
 

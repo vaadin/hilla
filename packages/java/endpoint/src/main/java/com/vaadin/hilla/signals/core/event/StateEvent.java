@@ -31,7 +31,7 @@ public class StateEvent<T> {
      * Possible types of state events.
      */
     public enum EventType {
-        SNAPSHOT, SET, REPLACE, REJECT
+        SNAPSHOT, SET, REPLACE, REJECT, INCREMENT
     }
 
     /**
@@ -135,7 +135,7 @@ public class StateEvent<T> {
         var rawType = json.get(Field.TYPE);
         if (rawType == null) {
             var message = String.format(
-                    "Missing event type. Type is required, and should be either of: %s",
+                    "Missing event type. Type is required, and should be one of: %s",
                     Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message);
         }
@@ -143,7 +143,7 @@ public class StateEvent<T> {
             return EventType.valueOf(rawType.asText().toUpperCase());
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                    "Invalid event type %s. Type should be either of: %s",
+                    "Invalid event type %s. Type should be one of: %s",
                     rawType.asText(), Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }

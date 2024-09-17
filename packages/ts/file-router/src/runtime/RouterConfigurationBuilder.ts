@@ -109,6 +109,8 @@ export class RouterConfigurationBuilder {
    * each fallback component.
    */
   withFallback(component: ComponentType, config?: ViewConfig): this {
+    this.withLayout(component);
+
     // Fallback adds two routes, so that the index (empty path) has a fallback too
     const fallbackRoutes: readonly RouteObject[] = [
       { path: '*', element: createElement(component), handle: config },
@@ -150,16 +152,7 @@ export class RouterConfigurationBuilder {
    */
   withLayout(layoutComponent: ComponentType): this {
     function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
-      const nestedRoutes = routes.map((route) => {
-        if (route.children === undefined) {
-          return route;
-        }
-
-        return {
-          ...route,
-          children: applyLayouts(route.children),
-        } as RouteObject;
-      });
+      const nestedRoutes = routes.map((route) => route);
       return [
         {
           element: createElement(layoutComponent),
@@ -168,15 +161,20 @@ export class RouterConfigurationBuilder {
       ];
     }
 
+    function checkFlowLayout(route: RouteObject): boolean {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      let flowLayout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
+      if (!flowLayout && route.children) {
+        flowLayout = route.children.filter((child) => checkFlowLayout(child)).length > 0;
+      }
+      return flowLayout;
+    }
+
     this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
       if (!routes) {
         return routes;
       }
-      const withLayout = routes.filter((route) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const layout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
-        return layout;
-      });
+      const withLayout = routes.filter((route) => checkFlowLayout(route));
       const allRoutes = routes.filter((route) => !withLayout.includes(route));
       const catchAll = [routes.find((route) => route.path === '*')].filter((route) => route !== undefined);
       withLayout.push(...catchAll); // Add * fallback to all child routes
