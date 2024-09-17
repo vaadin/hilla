@@ -1,9 +1,9 @@
-export type Translations = Record<string, string>;
+export type Translations = Readonly<Record<string, string>>;
 
-export type TranslationsResult = {
+export type TranslationsResult = Readonly<{
   translations: Translations;
   resolvedLanguage?: string;
-};
+}>;
 
 export interface I18nOptions {
   /**

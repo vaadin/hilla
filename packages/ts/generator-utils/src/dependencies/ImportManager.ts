@@ -25,6 +25,18 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return record.id;
   }
 
+  remove(path: string, specifier: string): void {
+    const specifiers = this.#map.get(path);
+
+    if (specifiers) {
+      specifiers.delete(specifier);
+
+      if (specifiers.size === 0) {
+        this.#map.delete(path);
+      }
+    }
+  }
+
   override clear(): void {
     this.#map.clear();
   }
@@ -33,12 +45,8 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     return this.#map.get(path)?.get(specifier)?.id;
   }
 
-  *identifiers(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
-    for (const [path, specifiers] of this.#map) {
-      for (const [specifier, { id, isType }] of specifiers) {
-        yield [path, specifier, id, isType];
-      }
-    }
+  iter(): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
+    return this[Symbol.iterator]();
   }
 
   isType(path: string, specifier: string): boolean | undefined {
@@ -82,6 +90,14 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
       ];
     }
   }
+
+  *[Symbol.iterator](): IterableIterator<readonly [path: string, specifier: string, id: Identifier, isType: boolean]> {
+    for (const [path, specifiers] of this.#map) {
+      for (const [specifier, { id, isType }] of specifiers) {
+        yield [path, specifier, id, isType];
+      }
+    }
+  }
 }
 
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
@@ -101,10 +117,8 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
     return this.#map.get(path);
   }
 
-  *identifiers(): IterableIterator<Identifier> {
-    for (const id of this.#map.values()) {
-      yield id;
-    }
+  iter(): IterableIterator<readonly [path: string, id: Identifier]> {
+    return this[Symbol.iterator]();
   }
 
   paths(): IterableIterator<string> {
@@ -123,6 +137,16 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
       ];
     }
   }
+
+  remove(path: string): void {
+    this.#map.delete(path);
+  }
+
+  *[Symbol.iterator](): IterableIterator<readonly [path: string, id: Identifier]> {
+    for (const [path, id] of this.#map) {
+      yield [path, id];
+    }
+  }
 }
 
 export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
@@ -138,14 +162,18 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
     return this.#map.get(path)?.id;
   }
 
+  remove(path: string): void {
+    if (this.#map.has(path)) {
+      this.#map.delete(path);
+    }
+  }
+
   override clear(): void {
     this.#map.clear();
   }
 
-  *identifiers(): IterableIterator<readonly [id: Identifier, isType: boolean]> {
-    for (const { id, isType } of this.#map.values()) {
-      yield [id, isType];
-    }
+  iter(): IterableIterator<readonly [path: string, id: Identifier, isType: boolean]> {
+    return this[Symbol.iterator]();
   }
 
   isType(path: string): boolean | undefined {
@@ -166,6 +194,12 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
           ts.factory.createStringLiteral(path),
         ),
       ];
+    }
+  }
+
+  *[Symbol.iterator](): IterableIterator<readonly [path: string, id: Identifier, isType: boolean]> {
+    for (const [path, { id, isType }] of this.#map) {
+      yield [path, id, isType];
     }
   }
 }

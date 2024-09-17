@@ -1,14 +1,4 @@
 {
-  "": {
-    "params": {},
-    "title": "Layout",
-    "rolesAllowed": null,
-    "loginRequired": false,
-    "route": "",
-    "lazy": false,
-    "register": false,
-    "menu": null
-  },
   "/foo": {
     "params": {},
     "title": "RouteTarget",
@@ -17,7 +7,8 @@
     "route": "/foo",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/bar": {
     "params": {},
@@ -27,7 +18,8 @@
     "route": "/bar",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/home": {
     "params": {},
@@ -37,7 +29,8 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/comments": {
     "params": {
@@ -49,7 +42,8 @@
     "route": "/comments",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/wildcard": {
     "params": {
@@ -61,7 +55,8 @@
     "route": "/wildcard",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   },
   "/profile": {
     "params": {},
@@ -74,6 +69,7 @@
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null
+    "menu": null,
+    "flowLayout":false
   }
 }

@@ -20,6 +20,7 @@ import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.PackageInfoModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -74,17 +75,56 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
                 annotations = considerAscendantAnnotations(annotations,
                         nodePath);
 
-                annotations
-                        .map(annotation -> annotationsMap
-                                .get(annotation.getName()))
-                        .filter(Objects::nonNull)
-                        .max(Comparator
-                                .comparingInt(AnnotationMatcher::getScore))
-                        .map(AnnotationMatcher::doesMakeNullable)
-                        .ifPresent(nullable -> schema
-                                .setNullable(nullable ? true : null));
+                computeNullabilityFromAnnotations(annotations).ifPresent(
+                        nullable -> schema.setNullable(nullable ? true : null));
+
+                // For type arguments, it is necessary to apply the same
+                // processing
+                if (nodeSource instanceof ClassRefSignatureModel) {
+                    var args = ((ClassRefSignatureModel) nodeSource)
+                            .getTypeArguments();
+
+                    if (!args.isEmpty()) {
+                        Optional.ofNullable(schema.getExtensions())
+                                .map(ext -> ext.get("x-type-arguments"))
+                                .map(ext -> (Schema<?>) ext)
+                                .map(Schema::getAllOf).ifPresent(schemas -> {
+                                    if (schemas.size() != args.size()) {
+                                        throw new IllegalStateException(
+                                                "Number of parameters mismatch for "
+                                                        + nodePath);
+                                    }
+
+                                    var nullables = args.stream()
+                                            .map(param -> Stream.concat(
+                                                    getPackageAnnotationsStream(
+                                                            nodePath),
+                                                    param.getAnnotations()
+                                                            .stream()))
+                                            .map(this::computeNullabilityFromAnnotations)
+                                            .toList();
+
+                                    for (var i = 0; i < nullables.size(); i++) {
+                                        var sch = schemas.get(i);
+                                        nullables.get(i).ifPresent(
+                                                nullable -> sch.setNullable(
+                                                        nullable ? true
+                                                                : null));
+                                    }
+                                });
+                    }
+                }
             }
         }
+    }
+
+    private Optional<Boolean> computeNullabilityFromAnnotations(
+            Stream<AnnotationInfoModel> annotations) {
+        return annotations
+                .map(annotation -> annotationsMap.get(annotation.getName()))
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(AnnotationMatcher::getScore))
+                .map(AnnotationMatcher::doesMakeNullable);
     }
 
     @Override

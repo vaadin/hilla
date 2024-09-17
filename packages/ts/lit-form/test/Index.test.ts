@@ -22,8 +22,8 @@ describe('@vaadin/hilla-lit-form', () => {
 
     it('should add registration', () => {
       assert.isDefined($wnd.Vaadin);
-      assert.isArray($wnd.Vaadin!.registrations);
-      const formRegistrations = $wnd.Vaadin!.registrations!.filter((r) => r.is === '@vaadin/hilla-lit-form');
+      assert.isArray($wnd.Vaadin.registrations);
+      const formRegistrations = $wnd.Vaadin.registrations!.filter((r) => r.is === '@vaadin/hilla-lit-form');
       assert.lengthOf(formRegistrations, 1);
     });
   });

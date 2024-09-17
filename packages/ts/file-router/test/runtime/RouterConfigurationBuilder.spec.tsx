@@ -1,5 +1,6 @@
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
+import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
@@ -79,6 +80,152 @@ describe('RouterBuilder', () => {
         ],
       },
     ]);
+  });
+
+  it('should add layout routes under layout component', () => {
+    const { routes } = builder
+      .withReactRoutes([
+        {
+          path: '',
+          handle: {
+            flowLayout: true,
+          },
+        },
+        {
+          path: '/test',
+          handle: {
+            flowLayout: true,
+          },
+          children: [
+            {
+              path: '/child',
+            },
+          ],
+        },
+      ])
+      .withLayout(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        children: [
+          {
+            path: '',
+            handle: {
+              flowLayout: true,
+            },
+          },
+          {
+            children: [
+              {
+                path: '/child',
+              },
+            ],
+            path: '/test',
+            handle: {
+              flowLayout: true,
+            },
+          },
+        ],
+        element: createElement(Server),
+      },
+      {
+        children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
+        ],
+        path: '',
+      },
+    ]);
+  });
+
+  it('should add layout routes for nested folder layout component', () => {
+    const { routes } = builder
+      .withReactRoutes([
+        {
+          path: 'nest',
+          children: [
+            {
+              path: '',
+              handle: {
+                flowLayout: true,
+              },
+            },
+            {
+              path: '/nested',
+              handle: {
+                flowLayout: true,
+              },
+            },
+          ],
+        },
+        {
+          path: '/test',
+          handle: {
+            flowLayout: true,
+          },
+          children: [
+            {
+              path: '/child',
+            },
+          ],
+        },
+      ])
+      .withLayout(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        children: [
+          {
+            children: [
+              {
+                path: '',
+                handle: {
+                  flowLayout: true,
+                },
+              },
+              {
+                path: '/nested',
+                handle: {
+                  flowLayout: true,
+                },
+              },
+            ],
+            path: 'nest',
+          },
+          {
+            children: [
+              {
+                path: '/child',
+              },
+            ],
+            path: '/test',
+            handle: {
+              flowLayout: true,
+            },
+          },
+        ],
+        element: createElement(Server),
+      },
+      {
+        children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
+        ],
+        path: '',
+      },
+    ]);
+  });
+
+  it('should not throw when no routes', () => {
+    const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
+
+    expect(routes).to.be.like([]);
   });
 
   it('should merge file routes deeply', () => {
