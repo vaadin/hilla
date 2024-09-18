@@ -12,9 +12,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class ValueSignalTest {
 
@@ -96,9 +98,13 @@ public class ValueSignalTest {
                 // notification for the initial value
                 assertNull(stateEvent.getValue());
             } else if (counter.get() == 1) {
+                assertTrue(StateEvent.isAccepted(eventJson));
                 assertEquals(name, stateEvent.getValue().getName());
+                assertEquals(name, signal.getValue().getName());
                 assertEquals(age, stateEvent.getValue().getAge());
+                assertEquals(age, signal.getValue().getAge());
                 assertEquals(adult, stateEvent.getValue().isAdult());
+                assertEquals(adult, signal.getValue().isAdult());
             }
             counter.incrementAndGet();
         });
@@ -110,7 +116,7 @@ public class ValueSignalTest {
     }
 
     @Test
-    public void submit_conditionIsMet_notifies_subscribers_with_snapshot_event() {
+    public void submit_conditionIsMet_notifies_subscribers_with_accepted_status_in_event() {
         var signal = new ValueSignal<>(2.0, Double.class);
         Flux<ObjectNode> flux = signal.subscribe();
 
@@ -123,12 +129,14 @@ public class ValueSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertEquals(2.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
                         .asText(), stateEvent.getId());
-                assertEquals(StateEvent.EventType.SNAPSHOT,
+                assertEquals(StateEvent.EventType.REPLACE,
                         stateEvent.getEventType());
-                assertEquals(3.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
+                assertEquals(3.0, signal.getValue(), 0.0);
             }
             counter.incrementAndGet();
         });
@@ -152,12 +160,14 @@ public class ValueSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertEquals(1.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
                         .asText(), stateEvent.getId());
-                assertEquals(StateEvent.EventType.REJECT,
+                assertEquals(StateEvent.EventType.REPLACE,
                         stateEvent.getEventType());
-                assertEquals(1.0, stateEvent.getValue(), 0.0);
+                assertFalse(StateEvent.isAccepted(eventJson));
+                assertEquals(1.0, signal.getValue(), 0.0);
             }
             counter.incrementAndGet();
         });

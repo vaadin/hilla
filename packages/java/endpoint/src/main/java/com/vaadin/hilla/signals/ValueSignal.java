@@ -53,10 +53,9 @@ public class ValueSignal<T> extends Signal<T> {
     }
 
     @Override
-    protected ObjectNode createStatusUpdateEvent(String eventId,
-            StateEvent.EventType eventType) {
-        var snapshot = new StateEvent<>(eventId, eventType, this.value);
-        return snapshot.toJson();
+    protected ObjectNode createSnapshotEvent() {
+        var snapshot = new StateEvent<>(getId().toString(), StateEvent.EventType.SNAPSHOT, this.value).toJson();
+        return StateEvent.setAccepted(snapshot, true);
     }
 
     /**

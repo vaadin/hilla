@@ -9,6 +9,7 @@ type CreateStateEventType<V, T extends string, C extends Record<string, unknown>
     id: string;
     type: T;
     value: V;
+    accepted: boolean;
   }> &
     Readonly<C>
 >;
@@ -19,11 +20,8 @@ type CreateStateEventType<V, T extends string, C extends Record<string, unknown>
  */
 export type SnapshotStateEvent<T> = CreateStateEventType<T, 'snapshot'>;
 
-export type RejectStateEvent = CreateStateEventType<never, 'reject'>;
-
 /**
- * A state event defines a new value of the signal shared with the server. The
- *
+ * A state event defines a new value of the signal shared with the server.
  */
 export type SetStateEvent<T> = CreateStateEventType<T, 'set'>;
 
@@ -32,6 +30,7 @@ export function createSetStateEvent<T>(value: T): SetStateEvent<T> {
     id: nanoid(),
     type: 'set',
     value,
+    accepted: false,
   };
 }
 
@@ -43,6 +42,7 @@ export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateE
     type: 'replace',
     value,
     expected,
+    accepted: false,
   };
 }
 
@@ -53,15 +53,11 @@ export function createIncrementStateEvent(delta: number): IncrementStateEvent {
     id: nanoid(),
     type: 'increment',
     value: delta,
+    accepted: false,
   };
 }
 
 /**
  * An object that describes the change of the signal state.
  */
-export type StateEvent<T> =
-  | IncrementStateEvent
-  | RejectStateEvent
-  | ReplaceStateEvent<T>
-  | SetStateEvent<T>
-  | SnapshotStateEvent<T>;
+export type StateEvent<T> = IncrementStateEvent | ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;

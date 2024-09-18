@@ -133,7 +133,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('baz');
     });
 
-    it('should send the correct event and update the value when receiving snapshot event after calling update', async () => {
+    it('should send the correct event and update the value when receiving accepted event after calling update', async () => {
       const valueSignal = new ValueSignal<string>('ba', config);
       render(<div>{valueSignal}</div>);
       await nextFrame();
@@ -150,7 +150,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'snapshot', value: 'bar' });
+      onNextCallback({ id: params?.event.id, type: 'replace', value: 'bar', accepted: true });
       expect(valueSignal.value).to.equal('bar');
     });
 
@@ -171,12 +171,12 @@ describe('@vaadin/hilla-react-signals', () => {
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
 
-      // Simulate a snapshot event representing a concurrent value change before the reject is received:
-      onNextCallback({ id: 'another-event-id', type: 'snapshot', value: 'b' });
+      // Simulate an accepted event representing a concurrent value change before the reject is received:
+      onNextCallback({ id: 'another-event-id', type: 'replace', value: 'b', expected: 'a', accepted: true });
       expect(valueSignal.value).to.equal('b');
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params1?.event.id, type: 'reject', value: 'dont care' });
+      onNextCallback({ id: params1?.event.id, type: 'replace', value: 'aa', expected: 'a', accepted: false });
       // verify that the value is not updated after receiving a reject event:
       expect(valueSignal.value).to.equal('b');
       // verify that receiving reject event triggers another update call:
@@ -185,32 +185,32 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: valueSignal.id,
         // @ts-expect-error params.event type has id property
-        event: { id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b' },
+        event: { id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b', accepted: false },
       });
 
       // Simulate another concurrent value change before the reject is received:
-      onNextCallback({ id: 'another-event-id', type: 'snapshot', value: 'c' });
+      onNextCallback({ id: 'another-event-id', type: 'replace', value: 'c', expected: 'b', accepted: true });
       expect(valueSignal.value).to.equal('c');
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params2?.event.id, type: 'reject' });
+      onNextCallback({ id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b', accepted: false });
       expect(client.call).to.have.been.calledThrice;
       const [, , params3] = client.call.thirdCall.args;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: valueSignal.id,
         // @ts-expect-error params.event type has id property
-        event: { id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c' },
+        event: { id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c', accepted: false },
       });
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params3?.event.id, type: 'reject', value: 'dont care' });
+      onNextCallback({ id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c', accepted: false });
       expect(client.call).to.have.been.callCount(4);
 
       setTimeout(() => updateOperation.cancel(), 500);
       expect(valueSignal.value).to.equal('c');
     });
 
-    it('should update the value when receive snapshot event following reject events after calling update', async () => {
+    it('should update the value when receive accepted event following rejected events after calling update', async () => {
       const valueSignal = new ValueSignal<string>('foo', config);
       expect(valueSignal.value).to.equal('foo');
       render(<div>{valueSignal}</div>);
@@ -222,17 +222,17 @@ describe('@vaadin/hilla-react-signals', () => {
       const [, , params1] = client.call.firstCall.args;
 
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params1?.event.id, type: 'reject', value: 'dont care' });
+      onNextCallback({ id: params1?.event.id, type: 'replace', value: 'dont care', accepted: false });
       expect(valueSignal.value).to.equal('foo');
 
       const [, , params2] = client.call.secondCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params2?.event.id, type: 'reject', value: 'dont care' });
+      onNextCallback({ id: params2?.event.id, type: 'replace', value: 'dont care', accepted: false });
       expect(valueSignal.value).to.equal('foo');
 
       const [, , params3] = client.call.thirdCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params3?.event.id, type: 'snapshot', value: 'foobar' });
+      onNextCallback({ id: params3?.event.id, type: 'replace', value: 'foobar', accepted: true });
       expect(valueSignal.value).to.equal('foobar');
     });
   });

@@ -20,7 +20,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
   function simulateReceivingSnapshot(eventId: string, value: number): void {
     const [onNextCallback] = subscription.onNext.firstCall.args;
-    onNextCallback({ id: eventId, type: 'snapshot', value });
+    onNextCallback({ id: eventId, type: 'snapshot', value, accepted: true });
   }
 
   beforeEach(() => {

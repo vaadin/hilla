@@ -60,9 +60,8 @@ public abstract class Signal<T> {
             LOGGER.debug("New Flux subscription...");
             lock.lock();
             try {
-                var currentValue = createStatusUpdateEvent(this.id.toString(),
-                        StateEvent.EventType.SNAPSHOT);
-                sink.tryEmitNext(currentValue);
+                var snapshot = createSnapshotEvent();
+                sink.tryEmitNext(snapshot);
                 subscribers.add(sink);
             } finally {
                 lock.unlock();
@@ -88,14 +87,11 @@ public abstract class Signal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            boolean success = processEvent(event);
+            boolean accepted = processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
-                var statusUpdate = createStatusUpdateEvent(
-                        event.get("id").asText(),
-                        success ? StateEvent.EventType.SNAPSHOT
-                                : StateEvent.EventType.REJECT);
-                boolean failure = sink.tryEmitNext(statusUpdate).isFailure();
+                var eventWithStatus = StateEvent.setAccepted(event, accepted);
+                boolean failure = sink.tryEmitNext(eventWithStatus).isFailure();
                 if (failure) {
                     LOGGER.debug("Failed push");
                 }
@@ -107,16 +103,11 @@ public abstract class Signal<T> {
     }
 
     /**
-     * Creates a new status update event for the signal.
+     * Creates a snapshot event reflecting the current state of the signal.
      *
-     * @param eventId
-     *            the event ID
-     * @param eventType
-     *            the event type
-     * @return the status update event
+     * @return the snapshot event
      */
-    protected abstract ObjectNode createStatusUpdateEvent(String eventId,
-            StateEvent.EventType eventType);
+    protected abstract ObjectNode createSnapshotEvent();
 
     /**
      * Processes the event and updates the signal value if needed. Note that

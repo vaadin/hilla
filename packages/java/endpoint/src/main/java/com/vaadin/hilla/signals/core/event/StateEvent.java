@@ -27,13 +27,14 @@ public class StateEvent<T> {
         public static final String TYPE = "type";
         public static final String VALUE = "value";
         public static final String EXPECTED = "expected";
+        public static final String ACCEPTED = "accepted";
     }
 
     /**
      * Possible types of state events.
      */
     public enum EventType {
-        SNAPSHOT, SET, REPLACE, REJECT, INCREMENT;
+        SNAPSHOT, SET, REPLACE, INCREMENT;
 
         public static EventType of(String type) {
             return EventType.valueOf(type.toUpperCase());
@@ -134,6 +135,14 @@ public class StateEvent<T> {
                     rawType.asText(), Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }
+    }
+
+    public static ObjectNode setAccepted(ObjectNode event, boolean accepted) {
+        return event.put(Field.ACCEPTED, accepted);
+    }
+
+    public static boolean isAccepted(ObjectNode event) {
+        return event.has(Field.ACCEPTED) && event.get(Field.ACCEPTED).asBoolean();
     }
 
     /**

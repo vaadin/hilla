@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ListStateEvent<T> {
@@ -67,6 +66,8 @@ public class ListStateEvent<T> {
 
     private final String id;
     private final EventType eventType;
+    private Boolean accepted;
+    // Only used for snapshot events:
     private final Collection<ListEntry<T>> entries;
     // Only used for insert events:
     private final InsertPosition insertPosition;
@@ -96,7 +97,7 @@ public class ListStateEvent<T> {
         this.eventType = extractEventType(json);
         this.entries = extractEntries(json, valueType, entryFactory);
         this.insertPosition = this.eventType == EventType.INSERT
-                ? extractDirection(json)
+                ? extractPosition(json)
                 : null;
     }
 
@@ -149,7 +150,7 @@ public class ListStateEvent<T> {
         return rawId == null ? null : UUID.fromString(rawId.asText());
     }
 
-    private static InsertPosition extractDirection(JsonNode json) {
+    private static InsertPosition extractPosition(JsonNode json) {
         var rawDirection = json.get(Field.POSITION);
         if (rawDirection == null) {
             var message = String.format(
@@ -194,11 +195,10 @@ public class ListStateEvent<T> {
             snapshotData.put(Field.POSITION,
                     insertPosition.name().toLowerCase());
         }
+        if (getAccepted() != null) {
+            snapshotData.put(StateEvent.Field.ACCEPTED, getAccepted());
+        }
         return snapshotData;
-    }
-
-    private static String toStringOrNull(UUID uuid) {
-        return Objects.toString(uuid, null);
     }
 
     public String getId() {
@@ -209,11 +209,19 @@ public class ListStateEvent<T> {
         return eventType;
     }
 
+    public Boolean getAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
+    }
+
     public Collection<ListEntry<T>> getEntries() {
         return entries;
     }
 
-    public InsertPosition getDirection() {
+    public InsertPosition getPosition() {
         return insertPosition;
     }
 }

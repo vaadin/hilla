@@ -80,18 +80,18 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       this.#pendingRequests.delete(event.id);
     }
 
-    if (event.type === 'snapshot') {
-      if (record) {
-        record.waiter.resolve();
-      }
-      this.value = event.value;
-    }
-
-    if (event.type === 'reject' && record) {
+    if (!event.accepted && record) {
       if (!record.canceled) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.update(record.callback);
       }
+    }
+
+    if (event.accepted) {
+      if (record) {
+        record.waiter.resolve();
+      }
+      this.value = event.value as T;
     }
   }
 }

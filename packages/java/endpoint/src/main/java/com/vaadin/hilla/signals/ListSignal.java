@@ -2,7 +2,6 @@ package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
-import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
 import jakarta.annotation.Nullable;
 
@@ -74,12 +73,11 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     @Override
-    protected ObjectNode createStatusUpdateEvent(String eventId,
-            StateEvent.EventType eventType) {
+    protected ObjectNode createSnapshotEvent() {
         var entries = this.entries.values().stream()
                 .map(entry -> (ListEntry<T>) entry).toList();
-        var listEventType = ListStateEvent.EventType.of(eventType.name());
-        var event = new ListStateEvent<>(eventId, listEventType, entries);
+        var listEventType = ListStateEvent.EventType.SNAPSHOT;
+        var event = new ListStateEvent<>(getId().toString(), listEventType, entries);
         return event.toJson();
     }
 
@@ -112,7 +110,7 @@ public class ListSignal<T> extends Signal<T> {
         if (entries.containsKey(toBeInserted.id())) {
             return false;
         }
-        switch (event.getDirection()) {
+        switch (event.getPosition()) {
         case FIRST -> throw new UnsupportedOperationException(
                 "Insert first is not supported");
         case BEFORE -> throw new UnsupportedOperationException(
