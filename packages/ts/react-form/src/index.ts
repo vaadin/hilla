@@ -104,7 +104,9 @@ function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknow
 function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
-    defaultValue: node.defaultValue,
+    get defaultValue() {
+      return node.defaultValue;
+    },
     dirty: node.dirty,
     errors: node.errors,
     invalid: node.invalid,
@@ -123,7 +125,9 @@ function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseForm
     },
     validate: node.validate.bind(node),
     validators: node.validators,
-    value: node.value,
+    get value() {
+      return node.value;
+    },
     visited: node.visited,
   };
 }
