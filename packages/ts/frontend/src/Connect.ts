@@ -47,8 +47,10 @@ export interface Subscription<T> {
   onDisconnect(callback: () => void): Subscription<T>;
 
   /**
-   * Defines what to do when the connection is lost and reconnected: can be either a boolean to
-   * trigger automatic resubscription or a callback to be called when reconnected.
+   * Called when the connection is restored, but there's no longer a valid subscription. If the callback returns
+   * `HandleSubscriptionLoss.RECONNECT`, the subscription will be re-established by connecting to the same
+   * server method again. If the callback returns `HandleSubscriptionLoss.REMOVE`, the subscription will be
+   * forgotten. This is also the default behavior if the callback is not set or if it returns `undefined`.
    */
   onSubscriptionLost(callback: () => HandleSubscriptionLoss | undefined): Subscription<T>;
 }
