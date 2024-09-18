@@ -226,12 +226,124 @@
         }
       }
     },
+    "/PersonService/personSignalWithParams" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personSignalWithParams_POST",
+        "requestBody" : {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dummyBoolean": {
+                    "type": "boolean",
+                    "x-java-type": "java.lang.Boolean"
+                  },
+                  "dummyString": {
+                    "type": "string",
+                    "x-java-type": "java.lang.String",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": true,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PersonService/personSignalNonNull" : {
       "post" : {
         "tags" : [
           "PersonService"
         ],
         "operationId" : "PersonService_personSignalNonNull_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": false,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/personSignalNonNullWithParams" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personSignalNonNullWithParams_POST",
+        "requestBody" : {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dummyBoolean": {
+                    "type": "boolean",
+                    "x-java-type": "java.lang.Boolean"
+                  },
+                  "dummyString": {
+                    "type": "string",
+                    "x-java-type": "java.lang.String",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses" : {
           "200" : {
             "description" : "",
