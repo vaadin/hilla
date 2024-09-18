@@ -593,7 +593,7 @@ describe('@vaadin/hilla-lit-form', () => {
           const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
 
           expect(currentStrategy instanceof GenericStringFieldStrategy).to.be.true;
-          expect(currentStrategy.value).to.be.rendered.equal('');
+          expect(currentStrategy.value).to.be.equal('');
           expect(currentStrategy.model).to.be.equal(model);
         });
       });
