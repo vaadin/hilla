@@ -382,7 +382,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       const { container } = render(<StreetAddressView />);
       const streetNameField = await waitFor(() => container.querySelector('input')!);
-      expect(streetNameField.value).to.have.rendered.eq('undefined');
+      expect(streetNameField).to.be.rendered.value('');
     });
   });
 
