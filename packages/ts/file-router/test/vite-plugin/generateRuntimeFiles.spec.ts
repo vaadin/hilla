@@ -1,5 +1,5 @@
 import { existsSync, watch } from 'node:fs';
-import { rm } from 'node:fs/promises';
+import { rm, mkdir, writeFile } from 'node:fs/promises';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
 import type { Logger } from 'vite';
@@ -22,6 +22,7 @@ describe('@vaadin/hilla-file-router', () => {
       runtimeUrls = {
         json: new URL('server/file-routes.json', tmp),
         code: new URL('generated/file-routes.ts', tmp),
+        layouts: new URL('generated/layouts.json', tmp),
       };
 
       await createTestingRouteFiles(viewsDir);
@@ -36,6 +37,10 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should generate the runtime files', async () => {
+      await mkdir(new URL('generated', tmp));
+      await writeFile(runtimeUrls.layouts, '[{"path": "/profile"}, {"path": "home"}]', 'utf-8');
+      expect(existsSync(runtimeUrls.layouts)).to.be.true;
+
       await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger, true);
       expect(existsSync(runtimeUrls.json)).to.be.true;
       expect(existsSync(runtimeUrls.code)).to.be.true;
