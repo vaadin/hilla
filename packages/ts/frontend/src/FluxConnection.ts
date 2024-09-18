@@ -27,17 +27,17 @@ type ListenerType<T extends keyof EventMap> =
     }
   | null;
 
+export enum HandleSubscriptionLoss {
+  RESUBSCRIBE = 'resubscribe',
+  REMOVE = 'remove',
+}
+
 type EndpointInfo = {
   endpointName: string;
   methodName: string;
   params: unknown[] | undefined;
-  reconnect?(): void;
+  reconnect?(): HandleSubscriptionLoss | undefined;
 };
-
-/**
- * A default handler for `onSubscriptionLost` that will resubscribe to the original server method.
- */
-export function resubscribe(): void {}
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
@@ -109,7 +109,7 @@ export class FluxConnection extends EventTarget {
         this.#onDisconnectCallbacks.set(id, callback);
         return hillaSubscription;
       },
-      onSubscriptionLost: (callback: () => void): Subscription<any> => {
+      onSubscriptionLost: (callback: () => HandleSubscriptionLoss | undefined): Subscription<any> => {
         if (this.#endpointInfos.has(id)) {
           this.#endpointInfos.get(id)!.reconnect = callback;
         } else {
@@ -165,22 +165,23 @@ export class FluxConnection extends EventTarget {
       },
       onReopen: () => {
         if (this.state !== State.ACTIVE) {
+          const toBeRemoved: string[] = [];
           this.#endpointInfos.forEach((endpointInfo, id) => {
-            if (endpointInfo.reconnect === undefined) {
-              // Do nothing
-            } else if (endpointInfo.reconnect === resubscribe) {
-              const msg: ServerConnectMessage = {
-                '@type': 'subscribe',
-                endpointName: endpointInfo.endpointName,
-                id,
-                methodName: endpointInfo.methodName,
-                params: endpointInfo.params,
-              };
-              this.#send(msg);
-            } else {
-              endpointInfo.reconnect();
+            switch (endpointInfo.reconnect?.()) {
+              case HandleSubscriptionLoss.RESUBSCRIBE:
+                this.#send({
+                  '@type': 'subscribe',
+                  endpointName: endpointInfo.endpointName,
+                  id,
+                  methodName: endpointInfo.methodName,
+                  params: endpointInfo.params,
+                });
+                break;
+              default:
+                toBeRemoved.push(id);
             }
           });
+          toBeRemoved.forEach((id) => this.#removeSubscription(id));
 
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));

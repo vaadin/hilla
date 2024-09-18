@@ -9,7 +9,7 @@ import {
   UnauthorizedResponseError,
   type ValidationErrorData,
 } from './EndpointErrors.js';
-import { FluxConnection } from './FluxConnection.js';
+import { FluxConnection, type HandleSubscriptionLoss } from './FluxConnection.js';
 import type { VaadinWindow } from './types.js';
 
 const $wnd = window as VaadinWindow;
@@ -50,7 +50,7 @@ export interface Subscription<T> {
    * Defines what to do when the connection is lost and reconnected: can be either a boolean to
    * trigger automatic resubscription or a callback to be called when reconnected.
    */
-  onSubscriptionLost(callback: () => void): Subscription<T>;
+  onSubscriptionLost(callback: () => HandleSubscriptionLoss | undefined): Subscription<T>;
 }
 
 interface ConnectExceptionData {
