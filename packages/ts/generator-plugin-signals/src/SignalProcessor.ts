@@ -47,11 +47,6 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
-          let genericReturnType;
-          if (genericSignals.includes(signalId.text)) {
-            genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
-          }
-          const returnType = genericReturnType ?? signalId;
           let initialValue: ts.Expression = signalId.text.startsWith('NumberSignal')
             ? ts.factory.createNumericLiteral('0')
             : ts.factory.createIdentifier('undefined');
@@ -60,20 +55,17 @@ export default class SignalProcessor {
           );
           // `filteredParams` can be altered after, need to store the param names now
           const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
-          // Searching for a non-nullable signal like ValueSignal<SomeType>
-          if (
-            ts.isUnionTypeNode(returnType) &&
-            returnType.types.length &&
-            ts.isTypeReferenceNode(returnType.types[0]) &&
-            returnType.types[0].typeArguments?.length === 1 &&
-            ts.isUnionTypeNode(returnType.types[0].typeArguments[0]) &&
-            returnType.types[0].typeArguments[0].types.length === 1
-          ) {
-            const requiredDefaultType = returnType.types[0].typeArguments[0].types[0];
-            const { alias, param } = SignalProcessor.#createDefaultValueParameter(requiredDefaultType);
-            initialValue = alias;
-            filteredParams.splice(-1, 0, param);
+          let genericReturnType;
+          if (genericSignals.includes(signalId.text)) {
+            genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
+            const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
+            if (defaultValueType) {
+              const { alias, param } = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+              initialValue = alias;
+              filteredParams.push(param);
+            }
           }
+          const returnType = genericReturnType ?? signalId;
           if (filteredParams.length > 0) {
             functionParams.set(tsNode.name.text, filteredParams);
           }
@@ -139,18 +131,27 @@ export default class SignalProcessor {
     );
   }
 
-  static #createDefaultValueParameter(requiredDefaultType: ts.TypeNode) {
+  static #getDefaultValueType(node: ts.Node) {
+    if (
+      ts.isUnionTypeNode(node) &&
+      node.types.length &&
+      ts.isTypeReferenceNode(node.types[0]) &&
+      node.types[0].typeArguments?.length === 1 &&
+      ts.isUnionTypeNode(node.types[0].typeArguments[0])
+    ) {
+      return node.types[0].typeArguments[0];
+    }
+
+    return undefined;
+  }
+
+  static #createDefaultValueParameter(returnType: ts.TypeNode) {
     const alias = createFullyUniqueIdentifier('defaultValue');
     const bindingPattern = ts.factory.createObjectBindingPattern([
       ts.factory.createBindingElement(undefined, ts.factory.createIdentifier('defaultValue'), alias, undefined),
     ]);
     const paramType = ts.factory.createTypeLiteralNode([
-      ts.factory.createPropertySignature(
-        undefined,
-        ts.factory.createIdentifier('defaultValue'),
-        undefined,
-        requiredDefaultType,
-      ),
+      ts.factory.createPropertySignature(undefined, ts.factory.createIdentifier('defaultValue'), undefined, returnType),
     ]);
     // Return both the alias and the full parameter
     return {
