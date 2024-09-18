@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
+import applyLayouts from './applyLayouts.js';
 import collectRoutesFromFS from './collectRoutesFromFS.js';
 import createRoutesFromMeta from './createRoutesFromMeta.js';
 import createViewConfigJson from './createViewConfigJson.js';
@@ -18,6 +19,10 @@ export type RuntimeFileUrls = Readonly<{
    * The URL of the module with the routes tree in a framework-agnostic format.
    */
   code: URL;
+  /**
+   * The URL of the JSON file containing server layout path information.
+   */
+  layouts: URL;
 }>;
 
 /**
@@ -59,10 +64,11 @@ export async function generateRuntimeFiles(
   logger: Logger,
   debug: boolean,
 ): Promise<void> {
-  const routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
+  let routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
   if (debug) {
     logger.info('Collected file-based routes');
   }
+  routeMeta = await applyLayouts(routeMeta, urls.layouts);
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
 
