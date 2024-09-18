@@ -17,6 +17,7 @@ import {
   type Project,
   TeamModel,
   type Player,
+  PostalAddressModel,
 } from './models.js';
 
 use(sinonChai);
@@ -369,6 +370,19 @@ describe('@vaadin/hilla-react-form', () => {
       fireEvent.change(projectInput);
       const count = await findByTestId('count');
       expect(count).to.have.text('1');
+    });
+
+    it('should work with optional hierarchy with optional values', async () => {
+      function StreetAddressView() {
+        const { model, field } = useForm(PostalAddressModel);
+        useFormPart(model.streetAddress.name);
+
+        return <input data-testid="street-name" {...field(model.streetAddress.name)} />;
+      }
+
+      const { container } = render(<StreetAddressView />);
+      const streetNameField = await waitFor(() => container.querySelector('input')!);
+      expect(streetNameField.value).to.equal('');
     });
   });
 
