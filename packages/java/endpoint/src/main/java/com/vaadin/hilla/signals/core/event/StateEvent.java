@@ -142,7 +142,8 @@ public class StateEvent<T> {
     }
 
     public static boolean isAccepted(ObjectNode event) {
-        return event.has(Field.ACCEPTED) && event.get(Field.ACCEPTED).asBoolean();
+        return event.has(Field.ACCEPTED)
+                && event.get(Field.ACCEPTED).asBoolean();
     }
 
     /**

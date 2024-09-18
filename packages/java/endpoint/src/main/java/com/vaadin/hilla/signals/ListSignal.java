@@ -77,7 +77,8 @@ public class ListSignal<T> extends Signal<T> {
         var entries = this.entries.values().stream()
                 .map(entry -> (ListEntry<T>) entry).toList();
         var listEventType = ListStateEvent.EventType.SNAPSHOT;
-        var event = new ListStateEvent<>(getId().toString(), listEventType, entries);
+        var event = new ListStateEvent<>(getId().toString(), listEventType,
+                entries);
         return event.toJson();
     }
 
