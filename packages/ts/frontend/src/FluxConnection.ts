@@ -27,8 +27,17 @@ type ListenerType<T extends keyof EventMap> =
     }
   | null;
 
-export enum HandleSubscriptionLoss {
+/**
+ * Possible options for dealing with lost subscriptions after a websocket is reopened.
+ */
+export enum ActionOnLostSubscription {
+  /**
+   * The subscription should be resubscribed using the same server method and parameters.
+   */
   RESUBSCRIBE = 'resubscribe',
+  /**
+   * The subscription should be removed.
+   */
   REMOVE = 'remove',
 }
 
@@ -36,7 +45,7 @@ type EndpointInfo = {
   endpointName: string;
   methodName: string;
   params: unknown[] | undefined;
-  reconnect?(): HandleSubscriptionLoss | undefined;
+  reconnect?(): ActionOnLostSubscription | void;
 };
 
 /**
@@ -109,7 +118,7 @@ export class FluxConnection extends EventTarget {
         this.#onDisconnectCallbacks.set(id, callback);
         return hillaSubscription;
       },
-      onSubscriptionLost: (callback: () => HandleSubscriptionLoss | undefined): Subscription<any> => {
+      onSubscriptionLost: (callback: () => ActionOnLostSubscription | void): Subscription<any> => {
         if (this.#endpointInfos.has(id)) {
           this.#endpointInfos.get(id)!.reconnect = callback;
         } else {
@@ -168,7 +177,7 @@ export class FluxConnection extends EventTarget {
           const toBeRemoved: string[] = [];
           this.#endpointInfos.forEach((endpointInfo, id) => {
             switch (endpointInfo.reconnect?.()) {
-              case HandleSubscriptionLoss.RESUBSCRIBE:
+              case ActionOnLostSubscription.RESUBSCRIBE:
                 this.#send({
                   '@type': 'subscribe',
                   endpointName: endpointInfo.endpointName,

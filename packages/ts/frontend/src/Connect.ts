@@ -9,7 +9,7 @@ import {
   UnauthorizedResponseError,
   type ValidationErrorData,
 } from './EndpointErrors.js';
-import { FluxConnection, type HandleSubscriptionLoss } from './FluxConnection.js';
+import { type ActionOnLostSubscription, FluxConnection } from './FluxConnection.js';
 import type { VaadinWindow } from './types.js';
 
 const $wnd = window as VaadinWindow;
@@ -52,7 +52,7 @@ export interface Subscription<T> {
    * server method again. If the callback returns `HandleSubscriptionLoss.REMOVE`, the subscription will be
    * forgotten. This is also the default behavior if the callback is not set or if it returns `undefined`.
    */
-  onSubscriptionLost(callback: () => HandleSubscriptionLoss | void): Subscription<T>;
+  onSubscriptionLost(callback: () => ActionOnLostSubscription | void): Subscription<T>;
 }
 
 interface ConnectExceptionData {

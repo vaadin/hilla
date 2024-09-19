@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
 import sinon from 'sinon';
-import { FluxConnection, HandleSubscriptionLoss, State } from '../src/FluxConnection.js';
+import { ActionOnLostSubscription, FluxConnection, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
   ClientCompleteMessage,
@@ -379,7 +379,7 @@ describe('@vaadin/hilla-frontend', () => {
     it('should resubscribe on reopen when callback returns RESUBSCRIBE', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod', [2, 'a']);
       const resubscribe = sinon.stub();
-      resubscribe.returns(HandleSubscriptionLoss.RESUBSCRIBE);
+      resubscribe.returns(ActionOnLostSubscription.RESUBSCRIBE);
       sub.onSubscriptionLost(resubscribe);
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
@@ -398,7 +398,7 @@ describe('@vaadin/hilla-frontend', () => {
     it('should remove subscription information when callback returns REMOVE', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod', [2, 'a']);
       const resubscribe = sinon.stub();
-      resubscribe.returns(HandleSubscriptionLoss.REMOVE);
+      resubscribe.returns(ActionOnLostSubscription.REMOVE);
       sub.onSubscriptionLost(resubscribe);
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
@@ -407,7 +407,7 @@ describe('@vaadin/hilla-frontend', () => {
       expect(resubscribe).to.have.been.calledOnce;
     });
 
-    it('should remove subscription information when callback returns void', () => {
+    it('should remove subscription information when callback has no return value', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod', [2, 'a']);
       const resubscribe = sinon.stub();
       sub.onSubscriptionLost(resubscribe);
