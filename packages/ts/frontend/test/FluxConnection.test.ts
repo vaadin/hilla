@@ -407,10 +407,9 @@ describe('@vaadin/hilla-frontend', () => {
       expect(resubscribe).to.have.been.calledOnce;
     });
 
-    it('should remove subscription information when callback returns undefined', () => {
+    it('should remove subscription information when callback returns void', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod', [2, 'a']);
       const resubscribe = sinon.stub();
-      resubscribe.returns(undefined);
       sub.onSubscriptionLost(resubscribe);
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();

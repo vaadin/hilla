@@ -52,7 +52,7 @@ export interface Subscription<T> {
    * server method again. If the callback returns `HandleSubscriptionLoss.REMOVE`, the subscription will be
    * forgotten. This is also the default behavior if the callback is not set or if it returns `undefined`.
    */
-  onSubscriptionLost(callback: () => HandleSubscriptionLoss | undefined): Subscription<T>;
+  onSubscriptionLost(callback: () => HandleSubscriptionLoss | void): Subscription<T>;
 }
 
 interface ConnectExceptionData {
