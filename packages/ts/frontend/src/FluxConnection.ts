@@ -176,18 +176,16 @@ export class FluxConnection extends EventTarget {
         if (this.state !== State.ACTIVE) {
           const toBeRemoved: string[] = [];
           this.#endpointInfos.forEach((endpointInfo, id) => {
-            switch (endpointInfo.reconnect?.()) {
-              case ActionOnLostSubscription.RESUBSCRIBE:
-                this.#send({
-                  '@type': 'subscribe',
-                  endpointName: endpointInfo.endpointName,
-                  id,
-                  methodName: endpointInfo.methodName,
-                  params: endpointInfo.params,
-                });
-                break;
-              default:
-                toBeRemoved.push(id);
+            if (endpointInfo.reconnect?.() === ActionOnLostSubscription.RESUBSCRIBE) {
+              this.#send({
+                '@type': 'subscribe',
+                endpointName: endpointInfo.endpointName,
+                id,
+                methodName: endpointInfo.methodName,
+                params: endpointInfo.params,
+              });
+            } else {
+              toBeRemoved.push(id);
             }
           });
           toBeRemoved.forEach((id) => this.#removeSubscription(id));
