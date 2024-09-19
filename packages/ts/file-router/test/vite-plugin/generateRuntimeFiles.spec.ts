@@ -38,7 +38,11 @@ describe('@vaadin/hilla-file-router', () => {
 
     it('should generate the runtime files', async () => {
       await mkdir(new URL('generated', tmp));
-      await writeFile(runtimeUrls.layouts, '[{"path": "/profile"}, {"path": "home"}]', 'utf-8');
+      await writeFile(
+        runtimeUrls.layouts,
+        '[{"path": "/really/long/path/for/layout"}, {"path": "/profile"}, {"path": "home"}, {"path": "/"}]',
+        'utf-8',
+      );
       expect(existsSync(runtimeUrls.layouts)).to.be.true;
 
       await generateRuntimeFiles(viewsDir, runtimeUrls, ['.tsx', '.jsx'], logger, true);
