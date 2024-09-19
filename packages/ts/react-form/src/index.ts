@@ -26,9 +26,16 @@ import type { Writable } from 'type-fest';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 __REGISTER__();
 
+let isRendering = false;
+
 function useUpdate() {
-  const [_, update] = useReducer((x: number) => x + 1, 0);
-  return update;
+  const [_, count] = useReducer((x: number) => x + 1, 0);
+  return () => {
+    if (isRendering) {
+      return;
+    }
+    count();
+  };
 }
 
 export type FieldDirectiveResult = Readonly<{
@@ -97,7 +104,9 @@ function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknow
 function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
-    defaultValue: node.defaultValue,
+    get defaultValue() {
+      return node.defaultValue;
+    },
     dirty: node.dirty,
     errors: node.errors,
     invalid: node.invalid,
@@ -116,7 +125,9 @@ function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseForm
     },
     validate: node.validate.bind(node),
     validators: node.validators,
-    value: node.value,
+    get value() {
+      return node.value;
+    },
     visited: node.visited,
   };
 }
@@ -128,6 +139,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
     const registry = new WeakMap<AbstractModel, FieldState>();
 
     return ((model: AbstractModel) => {
+      isRendering = true;
       const n = getBinderNode(model);
 
       let fieldState = registry.get(model);
@@ -211,6 +223,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
         fieldState.strategy.invalid = n.invalid;
       }
 
+      isRendering = false;
       return {
         name: n.name,
         ref: fieldState.ref,
@@ -257,8 +270,10 @@ export function useForm<M extends AbstractModel>(
 }
 
 export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
+  isRendering = true;
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
+  isRendering = false;
 
   return {
     ...getFormPart(binderNode),
@@ -274,7 +289,9 @@ export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResul
  * @returns The array model part of the form
  */
 export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
+  isRendering = true;
   const binderNode = getBinderNode(model);
+  isRendering = false;
   return {
     ...getFormPart(binderNode),
     items: Array.from(model, (item) => item.model as ArrayItemModel<M>),

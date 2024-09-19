@@ -122,6 +122,10 @@ module.exports = (config) => {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox', '--disable-setuid-sandbox'],
       },
+      ChromeNoSS: {
+        base: 'Chrome',
+        flags: ['-disable-search-engine-choice-screen'],
+      },
     },
 
     frameworks: ['mocha', 'vite', 'viewport'],

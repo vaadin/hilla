@@ -1,5 +1,6 @@
 package com.vaadin.hilla.signals.core.registry;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
@@ -33,7 +34,7 @@ public class SecureSignalsRegistry {
     }
 
     public synchronized void register(String clientSignalId,
-            String endpointName, String methodName)
+            String endpointName, String methodName, ObjectNode body)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException,
             EndpointInvocationException.EndpointBadRequestException,
@@ -45,7 +46,7 @@ public class SecureSignalsRegistry {
         checkAccess(endpointName, methodName, principal, isInRole);
 
         ValueSignal<?> signal = (ValueSignal<?>) invoker.invoke(endpointName,
-                methodName, null, principal, isInRole);
+                methodName, body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
         delegate.register(clientSignalId, signal);

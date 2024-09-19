@@ -66,7 +66,7 @@ export class RouterConfigurationBuilder {
   withFileRoutes(routes: readonly AgnosticRoute[]): this {
     return this.update(routes, (original, added, children) => {
       if (added) {
-        const { module, path } = added;
+        const { module, path, flowLayout } = added;
         if (!isReactRouteModule(module)) {
           throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
         }
@@ -75,6 +75,7 @@ export class RouterConfigurationBuilder {
         const handle = {
           ...module?.config,
           title: module?.config?.title ?? convertComponentNameToTitle(module?.default),
+          flowLayout: module?.config?.flowLayout ?? flowLayout,
         };
 
         if (path === '' && !children) {
@@ -109,6 +110,8 @@ export class RouterConfigurationBuilder {
    * each fallback component.
    */
   withFallback(component: ComponentType, config?: ViewConfig): this {
+    this.withLayout(component);
+
     // Fallback adds two routes, so that the index (empty path) has a fallback too
     const fallbackRoutes: readonly RouteObject[] = [
       { path: '*', element: createElement(component), handle: config },
@@ -116,7 +119,8 @@ export class RouterConfigurationBuilder {
     ];
 
     this.update(fallbackRoutes, (original, added, children) => {
-      if (original) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (original && !original.handle?.ignoreFallback) {
         if (!children) {
           return original;
         }
@@ -150,33 +154,36 @@ export class RouterConfigurationBuilder {
    */
   withLayout(layoutComponent: ComponentType): this {
     function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
-      const nestedRoutes = routes.map((route) => {
-        if (route.children === undefined) {
-          return route;
-        }
-
-        return {
-          ...route,
-          children: applyLayouts(route.children),
-        } as RouteObject;
-      });
+      if (routes.length === 0) {
+        return routes;
+      }
+      const nestedRoutes = routes.map((route) => route);
       return [
         {
           element: createElement(layoutComponent),
           children: nestedRoutes,
+          handle: {
+            ignoreFallback: true,
+          },
         },
       ];
+    }
+
+    function checkFlowLayout(route: RouteObject): boolean {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      let flowLayout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
+      // Check children if they have layout. If yes then parent should have layout also.
+      if (!flowLayout && route.children) {
+        flowLayout = route.children.filter((child) => checkFlowLayout(child)).length > 0;
+      }
+      return flowLayout;
     }
 
     this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
       if (!routes) {
         return routes;
       }
-      const withLayout = routes.filter((route) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const layout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
-        return layout;
-      });
+      const withLayout = routes.filter((route) => checkFlowLayout(route));
       const allRoutes = routes.filter((route) => !withLayout.includes(route));
       const catchAll = [routes.find((route) => route.path === '*')].filter((route) => route !== undefined);
       withLayout.push(...catchAll); // Add * fallback to all child routes

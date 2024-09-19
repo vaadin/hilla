@@ -96,6 +96,23 @@ public class NumberSignalTest {
         assertTrue(exception.getMessage().startsWith("Unsupported JSON: "));
     }
 
+    @Test
+    public void submit_eventWithIncrementCommand_incrementsValue() {
+        NumberSignal signal = new NumberSignal(42.0);
+
+        signal.submit(createIncrementEvent("2"));
+        assertEquals(44.0, signal.getValue(), 0.0);
+
+        signal.submit(createIncrementEvent("-5.5"));
+        assertEquals(38.5, signal.getValue(), 0.0);
+    }
+
+    private ObjectNode createIncrementEvent(String value) {
+        var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
+                StateEvent.EventType.INCREMENT, Double.parseDouble(value));
+        return setEvent.toJson();
+    }
+
     private ObjectNode createSetEvent(String value) {
         var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
                 StateEvent.EventType.SET, Double.parseDouble(value));

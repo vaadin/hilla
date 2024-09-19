@@ -83,19 +83,6 @@ describe('RouterBuilder', () => {
   });
 
   it('should add layout routes under layout component', () => {
-    const serverWildcard = {
-      path: '*',
-      element: <Server />,
-      handle: { title: 'Server' },
-    };
-    const serverIndex = {
-      index: true,
-      element: <Server />,
-      handle: { title: 'Server' },
-    };
-
-    const serverRoutes = [serverWildcard, serverIndex];
-
     const { routes } = builder
       .withReactRoutes([
         {
@@ -131,12 +118,105 @@ describe('RouterBuilder', () => {
           {
             children: [
               {
-                children: [
-                  {
-                    path: '/child',
-                  },
-                ],
-                element: createElement(Server),
+                path: '/child',
+              },
+            ],
+            path: '/test',
+            handle: {
+              flowLayout: true,
+            },
+          },
+        ],
+        element: createElement(Server),
+      },
+      {
+        children: [
+          {
+            path: '/test',
+            element: <div>Test</div>,
+          },
+        ],
+        path: '',
+      },
+    ]);
+  });
+
+  it('empty flowLayout array should not generate element', () => {
+    const { routes } = new RouterConfigurationBuilder()
+      .withReactRoutes([
+        {
+          path: '',
+        },
+      ])
+      .withLayout(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        path: '',
+      },
+    ]);
+  });
+
+  it('should add layout routes for nested folder layout component', () => {
+    const { routes } = builder
+      .withReactRoutes([
+        {
+          path: 'nest',
+          children: [
+            {
+              path: '',
+              handle: {
+                flowLayout: true,
+              },
+            },
+            {
+              path: '/nested',
+              handle: {
+                flowLayout: true,
+              },
+            },
+          ],
+        },
+        {
+          path: '/test',
+          handle: {
+            flowLayout: true,
+          },
+          children: [
+            {
+              path: '/child',
+            },
+          ],
+        },
+      ])
+      .withLayout(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        children: [
+          {
+            children: [
+              {
+                path: '',
+                handle: {
+                  flowLayout: true,
+                },
+              },
+              {
+                path: '/nested',
+                handle: {
+                  flowLayout: true,
+                },
+              },
+            ],
+            path: 'nest',
+          },
+          {
+            children: [
+              {
+                path: '/child',
               },
             ],
             path: '/test',
