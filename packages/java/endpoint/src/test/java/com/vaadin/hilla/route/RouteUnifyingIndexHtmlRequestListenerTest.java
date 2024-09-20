@@ -206,8 +206,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -260,8 +259,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -316,8 +314,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
 
     }
@@ -362,8 +359,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -492,8 +488,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -616,8 +611,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
