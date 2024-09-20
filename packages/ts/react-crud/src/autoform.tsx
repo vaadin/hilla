@@ -379,6 +379,9 @@ export function AutoForm<M extends AbstractModel>({
   }
 
   const handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.target instanceof HTMLTextAreaElement) {
+      return;
+    }
     if (event.key === 'Enter' && !isSubmitDisabled) {
       // eslint-disable-next-line no-void
       void handleSubmit();

@@ -3,6 +3,7 @@ import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
 import { _fromString, type AbstractModel, ArrayModel, BooleanModel, hasFromString, ObjectModel } from './Models.js';
+import { StringModel } from './Models.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -203,6 +204,16 @@ export class GenericFieldStrategy<T = any, E extends FieldElement<T> = FieldElem
   }
 }
 
+export class GenericStringFieldStrategy extends GenericFieldStrategy<string> {
+  override get value(): string | undefined {
+    return super.value;
+  }
+
+  override set value(val: string | undefined) {
+    super.value = val ?? '';
+  }
+}
+
 type CheckedFieldElement<T> = FieldElement<T> & {
   checked: boolean;
 };
@@ -325,8 +336,14 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
       if (elm.localName === 'input' && /^(checkbox|radio)$/u.test((elm as unknown as HTMLInputElement).type)) {
         return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
       }
-      return (elm.constructor as unknown as MaybeVaadinElementConstructor).version
-        ? new VaadinFieldStrategy(elm, model)
+      if ((elm.constructor as unknown as MaybeVaadinElementConstructor).version) {
+        return new VaadinFieldStrategy(elm, model);
+      }
+      return model instanceof StringModel
+        ? (new GenericStringFieldStrategy(
+            elm as FieldElement<string>,
+            model as AbstractModel<string>,
+          ) as AbstractFieldStrategy<T>)
         : new GenericFieldStrategy(elm, model);
   }
 }

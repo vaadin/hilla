@@ -19,6 +19,7 @@ describe('@vaadin/hilla-file-router', () => {
       runtimeUrls = {
         json: new URL('server/file-routes.json', dir),
         code: new URL('generated/file-routes.ts', dir),
+        layouts: new URL('generated/layouts.json', dir),
       };
     });
 
@@ -41,30 +42,30 @@ import * as Page12 from "../views/test/issue-002378/{requiredParam}/edit.js";
 import * as Layout15 from "../views/test/issue-002571-empty-layout/@layout.js";
 import * as Page16 from "../views/test/issue-002879-config-below.js";
 const routes: readonly AgnosticRoute[] = [
-    createRoute("nameToReplace", Page0),
-    createRoute("profile", [
-        createRoute("", Page1),
-        createRoute("account", Layout5, [
-            createRoute("security", [
-                createRoute("password", Page2),
-                createRoute("two-factor-auth", Page3)
+    createRoute("nameToReplace", false, Page0),
+    createRoute("profile", false, [
+        createRoute("", false, Page1),
+        createRoute("account", false, Layout5, [
+            createRoute("security", false, [
+                createRoute("password", false, Page2),
+                createRoute("two-factor-auth", false, Page3)
             ])
         ]),
-        createRoute("friends", Layout8, [
-            createRoute("list", Page6),
-            createRoute(":user", Page7)
+        createRoute("friends", false, Layout8, [
+            createRoute("list", false, Page6),
+            createRoute(":user", false, Page7)
         ])
     ]),
-    createRoute("test", [
-        createRoute(":optional?", Page10),
-        createRoute("*", Page11),
-        createRoute("issue-002378", [
-            createRoute(":requiredParam", [
-                createRoute("edit", Page12)
+    createRoute("test", false, [
+        createRoute(":optional?", false, Page10),
+        createRoute("*", false, Page11),
+        createRoute("issue-002378", false, [
+            createRoute(":requiredParam", false, [
+                createRoute("edit", false, Page12)
             ])
         ]),
-        createRoute("issue-002571-empty-layout", Layout15, []),
-        createRoute("issue-002879-config-below", Page16)
+        createRoute("issue-002571-empty-layout", false, Layout15, []),
+        createRoute("issue-002879-config-below", false, Page16)
     ])
 ];
 export default routes;

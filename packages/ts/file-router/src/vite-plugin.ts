@@ -81,6 +81,7 @@ export default function vitePluginFileSystemRouter({
       runtimeUrls = {
         json: new URL('file-routes.json', isDevMode ? _generatedDir : _outDir),
         code: new URL('file-routes.ts', _generatedDir),
+        layouts: new URL('layouts.json', _generatedDir),
       };
     },
     async buildStart() {
