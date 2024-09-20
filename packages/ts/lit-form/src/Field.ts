@@ -235,6 +235,19 @@ export class CheckedFieldStrategy<
   }
 }
 
+export class CheckedGroupFieldStrategy<
+  T = any,
+  E extends FieldElement<T> = FieldElement<T>,
+> extends GenericFieldStrategy<T, E> {
+  override get value(): T | undefined {
+    return super.value;
+  }
+
+  override set value(val: T | undefined) {
+    super.value = val ?? ([] as T);
+  }
+}
+
 type ComboBoxFieldElement<T> = FieldElement<T> & {
   value: string;
   selectedItem: T | null;
@@ -319,6 +332,8 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
       return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
+    case 'vaadin-checkbox-group':
+      return new CheckedGroupFieldStrategy(elm, model);
     case 'vaadin-combo-box':
       return new ComboBoxFieldStrategy(elm as ComboBoxFieldElement<T>, model);
     case 'vaadin-list-box':

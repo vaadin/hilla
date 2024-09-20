@@ -23,6 +23,7 @@ import {
   Required,
   SelectedFieldStrategy,
   VaadinFieldStrategy,
+  CheckedGroupFieldStrategy,
 } from '../src/index.js';
 import { OrderModel, TestModel } from './TestModels.js';
 
@@ -674,6 +675,43 @@ describe('@vaadin/hilla-lit-form', () => {
           expect(currentStrategy.model).to.be.equal(model);
 
           expect(element.checked).to.be.true;
+
+          await binderNode.validate();
+          element = renderElement();
+          expect(element.hasAttribute('invalid')).to.be.true;
+          expect(element.hasAttribute('errorMessage')).to.be.false;
+        });
+      });
+
+      [{ tag: 'vaadin-checkbox-group' }].forEach(({ tag }) => {
+        it(`CheckedGroupFieldStrategy ${tag} `, async () => {
+          const tagName = unsafeStatic(tag);
+
+          const model = binder.model.fieldArrayString;
+          const binderNode = binder.for(model);
+
+          let element;
+          const renderElement = () => {
+            render(
+              html`
+                  <${tagName} ${field(model)}></${tagName}>`,
+              div,
+            );
+            return div.firstElementChild as Element & { checked?: boolean };
+          };
+
+          binderNode.value = ['0', '1'];
+          await resetBinderNodeValidation(binderNode);
+
+          binderNode.validators = [{ message: 'any-err-msg', validate: () => false }];
+
+          element = renderElement();
+
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
+          expect(currentStrategy instanceof CheckedGroupFieldStrategy).to.be.true;
+          expect(currentStrategy.value).to.be.deep.equal(['0', '1']);
+          expect(currentStrategy.model).to.be.equal(model);
 
           await binderNode.validate();
           element = renderElement();
