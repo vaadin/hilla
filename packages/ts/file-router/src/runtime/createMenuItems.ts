@@ -39,3 +39,19 @@ export function createMenuItems(): readonly MenuItem[] {
       })
   );
 }
+
+// @ts-expect-error Vite hotswapping
+if (import.meta.hot) {
+  // @ts-expect-error Vite hotswapping
+  // eslint-disable-next-line
+  import.meta.hot.on('fs-route-update', () => {
+    fetch('?v-r=routeinfo')
+      .then(async (resp) => resp.json())
+      .then((json) => {
+        viewsSignal.value = json;
+      })
+      .catch((e) => {
+        console.error('Failed to fetch route info', e);
+      });
+  });
+}
