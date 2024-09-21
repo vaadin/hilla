@@ -1,7 +1,8 @@
+import './vaadinGlobals.js'; // eslint-disable-line import/no-unassigned-import
 import { expect, use } from '@esm-bundle/chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
-import { createMenuItems } from '../../src/runtime/createMenuItems.js';
+import { createMenuItems, viewsSignal } from '../../src/runtime/createMenuItems.js';
 import type { MenuItem } from '../../src/types.js';
 
 use(chaiLike);
@@ -25,17 +26,16 @@ function cleanup(items: Array<Writable<MenuItem>>) {
 describe('@vaadin/hilla-file-router', () => {
   describe('createMenuItems', () => {
     it('should generate a set of menu items', () => {
-      const items = createMenuItems({
-        views: {
-          '/about': { route: 'about', title: 'About' },
-          '/profile/': { title: 'Profile' },
-          '/profile/account/security/password': { title: 'Password' },
-          '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
-          '/profile/friends/list': { title: 'List' },
-          '/test/empty': {},
-          '/test/no-default-export': { title: 'No Default Export' },
-        },
-      });
+      viewsSignal.value = {
+        '/about': { route: 'about', title: 'About' },
+        '/profile/': { title: 'Profile' },
+        '/profile/account/security/password': { title: 'Password' },
+        '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth' },
+        '/profile/friends/list': { title: 'List' },
+        '/test/empty': {},
+        '/test/no-default-export': { title: 'No Default Export' },
+      };
+      const items = createMenuItems();
       cleanup(items as Array<Writable<MenuItem>>);
 
       const expected = [
@@ -73,18 +73,17 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should sort menu items by order then by natural string comparison based on path', () => {
-      const items = createMenuItems({
-        views: {
-          '/a/b': { route: 'about', title: 'About' },
-          '': { title: 'Profile' },
-          '/profile/account/security/password': { title: 'Password', menu: { order: 20 } },
-          '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth', menu: { order: 20 } },
-          '/b': { title: 'List' },
-          '/': { title: 'Root' },
-          '/test/empty': { title: 'empty', menu: { order: 5 } },
-          '/test/no-default-export': { title: 'No Default Export', menu: { order: 10 } },
-        },
-      });
+      viewsSignal.value = {
+        '/a/b': { route: 'about', title: 'About' },
+        '': { title: 'Profile' },
+        '/profile/account/security/password': { title: 'Password', menu: { order: 20 } },
+        '/profile/account/security/two-factor-auth': { title: 'Two Factor Auth', menu: { order: 20 } },
+        '/b': { title: 'List' },
+        '/': { title: 'Root' },
+        '/test/empty': { title: 'empty', menu: { order: 5 } },
+        '/test/no-default-export': { title: 'No Default Export', menu: { order: 10 } },
+      };
+      const items = createMenuItems();
       const cleanedUp = (items as Array<Writable<MenuItem>>).map((item) => ({
         to: item.to,
         title: item.title,
