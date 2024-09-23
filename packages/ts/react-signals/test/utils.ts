@@ -29,6 +29,9 @@ export function createSubscriptionStub<T>(): sinon.SinonStubbedInstance<Subscrip
     onDisconnect() {
       return this;
     },
+    onSubscriptionLost() {
+      return this;
+    },
   });
 }
 
