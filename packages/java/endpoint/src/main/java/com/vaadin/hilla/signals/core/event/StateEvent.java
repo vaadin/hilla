@@ -90,20 +90,20 @@ public class StateEvent<T> {
     public StateEvent(ObjectNode json, Class<T> valueType) {
         this.id = extractId(json);
         this.eventType = extractEventType(json);
-        this.value = convertValue(extractValue(json), valueType);
+        this.value = convertValue(extractValue(json, true), valueType);
 
         JsonNode expected = json.get(Field.EXPECTED);
         this.expected = convertValue(expected, valueType);
     }
 
-    static <X> X convertValue(JsonNode rawValue, Class<X> valueType) {
+    public static <X> X convertValue(JsonNode rawValue, Class<X> valueType) {
         if (rawValue == null) {
             return null;
         }
         return MAPPER.convertValue(rawValue, valueType);
     }
 
-    static String extractId(JsonNode json) {
+    public static String extractId(JsonNode json) {
         var id = json.get(Field.ID);
         if (id == null) {
             throw new MissingFieldException(Field.ID);
@@ -111,10 +111,13 @@ public class StateEvent<T> {
         return id.asText();
     }
 
-    static JsonNode extractValue(JsonNode json) {
+    public static JsonNode extractValue(JsonNode json, boolean required) {
         var value = json.get(Field.VALUE);
         if (value == null) {
-            throw new MissingFieldException(Field.VALUE);
+            if (required) {
+                throw new MissingFieldException(Field.VALUE);
+            }
+            return null;
         }
         return value;
     }

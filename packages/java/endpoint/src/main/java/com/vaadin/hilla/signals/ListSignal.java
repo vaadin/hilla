@@ -2,7 +2,9 @@ package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.exception.MissingFieldException;
 import jakarta.annotation.Nullable;
 
 import java.util.HashMap;
@@ -18,14 +20,14 @@ public class ListSignal<T> extends Signal<T> {
         private final UUID id;
         private UUID prev;
         private UUID next;
-        private V value;
+        private final ValueSignal<V> value;
 
-        public Entry(UUID id, @Nullable UUID prev, @Nullable UUID next,
-                V value) {
+        public Entry(UUID id, @Nullable UUID prev, @Nullable UUID next, V value,
+                Class<V> valueType) {
             this.id = id;
             this.prev = prev;
             this.next = next;
-            this.value = value;
+            this.value = new ValueSignal<V>(value, valueType);
         }
 
         @Override
@@ -45,6 +47,11 @@ public class ListSignal<T> extends Signal<T> {
 
         @Override
         public V value() {
+            return value.getValue();
+        }
+
+        @Override
+        public ValueSignal<V> getValueSignal() {
             return value;
         }
 
@@ -100,14 +107,10 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     private boolean handleInsert(ListStateEvent<T> event) {
-        if (event.getEntries().isEmpty()) {
-            return false;
+        if (event.getValue() == null) {
+            throw new MissingFieldException(StateEvent.Field.VALUE);
         }
-        if (event.getEntries().size() > 1) {
-            throw new UnsupportedOperationException(
-                    "Batch insert is not supported");
-        }
-        var toBeInserted = getAsEntry(event.getEntries().iterator().next());
+        var toBeInserted = createEntry(event.getValue());
         if (entries.containsKey(toBeInserted.id())) {
             return false;
         }
@@ -136,21 +139,19 @@ public class ListSignal<T> extends Signal<T> {
         return false;
     }
 
-    private Entry<T> getAsEntry(ListEntry<T> entry) {
-        return new Entry<>(entry.id(), entry.previous(), entry.next(),
-                entry.value());
+    private Entry<T> createEntry(T value) {
+        return new Entry<>(UUID.randomUUID(), null, null, value,
+                getValueType());
     }
 
     private boolean handleRemoval(ListStateEvent<T> event) {
-        if (head == null || event.getEntries().isEmpty()) {
+        if (event.getEntryId() == null) {
+            throw new MissingFieldException(ListStateEvent.Field.ENTRY_ID);
+        }
+        if (head == null || entries.isEmpty()) {
             return false;
         }
-        if (event.getEntries().size() > 1) {
-            throw new UnsupportedOperationException(
-                    "Batch removal is not supported");
-        }
-        var toBeRemoved = event.getEntries().iterator().next();
-        var toBeRemovedEntry = entries.get(toBeRemoved.id());
+        var toBeRemovedEntry = entries.get(event.getEntryId());
         if (toBeRemovedEntry == null) {
             // no longer exists anyway
             return true;
@@ -181,5 +182,4 @@ public class ListSignal<T> extends Signal<T> {
         }
         return true;
     }
-
 }

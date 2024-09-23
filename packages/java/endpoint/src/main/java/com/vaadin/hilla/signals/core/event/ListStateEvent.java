@@ -3,14 +3,13 @@ package com.vaadin.hilla.signals.core.event;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.ValueSignal;
 import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
-import com.vaadin.hilla.signals.core.event.exception.MissingFieldException;
+
 import jakarta.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 public class ListStateEvent<T> {
@@ -25,11 +24,14 @@ public class ListStateEvent<T> {
         UUID next();
 
         T value();
+
+        ValueSignal<T> getValueSignal();
     }
 
     @FunctionalInterface
     public interface ListEntryFactory<T> {
-        ListEntry<T> create(UUID id, UUID prev, UUID next, T value);
+        ListEntry<T> create(UUID id, UUID prev, UUID next, T value,
+                Class<T> valueType);
     }
 
     /**
@@ -40,6 +42,7 @@ public class ListStateEvent<T> {
         public static final String PREV = "prev";
         public static final String POSITION = "position";
         public static final String ENTRIES = "entries";
+        public static final String ENTRY_ID = "entryId";
     }
 
     /**
@@ -57,7 +60,7 @@ public class ListStateEvent<T> {
      * Possible types of state events.
      */
     public enum EventType {
-        SNAPSHOT, REJECT, INSERT, REMOVE;
+        SNAPSHOT, INSERT, REMOVE;
 
         public static EventType of(String type) {
             return EventType.valueOf(type.toUpperCase());
@@ -67,22 +70,41 @@ public class ListStateEvent<T> {
     private final String id;
     private final EventType eventType;
     private Boolean accepted;
-    // Only used for snapshot events:
+    private final T value;
+    // Only used for snapshot event:
     private final Collection<ListEntry<T>> entries;
-    // Only used for insert events:
+    // Only for remove event:
+    private final UUID entryId;
+    // Only used for insert event:
     private final InsertPosition insertPosition;
 
     public ListStateEvent(String id, EventType eventType,
-            Collection<ListEntry<T>> entries, InsertPosition insertPosition) {
+            Collection<ListEntry<T>> entries) {
         this.id = id;
         this.eventType = eventType;
+        this.insertPosition = null;
+        this.value = null;
         this.entries = entries;
-        this.insertPosition = insertPosition;
+        this.entryId = null;
     }
 
-    public ListStateEvent(String id, EventType eventType,
-            Collection<ListEntry<T>> entries) {
-        this(id, eventType, entries, null);
+    public ListStateEvent(String id, EventType eventType, T value) {
+        this.id = id;
+        this.eventType = eventType;
+        this.value = value;
+        this.insertPosition = null;
+        this.entries = null;
+        this.entryId = null;
+    }
+
+    public ListStateEvent(String id, EventType eventType, T value,
+            InsertPosition insertPosition) {
+        this.id = id;
+        this.eventType = eventType;
+        this.value = value;
+        this.insertPosition = insertPosition;
+        this.entries = null;
+        this.entryId = null;
     }
 
     /**
@@ -95,10 +117,25 @@ public class ListStateEvent<T> {
             ListEntryFactory<T> entryFactory) {
         this.id = StateEvent.extractId(json);
         this.eventType = extractEventType(json);
-        this.entries = extractEntries(json, valueType, entryFactory);
+        this.value = this.eventType == EventType.INSERT
+                ? StateEvent.convertValue(StateEvent.extractValue(json, true),
+                        valueType)
+                : null;
         this.insertPosition = this.eventType == EventType.INSERT
                 ? extractPosition(json)
                 : null;
+        this.entryId = this.eventType == EventType.REMOVE
+                ? UUID.fromString(extractEntryId(json))
+                : null;
+        this.entries = null;
+    }
+
+    private static <X> ListEntry<X> extractEntry(ObjectNode json,
+            Class<X> valueType, ListEntryFactory<X> entryFactory) {
+        var rawValue = StateEvent.extractValue(json, false);
+        X value = StateEvent.convertValue(rawValue, valueType);
+        return entryFactory.create(UUID.randomUUID(), null, null, value,
+                valueType);
     }
 
     private static EventType extractEventType(JsonNode json) {
@@ -117,37 +154,6 @@ public class ListStateEvent<T> {
                     rawType.asText(), Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }
-    }
-
-    private static <X> List<ListEntry<X>> extractEntries(JsonNode json,
-            Class<X> valueType, ListEntryFactory<X> entryFactory) {
-        var rawEntries = json.get(Field.ENTRIES);
-        if (rawEntries == null) {
-            throw new MissingFieldException(Field.ENTRIES);
-        }
-        List<ListEntry<X>> entries = new ArrayList<>();
-        for (JsonNode rawEntry : rawEntries) {
-            var id = extractEntryId(rawEntry);
-            var next = extractUUIDOrNull(rawEntry, Field.NEXT);
-            var prev = extractUUIDOrNull(rawEntry, Field.PREV);
-            var value = StateEvent
-                    .convertValue(StateEvent.extractValue(rawEntry), valueType);
-            entries.add(entryFactory.create(id, prev, next, value));
-        }
-        return entries;
-    }
-
-    private static UUID extractEntryId(JsonNode rawEntry) {
-        var id = rawEntry.get(StateEvent.Field.ID);
-        if (id == null) {
-            return UUID.randomUUID();
-        }
-        return UUID.fromString(id.asText());
-    }
-
-    private static UUID extractUUIDOrNull(JsonNode json, String fieldName) {
-        var rawId = json.get(fieldName);
-        return rawId == null ? null : UUID.fromString(rawId.asText());
     }
 
     private static InsertPosition extractPosition(JsonNode json) {
@@ -169,10 +175,19 @@ public class ListStateEvent<T> {
         }
     }
 
+    private static String extractEntryId(JsonNode json) {
+        var entryId = json.get(Field.ENTRY_ID);
+        return entryId == null ? null : entryId.asText();
+    }
+
     public ObjectNode toJson() {
         ObjectNode snapshotData = StateEvent.MAPPER.createObjectNode();
         snapshotData.put(StateEvent.Field.ID, id);
         snapshotData.put(StateEvent.Field.TYPE, eventType.name().toLowerCase());
+        if (value != null) {
+            snapshotData.set(StateEvent.Field.VALUE,
+                    StateEvent.MAPPER.valueToTree(value));
+        }
         if (entries != null) {
             ArrayNode snapshotEntries = StateEvent.MAPPER.createArrayNode();
             entries.forEach(entry -> {
@@ -195,9 +210,6 @@ public class ListStateEvent<T> {
             snapshotData.put(Field.POSITION,
                     insertPosition.name().toLowerCase());
         }
-        if (getAccepted() != null) {
-            snapshotData.put(StateEvent.Field.ACCEPTED, getAccepted());
-        }
         return snapshotData;
     }
 
@@ -209,19 +221,19 @@ public class ListStateEvent<T> {
         return eventType;
     }
 
-    public Boolean getAccepted() {
-        return accepted;
-    }
-
-    public void setAccepted(Boolean accepted) {
-        this.accepted = accepted;
-    }
-
     public Collection<ListEntry<T>> getEntries() {
         return entries;
     }
 
+    public T getValue() {
+        return value;
+    }
+
     public InsertPosition getPosition() {
         return insertPosition;
+    }
+
+    public UUID getEntryId() {
+        return entryId;
     }
 }

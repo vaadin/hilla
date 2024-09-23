@@ -74,11 +74,11 @@ export type ServerConnectionConfig = Readonly<{
  */
 class ServerConnection<T> {
   readonly #id: string;
-  readonly #config: ServerConnectionConfig;
+  readonly config: ServerConnectionConfig;
   #subscription?: Subscription<StateEvent<T>>;
 
   constructor(id: string, config: ServerConnectionConfig) {
-    this.#config = config;
+    this.config = config;
     this.#id = id;
   }
 
@@ -87,7 +87,7 @@ class ServerConnection<T> {
   }
 
   connect() {
-    const { client, endpoint, method, params } = this.#config;
+    const { client, endpoint, method, params } = this.config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
@@ -100,7 +100,7 @@ class ServerConnection<T> {
   }
 
   async update(event: StateEvent<T>): Promise<void> {
-    await this.#config.client.call(ENDPOINT, 'update', {
+    await this.config.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
     });

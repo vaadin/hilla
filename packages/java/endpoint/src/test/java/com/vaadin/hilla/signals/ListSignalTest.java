@@ -1,7 +1,12 @@
 package com.vaadin.hilla.signals;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.core.event.exception.MissingFieldException;
+import jakarta.annotation.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -22,28 +27,65 @@ import static org.junit.Assert.assertThrows;
 
 import static com.vaadin.hilla.signals.core.event.ListStateEvent.InsertPosition;
 import static com.vaadin.hilla.signals.core.event.ListStateEvent.ListEntry;
+import static org.junit.Assert.assertTrue;
 
 public class ListSignalTest {
 
-    // @formatter:off
-    private record Entry<V>(UUID id, UUID previous, UUID next, V value)
-        implements ListStateEvent.ListEntry<V>
-    {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final class Entry<V> implements ListEntry<V> {
+        private final UUID id;
+        private UUID prev;
+        private UUID next;
+        private final ValueSignal<V> value;
+
+        public Entry(UUID id, @Nullable UUID prev, @Nullable UUID next, V value,
+                Class<V> valueType) {
+            this.id = id;
+            this.prev = prev;
+            this.next = next;
+            this.value = new ValueSignal<V>(value, valueType);
+        }
+
+        @Override
+        public UUID id() {
+            return id;
+        }
+
+        @Override
+        public UUID previous() {
+            return prev;
+        }
+
+        @Override
+        public UUID next() {
+            return next;
+        }
+
+        @Override
+        public V value() {
+            return value.getValue();
+        }
+
+        @Override
+        public ValueSignal<V> getValueSignal() {
+            return value;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o)
                 return true;
-            if (!(o instanceof ListStateEvent.ListEntry<?> entry))
+            if (!(o instanceof ListEntry<?> entry))
                 return false;
-            return Objects.equals(id(), entry.id());
+            return Objects.equals(id, entry.id());
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(id());
+            return Objects.hashCode(id);
         }
     }
-    // @formatter:on
 
     @Test
     public void constructor_withNullArgs_doesNotAcceptNull() {
@@ -77,17 +119,14 @@ public class ListSignalTest {
         var counter = new AtomicInteger(0);
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
+
             if (counter.get() == 0) {
                 // notification for the initial state
-                assertEquals(0, stateEvent.getEntries().size());
+                var entries = extractEntries(eventJson, Person.class,
+                        Entry::new);
+                assertEquals(0, entries.size());
             } else if (counter.get() == 1) {
-                assertEquals(1, stateEvent.getEntries().size());
-                var entry = stateEvent.getEntries().iterator().next();
-                assertEquals(name, entry.value().getName());
-                assertEquals(age, entry.value().getAge());
-                assertEquals(adult, entry.value().isAdult());
+                assertTrue(isAccepted(eventJson));
             }
             counter.incrementAndGet();
         });
@@ -97,6 +136,14 @@ public class ListSignalTest {
         signal.submit(evt);
 
         assertEquals(2, counter.get());
+
+        var entries = extractEntries(signal.createSnapshotEvent(), Person.class,
+                Entry::new);
+        assertEquals(1, entries.size());
+        var entry = entries.get(0);
+        assertEquals(name, entry.value().getName());
+        assertEquals(age, entry.value().getAge());
+        assertEquals(adult, entry.value().isAdult());
     }
 
     @Test
@@ -126,18 +173,16 @@ public class ListSignalTest {
         var age = 42;
         var adult = true;
 
-        var receivedEntries = new ArrayList<ListStateEvent.ListEntry<Person>>();
         var counter = new AtomicInteger(0);
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
             if (counter.get() == 0) {
                 // notification for the initial state
-                assertEquals(0, stateEvent.getEntries().size());
+                var entries = extractEntries(eventJson, Person.class,
+                        Entry::new);
+                assertEquals(0, entries.size());
             } else {
-                receivedEntries.clear();
-                receivedEntries.addAll(stateEvent.getEntries());
+                assertTrue(isAccepted(eventJson));
             }
             counter.incrementAndGet();
         });
@@ -149,7 +194,9 @@ public class ListSignalTest {
         });
         assertEquals(6, counter.get());
 
-        var linkedList = buildLinkedList(receivedEntries);
+        var snapshot = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
+        var linkedList = buildLinkedList(snapshot);
         assertEquals(5, linkedList.size());
 
         for (int i = 0; i < linkedList.size(); i++) {
@@ -173,18 +220,11 @@ public class ListSignalTest {
         var age = 42;
         var adult = true;
 
-        var receivedEntries = new ArrayList<ListStateEvent.ListEntry<Person>>();
         var counter = new AtomicInteger(0);
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
-            if (counter.get() == 0) {
-                // notification for the initial state
-                assertEquals(0, stateEvent.getEntries().size());
-            } else {
-                receivedEntries.clear();
-                receivedEntries.addAll(stateEvent.getEntries());
+            if (counter.get() > 0) {
+                assertTrue(isAccepted(eventJson));
             }
             counter.incrementAndGet();
         });
@@ -201,16 +241,19 @@ public class ListSignalTest {
         signal.submit(insert2);
         signal.submit(insert3);
 
+        var receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         var linkedList = buildLinkedList(receivedEntries);
         assertEquals(3, linkedList.size());
 
         var entry2 = linkedList.get(1);
-        var removeEvent = new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.REMOVE, List.of(entry2));
-        signal.submit(removeEvent.toJson());
+        var removeEvent = createRemoveEvent(entry2);
+        signal.submit(removeEvent);
 
         assertEquals(5, counter.get());
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(2, linkedList.size());
 
@@ -232,28 +275,26 @@ public class ListSignalTest {
         var age = 42;
         var adult = true;
 
-        var receivedEntries = new ArrayList<ListStateEvent.ListEntry<Person>>();
-
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
-            receivedEntries.clear();
-            receivedEntries.addAll(stateEvent.getEntries());
+            isAccepted(eventJson);
         });
 
         var person1 = new Person(name, age, adult);
         var insert1 = createInsertEvent(person1, InsertPosition.LAST);
         signal.submit(insert1);
 
+        var receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         var linkedList = buildLinkedList(receivedEntries);
         assertEquals(1, linkedList.size());
 
         var entry1 = linkedList.get(0);
-        var removeEvent = new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.REMOVE, List.of(entry1));
-        signal.submit(removeEvent.toJson());
+        var removeEvent = createRemoveEvent(entry1);
+        signal.submit(removeEvent);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         assertEquals(0, receivedEntries.size());
     }
 
@@ -266,14 +307,9 @@ public class ListSignalTest {
         var age = 42;
         var adult = true;
 
-        var receivedEntries = new ArrayList<ListStateEvent.ListEntry<Person>>();
-
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
-            receivedEntries.clear();
-            receivedEntries.addAll(stateEvent.getEntries());
+            isAccepted(eventJson);
         });
 
         var person1 = new Person(name, age, adult);
@@ -283,14 +319,17 @@ public class ListSignalTest {
         signal.submit(insert1);
         signal.submit(insert2);
 
+        var receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         var linkedList = buildLinkedList(receivedEntries);
         assertEquals(2, linkedList.size());
 
         var head = linkedList.get(0);
-        var removeEvent = new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.REMOVE, List.of(head));
-        signal.submit(removeEvent.toJson());
+        var removeEvent = createRemoveEvent(head);
+        signal.submit(removeEvent);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(1, linkedList.size());
 
@@ -302,6 +341,8 @@ public class ListSignalTest {
         var insert3 = createInsertEvent(person3, InsertPosition.LAST);
         signal.submit(insert3);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(2, linkedList.size());
         var newHead = linkedList.get(0);
@@ -318,14 +359,9 @@ public class ListSignalTest {
         var age = 42;
         var adult = true;
 
-        var receivedEntries = new ArrayList<ListStateEvent.ListEntry<Person>>();
-
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
-            receivedEntries.clear();
-            receivedEntries.addAll(stateEvent.getEntries());
+            isAccepted(eventJson);
         });
 
         var person1 = new Person(name, age, adult);
@@ -335,14 +371,17 @@ public class ListSignalTest {
         signal.submit(insert1);
         signal.submit(insert2);
 
+        var receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         var linkedList = buildLinkedList(receivedEntries);
         assertEquals(2, linkedList.size());
 
         var tail = linkedList.get(1);
-        var removeEvent = new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.REMOVE, List.of(tail));
-        signal.submit(removeEvent.toJson());
+        var removeEvent = createRemoveEvent(tail);
+        signal.submit(removeEvent);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(1, linkedList.size());
 
@@ -357,12 +396,15 @@ public class ListSignalTest {
         var insert3 = createInsertEvent(person3, InsertPosition.LAST);
         signal.submit(insert3);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         tail = linkedList.get(2);
-        removeEvent = new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.REMOVE, List.of(tail));
-        signal.submit(removeEvent.toJson());
+        removeEvent = createRemoveEvent(tail);
+        signal.submit(removeEvent);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         var newTail = linkedList.get(1);
         assertEquals(person2.getName(), newTail.value().getName());
@@ -378,14 +420,9 @@ public class ListSignalTest {
         var age = 42;
         var adult = true;
 
-        var receivedEntries = new ArrayList<ListStateEvent.ListEntry<Person>>();
-
         flux.subscribe(eventJson -> {
             assertNotNull(eventJson);
-            var stateEvent = new ListStateEvent<>(eventJson, Person.class,
-                    Entry::new);
-            receivedEntries.clear();
-            receivedEntries.addAll(stateEvent.getEntries());
+            isAccepted(eventJson);
         });
 
         var person1 = new Person(name + 1, age + 1, adult);
@@ -408,6 +445,8 @@ public class ListSignalTest {
         signal.submit(insert4);
         signal.submit(insert5);
 
+        var receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         var linkedList = buildLinkedList(receivedEntries);
         assertEquals(5, linkedList.size());
 
@@ -424,6 +463,8 @@ public class ListSignalTest {
 
         signal.submit(createRemoveEvent(entry5));
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(3, linkedList.size());
 
@@ -436,6 +477,8 @@ public class ListSignalTest {
         signal.submit(createRemoveEvent(entry3));
         signal.submit(createRemoveEvent(entry6));
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(2, linkedList.size());
 
@@ -445,6 +488,8 @@ public class ListSignalTest {
         signal.submit(createRemoveEvent(linkedList.get(0)));
         signal.submit(createRemoveEvent(linkedList.get(1)));
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         assertEquals(0, receivedEntries.size());
 
         signal.submit(insert6);
@@ -454,6 +499,8 @@ public class ListSignalTest {
         signal.submit(insert2);
         signal.submit(insert1);
 
+        receivedEntries = extractEntries(signal.createSnapshotEvent(),
+                Person.class, Entry::new);
         linkedList = buildLinkedList(receivedEntries);
         assertEquals(6, linkedList.size());
 
@@ -466,14 +513,16 @@ public class ListSignalTest {
 
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {
         return new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.INSERT,
-                List.of(new Entry<>(UUID.randomUUID(), null, null, value)),
-                position).toJson();
+                ListStateEvent.EventType.INSERT, value, position).toJson();
     }
 
     private <T> ObjectNode createRemoveEvent(ListEntry<T> toRemove) {
-        return new ListStateEvent<>(UUID.randomUUID().toString(),
-                ListStateEvent.EventType.REMOVE, List.of(toRemove)).toJson();
+        ObjectNode event = MAPPER.createObjectNode();
+        event.put(StateEvent.Field.ID, UUID.randomUUID().toString());
+        event.put(StateEvent.Field.TYPE,
+                ListStateEvent.EventType.REMOVE.name().toLowerCase());
+        event.put(ListStateEvent.Field.ENTRY_ID, toRemove.id().toString());
+        return event;
     }
 
     private <V> List<ListStateEvent.ListEntry<V>> buildLinkedList(
@@ -506,5 +555,42 @@ public class ListSignalTest {
             current = entryMap.get(current.next());
         }
         return linkedList;
+    }
+
+    private static <X> List<ListEntry<X>> extractEntries(JsonNode json,
+            Class<X> valueType,
+            ListStateEvent.ListEntryFactory<X> entryFactory) {
+        var rawEntries = json.get(ListStateEvent.Field.ENTRIES);
+        if (rawEntries == null) {
+            throw new MissingFieldException(ListStateEvent.Field.ENTRIES);
+        }
+        List<ListEntry<X>> entries = new ArrayList<>();
+        for (JsonNode rawEntry : rawEntries) {
+            var id = extractEntryId(rawEntry);
+            var next = extractUUIDOrNull(rawEntry, ListStateEvent.Field.NEXT);
+            var prev = extractUUIDOrNull(rawEntry, ListStateEvent.Field.PREV);
+            var value = StateEvent.convertValue(
+                    StateEvent.extractValue(rawEntry, true), valueType);
+            entries.add(entryFactory.create(id, prev, next, value, valueType));
+        }
+        return entries;
+    }
+
+    private static UUID extractEntryId(JsonNode rawEntry) {
+        var id = rawEntry.get(StateEvent.Field.ID);
+        if (id == null) {
+            return UUID.randomUUID();
+        }
+        return UUID.fromString(id.asText());
+    }
+
+    private static UUID extractUUIDOrNull(JsonNode json, String fieldName) {
+        var rawId = json.get(fieldName);
+        return rawId == null ? null : UUID.fromString(rawId.asText());
+    }
+
+    private static boolean isAccepted(ObjectNode event) {
+        return event.has(StateEvent.Field.ACCEPTED)
+                && event.get(StateEvent.Field.ACCEPTED).asBoolean();
     }
 }
