@@ -25,6 +25,7 @@ import com.vaadin.flow.server.menu.MenuRegistry;
 import com.vaadin.hilla.HillaStats;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUtil;
+import com.vaadin.hilla.route.ServerAndClientViewsProvider;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,10 +78,12 @@ public class RouteUnifyingServiceInitListener
                 deploymentConfiguration.isReactEnabled());
         boolean hasHillaFsRoute = false;
         if (deploymentConfiguration.isReactEnabled()) {
-            var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+            var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
                     deploymentConfiguration, accessControl, viewAccessChecker,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
+            var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    serverAndClientViewsProvider);
             var deploymentMode = deploymentConfiguration.isProductionMode()
                     ? "PRODUCTION"
                     : "DEVELOPMENT";
