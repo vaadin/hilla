@@ -76,11 +76,6 @@ public class ServerAndClientViewsProvider {
             availableViews.putAll(collectServerViews(hasMainMenuRoute));
         }
 
-        if (availableViews.isEmpty()) {
-            LOGGER.debug(
-                    "No server-side nor client-side views found, skipping response modification.");
-            return "";
-        }
         return mapper.writeValueAsString(availableViews);
     }
 
