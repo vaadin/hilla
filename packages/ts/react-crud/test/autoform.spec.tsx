@@ -9,7 +9,7 @@ import { ValidationError } from '@vaadin/hilla-lit-form';
 import type { ValueError } from '@vaadin/hilla-lit-form/Validation.js';
 import type { SelectElement } from '@vaadin/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
-import type { TextFieldElement } from '@vaadin/react-components/TextField.js';
+import { TextField, type TextFieldElement } from '@vaadin/react-components/TextField.js';
 import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
@@ -1164,6 +1164,55 @@ describe('@vaadin/hilla-react-crud', () => {
 
           const field = result.queryField('Custom last name');
           expect(field).to.exist;
+        });
+
+        it('should submit when the enter key is pressed on a custom renderer field', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
+
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  label: 'Custom last name',
+                  renderer: ({ field }) => <TextField key={field.name} {...field} />,
+                },
+              },
+            },
+            undefined,
+            false,
+            service,
+          );
+
+          await result.typeInField('Custom last name', 'Maxwell Smart{enter}');
+
+          expect(saveSpy).to.have.calledOnce;
+          expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell Smart'));
+        });
+
+        it('should not submit when the enter key pressed on a textarea', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
+
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  label: 'Custom last name',
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                },
+              },
+            },
+            undefined,
+            false,
+            service,
+          );
+
+          await result.typeInField('Custom last name', 'Maxwell\nSmart{enter}');
+
+          expect(saveSpy).to.have.not.called;
         });
       });
 

@@ -92,6 +92,9 @@ describe('@vaadin/hilla-react-signals', () => {
         onDisconnect() {
           return this;
         },
+        onSubscriptionLost() {
+          return this;
+        },
       });
       // Mock the subscribe method
       client.subscribe.returns(subscription);
