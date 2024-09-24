@@ -64,6 +64,19 @@ describe('@vaadin/hilla-react-signals', () => {
       onNextCallback(event);
     }
 
+    function simulateResubscription(
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
+    ) {
+      /*
+      const [onDisconnectCallback] = connectSubscriptionMock.onDisconnect.firstCall.args;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      onDisconnectCallback();
+      */
+      const [onSubscriptionLostCallback] = connectSubscriptionMock.onSubscriptionLost.firstCall.args;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      onSubscriptionLostCallback();
+    }
+
     let client: sinon.SinonStubbedInstance<ConnectClient>;
     let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
     let signal: NumberSignal;
@@ -284,6 +297,14 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should throw an error when the server call fails', () => {
       client.call.rejects(new Error('Server error'));
       signal.value = 42;
+    });
+
+    it('should resubscribe when reconnecting', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+      simulateResubscription(subscription);
+
+      expect(client.subscribe).to.be.have.been.calledTwice;
     });
   });
 });
