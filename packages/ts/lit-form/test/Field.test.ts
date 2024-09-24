@@ -18,7 +18,6 @@ import {
   type FieldElement,
   type FieldStrategy,
   GenericFieldStrategy,
-  GenericStringFieldStrategy,
   MultiSelectComboBoxFieldStrategy,
   Required,
   SelectedFieldStrategy,
@@ -538,41 +537,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       ['div', 'input'].forEach((tag) => {
-        it(`GenericStringFieldStrategy ${tag}`, async () => {
-          const tagName = unsafeStatic(tag);
-
-          const model = binder.model.fieldString;
-          const binderNode = binder.for(model);
-          binderNode.value = 'foo';
-          await resetBinderNodeValidation(binderNode);
-
-          const renderElement = () => {
-            render(
-              html`
-                <${tagName} ${field(model)}></${tagName}>`,
-              div,
-            );
-            return div.firstElementChild as Element & { value?: any };
-          };
-
-          binderNode.validators = [{ message: 'any-err-msg', validate: () => false }];
-
-          renderElement();
-
-          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
-
-          expect(currentStrategy instanceof GenericStringFieldStrategy).to.be.true;
-          expect(currentStrategy.value).to.be.equal('foo');
-          expect(currentStrategy.model).to.be.equal(model);
-
-          await binderNode.validate();
-          const element = renderElement();
-
-          expect(element.hasAttribute('invalid')).to.be.true;
-          expect(element.hasAttribute('errorMessage')).to.be.false;
-        });
-
-        it(`GenericStringFieldStrategy undefined ${tag}`, async () => {
+        it(`GenericFieldStrategy undefined ${tag}`, async () => {
           const tagName = unsafeStatic(tag);
 
           const model = binder.model.fieldString;
@@ -593,7 +558,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
           const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
 
-          expect(currentStrategy instanceof GenericStringFieldStrategy).to.be.true;
+          expect(currentStrategy instanceof GenericFieldStrategy).to.be.true;
           expect(currentStrategy.value).to.be.equal('');
           expect(currentStrategy.model).to.be.equal(model);
         });

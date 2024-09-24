@@ -2,7 +2,15 @@
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
-import { _fromString, type AbstractModel, ArrayModel, BooleanModel, hasFromString, ObjectModel } from './Models.js';
+import {
+  _fromString,
+  type AbstractModel,
+  ArrayModel,
+  BooleanModel,
+  hasFromString,
+  NumberModel,
+  ObjectModel,
+} from './Models.js';
 import { StringModel } from './Models.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
@@ -94,6 +102,10 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
   }
 
   set value(value: T | undefined) {
+    if (this.model instanceof StringModel || this.model instanceof NumberModel) {
+      this.#element.value = value ?? ('' as T);
+      return;
+    }
     this.#element.value = value;
   }
 
@@ -201,16 +213,6 @@ export class GenericFieldStrategy<T = any, E extends FieldElement<T> = FieldElem
 
   set invalid(value: boolean) {
     this.setAttribute('invalid', value);
-  }
-}
-
-export class GenericStringFieldStrategy extends GenericFieldStrategy<string> {
-  override get value(): string | undefined {
-    return super.value;
-  }
-
-  override set value(val: string | undefined) {
-    super.value = val ?? '';
   }
 }
 
@@ -354,12 +356,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
       if ((elm.constructor as unknown as MaybeVaadinElementConstructor).version) {
         return new VaadinFieldStrategy(elm, model);
       }
-      return model instanceof StringModel
-        ? (new GenericStringFieldStrategy(
-            elm as FieldElement<string>,
-            model as AbstractModel<string>,
-          ) as AbstractFieldStrategy<T>)
-        : new GenericFieldStrategy(elm, model);
+      return new GenericFieldStrategy(elm, model);
   }
 }
 
