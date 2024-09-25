@@ -1,4 +1,4 @@
-import { computed, effect, signal, type ReadonlySignal } from './core.js';
+import { computed, signal, type ReadonlySignal } from './core.js';
 import { createInsertLastStateEvent, createRemoveStateEvent, type StateEvent } from './events.js';
 import { $processServerResponse, $update, FullStackSignal, type ServerConnectionConfig } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
@@ -16,18 +16,11 @@ export class ListSignal<T> extends FullStackSignal<T> {
   #tail: EntryId | undefined = undefined;
 
   readonly #values = new Map<string, Entry<T>>();
-  items: ReadonlySignal<ReadonlyArray<ValueSignal<T>>> = computed(() => []);
-
-  // eslint-disable-next-line no-unused-private-class-members
-  #size: number = 0;
-  readonly #counter = signal(0);
+  readonly items: ReadonlySignal<ReadonlyArray<ValueSignal<T>>> = computed(() => this.#internalItems.value);
+  readonly #internalItems = signal<ReadonlyArray<ValueSignal<T>>>([]);
 
   constructor(config: ServerConnectionConfig) {
     super(undefined, config);
-    effect(() => {
-      this.items = computed(() => this.#computeItems());
-      this.#size = this.#counter.value;
-    });
   }
 
   #computeItems(): ReadonlyArray<ValueSignal<T>> {
@@ -75,7 +68,7 @@ export class ListSignal<T> extends FullStackSignal<T> {
       this.#tail = newEntry.id;
     }
     this.#values.set(valueSignal.id, newEntry);
-    this.#counter.value += 1;
+    this.#internalItems.value = this.#computeItems();
   }
 
   #handleRemoveUpdate(event: StateEvent<T>): void {
@@ -104,6 +97,7 @@ export class ListSignal<T> extends FullStackSignal<T> {
         nextEntry.prev = prevEntry.id;
       }
     }
+    this.#internalItems.value = this.#computeItems();
   }
 
   insertLast(value: T): void {
