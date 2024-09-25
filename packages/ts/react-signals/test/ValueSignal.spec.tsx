@@ -142,15 +142,16 @@ describe('@vaadin/hilla-react-signals', () => {
       const [, , params] = client.call.firstCall.args;
 
       expect(client.call).to.have.been.calledOnce;
+      // @ts-expect-error params.event type has id property
+      const expectedEvent = { id: params?.event.id, type: 'replace', value: 'bar', expected: 'ba' };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: valueSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params?.event.id, type: 'replace', value: 'bar', expected: 'ba' },
+        event: expectedEvent,
       });
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'replace', value: 'bar', accepted: true });
+      onNextCallback({ ...expectedEvent, accepted: true });
       expect(valueSignal.value).to.equal('bar');
     });
 
@@ -232,7 +233,7 @@ describe('@vaadin/hilla-react-signals', () => {
 
       const [, , params3] = client.call.thirdCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params3?.event.id, type: 'replace', value: 'foobar', accepted: true });
+      onNextCallback({ id: params3?.event.id, type: 'replace', value: 'foobar', expected: 'foo', accepted: true });
       expect(valueSignal.value).to.equal('foobar');
     });
   });

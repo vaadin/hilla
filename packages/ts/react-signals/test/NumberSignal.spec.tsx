@@ -18,9 +18,9 @@ describe('@vaadin/hilla-react-signals', () => {
   let subscription: sinon.SinonStubbedInstance<Subscription<StateEvent<number>>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
-  function simulateReceivingSnapshot(eventId: string, value: number): void {
+  function simulateReceivingAcceptedEvent(event: StateEvent<number>): void {
     const [onNextCallback] = subscription.onNext.firstCall.args;
-    onNextCallback({ id: eventId, type: 'snapshot', value, accepted: true });
+    onNextCallback({ ...event, accepted: true });
   }
 
   beforeEach(() => {
@@ -78,35 +78,38 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(1);
       const [, , params1] = client.call.firstCall.args;
+      // @ts-expect-error params.event type has id property
+      const expectedEvent1 = { id: params1?.event.id, type: 'increment', value: 1 };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params1?.event.id, type: 'increment', value: 1 },
+        event: expectedEvent1,
       });
       // @ts-expect-error params.event type has id property
-      simulateReceivingSnapshot(params1?.event.id, 43);
+      simulateReceivingAcceptedEvent(expectedEvent1);
       expect(numberSignal.value).to.equal(43);
 
       numberSignal.incrementBy(2);
       const [, , params2] = client.call.secondCall.args;
+      // @ts-expect-error params.event type has id property
+      const expectedEvent2 = { id: params2?.event.id, type: 'increment', value: 2 };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params2?.event.id, type: 'increment', value: 2 },
+        event: expectedEvent2,
       });
       // @ts-expect-error params.event type has id property
-      simulateReceivingSnapshot(params2?.event.id, 45);
+      simulateReceivingAcceptedEvent(expectedEvent2);
       expect(numberSignal.value).to.equal(45);
 
       numberSignal.incrementBy(-5);
       const [, , params3] = client.call.thirdCall.args;
+      // @ts-expect-error params.event type has id property
+      const expectedEvent3 = { id: params3?.event.id, type: 'increment', value: -5 };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params3?.event.id, type: 'increment', value: -5 },
+        event: expectedEvent3,
       });
       // @ts-expect-error params.event type has id property
-      simulateReceivingSnapshot(params3?.event.id, 40);
+      simulateReceivingAcceptedEvent(expectedEvent3);
       expect(numberSignal.value).to.equal(40);
     });
 

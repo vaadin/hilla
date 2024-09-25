@@ -87,11 +87,21 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       }
     }
 
-    if (event.accepted) {
+    if (event.accepted || event.type === 'snapshot') {
       if (record) {
         record.waiter.resolve();
       }
-      this.value = event.value as T;
+      this.#applyAcceptedEvent(event);
+    }
+  }
+
+  #applyAcceptedEvent(event: StateEvent<T>): void {
+    if (event.type === 'set' || event.type === 'snapshot') {
+      this.value = event.value;
+    } else if (event.type === 'replace') {
+      if (JSON.stringify(this.value) === JSON.stringify(event.expected)) {
+        this.value = event.value;
+      }
     }
   }
 }

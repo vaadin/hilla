@@ -1,5 +1,5 @@
-import { createIncrementStateEvent } from './events.js';
-import { $update } from './FullStackSignal.js';
+import { createIncrementStateEvent, type StateEvent } from './events.js';
+import { $processServerResponse, $update } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
@@ -26,6 +26,8 @@ import { ValueSignal } from './ValueSignal.js';
  * ```
  */
 export class NumberSignal extends ValueSignal<number> {
+  readonly #sentIncrementEvents = new Map<string, StateEvent<number>>();
+
   /**
    * Increments the value by the specified delta. The delta can be negative to
    * decrease the value.
@@ -44,6 +46,19 @@ export class NumberSignal extends ValueSignal<number> {
     }
     this.setValueLocal(this.value + delta);
     const event = createIncrementStateEvent(delta);
+    this.#sentIncrementEvents.set(event.id, event);
     this[$update](event);
+  }
+
+  protected override [$processServerResponse](event: StateEvent<number>): void {
+    if (event.accepted && event.type === 'increment') {
+      if (this.#sentIncrementEvents.has(event.id)) {
+        this.#sentIncrementEvents.delete(event.id);
+        return;
+      }
+      this.setValueLocal(this.value + event.value);
+    } else {
+      super[$processServerResponse](event);
+    }
   }
 }
