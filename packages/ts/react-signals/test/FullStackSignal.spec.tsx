@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
-import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -66,15 +66,13 @@ describe('@vaadin/hilla-react-signals', () => {
 
     function simulateResubscription(
       connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
+      client: sinon.SinonStubbedInstance<ConnectClient>,
     ) {
-      /*
-      const [onDisconnectCallback] = connectSubscriptionMock.onDisconnect.firstCall.args;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      onDisconnectCallback();
-      */
       const [onSubscriptionLostCallback] = connectSubscriptionMock.onSubscriptionLost.firstCall.args;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      onSubscriptionLostCallback();
+      if (onSubscriptionLostCallback() === ActionOnLostSubscription.RESUBSCRIBE) {
+        client.subscribe('TestEndpoint', 'testMethod');
+      }
     }
 
     let client: sinon.SinonStubbedInstance<ConnectClient>;
@@ -302,7 +300,7 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should resubscribe when reconnecting', async () => {
       render(<span>Value is {signal}</span>);
       await nextFrame();
-      simulateResubscription(subscription);
+      simulateResubscription(subscription, client);
 
       expect(client.subscribe).to.be.have.been.calledTwice;
     });
