@@ -15,7 +15,7 @@ export const viewsSignal = signal((window as VaadinWindow).Vaadin?.views);
 export function createMenuItems(): readonly MenuItem[] {
   // @ts-expect-error: esbuild injection
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  __REGISTER__('createMenuItems', (window as VaadinWindow).Vaadin?.views);
+  __REGISTER__('createMenuItems', (window as VaadinWindow).Vaadin);
   const collator = new Intl.Collator('en-US');
   if (!viewsSignal.value) {
     return [];
