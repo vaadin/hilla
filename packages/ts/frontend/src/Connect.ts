@@ -48,8 +48,8 @@ export interface Subscription<T> {
 
   /**
    * Called when the connection is restored, but there's no longer a valid subscription. If the callback returns
-   * `HandleSubscriptionLoss.RECONNECT`, the subscription will be re-established by connecting to the same
-   * server method again. If the callback returns `HandleSubscriptionLoss.REMOVE`, the subscription will be
+   * `ActionOnLostSubscription.RESUBSCRIBE`, the subscription will be re-established by connecting to the same
+   * server method again. If the callback returns `ActionOnLostSubscription.REMOVE`, the subscription will be
    * forgotten. This is also the default behavior if the callback is not set or if it returns `undefined`.
    */
   onSubscriptionLost(callback: () => ActionOnLostSubscription | void): Subscription<T>;
