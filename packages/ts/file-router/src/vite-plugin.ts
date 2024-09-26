@@ -97,7 +97,7 @@ export default function vitePluginFileSystemRouter({
       const changeListener = (file: string): void => {
         if (!file.startsWith(dir)) {
           if (file === fileURLToPath(runtimeUrls.json)) {
-            server.hot.send({ type: 'full-reload' });
+            server.hot.send({ type: 'custom', event: 'fs-route-update' });
           }
           return;
         }

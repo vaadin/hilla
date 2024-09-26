@@ -38,16 +38,16 @@ describe('@vaadin/hilla-file-router', () => {
       sinon.resetHistory();
     });
 
-    it('should send full-reload only when file-routes.json is added', () => {
+    it('should send fs-route-update when file-routes.json is added', () => {
       expect(mockServer.hot.send).to.not.be.called;
       mockServer.watcher.emit('add', fileURLToPath(new URL('file-routes.json', generatedDir)));
-      expect(mockServer.hot.send).to.be.calledWith({ type: 'full-reload' });
+      expect(mockServer.hot.send).to.be.calledWith({ type: 'custom', event: 'fs-route-update' });
     });
 
-    it('should send full-reload only when file-routes.json changes', () => {
+    it('should send fs-route-update when file-routes.json changes', () => {
       expect(mockServer.hot.send).to.not.be.called;
       mockServer.watcher.emit('change', fileURLToPath(new URL('file-routes.json', generatedDir)));
-      expect(mockServer.hot.send).to.be.calledWith({ type: 'full-reload' });
+      expect(mockServer.hot.send).to.be.calledWith({ type: 'custom', event: 'fs-route-update' });
     });
 
     it('should not send full-reload when other files change', () => {

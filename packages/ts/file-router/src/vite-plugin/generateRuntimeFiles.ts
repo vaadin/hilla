@@ -32,20 +32,28 @@ export type RuntimeFileUrls = Readonly<{
  *
  * @param url - The URL of the file to generate.
  * @param data - The data to write to the file.
+ * @param forceWrite - true to force writing the file even if there are no changes
+ * @returns true if the file was written, false otherwise.
  */
-async function generateRuntimeFile(url: URL, data: string): Promise<void> {
+async function generateRuntimeFile(url: URL, data: string, forceWrite?: boolean): Promise<boolean> {
   await mkdir(new URL('./', url), { recursive: true });
-  let contents: string | undefined;
-  try {
-    contents = await readFile(url, 'utf-8');
-  } catch (e: unknown) {
-    if (!(e != null && typeof e === 'object' && 'code' in e && e.code === 'ENOENT')) {
-      throw e;
+  let shouldWrite = forceWrite ?? false;
+  if (!forceWrite) {
+    let contents: string | undefined;
+    try {
+      contents = await readFile(url, 'utf-8');
+    } catch (e: unknown) {
+      if (!(e != null && typeof e === 'object' && 'code' in e && e.code === 'ENOENT')) {
+        throw e;
+      }
     }
+    shouldWrite = contents !== data;
   }
-  if (contents !== data) {
+  if (shouldWrite) {
     await writeFile(url, data, 'utf-8');
   }
+
+  return shouldWrite;
 }
 
 /**
@@ -72,16 +80,15 @@ export async function generateRuntimeFiles(
   const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
 
-  await Promise.all([
-    generateRuntimeFile(urls.json, viewConfigJson).then(() => {
-      if (debug) {
-        logger.info(`Frontend route list is generated: ${String(urls.json)}`);
-      }
-    }),
-    generateRuntimeFile(urls.code, runtimeRoutesCode).then(() => {
-      if (debug) {
-        logger.info(`File Route module is generated: ${String(urls.code)}`);
-      }
-    }),
-  ]);
+  const jsonWritten = await generateRuntimeFile(urls.json, viewConfigJson);
+  if (debug) {
+    logger.info(`Frontend route list is generated: ${String(urls.json)}`);
+  }
+  // If the metadata has changed, we need to write the TS file also to make Vite HMR updates work properly.
+  // Even though the contents of the TS file does not change, the contents of the files imported in the TS
+  // files changes and the routes must be re-applied to the React router
+  await generateRuntimeFile(urls.code, runtimeRoutesCode, jsonWritten);
+  if (debug) {
+    logger.info(`File Route module is generated: ${String(urls.code)}`);
+  }
 }
