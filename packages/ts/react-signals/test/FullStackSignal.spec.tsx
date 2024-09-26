@@ -5,7 +5,7 @@ import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { SnapshotStateEvent, StateEvent } from '../src/events.js';
+import type { StateEvent } from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
