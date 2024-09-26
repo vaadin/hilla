@@ -135,9 +135,9 @@ public class ValueSignal<T> {
         return this.value;
     }
 
-    private ObjectNode  createSnapshotEvent() {
+    private ObjectNode createSnapshotEvent() {
         var snapshot = new StateEvent<>(getId().toString(),
-            StateEvent.EventType.SNAPSHOT, this.value).toJson();
+                StateEvent.EventType.SNAPSHOT, this.value).toJson();
         return StateEvent.setAccepted(snapshot, true);
     }
 
