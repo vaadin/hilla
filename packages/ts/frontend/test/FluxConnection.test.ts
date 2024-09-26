@@ -357,16 +357,6 @@ describe('@vaadin/hilla-frontend', () => {
       expect(fluxConnection.state).to.equal(State.INACTIVE);
     });
 
-    it('should call disconnect callbacks on reconnect', () => {
-      const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
-      const onDisconnect = sinon.stub();
-
-      sub.onDisconnect(onDisconnect);
-
-      getSubscriptionEventSpies()?.onReconnect?.();
-      expect(onDisconnect).to.have.been.calledOnce;
-    });
-
     it('should update state while reconnecting', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
       fluxConnection.state = State.INACTIVE;

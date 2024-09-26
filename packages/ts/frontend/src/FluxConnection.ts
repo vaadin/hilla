@@ -58,7 +58,6 @@ export class FluxConnection extends EventTarget {
   readonly #onCompleteCallbacks = new Map<string, () => void>();
   readonly #onErrorCallbacks = new Map<string, () => void>();
   readonly #onNextCallbacks = new Map<string, (value: any) => void>();
-  readonly #onDisconnectCallbacks = new Map<string, () => void>();
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
 
@@ -112,10 +111,6 @@ export class FluxConnection extends EventTarget {
       },
       onNext: (callback: (value: any) => void): Subscription<any> => {
         this.#onNextCallbacks.set(id, callback);
-        return hillaSubscription;
-      },
-      onDisconnect: (callback: () => void): Subscription<any> => {
-        this.#onDisconnectCallbacks.set(id, callback);
         return hillaSubscription;
       },
       onSubscriptionLost: (callback: () => ActionOnLostSubscription | void): Subscription<any> => {
@@ -198,7 +193,6 @@ export class FluxConnection extends EventTarget {
       onReconnect: () => {
         if (this.state !== State.RECONNECTING) {
           this.state = State.RECONNECTING;
-          this.#onDisconnectCallbacks.forEach((callback) => callback());
         }
       },
       onFailureToReconnect: () => {
@@ -248,7 +242,6 @@ export class FluxConnection extends EventTarget {
     this.#onCompleteCallbacks.delete(id);
     this.#onErrorCallbacks.delete(id);
     this.#endpointInfos.delete(id);
-    this.#onDisconnectCallbacks.delete(id);
   }
 
   #send(message: ServerMessage) {

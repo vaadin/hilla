@@ -43,9 +43,6 @@ export interface Subscription<T> {
   /** Called when a new value is available. */
   onNext(callback: (value: T) => void): Subscription<T>;
 
-  /** Called when subscription disconnected */
-  onDisconnect(callback: () => void): Subscription<T>;
-
   /**
    * Called when the connection is restored, but there's no longer a valid subscription. If the callback returns
    * `ActionOnLostSubscription.RESUBSCRIBE`, the subscription will be re-established by connecting to the same
