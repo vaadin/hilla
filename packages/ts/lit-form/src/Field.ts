@@ -296,6 +296,10 @@ export class VaadinDateTimeFieldStrategy<
   T = string,
   E extends FieldElement<T> = FieldElement<T>,
 > extends VaadinFieldStrategy<T, E> {
+  override get value(): T | undefined {
+    return super.value;
+  }
+
   override set value(val: T | undefined) {
     if (!val || isEmptyObject(val)) {
       super.value = '' as T;
