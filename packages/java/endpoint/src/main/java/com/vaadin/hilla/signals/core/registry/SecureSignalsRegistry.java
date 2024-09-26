@@ -45,8 +45,8 @@ public class SecureSignalsRegistry {
                 .getSecurityHolderRoleChecker();
         checkAccess(endpointName, methodName, principal, isInRole);
 
-        Signal<?> signal = (Signal<?>) invoker.invoke(endpointName,
-                methodName, body, principal, isInRole);
+        Signal<?> signal = (Signal<?>) invoker.invoke(endpointName, methodName,
+                body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
         delegate.register(clientSignalId, signal);

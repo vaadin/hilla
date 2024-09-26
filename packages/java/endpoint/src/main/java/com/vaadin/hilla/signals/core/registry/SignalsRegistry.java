@@ -40,8 +40,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} or {@code signal} is null
      */
-    public synchronized void register(String clientSignalId,
-            Signal<?> signal) {
+    public synchronized void register(String clientSignalId, Signal<?> signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Objects.requireNonNull(signal, "Signal must not be null");

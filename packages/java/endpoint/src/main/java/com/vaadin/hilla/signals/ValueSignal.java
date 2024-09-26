@@ -6,7 +6,6 @@ import jakarta.annotation.Nullable;
 
 import java.util.Objects;
 
-
 public class ValueSignal<T> extends Signal<T> {
 
     private T value;
