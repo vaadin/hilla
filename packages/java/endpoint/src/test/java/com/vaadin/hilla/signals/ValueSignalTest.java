@@ -132,9 +132,9 @@ public class ValueSignalTest {
                 assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
-                    .asText(), stateEvent.getId());
+                        .asText(), stateEvent.getId());
                 assertEquals(StateEvent.EventType.REPLACE,
-                    stateEvent.getEventType());
+                        stateEvent.getEventType());
                 assertTrue(StateEvent.isAccepted(eventJson));
                 assertEquals(3.0, signal.getValue(), 0.0);
             }
@@ -162,9 +162,9 @@ public class ValueSignalTest {
                 assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
-                    .asText(), stateEvent.getId());
+                        .asText(), stateEvent.getId());
                 assertEquals(StateEvent.EventType.REPLACE,
-                    stateEvent.getEventType());
+                        stateEvent.getEventType());
                 assertFalse(StateEvent.isAccepted(eventJson));
                 assertEquals(1.0, signal.getValue(), 0.0);
             }
