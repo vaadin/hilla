@@ -37,23 +37,21 @@ function enableFlowLayout(route: RouteMeta): RouteMeta {
 function layoutExists(layoutPaths: string[], path: string) {
   const splitPath: string[] = path.split('/');
 
-  return (
-    layoutPaths.filter((layout) => {
-      if (layout.length === 0) {
-        return true;
-      }
-      const splitLayout: string[] = layout.split('/');
-      if (splitLayout.length > splitPath.length) {
+  return layoutPaths.some((layout) => {
+    if (layout.length === 0) {
+      return true;
+    }
+    const splitLayout: string[] = layout.split('/');
+    if (splitLayout.length > splitPath.length) {
+      return false;
+    }
+    for (let i = 0; i < splitLayout.length; i++) {
+      if (!(splitPath[i] === splitLayout[i])) {
         return false;
       }
-      for (let i = 0; i < splitLayout.length; i++) {
-        if (!(splitPath[i] === splitLayout[i])) {
-          return false;
-        }
-      }
-      return true;
-    }).length > 0
-  );
+    }
+    return true;
+  });
 }
 
 /**
