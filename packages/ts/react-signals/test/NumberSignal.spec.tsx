@@ -16,7 +16,7 @@ use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonStubbedInstance<Subscription<StateEvent<number>>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
   function simulateReceivingAcceptedEvent(event: StateEvent<number>): void {

@@ -21,7 +21,7 @@ describe('@vaadin/hilla-react-signals', () => {
   };
 
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonStubbedInstance<Subscription<StateEvent<string>>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<string>>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
   beforeEach(() => {
