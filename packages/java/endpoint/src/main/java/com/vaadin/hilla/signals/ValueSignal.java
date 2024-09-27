@@ -74,9 +74,8 @@ public class ValueSignal<T> {
             LOGGER.debug("New Flux subscription...");
             lock.lock();
             try {
-                var currentValue = createStatusUpdateEvent(this.id.toString(),
-                        StateEvent.EventType.SNAPSHOT);
-                sink.tryEmitNext(currentValue);
+                var snapshot = createSnapshotEvent();
+                sink.tryEmitNext(snapshot);
                 subscribers.add(sink);
             } finally {
                 lock.unlock();
@@ -102,14 +101,11 @@ public class ValueSignal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            boolean success = processEvent(event);
+            boolean accepted = processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
-                var updatedValue = createStatusUpdateEvent(
-                        event.get("id").asText(),
-                        success ? StateEvent.EventType.SNAPSHOT
-                                : StateEvent.EventType.REJECT);
-                boolean failure = sink.tryEmitNext(updatedValue).isFailure();
+                var eventWithStatus = StateEvent.setAccepted(event, accepted);
+                boolean failure = sink.tryEmitNext(eventWithStatus).isFailure();
                 if (failure) {
                     LOGGER.debug("Failed push");
                 }
@@ -139,10 +135,10 @@ public class ValueSignal<T> {
         return this.value;
     }
 
-    private ObjectNode createStatusUpdateEvent(String eventId,
-            StateEvent.EventType eventType) {
-        var snapshot = new StateEvent<>(eventId, eventType, this.value);
-        return snapshot.toJson();
+    private ObjectNode createSnapshotEvent() {
+        var snapshot = new StateEvent<>(getId().toString(),
+                StateEvent.EventType.SNAPSHOT, this.value).toJson();
+        return StateEvent.setAccepted(snapshot, true);
     }
 
     /**

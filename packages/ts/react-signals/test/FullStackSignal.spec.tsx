@@ -5,7 +5,7 @@ import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaa
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { SnapshotStateEvent, StateEvent } from '../src/events.js';
+import type { StateEvent } from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
@@ -51,8 +51,11 @@ describe('@vaadin/hilla-react-signals', () => {
   });
 
   describe('FullStackSignal', () => {
-    function createSnapshotEvent(value: number): SnapshotStateEvent<number> {
-      return { id: nanoid(), type: 'snapshot', value };
+    function createAcceptedEvent(
+      value: number,
+      type: 'increment' | 'replace' | 'set' | 'snapshot',
+    ): StateEvent<number> {
+      return { id: nanoid(), type, value, expected: 0, accepted: true };
     }
 
     function simulateReceivedChange(
@@ -195,7 +198,7 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
 
       // Simulate the event received from the server:
-      const snapshotEvent = createSnapshotEvent(42);
+      const snapshotEvent = createAcceptedEvent(42, 'snapshot');
       simulateReceivedChange(subscription, snapshotEvent);
 
       // Check if the signal value is updated:
@@ -207,13 +210,13 @@ describe('@vaadin/hilla-react-signals', () => {
 
       let result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
-      simulateReceivedChange(subscription, createSnapshotEvent(42));
+      simulateReceivedChange(subscription, createAcceptedEvent(42, 'snapshot'));
 
       result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
-      simulateReceivedChange(subscription, createSnapshotEvent(99));
+      simulateReceivedChange(subscription, createAcceptedEvent(99, 'set'));
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 99');
     });
