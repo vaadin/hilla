@@ -5,6 +5,7 @@ import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import type { IncrementStateEvent } from '../events.js';
 import type { StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, NumberSignal } from '../src/index.js';
@@ -15,7 +16,7 @@ use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonStubbedInstance<Subscription<StateEvent<number>>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
   function simulateReceivingAcceptedEvent(event: StateEvent<number>): void {
@@ -78,37 +79,47 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(1);
       const [, , params1] = client.call.firstCall.args;
-      // @ts-expect-error params.event type has id property
-      const expectedEvent1 = { id: params1?.event.id, type: 'increment', value: 1 };
+      const expectedEvent1: IncrementStateEvent = {
+        // @ts-expect-error params.event type has id property
+        id: params1?.event.id,
+        type: 'increment',
+        value: 1,
+        accepted: false,
+      };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent1,
       });
-      // @ts-expect-error params.event type has id property
+
       simulateReceivingAcceptedEvent(expectedEvent1);
       expect(numberSignal.value).to.equal(43);
 
       numberSignal.incrementBy(2);
       const [, , params2] = client.call.secondCall.args;
       // @ts-expect-error params.event type has id property
-      const expectedEvent2 = { id: params2?.event.id, type: 'increment', value: 2 };
+      const expectedEvent2: IncrementStateEvent = { id: params2?.event.id, type: 'increment', value: 2 };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent2,
       });
-      // @ts-expect-error params.event type has id property
+
       simulateReceivingAcceptedEvent(expectedEvent2);
       expect(numberSignal.value).to.equal(45);
 
       numberSignal.incrementBy(-5);
       const [, , params3] = client.call.thirdCall.args;
-      // @ts-expect-error params.event type has id property
-      const expectedEvent3 = { id: params3?.event.id, type: 'increment', value: -5 };
+      const expectedEvent3: IncrementStateEvent = {
+        // @ts-expect-error params.event type has id property
+        id: params3?.event.id,
+        type: 'increment',
+        value: -5,
+        accepted: false,
+      };
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent3,
       });
-      // @ts-expect-error params.event type has id property
+
       simulateReceivingAcceptedEvent(expectedEvent3);
       expect(numberSignal.value).to.equal(40);
     });
@@ -133,6 +144,16 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(0);
       expect(client.call).not.to.have.been.called;
+    });
+
+    it('should only apply the change to the value upon receiving accepted event that is not initiated by the NumberSignal itself', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      const expectedEvent: IncrementStateEvent = { id: 'testId', type: 'increment', value: 1, accepted: true };
+      simulateReceivingAcceptedEvent(expectedEvent);
+
+      expect(numberSignal.value).to.equal(43);
     });
   });
 });
