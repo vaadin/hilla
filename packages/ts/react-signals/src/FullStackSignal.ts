@@ -1,4 +1,4 @@
-import { ActionOnLostSubscription, type ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import type { ActionOnLostSubscription, ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
@@ -209,7 +209,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   #connect() {
     this.server
       .connect()
-      .onSubscriptionLost(() => ActionOnLostSubscription.RESUBSCRIBE)
+      .onSubscriptionLost(() => 'resubscribe' as ActionOnLostSubscription)
       .onNext((event: StateEvent<T>) => {
         this.#paused = true;
         this[$processServerResponse](event);
