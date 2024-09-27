@@ -57,7 +57,40 @@ export function createIncrementStateEvent(delta: number): IncrementStateEvent {
   };
 }
 
+export type InsertLastStateEvent<T> = CreateStateEventType<T, 'insert', { position: 'last' }>;
+
+export function createInsertLastStateEvent<T>(value: T): InsertLastStateEvent<T> {
+  return {
+    id: nanoid(),
+    type: 'insert',
+    value,
+    position: 'last',
+    accepted: false,
+  };
+}
+
+export type InsertFirstStateEvent<T> = CreateStateEventType<T, 'insert', { position: 'first' }>;
+
+export type RemoveStateEvent = CreateStateEventType<never, 'remove', { entryId: string }>;
+
+export function createRemoveStateEvent(entryId: string): RemoveStateEvent {
+  return {
+    id: nanoid(),
+    type: 'remove',
+    entryId,
+    value: undefined as never,
+    accepted: false,
+  };
+}
+
 /**
  * An object that describes the change of the signal state.
  */
-export type StateEvent<T> = IncrementStateEvent | ReplaceStateEvent<T> | SetStateEvent<T> | SnapshotStateEvent<T>;
+export type StateEvent<T> =
+  | IncrementStateEvent
+  | InsertFirstStateEvent<T>
+  | InsertLastStateEvent<T>
+  | RemoveStateEvent
+  | ReplaceStateEvent<T>
+  | SetStateEvent<T>
+  | SnapshotStateEvent<T>;

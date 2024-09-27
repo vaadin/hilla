@@ -130,7 +130,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.VALUE, value);
 
         Exception exception = assertThrows(
-                StateEvent.InvalidEventTypeException.class,
+                InvalidEventTypeException.class,
                 () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Invalid event type invalidType. Type should be one of: [SNAPSHOT, SET, REPLACE, INCREMENT]";
@@ -149,7 +149,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.VALUE, value);
 
         Exception exception = assertThrows(
-                StateEvent.InvalidEventTypeException.class,
+                InvalidEventTypeException.class,
                 () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Missing event type. Type is required, and should be one of: [SNAPSHOT, SET, REPLACE, INCREMENT]";
