@@ -1,4 +1,10 @@
-import { createReplaceStateEvent, type StateEvent } from './events.js';
+import {
+  createReplaceStateEvent,
+  isReplaceStateEvent,
+  isSetStateEvent,
+  isSnapshotStateEvent,
+  type StateEvent,
+} from './events.js';
 import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
@@ -74,7 +80,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     };
   }
 
-  protected override [$processServerResponse](event: StateEvent<T>): void {
+  protected override [$processServerResponse](event: StateEvent): void {
     const record = this.#pendingRequests.get(event.id);
     if (record) {
       this.#pendingRequests.delete(event.id);
@@ -87,7 +93,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       }
     }
 
-    if (event.accepted || event.type === 'snapshot') {
+    if (event.accepted || isSnapshotStateEvent<T>(event)) {
       if (record) {
         record.waiter.resolve();
       }
@@ -95,10 +101,10 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     }
   }
 
-  #applyAcceptedEvent(event: StateEvent<T>): void {
-    if (event.type === 'set' || event.type === 'snapshot') {
+  #applyAcceptedEvent(event: StateEvent): void {
+    if (isSetStateEvent<T>(event) || isSnapshotStateEvent<T>(event)) {
       this.value = event.value;
-    } else if (event.type === 'replace') {
+    } else if (isReplaceStateEvent<T>(event)) {
       if (JSON.stringify(this.value) === JSON.stringify(event.expected)) {
         this.value = event.value;
       }

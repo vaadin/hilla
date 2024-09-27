@@ -72,10 +72,10 @@ export type ServerConnectionConfig = Readonly<{
 /**
  * A server connection manager.
  */
-class ServerConnection<T> {
+class ServerConnection {
   readonly #id: string;
   readonly config: ServerConnectionConfig;
-  #subscription?: Subscription<StateEvent<T>>;
+  #subscription?: Subscription<StateEvent>;
 
   constructor(id: string, config: ServerConnectionConfig) {
     this.config = config;
@@ -99,7 +99,7 @@ class ServerConnection<T> {
     return this.#subscription;
   }
 
-  async update(event: StateEvent<T>): Promise<void> {
+  async update(event: StateEvent): Promise<void> {
     await this.config.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
@@ -133,7 +133,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   /**
    * The server connection manager.
    */
-  readonly server: ServerConnection<T>;
+  readonly server: ServerConnection;
 
   /**
    * Defines whether the signal is currently awaits a server-side response.
@@ -187,7 +187,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The event to update the server with.
    */
-  protected [$update](event: StateEvent<T>): void {
+  protected [$update](event: StateEvent): void {
     this.server
       .update(event)
       .catch((error: unknown) => {
@@ -204,13 +204,13 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The server response event.
    */
-  protected abstract [$processServerResponse](event: StateEvent<T>): void;
+  protected abstract [$processServerResponse](event: StateEvent): void;
 
   #connect() {
     this.server
       .connect()
       .onSubscriptionLost(() => 'resubscribe' as ActionOnLostSubscription)
-      .onNext((event: StateEvent<T>) => {
+      .onNext((event: StateEvent) => {
         this.#paused = true;
         this[$processServerResponse](event);
         this.#paused = false;

@@ -1,5 +1,14 @@
-import { computed, signal, type ReadonlySignal } from './core.js';
-import { createInsertLastStateEvent, createRemoveStateEvent, type StateEvent } from './events.js';
+import {
+  createInsertLastStateEvent,
+  createRemoveStateEvent,
+  type InsertLastStateEvent,
+  isInsertLastStateEvent,
+  isListSnapshotStateEvent,
+  isRemoveStateEvent,
+  type ListSnapshotStateEvent,
+  type RemoveStateEvent,
+  type StateEvent,
+} from './events.js';
 import { $processServerResponse, $update, FullStackSignal, type ServerConnectionConfig } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
@@ -11,13 +20,11 @@ export type Entry<T> = {
   prev?: EntryId;
 };
 
-export class ListSignal<T> extends FullStackSignal<T> {
+export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>> {
   #head: EntryId | undefined = undefined;
   #tail: EntryId | undefined = undefined;
 
   readonly #values = new Map<string, Entry<T>>();
-  readonly items: ReadonlySignal<ReadonlyArray<ValueSignal<T>>> = computed(() => this.#internalItems.value);
-  readonly #internalItems = signal<ReadonlyArray<ValueSignal<T>>>([]);
 
   constructor(config: ServerConnectionConfig) {
     super(undefined, config);
@@ -37,22 +44,25 @@ export class ListSignal<T> extends FullStackSignal<T> {
     return result;
   }
 
-  protected override [$processServerResponse](event: StateEvent<T>): void {
+  protected override [$processServerResponse](event: StateEvent): void {
+    if (isListSnapshotStateEvent<T>(event)) {
+      this.#handleSnapshotEvent(event);
+    }
     if (!event.accepted) {
       return;
     }
-    if (event.type === 'insert' && event.position === 'last') {
+    if (isInsertLastStateEvent<T>(event)) {
       this.#handleInsertLastUpdate(event);
-    } else if (event.type === 'remove') {
+    } else if (isRemoveStateEvent(event)) {
       this.#handleRemoveUpdate(event);
     }
   }
 
-  #handleInsertLastUpdate(event: StateEvent<T>): void {
+  #handleInsertLastUpdate(event: InsertLastStateEvent<T>): void {
     if (!event.accepted) {
       return;
     }
-    const valueSignal = new ValueSignal<T>(event.value as T, this.server.config);
+    const valueSignal = new ValueSignal<T>(event.value, this.server.config);
     const newEntry: Entry<T> = { id: valueSignal.id, value: valueSignal };
 
     if (this.#head === undefined) {
@@ -68,10 +78,10 @@ export class ListSignal<T> extends FullStackSignal<T> {
       this.#tail = newEntry.id;
     }
     this.#values.set(valueSignal.id, newEntry);
-    this.#internalItems.value = this.#computeItems();
+    this.setValueLocal(this.#computeItems());
   }
 
-  #handleRemoveUpdate(event: StateEvent<T>): void {
+  #handleRemoveUpdate(event: RemoveStateEvent): void {
     const entryToRemove = this.#values.get(event.id);
     if (entryToRemove === undefined) {
       return;
@@ -97,7 +107,25 @@ export class ListSignal<T> extends FullStackSignal<T> {
         nextEntry.prev = prevEntry.id;
       }
     }
-    this.#internalItems.value = this.#computeItems();
+    this.setValueLocal(this.#computeItems());
+  }
+
+  #handleSnapshotEvent(event: ListSnapshotStateEvent<T>): void {
+    event.entries.forEach((entry) => {
+      this.#values.set(entry.id, {
+        id: entry.id,
+        prev: entry.prev,
+        next: entry.next,
+        value: new ValueSignal(entry.value, this.server.config),
+      });
+      if (entry.prev === undefined) {
+        this.#head = entry.id;
+      }
+      if (entry.next === undefined) {
+        this.#tail = entry.id;
+      }
+    });
+    this.setValueLocal(this.#computeItems());
   }
 
   insertLast(value: T): void {

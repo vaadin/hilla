@@ -27,7 +27,7 @@ public class ListSignal<T> extends Signal<T> {
             this.id = id;
             this.prev = prev;
             this.next = next;
-            this.value = new ValueSignal<V>(value, valueType);
+            this.value = new ValueSignal<>(value, valueType);
         }
 
         @Override
