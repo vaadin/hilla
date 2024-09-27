@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
-import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { SnapshotStateEvent, StateEvent } from '../src/events.js';
+import type { StateEvent } from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
@@ -65,6 +65,17 @@ describe('@vaadin/hilla-react-signals', () => {
       const [onNextCallback] = connectSubscriptionMock.onNext.firstCall.args;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       onNextCallback(event);
+    }
+
+    function simulateResubscription(
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
+      client: sinon.SinonStubbedInstance<ConnectClient>,
+    ) {
+      const [onSubscriptionLostCallback] = connectSubscriptionMock.onSubscriptionLost.firstCall.args;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (onSubscriptionLostCallback() === ActionOnLostSubscription.RESUBSCRIBE) {
+        client.subscribe('TestEndpoint', 'testMethod');
+      }
     }
 
     let client: sinon.SinonStubbedInstance<ConnectClient>;
@@ -287,6 +298,14 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should throw an error when the server call fails', () => {
       client.call.rejects(new Error('Server error'));
       signal.value = 42;
+    });
+
+    it('should resubscribe when reconnecting', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+      simulateResubscription(subscription, client);
+
+      expect(client.subscribe).to.be.have.been.calledTwice;
     });
   });
 });

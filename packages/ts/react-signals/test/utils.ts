@@ -11,8 +11,8 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-export function createSubscriptionStub<T>(): sinon.SinonStubbedInstance<Subscription<StateEvent<T>>> {
-  return sinon.stub<Subscription<StateEvent<T>>>({
+export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscription<StateEvent<T>>> {
+  return sinon.spy<Subscription<StateEvent<T>>>({
     cancel() {},
     context() {
       return this;
