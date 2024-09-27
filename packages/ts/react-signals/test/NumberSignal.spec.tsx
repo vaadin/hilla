@@ -90,6 +90,7 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: numberSignal.id,
         event: expectedEvent1,
       });
+
       simulateReceivingAcceptedEvent(expectedEvent1);
       expect(numberSignal.value).to.equal(43);
 
@@ -101,11 +102,13 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: numberSignal.id,
         event: expectedEvent2,
       });
+
       simulateReceivingAcceptedEvent(expectedEvent2);
       expect(numberSignal.value).to.equal(45);
 
       numberSignal.incrementBy(-5);
       const [, , params3] = client.call.thirdCall.args;
+
       const expectedEvent3: IncrementStateEvent = {
         // @ts-expect-error params.event type has id property
         id: params3?.event.id,
@@ -113,10 +116,12 @@ describe('@vaadin/hilla-react-signals', () => {
         value: -5,
         accepted: false,
       };
+
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent3,
       });
+
       simulateReceivingAcceptedEvent(expectedEvent3);
       expect(numberSignal.value).to.equal(40);
     });
