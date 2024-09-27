@@ -46,7 +46,7 @@ function layoutExists(layoutPaths: string[], path: string) {
       return false;
     }
     for (let i = 0; i < splitLayout.length; i++) {
-      if (!(splitPath[i] === splitLayout[i])) {
+      if (splitPath[i] !== splitLayout[i]) {
         return false;
       }
     }
