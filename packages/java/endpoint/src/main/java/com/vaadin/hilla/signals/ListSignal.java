@@ -3,8 +3,8 @@ package com.vaadin.hilla.signals;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.event.StateEvent;
-import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
-import com.vaadin.hilla.signals.core.event.exception.MissingFieldException;
+import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import jakarta.annotation.Nullable;
 
 import java.util.HashMap;

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.ValueSignal;
-import com.vaadin.hilla.signals.core.event.exception.InvalidEventTypeException;
 
 import jakarta.annotation.Nullable;
 
