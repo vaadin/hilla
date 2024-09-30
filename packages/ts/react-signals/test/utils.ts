@@ -26,9 +26,6 @@ export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscripti
     onNext() {
       return this;
     },
-    onDisconnect() {
-      return this;
-    },
     onSubscriptionLost() {
       return this;
     },
