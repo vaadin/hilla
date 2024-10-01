@@ -99,7 +99,8 @@ public class ListSignal<T> extends Signal<T> {
     public void submit(ObjectNode event) {
         var rawEventType = StateEvent.extractRawEventType(event);
         if (StateEvent.EventType.of(rawEventType) != null) {
-            // It is not a List structure event, find the signal to submit to:
+            // It is not a List structure event, find the signal to submit to.
+            // For internal signals, the signal id is the event id:
             var signalId = StateEvent.extractId(event);
             var signalEntry = entries.get(UUID.fromString(signalId));
             if (signalEntry == null) {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import jakarta.annotation.Nullable;
 import reactor.core.publisher.Flux;
@@ -79,10 +80,19 @@ public class SignalsHandler {
     public void update(String clientSignalId, ObjectNode event)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {
-        if (registry.get(clientSignalId) == null) {
-            throw new IllegalStateException(String.format(
+        var parentSignalId = ListStateEvent.extractParentSignalId(event);
+        if (parentSignalId != null) {
+            if (registry.get(parentSignalId) == null) {
+                throw new IllegalStateException(String.format(
+                    "Parent Signal not found for signal id: %s", parentSignalId));
+            }
+            registry.get(parentSignalId).submit(event);
+        } else {
+            if (registry.get(clientSignalId) == null) {
+                throw new IllegalStateException(String.format(
                     "Signal not found for client signal: %s", clientSignalId));
+            }
+            registry.get(clientSignalId).submit(event);
         }
-        registry.get(clientSignalId).submit(event);
     }
 }

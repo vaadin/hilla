@@ -42,6 +42,7 @@ public class ListStateEvent<T> {
         public static final String POSITION = "position";
         public static final String ENTRIES = "entries";
         public static final String ENTRY_ID = "entryId";
+        public static final String PARENT_SIGNAL_ID = "parentSignalId";
     }
 
     /**
@@ -127,14 +128,6 @@ public class ListStateEvent<T> {
         this.entries = null;
     }
 
-    private static <X> ListEntry<X> extractEntry(ObjectNode json,
-            Class<X> valueType, ListEntryFactory<X> entryFactory) {
-        var rawValue = StateEvent.extractValue(json, false);
-        X value = StateEvent.convertValue(rawValue, valueType);
-        return entryFactory.create(UUID.randomUUID(), null, null, value,
-                valueType);
-    }
-
     private static EventType extractEventType(JsonNode json) {
         var rawType = StateEvent.extractRawEventType(json);
         try {
@@ -164,6 +157,14 @@ public class ListStateEvent<T> {
                     Arrays.toString(InsertPosition.values()));
             throw new InvalidEventTypeException(message, e);
         }
+    }
+
+    public static String extractParentSignalId(JsonNode json) {
+        var rawParentSignalId = json.get(Field.PARENT_SIGNAL_ID);
+        if (rawParentSignalId == null) {
+            return null;
+        }
+        return rawParentSignalId.asText();
     }
 
     private static String extractEntryId(JsonNode json) {

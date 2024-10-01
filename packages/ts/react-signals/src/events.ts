@@ -5,6 +5,7 @@ export type StateEvent = Readonly<{
   type: string;
   value: unknown;
   accepted: boolean;
+  parentSignalId?: string;
 }>;
 
 /**
@@ -28,24 +29,31 @@ export type SnapshotStateEvent<T> = CreateStateEventType<T, 'snapshot'>;
  */
 export type SetStateEvent<T> = CreateStateEventType<T, 'set'>;
 
-export function createSetStateEvent<T>(value: T): SetStateEvent<T> {
+export function createSetStateEvent<T>(value: T, signalId?: string, parentSignalId?: string): SetStateEvent<T> {
   return {
-    id: nanoid(),
+    id: signalId ?? nanoid(),
     type: 'set',
     value,
     accepted: false,
+    ...(parentSignalId !== undefined ? { parentSignalId } : {}),
   };
 }
 
 export type ReplaceStateEvent<T> = CreateStateEventType<T, 'replace', { expected: T }>;
 
-export function createReplaceStateEvent<T>(expected: T, value: T): ReplaceStateEvent<T> {
+export function createReplaceStateEvent<T>(
+  expected: T,
+  value: T,
+  signalId?: string,
+  parentSignalId?: string,
+): ReplaceStateEvent<T> {
   return {
-    id: nanoid(),
+    id: signalId ?? nanoid(),
     type: 'replace',
     value,
     expected,
     accepted: false,
+    ...(parentSignalId !== undefined ? { parentSignalId } : {}),
   };
 }
 

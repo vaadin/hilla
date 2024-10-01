@@ -171,7 +171,13 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
-        this[$update](createSetStateEvent(v));
+        // For internal signals, the signalId is passed in to be used as the
+        // event id. And the parent client side signal id is also needed to be
+        // sent for addressing the correct parent/child signal instances on the
+        // server. For a standalone signal, both of this values are passed in as
+        // undefined:
+        const signalId = config.parentClientSignalId !== undefined ? this.id : undefined;
+        this[$update](createSetStateEvent(v, signalId, config.parentClientSignalId));
       }
     });
 

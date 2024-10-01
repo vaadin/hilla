@@ -49,7 +49,9 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @param newValue - The new value.
    */
   replace(expected: T, newValue: T): void {
-    this[$update](createReplaceStateEvent(expected, newValue));
+    const { parentClientSignalId } = this.server.config;
+    const signalId = parentClientSignalId !== undefined ? this.id : undefined;
+    this[$update](createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId));
   }
 
   /**
