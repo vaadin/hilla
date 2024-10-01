@@ -80,7 +80,6 @@ public class ListSignal<T> extends Signal<T> {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ListSignal.class);
     private final Map<UUID, Entry<T>> entries = new HashMap<>();
-    // private final Map<UUID, ValueSignal<T>> entrySignals = new HashMap<>();
 
     private UUID head;
     private UUID tail;
