@@ -1,3 +1,4 @@
+import { CollectionSignal } from './CollectionSignal.js';
 import {
   createInsertLastStateEvent,
   createRemoveStateEvent,
@@ -9,7 +10,7 @@ import {
   type RemoveStateEvent,
   type StateEvent,
 } from './events.js';
-import { $processServerResponse, $update, FullStackSignal, type ServerConnectionConfig } from './FullStackSignal.js';
+import { $processServerResponse, $update, type ServerConnectionConfig } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 export type EntryId = string;
@@ -20,7 +21,7 @@ export type Entry<T> = {
   prev?: EntryId;
 };
 
-export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>> {
+export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>>> {
   #head: EntryId | undefined = undefined;
   #tail: EntryId | undefined = undefined;
 
