@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
 import sinon from 'sinon';
+import { FluxSubscriptionState } from '../FluxConnection';
 import { ActionOnLostSubscription, FluxConnection, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
@@ -80,7 +81,7 @@ describe('@vaadin/hilla-frontend', () => {
 
     it('should immediately return a Subscription when subscribing', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
-      for (const name of ['onNext', 'onComplete', 'onError']) {
+      for (const name of ['onNext', 'onComplete', 'onError', 'onConnectionStateChange', 'onSubscriptionLost']) {
         expect(sub).to.have.property(name).which.is.a('function');
       }
     });
@@ -406,6 +407,58 @@ describe('@vaadin/hilla-frontend', () => {
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
       expect(resubscribe).to.have.been.calledOnce;
+    });
+
+    describe('flux subscription state', () => {
+      it('calls change subscription connection state callback', () => {
+        const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+        let subState;
+        sub.onConnectionStateChange((event) => {
+          subState = event.detail.state;
+        });
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTING);
+        emitMessage({ '@type': 'update', id: '0' });
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTED);
+        getSubscriptionEventSpies()?.onClose?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTED);
+        getSubscriptionEventSpies()?.onReconnect?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CLOSED);
+        getSubscriptionEventSpies()?.onReopen?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CLOSED);
+      });
+
+      it('calls change subscription connection state callback with re-subscription', () => {
+        const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+        let subState;
+        const resubscribe = sinon.stub();
+        resubscribe.returns(ActionOnLostSubscription.RESUBSCRIBE);
+        sub.onSubscriptionLost(resubscribe);
+        sub.onConnectionStateChange((event) => {
+          subState = event.detail.state;
+        });
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTING);
+        emitMessage({ '@type': 'update', id: '0' });
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTED);
+        getSubscriptionEventSpies()?.onClose?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTED);
+        getSubscriptionEventSpies()?.onReconnect?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTING);
+        getSubscriptionEventSpies()?.onReopen?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTING);
+        emitMessage({ '@type': 'update', id: '0' });
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTED);
+      });
+
+      it('should close subscription connection state if failed to reconnect', () => {
+        const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+        let subState;
+        sub.onConnectionStateChange((event) => {
+          subState = event.detail.state;
+        });
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTING);
+        getSubscriptionEventSpies()?.onFailureToReconnect?.();
+        expect(subState).to.be.eq(FluxSubscriptionState.CLOSED);
+      });
     });
   });
 });
