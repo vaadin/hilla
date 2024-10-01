@@ -62,7 +62,9 @@ public class ListStateEvent<T> {
         SNAPSHOT, INSERT, REMOVE;
 
         public static EventType of(String type) {
-            return EventType.valueOf(type.toUpperCase());
+            return Arrays.stream(values())
+                    .filter(e -> e.name().equalsIgnoreCase(type)).findFirst()
+                    .orElse(null);
         }
     }
 
@@ -72,8 +74,7 @@ public class ListStateEvent<T> {
     private final T value;
     // Only used for snapshot event:
     private final Collection<ListEntry<T>> entries;
-    // Only for remove event:
-    private final UUID entryId;
+    private UUID entryId;
     // Only used for insert event:
     private final InsertPosition insertPosition;
 
@@ -84,7 +85,6 @@ public class ListStateEvent<T> {
         this.insertPosition = null;
         this.value = null;
         this.entries = entries;
-        this.entryId = null;
     }
 
     public ListStateEvent(String id, EventType eventType, T value) {
@@ -93,7 +93,6 @@ public class ListStateEvent<T> {
         this.value = value;
         this.insertPosition = null;
         this.entries = null;
-        this.entryId = null;
     }
 
     public ListStateEvent(String id, EventType eventType, T value,
@@ -103,7 +102,6 @@ public class ListStateEvent<T> {
         this.value = value;
         this.insertPosition = insertPosition;
         this.entries = null;
-        this.entryId = null;
     }
 
     /**
@@ -138,19 +136,13 @@ public class ListStateEvent<T> {
     }
 
     private static EventType extractEventType(JsonNode json) {
-        var rawType = json.get(StateEvent.Field.TYPE);
-        if (rawType == null) {
-            var message = String.format(
-                    "Missing event type. Type is required, and should be one of: %s",
-                    Arrays.toString(EventType.values()));
-            throw new InvalidEventTypeException(message);
-        }
+        var rawType = StateEvent.extractRawEventType(json);
         try {
-            return EventType.of(rawType.asText());
+            return EventType.of(rawType);
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                    "Invalid event type %s. Type should be one of: %s",
-                    rawType.asText(), Arrays.toString(EventType.values()));
+                    "Invalid event type %s. Type should be one of: %s", rawType,
+                    Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }
     }
@@ -209,6 +201,12 @@ public class ListStateEvent<T> {
             snapshotData.put(Field.POSITION,
                     insertPosition.name().toLowerCase());
         }
+        if (entryId != null) {
+            snapshotData.put(Field.ENTRY_ID, entryId.toString());
+        }
+        if (accepted != null) {
+            snapshotData.put(StateEvent.Field.ACCEPTED, accepted);
+        }
         return snapshotData;
     }
 
@@ -234,5 +232,17 @@ public class ListStateEvent<T> {
 
     public UUID getEntryId() {
         return entryId;
+    }
+
+    public void setEntryId(UUID entryId) {
+        this.entryId = entryId;
+    }
+
+    public Boolean getAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
     }
 }

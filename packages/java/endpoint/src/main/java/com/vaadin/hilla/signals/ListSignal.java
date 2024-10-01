@@ -6,6 +6,9 @@ import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import jakarta.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +31,10 @@ public class ListSignal<T> extends Signal<T> {
             this.prev = prev;
             this.next = next;
             this.value = new ValueSignal<>(value, valueType);
+        }
+
+        public Entry(UUID id, V value, Class<V> valueType) {
+            this(id, null, null, value, valueType);
         }
 
         @Override
@@ -70,13 +77,41 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ListSignal.class);
     private final Map<UUID, Entry<T>> entries = new HashMap<>();
+    // private final Map<UUID, ValueSignal<T>> entrySignals = new HashMap<>();
 
     private UUID head;
     private UUID tail;
 
     public ListSignal(Class<T> valueType) {
         super(valueType);
+    }
+
+    @Override
+    public Flux<ObjectNode> subscribe(String signalId) {
+        var signalEntry = entries.get(UUID.fromString(signalId));
+        return signalEntry.value.subscribe();
+    }
+
+    @Override
+    public void submit(ObjectNode event) {
+        var rawEventType = StateEvent.extractRawEventType(event);
+        if (StateEvent.EventType.of(rawEventType) != null) {
+            // It is not a List structure event, find the signal to submit to:
+            var signalId = StateEvent.extractId(event);
+            var signalEntry = entries.get(UUID.fromString(signalId));
+            if (signalEntry == null) {
+                LOGGER.warn(
+                        "Signal entry not found for signal id: {}. Ignoring the event: {}",
+                        signalId, event);
+                return;
+            }
+            signalEntry.value.submit(event);
+        } else {
+            super.submit(event);
+        }
     }
 
     @Override
@@ -90,13 +125,13 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     @Override
-    protected boolean processEvent(ObjectNode event) {
+    protected ObjectNode processEvent(ObjectNode event) {
         try {
             var stateEvent = new ListStateEvent<>(event, getValueType(),
                     Entry::new);
             return switch (stateEvent.getEventType()) {
-            case INSERT -> handleInsert(stateEvent);
-            case REMOVE -> handleRemoval(stateEvent);
+            case INSERT -> handleInsert(stateEvent).toJson();
+            case REMOVE -> handleRemoval(stateEvent).toJson();
             default -> throw new UnsupportedOperationException(
                     "Unsupported event: " + stateEvent.getEventType());
             };
@@ -106,13 +141,14 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
-    private boolean handleInsert(ListStateEvent<T> event) {
+    private ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
         if (event.getValue() == null) {
             throw new MissingFieldException(StateEvent.Field.VALUE);
         }
         var toBeInserted = createEntry(event.getValue());
         if (entries.containsKey(toBeInserted.id())) {
-            return false;
+            event.setAccepted(false);
+            return event;
         }
         switch (event.getPosition()) {
         case FIRST -> throw new UnsupportedOperationException(
@@ -125,36 +161,38 @@ public class ListSignal<T> extends Signal<T> {
             if (tail == null) {
                 // first entry being added:
                 head = tail = toBeInserted.id();
-                entries.put(toBeInserted.id(), toBeInserted);
-                return true;
+            } else {
+                var currentTail = entries.get(tail);
+                currentTail.next = toBeInserted.id();
+                toBeInserted.prev = currentTail.id();
+                tail = toBeInserted.id();
             }
-            var currentTail = entries.get(tail);
-            currentTail.next = toBeInserted.id();
-            toBeInserted.prev = currentTail.id();
-            tail = toBeInserted.id();
             entries.put(toBeInserted.id(), toBeInserted);
-            return true;
+            event.setEntryId(toBeInserted.id());
+            event.setAccepted(true);
+            return event;
         }
         }
-        return false;
+        return event;
     }
 
     private Entry<T> createEntry(T value) {
-        return new Entry<>(UUID.randomUUID(), null, null, value,
-                getValueType());
+        return new Entry<>(UUID.randomUUID(), value, getValueType());
     }
 
-    private boolean handleRemoval(ListStateEvent<T> event) {
+    private ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
         if (event.getEntryId() == null) {
             throw new MissingFieldException(ListStateEvent.Field.ENTRY_ID);
         }
         if (head == null || entries.isEmpty()) {
-            return false;
+            event.setAccepted(false);
+            return event;
         }
         var toBeRemovedEntry = entries.get(event.getEntryId());
         if (toBeRemovedEntry == null) {
             // no longer exists anyway
-            return true;
+            event.setAccepted(true);
+            return event;
         }
 
         entries.remove(toBeRemovedEntry.id());
@@ -163,7 +201,8 @@ public class ListSignal<T> extends Signal<T> {
             if (toBeRemovedEntry.next() == null) {
                 // removing the only entry
                 head = tail = null;
-                return true;
+                event.setAccepted(true);
+                return event;
             }
             var newHead = entries.get(toBeRemovedEntry.next());
             head = newHead.id();
@@ -175,11 +214,13 @@ public class ListSignal<T> extends Signal<T> {
                 // removing tail
                 tail = prev.id();
                 prev.next = null;
-                return true;
+                event.setAccepted(true);
+                return event;
             }
             prev.next = next.id();
             next.prev = prev.id();
         }
-        return true;
+        event.setAccepted(true);
+        return event;
     }
 }

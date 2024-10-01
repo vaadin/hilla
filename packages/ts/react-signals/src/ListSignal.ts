@@ -62,7 +62,11 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
     if (!event.accepted) {
       return;
     }
-    const valueSignal = new ValueSignal<T>(event.value, this.server.config);
+    const valueSignal = new ValueSignal<T>(
+      event.value,
+      { ...this.server.config, parentClientSignalId: this.id },
+      event.entryId,
+    );
     const newEntry: Entry<T> = { id: valueSignal.id, value: valueSignal };
 
     if (this.#head === undefined) {
@@ -82,7 +86,7 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
   }
 
   #handleRemoveUpdate(event: RemoveStateEvent): void {
-    const entryToRemove = this.#values.get(event.id);
+    const entryToRemove = this.#values.get(event.entryId);
     if (entryToRemove === undefined) {
       return;
     }
@@ -91,11 +95,11 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
       if (entryToRemove.next === undefined) {
         this.#head = undefined;
         this.#tail = undefined;
-        return;
+      } else {
+        const newHead = this.#values.get(entryToRemove.next)!;
+        this.#head = newHead.id;
+        newHead.prev = undefined;
       }
-      const newHead = this.#values.get(entryToRemove.next)!;
-      this.#head = newHead.id;
-      newHead.prev = undefined;
     } else {
       const prevEntry = this.#values.get(entryToRemove.prev!)!;
       const nextEntry = entryToRemove.next !== undefined ? this.#values.get(entryToRemove.next) : undefined;
@@ -116,7 +120,7 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
         id: entry.id,
         prev: entry.prev,
         next: entry.next,
-        value: new ValueSignal(entry.value, this.server.config),
+        value: new ValueSignal(entry.value, { ...this.server.config, parentClientSignalId: this.id }, entry.id),
       });
       if (entry.prev === undefined) {
         this.#head = entry.id;

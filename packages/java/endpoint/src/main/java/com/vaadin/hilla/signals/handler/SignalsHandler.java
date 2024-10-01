@@ -5,6 +5,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
+import jakarta.annotation.Nullable;
 import reactor.core.publisher.Flux;
 
 /**
@@ -33,8 +34,12 @@ public class SignalsHandler {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String providerEndpoint,
-            String providerMethod, String clientSignalId, ObjectNode body) {
+            String providerMethod, String clientSignalId, ObjectNode body,
+            @Nullable String parentClientSignalId) {
         try {
+            if (parentClientSignalId != null) {
+                return subscribe(parentClientSignalId, clientSignalId);
+            }
             var signal = registry.get(clientSignalId);
             if (signal != null) {
                 return signal.subscribe().doFinally(
@@ -47,6 +52,20 @@ public class SignalsHandler {
         } catch (Exception e) {
             return Flux.error(e);
         }
+    }
+
+    private Flux<ObjectNode> subscribe(String parentClientSignalId,
+            String clientSignalId)
+            throws EndpointInvocationException.EndpointAccessDeniedException,
+            EndpointInvocationException.EndpointNotFoundException {
+        var parentSignal = registry.get(parentClientSignalId);
+        if (parentSignal == null) {
+            throw new IllegalStateException(String.format(
+                    "Parent Signal not found for parent client signal id: %s",
+                    parentClientSignalId));
+        }
+        return parentSignal.subscribe(clientSignalId)
+                .doFinally((event) -> registry.unsubscribe(clientSignalId));
     }
 
     /**

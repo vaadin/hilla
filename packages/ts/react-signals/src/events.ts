@@ -69,7 +69,7 @@ export type ListEntry<T> = Readonly<{
 
 export type ListSnapshotStateEvent<T> = CreateStateEventType<never, 'snapshot', { entries: Array<ListEntry<T>> }>;
 
-export type InsertLastStateEvent<T> = CreateStateEventType<T, 'insert', { position: 'last' }>;
+export type InsertLastStateEvent<T> = CreateStateEventType<T, 'insert', { position: 'last'; entryId?: string }>;
 
 export function createInsertLastStateEvent<T>(value: T): InsertLastStateEvent<T> {
   return {
@@ -137,5 +137,12 @@ export function isInsertLastStateEvent<T>(event: unknown): event is InsertLastSt
 }
 
 export function isRemoveStateEvent(event: unknown): event is RemoveStateEvent {
-  return isStateEvent(event) && event.type === 'remove';
+  return (
+    typeof event === 'object' &&
+    event !== null &&
+    typeof (event as { id?: unknown }).id === 'string' &&
+    (event as { type?: unknown }).type === 'remove' &&
+    typeof (event as { entryId?: unknown }).entryId === 'string' &&
+    typeof (event as { value?: unknown }).value === 'undefined'
+  );
 }

@@ -35,7 +35,9 @@ public class StateEvent<T> {
         SNAPSHOT, SET, REPLACE, INCREMENT;
 
         public static EventType of(String type) {
-            return EventType.valueOf(type.toUpperCase());
+            return Arrays.stream(values())
+                    .filter(e -> e.name().equalsIgnoreCase(type)).findFirst()
+                    .orElse(null);
         }
     }
 
@@ -45,6 +47,7 @@ public class StateEvent<T> {
     private final EventType eventType;
     private final T value;
     private final T expected;
+    private Boolean accepted;
 
     /**
      * Creates a new state event using the given parameters.
@@ -120,20 +123,25 @@ public class StateEvent<T> {
         return value;
     }
 
-    static EventType extractEventType(JsonNode json) {
+    public static String extractRawEventType(JsonNode json) {
         var rawType = json.get(Field.TYPE);
         if (rawType == null) {
             var message = String.format(
                     "Missing event type. Type is required, and should be one of: %s",
                     Arrays.toString(EventType.values()));
-            throw new InvalidEventTypeException(message);
+            throw new MissingFieldException(message);
         }
+        return rawType.asText();
+    }
+
+    public static EventType extractEventType(JsonNode json) {
+        var rawType = extractRawEventType(json);
         try {
-            return EventType.of(rawType.asText());
+            return EventType.of(rawType);
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                    "Invalid event type %s. Type should be one of: %s",
-                    rawType.asText(), Arrays.toString(EventType.values()));
+                    "Invalid event type %s. Type should be one of: %s", rawType,
+                    Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }
     }
@@ -151,12 +159,16 @@ public class StateEvent<T> {
         if (getExpected() != null) {
             json.set(Field.EXPECTED, valueAsJsonNode(getExpected()));
         }
+        if (accepted != null) {
+            json.put(Field.ACCEPTED, accepted);
+        }
         return json;
     }
 
-    public static ObjectNode setAccepted(ObjectNode event, boolean accepted) {
-        return event.put(Field.ACCEPTED, accepted);
-    }
+    // public static ObjectNode setAccepted(ObjectNode event, boolean accepted)
+    // {
+    // return event.put(Field.ACCEPTED, accepted);
+    // }
 
     public static boolean isAccepted(ObjectNode event) {
         return event.has(Field.ACCEPTED)
@@ -201,6 +213,25 @@ public class StateEvent<T> {
      */
     public T getExpected() {
         return expected;
+    }
+
+    /**
+     * Returns whether the event was accepted or not.
+     *
+     * @return whether the event was accepted or not.
+     */
+    public Boolean getAccepted() {
+        return accepted;
+    }
+
+    /**
+     * Sets whether the event was accepted or not.
+     *
+     * @param accepted
+     *            whether the event was accepted or not.
+     */
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
     }
 
     @Override

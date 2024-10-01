@@ -67,6 +67,11 @@ export type ServerConnectionConfig = Readonly<{
    * method that provides the signal when subscribing to it.
    */
   params?: Record<string, unknown>;
+
+  /**
+   * The unique identifier of the parent signal in the client.
+   */
+  parentClientSignalId?: string;
 }>;
 
 /**
@@ -87,13 +92,14 @@ class ServerConnection {
   }
 
   connect() {
-    const { client, endpoint, method, params } = this.config;
+    const { client, endpoint, method, params, parentClientSignalId } = this.config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
       params,
+      parentClientSignalId,
     });
 
     return this.#subscription;
@@ -128,7 +134,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * The unique identifier of the signal necessary to communicate with the
    * server.
    */
-  readonly id = nanoid();
+  readonly id: string;
 
   /**
    * The server connection manager.
@@ -152,12 +158,13 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   // value to the server.
   #paused = true;
 
-  constructor(value: T | undefined, config: ServerConnectionConfig) {
+  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string) {
     super(
       value,
       () => this.#connect(),
       () => this.#disconnect(),
     );
+    this.id = id ?? nanoid();
     this.server = new ServerConnection(this.id, config);
 
     this.subscribe((v) => {
