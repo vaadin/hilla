@@ -9,7 +9,11 @@ import {
   UnauthorizedResponseError,
   type ValidationErrorData,
 } from './EndpointErrors.js';
-import { type ActionOnLostSubscription, FluxConnection } from './FluxConnection.js';
+import {
+  type ActionOnLostSubscription,
+  FluxConnection,
+  type FluxSubscriptionStateChangeEvent,
+} from './FluxConnection.js';
 import type { VaadinWindow } from './types.js';
 
 const $wnd = window as VaadinWindow;
@@ -42,6 +46,9 @@ export interface Subscription<T> {
 
   /** Called when a new value is available. */
   onNext(callback: (value: T) => void): Subscription<T>;
+
+  /** Called when the subscription state changes. */
+  onConnectionStateChange(callback: (event: FluxSubscriptionStateChangeEvent) => void): Subscription<T>;
 
   /**
    * Called when the connection is restored, but there's no longer a valid subscription. If the callback returns
