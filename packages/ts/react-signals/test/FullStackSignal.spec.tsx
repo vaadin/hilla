@@ -100,9 +100,6 @@ describe('@vaadin/hilla-react-signals', () => {
         onNext() {
           return this;
         },
-        onDisconnect() {
-          return this;
-        },
         onSubscriptionLost() {
           return this;
         },
