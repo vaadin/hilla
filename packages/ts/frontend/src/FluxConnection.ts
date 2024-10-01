@@ -59,6 +59,9 @@ export enum FluxSubscriptionState {
   CLOSED = 'closed',
 }
 
+/**
+ * Event wrapper for flux subscription connection state change callback
+ */
 export type FluxSubscriptionStateChangeEvent = CustomEvent<{ state: FluxSubscriptionState }>;
 
 type EndpointInfo = {
