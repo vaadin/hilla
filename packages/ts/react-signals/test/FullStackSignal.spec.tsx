@@ -51,16 +51,13 @@ describe('@vaadin/hilla-react-signals', () => {
   });
 
   describe('FullStackSignal', () => {
-    function createAcceptedEvent(
-      value: number,
-      type: 'increment' | 'replace' | 'set' | 'snapshot',
-    ): StateEvent<number> {
+    function createAcceptedEvent(value: number, type: 'increment' | 'replace' | 'set' | 'snapshot'): StateEvent {
       return { id: nanoid(), type, value, expected: 0, accepted: true };
     }
 
     function simulateReceivedChange(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
-      event: StateEvent<number>,
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>,
+      event: StateEvent,
     ) {
       const [onNextCallback] = connectSubscriptionMock.onNext.firstCall.args;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -68,7 +65,7 @@ describe('@vaadin/hilla-react-signals', () => {
     }
 
     function simulateResubscription(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>,
       client: sinon.SinonStubbedInstance<ConnectClient>,
     ) {
       const [onSubscriptionLostCallback] = connectSubscriptionMock.onSubscriptionLost.firstCall.args;
@@ -79,14 +76,14 @@ describe('@vaadin/hilla-react-signals', () => {
     }
 
     let client: sinon.SinonStubbedInstance<ConnectClient>;
-    let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
+    let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
     let signal: NumberSignal;
 
     beforeEach(() => {
       client = sinon.createStubInstance(ConnectClient);
       client.call.resolves();
 
-      subscription = sinon.spy<Subscription<StateEvent<number>>>({
+      subscription = sinon.spy<Subscription<StateEvent>>({
         cancel() {},
         context() {
           return this;
