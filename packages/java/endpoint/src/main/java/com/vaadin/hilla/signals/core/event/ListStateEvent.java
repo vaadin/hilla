@@ -130,19 +130,19 @@ public class ListStateEvent<T> {
     }
 
     private static InsertPosition extractPosition(JsonNode json) {
-        var rawDirection = json.get(Field.POSITION);
-        if (rawDirection == null) {
+        var rawPosition = json.get(Field.POSITION);
+        if (rawPosition == null) {
             var message = String.format(
-                    "Missing event direction. Direction is required, and should be one of: %s",
+                    "Missing event position. Position is required, and should be one of: %s",
                     Arrays.toString(InsertPosition.values()));
-            throw new InvalidEventTypeException(message);
+            throw new MissingFieldException(message);
         }
         try {
-            return InsertPosition.of(rawDirection.asText());
+            return InsertPosition.of(rawPosition.asText());
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                    "Invalid event direction %s. Direction should be one of: %s",
-                    rawDirection.asText(),
+                    "Invalid event position: %s. Position should be one of: %s",
+                    rawPosition.asText(),
                     Arrays.toString(InsertPosition.values()));
             throw new InvalidEventTypeException(message, e);
         }
@@ -158,7 +158,10 @@ public class ListStateEvent<T> {
 
     private static String extractEntryId(JsonNode json) {
         var entryId = json.get(Field.ENTRY_ID);
-        return entryId == null ? null : entryId.asText();
+        if (entryId == null) {
+            throw new MissingFieldException(Field.ENTRY_ID);
+        }
+        return entryId.asText();
     }
 
     public ObjectNode toJson() {
