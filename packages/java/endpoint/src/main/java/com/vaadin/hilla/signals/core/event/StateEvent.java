@@ -169,11 +169,6 @@ public class StateEvent<T> {
         return json;
     }
 
-    // public static ObjectNode setAccepted(ObjectNode event, boolean accepted)
-    // {
-    // return event.put(Field.ACCEPTED, accepted);
-    // }
-
     public static boolean isAccepted(ObjectNode event) {
         return event.has(Field.ACCEPTED)
                 && event.get(Field.ACCEPTED).asBoolean();
