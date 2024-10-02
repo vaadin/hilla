@@ -97,14 +97,14 @@ public class ListSignal<T> extends Signal<T> {
     @Override
     public void submit(ObjectNode event) {
         var rawEventType = StateEvent.extractRawEventType(event);
-        if (StateEvent.EventType.of(rawEventType) != null) {
+        if (StateEvent.EventType.find(rawEventType).isPresent()) {
             // It is not a List structure event, find the signal to submit to.
             // For internal signals, the signal id is the event id:
             var signalId = StateEvent.extractId(event);
             var signalEntry = entries.get(UUID.fromString(signalId));
             if (signalEntry == null) {
-                LOGGER.warn(
-                        "Signal entry not found for signal id: {}. Ignoring the event: {}",
+                LOGGER.debug(
+                        "Signal entry not found for id: {}. Ignoring the event: {}",
                         signalId, event);
                 return;
             }
@@ -127,8 +127,7 @@ public class ListSignal<T> extends Signal<T> {
     @Override
     protected ObjectNode processEvent(ObjectNode event) {
         try {
-            var stateEvent = new ListStateEvent<>(event, getValueType(),
-                    Entry::new);
+            var stateEvent = new ListStateEvent<>(event, getValueType());
             return switch (stateEvent.getEventType()) {
             case INSERT -> handleInsert(stateEvent).toJson();
             case REMOVE -> handleRemoval(stateEvent).toJson();
@@ -147,6 +146,10 @@ public class ListSignal<T> extends Signal<T> {
         }
         var toBeInserted = createEntry(event.getValue());
         if (entries.containsKey(toBeInserted.id())) {
+            // already exists (the chances of this happening are extremely low)
+            LOGGER.warn(
+                    "Duplicate UUID generation detected when adding a new entry: {}, rejecting the insert event.",
+                    toBeInserted.id());
             event.setAccepted(false);
             return event;
         }
@@ -195,18 +198,16 @@ public class ListSignal<T> extends Signal<T> {
             return event;
         }
 
-        entries.remove(toBeRemovedEntry.id());
         if (head.equals(toBeRemovedEntry.id())) {
             // removing head
             if (toBeRemovedEntry.next() == null) {
                 // removing the only entry
                 head = tail = null;
-                event.setAccepted(true);
-                return event;
+            } else {
+                var newHead = entries.get(toBeRemovedEntry.next());
+                head = newHead.id();
+                newHead.prev = null;
             }
-            var newHead = entries.get(toBeRemovedEntry.next());
-            head = newHead.id();
-            newHead.prev = null;
         } else {
             var prev = entries.get(toBeRemovedEntry.previous());
             var next = entries.get(toBeRemovedEntry.next());
@@ -214,12 +215,13 @@ public class ListSignal<T> extends Signal<T> {
                 // removing tail
                 tail = prev.id();
                 prev.next = null;
-                event.setAccepted(true);
-                return event;
+            } else {
+                prev.next = next.id();
+                next.prev = prev.id();
             }
-            prev.next = next.id();
-            next.prev = prev.id();
         }
+        entries.remove(toBeRemovedEntry.id());
+
         event.setAccepted(true);
         return event;
     }

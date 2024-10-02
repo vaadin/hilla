@@ -2,6 +2,7 @@ package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
 
@@ -88,7 +89,7 @@ public class ValueSignal<T> extends Signal<T> {
                 default -> throw new UnsupportedOperationException(
                     "Unsupported event: " + stateEvent.getEventType());
             };
-        } catch (InvalidEventTypeException e) {
+        } catch (InvalidEventTypeException | MissingFieldException e) {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
         }

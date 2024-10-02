@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A utility class for representing state events out of an ObjectNode. This
@@ -35,9 +36,12 @@ public class StateEvent<T> {
         SNAPSHOT, SET, REPLACE, INCREMENT;
 
         public static EventType of(String type) {
+            return valueOf(type.toUpperCase());
+        }
+
+        public static Optional<EventType> find(String type) {
             return Arrays.stream(values())
-                    .filter(e -> e.name().equalsIgnoreCase(type)).findFirst()
-                    .orElse(null);
+                    .filter(e -> e.name().equalsIgnoreCase(type)).findFirst();
         }
     }
 

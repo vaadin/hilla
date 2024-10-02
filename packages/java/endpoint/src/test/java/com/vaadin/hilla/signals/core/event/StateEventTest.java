@@ -139,7 +139,7 @@ public class StateEventTest {
     }
 
     @Test
-    public void constructor_withJsonMissingEventType_shouldThrowInvalidEventTypeException() {
+    public void constructor_withJsonMissingEventType_shouldThrowMissingFieldException() {
         String clientId = UUID.randomUUID().toString();
         String value = "testValue";
 
@@ -147,7 +147,7 @@ public class StateEventTest {
         json.put(StateEvent.Field.ID, clientId);
         json.put(StateEvent.Field.VALUE, value);
 
-        Exception exception = assertThrows(InvalidEventTypeException.class,
+        Exception exception = assertThrows(MissingFieldException.class,
                 () -> new StateEvent<>(json, String.class));
 
         String expectedMessage = "Missing event type. Type is required, and should be one of: [SNAPSHOT, SET, REPLACE, INCREMENT]";

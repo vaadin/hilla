@@ -2,6 +2,7 @@ package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 
 /**
@@ -52,7 +53,7 @@ public class NumberSignal extends ValueSignal<Double> {
             boolean accepted = super.compareAndSet(newValue, expectedValue);
             stateEvent.setAccepted(accepted);
             return stateEvent.toJson();
-        } catch (InvalidEventTypeException e) {
+        } catch (InvalidEventTypeException | MissingFieldException e) {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
         }

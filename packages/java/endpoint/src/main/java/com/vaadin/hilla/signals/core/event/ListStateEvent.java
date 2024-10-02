@@ -52,7 +52,7 @@ public class ListStateEvent<T> {
         FIRST, LAST, BEFORE, AFTER;
 
         public static InsertPosition of(String direction) {
-            return InsertPosition.valueOf(direction.toUpperCase());
+            return valueOf(direction.toUpperCase());
         }
     }
 
@@ -63,9 +63,7 @@ public class ListStateEvent<T> {
         SNAPSHOT, INSERT, REMOVE;
 
         public static EventType of(String type) {
-            return Arrays.stream(values())
-                    .filter(e -> e.name().equalsIgnoreCase(type)).findFirst()
-                    .orElse(null);
+            return valueOf(type.toUpperCase());
         }
     }
 
@@ -88,14 +86,6 @@ public class ListStateEvent<T> {
         this.entries = entries;
     }
 
-    public ListStateEvent(String id, EventType eventType, T value) {
-        this.id = id;
-        this.eventType = eventType;
-        this.value = value;
-        this.insertPosition = null;
-        this.entries = null;
-    }
-
     public ListStateEvent(String id, EventType eventType, T value,
             InsertPosition insertPosition) {
         this.id = id;
@@ -111,8 +101,7 @@ public class ListStateEvent<T> {
      * @param json
      *            The JSON representation of the event.
      */
-    public ListStateEvent(ObjectNode json, Class<T> valueType,
-            ListEntryFactory<T> entryFactory) {
+    public ListStateEvent(ObjectNode json, Class<T> valueType) {
         this.id = StateEvent.extractId(json);
         this.eventType = extractEventType(json);
         this.value = this.eventType == EventType.INSERT

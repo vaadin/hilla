@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
@@ -108,6 +109,30 @@ public class ListSignalTest {
     }
 
     @Test
+    public void subscribe_toAnEntry_returns_flux_withJsonEvents() {
+        var listSignal = new ListSignal<>(Person.class);
+        var listFlux = listSignal.subscribe();
+
+        var entryIds = new ArrayList<String>();
+        var counter = new AtomicInteger(0);
+        listFlux.subscribe(eventJson -> {
+            // skip the initial state notification when counter is 0
+            if (counter.get() == 1) {
+                assertTrue(isAccepted(eventJson));
+                entryIds.add(extractEntryId(eventJson));
+            }
+            counter.incrementAndGet();
+        });
+        var evt = createInsertEvent(new Person("John", 42, true),
+                InsertPosition.LAST);
+        listSignal.submit(evt);
+        assertEquals(2, counter.get());
+
+        var entryFlux = listSignal.subscribe(entryIds.get(0));
+        entryFlux.subscribe(Assert::assertNotNull);
+    }
+
+    @Test
     public void submit_notifies_subscribers_whenInsertingAtLast() {
         var signal = new ListSignal<>(Person.class);
         Flux<ObjectNode> flux = signal.subscribe();
@@ -144,6 +169,144 @@ public class ListSignalTest {
         assertEquals(name, entry.value().getName());
         assertEquals(age, entry.value().getAge());
         assertEquals(adult, entry.value().isAdult());
+    }
+
+    @Test
+    public void submit_setEvent_toAnEntry_notifies_subscribersToTheEntry_withCorrectEvents() {
+        var listSignal = new ListSignal<>(Person.class);
+        var listFlux = listSignal.subscribe();
+
+        var entryIds = new ArrayList<String>();
+        var counter = new AtomicInteger(0);
+        listFlux.subscribe(eventJson -> {
+            // skip the initial state notification when counter is 0
+            if (counter.get() > 0) {
+                assertTrue(isAccepted(eventJson));
+                entryIds.add(extractEntryId(eventJson));
+            }
+            counter.incrementAndGet();
+        });
+        var evt = createInsertEvent(new Person("John", 42, true),
+                InsertPosition.LAST);
+        listSignal.submit(evt);
+        var evt2 = createInsertEvent(new Person("Smith", 44, true),
+                InsertPosition.LAST);
+        listSignal.submit(evt2);
+
+        assertEquals(3, counter.get());
+
+        var entries = extractEntries(listSignal.createSnapshotEvent(),
+                Person.class, Entry::new);
+        var linkedList = buildLinkedList(entries);
+        assertEquals(2, linkedList.size());
+        var entry1 = linkedList.get(0);
+        assertEquals("John", entry1.value().getName());
+        assertEquals(42, entry1.value().getAge());
+        assertTrue(entry1.value().isAdult());
+
+        var entryFlux = listSignal.subscribe(entryIds.get(0));
+        var entryCounter = new AtomicInteger(0);
+        entryFlux.subscribe(eventJson -> {
+            // skip the initial state notification when counter is 0
+            if (entryCounter.get() == 1) {
+                assertEquals(StateEvent.EventType.SET.name().toLowerCase(),
+                        eventJson.get(StateEvent.Field.TYPE).asText());
+                assertTrue(isAccepted(eventJson));
+            }
+            entryCounter.incrementAndGet();
+        });
+        var setEvent = createSetEvent(new Person("Jane", 13, false),
+                entryIds.get(0));
+        listSignal.submit(setEvent);
+        assertEquals(2, entryCounter.get());
+
+        entries = extractEntries(listSignal.createSnapshotEvent(), Person.class,
+                Entry::new);
+        linkedList = buildLinkedList(entries);
+        assertEquals(2, linkedList.size());
+        var sameEntry1 = linkedList.get(0);
+        assertEquals("Jane", sameEntry1.value().getName());
+        assertEquals(13, sameEntry1.value().getAge());
+        assertFalse(sameEntry1.value().isAdult());
+        var secondEntry = linkedList.get(1);
+        assertEquals("Smith", secondEntry.value().getName());
+        assertEquals(44, secondEntry.value().getAge());
+        assertTrue(secondEntry.value().isAdult());
+
+        assertEquals(entry1.id(), sameEntry1.id());
+        assertEquals(entryIds.get(1), secondEntry.id().toString());
+
+        // No change is expected in the list signal itself:
+        assertEquals(3, counter.get());
+    }
+
+    @Test
+    public void submit_replaceEvent_toAnEntry_notifies_subscribersToTheEntry_withCorrectEvents() {
+        var listSignal = new ListSignal<>(Person.class);
+        var listFlux = listSignal.subscribe();
+
+        var entryIds = new ArrayList<String>();
+        var counter = new AtomicInteger(0);
+        listFlux.subscribe(eventJson -> {
+            // skip the initial state notification when counter is 0
+            if (counter.get() > 0) {
+                assertTrue(isAccepted(eventJson));
+                entryIds.add(extractEntryId(eventJson));
+            }
+            counter.incrementAndGet();
+        });
+        var evt = createInsertEvent(new Person("John", 42, true),
+                InsertPosition.LAST);
+        listSignal.submit(evt);
+        var evt2 = createInsertEvent(new Person("Smith", 44, true),
+                InsertPosition.LAST);
+        listSignal.submit(evt2);
+
+        assertEquals(3, counter.get());
+
+        var entries = extractEntries(listSignal.createSnapshotEvent(),
+                Person.class, Entry::new);
+        var linkedList = buildLinkedList(entries);
+        assertEquals(2, linkedList.size());
+        var entry2 = linkedList.get(1);
+        assertEquals("Smith", entry2.value().getName());
+        assertEquals(44, entry2.value().getAge());
+        assertTrue(entry2.value().isAdult());
+
+        var entryFlux = listSignal.subscribe(entryIds.get(1));
+        var entryCounter = new AtomicInteger(0);
+        entryFlux.subscribe(eventJson -> {
+            // skip the initial state notification when counter is 0
+            if (entryCounter.get() == 1) {
+                assertEquals(StateEvent.EventType.REPLACE.name().toLowerCase(),
+                        eventJson.get(StateEvent.Field.TYPE).asText());
+                assertTrue(isAccepted(eventJson));
+            }
+            entryCounter.incrementAndGet();
+        });
+        var replaceEvent = createReplaceEvent(new Person("Smith", 44, true),
+                new Person("Jane", 13, false), entryIds.get(1));
+        listSignal.submit(replaceEvent);
+        assertEquals(2, entryCounter.get());
+
+        entries = extractEntries(listSignal.createSnapshotEvent(), Person.class,
+                Entry::new);
+        linkedList = buildLinkedList(entries);
+        assertEquals(2, linkedList.size());
+        var entry1 = linkedList.get(0);
+        assertEquals("John", entry1.value().getName());
+        assertEquals(42, entry1.value().getAge());
+        assertTrue(entry1.value().isAdult());
+        var secondEntry = linkedList.get(1);
+        assertEquals("Jane", secondEntry.value().getName());
+        assertEquals(13, secondEntry.value().getAge());
+        assertFalse(secondEntry.value().isAdult());
+
+        assertEquals(entry2.id(), secondEntry.id());
+        assertEquals(entryIds.get(1), secondEntry.id().toString());
+
+        // No change is expected in the list signal itself:
+        assertEquals(3, counter.get());
     }
 
     @Test
@@ -525,6 +688,19 @@ public class ListSignalTest {
         return event;
     }
 
+    private <T> ObjectNode createSetEvent(T value, String entryId) {
+        var setEvent = new StateEvent<>(entryId, StateEvent.EventType.SET,
+                value);
+        return setEvent.toJson();
+    }
+
+    private <T> ObjectNode createReplaceEvent(T expectedValue, T value,
+            String entryId) {
+        var setEvent = new StateEvent<>(entryId, StateEvent.EventType.REPLACE,
+                value, expectedValue);
+        return setEvent.toJson();
+    }
+
     private <V> List<ListStateEvent.ListEntry<V>> buildLinkedList(
             Collection<ListStateEvent.ListEntry<V>> entries) {
         Map<UUID, ListStateEvent.ListEntry<V>> entryMap = new HashMap<>();
@@ -566,7 +742,7 @@ public class ListSignalTest {
         }
         List<ListEntry<X>> entries = new ArrayList<>();
         for (JsonNode rawEntry : rawEntries) {
-            var id = extractEntryId(rawEntry);
+            var id = extractOrGenerateId(rawEntry);
             var next = extractUUIDOrNull(rawEntry, ListStateEvent.Field.NEXT);
             var prev = extractUUIDOrNull(rawEntry, ListStateEvent.Field.PREV);
             var value = StateEvent.convertValue(
@@ -576,7 +752,7 @@ public class ListSignalTest {
         return entries;
     }
 
-    private static UUID extractEntryId(JsonNode rawEntry) {
+    private static UUID extractOrGenerateId(JsonNode rawEntry) {
         var id = rawEntry.get(StateEvent.Field.ID);
         if (id == null) {
             return UUID.randomUUID();
@@ -592,5 +768,10 @@ public class ListSignalTest {
     private static boolean isAccepted(ObjectNode event) {
         return event.has(StateEvent.Field.ACCEPTED)
                 && event.get(StateEvent.Field.ACCEPTED).asBoolean();
+    }
+
+    private static String extractEntryId(JsonNode json) {
+        var entryId = json.get(ListStateEvent.Field.ENTRY_ID);
+        return entryId == null ? null : entryId.asText();
     }
 }
