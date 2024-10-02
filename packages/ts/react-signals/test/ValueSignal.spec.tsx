@@ -5,6 +5,7 @@ import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import type { ReplaceStateEvent } from '../events.js';
 import type { StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { ValueSignal } from '../src/index.js';
@@ -21,7 +22,7 @@ describe('@vaadin/hilla-react-signals', () => {
   };
 
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<string>>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
   beforeEach(() => {
@@ -94,6 +95,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 
@@ -150,7 +152,6 @@ describe('@vaadin/hilla-react-signals', () => {
       });
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
-      // @ts-expect-error params.event type has id property
       onNextCallback({ ...expectedEvent, accepted: true });
       expect(valueSignal.value).to.equal('bar');
     });
@@ -173,7 +174,13 @@ describe('@vaadin/hilla-react-signals', () => {
       const [onNextCallback] = subscription.onNext.firstCall.args;
 
       // Simulate an accepted event representing a concurrent value change before the reject is received:
-      onNextCallback({ id: 'another-event-id', type: 'replace', value: 'b', expected: 'a', accepted: true });
+      onNextCallback({
+        id: 'another-event-id',
+        type: 'replace',
+        value: 'b',
+        expected: 'a',
+        accepted: true,
+      } as ReplaceStateEvent<string>);
       expect(valueSignal.value).to.equal('b');
 
       // @ts-expect-error params.event type has id property
@@ -190,7 +197,13 @@ describe('@vaadin/hilla-react-signals', () => {
       });
 
       // Simulate another concurrent value change before the reject is received:
-      onNextCallback({ id: 'another-event-id', type: 'replace', value: 'c', expected: 'b', accepted: true });
+      onNextCallback({
+        id: 'another-event-id',
+        type: 'replace',
+        value: 'c',
+        expected: 'b',
+        accepted: true,
+      } as ReplaceStateEvent<string>);
       expect(valueSignal.value).to.equal('c');
 
       // @ts-expect-error params.event type has id property

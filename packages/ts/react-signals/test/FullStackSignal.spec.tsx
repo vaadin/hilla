@@ -5,6 +5,7 @@ import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaa
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import type { IncrementStateEvent, ReplaceStateEvent, SetStateEvent, SnapshotStateEvent } from '../events.js';
 import type { StateEvent } from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
@@ -51,7 +52,10 @@ describe('@vaadin/hilla-react-signals', () => {
   });
 
   describe('FullStackSignal', () => {
-    function createAcceptedEvent(value: number, type: 'increment' | 'replace' | 'set' | 'snapshot'): StateEvent {
+    function createAcceptedEvent(
+      value: number,
+      type: 'increment' | 'replace' | 'set' | 'snapshot',
+    ): IncrementStateEvent | ReplaceStateEvent<number> | SetStateEvent<number> | SnapshotStateEvent<number> {
       return { id: nanoid(), type, value, expected: 0, accepted: true };
     }
 
@@ -133,6 +137,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 
@@ -146,6 +151,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
 
       const dependentSignal = computed(() => signal.value);
@@ -172,6 +178,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: { foo: 'bar', baz: true },
+        parentClientSignalId: undefined,
       });
     });
 
@@ -225,6 +232,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 

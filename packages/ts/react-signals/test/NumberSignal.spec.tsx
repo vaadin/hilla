@@ -16,10 +16,10 @@ use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
-  function simulateReceivingAcceptedEvent(event: StateEvent<number>): void {
+  function simulateReceivingAcceptedEvent(event: StateEvent): void {
     const [onNextCallback] = subscription.onNext.firstCall.args;
     onNextCallback({ ...event, accepted: true });
   }
