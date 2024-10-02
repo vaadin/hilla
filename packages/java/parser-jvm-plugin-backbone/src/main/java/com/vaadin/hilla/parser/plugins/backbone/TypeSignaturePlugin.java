@@ -255,6 +255,9 @@ public final class TypeSignaturePlugin
             }
         } else if (signature.isTypeVariable()) {
             items = List.of(((TypeVariableModel) signature).resolve());
+        } else if (signature.isClassRef()) {
+            items = ((ClassRefSignatureModel) signature).getTypeArguments()
+                    .stream().map(SignatureModel.class::cast).toList();
         }
 
         return items;
