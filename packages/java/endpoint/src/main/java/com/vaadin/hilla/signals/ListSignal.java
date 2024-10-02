@@ -118,9 +118,9 @@ public class ListSignal<T> extends Signal<T> {
     protected ObjectNode createSnapshotEvent() {
         var entries = this.entries.values().stream()
                 .map(entry -> (ListEntry<T>) entry).toList();
-        var listEventType = ListStateEvent.EventType.SNAPSHOT;
-        var event = new ListStateEvent<>(getId().toString(), listEventType,
+        var event = new ListStateEvent<>(getId().toString(), ListStateEvent.EventType.SNAPSHOT,
                 entries);
+        event.setAccepted(true);
         return event.toJson();
     }
 

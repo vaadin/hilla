@@ -344,6 +344,8 @@ public class ListSignalTest {
                 var entries = extractEntries(eventJson, Person.class,
                         Entry::new);
                 assertEquals(0, entries.size());
+                // check snapshot events to also marked as accepted
+                assertTrue(isAccepted(eventJson));
             } else {
                 assertTrue(isAccepted(eventJson));
             }

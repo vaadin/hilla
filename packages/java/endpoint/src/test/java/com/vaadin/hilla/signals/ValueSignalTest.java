@@ -100,6 +100,7 @@ public class ValueSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertNull(stateEvent.getValue());
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertTrue(StateEvent.isAccepted(eventJson));
                 assertEquals(name, stateEvent.getValue().getName());
