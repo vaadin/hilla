@@ -8,6 +8,10 @@ import jakarta.persistence.Version;
 
 import com.vaadin.hilla.Nullable;
 
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.util.Date;
+
 @MappedSuperclass
 public class AbstractEntity {
     @Id
@@ -18,6 +22,12 @@ public class AbstractEntity {
     @Version
     @Nullable
     private Long version;
+
+
+    private OffsetDateTime offsetDateTime;
+    private ZonedDateTime zonedDateTime;
+    private java.util.Date utilDate;
+    private java.sql.Date sqlDate;
 
     public Long getId() {
         return id;
@@ -33,5 +43,37 @@ public class AbstractEntity {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public OffsetDateTime getOffsetDateTime() {
+        return offsetDateTime;
+    }
+
+    public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
+        this.offsetDateTime = offsetDateTime;
+    }
+
+    public ZonedDateTime getZonedDateTime() {
+        return zonedDateTime;
+    }
+
+    public void setZonedDateTime(ZonedDateTime zonedDateTime) {
+        this.zonedDateTime = zonedDateTime;
+    }
+
+    public Date getUtilDate() {
+        return utilDate;
+    }
+
+    public void setUtilDate(Date utilDate) {
+        this.utilDate = utilDate;
+    }
+
+    public java.sql.Date getSqlDate() {
+        return sqlDate;
+    }
+
+    public void setSqlDate(java.sql.Date sqlDate) {
+        this.sqlDate = sqlDate;
     }
 }

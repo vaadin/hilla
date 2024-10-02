@@ -304,6 +304,94 @@
           }
         }
       }
+    },
+    "/DateTimeEndpoint/echoOffsetDateTime": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoOffsetDateTime_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mapInstant": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DateTimeEndpoint/echoZonedDateTime": {
+      "post": {
+        "tags": ["DateTimeEndpoint"],
+        "operationId": "DateTimeEndpoint_echoZonedDateTime_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mapInstant": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": true
+                  },
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
