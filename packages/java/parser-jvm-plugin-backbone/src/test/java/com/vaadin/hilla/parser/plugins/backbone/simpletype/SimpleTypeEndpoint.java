@@ -88,4 +88,8 @@ public class SimpleTypeEndpoint {
     public String getString() {
         return "test";
     };
+
+    protected String getProtectedValue() {
+        return "protected";
+    }
 }
