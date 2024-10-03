@@ -309,5 +309,73 @@ describe('@vaadin/hilla-react-signals', () => {
 
       expect(client.subscribe).to.be.have.been.calledTwice;
     });
+
+    it('should send undefined as parentClientSignalId when no parent signal is provided', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: undefined,
+      });
+    });
+
+    it('should send parentClientSignalId when parent signal is provided', async () => {
+      signal = new NumberSignal(undefined, {
+        client,
+        endpoint: 'TestEndpoint',
+        method: 'testMethod',
+        parentClientSignalId: '1234',
+      });
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: '1234',
+      });
+    });
+
+    it('should not generate a random id when id is provided for the constructor', () => {
+      signal = new NumberSignal(
+        undefined,
+        {
+          client,
+          endpoint: 'TestEndpoint',
+          method: 'testMethod',
+        },
+        '1234',
+      );
+      expect(signal.id).to.equal('1234');
+    });
+
+    it('should send the provided id as event id when sending set events to the server', async () => {
+      signal = new NumberSignal(
+        undefined,
+        {
+          client,
+          endpoint: 'TestEndpoint',
+          method: 'testMethod',
+          parentClientSignalId: 'a1b2c3d4',
+        },
+        '1234',
+      );
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      signal.value = 42;
+      expect(client.call).to.have.been.calledWith('SignalsHandler', 'update', {
+        clientSignalId: '1234',
+        event: { id: '1234', type: 'set', value: 42, accepted: false, parentSignalId: 'a1b2c3d4' },
+      });
+    });
   });
 });
