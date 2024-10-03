@@ -136,7 +136,8 @@ export function isListSnapshotStateEvent<T>(event: unknown): event is ListSnapsh
     event !== null &&
     typeof (event as { id?: unknown }).id === 'string' &&
     (event as { type?: unknown }).type === 'snapshot' &&
-    (event as { entries?: unknown }).entries instanceof Array
+    (event as { entries?: unknown }).entries instanceof Array &&
+    typeof (event as { accepted?: unknown }).accepted !== 'undefined'
   );
 }
 
