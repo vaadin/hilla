@@ -23,7 +23,6 @@ public class AbstractEntity {
     @Nullable
     private Long version;
 
-
     private OffsetDateTime offsetDateTime;
     private ZonedDateTime zonedDateTime;
     private java.util.Date utilDate;

@@ -29,7 +29,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
-            Instant.class, LocalTime.class, OffsetDateTime.class, ZonedDateTime.class };
+            Instant.class, LocalTime.class, OffsetDateTime.class,
+            ZonedDateTime.class };
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<ClassRefSignatureModel> interfaces;
