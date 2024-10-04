@@ -74,6 +74,10 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             }
           }
 
+          if (config === undefined) {
+            config = { flowLayout: flowLayout ?? false };
+          }
+
           let title: string;
 
           if (config?.title) {
