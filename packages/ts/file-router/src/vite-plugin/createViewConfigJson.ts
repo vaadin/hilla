@@ -80,7 +80,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
 
           let title: string;
 
-          if (config?.title) {
+          if (config.title) {
             ({ title } = config);
           } else {
             if (!componentName) {
@@ -95,7 +95,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
           return {
             route: convertFSRouteSegmentToURLPatternFormat(path),
             ...config,
-            params: extractParameterFromRouteSegment(config?.route ?? path),
+            params: extractParameterFromRouteSegment(config.route ?? path),
             title,
             children: newChildren ?? (layout ? [] : undefined),
           } satisfies ServerViewConfig;
