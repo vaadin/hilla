@@ -37,6 +37,18 @@ export class I18n {
         `The Hilla I18n API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.hillaI18n=true to vaadin-featureflags.properties`,
       );
     }
+    // @ts-expect-error import.meta.hot does not have TS definitions
+    if (import.meta.hot) {
+      // @ts-expect-error import.meta.hot does not have TS definitions
+      // eslint-disable-next-line
+      import.meta.hot.on('translations-update', () => {
+        this.#initialized.value = false;
+        this.#language.value = undefined;
+        this.#translations.value = {};
+        this.#resolvedLanguage.value = undefined;
+        this.#chunks.clear();
+      });
+    }
   }
 
   /**
