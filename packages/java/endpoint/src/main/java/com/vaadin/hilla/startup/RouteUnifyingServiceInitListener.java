@@ -26,7 +26,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.shared.ApplicationConstants;
 import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.hilla.HillaStats;

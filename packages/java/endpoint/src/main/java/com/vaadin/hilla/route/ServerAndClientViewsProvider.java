@@ -28,7 +28,7 @@ import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.menu.RouteParamType;
 
 public class ServerAndClientViewsProvider {
