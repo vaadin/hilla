@@ -108,7 +108,7 @@ describe('@vaadin/hilla-react-signals', () => {
         },
         onConnectionStateChange() {
           return this;
-        }
+        },
       });
       // Mock the subscribe method
       client.subscribe.returns(subscription);
