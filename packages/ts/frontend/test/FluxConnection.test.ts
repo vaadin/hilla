@@ -374,7 +374,7 @@ describe('@vaadin/hilla-frontend', () => {
       sub.onSubscriptionLost(resubscribe);
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
-      expect(resubscribe).to.have.been.calledOnce;
+      expect(resubscribe).to.have.been.calledTwice;
       expect(getSubscriptionEventSpies()?.push).to.have.been.calledWith(
         JSON.stringify({
           '@type': 'subscribe',
@@ -395,7 +395,7 @@ describe('@vaadin/hilla-frontend', () => {
       getSubscriptionEventSpies()?.onReopen?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
-      expect(resubscribe).to.have.been.calledOnce;
+      expect(resubscribe).to.have.been.calledTwice;
     });
 
     it('should remove subscription information when callback has no return value', () => {
@@ -406,7 +406,7 @@ describe('@vaadin/hilla-frontend', () => {
       getSubscriptionEventSpies()?.onReopen?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
-      expect(resubscribe).to.have.been.calledOnce;
+      expect(resubscribe).to.have.been.calledTwice;
     });
 
     describe('flux subscription state', () => {
