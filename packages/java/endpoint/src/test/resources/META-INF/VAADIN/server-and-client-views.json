@@ -29,7 +29,13 @@
     "route": "/home",
     "lazy": false,
     "register": false,
-    "menu": null,
+    "menu": {
+      "title": "Home",
+      "order": null,
+      "exclude": false,
+      "icon": null,
+      "menuClass": null
+    },
     "flowLayout":false
   },
   "/comments": {
@@ -69,7 +75,13 @@
     "route": "/profile",
     "lazy": false,
     "register": false,
-    "menu": null,
+    "menu": {
+      "title": "Profile",
+      "order": null,
+      "exclude": false,
+      "icon": null,
+      "menuClass": null
+    },
     "flowLayout":false
   }
 }
