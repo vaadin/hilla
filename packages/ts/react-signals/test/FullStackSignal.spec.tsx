@@ -5,8 +5,13 @@ import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaa
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { IncrementStateEvent, ReplaceStateEvent, SetStateEvent, SnapshotStateEvent } from '../events.js';
-import type { StateEvent } from '../src/events.js';
+import type {
+  IncrementStateEvent,
+  ReplaceStateEvent,
+  SetStateEvent,
+  SnapshotStateEvent,
+  StateEvent,
+} from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';

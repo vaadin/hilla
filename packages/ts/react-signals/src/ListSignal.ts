@@ -10,7 +10,7 @@ import {
   type RemoveStateEvent,
   type StateEvent,
 } from './events.js';
-import { $processServerResponse, $update, FullStackSignal, type ServerConnectionConfig } from './FullStackSignal.js';
+import { $processServerResponse, $setValueQuietly, $update, type ServerConnectionConfig } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 export type EntryId = string;
@@ -21,9 +21,9 @@ export type Entry<T> = {
   prev?: EntryId;
 };
 
-export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>> {
-  #head: EntryId | undefined = undefined;
-  #tail: EntryId | undefined = undefined;
+export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>>> {
+  #head?: EntryId;
+  #tail?: EntryId;
 
   readonly #values = new Map<string, Entry<T>>();
 
@@ -83,7 +83,7 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
       this.#tail = newEntry.id;
     }
     this.#values.set(valueSignal.id, newEntry);
-    this.setValueLocal(this.#computeItems());
+    this[$setValueQuietly](this.#computeItems());
   }
 
   #handleRemoveUpdate(event: RemoveStateEvent): void {
@@ -112,7 +112,7 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
         nextEntry.prev = prevEntry.id;
       }
     }
-    this.setValueLocal(this.#computeItems());
+    this[$setValueQuietly](this.#computeItems());
   }
 
   #handleSnapshotEvent(event: ListSnapshotStateEvent<T>): void {
@@ -130,7 +130,7 @@ export class ListSignal<T> extends FullStackSignal<ReadonlyArray<ValueSignal<T>>
         this.#tail = entry.id;
       }
     });
-    this.setValueLocal(this.#computeItems());
+    this[$setValueQuietly](this.#computeItems());
   }
 
   insertLast(value: T): void {

@@ -120,6 +120,7 @@ class ServerConnection {
 
 export const $update = Symbol('update');
 export const $processServerResponse = Symbol('processServerResponse');
+export const $setValueQuietly = Symbol('setValueQuietly');
 
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
@@ -190,9 +191,9 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * @param value - The new value.
    * @internal
    */
-  protected setValueLocal(value: T): void {
+  protected [$setValueQuietly](value: T): void {
     this.#paused = true;
-    this.value = value;
+    super.value = value;
     this.#paused = false;
   }
 

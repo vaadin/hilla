@@ -1,7 +1,10 @@
 import { expect } from '@esm-bundle/chai';
 import {
+  createIncrementStateEvent,
   createInsertLastStateEvent,
   createRemoveStateEvent,
+  createReplaceStateEvent,
+  createSetStateEvent,
   isIncrementStateEvent,
   isInsertLastStateEvent,
   isListSnapshotStateEvent,
@@ -10,8 +13,7 @@ import {
   isSetStateEvent,
   isSnapshotStateEvent,
   type ListEntry,
-} from '../events.js';
-import { createIncrementStateEvent, createReplaceStateEvent, createSetStateEvent } from '../src/events.js';
+} from '../src/events.js';
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('CreateStateEventType', () => {
