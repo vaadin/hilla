@@ -1,5 +1,5 @@
 import { createReplaceStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
+import { $processServerResponse, $update, FullStackSignal, type Operation } from './FullStackSignal.js';
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Readonly<{
@@ -11,7 +11,7 @@ type PendingRequestsRecord<T> = Readonly<{
 /**
  * An operation subscription that can be canceled.
  */
-export interface OperationSubscription {
+export interface OperationSubscription extends Operation {
   cancel(): void;
 }
 
@@ -42,8 +42,8 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @param expected - The expected value.
    * @param newValue - The new value.
    */
-  replace(expected: T, newValue: T): void {
-    this[$update](createReplaceStateEvent(expected, newValue));
+  replace(expected: T, newValue: T): Operation {
+    return this[$update](createReplaceStateEvent(expected, newValue));
   }
 
   /**
@@ -62,11 +62,14 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
     const event = createReplaceStateEvent(this.value, newValue);
-    this[$update](event);
+    const operation = this[$update](event);
     const waiter = Promise.withResolvers<void>();
     const pendingRequest = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
+      // TypeScript thinks that this is a promise as it has a `then`.
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      ...operation,
       cancel: () => {
         pendingRequest.canceled = true;
         pendingRequest.waiter.resolve();

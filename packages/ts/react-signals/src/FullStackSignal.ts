@@ -1,9 +1,20 @@
 import type { ActionOnLostSubscription, ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
+import type { MutableRefObject } from 'react';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
+
+export type Operation = {
+  then(callback: () => void): Operation;
+};
+
+export const noOperation: Operation = {
+  then(_callback: () => void): Operation {
+    return noOperation;
+  },
+};
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
@@ -187,15 +198,26 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The event to update the server with.
    */
-  protected [$update](event: StateEvent<T>): void {
+  protected [$update](event: StateEvent<T>, operation?: Operation): Operation {
+    const callbackRef: MutableRefObject<(() => void) | undefined> = { current: undefined };
+    const op = operation ?? noOperation;
+    op.then = (callback) => {
+      callbackRef.current = callback;
+      return op;
+    };
     this.server
       .update(event)
+      .then(() => {
+        callbackRef.current?.();
+      })
       .catch((error: unknown) => {
         this.#error.value = error instanceof Error ? error : new Error(String(error));
       })
       .finally(() => {
         this.#pending.value = false;
       });
+
+    return op;
   }
 
   /**
