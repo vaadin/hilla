@@ -1,5 +1,8 @@
-import { expect } from '@esm-bundle/chai';
-import { createIncrementStateEvent, createReplaceStateEvent, createSetStateEvent } from '../src/events.js';
+// eslint-disable-next-line import/no-unassigned-import
+import './setup.js';
+
+import {expect} from '@esm-bundle/chai';
+import {createIncrementStateEvent, createReplaceStateEvent, createSetStateEvent} from '../src/events.js';
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('CreateStateEventType', () => {
