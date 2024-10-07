@@ -106,6 +106,9 @@ describe('@vaadin/hilla-react-signals', () => {
         onSubscriptionLost() {
           return this;
         },
+        onConnectionStateChange() {
+          return this;
+        }
       });
       // Mock the subscribe method
       client.subscribe.returns(subscription);
