@@ -25,7 +25,6 @@ public class Person extends AbstractEntity {
     private java.util.Date utilDate;
     private java.sql.Date sqlDate;
 
-
     public String getFirstName() {
         return firstName;
     }
