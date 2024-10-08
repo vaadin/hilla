@@ -630,7 +630,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         fetchMock
           .resetHistory()
           .reset()
-          .get('*', {
+          .get('./?v-r=i18n&langtag=en-US', {
             body: {
               'addresses.form.city.label': 'City updated',
             },
