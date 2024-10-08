@@ -36,10 +36,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
     let current = this.#head;
     const result: Array<ValueSignal<T>> = [];
     while (current !== undefined) {
-      const entry = this.#values.get(current);
-      if (entry === undefined) {
-        throw new Error('Unexpected state: Entry not found');
-      }
+      const entry = this.#values.get(current)!;
       result.push(entry.value);
       current = entry.next;
     }
@@ -74,10 +71,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
       this.#head = newEntry.id;
       this.#tail = this.#head;
     } else {
-      const tailEntry = this.#values.get(this.#tail!);
-      if (tailEntry === undefined) {
-        throw new Error('Unexpected state: Tail entry not found');
-      }
+      const tailEntry = this.#values.get(this.#tail!)!;
       tailEntry.next = newEntry.id;
       newEntry.prev = this.#tail;
       this.#tail = newEntry.id;
