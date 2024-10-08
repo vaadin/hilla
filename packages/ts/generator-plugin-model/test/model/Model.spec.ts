@@ -34,7 +34,10 @@ describe('FormPlugin', () => {
           const fileName = `com/example/application/endpoints/TsFormEndpoint/${modelName}.ts`;
           const modelFile = filesByName[fileName];
           expect(modelFile, `${fileName} file`).to.not.be.undefined;
-          await expect(await modelFile.text(), `${fileName} file`).toMatchSnapshot(modelName+'.snap.ts', import.meta.url);
+          await expect(await modelFile.text(), `${fileName} file`).toMatchSnapshot(
+            `${modelName}.snap.ts`,
+            import.meta.url,
+          );
         }),
       );
     });
