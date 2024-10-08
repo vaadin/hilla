@@ -2,9 +2,8 @@ package com.vaadin.hilla.test.reactgrid;
 
 import jakarta.persistence.Entity;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.util.Date;
 
 @Entity
 public class Person extends AbstractEntity {
@@ -21,6 +20,11 @@ public class Person extends AbstractEntity {
     private LocalDate birthDate;
     private LocalTime shiftStart;
     private LocalDateTime appointmentTime;
+    private OffsetDateTime offsetDateTime;
+    private ZonedDateTime zonedDateTime;
+    private java.util.Date utilDate;
+    private java.sql.Date sqlDate;
+
 
     public String getFirstName() {
         return firstName;
@@ -92,5 +96,37 @@ public class Person extends AbstractEntity {
 
     public void setAppointmentTime(LocalDateTime appointmentTime) {
         this.appointmentTime = appointmentTime;
+    }
+
+    public OffsetDateTime getOffsetDateTime() {
+        return offsetDateTime;
+    }
+
+    public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
+        this.offsetDateTime = offsetDateTime;
+    }
+
+    public ZonedDateTime getZonedDateTime() {
+        return zonedDateTime;
+    }
+
+    public void setZonedDateTime(ZonedDateTime zonedDateTime) {
+        this.zonedDateTime = zonedDateTime;
+    }
+
+    public Date getUtilDate() {
+        return utilDate;
+    }
+
+    public void setUtilDate(Date utilDate) {
+        this.utilDate = utilDate;
+    }
+
+    public java.sql.Date getSqlDate() {
+        return sqlDate;
+    }
+
+    public void setSqlDate(java.sql.Date sqlDate) {
+        this.sqlDate = sqlDate;
     }
 }
