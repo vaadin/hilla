@@ -23,7 +23,7 @@ describe('PushPlugin', () => {
 
       const endpointFile = files.find((f) => f.name === 'PushTypeEndpoint.ts')!;
       expect(endpointFile).to.exist;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
 
@@ -39,7 +39,7 @@ describe('PushPlugin', () => {
 
       const endpointFile = files.find((f) => f.name === 'PushTypeOnlyEndpoint.ts')!;
       expect(endpointFile).to.exist;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
   });

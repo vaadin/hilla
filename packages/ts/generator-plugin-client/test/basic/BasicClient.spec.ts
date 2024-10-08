@@ -21,7 +21,7 @@ describe('ClientPlugin', () => {
 
     const [clientFile] = files;
 
-    await expect(await clientFile.text()).toMatchSnapshot(`client`, import.meta.url);
+    await expect(await clientFile.text()).toMatchSnapshot(`client.snap.ts`, import.meta.url);
     expect(clientFile.name).to.equal(`connect-client.default.ts`);
   });
 });
