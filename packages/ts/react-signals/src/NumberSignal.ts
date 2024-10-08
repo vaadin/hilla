@@ -38,6 +38,7 @@ export class NumberSignal extends ValueSignal<number> {
    *
    * @param delta - The delta to increment the value by. The delta can be
    * negative.
+   * @returns An operation object that allows to perform additional actions.
    */
   incrementBy(delta: number): Operation {
     if (delta === 0) {

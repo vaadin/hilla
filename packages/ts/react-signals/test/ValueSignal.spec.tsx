@@ -133,6 +133,14 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('baz');
     });
 
+    it('should accept a callback after replace', (done) => {
+      new ValueSignal<string>('a', config).replace('a', 'b').then(done);
+    });
+
+    it('should accept a callback after update', (done) => {
+      new ValueSignal<string>('a', config).update(() => 'b').then(done);
+    });
+
     it('should send the correct event and update the value when receiving accepted event after calling update', async () => {
       const valueSignal = new ValueSignal<string>('ba', config);
       render(<div>{valueSignal}</div>);

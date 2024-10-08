@@ -41,6 +41,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param expected - The expected value.
    * @param newValue - The new value.
+   * @returns An operation object that allows to perform additional actions.
    */
   replace(expected: T, newValue: T): Operation {
     return this[$update](createReplaceStateEvent(expected, newValue));
@@ -57,7 +58,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param callback - The function that is applied on the current value to
    *                   produce the new value.
-   * @returns An operation subscription that can be canceled.
+   * @returns An operation object that allows to perform additional actions, including cancellation.
    */
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
@@ -67,7 +68,6 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const pendingRequest = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      // TypeScript thinks that this is a promise as it has a `then`.
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       ...operation,
       cancel: () => {

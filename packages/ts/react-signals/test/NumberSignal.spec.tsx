@@ -158,7 +158,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(43);
     });
 
-    it('should allow to call a callback after operations', (done) => {
+    it('should accept a callback after incrementBy', (done) => {
       new NumberSignal(42, config).incrementBy(1).then(done);
     });
   });

@@ -6,15 +6,21 @@ import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
 
+/**
+ * A return type for signal operations.
+ */
 export type Operation = {
   then(callback: () => void): Operation;
 };
 
-export const noOperation: Operation = {
+/**
+ * An operation where all callbacks are predefined to be no-ops.
+ */
+export const noOperation: Operation = Object.freeze({
   then(_callback: () => void): Operation {
     return noOperation;
   },
-};
+});
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
@@ -197,10 +203,15 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * A method to update the server with the new value.
    *
    * @param event - The event to update the server with.
+   * @param operation - An optional operation object to chain callbacks.
+   * @returns An operation object that can be chained with a callback
+   *          (it is the object passed as parameter or a new one if missing).
    */
   protected [$update](event: StateEvent<T>, operation?: Operation): Operation {
+    // Prepare the return value so that it can receive a callback.
     const callbackRef: MutableRefObject<(() => void) | undefined> = { current: undefined };
-    const op = operation ?? noOperation;
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    const op = operation ?? { ...noOperation };
     op.then = (callback) => {
       callbackRef.current = callback;
       return op;
