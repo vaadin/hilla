@@ -7,7 +7,7 @@ export class TestView extends LitElement {
   @query('#input')
   input!: HTMLInputElement;
   @query('#result')
-  result!: HTMLInputElement;
+  _result!: HTMLInputElement;
 
   render() {
     return html`
@@ -17,8 +17,8 @@ export class TestView extends LitElement {
         <button
           id="normalEndpoint"
           @click=${() => {
-            this.result.innerText = '';
-            EchoEndpoint.echo(this.input.value).then((resp) => (this.result.innerText += resp));
+            this._result.innerText = '';
+            EchoEndpoint.echo(this.input.value).then((resp) => (this._result.innerText += resp));
           }}
         >
           Echo using normal endpoint
@@ -26,8 +26,8 @@ export class TestView extends LitElement {
         <button
           id="fluxEndpoint"
           @click=${() => {
-            this.result.innerText = '';
-            EchoEndpoint.fluxEcho(this.input.value).onNext((resp) => (this.result.innerText += resp));
+            this._result.innerText = '';
+            EchoEndpoint.fluxEcho(this.input.value).onNext((resp) => (this._result.innerText += resp));
           }}
         >
           Echo using reactive endpoint
