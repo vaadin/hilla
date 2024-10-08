@@ -1,4 +1,4 @@
-import { Commands, Context, Route } from '@vaadin/router';
+import { Commands, RouteContext, Route } from '@vaadin/router';
 import { logout, isAuthenticated } from './auth';
 import { appStore } from './stores/app-store';
 import './views/main-view';
@@ -37,7 +37,7 @@ export const views: ViewRoute[] = [
     path: 'private',
     component: 'private-view',
     title: 'Private',
-    action: async (_context: Context, commands: Commands) => {
+    action: async (_context: RouteContext, commands: Commands) => {
       if (!isAuthenticated()) {
         return commands.redirect('/login');
       }
@@ -49,7 +49,7 @@ export const views: ViewRoute[] = [
     path: 'admin',
     component: 'admin-view',
     title: 'Admin View',
-    action: async (_context: Context, commands: Commands) => {
+    action: async (_context: RouteContext, commands: Commands) => {
       if (!appStore.isUserInRole('admin')) {
         return commands.redirect('/login');
       }
@@ -68,7 +68,7 @@ export const routes: ViewRoute[] = [
   },
   {
     path: '/logout',
-    action: async (_: Context, commands: Commands) => {
+    action: async (_: RouteContext, commands: Commands) => {
       await logout();
       return commands.redirect('/');
     },
