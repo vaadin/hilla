@@ -42,11 +42,8 @@ export class I18n {
       // @ts-expect-error import.meta.hot does not have TS definitions
       // eslint-disable-next-line
       import.meta.hot.on('translations-update', () => {
-        this.#initialized.value = false;
-        this.#language.value = undefined;
-        this.#translations.value = {};
-        this.#resolvedLanguage.value = undefined;
-        this.#chunks.clear();
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.reloadTranslations();
       });
     }
   }
@@ -191,6 +188,32 @@ export class I18n {
           language: newLanguage,
         });
       }
+    });
+  }
+
+  /**
+   * Reloads all translations for the current language. This method should only
+   * be used for HMR in development mode.
+   */
+  private async reloadTranslations() {
+    const currentLanguage = this.#language.value;
+    if (!currentLanguage) {
+      return;
+    }
+
+    let translationsResult: TranslationsResult;
+    try {
+      translationsResult = await this.#backend.loadTranslations(currentLanguage);
+    } catch (e) {
+      console.error(`Failed to reload translations for language: ${currentLanguage}`, e);
+      return;
+    }
+
+    // Update all signals together to avoid triggering side effects multiple times
+    batch(() => {
+      this.#translations.value = translationsResult.translations;
+      this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
+      this.#formatCache = new FormatCache(currentLanguage);
     });
   }
 
