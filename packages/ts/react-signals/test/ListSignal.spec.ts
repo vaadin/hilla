@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
-import { ListSignal } from '../src';
+import { ListSignal, ValueSignal } from '../src';
 import type { InsertLastStateEvent, RemoveStateEvent, StateEvent } from '../src/events.js';
 import { createSubscriptionStub, subscribeToSignalViaEffect } from './utils.js';
 
@@ -389,6 +389,32 @@ describe('@vaadin/hilla-react-signals', () => {
         accepted: false,
       };
       simulateReceivingEvent(notAcceptedEvent2);
+      expect(listSignal.value).to.have.length(4);
+    });
+
+    it('should do nothing when a non existent signal is passed to remove function', () => {
+      subscribeToSignalViaEffect(listSignal);
+      const snapshot = {
+        id: '123',
+        type: 'snapshot',
+        accepted: true,
+        value: undefined,
+        entries: [
+          { id: '1', next: '2', value: 'Alice' },
+          { id: '2', prev: '1', next: '3', value: 'Bob' },
+          { id: '3', prev: '2', next: '4', value: 'John' },
+          { id: '4', prev: '3', value: 'Jane' },
+        ],
+      };
+      simulateReceivingEvent(snapshot);
+      expect(listSignal.value).to.have.length(4);
+
+      const nonExistentSignal = new ValueSignal<string>('', {
+        client,
+        endpoint: 'NameService',
+        method: 'nameListSignal',
+      });
+      listSignal.remove(nonExistentSignal);
       expect(listSignal.value).to.have.length(4);
     });
   });
