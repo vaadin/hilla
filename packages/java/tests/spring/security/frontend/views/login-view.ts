@@ -1,5 +1,5 @@
 import { LoginResult } from '@vaadin/hilla-frontend';
-import { AfterEnterObserver, RouterLocation } from '@vaadin/router';
+import { RouterLocation, WebComponentInterface } from '@vaadin/router';
 import '@vaadin/login/vaadin-login-overlay';
 import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -7,7 +7,7 @@ import { login } from '../auth';
 import { View } from './view';
 
 @customElement('login-view')
-export class LoginView extends View implements AfterEnterObserver {
+export class LoginView extends View implements WebComponentInterface {
   @state()
   private error = false;
 
