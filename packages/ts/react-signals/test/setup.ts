@@ -8,10 +8,12 @@ declare global {
   }
 }
 
-window.Vaadin = {
-  featureFlags: {
-    fullstackSignals: true,
-  },
-};
+before(() => {
+  window.Vaadin = {
+    featureFlags: {
+      fullstackSignals: true,
+    },
+  };
+});
 
 export {};
