@@ -13,8 +13,8 @@ import {
 import { $processServerResponse, $setValueQuietly, $update, type ServerConnectionConfig } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
-export type EntryId = string;
-export type Entry<T> = {
+type EntryId = string;
+type Entry<T> = {
   id: EntryId;
   value: ValueSignal<T>;
   next?: EntryId;
@@ -60,8 +60,8 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
   }
 
   #handleInsertLastUpdate(event: InsertLastStateEvent<T>): void {
-    if (!event.accepted) {
-      return;
+    if (event.entryId === undefined) {
+      throw new Error('Unexpected state: Entry id should be defined when insert last event is accepted');
     }
     const valueSignal = new ValueSignal<T>(
       event.value,
@@ -133,11 +133,19 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
     this[$setValueQuietly](this.#computeItems());
   }
 
+  /**
+   * Inserts a new value at the end of the list.
+   * @param value - The value to insert.
+   */
   insertLast(value: T): void {
     const event = createInsertLastStateEvent(value);
     this[$update](event);
   }
 
+  /**
+   * Removes the given item from the list.
+   * @param item - The item to remove.
+   */
   remove(item: ValueSignal<T>): void {
     const entryToRemove = this.#values.get(item.id);
     if (entryToRemove === undefined) {
