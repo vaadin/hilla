@@ -20,8 +20,8 @@ describe('BackbonePlugin', () => {
       expect(files.length).to.equal(2);
 
       const [endpointFile, entity] = files;
-      await expect(await entity.text()).toMatchSnapshot('GenericTypesEntity', import.meta.url);
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
+      await expect(await entity.text()).toMatchSnapshot('GenericTypesEntity.snap.ts', import.meta.url);
+      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
       expect(entity.name).to.equal(`${modelSectionPath}/GenericTypesEntity.ts`);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });

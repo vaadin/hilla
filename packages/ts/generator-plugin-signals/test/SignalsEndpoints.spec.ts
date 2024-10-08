@@ -21,13 +21,13 @@ describe('SignalsPlugin', () => {
 
       const generatedNumberSignalService = files.find((f) => f.name === 'NumberSignalService.ts')!;
       await expect(await generatedNumberSignalService.text()).toMatchSnapshot(
-        `NumberSignalServiceMix`,
+        `NumberSignalServiceMix.snap.ts`,
         import.meta.url,
       );
 
       // Non-signal returning services should remain unchanged as before:
       const generatedHelloWorldService = files.find((f) => f.name === 'HelloWorldService.ts')!;
-      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService`, import.meta.url);
+      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService.snap.ts`, import.meta.url);
     });
 
     it('removes unused request init import', async () => {
@@ -40,13 +40,13 @@ describe('SignalsPlugin', () => {
       // Signal-only returning services should have the init import removed:
       const generatedNumberSignalService = files.find((f) => f.name === 'NumberSignalService.ts')!;
       await expect(await generatedNumberSignalService.text()).toMatchSnapshot(
-        `NumberSignalServiceSignalOnly`,
+        `NumberSignalServiceSignalOnly.snap.ts`,
         import.meta.url,
       );
 
       // Non-signal returning services should remain unchanged as before:
       const generatedHelloWorldService = files.find((f) => f.name === 'HelloWorldService.ts')!;
-      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService`, import.meta.url);
+      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService.snap.ts`, import.meta.url);
     });
 
     it('correctly generates service with mixture of normal and ValueSignal returning methods', async () => {
@@ -57,11 +57,11 @@ describe('SignalsPlugin', () => {
       const files = await generator.process(input);
 
       const generatedValueSignalService = files.find((f) => f.name === 'PersonService.ts')!;
-      await expect(await generatedValueSignalService.text()).toMatchSnapshot(`ValueSignalServiceMix`, import.meta.url);
+      await expect(await generatedValueSignalService.text()).toMatchSnapshot(`ValueSignalServiceMix.snap.ts`, import.meta.url);
 
       // Non-signal returning services should remain unchanged as before:
       const generatedHelloWorldService = files.find((f) => f.name === 'HelloWorldService.ts')!;
-      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService`, import.meta.url);
+      await expect(await generatedHelloWorldService.text()).toMatchSnapshot(`HelloWorldService.snap.ts`, import.meta.url);
     });
   });
 });
