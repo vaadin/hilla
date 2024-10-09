@@ -11,10 +11,9 @@ type PendingRequestsRecord<T> = Readonly<{
 /**
  * An operation subscription that can be canceled.
  */
-export interface OperationSubscription {
-  then: Promise<void>['then'];
+export type OperationSubscription = Pick<Promise<void>, 'then'> & {
   cancel(): void;
-}
+};
 
 /**
  * A full-stack signal that holds an arbitrary value.
