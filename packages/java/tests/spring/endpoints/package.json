@@ -10,7 +10,7 @@
     "@vaadin/icon": "24.5.0-rc2",
     "@vaadin/icons": "24.5.0-rc2",
     "@vaadin/polymer-legacy-adapter": "24.5.0-rc2",
-    "@vaadin/router": "2.0.0-rc2",
+    "@vaadin/router": "2.0.0-rc3",
     "@vaadin/tooltip": "24.5.0-rc2",
     "@vaadin/vaadin-lumo-styles": "24.5.0-rc2",
     "@vaadin/vaadin-themable-mixin": "24.5.0-rc2",
@@ -55,7 +55,7 @@
       "@vaadin/icon": "24.5.0-rc2",
       "@vaadin/icons": "24.5.0-rc2",
       "@vaadin/polymer-legacy-adapter": "24.5.0-rc2",
-      "@vaadin/router": "2.0.0-rc2",
+      "@vaadin/router": "2.0.0-rc3",
       "@vaadin/tooltip": "24.5.0-rc2",
       "@vaadin/vaadin-lumo-styles": "24.5.0-rc2",
       "@vaadin/vaadin-themable-mixin": "24.5.0-rc2",
@@ -91,7 +91,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "cf892e6e3d507a7efeb045d5eb427d9e2a05b6c323641080b453c37843c03dfa"
+    "hash": "6bfea24485440dbda75d3affd62608e04c261d032f15dc1c807ef452c56b020e"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
