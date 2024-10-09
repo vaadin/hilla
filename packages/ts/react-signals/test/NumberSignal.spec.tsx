@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+// eslint-disable-next-line import/no-unassigned-import
+import './setup.js';
+
 import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { IncrementStateEvent } from '../events.js';
-import type { StateEvent } from '../src/events.js';
+import type { IncrementStateEvent, StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, subscribeToSignalViaEffect } from './utils.js';
