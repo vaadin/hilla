@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-crud",
-  "version": "24.5.0-beta6",
+  "version": "24.5.0-rc1",
   "description": "Hilla CRUD utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -56,9 +56,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.5.0-beta6",
-    "@vaadin/hilla-lit-form": "24.5.0-beta6",
-    "@vaadin/hilla-react-form": "24.5.0-beta6",
+    "@vaadin/hilla-frontend": "24.5.0-rc1",
+    "@vaadin/hilla-lit-form": "24.5.0-rc1",
+    "@vaadin/hilla-react-form": "24.5.0-rc1",
     "@vaadin/react-components": "24.5.0-rc2"
   },
   "peerDependencies": {
