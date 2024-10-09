@@ -14,8 +14,9 @@ const SIGNAL = '$SIGNAL$';
 const RETURN_TYPE = '$RETURN_TYPE$';
 const INITIAL_VALUE = '$INITIAL_VALUE$';
 
-const signals = ['NumberSignal', 'ValueSignal'];
-const genericSignals = ['ValueSignal'];
+const signals = ['NumberSignal', 'ValueSignal', 'ListSignal'];
+const genericSignals = ['ValueSignal', 'ListSignal'];
+const collectionSignals = ['ListSignal'];
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -55,14 +56,17 @@ export default class SignalProcessor {
           );
           // `filteredParams` can be altered after, need to store the param names now
           const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
+          const isCollectionSignal = collectionSignals.includes(signalId.text);
           let genericReturnType;
           if (genericSignals.includes(signalId.text)) {
             genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
-            const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
-            if (defaultValueType) {
-              const { alias, param } = SignalProcessor.#createDefaultValueParameter(defaultValueType);
-              initialValue = alias;
-              filteredParams.push(param);
+            if (!isCollectionSignal) {
+              const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
+              if (defaultValueType) {
+                const { alias, param } = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+                initialValue = alias;
+                filteredParams.push(param);
+              }
             }
           }
           const returnType = genericReturnType ?? signalId;
@@ -71,7 +75,7 @@ export default class SignalProcessor {
           }
           return template(
             `function ${METHOD_NAME}(): ${RETURN_TYPE} {
-  return new ${SIGNAL}(${INITIAL_VALUE}, { client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${paramNames.length ? `, params: { ${paramNames} }` : ''} });
+  return new ${SIGNAL}(${isCollectionSignal ? '' : `${INITIAL_VALUE}, `}{ client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${paramNames.length ? `, params: { ${paramNames} }` : ''} });
 }`,
             (statements) => statements,
             [
