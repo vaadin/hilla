@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.jackson.JacksonEndpoint.Sample;
@@ -27,8 +29,10 @@ public class JacksonTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(JacksonEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

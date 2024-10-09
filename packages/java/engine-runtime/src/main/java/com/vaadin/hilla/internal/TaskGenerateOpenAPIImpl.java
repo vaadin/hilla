@@ -15,13 +15,20 @@
  */
 package com.vaadin.hilla.internal;
 
-import javax.annotation.Nonnull;
+import com.vaadin.hilla.engine.AotEndpointFinder;
+import jakarta.annotation.Nonnull;
+
 import java.io.File;
 import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import com.vaadin.hilla.engine.ParserException;
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -81,15 +88,25 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        try {
-            var engineConfiguration = getEngineConfiguration();
+        var engineConfiguration = EngineConfiguration.getDefault();
+        if (isProductionMode) {
+            var endpoints = engineConfiguration.getOfflineEndpointProvider()
+                    .findEndpoints();
             var processor = new ParserProcessor(engineConfiguration,
-                    classLoader, isProductionMode);
-            processor.process();
-        } catch (ParserException e) {
-            // Make sure the exception is printed in the logs
-            LOGGER.error("Java code parsing failed", e);
-            throw new ExecutionFailedException("Java code parsing failed");
+                    classLoader, true);
+            processor.process(endpoints);
+        } else {
+            ApplicationContextProvider.runOnContext(applicationContext -> {
+                List<Class<?>> endpoints = engineConfiguration.getParser()
+                        .getEndpointAnnotations().stream()
+                        .map(applicationContext::getBeansWithAnnotation)
+                        .map(Map::values).flatMap(Collection::stream)
+                        .map(Object::getClass).distinct()
+                        .collect(Collectors.toList());
+                var processor = new ParserProcessor(engineConfiguration,
+                        classLoader, false);
+                processor.process(endpoints);
+            });
         }
     }
 }

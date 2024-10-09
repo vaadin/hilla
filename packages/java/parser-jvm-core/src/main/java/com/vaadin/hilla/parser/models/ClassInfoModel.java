@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import io.github.classgraph.ClassInfo;
 
