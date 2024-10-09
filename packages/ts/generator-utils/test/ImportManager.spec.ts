@@ -24,7 +24,7 @@ describe('ImportManager', () => {
       const file = createSourceFile(code, 'foo.ts');
       const printer = ts.createPrinter();
 
-      await expect(printer.printFile(file)).toMatchSnapshot('ImportManager', import.meta.url);
+      await expect(printer.printFile(file)).toMatchSnapshot('ImportManager.snap', import.meta.url);
     });
 
     it('should extract imports from a code', () => {
