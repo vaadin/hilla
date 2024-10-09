@@ -1,5 +1,5 @@
 import { createIncrementStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $update } from './FullStackSignal.js';
+import { $processServerResponse, $update, noOperation, type Operation } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
@@ -40,14 +40,9 @@ export class NumberSignal extends ValueSignal<number> {
    * negative.
    * @returns An operation object that allows to perform additional actions.
    */
-  incrementBy(delta: number): { then: Promise<void>['then'] } {
+  incrementBy(delta: number): Operation {
     if (delta === 0) {
-      return {
-        then: async <TResult1 = void, TResult2 = never>(
-          onfulfilled?: ((value: void) => PromiseLike<TResult1> | TResult1) | null,
-          onrejected?: ((reason: any) => PromiseLike<TResult2> | TResult2) | null,
-        ) => Promise.resolve<void>(undefined).then(onfulfilled, onrejected),
-      };
+      return noOperation;
     }
 
     this.setValueLocal(this.value + delta);
