@@ -1,5 +1,5 @@
 import { createReplaceStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $update, FullStackSignal, type Operation } from './FullStackSignal.js';
+import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Readonly<{
@@ -11,7 +11,8 @@ type PendingRequestsRecord<T> = Readonly<{
 /**
  * An operation subscription that can be canceled.
  */
-export interface OperationSubscription extends Operation {
+export interface OperationSubscription {
+  then: Promise<void>['then'];
   cancel(): void;
 }
 
@@ -43,7 +44,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @param newValue - The new value.
    * @returns An operation object that allows to perform additional actions.
    */
-  replace(expected: T, newValue: T): Operation {
+  replace(expected: T, newValue: T): Pick<Promise<void>, 'then'> {
     return this[$update](createReplaceStateEvent(expected, newValue));
   }
 
@@ -63,13 +64,12 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
     const event = createReplaceStateEvent(this.value, newValue);
-    const operation = this[$update](event);
+    const thenable = this[$update](event);
     const waiter = Promise.withResolvers<void>();
     const pendingRequest = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      ...operation,
+      then: thenable.then,
       cancel: () => {
         pendingRequest.canceled = true;
         pendingRequest.waiter.resolve();
