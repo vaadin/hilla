@@ -3,22 +3,22 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@polymer/polymer": "3.5.1",
+    "@polymer/polymer": "3.5.2",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "24.5.0-rc1",
-    "@vaadin/icons": "24.5.0-rc1",
-    "@vaadin/polymer-legacy-adapter": "24.5.0-rc1",
-    "@vaadin/router": "1.7.5",
-    "@vaadin/tooltip": "24.5.0-rc1",
-    "@vaadin/vaadin-lumo-styles": "24.5.0-rc1",
-    "@vaadin/vaadin-themable-mixin": "24.5.0-rc1",
+    "@vaadin/icon": "24.5.0-rc2",
+    "@vaadin/icons": "24.5.0-rc2",
+    "@vaadin/polymer-legacy-adapter": "24.5.0-rc2",
+    "@vaadin/router": "2.0.0-rc3",
+    "@vaadin/tooltip": "24.5.0-rc2",
+    "@vaadin/vaadin-lumo-styles": "24.5.0-rc2",
+    "@vaadin/vaadin-themable-mixin": "24.5.0-rc2",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.2.0"
+    "lit": "3.2.1"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.24.7",
+    "@babel/preset-react": "7.25.7",
     "@preact/signals-react-transform": "0.4.0",
     "@rollup/plugin-replace": "6.0.1",
     "@rollup/pluginutils": "5.1.2",
@@ -32,7 +32,7 @@
     "@vaadin/hilla-generator-plugin-signals": "file:../../../../ts/generator-plugin-signals",
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "4.3.1",
+    "@vitejs/plugin-react": "4.3.2",
     "async": "3.2.6",
     "glob": "10.4.5",
     "rollup-plugin-brotli": "3.1.0",
@@ -48,22 +48,22 @@
   },
   "vaadin": {
     "dependencies": {
-      "@polymer/polymer": "3.5.1",
+      "@polymer/polymer": "3.5.2",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.5.0-beta5",
       "@vaadin/hilla-lit-form": "24.5.0-beta5",
-      "@vaadin/icon": "24.5.0-rc1",
-      "@vaadin/icons": "24.5.0-rc1",
-      "@vaadin/polymer-legacy-adapter": "24.5.0-rc1",
-      "@vaadin/router": "1.7.5",
-      "@vaadin/tooltip": "24.5.0-rc1",
-      "@vaadin/vaadin-lumo-styles": "24.5.0-rc1",
-      "@vaadin/vaadin-themable-mixin": "24.5.0-rc1",
+      "@vaadin/icon": "24.5.0-rc2",
+      "@vaadin/icons": "24.5.0-rc2",
+      "@vaadin/polymer-legacy-adapter": "24.5.0-rc2",
+      "@vaadin/router": "2.0.0-rc3",
+      "@vaadin/tooltip": "24.5.0-rc2",
+      "@vaadin/vaadin-lumo-styles": "24.5.0-rc2",
+      "@vaadin/vaadin-themable-mixin": "24.5.0-rc2",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.2.0"
+      "lit": "3.2.1"
     },
     "devDependencies": {
-      "@babel/preset-react": "7.24.7",
+      "@babel/preset-react": "7.25.7",
       "@preact/signals-react-transform": "0.4.0",
       "@rollup/plugin-replace": "6.0.1",
       "@rollup/pluginutils": "5.1.2",
@@ -77,7 +77,7 @@
       "@vaadin/hilla-generator-plugin-signals": "24.5.0-beta5",
       "@vaadin/hilla-generator-plugin-subtypes": "24.5.0-beta5",
       "@vaadin/hilla-generator-utils": "24.5.0-beta5",
-      "@vitejs/plugin-react": "4.3.1",
+      "@vitejs/plugin-react": "4.3.2",
       "async": "3.2.6",
       "glob": "10.4.5",
       "rollup-plugin-brotli": "3.1.0",
@@ -91,7 +91,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "7e77b3d3a744c98ca7b63ab4b8c89ab39e28aeebe6fdccf880fd2ddd9d5364a1"
+    "hash": "6bfea24485440dbda75d3affd62608e04c261d032f15dc1c807ef452c56b020e"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
