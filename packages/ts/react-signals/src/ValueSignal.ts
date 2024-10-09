@@ -68,7 +68,6 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const pendingRequest = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       ...operation,
       cancel: () => {
         pendingRequest.canceled = true;

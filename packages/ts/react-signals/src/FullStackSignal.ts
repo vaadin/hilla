@@ -10,14 +10,14 @@ const ENDPOINT = 'SignalsHandler';
  * A return type for signal operations.
  */
 export type Operation = {
-  then(callback: () => void): Operation;
+  onComplete(callback: () => void): Operation;
 };
 
 /**
  * An operation where all callbacks are predefined to be no-ops.
  */
 export const noOperation: Operation = Object.freeze({
-  then(_callback: () => void): Operation {
+  onComplete(_callback: () => void): Operation {
     return noOperation;
   },
 });
@@ -217,9 +217,8 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   protected [$update](event: StateEvent<T>, operation?: Operation): Operation {
     // Prepare the return value so that it can receive a callback.
     const callbackRef: MutableRefObject<(() => void) | undefined> = { current: undefined };
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const op = operation ?? { ...noOperation };
-    op.then = (callback) => {
+    op.onComplete = (callback) => {
       callbackRef.current = callback;
       return op;
     };
