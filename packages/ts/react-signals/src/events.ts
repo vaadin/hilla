@@ -11,7 +11,7 @@ type CreateStateEventType<V, T extends string, C extends Record<string, unknown>
     value: V;
     accepted: boolean;
   }> &
-    Readonly<C>
+    Readonly<C> & { thenCallback?: (() => void) | undefined }
 >;
 
 /**

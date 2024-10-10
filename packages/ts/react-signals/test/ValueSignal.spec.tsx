@@ -137,11 +137,11 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should accept a callback after replace', (done) => {
-      new ValueSignal<string>('a', config).replace('a', 'b').onComplete(done);
+      new ValueSignal<string>('a', config).replace('a', 'b').result.then(done);
     });
 
     it('should accept a callback after update', (done) => {
-      new ValueSignal<string>('a', config).update(() => 'b').onComplete(done);
+      new ValueSignal<string>('a', config).update(() => 'b').result.then(done);
     });
 
     it('should send the correct event and update the value when receiving accepted event after calling update', async () => {

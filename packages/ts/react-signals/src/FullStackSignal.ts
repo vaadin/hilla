@@ -1,26 +1,9 @@
 import type { ActionOnLostSubscription, ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
-import type { MutableRefObject } from 'react';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
 
 const ENDPOINT = 'SignalsHandler';
-
-/**
- * A return type for signal operations.
- */
-export type Operation = {
-  onComplete(callback: () => void): Operation;
-};
-
-/**
- * An operation where all callbacks are predefined to be no-ops.
- */
-export const noOperation: Operation = Object.freeze({
-  onComplete(_callback: () => void): Operation {
-    return noOperation;
-  },
-});
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
@@ -210,31 +193,16 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * A method to update the server with the new value.
    *
    * @param event - The event to update the server with.
-   * @param operation - An optional operation object to chain callbacks.
-   * @returns An operation object that can be chained with a callback
-   *          (it is the object passed as parameter or a new one if missing).
    */
-  protected [$update](event: StateEvent<T>, operation?: Operation): Operation {
-    // Prepare the return value so that it can receive a callback.
-    const callbackRef: MutableRefObject<(() => void) | undefined> = { current: undefined };
-    const op = operation ?? { ...noOperation };
-    op.onComplete = (callback) => {
-      callbackRef.current = callback;
-      return op;
-    };
+  protected [$update](event: StateEvent<T>): void {
     this.server
       .update(event)
-      .then(() => {
-        callbackRef.current?.();
-      })
       .catch((error: unknown) => {
         this.#error.value = error instanceof Error ? error : new Error(String(error));
       })
       .finally(() => {
         this.#pending.value = false;
       });
-
-    return op;
   }
 
   /**
