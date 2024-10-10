@@ -33,7 +33,7 @@ export function GridUseDataProviderHook(): JSX.Element {
     birthDate: '2000-01-01',
     shiftStart: '08:00',
     appointmentTime: '',
-  };
+  } as Person;
 
   function addNewPerson() {
     PersonService.save(newPerson).then(setSavedPerson);
