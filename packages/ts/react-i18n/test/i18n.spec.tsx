@@ -605,6 +605,62 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 22:33:44');
       });
     });
+
+    describe('hmr', () => {
+      async function triggerHmrEvent() {
+        // @ts-expect-error import.meta.hot does not have TS definitions
+        // eslint-disable-next-line
+        import.meta.hot.hmrClient.notifyListeners('translations-update');
+        // No promise to wait for, just delay the next test step a bit
+        await new Promise((resolve) => {
+          setTimeout(resolve, 10);
+        });
+      }
+
+      it('should not update translations if not initialized', async () => {
+        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+        await triggerHmrEvent();
+        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+      });
+
+      it('should update translations on HMR event', async () => {
+        await i18n.configure({ language: 'en-US' });
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City');
+
+        fetchMock
+          .resetHistory()
+          .reset()
+          .get('./?v-r=i18n&langtag=en-US', {
+            body: {
+              'addresses.form.city.label': 'City updated',
+            },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+          });
+
+        await triggerHmrEvent();
+
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City updated');
+      });
+
+      it('should update resolved language on HMR event', async () => {
+        await i18n.configure({ language: 'en-US' });
+        expect(i18n.resolvedLanguage.value).to.equal('und');
+
+        fetchMock
+          .resetHistory()
+          .reset()
+          .get('*', {
+            body: {},
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'en' },
+          });
+
+        await triggerHmrEvent();
+
+        expect(i18n.resolvedLanguage.value).to.equal('en');
+      });
+    });
   });
 
   describe('FormatCache', () => {
