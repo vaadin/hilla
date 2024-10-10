@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -27,7 +29,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
-            Instant.class, LocalTime.class };
+            Instant.class, LocalTime.class, OffsetDateTime.class,
+            ZonedDateTime.class };
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<ClassRefSignatureModel> interfaces;
