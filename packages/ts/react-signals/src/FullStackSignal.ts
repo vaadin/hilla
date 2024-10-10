@@ -107,10 +107,20 @@ class ServerConnection<T> {
   }
 
   async update(event: StateEvent<T>): Promise<void> {
+    const onTheFly = !this.#subscription;
+
+    if (onTheFly) {
+      this.connect();
+    }
+
     await this.#config.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
     });
+
+    if (onTheFly) {
+      this.disconnect();
+    }
   }
 
   disconnect() {
