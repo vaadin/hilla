@@ -21,6 +21,17 @@ type Entry<T> = {
   prev?: EntryId;
 };
 
+/**
+ * A {@link FullStackSignal} that represents a shared list of values, where each
+ * value is represented by a {@link ValueSignal}.
+ * The list can be modified by calling the defined methods to insert or remove
+ * items, but the `value` property of a `ListSignal` instance is read-only and
+ * cannot be assigned directly.
+ * The value of each item in the list can be manipulated similar to a regular
+ * {@link ValueSignal}.
+ *
+ * @typeParam T - The type of the values in the list.
+ */
 export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>>> {
   #head?: EntryId;
   #tail?: EntryId;
