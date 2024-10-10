@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
+import jakarta.annotation.Nullable;
 import reactor.core.publisher.Flux;
 
 /**
@@ -33,8 +35,12 @@ public class SignalsHandler {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String providerEndpoint,
-            String providerMethod, String clientSignalId, ObjectNode body) {
+            String providerMethod, String clientSignalId, ObjectNode body,
+            @Nullable String parentClientSignalId) {
         try {
+            if (parentClientSignalId != null) {
+                return subscribe(parentClientSignalId, clientSignalId);
+            }
             var signal = registry.get(clientSignalId);
             if (signal != null) {
                 return signal.subscribe().doFinally(
@@ -49,6 +55,20 @@ public class SignalsHandler {
         }
     }
 
+    private Flux<ObjectNode> subscribe(String parentClientSignalId,
+            String clientSignalId)
+            throws EndpointInvocationException.EndpointAccessDeniedException,
+            EndpointInvocationException.EndpointNotFoundException {
+        var parentSignal = registry.get(parentClientSignalId);
+        if (parentSignal == null) {
+            throw new IllegalStateException(String.format(
+                    "Parent Signal not found for parent client signal id: %s",
+                    parentClientSignalId));
+        }
+        return parentSignal.subscribe(clientSignalId)
+                .doFinally((event) -> registry.unsubscribe(clientSignalId));
+    }
+
     /**
      * Updates a signal with an event.
      *
@@ -60,10 +80,21 @@ public class SignalsHandler {
     public void update(String clientSignalId, ObjectNode event)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {
-        if (registry.get(clientSignalId) == null) {
-            throw new IllegalStateException(String.format(
-                    "Signal not found for client signal: %s", clientSignalId));
+        var parentSignalId = ListStateEvent.extractParentSignalId(event);
+        if (parentSignalId != null) {
+            if (registry.get(parentSignalId) == null) {
+                throw new IllegalStateException(String.format(
+                        "Parent Signal not found for signal id: %s",
+                        parentSignalId));
+            }
+            registry.get(parentSignalId).submit(event);
+        } else {
+            if (registry.get(clientSignalId) == null) {
+                throw new IllegalStateException(
+                        String.format("Signal not found for client signal: %s",
+                                clientSignalId));
+            }
+            registry.get(clientSignalId).submit(event);
         }
-        registry.get(clientSignalId).submit(event);
     }
 }

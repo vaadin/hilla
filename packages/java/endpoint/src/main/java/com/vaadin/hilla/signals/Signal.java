@@ -1,7 +1,6 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -78,6 +77,17 @@ public abstract class Signal<T> {
     }
 
     /**
+     * Subscribes to an internal child signal with a specific signal id.
+     *
+     * @param signalId
+     *            the internal signal id
+     * @return a Flux of JSON events
+     */
+    public Flux<ObjectNode> subscribe(String signalId) {
+        return subscribe();
+    }
+
+    /**
      * Submits an event to the signal and notifies subscribers about the change
      * of the signal value.
      *
@@ -87,11 +97,10 @@ public abstract class Signal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            boolean accepted = processEvent(event);
+            var processedEvent = processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
-                var eventWithStatus = StateEvent.setAccepted(event, accepted);
-                boolean failure = sink.tryEmitNext(eventWithStatus).isFailure();
+                boolean failure = sink.tryEmitNext(processedEvent).isFailure();
                 if (failure) {
                     LOGGER.debug("Failed push");
                 }
@@ -119,7 +128,7 @@ public abstract class Signal<T> {
      * @return <code>true</code> if the event was successfully processed and the
      *         signal value was updated, <code>false</code> otherwise.
      */
-    protected abstract boolean processEvent(ObjectNode event);
+    protected abstract ObjectNode processEvent(ObjectNode event);
 
     @Override
     public boolean equals(Object o) {

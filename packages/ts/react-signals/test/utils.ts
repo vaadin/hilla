@@ -1,7 +1,8 @@
+import type { Signal } from '@preact/signals-react';
 import type { Subscription } from '@vaadin/hilla-frontend';
 import sinon from 'sinon';
 import type { StateEvent } from '../src/events.js';
-import { effect, type ValueSignal } from '../src/index.js';
+import { effect } from '../src/index.js';
 
 export async function nextFrame(): Promise<void> {
   return new Promise<void>((resolve) => {
@@ -11,8 +12,8 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscription<StateEvent<T>>> {
-  return sinon.spy<Subscription<StateEvent<T>>>({
+export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscription<StateEvent>> {
+  return sinon.spy<Subscription<StateEvent>>({
     cancel() {},
     context() {
       return this;
@@ -32,7 +33,7 @@ export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscripti
   });
 }
 
-export function subscribeToSignalViaEffect<T>(signal: ValueSignal<T>): Array<T | undefined> {
+export function subscribeToSignalViaEffect<T>(signal: Signal<T>): Array<T | undefined> {
   const results: Array<T | undefined> = [];
   effect(() => {
     results.push(signal.value);

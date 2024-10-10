@@ -3,6 +3,7 @@ package com.vaadin.hilla.signals;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 
@@ -19,6 +20,8 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class ValueSignalTest {
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void constructor_withValueArg_usesValueAsDefaultValue() {
@@ -97,6 +100,7 @@ public class ValueSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertNull(stateEvent.getValue());
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertTrue(StateEvent.isAccepted(eventJson));
                 assertEquals(name, stateEvent.getValue().getName());
@@ -176,6 +180,15 @@ public class ValueSignalTest {
         assertEquals(2, counter.get());
     }
 
+    @Test
+    public void submit_eventWithUnknownCommand_throws() {
+        var signal = new ValueSignal<>("Foo", String.class);
+
+        var exception = assertThrows(UnsupportedOperationException.class,
+                () -> signal.submit(createUnknownCommandEvent()));
+        assertTrue(exception.getMessage().startsWith("Unsupported JSON: "));
+    }
+
     private <T> ObjectNode createSetEvent(T value) {
         var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
                 StateEvent.EventType.SET, value);
@@ -186,5 +199,13 @@ public class ValueSignalTest {
         var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
                 StateEvent.EventType.REPLACE, value, expectedValue);
         return setEvent.toJson();
+    }
+
+    private ObjectNode createUnknownCommandEvent() {
+        var unknown = mapper.createObjectNode();
+        unknown.put(StateEvent.Field.ID, UUID.randomUUID().toString());
+        unknown.put("concat", "bar");
+        unknown.put(StateEvent.Field.VALUE, "Foo");
+        return unknown;
     }
 }
