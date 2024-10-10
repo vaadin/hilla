@@ -1,6 +1,38 @@
 import { createReplaceStateEvent, type StateEvent } from './events.js';
 import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
+/**
+ * A return type for signal operations.
+ */
+export type Operation = {
+  result: {
+    then(callback: () => void): Operation['result'];
+  };
+};
+
+/**
+ * An operation where all callbacks are predefined to be no-ops.
+ */
+export const noOperation: Operation = Object.freeze({
+  result: {
+    then(_callback: () => void): Operation['result'] {
+      return noOperation.result;
+    },
+  },
+});
+
+export const createOperation = (event: StateEvent<unknown>): Operation => {
+  const op: Operation = {
+    result: {
+      then(callback: () => void) {
+        event.thenCallback = callback;
+        return op.result;
+      },
+    },
+  };
+  return op;
+};
+
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Readonly<{
   waiter: PromiseWithResolvers;
@@ -11,7 +43,7 @@ type PendingRequestsRecord<T> = Readonly<{
 /**
  * An operation subscription that can be canceled.
  */
-export interface OperationSubscription {
+export interface OperationSubscription extends Operation {
   cancel(): void;
 }
 
@@ -41,9 +73,12 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param expected - The expected value.
    * @param newValue - The new value.
+   * @returns An operation object that allows to perform additional actions.
    */
-  replace(expected: T, newValue: T): void {
-    this[$update](createReplaceStateEvent(expected, newValue));
+  replace(expected: T, newValue: T): Operation {
+    const event = createReplaceStateEvent(expected, newValue);
+    this[$update](event);
+    return createOperation(event);
   }
 
   /**
@@ -57,7 +92,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param callback - The function that is applied on the current value to
    *                   produce the new value.
-   * @returns An operation subscription that can be canceled.
+   * @returns An operation object that allows to perform additional actions, including cancellation.
    */
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
@@ -67,6 +102,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const pendingRequest = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
+      ...createOperation(event),
       cancel: () => {
         pendingRequest.canceled = true;
         pendingRequest.waiter.resolve();
@@ -78,20 +114,16 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const record = this.#pendingRequests.get(event.id);
     if (record) {
       this.#pendingRequests.delete(event.id);
-    }
 
-    if (!event.accepted && record) {
-      if (!record.canceled) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      if (!(event.accepted || !record.canceled)) {
         this.update(record.callback);
       }
     }
 
     if (event.accepted || event.type === 'snapshot') {
-      if (record) {
-        record.waiter.resolve();
-      }
+      record?.waiter.resolve();
       this.#applyAcceptedEvent(event);
+      event.thenCallback?.();
     }
   }
 

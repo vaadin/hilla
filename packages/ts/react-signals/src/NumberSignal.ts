@@ -1,6 +1,6 @@
 import { createIncrementStateEvent, type StateEvent } from './events.js';
 import { $processServerResponse, $update } from './FullStackSignal.js';
-import { ValueSignal } from './ValueSignal.js';
+import { createOperation, noOperation, ValueSignal, type Operation } from './ValueSignal.js';
 
 /**
  * A signal that holds a number value. The underlying
@@ -38,15 +38,18 @@ export class NumberSignal extends ValueSignal<number> {
    *
    * @param delta - The delta to increment the value by. The delta can be
    * negative.
+   * @returns An operation object that allows to perform additional actions.
    */
-  incrementBy(delta: number): void {
+  incrementBy(delta: number): Operation {
     if (delta === 0) {
-      return;
+      return noOperation;
     }
+
     this.setValueLocal(this.value + delta);
     const event = createIncrementStateEvent(delta);
     this.#sentIncrementEvents.set(event.id, event);
     this[$update](event);
+    return createOperation(event);
   }
 
   protected override [$processServerResponse](event: StateEvent<number>): void {
