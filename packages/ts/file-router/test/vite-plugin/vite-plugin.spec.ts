@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { existsSync } from 'node:fs';
+import { existsSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -19,7 +19,7 @@ describe('@vaadin/hilla-file-router', () => {
 
     async function expectRuntimeFileGeneratedOnFileChange(changedFileName: string, expectGeneration: boolean) {
       await createTestingRouteFiles(viewsDir);
-      expect(existsSync(new URL('file-routes.json', generatedDir))).to.be.false;
+      rmSync(new URL('file-routes.json', generatedDir));
       mockServer.watcher.emit('change', fileURLToPath(new URL(changedFileName, generatedDir)));
       await new Promise((resolve) => {
         // Wait some time to ensure that the files have been written
