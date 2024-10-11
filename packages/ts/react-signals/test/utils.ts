@@ -31,7 +31,7 @@ export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscripti
     },
     onConnectionStateChange() {
       return this;
-    }
+    },
   });
 }
 
