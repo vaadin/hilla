@@ -28,7 +28,7 @@ export interface Transformer {
 }
 
 // TODO: compute this number when we maintain multiple hilla branches
-export const branch = 'main';
+export const branch = '24.5';
 
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
