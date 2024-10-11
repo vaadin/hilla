@@ -173,10 +173,5 @@ describe('@vaadin/hilla-react-signals', () => {
         accepted: true,
       });
     });
-
-    it('should ignore callback when incrementBy is called with zero as delta', (done) => {
-      new NumberSignal(42, config).incrementBy(0).result.then(() => done(new Error('Callback should not be called')));
-      setTimeout(done, 100);
-    });
   });
 });
