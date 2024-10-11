@@ -67,10 +67,6 @@
                     <quiet>true</quiet>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>hilla-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 
