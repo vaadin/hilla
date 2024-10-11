@@ -17,7 +17,7 @@ describe('@vaadin/hilla-file-router', () => {
     let generatedDir: URL;
     let viewsDir: URL;
 
-    async function expectRuntimeFileGenerated(watcherEvent: string) {
+    async function expectRuntimeFileGeneratedOnLayoutsJsonChange(watcherEvent: string) {
       await createTestingRouteFiles(viewsDir);
       mockServer.watcher.emit(watcherEvent, fileURLToPath(new URL('layouts.json', generatedDir)));
       await new Promise((resolve) => {
@@ -77,11 +77,11 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should regenerate files when layouts.json is updated', async () => {
-      await expectRuntimeFileGenerated('change');
+      await expectRuntimeFileGeneratedOnLayoutsJsonChange('change');
     });
 
     it('should regenerate files when layouts.json is added', async () => {
-      await expectRuntimeFileGenerated('add');
+      await expectRuntimeFileGeneratedOnLayoutsJsonChange('add');
     });
   });
 });
