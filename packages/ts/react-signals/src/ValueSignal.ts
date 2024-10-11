@@ -52,6 +52,7 @@ export interface OperationSubscription extends Operation {
  */
 export class ValueSignal<T> extends FullStackSignal<T> {
   readonly #pendingRequests = new Map<string, PendingRequestsRecord<T>>();
+  readonly #thenCallbacks = new Map<string, { thenCallback?(): void }>();
 
   /**
    * Sets the value.
@@ -78,7 +79,9 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   replace(expected: T, newValue: T): Operation {
     const event = createReplaceStateEvent(expected, newValue);
     this[$update](event);
-    return createOperation(event);
+    const holder: { thenCallback?(): void } = {};
+    this.#thenCallbacks.set(event.id, holder);
+    return createOperation(holder);
   }
 
   /**
@@ -119,6 +122,14 @@ export class ValueSignal<T> extends FullStackSignal<T> {
         record.thenCallback?.();
       } else if (!record.canceled) {
         this.update(record.callback);
+      }
+    }
+
+    const holder = this.#thenCallbacks.get(event.id);
+    if (holder) {
+      this.#thenCallbacks.delete(event.id);
+      if (event.accepted) {
+        holder.thenCallback?.();
       }
     }
 

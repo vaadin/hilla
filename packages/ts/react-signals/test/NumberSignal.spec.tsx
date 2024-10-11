@@ -161,7 +161,17 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should accept a callback after incrementBy', (done) => {
-      new NumberSignal(42, config).incrementBy(1).result.then(done);
+      // @vlad and @soroosh say you have to work!!!
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+      numberSignal.incrementBy(1).result.then(done);
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivingAcceptedEvent({
+        id: (params!.event as { id: string }).id,
+        type: 'increment',
+        value: 43,
+        accepted: true,
+      });
     });
 
     it('should ignore callback when incrementBy is called with zero as delta', (done) => {

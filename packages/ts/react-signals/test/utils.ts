@@ -32,6 +32,14 @@ export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscripti
   });
 }
 
+export function simulateReceivedChange<T>(
+  connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<T>>>,
+  event: StateEvent<T>,
+): void {
+  const [onNextCallback] = connectSubscriptionMock.onNext.firstCall.args;
+  onNextCallback(event);
+}
+
 export function subscribeToSignalViaEffect<T>(signal: ValueSignal<T>): Array<T | undefined> {
   const results: Array<T | undefined> = [];
   effect(() => {

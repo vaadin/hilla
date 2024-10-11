@@ -11,7 +11,7 @@ import sinonChai from 'sinon-chai';
 import type { StateEvent } from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
-import { nextFrame } from './utils.js';
+import { createSubscriptionStub, nextFrame, simulateReceivedChange } from './utils.js';
 
 use(sinonChai);
 
@@ -61,15 +61,6 @@ describe('@vaadin/hilla-react-signals', () => {
       return { id: nanoid(), type, value, expected: 0, accepted: true };
     }
 
-    function simulateReceivedChange(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
-      event: StateEvent<number>,
-    ) {
-      const [onNextCallback] = connectSubscriptionMock.onNext.firstCall.args;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      onNextCallback(event);
-    }
-
     function simulateResubscription(
       connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
       client: sinon.SinonStubbedInstance<ConnectClient>,
@@ -89,24 +80,7 @@ describe('@vaadin/hilla-react-signals', () => {
       client = sinon.createStubInstance(ConnectClient);
       client.call.resolves();
 
-      subscription = sinon.spy<Subscription<StateEvent<number>>>({
-        cancel() {},
-        context() {
-          return this;
-        },
-        onComplete() {
-          return this;
-        },
-        onError() {
-          return this;
-        },
-        onNext() {
-          return this;
-        },
-        onSubscriptionLost() {
-          return this;
-        },
-      });
+      subscription = createSubscriptionStub();
       // Mock the subscribe method
       client.subscribe.returns(subscription);
 
