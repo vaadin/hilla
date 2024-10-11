@@ -17,6 +17,17 @@ describe('@vaadin/hilla-file-router', () => {
     let generatedDir: URL;
     let viewsDir: URL;
 
+    async function expectRuntimeFileGenerated(watcherEvent: string) {
+      await createTestingRouteFiles(viewsDir);
+      mockServer.watcher.emit(watcherEvent, fileURLToPath(new URL('layouts.json', generatedDir)));
+      await new Promise((resolve) => {
+        // Wait some time to ensure that the files have been written
+        setTimeout(resolve, 1000);
+      });
+      expect(existsSync(new URL('file-routes.json', generatedDir))).to.be.true;
+      expect(mockServer.hot.send).to.not.be.called;
+    }
+
     before(async () => {
       // const rootDir = pathToFileURL('/path/to/project/');
       const rootDir = await createTmpDir();
@@ -66,25 +77,11 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should regenerate files when layouts.json is updated', async () => {
-      await createTestingRouteFiles(viewsDir);
-      mockServer.watcher.emit('change', fileURLToPath(new URL('layouts.json', generatedDir)));
-      await new Promise((resolve) => {
-        // Wait some time to ensure that the file is not changed
-        setTimeout(resolve, 1000);
-      });
-      expect(existsSync(new URL('file-routes.json', generatedDir))).to.be.true;
-      expect(mockServer.hot.send).to.not.be.called;
+      await expectRuntimeFileGenerated('change');
     });
 
     it('should regenerate files when layouts.json is added', async () => {
-      await createTestingRouteFiles(viewsDir);
-      mockServer.watcher.emit('add', fileURLToPath(new URL('layouts.json', generatedDir)));
-      await new Promise((resolve) => {
-        // Wait some time to ensure that the file is not changed
-        setTimeout(resolve, 1000);
-      });
-      expect(existsSync(new URL('file-routes.json', generatedDir))).to.be.true;
-      expect(mockServer.hot.send).to.not.be.called;
+      await expectRuntimeFileGenerated('add');
     });
   });
 });
