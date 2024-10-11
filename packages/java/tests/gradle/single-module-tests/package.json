@@ -1,5 +1,5 @@
 {
-  "name": "no-name",
+  "private": true,
   "license": "UNLICENSED",
   "dependencies": {
     "@vaadin/react-components": "24.4.0-alpha14",
