@@ -5,13 +5,14 @@ import type { Simplify } from 'type-fest';
  * Creates a new state event type.
  */
 type CreateStateEventType<V, T extends string, C extends Record<string, unknown> = Record<never, never>> = Simplify<
-  Readonly<{
-    id: string;
-    type: T;
-    value: V;
-    accepted: boolean;
-  }> &
-    Readonly<C> & { thenCallback?: (() => void) | undefined }
+  Partial<{ thenCallback(): void }> &
+    Readonly<{
+      id: string;
+      type: T;
+      value: V;
+      accepted: boolean;
+    }> &
+    Readonly<C>
 >;
 
 /**

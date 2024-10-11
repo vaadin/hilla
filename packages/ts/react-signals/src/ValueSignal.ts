@@ -21,11 +21,11 @@ export const noOperation: Operation = Object.freeze({
   },
 });
 
-export const createOperation = (event: StateEvent<unknown>): Operation => {
+export const createOperation = (callbackStore: Partial<{ thenCallback(): void }>): Operation => {
   const op: Operation = {
     result: {
       then(callback: () => void) {
-        event.thenCallback = callback;
+        callbackStore.thenCallback = callback;
         return op.result;
       },
     },
@@ -34,11 +34,11 @@ export const createOperation = (event: StateEvent<unknown>): Operation => {
 };
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
-type PendingRequestsRecord<T> = Readonly<{
-  waiter: PromiseWithResolvers;
-  callback(value: T): T;
-  canceled: boolean;
-}>;
+type PendingRequestsRecord<T> = Partial<{ thenCallback(): void }> &
+  Readonly<{
+    waiter: PromiseWithResolvers;
+    callback(value: T): T;
+  }> & { canceled: boolean };
 
 /**
  * An operation subscription that can be canceled.
@@ -99,10 +99,10 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const event = createReplaceStateEvent(this.value, newValue);
     this[$update](event);
     const waiter = Promise.withResolvers<void>();
-    const pendingRequest = { callback, waiter, canceled: false };
+    const pendingRequest: PendingRequestsRecord<T> = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      ...createOperation(event),
+      ...createOperation(pendingRequest),
       cancel: () => {
         pendingRequest.canceled = true;
         pendingRequest.waiter.resolve();
@@ -115,7 +115,9 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     if (record) {
       this.#pendingRequests.delete(event.id);
 
-      if (!(event.accepted || !record.canceled)) {
+      if (event.accepted) {
+        record.thenCallback?.();
+      } else if (!record.canceled) {
         this.update(record.callback);
       }
     }
@@ -123,7 +125,6 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     if (event.accepted || event.type === 'snapshot') {
       record?.waiter.resolve();
       this.#applyAcceptedEvent(event);
-      event.thenCallback?.();
     }
   }
 

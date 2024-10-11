@@ -54,11 +54,13 @@ export class NumberSignal extends ValueSignal<number> {
 
   protected override [$processServerResponse](event: StateEvent<number>): void {
     if (event.accepted && event.type === 'increment') {
-      if (this.#sentIncrementEvents.has(event.id)) {
+      const sentEvent = this.#sentIncrementEvents.get(event.id);
+      if (sentEvent) {
         this.#sentIncrementEvents.delete(event.id);
-        return;
+        sentEvent.thenCallback?.();
+      } else {
+        this.setValueLocal(this.value + event.value);
       }
-      this.setValueLocal(this.value + event.value);
     } else {
       super[$processServerResponse](event);
     }
