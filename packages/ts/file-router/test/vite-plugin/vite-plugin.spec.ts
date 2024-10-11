@@ -1,38 +1,47 @@
 import { EventEmitter } from 'node:events';
+import { existsSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import vitePluginFileSystemRouter from '../../src/vite-plugin';
+import { createTestingRouteFiles, createTmpDir } from '../utils';
 
 use(chaiAsPromised);
 use(sinonChai);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('vite-plugin', () => {
-    const rootDir = pathToFileURL('/path/to/project/');
-    const outDir = new URL('dist/', rootDir);
-    const viewsDir = new URL('frontend/views/', rootDir);
-    const generatedDir = new URL('frontend/generated/', rootDir);
-    const watcher = new EventEmitter();
-    const mockServer = {
-      hot: {
-        send: sinon.spy(),
-      },
-      watcher,
-    };
-    const plugin = vitePluginFileSystemRouter({ isDevMode: true, debug: true });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error: the configResolved method could be either a function or an object.
-    plugin.configResolved({
-      logger: { info: sinon.spy() },
-      root: fileURLToPath(rootDir),
-      build: { outDir: fileURLToPath(outDir) },
+    let mockServer: { hot: { send: any }; watcher: EventEmitter };
+    let generatedDir: URL;
+    let viewsDir: URL;
+
+    before(async () => {
+      // const rootDir = pathToFileURL('/path/to/project/');
+      const rootDir = await createTmpDir();
+      const outDir = new URL('dist/', rootDir);
+      viewsDir = new URL('frontend/views/', rootDir);
+      generatedDir = new URL('frontend/generated/', rootDir);
+      const watcher = new EventEmitter();
+      mockServer = {
+        hot: {
+          send: sinon.spy(),
+        },
+        watcher,
+      };
+      const plugin = vitePluginFileSystemRouter({ isDevMode: true, debug: true });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error: the configResolved method could be either a function or an object.
+      plugin.configResolved({
+        logger: { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() },
+        root: fileURLToPath(rootDir),
+        build: { outDir: fileURLToPath(outDir) },
+      });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error: the configResolved method could be either a function or an object.
+      plugin.configureServer(mockServer);
     });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error: the configResolved method could be either a function or an object.
-    plugin.configureServer(mockServer);
 
     beforeEach(() => {
       sinon.resetHistory();
@@ -53,6 +62,28 @@ describe('@vaadin/hilla-file-router', () => {
     it('should not send full-reload when other files change', () => {
       expect(mockServer.hot.send).to.not.be.called;
       mockServer.watcher.emit('change', fileURLToPath(new URL('file.tsx', viewsDir)));
+      expect(mockServer.hot.send).to.not.be.called;
+    });
+
+    it('should regenerate files when layouts.json is updated', async () => {
+      await createTestingRouteFiles(viewsDir);
+      mockServer.watcher.emit('change', fileURLToPath(new URL('layouts.json', generatedDir)));
+      await new Promise((resolve) => {
+        // Wait some time to ensure that the file is not changed
+        setTimeout(resolve, 1000);
+      });
+      expect(existsSync(new URL('file-routes.json', generatedDir))).to.be.true;
+      expect(mockServer.hot.send).to.not.be.called;
+    });
+
+    it('should regenerate files when layouts.json is added', async () => {
+      await createTestingRouteFiles(viewsDir);
+      mockServer.watcher.emit('add', fileURLToPath(new URL('layouts.json', generatedDir)));
+      await new Promise((resolve) => {
+        // Wait some time to ensure that the file is not changed
+        setTimeout(resolve, 1000);
+      });
+      expect(existsSync(new URL('file-routes.json', generatedDir))).to.be.true;
       expect(mockServer.hot.send).to.not.be.called;
     });
   });
