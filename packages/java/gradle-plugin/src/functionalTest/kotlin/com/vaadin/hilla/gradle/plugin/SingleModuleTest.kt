@@ -231,7 +231,7 @@ class SingleModuleTest : AbstractGradleTest() {
             }
 
             dependencies {
-                implementation 'com.vaadin.hilla:hilla'
+                implementation 'com.vaadin:hilla'
                 implementation 'com.vaadin:vaadin-spring'
                 implementation 'org.springframework.boot:spring-boot-starter-web'
             }
@@ -239,6 +239,7 @@ class SingleModuleTest : AbstractGradleTest() {
             dependencyManagement {
                 imports {
                     mavenBom "com.vaadin:hilla-bom:$hillaVersion"
+                    mavenBom "com.vaadin:flow-bom:$flowVersion"
                 }
             }
         """.trimIndent()
