@@ -18,10 +18,10 @@ use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
-  function simulateReceivingAcceptedEvent(event: StateEvent<number>): void {
+  function simulateReceivingAcceptedEvent(event: StateEvent): void {
     const [onNextCallback] = subscription.onNext.firstCall.args;
     onNextCallback({ ...event, accepted: true });
   }
@@ -110,7 +110,6 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(-5);
       const [, , params3] = client.call.thirdCall.args;
-
       const expectedEvent3: IncrementStateEvent = {
         // @ts-expect-error params.event type has id property
         id: params3?.event.id,
@@ -118,7 +117,6 @@ describe('@vaadin/hilla-react-signals', () => {
         value: -5,
         accepted: false,
       };
-
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent3,
