@@ -238,7 +238,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
             dependencyManagement {
                 imports {
-                    mavenBom "com.vaadin.hilla:hilla-bom:$hillaVersion"
+                    mavenBom "com.vaadin:hilla-bom:$hillaVersion"
                 }
             }
         """.trimIndent()
