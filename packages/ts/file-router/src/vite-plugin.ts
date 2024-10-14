@@ -98,8 +98,10 @@ export default function vitePluginFileSystemRouter({
         if (!file.startsWith(dir)) {
           if (file === fileURLToPath(runtimeUrls.json)) {
             server.hot.send({ type: 'custom', event: 'fs-route-update' });
+          } else if (file !== fileURLToPath(runtimeUrls.layouts)) {
+            // outside views folder, only changes to layouts file should trigger files generation
+            return;
           }
-          return;
         }
 
         generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug).catch((e: unknown) =>

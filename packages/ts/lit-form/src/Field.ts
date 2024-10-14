@@ -288,6 +288,26 @@ export class VaadinStringFieldStrategy extends VaadinFieldStrategy<string> {
     super.value = val ?? '';
   }
 }
+function isEmptyObject(val: any): boolean {
+  return val && typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0;
+}
+
+export class VaadinDateTimeFieldStrategy<
+  T = string,
+  E extends FieldElement<T> = FieldElement<T>,
+> extends VaadinFieldStrategy<T, E> {
+  override get value(): T | undefined {
+    return super.value;
+  }
+
+  override set value(val: T | undefined) {
+    if (!val || isEmptyObject(val)) {
+      super.value = '' as T;
+    }
+    const date = Date.parse(val as string);
+    super.value = (Number.isNaN(date) ? '' : new Date(date).toISOString().slice(0, 19)) as T;
+  }
+}
 
 type MultiSelectComboBoxFieldElement<T> = FieldElement<T> & {
   value: never;
@@ -349,6 +369,8 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
         elm as FieldElement<string>,
         model as AbstractModel<string>,
       ) as AbstractFieldStrategy<T>;
+    case 'vaadin-date-time-picker':
+      return new VaadinDateTimeFieldStrategy(elm, model) as AbstractFieldStrategy<T>;
     default:
       if (elm.localName === 'input' && /^(checkbox|radio)$/u.test((elm as unknown as HTMLInputElement).type)) {
         return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
