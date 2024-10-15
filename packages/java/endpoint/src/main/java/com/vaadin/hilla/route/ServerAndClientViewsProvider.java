@@ -66,7 +66,7 @@ public class ServerAndClientViewsProvider {
             throws JsonProcessingException {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
                 collectClientViews(request));
-        final boolean hasAutoLayout = MenuRegistry.hasHillaAutoLayout(
+        final boolean hasAutoLayout = MenuRegistry.hasHillaMainLayout(
                 request.getService().getDeploymentConfiguration());
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
