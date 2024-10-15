@@ -1,6 +1,6 @@
 import { createIncrementStateEvent, type StateEvent } from './events.js';
 import { $processServerResponse, $update } from './FullStackSignal.js';
-import { createOperation, noOperation, ValueSignal, type Operation } from './ValueSignal.js';
+import { noOperation, ValueSignal, type Operation } from './ValueSignal.js';
 
 /**
  * A signal that holds a number value. The underlying
@@ -49,7 +49,7 @@ export class NumberSignal extends ValueSignal<number> {
     const event = createIncrementStateEvent(delta);
     this.#sentIncrementEvents.set(event.id, event);
     this[$update](event);
-    return createOperation(event);
+    return this.createOperation(event.id);
   }
 
   protected override [$processServerResponse](event: StateEvent<number>): void {
@@ -57,10 +57,10 @@ export class NumberSignal extends ValueSignal<number> {
       const sentEvent = this.#sentIncrementEvents.get(event.id);
       if (sentEvent) {
         this.#sentIncrementEvents.delete(event.id);
-        sentEvent.thenCallback?.();
       } else {
         this.setValueLocal(this.value + event.value);
       }
+      this.runCallback(event);
     } else {
       super[$processServerResponse](event);
     }

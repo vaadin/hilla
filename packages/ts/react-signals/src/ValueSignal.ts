@@ -1,12 +1,14 @@
 import { createReplaceStateEvent, type StateEvent } from './events.js';
 import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
+export type ThenCallback = () => void;
+
 /**
  * A return type for signal operations.
  */
 export type Operation = {
   result: {
-    then(callback: () => void): Operation['result'];
+    then(callback: ThenCallback): Operation['result'];
   };
 };
 
@@ -15,23 +17,11 @@ export type Operation = {
  */
 export const noOperation: Operation = Object.freeze({
   result: {
-    then(_callback: () => void): Operation['result'] {
+    then(_callback: ThenCallback): Operation['result'] {
       return noOperation.result;
     },
   },
 });
-
-export const createOperation = (callbackStore: Partial<{ thenCallback(): void }>): Operation => {
-  const op: Operation = {
-    result: {
-      then(callback: () => void) {
-        callbackStore.thenCallback = callback;
-        return op.result;
-      },
-    },
-  };
-  return op;
-};
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Partial<{ thenCallback(): void }> &
@@ -52,7 +42,20 @@ export interface OperationSubscription extends Operation {
  */
 export class ValueSignal<T> extends FullStackSignal<T> {
   readonly #pendingRequests = new Map<string, PendingRequestsRecord<T>>();
-  readonly #thenCallbacks = new Map<string, { thenCallback?(): void }>();
+  protected readonly thenCallbacks = new Map<string, ThenCallback>();
+
+  protected createOperation(id: string): Operation {
+    const callbacks = this.thenCallbacks;
+    const op: Operation = {
+      result: {
+        then(callback) {
+          callbacks.set(id, callback);
+          return op.result;
+        },
+      },
+    };
+    return op;
+  }
 
   /**
    * Sets the value.
@@ -79,9 +82,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   replace(expected: T, newValue: T): Operation {
     const event = createReplaceStateEvent(expected, newValue);
     this[$update](event);
-    const holder: { thenCallback?(): void } = {};
-    this.#thenCallbacks.set(event.id, holder);
-    return createOperation(holder);
+    return this.createOperation(event.id);
   }
 
   /**
@@ -105,7 +106,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const pendingRequest: PendingRequestsRecord<T> = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      ...createOperation(pendingRequest),
+      ...this.createOperation(event.id),
       cancel: () => {
         pendingRequest.canceled = true;
         pendingRequest.waiter.resolve();
@@ -125,17 +126,21 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       }
     }
 
-    const holder = this.#thenCallbacks.get(event.id);
-    if (holder) {
-      this.#thenCallbacks.delete(event.id);
-      if (event.accepted) {
-        holder.thenCallback?.();
-      }
-    }
-
     if (event.accepted || event.type === 'snapshot') {
       record?.waiter.resolve();
       this.#applyAcceptedEvent(event);
+    }
+
+    this.runCallback(event);
+  }
+
+  protected runCallback(event: StateEvent<T>): void {
+    const thenCallback = this.thenCallbacks.get(event.id);
+    if (thenCallback) {
+      this.thenCallbacks.delete(event.id);
+      if (event.accepted) {
+        thenCallback();
+      }
     }
   }
 
