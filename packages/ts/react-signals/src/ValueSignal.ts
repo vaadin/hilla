@@ -1,4 +1,10 @@
-import { createReplaceStateEvent, type StateEvent } from './events.js';
+import {
+  createReplaceStateEvent,
+  isReplaceStateEvent,
+  isSetStateEvent,
+  isSnapshotStateEvent,
+  type StateEvent,
+} from './events.js';
 import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
 export type ThenCallback = () => void;
@@ -80,7 +86,9 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @returns An operation object that allows to perform additional actions.
    */
   replace(expected: T, newValue: T): Operation {
-    const event = createReplaceStateEvent(expected, newValue);
+    const { parentClientSignalId } = this.server.config;
+    const signalId = parentClientSignalId !== undefined ? this.id : undefined;
+    const event = createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId);
     this[$update](event);
     return this.createOperation(event.id);
   }
@@ -114,7 +122,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     };
   }
 
-  protected override [$processServerResponse](event: StateEvent<T>): void {
+  protected override [$processServerResponse](event: StateEvent): void {
     const record = this.#pendingRequests.get(event.id);
     if (record) {
       this.#pendingRequests.delete(event.id);
@@ -126,7 +134,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       }
     }
 
-    if (event.accepted || event.type === 'snapshot') {
+    if (event.accepted || isSnapshotStateEvent<T>(event)) {
       record?.waiter.resolve();
       this.#applyAcceptedEvent(event);
     }
@@ -134,7 +142,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     this.runCallback(event);
   }
 
-  protected runCallback(event: StateEvent<T>): void {
+  protected runCallback(event: StateEvent): void {
     const thenCallback = this.thenCallbacks.get(event.id);
     if (thenCallback) {
       this.thenCallbacks.delete(event.id);
@@ -144,10 +152,10 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     }
   }
 
-  #applyAcceptedEvent(event: StateEvent<T>): void {
-    if (event.type === 'set' || event.type === 'snapshot') {
+  #applyAcceptedEvent(event: StateEvent): void {
+    if (isSetStateEvent<T>(event) || isSnapshotStateEvent<T>(event)) {
       this.value = event.value;
-    } else if (event.type === 'replace') {
+    } else if (isReplaceStateEvent<T>(event)) {
       if (JSON.stringify(this.value) === JSON.stringify(event.expected)) {
         this.value = event.value;
       }
