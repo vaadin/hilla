@@ -1,0 +1,83 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "NullableEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.nonnull.nullable.NullableEndpoint"
+    }
+  ],
+  "paths" : {
+    "/NullableEndpoint/nullableFieldModel" : {
+      "post" : {
+        "tags" : [
+          "NullableEndpoint"
+        ],
+        "operationId" : "NullableEndpoint_nullableFieldModel_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "nullableFieldModel" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nullable.NullableEndpoint$NullableFieldModel"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nullable.NullableEndpoint$NullableFieldModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.parser.plugins.nonnull.nullable.NullableEndpoint$NullableFieldModel" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64",
+            "nullable" : true
+          }
+        }
+      }
+    }
+  }
+}
