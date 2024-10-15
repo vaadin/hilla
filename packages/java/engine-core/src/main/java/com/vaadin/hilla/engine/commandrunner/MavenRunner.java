@@ -80,11 +80,11 @@ public class MavenRunner implements CommandRunner {
         }
         // Prefer the wrapper over a global installation
         if (IS_WINDOWS) {
-            executableList.add(".\\mvnw.cmd");
-            executableList.add("mvn.cmd");
+            executableList.add(".\\mvnw2.cmd");
+            executableList.add("mvn2.cmd");
         } else {
-            executableList.add("./mvnw");
-            executableList.add("mvn");
+            executableList.add("./mvnw2");
+            executableList.add("mvn2");
         }
         return List.copyOf(executableList);
     }
