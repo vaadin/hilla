@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,5 +49,13 @@ public class DateTimeEndpoint {
     }
 
     public static class CustomDate extends Date {
+    }
+
+    public OffsetDateTime echoOffsetDateTime(OffsetDateTime offsetDateTime) {
+        return offsetDateTime;
+    }
+
+    public ZonedDateTime echoZonedDateTime(ZonedDateTime zonedDateTime) {
+        return zonedDateTime;
     }
 }

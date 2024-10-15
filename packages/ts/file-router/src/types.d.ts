@@ -77,6 +77,7 @@ export type AgnosticRoute = Readonly<{
   path: string;
   module?: Module;
   children?: readonly AgnosticRoute[];
+  flowLayout?: boolean;
 }>;
 
 /**

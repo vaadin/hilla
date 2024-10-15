@@ -9,7 +9,7 @@ import {
   UnauthorizedResponseError,
   type ValidationErrorData,
 } from './EndpointErrors.js';
-import { FluxConnection } from './FluxConnection.js';
+import { type ActionOnLostSubscription, FluxConnection } from './FluxConnection.js';
 import type { VaadinWindow } from './types.js';
 
 const $wnd = window as VaadinWindow;
@@ -43,8 +43,13 @@ export interface Subscription<T> {
   /** Called when a new value is available. */
   onNext(callback: (value: T) => void): Subscription<T>;
 
-  /** Called when subscription disconnected */
-  onDisconnect(callback: () => void): Subscription<T>;
+  /**
+   * Called when the connection is restored, but there's no longer a valid subscription. If the callback returns
+   * `ActionOnLostSubscription.RESUBSCRIBE`, the subscription will be re-established by connecting to the same
+   * server method again. If the callback returns `ActionOnLostSubscription.REMOVE`, the subscription will be
+   * forgotten. This is also the default behavior if the callback is not set or if it returns `undefined`.
+   */
+  onSubscriptionLost(callback: () => ActionOnLostSubscription | void): Subscription<T>;
 }
 
 interface ConnectExceptionData {

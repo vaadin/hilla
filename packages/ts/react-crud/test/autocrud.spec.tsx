@@ -346,7 +346,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
         const form = await FormController.init(user);
         expect(form.instance).to.exist;
-        expect((await form.getField('Name')).value).to.equal(undefined);
+        expect(await form.getField('Name')).to.have.value('');
       });
 
       it('closes the dialog when clicking close button', async () => {

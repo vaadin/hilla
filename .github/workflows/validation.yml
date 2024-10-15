@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [ main, '24.4', '2.5', '1.5', '1.4', '1.3' ]
+    branches: [ main, '24.5', '24.4', '2.5', '1.5', '1.4' ]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -207,9 +207,9 @@ jobs:
         include:
           - os: ubuntu-latest
             it-modules: group-1
-          - os: windows-latest
+          - os: ubuntu-latest
             it-modules: group-2
-          - os: windows-latest
+          - os: ubuntu-latest
             it-modules: some
     runs-on: ${{ matrix.os }}
 

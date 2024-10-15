@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>tests</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>tests-spring</artifactId>
@@ -192,6 +192,7 @@
             <id>it-modules-group-1</id>
             <modules>
                 <module>endpoints</module>
+                <module>endpoints-contextpath</module>
                 <module>endpoints discovery</module>
                 <module>endpoints-custom-client</module>
                 <!--
@@ -199,8 +200,6 @@
         <module>endpoints-maven-engine</module>
         -->
                 <module>endpoints-latest-java</module>
-                <module>react-grid-test</module>
-                <module>react-signals</module>
                 <module>react-i18n</module>
             </modules>
         </profile>
@@ -221,6 +220,7 @@
                 <module>endpoints</module>
                 <module>endpoints discovery</module>
                 <module>react-grid-test</module>
+                <module>react-signals</module>
             </modules>
         </profile>
 

@@ -1,4 +1,4 @@
-import type { ConnectClient, Subscription } from '@vaadin/hilla-frontend';
+import type { ActionOnLostSubscription, ConnectClient, Subscription } from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
@@ -20,6 +20,13 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   #subscribeCount = -1;
 
   protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (!(window as any).Vaadin?.featureFlags?.fullstackSignals) {
+      // Remove when removing feature flag
+      throw new Error(
+        `The Hilla Fullstack Signals API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.fullstackSignals=true to vaadin-featureflags.properties`,
+      );
+    }
     super(value);
     this.#onFirstSubscribe = onFirstSubscribe;
     this.#onLastUnsubscribe = onLastUnsubscribe;
@@ -67,18 +74,23 @@ export type ServerConnectionConfig = Readonly<{
    * method that provides the signal when subscribing to it.
    */
   params?: Record<string, unknown>;
+
+  /**
+   * The unique identifier of the parent signal in the client.
+   */
+  parentClientSignalId?: string;
 }>;
 
 /**
  * A server connection manager.
  */
-class ServerConnection<T> {
+class ServerConnection {
   readonly #id: string;
-  readonly #config: ServerConnectionConfig;
-  #subscription?: Subscription<StateEvent<T>>;
+  readonly config: ServerConnectionConfig;
+  #subscription?: Subscription<StateEvent>;
 
   constructor(id: string, config: ServerConnectionConfig) {
-    this.#config = config;
+    this.config = config;
     this.#id = id;
   }
 
@@ -87,20 +99,21 @@ class ServerConnection<T> {
   }
 
   connect() {
-    const { client, endpoint, method, params } = this.#config;
+    const { client, endpoint, method, params, parentClientSignalId } = this.config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
       params,
+      parentClientSignalId,
     });
 
     return this.#subscription;
   }
 
-  async update(event: StateEvent<T>): Promise<void> {
-    await this.#config.client.call(ENDPOINT, 'update', {
+  async update(event: StateEvent): Promise<void> {
+    await this.config.client.call(ENDPOINT, 'update', {
       clientSignalId: this.#id,
       event,
     });
@@ -114,6 +127,7 @@ class ServerConnection<T> {
 
 export const $update = Symbol('update');
 export const $processServerResponse = Symbol('processServerResponse');
+export const $setValueQuietly = Symbol('setValueQuietly');
 
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
@@ -128,12 +142,12 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * The unique identifier of the signal necessary to communicate with the
    * server.
    */
-  readonly id = nanoid();
+  readonly id: string;
 
   /**
    * The server connection manager.
    */
-  readonly server: ServerConnection<T>;
+  readonly server: ServerConnection;
 
   /**
    * Defines whether the signal is currently awaits a server-side response.
@@ -152,19 +166,27 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   // value to the server.
   #paused = true;
 
-  constructor(value: T | undefined, config: ServerConnectionConfig) {
+  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string) {
     super(
       value,
       () => this.#connect(),
       () => this.#disconnect(),
     );
+    this.id = id ?? nanoid();
     this.server = new ServerConnection(this.id, config);
 
     this.subscribe((v) => {
       if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
-        this[$update](createSetStateEvent(v));
+        // For internal signals, the provided non-null to the constructor should
+        // be used along with the parent client side signal id when sending the
+        // set event to the server. For internal signals this combination is
+        // needed for addressing the correct parent/child signal instances on
+        // the server. For a standalone signal, both of them should be passed in
+        // as undefined:
+        const signalId = config.parentClientSignalId !== undefined ? this.id : undefined;
+        this[$update](createSetStateEvent(v, signalId, config.parentClientSignalId));
       }
     });
 
@@ -176,9 +198,9 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * @param value - The new value.
    * @internal
    */
-  protected setValueLocal(value: T): void {
+  protected [$setValueQuietly](value: T): void {
     this.#paused = true;
-    this.value = value;
+    super.value = value;
     this.#paused = false;
   }
 
@@ -187,7 +209,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The event to update the server with.
    */
-  protected [$update](event: StateEvent<T>): void {
+  protected [$update](event: StateEvent): void {
     this.server
       .update(event)
       .catch((error: unknown) => {
@@ -204,14 +226,17 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    *
    * @param event - The server response event.
    */
-  protected abstract [$processServerResponse](event: StateEvent<T>): void;
+  protected abstract [$processServerResponse](event: StateEvent): void;
 
   #connect() {
-    this.server.connect().onNext((event: StateEvent<T>) => {
-      this.#paused = true;
-      this[$processServerResponse](event);
-      this.#paused = false;
-    });
+    this.server
+      .connect()
+      .onSubscriptionLost(() => 'resubscribe' as ActionOnLostSubscription)
+      .onNext((event: StateEvent) => {
+        this.#paused = true;
+        this[$processServerResponse](event);
+        this.#paused = false;
+      });
   }
 
   #disconnect() {

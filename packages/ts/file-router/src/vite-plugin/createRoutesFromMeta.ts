@@ -50,9 +50,15 @@ function createImport(mod: string, file: string): ImportDeclaration {
  * @param mod - The name of the route module imported as a namespace.
  * @param children - The list of child route call expressions.
  */
-function createRouteData(path: string, mod: string | undefined, children?: readonly CallExpression[]): CallExpression {
+function createRouteData(
+  path: string,
+  flowLayout: boolean | undefined,
+  mod: string | undefined,
+  children?: readonly CallExpression[],
+): CallExpression {
+  const serverLayout = flowLayout ?? false;
   return template(
-    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children ? `, CHILDREN` : ''})`,
+    `const route = createRoute("${path}",${serverLayout}${mod ? `, ${mod}` : ''}${children ? `, CHILDREN` : ''})`,
     ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
     [
       transformer((node) =>
@@ -84,7 +90,7 @@ export default function createRoutesFromMeta(views: readonly RouteMeta[], { code
         .map((dup) => `console.error("Two views share the same path: ${dup}");`),
     );
 
-    return metas.map(({ file, layout, path, children }) => {
+    return metas.map(({ file, layout, path, children, flowLayout }) => {
       let _children: readonly CallExpression[] | undefined;
 
       if (children) {
@@ -103,7 +109,7 @@ export default function createRoutesFromMeta(views: readonly RouteMeta[], { code
         imports.push(createImport(mod, relativize(layout, codeDir)));
       }
 
-      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children);
+      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), flowLayout, mod, _children);
     });
   });
 

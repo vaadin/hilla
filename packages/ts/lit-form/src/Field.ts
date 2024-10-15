@@ -2,7 +2,16 @@
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
-import { _fromString, type AbstractModel, ArrayModel, BooleanModel, hasFromString, ObjectModel } from './Models.js';
+import {
+  _fromString,
+  type AbstractModel,
+  ArrayModel,
+  BooleanModel,
+  hasFromString,
+  NumberModel,
+  ObjectModel,
+} from './Models.js';
+import { StringModel } from './Models.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -93,6 +102,10 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
   }
 
   set value(value: T | undefined) {
+    if (this.model instanceof StringModel || this.model instanceof NumberModel) {
+      this.#element.value = value ?? ('' as T);
+      return;
+    }
     this.#element.value = value;
   }
 
@@ -224,6 +237,19 @@ export class CheckedFieldStrategy<
   }
 }
 
+export class CheckedGroupFieldStrategy<
+  T = any,
+  E extends FieldElement<T> = FieldElement<T>,
+> extends GenericFieldStrategy<T, E> {
+  override get value(): T | undefined {
+    return super.value;
+  }
+
+  override set value(val: T | undefined) {
+    super.value = val ?? ([] as T);
+  }
+}
+
 type ComboBoxFieldElement<T> = FieldElement<T> & {
   value: string;
   selectedItem: T | null;
@@ -260,6 +286,26 @@ export class VaadinStringFieldStrategy extends VaadinFieldStrategy<string> {
     // Some Vaadin components (e.g. vaadin-time-picker) do not support setting
     // the value to `null` or `undefined`. Instead, set it to an empty string.
     super.value = val ?? '';
+  }
+}
+function isEmptyObject(val: any): boolean {
+  return val && typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0;
+}
+
+export class VaadinDateTimeFieldStrategy<
+  T = string,
+  E extends FieldElement<T> = FieldElement<T>,
+> extends VaadinFieldStrategy<T, E> {
+  override get value(): T | undefined {
+    return super.value;
+  }
+
+  override set value(val: T | undefined) {
+    if (!val || isEmptyObject(val)) {
+      super.value = '' as T;
+    }
+    const date = Date.parse(val as string);
+    super.value = (Number.isNaN(date) ? '' : new Date(date).toISOString().slice(0, 19)) as T;
   }
 }
 
@@ -308,6 +354,8 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
       return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
+    case 'vaadin-checkbox-group':
+      return new CheckedGroupFieldStrategy(elm, model);
     case 'vaadin-combo-box':
       return new ComboBoxFieldStrategy(elm as ComboBoxFieldElement<T>, model);
     case 'vaadin-list-box':
@@ -321,13 +369,16 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
         elm as FieldElement<string>,
         model as AbstractModel<string>,
       ) as AbstractFieldStrategy<T>;
+    case 'vaadin-date-time-picker':
+      return new VaadinDateTimeFieldStrategy(elm, model) as AbstractFieldStrategy<T>;
     default:
       if (elm.localName === 'input' && /^(checkbox|radio)$/u.test((elm as unknown as HTMLInputElement).type)) {
         return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);
       }
-      return (elm.constructor as unknown as MaybeVaadinElementConstructor).version
-        ? new VaadinFieldStrategy(elm, model)
-        : new GenericFieldStrategy(elm, model);
+      if ((elm.constructor as unknown as MaybeVaadinElementConstructor).version) {
+        return new VaadinFieldStrategy(elm, model);
+      }
+      return new GenericFieldStrategy(elm, model);
   }
 }
 

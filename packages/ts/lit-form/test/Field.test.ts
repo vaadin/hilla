@@ -21,7 +21,9 @@ import {
   MultiSelectComboBoxFieldStrategy,
   Required,
   SelectedFieldStrategy,
+  VaadinDateTimeFieldStrategy,
   VaadinFieldStrategy,
+  CheckedGroupFieldStrategy,
 } from '../src/index.js';
 import { OrderModel, TestModel } from './TestModels.js';
 
@@ -535,6 +537,34 @@ describe('@vaadin/hilla-lit-form', () => {
         });
       });
 
+      ['div', 'input'].forEach((tag) => {
+        it(`GenericFieldStrategy undefined ${tag}`, async () => {
+          const tagName = unsafeStatic(tag);
+
+          const model = binder.model.fieldString;
+          const binderNode = binder.for(model);
+          binderNode.value = undefined;
+          await resetBinderNodeValidation(binderNode);
+
+          const renderElement = () => {
+            render(
+              html`
+                <${tagName} ${field(model)}></${tagName}>`,
+              div,
+            );
+            return div.firstElementChild as Element & { value?: any };
+          };
+
+          renderElement();
+
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
+          expect(currentStrategy instanceof GenericFieldStrategy).to.be.true;
+          expect(currentStrategy.value).to.be.equal('');
+          expect(currentStrategy.model).to.be.equal(model);
+        });
+      });
+
       [{ tag: 'vaadin-time-picker' }].forEach(({ tag }) => {
         describe(`VaadinStringFieldStrategy ${tag}`, () => {
           const tagName = unsafeStatic(tag);
@@ -564,6 +594,39 @@ describe('@vaadin/hilla-lit-form', () => {
             expect(currentStrategy.value).to.be.equal('');
             expect(element.value).to.be.equal('');
           });
+        });
+      });
+
+      describe(`VaadinStringFieldStrategy vaadin-date-time-picker`, () => {
+        const tagName = unsafeStatic('vaadin-date-time-picker');
+        let currentStrategy: FieldStrategy;
+        let element: Element & { value?: any };
+
+        function renderTag(model: AbstractModel) {
+          render(
+            html`
+                <${tagName} ${field(model)}></${tagName}>`,
+            div,
+          );
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+          element = div.firstElementChild as Element & { value?: string };
+        }
+
+        it('should clear optional field to an empty string', () => {
+          const model = binder.model.fieldOptionalString;
+
+          binder.read({ ...TestModel.createEmptyValue(), fieldOptionalString: '2024-12-14T11:15:30.1234567' });
+          renderTag(model);
+
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+          expect(currentStrategy instanceof VaadinDateTimeFieldStrategy).to.be.true;
+          expect(currentStrategy.value).to.be.equal('2024-12-14T11:15:30');
+          expect(element.value).to.be.equal('2024-12-14T11:15:30');
+
+          binder.clear();
+          renderTag(model);
+          expect(currentStrategy.value).to.be.equal('');
+          expect(element.value).to.be.equal('');
         });
       });
 
@@ -611,6 +674,43 @@ describe('@vaadin/hilla-lit-form', () => {
           expect(currentStrategy.model).to.be.equal(model);
 
           expect(element.checked).to.be.true;
+
+          await binderNode.validate();
+          element = renderElement();
+          expect(element.hasAttribute('invalid')).to.be.true;
+          expect(element.hasAttribute('errorMessage')).to.be.false;
+        });
+      });
+
+      [{ tag: 'vaadin-checkbox-group' }].forEach(({ tag }) => {
+        it(`CheckedGroupFieldStrategy ${tag} `, async () => {
+          const tagName = unsafeStatic(tag);
+
+          const model = binder.model.fieldArrayString;
+          const binderNode = binder.for(model);
+
+          let element;
+          const renderElement = () => {
+            render(
+              html`
+                  <${tagName} ${field(model)}></${tagName}>`,
+              div,
+            );
+            return div.firstElementChild as Element & { checked?: boolean };
+          };
+
+          binderNode.value = ['0', '1'];
+          await resetBinderNodeValidation(binderNode);
+
+          binderNode.validators = [{ message: 'any-err-msg', validate: () => false }];
+
+          element = renderElement();
+
+          const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+
+          expect(currentStrategy instanceof CheckedGroupFieldStrategy).to.be.true;
+          expect(currentStrategy.value).to.be.deep.equal(['0', '1']);
+          expect(currentStrategy.model).to.be.equal(model);
 
           await binderNode.validate();
           element = renderElement();

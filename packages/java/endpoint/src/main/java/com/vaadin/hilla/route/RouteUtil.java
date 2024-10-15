@@ -5,7 +5,7 @@ import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import jakarta.servlet.http.HttpServletRequest;

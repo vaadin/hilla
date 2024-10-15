@@ -20,7 +20,7 @@ export default function snapshotMatcher(chai: Chai.ChaiStatic, utils: Chai.ChaiU
     // eslint-disable-next-line prefer-arrow-callback
     async function toMatchSnapshot(this: object, snapshotName: string, importMetaUrl: string): Promise<void> {
       const obj = utils.flag(this, 'object');
-      const snapshotURL = new URL(`./fixtures/${snapshotName}.snap.ts`, importMetaUrl);
+      const snapshotURL = new URL(`./fixtures/${snapshotName}`, importMetaUrl);
       const snapshotPath = fileURLToPath(snapshotURL);
 
       if (shouldUpdate) {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A utility class for representing state events out of an ObjectNode. This
@@ -25,31 +26,22 @@ public class StateEvent<T> {
         public static final String TYPE = "type";
         public static final String VALUE = "value";
         public static final String EXPECTED = "expected";
+        public static final String ACCEPTED = "accepted";
     }
 
     /**
      * Possible types of state events.
      */
     public enum EventType {
-        SNAPSHOT, SET, REPLACE, REJECT, INCREMENT
-    }
+        SNAPSHOT, SET, REPLACE, INCREMENT;
 
-    /**
-     * An exception thrown when the event type is null or invalid.
-     */
-    public static class InvalidEventTypeException extends RuntimeException {
-        public InvalidEventTypeException(String message) {
-            super(message);
+        public static EventType of(String type) {
+            return valueOf(type.toUpperCase());
         }
 
-        public InvalidEventTypeException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    public static class MissingFieldException extends RuntimeException {
-        public MissingFieldException(String fieldName) {
-            super("Missing field: " + fieldName);
+        public static Optional<EventType> find(String type) {
+            return Arrays.stream(values())
+                    .filter(e -> e.name().equalsIgnoreCase(type)).findFirst();
         }
     }
 
@@ -59,6 +51,7 @@ public class StateEvent<T> {
     private final EventType eventType;
     private final T value;
     private final T expected;
+    private Boolean accepted;
 
     /**
      * Creates a new state event using the given parameters.
@@ -102,20 +95,20 @@ public class StateEvent<T> {
     public StateEvent(ObjectNode json, Class<T> valueType) {
         this.id = extractId(json);
         this.eventType = extractEventType(json);
-        this.value = convertValue(extractValue(json), valueType);
+        this.value = convertValue(extractValue(json, true), valueType);
 
         JsonNode expected = json.get(Field.EXPECTED);
         this.expected = convertValue(expected, valueType);
     }
 
-    private T convertValue(JsonNode rawValue, Class<T> valueType) {
+    public static <X> X convertValue(JsonNode rawValue, Class<X> valueType) {
         if (rawValue == null) {
             return null;
         }
         return MAPPER.convertValue(rawValue, valueType);
     }
 
-    private String extractId(JsonNode json) {
+    public static String extractId(JsonNode json) {
         var id = json.get(Field.ID);
         if (id == null) {
             throw new MissingFieldException(Field.ID);
@@ -123,28 +116,36 @@ public class StateEvent<T> {
         return id.asText();
     }
 
-    private JsonNode extractValue(JsonNode json) {
+    public static JsonNode extractValue(JsonNode json, boolean required) {
         var value = json.get(Field.VALUE);
         if (value == null) {
-            throw new MissingFieldException(Field.VALUE);
+            if (required) {
+                throw new MissingFieldException(Field.VALUE);
+            }
+            return null;
         }
         return value;
     }
 
-    private EventType extractEventType(JsonNode json) {
+    public static String extractRawEventType(JsonNode json) {
         var rawType = json.get(Field.TYPE);
         if (rawType == null) {
             var message = String.format(
                     "Missing event type. Type is required, and should be one of: %s",
                     Arrays.toString(EventType.values()));
-            throw new InvalidEventTypeException(message);
+            throw new MissingFieldException(message);
         }
+        return rawType.asText();
+    }
+
+    public static EventType extractEventType(JsonNode json) {
+        var rawType = extractRawEventType(json);
         try {
-            return EventType.valueOf(rawType.asText().toUpperCase());
+            return EventType.of(rawType);
         } catch (IllegalArgumentException e) {
             var message = String.format(
-                    "Invalid event type %s. Type should be one of: %s",
-                    rawType.asText(), Arrays.toString(EventType.values()));
+                    "Invalid event type %s. Type should be one of: %s", rawType,
+                    Arrays.toString(EventType.values()));
             throw new InvalidEventTypeException(message, e);
         }
     }
@@ -162,10 +163,18 @@ public class StateEvent<T> {
         if (getExpected() != null) {
             json.set(Field.EXPECTED, valueAsJsonNode(getExpected()));
         }
+        if (accepted != null) {
+            json.put(Field.ACCEPTED, accepted);
+        }
         return json;
     }
 
-    private JsonNode valueAsJsonNode(T value) {
+    public static boolean isAccepted(ObjectNode event) {
+        return event.has(Field.ACCEPTED)
+                && event.get(Field.ACCEPTED).asBoolean();
+    }
+
+    private static JsonNode valueAsJsonNode(Object value) {
         return MAPPER.valueToTree(value);
     }
 
@@ -203,6 +212,25 @@ public class StateEvent<T> {
      */
     public T getExpected() {
         return expected;
+    }
+
+    /**
+     * Returns whether the event was accepted or not.
+     *
+     * @return whether the event was accepted or not.
+     */
+    public Boolean getAccepted() {
+        return accepted;
+    }
+
+    /**
+     * Sets whether the event was accepted or not.
+     *
+     * @param accepted
+     *            whether the event was accepted or not.
+     */
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
     }
 
     @Override

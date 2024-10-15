@@ -13,7 +13,7 @@
     <artifactId>hilla-bom</artifactId>
     <packaging>pom</packaging>
     <name>Hilla Platform (Bill of Materials)</name>
-    <version>24.5-SNAPSHOT</version>
+    <version>24.6-SNAPSHOT</version>
     <description>Hilla Platform (Bill of Materials)</description>
     <url>https://hilla.dev</url>
 

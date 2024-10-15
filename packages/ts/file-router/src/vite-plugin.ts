@@ -81,6 +81,7 @@ export default function vitePluginFileSystemRouter({
       runtimeUrls = {
         json: new URL('file-routes.json', isDevMode ? _generatedDir : _outDir),
         code: new URL('file-routes.ts', _generatedDir),
+        layouts: new URL('layouts.json', _generatedDir),
       };
     },
     async buildStart() {
@@ -96,9 +97,11 @@ export default function vitePluginFileSystemRouter({
       const changeListener = (file: string): void => {
         if (!file.startsWith(dir)) {
           if (file === fileURLToPath(runtimeUrls.json)) {
-            server.hot.send({ type: 'full-reload' });
+            server.hot.send({ type: 'custom', event: 'fs-route-update' });
+          } else if (file !== fileURLToPath(runtimeUrls.layouts)) {
+            // outside views folder, only changes to layouts file should trigger files generation
+            return;
           }
-          return;
         }
 
         generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug).catch((e: unknown) =>

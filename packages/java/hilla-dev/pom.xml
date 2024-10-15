@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.6-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -52,10 +52,6 @@
                     <failOnError>false</failOnError>
                     <quiet>true</quiet>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

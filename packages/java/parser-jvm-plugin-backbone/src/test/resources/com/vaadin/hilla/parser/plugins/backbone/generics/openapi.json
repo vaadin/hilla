@@ -709,6 +709,23 @@
             "type": "object",
             "nullable": true,
             "x-type-variable": "T"
+          },
+          "bareRefEntityProperty": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+              }
+            ],
+            "x-type-arguments": { 
+              "allOf" : [
+                {
+                  "type" : "object",
+                  "nullable" : true,
+                  "x-type-variable" : "T"
+                }
+              ]
+            }
           }
         },
         "x-type-parameters": [
@@ -734,7 +751,14 @@
                 "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
               }
             ],
-            "x-type-arguments" : { }
+            "x-type-arguments": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "nullable": true
+                }
+              ]
+            }
           }
         }
       },

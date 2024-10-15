@@ -3,6 +3,7 @@ package com.vaadin.hilla.signals;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 
@@ -12,11 +13,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class ValueSignalTest {
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void constructor_withValueArg_usesValueAsDefaultValue() {
@@ -95,10 +100,15 @@ public class ValueSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertNull(stateEvent.getValue());
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
+                assertTrue(StateEvent.isAccepted(eventJson));
                 assertEquals(name, stateEvent.getValue().getName());
+                assertEquals(name, signal.getValue().getName());
                 assertEquals(age, stateEvent.getValue().getAge());
+                assertEquals(age, signal.getValue().getAge());
                 assertEquals(adult, stateEvent.getValue().isAdult());
+                assertEquals(adult, signal.getValue().isAdult());
             }
             counter.incrementAndGet();
         });
@@ -123,12 +133,14 @@ public class ValueSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertEquals(2.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
                         .asText(), stateEvent.getId());
-                assertEquals(StateEvent.EventType.SNAPSHOT,
+                assertEquals(StateEvent.EventType.REPLACE,
                         stateEvent.getEventType());
-                assertEquals(3.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
+                assertEquals(3.0, signal.getValue(), 0.0);
             }
             counter.incrementAndGet();
         });
@@ -151,13 +163,14 @@ public class ValueSignalTest {
             var stateEvent = new StateEvent<>(eventJson, Double.class);
             if (counter.get() == 0) {
                 // notification for the initial value
-                assertEquals(1.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(conditionalReplaceEvent.get(StateEvent.Field.ID)
                         .asText(), stateEvent.getId());
-                assertEquals(StateEvent.EventType.REJECT,
+                assertEquals(StateEvent.EventType.REPLACE,
                         stateEvent.getEventType());
-                assertEquals(1.0, stateEvent.getValue(), 0.0);
+                assertFalse(StateEvent.isAccepted(eventJson));
+                assertEquals(1.0, signal.getValue(), 0.0);
             }
             counter.incrementAndGet();
         });
@@ -165,6 +178,15 @@ public class ValueSignalTest {
         signal.submit(conditionalReplaceEvent);
 
         assertEquals(2, counter.get());
+    }
+
+    @Test
+    public void submit_eventWithUnknownCommand_throws() {
+        var signal = new ValueSignal<>("Foo", String.class);
+
+        var exception = assertThrows(UnsupportedOperationException.class,
+                () -> signal.submit(createUnknownCommandEvent()));
+        assertTrue(exception.getMessage().startsWith("Unsupported JSON: "));
     }
 
     private <T> ObjectNode createSetEvent(T value) {
@@ -177,5 +199,13 @@ public class ValueSignalTest {
         var setEvent = new StateEvent<>(UUID.randomUUID().toString(),
                 StateEvent.EventType.REPLACE, value, expectedValue);
         return setEvent.toJson();
+    }
+
+    private ObjectNode createUnknownCommandEvent() {
+        var unknown = mapper.createObjectNode();
+        unknown.put(StateEvent.Field.ID, UUID.randomUUID().toString());
+        unknown.put("concat", "bar");
+        unknown.put(StateEvent.Field.VALUE, "Foo");
+        return unknown;
     }
 }

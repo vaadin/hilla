@@ -1,6 +1,6 @@
 package com.vaadin.hilla.signals.core.registry;
 
-import com.vaadin.hilla.signals.ValueSignal;
+import com.vaadin.hilla.signals.Signal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public final class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
-    private final Map<UUID, ValueSignal<?>> signals = new WeakHashMap<>();
+    private final Map<UUID, Signal<?>> signals = new WeakHashMap<>();
     private final Map<String, UUID> clientSignalToSignalMapping = new HashMap<>();
 
     SignalsRegistry() {
@@ -40,8 +40,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} or {@code signal} is null
      */
-    public synchronized void register(String clientSignalId,
-            ValueSignal<?> signal) {
+    public synchronized void register(String clientSignalId, Signal<?> signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Objects.requireNonNull(signal, "Signal must not be null");
@@ -67,7 +66,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} is null
      */
-    public synchronized ValueSignal<?> get(String clientSignalId) {
+    public synchronized Signal<?> get(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         UUID signalId = clientSignalToSignalMapping.get(clientSignalId);
@@ -91,7 +90,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized ValueSignal<?> getBySignalId(UUID signalId) {
+    public synchronized Signal<?> getBySignalId(UUID signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
         return signals.get(signalId);
     }

@@ -1,4 +1,10 @@
-import { createReplaceStateEvent, type StateEvent } from './events.js';
+import {
+  createReplaceStateEvent,
+  isReplaceStateEvent,
+  isSetStateEvent,
+  isSnapshotStateEvent,
+  type StateEvent,
+} from './events.js';
 import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
@@ -43,7 +49,9 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @param newValue - The new value.
    */
   replace(expected: T, newValue: T): void {
-    this[$update](createReplaceStateEvent(expected, newValue));
+    const { parentClientSignalId } = this.server.config;
+    const signalId = parentClientSignalId !== undefined ? this.id : undefined;
+    this[$update](createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId));
   }
 
   /**
@@ -74,23 +82,33 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     };
   }
 
-  protected override [$processServerResponse](event: StateEvent<T>): void {
+  protected override [$processServerResponse](event: StateEvent): void {
     const record = this.#pendingRequests.get(event.id);
     if (record) {
       this.#pendingRequests.delete(event.id);
     }
 
-    if (event.type === 'snapshot') {
-      if (record) {
-        record.waiter.resolve();
-      }
-      this.value = event.value;
-    }
-
-    if (event.type === 'reject' && record) {
+    if (!event.accepted && record) {
       if (!record.canceled) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.update(record.callback);
+      }
+    }
+
+    if (event.accepted || isSnapshotStateEvent<T>(event)) {
+      if (record) {
+        record.waiter.resolve();
+      }
+      this.#applyAcceptedEvent(event);
+    }
+  }
+
+  #applyAcceptedEvent(event: StateEvent): void {
+    if (isSetStateEvent<T>(event) || isSnapshotStateEvent<T>(event)) {
+      this.value = event.value;
+    } else if (isReplaceStateEvent<T>(event)) {
+      if (JSON.stringify(this.value) === JSON.stringify(event.expected)) {
+        this.value = event.value;
       }
     }
   }
