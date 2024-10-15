@@ -59,7 +59,7 @@ export class NumberSignal extends ValueSignal<number> {
       } else {
         this[$setValueQuietly](this.value + event.value);
       }
-      this.runCallback(event);
+      this.runCallback(event.id);
     } else {
       super[$processServerResponse](event);
     }

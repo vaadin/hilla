@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import {
   createReplaceStateEvent,
   isReplaceStateEvent,
@@ -29,9 +30,8 @@ export const noOperation: Operation = Object.freeze({
   },
 });
 
-type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Readonly<{
-  waiter: PromiseWithResolvers;
+  id: string;
   callback(value: T): T;
 }> & { canceled: boolean };
 
@@ -109,14 +109,12 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const newValue = callback(this.value);
     const event = createReplaceStateEvent(this.value, newValue);
     this[$update](event);
-    const waiter = Promise.withResolvers<void>();
-    const pendingRequest = { callback, waiter, canceled: false };
+    const pendingRequest = { id: nanoid(), callback, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      ...this.createOperation(event.id),
+      ...this.createOperation(pendingRequest.id),
       cancel: () => {
         pendingRequest.canceled = true;
-        pendingRequest.waiter.resolve();
       },
     };
   }
@@ -132,20 +130,16 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     }
 
     if (event.accepted || isSnapshotStateEvent<T>(event)) {
-      record?.waiter.resolve();
       this.#applyAcceptedEvent(event);
+      [record?.id, event.id].filter(Boolean).forEach((id) => this.runCallback(id!));
     }
-
-    this.runCallback(event);
   }
 
-  protected runCallback(event: StateEvent): void {
-    const thenCallback = this.thenCallbacks.get(event.id);
+  protected runCallback(eventId: string): void {
+    const thenCallback = this.thenCallbacks.get(eventId);
     if (thenCallback) {
-      this.thenCallbacks.delete(event.id);
-      if (event.accepted) {
-        thenCallback();
-      }
+      this.thenCallbacks.delete(eventId);
+      thenCallback();
     }
   }
 

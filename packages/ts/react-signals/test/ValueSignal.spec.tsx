@@ -146,7 +146,6 @@ describe('@vaadin/hilla-react-signals', () => {
         id: (params!.event as { id: string }).id,
         type: 'replace',
         value: 'b',
-        expected: 'a',
         accepted: true,
       });
     });
