@@ -8,6 +8,10 @@ import {
 } from './events.js';
 import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
 
+/**
+ * The type of function that is used to define a callback that is called when
+ * the `then` method is called on an operation object.
+ */
 export type ThenCallback = () => void;
 
 /**
@@ -47,14 +51,16 @@ export interface OperationSubscription extends Operation {
  */
 export class ValueSignal<T> extends FullStackSignal<T> {
   readonly #pendingRequests = new Map<string, PendingRequestsRecord<T>>();
+  // stores the `then` callbacks associated to operations
   protected readonly thenCallbacks = new Map<string, ThenCallback>();
 
+  // creates the obejct to be returned by operations to allow defining callbacks
   protected createOperation(eventId: string): Operation {
-    const callbacks = this.thenCallbacks;
+    const thens = this.thenCallbacks;
     const op: Operation = {
       result: {
         then(callback) {
-          callbacks.set(eventId, callback);
+          thens.set(eventId, callback);
           return op.result;
         },
       },
@@ -131,11 +137,13 @@ export class ValueSignal<T> extends FullStackSignal<T> {
 
     if (event.accepted || isSnapshotStateEvent<T>(event)) {
       this.#applyAcceptedEvent(event);
-      [record?.id, event.id].filter(Boolean).forEach((id) => this.runCallback(id!));
+      // `then` callbacks can be associated to the record or the event
+      // it depends on the operation that was performed
+      [record?.id, event.id].filter(Boolean).forEach((id) => this.runThenCallback(id!));
     }
   }
 
-  protected runCallback(eventId: string): void {
+  protected runThenCallback(eventId: string): void {
     const thenCallback = this.thenCallbacks.get(eventId);
     if (thenCallback) {
       this.thenCallbacks.delete(eventId);
