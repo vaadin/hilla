@@ -26,7 +26,6 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
-import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.menu.RouteParamType;
@@ -67,13 +66,12 @@ public class ServerAndClientViewsProvider {
             throws JsonProcessingException {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
                 collectClientViews(request));
-        final boolean hasMainMenuRoute = hasMainMenu(
-                MenuRegistry.collectClientMenuItems(true,
-                        deploymentConfiguration, request));
+        final boolean hasAutoLayout = MenuRegistry.hasHillaMainLayout(
+                request.getService().getDeploymentConfiguration());
         if (exposeServerRoutesToClient) {
             LOGGER.debug(
                     "Exposing server-side views to the client based on user configuration");
-            availableViews.putAll(collectServerViews(hasMainMenuRoute));
+            availableViews.putAll(collectServerViews(hasAutoLayout));
         }
 
         return mapper.writeValueAsString(availableViews);
@@ -157,24 +155,6 @@ public class ServerAndClientViewsProvider {
                         .noneMatch(param -> param == RouteParamType.REQUIRED))
                 .collect(Collectors.toMap(this::getMenuLink,
                         Function.identity()));
-    }
-
-    private boolean hasMainMenu(Map<String, AvailableViewInfo> availableViews) {
-        Map<String, AvailableViewInfo> clientItems = new HashMap<>(
-                availableViews);
-
-        Set<String> clientEntries = new HashSet<>(clientItems.keySet());
-        for (String key : clientEntries) {
-            if (!clientItems.containsKey(key)) {
-                continue;
-            }
-            AvailableViewInfo viewInfo = clientItems.get(key);
-            if (viewInfo.children() != null) {
-                RouteUtil.removeChildren(clientItems, viewInfo, key);
-            }
-        }
-        return !clientItems.isEmpty() && clientItems.size() == 1
-                && clientItems.values().iterator().next().route().equals("");
     }
 
     /**
