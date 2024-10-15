@@ -30,11 +30,10 @@ export const noOperation: Operation = Object.freeze({
 });
 
 type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
-type PendingRequestsRecord<T> = Partial<{ thenCallback(): void }> &
-  Readonly<{
-    waiter: PromiseWithResolvers;
-    callback(value: T): T;
-  }> & { canceled: boolean };
+type PendingRequestsRecord<T> = Readonly<{
+  waiter: PromiseWithResolvers;
+  callback(value: T): T;
+}> & { canceled: boolean };
 
 /**
  * An operation subscription that can be canceled.
@@ -50,12 +49,12 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   readonly #pendingRequests = new Map<string, PendingRequestsRecord<T>>();
   protected readonly thenCallbacks = new Map<string, ThenCallback>();
 
-  protected createOperation(id: string): Operation {
+  protected createOperation(eventId: string): Operation {
     const callbacks = this.thenCallbacks;
     const op: Operation = {
       result: {
         then(callback) {
-          callbacks.set(id, callback);
+          callbacks.set(eventId, callback);
           return op.result;
         },
       },
@@ -111,7 +110,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const event = createReplaceStateEvent(this.value, newValue);
     this[$update](event);
     const waiter = Promise.withResolvers<void>();
-    const pendingRequest: PendingRequestsRecord<T> = { callback, waiter, canceled: false };
+    const pendingRequest = { callback, waiter, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
       ...this.createOperation(event.id),
@@ -127,9 +126,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     if (record) {
       this.#pendingRequests.delete(event.id);
 
-      if (event.accepted) {
-        record.thenCallback?.();
-      } else if (!record.canceled) {
+      if (!(event.accepted || record.canceled)) {
         this.update(record.callback);
       }
     }

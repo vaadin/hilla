@@ -159,7 +159,6 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should accept a callback after incrementBy', (done) => {
-      // @vlad and @soroosh say you have to work!!!
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
       numberSignal.incrementBy(1).result.then(done);
