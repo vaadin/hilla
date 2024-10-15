@@ -305,7 +305,10 @@ export function AutoForm<M extends AbstractModel>({
       const nonPropertyErrorMessages = error.errors
         .filter((validationError) => !validationError.property || typeof validationError.property === 'string')
         .map((validationError) => {
-          const property = typeof validationError.property === 'string' ? `${validationError.property}: ` : '';
+          const property =
+            validationError.property && typeof validationError.property === 'string'
+              ? `${validationError.property}: `
+              : '';
           return `${property}${
             validationError.validatorMessage ? validationError.validatorMessage : validationError.message
           }`;
