@@ -8,7 +8,13 @@ import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaa
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { StateEvent } from '../src/events.js';
+import type {
+  IncrementStateEvent,
+  ReplaceStateEvent,
+  SetStateEvent,
+  SnapshotStateEvent,
+  StateEvent,
+} from '../src/events.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { nextFrame } from './utils.js';
@@ -57,13 +63,13 @@ describe('@vaadin/hilla-react-signals', () => {
     function createAcceptedEvent(
       value: number,
       type: 'increment' | 'replace' | 'set' | 'snapshot',
-    ): StateEvent<number> {
+    ): IncrementStateEvent | ReplaceStateEvent<number> | SetStateEvent<number> | SnapshotStateEvent<number> {
       return { id: nanoid(), type, value, expected: 0, accepted: true };
     }
 
     function simulateReceivedChange(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
-      event: StateEvent<number>,
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>,
+      event: StateEvent,
     ) {
       const [onNextCallback] = connectSubscriptionMock.onNext.firstCall.args;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -71,7 +77,7 @@ describe('@vaadin/hilla-react-signals', () => {
     }
 
     function simulateResubscription(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>,
       client: sinon.SinonStubbedInstance<ConnectClient>,
     ) {
       const [onSubscriptionLostCallback] = connectSubscriptionMock.onSubscriptionLost.firstCall.args;
@@ -82,14 +88,14 @@ describe('@vaadin/hilla-react-signals', () => {
     }
 
     let client: sinon.SinonStubbedInstance<ConnectClient>;
-    let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
+    let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
     let signal: NumberSignal;
 
     beforeEach(() => {
       client = sinon.createStubInstance(ConnectClient);
       client.call.resolves();
 
-      subscription = sinon.spy<Subscription<StateEvent<number>>>({
+      subscription = sinon.spy<Subscription<StateEvent>>({
         cancel() {},
         context() {
           return this;
@@ -104,6 +110,9 @@ describe('@vaadin/hilla-react-signals', () => {
           return this;
         },
         onSubscriptionLost() {
+          return this;
+        },
+        onConnectionStateChange() {
           return this;
         },
       });
@@ -139,6 +148,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 
@@ -152,6 +162,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
 
       const dependentSignal = computed(() => signal.value);
@@ -178,6 +189,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: { foo: 'bar', baz: true },
+        parentClientSignalId: undefined,
       });
     });
 
@@ -231,6 +243,7 @@ describe('@vaadin/hilla-react-signals', () => {
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
         params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 
@@ -306,6 +319,74 @@ describe('@vaadin/hilla-react-signals', () => {
       simulateResubscription(subscription, client);
 
       expect(client.subscribe).to.be.have.been.calledTwice;
+    });
+
+    it('should send undefined as parentClientSignalId when no parent signal is provided', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: undefined,
+      });
+    });
+
+    it('should send parentClientSignalId when parent signal is provided', async () => {
+      signal = new NumberSignal(undefined, {
+        client,
+        endpoint: 'TestEndpoint',
+        method: 'testMethod',
+        parentClientSignalId: '1234',
+      });
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: '1234',
+      });
+    });
+
+    it('should not generate a random id when id is provided for the constructor', () => {
+      signal = new NumberSignal(
+        undefined,
+        {
+          client,
+          endpoint: 'TestEndpoint',
+          method: 'testMethod',
+        },
+        '1234',
+      );
+      expect(signal.id).to.equal('1234');
+    });
+
+    it('should send the provided id as event id when sending set events to the server', async () => {
+      signal = new NumberSignal(
+        undefined,
+        {
+          client,
+          endpoint: 'TestEndpoint',
+          method: 'testMethod',
+          parentClientSignalId: 'a1b2c3d4',
+        },
+        '1234',
+      );
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      signal.value = 42;
+      expect(client.call).to.have.been.calledWith('SignalsHandler', 'update', {
+        clientSignalId: '1234',
+        event: { id: '1234', type: 'set', value: 42, accepted: false, parentSignalId: 'a1b2c3d4' },
+      });
     });
   });
 });
