@@ -69,6 +69,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
     @Before
     public void setUp() throws IOException {
+        MenuRegistry.clearFileRoutesCache();
         vaadinService = Mockito.mock(VaadinService.class);
 
         VaadinContext vaadinContext = Mockito.mock(VaadinContext.class);
@@ -93,6 +94,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var userPrincipal = Mockito.mock(Principal.class);
         Mockito.when(vaadinRequest.getUserPrincipal())
                 .thenReturn(userPrincipal);
+
+        Mockito.when(vaadinRequest.getService()).thenReturn(vaadinService);
+        Mockito.when(vaadinService.getDeploymentConfiguration())
+                .thenReturn(deploymentConfiguration);
 
         final Document document = Mockito.mock(Document.class);
         final Element element = new Element("head");
@@ -561,9 +566,22 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     @Test
     public void when_exposeServerRoutesToClient_layoutExists_serverSideRoutesAreInResponse()
             throws IOException {
+        assertServerRoutesExposedToClientWhenLayoutExists(
+                "clientRoutesWithLayout.json", "server-and-client-views.json");
+    }
 
+    @Test
+    public void when_exposeServerRoutesToClient_layoutExists_routeWithEmptyPath_serverSideRoutesAreInResponse()
+            throws IOException {
+        assertServerRoutesExposedToClientWhenLayoutExists(
+                "clientRoutesWithLayoutAndIndexView.json",
+                "server-and-client-views-layout-and-index-route.json");
+    }
+
+    private void assertServerRoutesExposedToClientWhenLayoutExists(
+            String testJsonFile, String expectedJsonFile) throws IOException {
         // Use routes with layout
-        copyClientRoutes("clientRoutesWithLayout.json", productionRouteFile);
+        copyClientRoutes(testJsonFile, productionRouteFile);
 
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class);
@@ -611,8 +629,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/server-and-client-views.json"));
+        var expected = mapper.readTree(
+                getClass().getResource("/META-INF/VAADIN/" + expectedJsonFile));
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
