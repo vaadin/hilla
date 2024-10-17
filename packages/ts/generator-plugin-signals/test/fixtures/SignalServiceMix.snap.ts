@@ -1,8 +1,11 @@
 import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
-import { ValueSignal as ValueSignal_1 } from "@vaadin/hilla-react-signals";
+import { ListSignal as ListSignal_1, ValueSignal as ValueSignal_1 } from "@vaadin/hilla-react-signals";
 import type Person_1 from "./com/github/taefi/data/Person.js";
 import client_1 from "./connect-client.default.js";
 async function getPerson_1(init?: EndpointRequestInit_1): Promise<Person_1 | undefined> { return client_1.call("PersonService", "getPerson", {}, init); }
+function personListSignal_1(): ListSignal_1<Person_1> {
+    return new ListSignal_1({ client: client_1, endpoint: "PersonService", method: "personListSignal" });
+}
 function personSignal_1({ defaultValue: defaultValue_1 }: {
     defaultValue: Person_1 | undefined;
 }): ValueSignal_1<Person_1 | undefined> {
@@ -23,4 +26,4 @@ function personSignalNonNullWithParams_1(dummyBoolean: boolean, dummyString: str
 }): ValueSignal_1<Person_1> {
     return new ValueSignal_1(defaultValue_4, { client: client_1, endpoint: "PersonService", method: "personSignalNonNullWithParams", params: { dummyBoolean, dummyString } });
 }
-export { getPerson_1 as getPerson, personSignal_1 as personSignal, personSignalNonNull_1 as personSignalNonNull, personSignalNonNullWithParams_1 as personSignalNonNullWithParams, personSignalWithParams_1 as personSignalWithParams };
+export { getPerson_1 as getPerson, personListSignal_1 as personListSignal, personSignal_1 as personSignal, personSignalNonNull_1 as personSignalNonNull, personSignalNonNullWithParams_1 as personSignalNonNullWithParams, personSignalWithParams_1 as personSignalWithParams };

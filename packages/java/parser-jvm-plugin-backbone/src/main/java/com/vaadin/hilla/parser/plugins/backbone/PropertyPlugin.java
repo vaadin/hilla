@@ -1,12 +1,13 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -28,7 +29,12 @@ import jakarta.annotation.Nonnull;
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
-            .build().getSerializationConfig();
+            .build()
+            .setVisibility(PropertyAccessor.SETTER,
+                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
+            .setVisibility(PropertyAccessor.GETTER,
+                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
+            .getSerializationConfig();
 
     @Override
     public void enter(NodePath<?> nodePath) {

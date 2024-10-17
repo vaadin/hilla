@@ -21,6 +21,7 @@ import {
   MultiSelectComboBoxFieldStrategy,
   Required,
   SelectedFieldStrategy,
+  VaadinDateTimeFieldStrategy,
   VaadinFieldStrategy,
   CheckedGroupFieldStrategy,
 } from '../src/index.js';
@@ -593,6 +594,39 @@ describe('@vaadin/hilla-lit-form', () => {
             expect(currentStrategy.value).to.be.equal('');
             expect(element.value).to.be.equal('');
           });
+        });
+      });
+
+      describe(`VaadinStringFieldStrategy vaadin-date-time-picker`, () => {
+        const tagName = unsafeStatic('vaadin-date-time-picker');
+        let currentStrategy: FieldStrategy;
+        let element: Element & { value?: any };
+
+        function renderTag(model: AbstractModel) {
+          render(
+            html`
+                <${tagName} ${field(model)}></${tagName}>`,
+            div,
+          );
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+          element = div.firstElementChild as Element & { value?: string };
+        }
+
+        it('should clear optional field to an empty string', () => {
+          const model = binder.model.fieldOptionalString;
+
+          binder.read({ ...TestModel.createEmptyValue(), fieldOptionalString: '2024-12-14T11:15:30.1234567' });
+          renderTag(model);
+
+          currentStrategy = getFieldStrategySpy.lastCall.returnValue;
+          expect(currentStrategy instanceof VaadinDateTimeFieldStrategy).to.be.true;
+          expect(currentStrategy.value).to.be.equal('2024-12-14T11:15:30');
+          expect(element.value).to.be.equal('2024-12-14T11:15:30');
+
+          binder.clear();
+          renderTag(model);
+          expect(currentStrategy.value).to.be.equal('');
+          expect(element.value).to.be.equal('');
         });
       });
 

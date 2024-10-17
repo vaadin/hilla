@@ -20,7 +20,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -389,7 +391,11 @@ public class ClassRefSignatureModelTests {
                                     "isInteger", "isClassRef", "isJDKClass"),
                             entry(Date.class.getName(), "isDate", "isClassRef",
                                     "isJDKClass"),
+                            entry(LocalDate.class.getName(), "isDate",
+                                    "isClassRef", "isJDKClass"),
                             entry(LocalDateTime.class.getName(), "isDateTime",
+                                    "isClassRef", "isJDKClass"),
+                            entry(OffsetDateTime.class.getName(), "isDateTime",
                                     "isClassRef", "isJDKClass"),
                             entry(Map.class.getName(), "isMap", "isClassRef",
                                     "isJDKClass"),
