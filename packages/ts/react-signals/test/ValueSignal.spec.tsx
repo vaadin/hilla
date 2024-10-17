@@ -150,6 +150,22 @@ describe('@vaadin/hilla-react-signals', () => {
       });
     });
 
+    it('should not run the callback after rejected replace', (done) => {
+      const valueSignal = new ValueSignal<string>('a', config);
+      subscribeToSignalViaEffect(valueSignal);
+      valueSignal
+        .replace('a', 'b')
+        .result.then(() => done('error: callback should not be called when the event is rejected'));
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'replace',
+        value: 'b',
+        accepted: false,
+      });
+      setTimeout(done, 100);
+    });
+
     it('should accept a callback after update', (done) => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
