@@ -391,8 +391,10 @@ describe('@vaadin/hilla-frontend', () => {
       const resubscribe = sinon.stub();
       resubscribe.returns(ActionOnLostSubscription.REMOVE);
       sub.onSubscriptionLost(resubscribe);
+      getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
+      getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
       expect(resubscribe).to.have.been.calledTwice;
@@ -402,8 +404,10 @@ describe('@vaadin/hilla-frontend', () => {
       const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod', [2, 'a']);
       const resubscribe = sinon.stub();
       sub.onSubscriptionLost(resubscribe);
+      getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
+      getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
       expect(resubscribe).to.have.been.calledTwice;
