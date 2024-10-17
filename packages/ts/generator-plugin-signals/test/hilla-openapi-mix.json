@@ -25,6 +25,91 @@
     }
   ],
   "paths" : {
+    "/ChatService/chatChannel" : {
+      "post" : {
+        "tags" : [
+          "ChatService"
+        ],
+        "operationId" : "ChatService_chatChannel_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ListSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.services.ChatService$Message"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ChatService/chatChannelByName" : {
+      "post" : {
+        "tags" : [
+          "ChatService"
+        ],
+        "operationId" : "ChatService_chatChannelByName_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "channelName" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ListSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.services.ChatService$Message"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/HelloWorldService/sayHello" : {
       "post" : {
         "tags" : [
@@ -183,6 +268,41 @@
                       "$ref" : "#/components/schemas/com.github.taefi.data.Person"
                     }
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PersonService/personListSignal" : {
+      "post" : {
+        "tags" : [
+          "PersonService"
+        ],
+        "operationId" : "PersonService_personListSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ListSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.github.taefi.data.Person"
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -378,17 +498,34 @@
   "components" : {
     "schemas" : {
       "com.vaadin.hilla.signals.NumberSignal" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+          },
+          {
+            "type" : "object"
+          }
+        ],
+        "x-type-arguments" : {
+          "allOf" : [
+            {
+              "type" : "number",
+              "format" : "double",
+              "x-java-type" : "java.lang.Double"
+            }
+          ]
+        }
+      },
+      "com.github.taefi.services.ChatService$Message" : {
         "type" : "object",
         "properties" : {
-          "id" : {
+          "text" : {
             "type" : "string",
             "x-java-type" : "java.lang.String"
           },
-          "value" : {
-            "type" : "number",
-            "format" : "double",
-            "nullable" : true,
-            "x-java-type" : "java.lang.Double"
+          "author" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
           }
         }
       },
@@ -406,17 +543,77 @@
           }
         }
       },
-      "com.vaadin.hilla.signals.ValueSignal" : {
+      "com.vaadin.hilla.signals.Signal" : {
         "type" : "object",
         "properties" : {
           "id" : {
             "type" : "string",
             "x-java-type" : "java.lang.String"
           },
-          "value" : {
+          "valueType" : {
             "type" : "object",
-            "nullable" : true
+            "x-type-arguments" : {
+              "allOf" : [
+                {
+                  "type" : "object",
+                  "x-type-variable" : "T"
+                }
+              ]
+            },
+            "x-java-type" : "java.lang.Class"
           }
+        },
+        "x-type-parameters" : [
+          "T"
+        ]
+      },
+      "com.vaadin.hilla.signals.ListSignal" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.Signal"
+          },
+          {
+            "type" : "object",
+            "x-type-parameters" : [
+              "T"
+            ]
+          }
+        ],
+        "x-type-arguments" : {
+          "allOf" : [
+            {
+              "type" : "object",
+              "x-type-variable" : "T"
+            }
+          ]
+        }
+      },
+      "com.vaadin.hilla.signals.ValueSignal" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.Signal"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "value" : {
+                "type" : "object",
+                "nullable" : true,
+                "x-type-variable" : "T"
+              }
+            },
+            "x-type-parameters" : [
+              "T"
+            ]
+          }
+        ],
+        "x-type-arguments" : {
+          "allOf" : [
+            {
+              "type" : "object",
+              "x-type-variable" : "T"
+            }
+          ]
         }
       }
     }
