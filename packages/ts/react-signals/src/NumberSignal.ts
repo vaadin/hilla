@@ -1,6 +1,6 @@
 import { createIncrementStateEvent, isIncrementStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $setValueQuietly, $update } from './FullStackSignal.js';
-import { noOperation, ValueSignal, type Operation } from './ValueSignal.js';
+import { $processServerResponse, $setValueQuietly, $update, noOperation, type Operation } from './FullStackSignal.js';
+import { $runThenCallback, ValueSignal } from './ValueSignal.js';
 
 /**
  * A signal that holds a number value. The underlying
@@ -59,7 +59,7 @@ export class NumberSignal extends ValueSignal<number> {
       } else {
         this[$setValueQuietly](this.value + event.value);
       }
-      this.runThenCallback(event.id);
+      this[$runThenCallback](event.id);
     } else {
       super[$processServerResponse](event);
     }

@@ -6,33 +6,13 @@ import {
   isSnapshotStateEvent,
   type StateEvent,
 } from './events.js';
-import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
-
-/**
- * The type of function that is used to define a callback that is called when
- * the `then` method is called on an operation object.
- */
-export type ThenCallback = () => void;
-
-/**
- * A return type for signal operations.
- */
-export type Operation = {
-  result: {
-    then(callback: ThenCallback): Operation['result'];
-  };
-};
-
-/**
- * An operation where all callbacks are predefined to be no-ops.
- */
-export const noOperation: Operation = Object.freeze({
-  result: {
-    then(_callback: ThenCallback): Operation['result'] {
-      return noOperation.result;
-    },
-  },
-});
+import {
+  $processServerResponse,
+  $update,
+  FullStackSignal,
+  type Operation,
+  type ThenCallback,
+} from './FullStackSignal.js';
 
 type PendingRequestsRecord<T> = Readonly<{
   id: string;
@@ -45,6 +25,8 @@ type PendingRequestsRecord<T> = Readonly<{
 export interface OperationSubscription extends Operation {
   cancel(): void;
 }
+
+export const $runThenCallback = Symbol('runThenCallback');
 
 /**
  * A full-stack signal that holds an arbitrary value.
@@ -139,11 +121,11 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       this.#applyAcceptedEvent(event);
       // `then` callbacks can be associated to the record or the event
       // it depends on the operation that was performed
-      [record?.id, event.id].filter(Boolean).forEach((id) => this.runThenCallback(id!));
+      [record?.id, event.id].filter(Boolean).forEach((id) => this[$runThenCallback](id!));
     }
   }
 
-  protected runThenCallback(eventId: string): void {
+  protected [$runThenCallback](eventId: string): void {
     const thenCallback = this.thenCallbacks.get(eventId);
     if (thenCallback) {
       this.thenCallbacks.delete(eventId);

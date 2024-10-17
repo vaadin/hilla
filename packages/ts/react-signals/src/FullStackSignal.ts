@@ -6,6 +6,32 @@ import { createSetStateEvent, type StateEvent } from './events.js';
 const ENDPOINT = 'SignalsHandler';
 
 /**
+ * The type of function that is used to define a callback that is called when
+ * the `then` method is called on an operation object.
+ */
+export type ThenCallback = () => void;
+
+/**
+ * A return type for signal operations.
+ */
+export type Operation = {
+  result: {
+    then(callback: ThenCallback): Operation['result'];
+  };
+};
+
+/**
+ * An operation where all callbacks are predefined to be no-ops.
+ */
+export const noOperation: Operation = Object.freeze({
+  result: {
+    then(_callback: ThenCallback): Operation['result'] {
+      return noOperation.result;
+    },
+  },
+});
+
+/**
  * An abstraction of a signal that tracks the number of subscribers, and calls
  * the provided `onSubscribe` and `onUnsubscribe` callbacks for the first
  * subscription and the last unsubscription, respectively.
