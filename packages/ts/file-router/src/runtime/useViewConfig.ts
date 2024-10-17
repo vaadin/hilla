@@ -1,5 +1,6 @@
 import type { UIMatch } from '@remix-run/router';
 import { useMatches } from 'react-router-dom';
+import type { VaadinWindow } from '../shared/internal.js';
 import type { ViewConfig } from '../types.js';
 
 /**
@@ -8,4 +9,10 @@ import type { ViewConfig } from '../types.js';
 export function useViewConfig<M extends ViewConfig>(): M | undefined {
   const matches = useMatches() as ReadonlyArray<UIMatch<unknown, M>>;
   return matches[matches.length - 1]?.handle;
+}
+/**
+ * Hook to return the {@link ViewConfig} title for the current route or if not available fall back to window.Vaadin.documentTitleSignal or given default title.
+ */
+export function useViewConfigTitle(defaultTitle: string = ''): string {
+  return useViewConfig()?.title ?? (window as VaadinWindow).Vaadin?.documentTitleSignal?.value ?? defaultTitle;
 }
