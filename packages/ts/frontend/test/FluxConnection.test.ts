@@ -371,6 +371,7 @@ describe('@vaadin/hilla-frontend', () => {
       const resubscribe = sinon.stub();
       resubscribe.returns(ActionOnLostSubscription.RESUBSCRIBE);
       sub.onSubscriptionLost(resubscribe);
+      getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
       expect(resubscribe).to.have.been.calledTwice;
