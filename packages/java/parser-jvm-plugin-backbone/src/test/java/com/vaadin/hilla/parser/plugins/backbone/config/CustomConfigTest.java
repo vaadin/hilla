@@ -2,8 +2,11 @@ package com.vaadin.hilla.parser.plugins.backbone.config;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;
@@ -26,8 +29,10 @@ public class CustomConfigTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(backbonePlugin).execute();
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                .addPlugin(backbonePlugin)
+                .execute(List.of(CustomConfigEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

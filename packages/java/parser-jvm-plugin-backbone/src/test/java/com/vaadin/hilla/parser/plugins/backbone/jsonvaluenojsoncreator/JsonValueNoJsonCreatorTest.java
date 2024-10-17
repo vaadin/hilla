@@ -1,11 +1,14 @@
 package com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator;
 
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.JsonValuePlugin.MalformedValueTypeException;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,8 +21,10 @@ public class JsonValueNoJsonCreatorTest {
         assertThrows(MalformedValueTypeException.class, () -> {
             new Parser().classLoader(getClass().getClassLoader())
                     .classPath(Set.of(helper.getTargetDir().toString()))
-                    .endpointAnnotation(Endpoint.class.getName())
-                    .addPlugin(new BackbonePlugin()).execute();
+                    .endpointAnnotations(List.of(Endpoint.class))
+                    .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                    .addPlugin(new BackbonePlugin())
+                    .execute(List.of(JsonValueNoJsonCreatorEndpoint.class));
         });
     }
 }

@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Objects;
 
+import com.vaadin.hilla.engine.AotEndpointFinder;
 import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -27,7 +26,6 @@ import com.vaadin.hilla.engine.ParserProcessor;
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-@Execute(goal = "configure")
 public final class EngineGenerateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "node")
@@ -46,11 +44,8 @@ public final class EngineGenerateMojo extends AbstractMojo {
             return;
         }
         try {
-            var baseDir = project.getBasedir().toPath();
-            var buildDir = baseDir.resolve(project.getBuild().getDirectory());
-            var conf = Objects.requireNonNull(
-                    EngineConfiguration.loadDirectory(buildDir));
-            var classPath = conf.getClassPath();
+            var conf = EngineConfiguration.getDefault();
+            var classPath = conf.getClasspath();
             var urls = new ArrayList<URL>(classPath.size());
             for (var classPathItem : classPath) {
                 urls.add(classPathItem.toUri().toURL());
@@ -64,11 +59,12 @@ public final class EngineGenerateMojo extends AbstractMojo {
             var generatorProcessor = new GeneratorProcessor(conf, nodeCommand,
                     isProduction);
 
-            parserProcessor.process();
+            var endpoints = new AotEndpointFinder(conf).findEndpointClasses();
+            parserProcessor.process(endpoints);
             generatorProcessor.process();
-        } catch (IOException e) {
-            throw new EngineGenerateMojoException(
-                    "Loading saved configuration failed", e);
+        } catch (IOException | InterruptedException e) {
+            throw new EngineGenerateMojoException("Endpoint collection failed",
+                    e);
         } catch (GeneratorException | ParserException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }

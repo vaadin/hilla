@@ -16,10 +16,15 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
@@ -74,37 +79,48 @@ public class EndpointCodeGenerator {
     /**
      * Re-generates the endpoint TypeScript and re-registers the endpoints in
      * Java.
-     *
-     * @throws IOException
-     *             if something went wrong
      */
-    public void update() throws IOException {
+    public void update() {
         initIfNeeded();
         if (configuration.isProductionMode()) {
             throw new IllegalStateException(
                     "This method is not available in production mode");
         }
 
-        EngineConfiguration engineConfiguration = EngineConfiguration
-                .loadDirectory(buildDirectory);
-        ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                getClass().getClassLoader(), false);
-        parser.process();
-        GeneratorProcessor generator = new GeneratorProcessor(
-                engineConfiguration, nodeExecutable, false);
-        generator.process();
+        ApplicationContextProvider.runOnContext(applicationContext -> {
+            EngineConfiguration engineConfiguration = EngineConfiguration
+                    .getDefault();
+            // TODO: extract this logic as it is also used in
+            // TaskGenerateOpenAPIImpl
+            List<Class<?>> endpoints = engineConfiguration.getParser()
+                    .getEndpointAnnotations().stream()
+                    .map(applicationContext::getBeansWithAnnotation)
+                    .map(Map::values).flatMap(Collection::stream)
+                    .map(Object::getClass).distinct().toList();
+            ParserProcessor parser = new ParserProcessor(engineConfiguration,
+                    getClass().getClassLoader(), false);
+            parser.process(endpoints);
 
-        OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
-                .ifPresent(openApiPath -> {
-                    try {
-                        this.endpointController
-                                .registerEndpoints(openApiPath.toUri().toURL());
-                    } catch (IOException e) {
-                        LOGGER.error(
-                                "Endpoints could not be registered due to an exception: ",
-                                e);
-                    }
-                });
+            GeneratorProcessor generator = new GeneratorProcessor(
+                    engineConfiguration, nodeExecutable, false);
+            generator.process();
+
+            try {
+                OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
+                        .ifPresent(openApiPath -> {
+                            try {
+                                this.endpointController.registerEndpoints(
+                                        openApiPath.toUri().toURL());
+                            } catch (IOException e) {
+                                LOGGER.error(
+                                        "Endpoints could not be registered due to an exception: ",
+                                        e);
+                            }
+                        });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private void initIfNeeded() {

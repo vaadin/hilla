@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import io.github.classgraph.AnnotationEnumValue;
 

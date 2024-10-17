@@ -1,8 +1,16 @@
 package com.vaadin.hilla.maven;
 
-import org.apache.maven.plugins.annotations.Execute;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.vaadin.hilla.engine.EngineConfiguration;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -31,7 +39,32 @@ import com.vaadin.flow.theme.Theme;
  * @since Flow 2.0
  */
 @Mojo(name = "build-frontend", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
-@Execute(goal = "configure")
 public class BuildFrontendMojo
         extends com.vaadin.flow.plugin.maven.BuildFrontendMojo {
+    @Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
+    private List<String> classpathElements;
+
+    @Parameter(defaultValue = "${project.groupId}", readonly = true, required = true)
+    private String groupId;
+
+    @Parameter(defaultValue = "${project.artifactId}", readonly = true, required = true)
+    private String artifactId;
+
+    @Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
+    private File buildDir;
+
+    @Parameter(property = "spring-boot.aot.main-class")
+    private String mainClass;
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        var conf = EngineConfiguration.getDefault();
+        conf.setClasspath(classpathElements.stream().map(Path::of)
+                .collect(Collectors.toSet()));
+        conf.setGroupId(groupId);
+        conf.setArtifactId(artifactId);
+        conf.setMainClass(mainClass);
+        conf.setBuildDir(buildDir.toPath());
+        super.execute();
+    }
 }

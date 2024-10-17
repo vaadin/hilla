@@ -69,6 +69,11 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>hilla-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>hilla-parser-jvm-plugin-nonnull</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -86,6 +91,11 @@
       <groupId>com.vaadin</groupId>
       <artifactId>hilla-parser-jvm-plugin-transfertypes</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-loader-tools</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
