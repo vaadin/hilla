@@ -1,8 +1,9 @@
+import isNumeric from 'validator/es/lib/isNumeric.js';
 import type { BinderNode } from './BinderNode.js';
 import { getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
 import { AbstractModel, NumberModel, type Value } from './Models.js';
-import { Required } from './Validators.js';
+import { IsNumber, Required, ValidityStateValidator } from './Validators.js';
 
 export interface ValueError<T = unknown> {
   property: AbstractModel | string;
@@ -92,7 +93,12 @@ export async function runValidator<M extends AbstractModel>(
   // If model is not required and value empty, do not run any validator. Except
   // always validate NumberModel, which has a mandatory builtin validator
   // to indicate NaN input.
-  if (!binderNode.required && !new Required().validate(value) && !(model instanceof NumberModel)) {
+  if (
+    !binderNode.required &&
+    !new Required().validate(value) &&
+    !(validator instanceof IsNumber) &&
+    !(validator instanceof ValidityStateValidator)
+  ) {
     return [];
   }
 

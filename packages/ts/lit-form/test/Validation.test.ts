@@ -88,18 +88,23 @@ class OrderView extends LitElement {
   @query('#total')
   total!: NumberOutput;
 
+  @query('#dateStart')
+  dateStart!: HTMLInputElement;
+
   override render() {
     const {
       notes,
       products,
       customer: { fullName, nickName },
       total,
+      dateStart,
     } = this.binder.model;
 
     return html`
       <input id="notes" ...="${field(notes)}" />
       <input id="fullName" ...="${field(fullName)}" />
       <input id="nickName" ...="${field(nickName)}" />
+      <vaadin-date-picker id="dateStart" ...="${field(dateStart)}" />
       <button id="add" @click=${() => this.binder.for(products).appendItem()}>+</button>
       ${repeat(
         products,
@@ -172,9 +177,7 @@ describe('@vaadin/hilla-lit-form', () => {
         'notes',
         'products.0.description',
         'products.0.price',
-        'products.0.price',
         'products.1.description',
-        'products.1.price',
         'products.1.price',
       ]);
     });
@@ -640,16 +643,14 @@ describe('@vaadin/hilla-lit-form', () => {
             'notes',
             'products.0.description',
             'products.0.price',
-            'products.0.price',
             'products.1.description',
-            'products.1.price',
             'products.1.price',
           ]);
         }
 
         expect(orderView.description).to.have.attribute('invalid');
         expect(orderView.price).to.have.attribute('invalid');
-        expect(String(orderView.priceError.textContent).trim()).to.equal('must be a number\nmust be greater than 0');
+        expect(String(orderView.priceError.textContent).trim()).to.equal('must be a number');
       });
 
       it(`should validate fields of arrays on submit`, async () => {
@@ -795,6 +796,7 @@ describe('@vaadin/hilla-lit-form', () => {
         value.notes = '42';
         value.total = 1;
         value.priority = 0;
+        value.dateStart = '02-11-2099';
         binder.value = value;
         await orderView.updateComplete;
 
@@ -829,6 +831,21 @@ describe('@vaadin/hilla-lit-form', () => {
         // Correction
         orderView.total.value = '2';
         await fireEvent(orderView.total, 'change');
+
+        errors = await binder.validate();
+        expect(errors).to.have.length(0);
+
+        // Simulate bad user date input
+        orderView.dateStart.value = 'not a date';
+        await fireEvent(orderView.dateStart, 'change');
+
+        errors = await binder.validate();
+        expect(errors).to.have.length(1);
+        expect(errors[0]).to.have.property('property', 'dateStart');
+
+        // Correction
+        orderView.dateStart.value = '02-12-2099';
+        await fireEvent(orderView.dateStart, 'change');
 
         errors = await binder.validate();
         expect(errors).to.have.length(0);
