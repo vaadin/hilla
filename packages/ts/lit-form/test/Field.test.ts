@@ -6,6 +6,7 @@ import { customElement, query } from 'lit/decorators.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import isLength from 'validator/es/lib/isLength.js';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test
 import {
@@ -496,6 +497,14 @@ describe('@vaadin/hilla-lit-form', () => {
         }
       }
 
+      @customElement('validity-vaadin-element-tag')
+      class ValidityVaadinElement extends AnyVaadinElement {
+        invalid = false;
+        checkValidity() {
+          return !this.invalid;
+        }
+      }
+
       beforeEach(() => {
         getFieldStrategySpy.resetHistory();
         render(nothing, div);
@@ -628,6 +637,62 @@ describe('@vaadin/hilla-lit-form', () => {
           expect(currentStrategy.value).to.be.equal('');
           expect(element.value).to.be.equal('');
         });
+      });
+
+      it(`should ignore old invalid state of element for checkValidity`, async () => {
+        const stringModel = binder.model.fieldString;
+        const binderNode = binder.for(stringModel);
+        binderNode.value = '';
+        await resetBinderNodeValidation(binderNode);
+
+        const renderElement = () => {
+          render(
+            html`
+                <validity-vaadin-element-tag ${field(stringModel)}"></validity-vaadin-element-tag>`,
+            div,
+          );
+          return div.firstElementChild as HTMLInputElement & {
+            invalid?: boolean;
+            required?: boolean;
+            errorMessage?: string;
+            selectedItems?: any;
+          };
+        };
+
+        binderNode.validators = [
+          {
+            message: 'too-long',
+            validate: (value) => isLength(value, { max: 3 }),
+          },
+        ];
+
+        await binderNode.validate();
+        let element = renderElement();
+
+        const currentStrategy: FieldStrategy = getFieldStrategySpy.lastCall.returnValue;
+        expect(currentStrategy instanceof VaadinFieldStrategy).to.be.true;
+
+        expect(binderNode.invalid).to.be.false;
+        expect(element.invalid).to.be.false;
+        expect(element.errorMessage).to.be.undefined;
+
+        element.value = 'test';
+        element.dispatchEvent(new CustomEvent('input', { bubbles: true, cancelable: false, composed: true }));
+        await binderNode.validate();
+        element = renderElement();
+
+        expect(element.invalid).to.be.true;
+        expect(binderNode.invalid).to.be.true;
+        expect(element.errorMessage).to.be.equal('too-long');
+
+        element.value = 'te';
+        element.dispatchEvent(new CustomEvent('input', { bubbles: true, cancelable: false, composed: true }));
+        await binderNode.validate();
+        element = renderElement();
+
+        expect(binderNode.invalid).to.be.false;
+        expect(element.invalid).to.be.false;
+        expect(element.errorMessage).to.be.empty;
       });
 
       [

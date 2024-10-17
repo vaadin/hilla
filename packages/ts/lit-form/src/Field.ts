@@ -120,13 +120,17 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
       return true;
     }
 
-    const valid = this.#element.checkValidity();
+    const valid = this.elementValidity();
     this.#validityFallback = {
       ...defaultValidity,
       valid,
       ...(valid ? {} : this.#detectValidityError()),
     };
     return valid;
+  }
+
+  elementValidity(): boolean {
+    return this.#element.checkValidity?.() ?? true;
   }
 
   setAttribute(key: string, val: any): void {
@@ -200,6 +204,17 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
     if (this.#invalid !== invalid) {
       this.element.invalid = this.#invalid;
     }
+  }
+
+  override elementValidity(): boolean {
+    // Ignore the `invalid` property of the Vaadin component to avoid
+    // reading the component's internal old validation state and validate
+    // the element based on the current state.
+    const isElementInvalid = this.element.invalid;
+    this.element.invalid = false;
+    const valid = this.element.checkValidity?.() ?? true;
+    this.element.invalid = isElementInvalid;
+    return valid;
   }
 }
 
