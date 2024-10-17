@@ -1,6 +1,8 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
 
@@ -54,8 +56,9 @@ public class ValueSignal<T> extends Signal<T> {
     @Override
     protected ObjectNode createSnapshotEvent() {
         var snapshot = new StateEvent<>(getId().toString(),
-                StateEvent.EventType.SNAPSHOT, this.value).toJson();
-        return StateEvent.setAccepted(snapshot, true);
+                StateEvent.EventType.SNAPSHOT, this.value);
+        snapshot.setAccepted(true);
+        return snapshot.toJson();
     }
 
     /**
@@ -68,20 +71,25 @@ public class ValueSignal<T> extends Signal<T> {
      * @return <code>true</code> if the event was successfully processed and the
      *         signal value was updated, <code>false</code> otherwise.
      */
-    protected boolean processEvent(ObjectNode event) {
+    protected ObjectNode processEvent(ObjectNode event) {
         try {
             var stateEvent = new StateEvent<>(event, getValueType());
             return switch (stateEvent.getEventType()) {
                 case SET -> {
                     this.value = stateEvent.getValue();
-                    yield true;
+                    stateEvent.setAccepted(true);
+                    yield stateEvent.toJson();
                 }
-                case REPLACE -> compareAndSet(stateEvent.getValue(),
-                    stateEvent.getExpected());
+                case REPLACE -> {
+                    boolean accepted = compareAndSet(stateEvent.getValue(),
+                        stateEvent.getExpected());
+                    stateEvent.setAccepted(accepted);
+                    yield stateEvent.toJson();
+                }
                 default -> throw new UnsupportedOperationException(
                     "Unsupported event: " + stateEvent.getEventType());
             };
-        } catch (StateEvent.InvalidEventTypeException e) {
+        } catch (InvalidEventTypeException | MissingFieldException e) {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
         }
