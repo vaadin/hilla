@@ -78,6 +78,7 @@ public class NumberSignalTest {
             if (counter.get() == 0) {
                 // notification for the initial value
                 assertEquals(0.0, stateEvent.getValue(), 0.0);
+                assertTrue(StateEvent.isAccepted(eventJson));
             } else if (counter.get() == 1) {
                 assertEquals(42.0, stateEvent.getValue(), 0.0);
             }
