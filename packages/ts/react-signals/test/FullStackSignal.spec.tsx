@@ -196,11 +196,20 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should publish updates to signals handler endpoint', () => {
       signal.value = 42;
 
+      expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.call).to.be.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: signal.id,
         event: { type: 'set', value: 42 },
       });
+    });
+
+    it('should not subscribe on the fly when updating if already subscribed', () => {
+      signal.subscribe(() => {});
+      client.subscribe.resetHistory();
+      signal.value = 42;
+      expect(client.subscribe).not.to.have.been.called;
+      expect(client.call).to.have.been.calledOnce;
     });
 
     it("should update signal's value based on the received event", async () => {
