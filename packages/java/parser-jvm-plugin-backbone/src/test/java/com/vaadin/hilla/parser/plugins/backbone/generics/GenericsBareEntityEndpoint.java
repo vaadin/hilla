@@ -21,4 +21,14 @@ public class GenericsBareEntityEndpoint {
             GenericsBareRefEntity<List<Float>> ref) {
         return ref;
     }
+
+    public record GenericsRecord<T1,T2>(
+    T1 first, T2 second)
+    {
+    }
+
+    public GenericsRecord<String, String> getRecord(
+            GenericsRecord<String, String> record) {
+        return record;
+    }
 }
