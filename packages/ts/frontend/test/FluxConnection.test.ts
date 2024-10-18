@@ -371,19 +371,28 @@ describe('@vaadin/hilla-frontend', () => {
       const resubscribe = sinon.stub();
       resubscribe.returns(ActionOnLostSubscription.RESUBSCRIBE);
       sub.onSubscriptionLost(resubscribe);
+      const resubscriptionMessage = JSON.stringify({
+        '@type': 'subscribe',
+        endpointName: 'MyEndpoint',
+        id: '0',
+        methodName: 'myMethod',
+        params: [2, 'a'],
+      });
+
+      // onClose => onReconnect => onReopen should resubscribe
       getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
-      expect(resubscribe).to.have.been.calledTwice;
-      expect(getSubscriptionEventSpies()?.push).to.have.been.calledWith(
-        JSON.stringify({
-          '@type': 'subscribe',
-          endpointName: 'MyEndpoint',
-          id: '0',
-          methodName: 'myMethod',
-          params: [2, 'a'],
-        }),
-      );
+      expect(resubscribe).to.have.been.calledOnce;
+      expect(getSubscriptionEventSpies()?.push).to.have.been.calledWith(resubscriptionMessage);
+
+      resubscribe.resetHistory();
+
+      // onClose => onOpen should resubscribe also
+      getSubscriptionEventSpies()?.onClose?.();
+      getSubscriptionEventSpies()?.onOpen?.();
+      expect(resubscribe).to.have.been.calledOnce;
+      expect(getSubscriptionEventSpies()?.push).to.have.been.calledWith(resubscriptionMessage);
     });
 
     it('should remove subscription information when callback returns REMOVE', () => {
@@ -395,9 +404,8 @@ describe('@vaadin/hilla-frontend', () => {
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
       getSubscriptionEventSpies()?.onClose?.();
-      getSubscriptionEventSpies()?.onReconnect?.();
-      getSubscriptionEventSpies()?.onReopen?.();
-      expect(resubscribe).to.have.been.calledTwice;
+      getSubscriptionEventSpies()?.onOpen?.();
+      expect(resubscribe).to.have.been.calledOnce;
     });
 
     it('should remove subscription information when callback has no return value', () => {
@@ -405,12 +413,11 @@ describe('@vaadin/hilla-frontend', () => {
       const resubscribe = sinon.stub();
       sub.onSubscriptionLost(resubscribe);
       getSubscriptionEventSpies()?.onClose?.();
-      getSubscriptionEventSpies()?.onReconnect?.();
-      getSubscriptionEventSpies()?.onReopen?.();
+      getSubscriptionEventSpies()?.onOpen?.();
       getSubscriptionEventSpies()?.onClose?.();
       getSubscriptionEventSpies()?.onReconnect?.();
       getSubscriptionEventSpies()?.onReopen?.();
-      expect(resubscribe).to.have.been.calledTwice;
+      expect(resubscribe).to.have.been.calledOnce;
     });
 
     describe('flux subscription state', () => {
@@ -426,7 +433,7 @@ describe('@vaadin/hilla-frontend', () => {
         getSubscriptionEventSpies()?.onClose?.();
         expect(subState).to.be.eq(FluxSubscriptionState.CONNECTED);
         getSubscriptionEventSpies()?.onReconnect?.();
-        expect(subState).to.be.eq(FluxSubscriptionState.CLOSED);
+        expect(subState).to.be.eq(FluxSubscriptionState.CONNECTING);
         getSubscriptionEventSpies()?.onReopen?.();
         expect(subState).to.be.eq(FluxSubscriptionState.CLOSED);
       });
