@@ -1,8 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
 import sinon from 'sinon';
-import { FluxSubscriptionState } from '../FluxConnection';
-import { ActionOnLostSubscription, FluxConnection, State } from '../src/FluxConnection.js';
+import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
   ClientCompleteMessage,
