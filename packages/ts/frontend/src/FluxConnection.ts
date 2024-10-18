@@ -91,6 +91,27 @@ export class FluxConnection extends EventTarget {
     this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
+  #resubscribeIfWasClosed() {
+    if (this.state !== State.ACTIVE) {
+      const toBeRemoved: string[] = [];
+      this.#endpointInfos.forEach((endpointInfo, id) => {
+        if (endpointInfo.reconnect?.() === ActionOnLostSubscription.RESUBSCRIBE) {
+          this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
+          this.#send({
+            '@type': 'subscribe',
+            endpointName: endpointInfo.endpointName,
+            id,
+            methodName: endpointInfo.methodName,
+            params: endpointInfo.params,
+          });
+        } else {
+          toBeRemoved.push(id);
+        }
+      });
+      toBeRemoved.forEach((id) => this.#removeSubscription(id));
+    }
+  }
+
   /**
    * Subscribes to the flux returned by the given endpoint name + method name using the given parameters.
    *
@@ -195,6 +216,7 @@ export class FluxConnection extends EventTarget {
       },
       onOpen: () => {
         if (this.state !== State.ACTIVE) {
+          this.#resubscribeIfWasClosed();
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
@@ -202,22 +224,7 @@ export class FluxConnection extends EventTarget {
       },
       onReopen: () => {
         if (this.state !== State.ACTIVE) {
-          const toBeRemoved: string[] = [];
-          this.#endpointInfos.forEach((endpointInfo, id) => {
-            if (endpointInfo.reconnect?.() === ActionOnLostSubscription.RESUBSCRIBE) {
-              this.#send({
-                '@type': 'subscribe',
-                endpointName: endpointInfo.endpointName,
-                id,
-                methodName: endpointInfo.methodName,
-                params: endpointInfo.params,
-              });
-            } else {
-              toBeRemoved.push(id);
-            }
-          });
-          toBeRemoved.forEach((id) => this.#removeSubscription(id));
-
+          this.#resubscribeIfWasClosed();
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
@@ -226,12 +233,8 @@ export class FluxConnection extends EventTarget {
       onReconnect: () => {
         if (this.state !== State.RECONNECTING) {
           this.state = State.RECONNECTING;
-          this.#endpointInfos.forEach((endpointInfo, id) => {
-            if (endpointInfo.reconnect?.() === ActionOnLostSubscription.RESUBSCRIBE) {
-              this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
-            } else {
-              this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED);
-            }
+          this.#endpointInfos.forEach((_, id) => {
+            this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
           });
         }
       },
