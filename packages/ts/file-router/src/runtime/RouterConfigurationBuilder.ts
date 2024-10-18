@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
+import * as Console from 'node:console';
 import { protectRoute } from '@vaadin/hilla-react-auth';
 import { type ComponentType, createElement } from 'react';
 import {
@@ -153,22 +154,6 @@ export class RouterConfigurationBuilder {
    * @param layoutComponent - layout component to use, usually Flow
    */
   withLayout(layoutComponent: ComponentType): this {
-    function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
-      if (routes.length === 0) {
-        return routes;
-      }
-      const nestedRoutes = routes.map((route) => route);
-      return [
-        {
-          element: createElement(layoutComponent),
-          children: nestedRoutes,
-          handle: {
-            ignoreFallback: true,
-          },
-        },
-      ];
-    }
-
     function checkFlowLayout(route: RouteObject): boolean {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       let flowLayout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
@@ -177,6 +162,84 @@ export class RouterConfigurationBuilder {
         flowLayout = route.children.filter((child) => checkFlowLayout(child)).length > 0;
       }
       return flowLayout;
+    }
+
+    function removeNonFlowLayoutChildren(route: RouteObject, copy: boolean) {
+      const routeCopy: RouteObject = copy ? JSON.parse(JSON.stringify(route)) : route;
+      if (route.children) {
+        const children: RouteObject[] = [];
+        route.children.forEach((child) =>
+          children.push(removeNonFlowLayoutChildren(child, child.children !== undefined)),
+        );
+        routeCopy.children = [];
+        while (children.length > 0) {
+          const child = children.pop();
+          if (child && (checkFlowLayout(child) || child.children)) {
+            routeCopy.children.push(child);
+          }
+        }
+      }
+      return routeCopy;
+    }
+
+    function removeFlowLayoutChildren(route: RouteObject, copy: boolean) {
+      const routeCopy: RouteObject = copy ? JSON.parse(JSON.stringify(route)) : route;
+      let flowLayout = true;
+      if (route.children) {
+        const children: RouteObject[] = [];
+        route.children.forEach((child) => children.push(removeFlowLayoutChildren(child, child.children !== undefined)));
+        routeCopy.children = [];
+        while (children.length > 0) {
+          const child = children.pop();
+          if (child && (!checkFlowLayout(child) || child.children)) {
+            routeCopy.children.push(child);
+            flowLayout = false;
+          }
+        }
+      }
+      return routeCopy;
+    }
+
+    function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
+      if (routes.length === 0) {
+        return routes;
+      }
+
+      // Remove all flowLayout: false children
+      const serverLayoutRoutes = routes.map((route) =>
+        removeNonFlowLayoutChildren(route, route.children !== undefined),
+      );
+      // Collect all flowLayout: false children to add as normal routes
+      const clientRoutes = routes
+        .map((route) => removeFlowLayoutChildren(route, route.children !== undefined))
+        .filter(
+          (route) =>
+            !(
+              (route.children && route.children.length === 0 && checkFlowLayout(route)) ??
+              (!route.children && checkFlowLayout(route))
+            ),
+        );
+      if (clientRoutes.length > 0) {
+        return [
+          {
+            element: createElement(layoutComponent),
+            children: serverLayoutRoutes,
+            handle: {
+              ignoreFallback: true,
+            },
+          },
+          ...clientRoutes,
+        ];
+      }
+      return [
+        {
+          element: createElement(layoutComponent),
+          children: serverLayoutRoutes,
+          handle: {
+            ignoreFallback: true,
+          },
+        },
+      ];
     }
 
     this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
