@@ -10,7 +10,13 @@ import {
   type RemoveStateEvent,
   type StateEvent,
 } from './events.js';
-import { $processServerResponse, $setValueQuietly, $update, type ServerConnectionConfig } from './FullStackSignal.js';
+import {
+  $processServerResponse,
+  $setValueQuietly,
+  $update,
+  type Operation,
+  type ServerConnectionConfig,
+} from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 type EntryId = string;
@@ -142,21 +148,31 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
    * Inserts a new value at the end of the list.
    * @param value - The value to insert.
    */
-  insertLast(value: T): void {
+  insertLast(value: T): Operation {
     const event = createInsertLastStateEvent(value);
     this[$update](event);
+    return this.createOperation(event.id);
   }
 
   /**
    * Removes the given item from the list.
    * @param item - The item to remove.
    */
-  remove(item: ValueSignal<T>): void {
+  remove(item: ValueSignal<T>): Operation {
     const entryToRemove = this.#values.get(item.id);
     if (entryToRemove === undefined) {
-      return;
+      const op: Operation = {
+        result: {
+          then: (callback) => {
+            callback();
+            return op.result;
+          },
+        },
+      };
+      return op;
     }
     const removeEvent = createRemoveStateEvent(entryToRemove.value.id);
     this[$update](removeEvent);
+    return this.createOperation(removeEvent.id);
   }
 }

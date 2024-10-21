@@ -34,6 +34,23 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   // FullStackSignal constructor.
   #subscribeCount = -1;
 
+  // stores the `then` callbacks associated to operations
+  protected readonly thenCallbacks = new Map<string, ThenCallback>();
+
+  // creates the obejct to be returned by operations to allow defining callbacks
+  protected createOperation(eventId: string): Operation {
+    const thens = this.thenCallbacks;
+    const op: Operation = {
+      result: {
+        then(callback) {
+          thens.set(eventId, callback);
+          return op.result;
+        },
+      },
+    };
+    return op;
+  }
+
   protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!(window as any).Vaadin?.featureFlags?.fullstackSignals) {

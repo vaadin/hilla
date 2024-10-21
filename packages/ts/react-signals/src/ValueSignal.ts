@@ -33,22 +33,6 @@ export const $runThenCallback = Symbol('runThenCallback');
  */
 export class ValueSignal<T> extends FullStackSignal<T> {
   readonly #pendingRequests = new Map<string, PendingRequestsRecord<T>>();
-  // stores the `then` callbacks associated to operations
-  protected readonly thenCallbacks = new Map<string, ThenCallback>();
-
-  // creates the obejct to be returned by operations to allow defining callbacks
-  protected createOperation(eventId: string): Operation {
-    const thens = this.thenCallbacks;
-    const op: Operation = {
-      result: {
-        then(callback) {
-          thens.set(eventId, callback);
-          return op.result;
-        },
-      },
-    };
-    return op;
-  }
 
   /**
    * Sets the value.
