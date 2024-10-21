@@ -1,5 +1,5 @@
 import { createIncrementStateEvent, isIncrementStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $setValueQuietly, $update, noOperation, type Operation } from './FullStackSignal.js';
+import { $processServerResponse, $setValueQuietly, $update, type Operation } from './FullStackSignal.js';
 import { $runThenCallback, ValueSignal } from './ValueSignal.js';
 
 /**
@@ -42,7 +42,15 @@ export class NumberSignal extends ValueSignal<number> {
    */
   incrementBy(delta: number): Operation {
     if (delta === 0) {
-      return noOperation;
+      const op: Operation = {
+        result: {
+          then: (callback) => {
+            callback();
+            return op.result;
+          },
+        },
+      };
+      return op;
     }
     this[$setValueQuietly](this.value + delta);
     const event = createIncrementStateEvent(delta);

@@ -21,17 +21,6 @@ export type Operation = {
 };
 
 /**
- * An operation where all callbacks are predefined to be no-ops.
- */
-export const noOperation: Operation = Object.freeze({
-  result: {
-    then(_callback: ThenCallback): Operation['result'] {
-      return noOperation.result;
-    },
-  },
-});
-
-/**
  * An abstraction of a signal that tracks the number of subscribers, and calls
  * the provided `onSubscribe` and `onUnsubscribe` callbacks for the first
  * subscription and the last unsubscription, respectively.

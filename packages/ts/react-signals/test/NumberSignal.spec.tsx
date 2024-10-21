@@ -186,5 +186,11 @@ describe('@vaadin/hilla-react-signals', () => {
       });
       setTimeout(done, 100);
     });
+
+    it('should accept a callback after incrementing by zero without server roundtrip', (done) => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+      numberSignal.incrementBy(0).result.then(done);
+    });
   });
 });
