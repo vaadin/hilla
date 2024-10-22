@@ -128,6 +128,7 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
     };
     return valid;
   }
+
   setAttribute(key: string, val: any): void {
     if (val) {
       this.#element.setAttribute(key, '');
