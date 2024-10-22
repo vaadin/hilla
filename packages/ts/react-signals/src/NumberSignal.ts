@@ -1,5 +1,6 @@
 import { createIncrementStateEvent, isIncrementStateEvent, type StateEvent } from './events.js';
 import {
+  $createOperation,
   $processServerResponse,
   $resolveOperation,
   $setValueQuietly,
@@ -54,7 +55,7 @@ export class NumberSignal extends ValueSignal<number> {
     const event = createIncrementStateEvent(delta);
     this.#sentIncrementEvents.set(event.id, event);
     const promise = this[$update](event);
-    return this.createOperation({ id: event.id, promise });
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   protected override [$processServerResponse](event: StateEvent): void {

@@ -7,6 +7,7 @@ import {
   type StateEvent,
 } from './events.js';
 import {
+  $createOperation,
   $processServerResponse,
   $resolveOperation,
   $update,
@@ -59,7 +60,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const signalId = parentClientSignalId !== undefined ? this.id : undefined;
     const event = createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId);
     const promise = this[$update](event);
-    return this.createOperation({ id: event.id, promise });
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   /**
@@ -82,7 +83,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const pendingRequest = { id: nanoid(), callback, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      ...this.createOperation({ id: pendingRequest.id, promise }),
+      ...this[$createOperation]({ id: pendingRequest.id, promise }),
       cancel: () => {
         pendingRequest.canceled = true;
       },

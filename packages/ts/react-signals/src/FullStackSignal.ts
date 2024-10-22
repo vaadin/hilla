@@ -26,45 +26,6 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   // FullStackSignal constructor.
   #subscribeCount = -1;
 
-  // stores the promise handlers associated to operations
-  protected readonly operationPromises = new Map<
-    string,
-    {
-      resolve(value: PromiseLike<void> | void): void;
-      reject(reason?: any): void;
-    }
-  >();
-
-  // creates the obejct to be returned by operations to allow defining callbacks
-  protected createOperation({ id, promise }: { id?: string; promise?: Promise<void> }): Operation {
-    const thens = this.operationPromises;
-    const promises: Array<Promise<void>> = [];
-
-    if (id) {
-      // Create a promise to be associated to the provided id
-      promises.push(
-        new Promise<void>((resolve, reject) => {
-          thens.set(id, { resolve, reject });
-        }),
-      );
-    }
-
-    if (promise) {
-      // Add the provided promise to the list of promises
-      promises.push(promise);
-    }
-
-    if (promises.length === 0) {
-      // If no promises were added, return a resolved promise
-      promises.push(Promise.resolve());
-    }
-
-    return {
-      // The `then` is needed to convert `void[]` to `void`
-      result: Promise.all(promises).then(() => undefined),
-    };
-  }
-
   protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (!(window as any).Vaadin?.featureFlags?.fullstackSignals) {
@@ -185,6 +146,7 @@ export const $update = Symbol('update');
 export const $processServerResponse = Symbol('processServerResponse');
 export const $setValueQuietly = Symbol('setValueQuietly');
 export const $resolveOperation = Symbol('resolveOperation');
+export const $createOperation = Symbol('createOperation');
 
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
@@ -251,6 +213,45 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
     this.#paused = false;
   }
 
+  // stores the promise handlers associated to operations
+  readonly #operationPromises = new Map<
+    string,
+    {
+      resolve(value: PromiseLike<void> | void): void;
+      reject(reason?: any): void;
+    }
+  >();
+
+  // creates the obejct to be returned by operations to allow defining callbacks
+  protected [$createOperation]({ id, promise }: { id?: string; promise?: Promise<void> }): Operation {
+    const thens = this.#operationPromises;
+    const promises: Array<Promise<void>> = [];
+
+    if (id) {
+      // Create a promise to be associated to the provided id
+      promises.push(
+        new Promise<void>((resolve, reject) => {
+          thens.set(id, { resolve, reject });
+        }),
+      );
+    }
+
+    if (promise) {
+      // Add the provided promise to the list of promises
+      promises.push(promise);
+    }
+
+    if (promises.length === 0) {
+      // If no promises were added, return a resolved promise
+      promises.push(Promise.resolve());
+    }
+
+    return {
+      // The `then` is needed to convert `void[]` to `void`
+      result: Promise.all(promises).then(() => undefined),
+    };
+  }
+
   /**
    * Sets the local value of the signal without sending any events to the server
    * @param value - The new value.
@@ -286,9 +287,9 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * @param reason - The reason to reject the promise (if any).
    */
   protected [$resolveOperation](eventId: string, reason?: string): void {
-    const operationPromise = this.operationPromises.get(eventId);
+    const operationPromise = this.#operationPromises.get(eventId);
     if (operationPromise) {
-      this.operationPromises.delete(eventId);
+      this.#operationPromises.delete(eventId);
       if (reason) {
         operationPromise.reject(reason);
       } else {

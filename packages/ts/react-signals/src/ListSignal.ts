@@ -11,6 +11,7 @@ import {
   type StateEvent,
 } from './events.js';
 import {
+  $createOperation,
   $processServerResponse,
   $resolveOperation,
   $setValueQuietly,
@@ -154,7 +155,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
   insertLast(value: T): Operation {
     const event = createInsertLastStateEvent(value);
     const promise = this[$update](event);
-    return this.createOperation({ id: event.id, promise });
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   /**
@@ -168,6 +169,6 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
     }
     const removeEvent = createRemoveStateEvent(entryToRemove.value.id);
     const promise = this[$update](removeEvent);
-    return this.createOperation({ id: removeEvent.id, promise });
+    return this[$createOperation]({ id: removeEvent.id, promise });
   }
 }
