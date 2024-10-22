@@ -261,6 +261,72 @@
         }
       }
     },
+    "/GenericsBareEntityEndpoint/getRecord": {
+      "post": {
+        "tags": ["GenericsBareEntityEndpoint"],
+        "operationId": "GenericsBareEntityEndpoint_getRecord_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "record": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint$GenericsRecord"
+                      }
+                    ],
+                    "x-type-arguments": {
+                      "allOf": [
+                        {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint$GenericsRecord"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/GenericsExtendedEndpoint/getMap": {
       "post": {
         "tags": ["GenericsExtendedEndpoint"],
@@ -718,11 +784,11 @@
               }
             ],
             "x-type-arguments": { 
-              "allOf" : [
+              "allOf": [
                 {
-                  "type" : "object",
-                  "nullable" : true,
-                  "x-type-variable" : "T"
+                  "type": "object",
+                  "nullable": true,
+                  "x-type-variable": "T"
                 }
               ]
             }
@@ -740,6 +806,25 @@
             "nullable": true
           }
         }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareEntityEndpoint$GenericsRecord": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "object",
+            "nullable": true,
+            "x-type-variable": "T1"
+          },
+          "second": {
+            "type": "object",
+            "nullable": true,
+            "x-type-variable": "T2"
+          }
+        },
+        "x-type-parameters": [
+          "T1",
+          "T2"
+        ]
       },
       "com.vaadin.hilla.parser.plugins.backbone.generics.GenericsExtendedRefEntity": {
         "type": "object",
@@ -762,7 +847,7 @@
           }
         }
       },
-      "com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType" : {
+      "com.vaadin.hilla.parser.plugins.backbone.generics.ConcreteType": {
         "type": "object"
       }
     }
