@@ -6,6 +6,13 @@ import { createSetStateEvent, type StateEvent } from './events.js';
 const ENDPOINT = 'SignalsHandler';
 
 /**
+ * A return type for signal operations.
+ */
+export type Operation = {
+  result: Promise<void>;
+};
+
+/**
  * An abstraction of a signal that tracks the number of subscribers, and calls
  * the provided `onSubscribe` and `onUnsubscribe` callbacks for the first
  * subscription and the last unsubscription, respectively.
@@ -138,6 +145,8 @@ class ServerConnection {
 export const $update = Symbol('update');
 export const $processServerResponse = Symbol('processServerResponse');
 export const $setValueQuietly = Symbol('setValueQuietly');
+export const $resolveOperation = Symbol('resolveOperation');
+export const $createOperation = Symbol('createOperation');
 
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
@@ -196,11 +205,56 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
         // the server. For a standalone signal, both of them should be passed in
         // as undefined:
         const signalId = config.parentClientSignalId !== undefined ? this.id : undefined;
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this[$update](createSetStateEvent(v, signalId, config.parentClientSignalId));
       }
     });
 
     this.#paused = false;
+  }
+
+  // stores the promise handlers associated to operations
+  readonly #operationPromises = new Map<
+    string,
+    {
+      resolve(value: PromiseLike<void> | void): void;
+      reject(reason?: any): void;
+    }
+  >();
+
+  // creates the obejct to be returned by operations to allow defining callbacks
+  protected [$createOperation]({ id, promise }: { id?: string; promise?: Promise<void> }): Operation {
+    const thens = this.#operationPromises;
+    const promises: Array<Promise<void>> = [];
+
+    if (promise) {
+      // Add the provided promise to the list of promises
+      promises.push(promise);
+    }
+
+    if (id) {
+      // Create a promise to be associated to the provided id
+      promises.push(
+        new Promise<void>((resolve, reject) => {
+          thens.set(id, { resolve, reject });
+        }),
+      );
+    }
+
+    if (promises.length === 0) {
+      // If no promises were added, return a resolved promise
+      promises.push(Promise.resolve());
+    }
+
+    return {
+      result: Promise.allSettled(promises).then((results) => {
+        const lastResult = results[results.length - 1];
+        if (lastResult.status === 'fulfilled') {
+          return undefined;
+        }
+        throw lastResult.reason;
+      }),
+    };
   }
 
   /**
@@ -218,9 +272,10 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * A method to update the server with the new value.
    *
    * @param event - The event to update the server with.
+   * @returns The server response promise.
    */
-  protected [$update](event: StateEvent): void {
-    this.server
+  protected async [$update](event: StateEvent): Promise<void> {
+    return this.server
       .update(event)
       .catch((error: unknown) => {
         this.#error.value = error instanceof Error ? error : new Error(String(error));
@@ -228,6 +283,24 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       .finally(() => {
         this.#pending.value = false;
       });
+  }
+
+  /**
+   * Resolves the operation promise associated with the given event id.
+   *
+   * @param eventId - The event id.
+   * @param reason - The reason to reject the promise (if any).
+   */
+  protected [$resolveOperation](eventId: string, reason?: string): void {
+    const operationPromise = this.#operationPromises.get(eventId);
+    if (operationPromise) {
+      this.#operationPromises.delete(eventId);
+      if (reason) {
+        operationPromise.reject(reason);
+      } else {
+        operationPromise.resolve();
+      }
+    }
   }
 
   /**

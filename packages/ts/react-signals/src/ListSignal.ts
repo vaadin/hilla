@@ -10,7 +10,15 @@ import {
   type RemoveStateEvent,
   type StateEvent,
 } from './events.js';
-import { $processServerResponse, $setValueQuietly, $update, type ServerConnectionConfig } from './FullStackSignal.js';
+import {
+  $createOperation,
+  $processServerResponse,
+  $resolveOperation,
+  $setValueQuietly,
+  $update,
+  type Operation,
+  type ServerConnectionConfig,
+} from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 type EntryId = string;
@@ -56,6 +64,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
 
   protected override [$processServerResponse](event: StateEvent): void {
     if (!event.accepted) {
+      this[$resolveOperation](event.id, 'server rejected the operation');
       return;
     }
     if (isListSnapshotStateEvent<T>(event)) {
@@ -65,6 +74,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
     } else if (isRemoveStateEvent(event)) {
       this.#handleRemoveUpdate(event);
     }
+    this[$resolveOperation](event.id);
   }
 
   #handleInsertLastUpdate(event: InsertLastStateEvent<T>): void {
@@ -142,21 +152,23 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
    * Inserts a new value at the end of the list.
    * @param value - The value to insert.
    */
-  insertLast(value: T): void {
+  insertLast(value: T): Operation {
     const event = createInsertLastStateEvent(value);
-    this[$update](event);
+    const promise = this[$update](event);
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   /**
    * Removes the given item from the list.
    * @param item - The item to remove.
    */
-  remove(item: ValueSignal<T>): void {
+  remove(item: ValueSignal<T>): Operation {
     const entryToRemove = this.#values.get(item.id);
     if (entryToRemove === undefined) {
-      return;
+      return { result: Promise.resolve() };
     }
     const removeEvent = createRemoveStateEvent(entryToRemove.value.id);
-    this[$update](removeEvent);
+    const promise = this[$update](removeEvent);
+    return this[$createOperation]({ id: removeEvent.id, promise });
   }
 }
