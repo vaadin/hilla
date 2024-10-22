@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,6 +79,7 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     protected void prepareEngineConfiguration()
             throws ExecutionFailedException {
         var configDir = projectDirectory.toPath().resolve(buildDirectoryName);
+        var errorMessages = new ArrayList<String>();
 
         if (firstRun) {
             logger.debug("Configure Hilla engine using build system plugin");
@@ -108,17 +110,21 @@ abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
                         firstRun = false;
                         break;
                     } catch (CommandRunnerException e) {
-                        logger.debug(
-                                "Failed to configure Hilla engine using "
-                                        + runner.getClass().getSimpleName()
-                                        + " with arguments "
-                                        + Arrays.toString(runner.arguments()),
-                                e);
+                        var message = "Failed to configure Hilla engine using "
+                                + runner.getClass().getSimpleName()
+                                + " with arguments "
+                                + Arrays.toString(runner.arguments());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(message, e);
+                        } else {
+                            errorMessages.add(message + ": " + e.getMessage());
+                        }
                     }
                 }
             }
 
             if (firstRun) {
+                errorMessages.forEach(logger::warn);
                 throw new ExecutionFailedException(
                         "Failed to configure Hilla engine: no runner succeeded. "
                                 + "Set log level to debug to see more details.");
