@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import {
   createReplaceStateEvent,
   isReplaceStateEvent,
@@ -5,19 +6,24 @@ import {
   isSnapshotStateEvent,
   type StateEvent,
 } from './events.js';
-import { $processServerResponse, $update, FullStackSignal } from './FullStackSignal.js';
+import {
+  $createOperation,
+  $processServerResponse,
+  $resolveOperation,
+  $update,
+  FullStackSignal,
+  type Operation,
+} from './FullStackSignal.js';
 
-type PromiseWithResolvers = ReturnType<typeof Promise.withResolvers<void>>;
 type PendingRequestsRecord<T> = Readonly<{
-  waiter: PromiseWithResolvers;
+  id: string;
   callback(value: T): T;
-  canceled: boolean;
-}>;
+}> & { canceled: boolean };
 
 /**
  * An operation subscription that can be canceled.
  */
-export interface OperationSubscription {
+export interface OperationSubscription extends Operation {
   cancel(): void;
 }
 
@@ -47,11 +53,14 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param expected - The expected value.
    * @param newValue - The new value.
+   * @returns An operation object that allows to perform additional actions.
    */
-  replace(expected: T, newValue: T): void {
+  replace(expected: T, newValue: T): Operation {
     const { parentClientSignalId } = this.server.config;
     const signalId = parentClientSignalId !== undefined ? this.id : undefined;
-    this[$update](createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId));
+    const event = createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId);
+    const promise = this[$update](event);
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   /**
@@ -65,19 +74,18 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param callback - The function that is applied on the current value to
    *                   produce the new value.
-   * @returns An operation subscription that can be canceled.
+   * @returns An operation object that allows to perform additional actions, including cancellation.
    */
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
     const event = createReplaceStateEvent(this.value, newValue);
-    this[$update](event);
-    const waiter = Promise.withResolvers<void>();
-    const pendingRequest = { callback, waiter, canceled: false };
+    const promise = this[$update](event);
+    const pendingRequest = { id: nanoid(), callback, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
+      ...this[$createOperation]({ id: pendingRequest.id, promise }),
       cancel: () => {
         pendingRequest.canceled = true;
-        pendingRequest.waiter.resolve();
       },
     };
   }
@@ -86,21 +94,21 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const record = this.#pendingRequests.get(event.id);
     if (record) {
       this.#pendingRequests.delete(event.id);
-    }
 
-    if (!event.accepted && record) {
-      if (!record.canceled) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      if (!(event.accepted || record.canceled)) {
         this.update(record.callback);
       }
     }
 
+    let reason: string | undefined;
     if (event.accepted || isSnapshotStateEvent<T>(event)) {
-      if (record) {
-        record.waiter.resolve();
-      }
       this.#applyAcceptedEvent(event);
+    } else {
+      reason = 'server rejected the operation';
     }
+    // `then` callbacks can be associated to the record or the event
+    // it depends on the operation that was performed
+    [record?.id, event.id].filter(Boolean).forEach((id) => this[$resolveOperation](id!, reason));
   }
 
   #applyAcceptedEvent(event: StateEvent): void {
