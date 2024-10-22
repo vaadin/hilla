@@ -137,10 +137,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('baz');
     });
 
-    it('should accept a callback after replace', (done) => {
+    it('should resolve the result promise after replace', (done) => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.replace('a', 'b').result.then(done);
+      valueSignal.replace('a', 'b').result.then(done, () => done('Should not reject'));
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -150,12 +150,13 @@ describe('@vaadin/hilla-react-signals', () => {
       });
     });
 
-    it('should not run the callback after rejected replace', (done) => {
+    it('should reject the result promise after rejected replace', (done) => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal
-        .replace('a', 'b')
-        .result.then(() => done('error: callback should not be called when the event is rejected'));
+      valueSignal.replace('a', 'b').result.then(
+        () => done('Should not resolve'),
+        () => done(),
+      );
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -166,10 +167,10 @@ describe('@vaadin/hilla-react-signals', () => {
       setTimeout(done, 100);
     });
 
-    it('should accept a callback after update', (done) => {
+    it('should resolve the result promise after update', (done) => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.update(() => 'b').result.then(done);
+      valueSignal.update(() => 'b').result.then(done, () => done('Should not reject'));
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,

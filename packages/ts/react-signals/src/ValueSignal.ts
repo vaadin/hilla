@@ -8,10 +8,10 @@ import {
 } from './events.js';
 import {
   $processServerResponse,
+  $resolveOperation,
   $update,
   FullStackSignal,
   type Operation,
-  type ThenCallback,
 } from './FullStackSignal.js';
 
 type PendingRequestsRecord<T> = Readonly<{
@@ -25,8 +25,6 @@ type PendingRequestsRecord<T> = Readonly<{
 export interface OperationSubscription extends Operation {
   cancel(): void;
 }
-
-export const $runThenCallback = Symbol('runThenCallback');
 
 /**
  * A full-stack signal that holds an arbitrary value.
@@ -60,8 +58,8 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     const { parentClientSignalId } = this.server.config;
     const signalId = parentClientSignalId !== undefined ? this.id : undefined;
     const event = createReplaceStateEvent(expected, newValue, signalId, parentClientSignalId);
-    this[$update](event);
-    return this.createOperation(event.id);
+    const promise = this[$update](event);
+    return this.createOperation({ id: event.id, promise });
   }
 
   /**
@@ -80,11 +78,11 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
     const event = createReplaceStateEvent(this.value, newValue);
-    this[$update](event);
+    const promise = this[$update](event);
     const pendingRequest = { id: nanoid(), callback, canceled: false };
     this.#pendingRequests.set(event.id, pendingRequest);
     return {
-      ...this.createOperation(pendingRequest.id),
+      ...this.createOperation({ id: pendingRequest.id, promise }),
       cancel: () => {
         pendingRequest.canceled = true;
       },
@@ -101,20 +99,15 @@ export class ValueSignal<T> extends FullStackSignal<T> {
       }
     }
 
+    let reason: string | undefined;
     if (event.accepted || isSnapshotStateEvent<T>(event)) {
       this.#applyAcceptedEvent(event);
-      // `then` callbacks can be associated to the record or the event
-      // it depends on the operation that was performed
-      [record?.id, event.id].filter(Boolean).forEach((id) => this[$runThenCallback](id!));
+    } else {
+      reason = 'server rejected the operation';
     }
-  }
-
-  protected [$runThenCallback](eventId: string): void {
-    const thenCallback = this.thenCallbacks.get(eventId);
-    if (thenCallback) {
-      this.thenCallbacks.delete(eventId);
-      thenCallback();
-    }
+    // `then` callbacks can be associated to the record or the event
+    // it depends on the operation that was performed
+    [record?.id, event.id].filter(Boolean).forEach((id) => this[$resolveOperation](id!, reason));
   }
 
   #applyAcceptedEvent(event: StateEvent): void {

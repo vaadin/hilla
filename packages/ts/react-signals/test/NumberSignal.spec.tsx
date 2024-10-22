@@ -158,10 +158,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(43);
     });
 
-    it('should accept a callback after incrementBy', (done) => {
+    it('should resolve the result promise after incrementBy', (done) => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
-      numberSignal.incrementBy(1).result.then(done);
+      numberSignal.incrementBy(1).result.then(done, () => done('Should not reject'));
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -171,12 +171,13 @@ describe('@vaadin/hilla-react-signals', () => {
       });
     });
 
-    it('should not run the callback after rejected incrementBy', (done) => {
+    it('should reject the result promise after rejected incrementBy', (done) => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
-      numberSignal
-        .incrementBy(1)
-        .result.then(() => done('error: callback should not be called when the event is rejected'));
+      numberSignal.incrementBy(1).result.then(
+        () => done('Should not resolve'),
+        () => done(),
+      );
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -184,13 +185,12 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 43,
         accepted: false,
       });
-      setTimeout(done, 100);
     });
 
-    it('should accept a callback after incrementing by zero without server roundtrip', (done) => {
+    it('should resolve the result promise after incrementing by zero without server roundtrip', (done) => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
-      numberSignal.incrementBy(0).result.then(done);
+      numberSignal.incrementBy(0).result.then(done, () => done('Should not reject'));
     });
   });
 });

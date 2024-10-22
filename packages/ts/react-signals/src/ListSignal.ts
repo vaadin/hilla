@@ -12,6 +12,7 @@ import {
 } from './events.js';
 import {
   $processServerResponse,
+  $resolveOperation,
   $setValueQuietly,
   $update,
   type Operation,
@@ -62,6 +63,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
 
   protected override [$processServerResponse](event: StateEvent): void {
     if (!event.accepted) {
+      this[$resolveOperation](event.id, 'server rejected the operation');
       return;
     }
     if (isListSnapshotStateEvent<T>(event)) {
@@ -71,6 +73,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
     } else if (isRemoveStateEvent(event)) {
       this.#handleRemoveUpdate(event);
     }
+    this[$resolveOperation](event.id);
   }
 
   #handleInsertLastUpdate(event: InsertLastStateEvent<T>): void {
@@ -150,8 +153,8 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
    */
   insertLast(value: T): Operation {
     const event = createInsertLastStateEvent(value);
-    this[$update](event);
-    return this.createOperation(event.id);
+    const promise = this[$update](event);
+    return this.createOperation({ id: event.id, promise });
   }
 
   /**
@@ -161,18 +164,10 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
   remove(item: ValueSignal<T>): Operation {
     const entryToRemove = this.#values.get(item.id);
     if (entryToRemove === undefined) {
-      const op: Operation = {
-        result: {
-          then: (callback) => {
-            callback();
-            return op.result;
-          },
-        },
-      };
-      return op;
+      return { result: Promise.resolve() };
     }
     const removeEvent = createRemoveStateEvent(entryToRemove.value.id);
-    this[$update](removeEvent);
-    return this.createOperation(removeEvent.id);
+    const promise = this[$update](removeEvent);
+    return this.createOperation({ id: removeEvent.id, promise });
   }
 }

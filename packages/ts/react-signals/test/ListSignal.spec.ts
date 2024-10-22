@@ -417,5 +417,53 @@ describe('@vaadin/hilla-react-signals', () => {
       listSignal.remove(nonExistentSignal);
       expect(listSignal.value).to.have.length(4);
     });
+
+    it('should resolve the result promise after insertLast', (done) => {
+      subscribeToSignalViaEffect(listSignal);
+      listSignal.insertLast('Alice').result.then(done, () => done('Should not reject'));
+      const [, , params] = client.call.firstCall.args;
+      const insertEvent: InsertLastStateEvent<string> = {
+        id: (params!.event as { id: string }).id,
+        type: 'insert',
+        position: 'last',
+        value: 'Alice',
+        entryId: '1',
+        accepted: true,
+      };
+      simulateReceivingEvent(insertEvent);
+    });
+
+    it('should resolve the result promise after remove', (done) => {
+      subscribeToSignalViaEffect(listSignal);
+      const snapshot = {
+        id: '123',
+        type: 'snapshot',
+        accepted: true,
+        value: undefined,
+        entries: [{ id: '1', value: 'Alice' }],
+      };
+      simulateReceivingEvent(snapshot);
+      const firstElement = listSignal.value.values().next().value!;
+      listSignal.remove(firstElement).result.then(done, () => done('Should not reject'));
+      const [, , params] = client.call.firstCall.args;
+      const removeEvent: RemoveStateEvent = {
+        id: (params!.event as { id: string }).id,
+        type: 'remove',
+        value: undefined as never,
+        entryId: '1',
+        accepted: true,
+      };
+      simulateReceivingEvent(removeEvent);
+    });
+
+    it('should resolve the result promise after removing a non-existing entry', (done) => {
+      subscribeToSignalViaEffect(listSignal);
+      const nonExistentSignal = new ValueSignal<string>('', {
+        client,
+        endpoint: 'NameService',
+        method: 'nameListSignal',
+      });
+      listSignal.remove(nonExistentSignal).result.then(done, () => done('Should not reject'));
+    });
   });
 });

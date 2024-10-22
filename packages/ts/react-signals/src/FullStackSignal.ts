@@ -6,18 +6,10 @@ import { createSetStateEvent, type StateEvent } from './events.js';
 const ENDPOINT = 'SignalsHandler';
 
 /**
- * The type of function that is used to define a callback that is called when
- * the `then` method is called on an operation object.
- */
-export type ThenCallback = () => void;
-
-/**
  * A return type for signal operations.
  */
 export type Operation = {
-  result: {
-    then(callback: ThenCallback): Operation['result'];
-  };
+  result: Promise<void>;
 };
 
 /**
@@ -34,21 +26,43 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   // FullStackSignal constructor.
   #subscribeCount = -1;
 
-  // stores the `then` callbacks associated to operations
-  protected readonly thenCallbacks = new Map<string, ThenCallback>();
+  // stores the promise handlers associated to operations
+  protected readonly operationPromises = new Map<
+    string,
+    {
+      resolve(value: PromiseLike<void> | void): void;
+      reject(reason?: any): void;
+    }
+  >();
 
   // creates the obejct to be returned by operations to allow defining callbacks
-  protected createOperation(eventId: string): Operation {
-    const thens = this.thenCallbacks;
-    const op: Operation = {
-      result: {
-        then(callback) {
-          thens.set(eventId, callback);
-          return op.result;
-        },
-      },
+  protected createOperation({ id, promise }: { id?: string; promise?: Promise<void> }): Operation {
+    const thens = this.operationPromises;
+    const promises: Array<Promise<void>> = [];
+
+    if (id) {
+      // Create a promise to be associated to the provided id
+      promises.push(
+        new Promise<void>((resolve, reject) => {
+          thens.set(id, { resolve, reject });
+        }),
+      );
+    }
+
+    if (promise) {
+      // Add the provided promise to the list of promises
+      promises.push(promise);
+    }
+
+    if (promises.length === 0) {
+      // If no promises were added, return a resolved promise
+      promises.push(Promise.resolve());
+    }
+
+    return {
+      // The `then` is needed to convert `void[]` to `void`
+      result: Promise.all(promises).then(() => undefined),
     };
-    return op;
   }
 
   protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
@@ -170,6 +184,7 @@ class ServerConnection {
 export const $update = Symbol('update');
 export const $processServerResponse = Symbol('processServerResponse');
 export const $setValueQuietly = Symbol('setValueQuietly');
+export const $resolveOperation = Symbol('resolveOperation');
 
 /**
  * A signal that holds a shared value. Each change to the value is propagated to
@@ -228,6 +243,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
         // the server. For a standalone signal, both of them should be passed in
         // as undefined:
         const signalId = config.parentClientSignalId !== undefined ? this.id : undefined;
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this[$update](createSetStateEvent(v, signalId, config.parentClientSignalId));
       }
     });
@@ -250,9 +266,10 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * A method to update the server with the new value.
    *
    * @param event - The event to update the server with.
+   * @returns The server response promise.
    */
-  protected [$update](event: StateEvent): void {
-    this.server
+  protected async [$update](event: StateEvent): Promise<void> {
+    return this.server
       .update(event)
       .catch((error: unknown) => {
         this.#error.value = error instanceof Error ? error : new Error(String(error));
@@ -260,6 +277,24 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       .finally(() => {
         this.#pending.value = false;
       });
+  }
+
+  /**
+   * Resolves the operation promise associated with the given event id.
+   *
+   * @param eventId - The event id.
+   * @param reason - The reason to reject the promise (if any).
+   */
+  protected [$resolveOperation](eventId: string, reason?: string): void {
+    const operationPromise = this.operationPromises.get(eventId);
+    if (operationPromise) {
+      this.operationPromises.delete(eventId);
+      if (reason) {
+        operationPromise.reject(reason);
+      } else {
+        operationPromise.resolve();
+      }
+    }
   }
 
   /**
