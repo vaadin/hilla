@@ -227,6 +227,11 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
     const thens = this.#operationPromises;
     const promises: Array<Promise<void>> = [];
 
+    if (promise) {
+      // Add the provided promise to the list of promises
+      promises.push(promise);
+    }
+
     if (id) {
       // Create a promise to be associated to the provided id
       promises.push(
@@ -236,19 +241,19 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       );
     }
 
-    if (promise) {
-      // Add the provided promise to the list of promises
-      promises.push(promise);
-    }
-
     if (promises.length === 0) {
       // If no promises were added, return a resolved promise
       promises.push(Promise.resolve());
     }
 
     return {
-      // The `then` is needed to convert `void[]` to `void`
-      result: Promise.all(promises).then(() => undefined),
+      result: Promise.allSettled(promises).then((results) => {
+        const lastResult = results[results.length - 1];
+        if (lastResult.status === 'fulfilled') {
+          return undefined;
+        }
+        throw lastResult.reason;
+      }),
     };
   }
 
