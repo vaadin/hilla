@@ -3,6 +3,7 @@ package com.vaadin.hilla.parser.plugins.transfertypes.push;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,10 +25,11 @@ public class PushTypeTest {
 
         var openAPI = new Parser().classLoader(getClass().getClassLoader())
                 .classPath(classpath.split(File.pathSeparator))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
-                .addPlugin(new TransferTypesPlugin()).execute();
+                .addPlugin(new TransferTypesPlugin())
+                .execute(List.of(OtherEndpoint.class, PushTypeEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

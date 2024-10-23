@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
 
 /**
  * Base class for Engine Maven plugin tests. Delegates to
@@ -29,7 +28,7 @@ import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
 public class AbstractMojoTest {
     private final DelegateMojoTestCase testCase = new DelegateMojoTestCase();
     private Path buildDirectory;
-    private EngineConfiguration.Builder configurationBuilder;
+    private EngineConfiguration engineConfiguration;
     private Path outputDirectory;
     private MavenProject project;
     private Path temporaryDirectory;
@@ -65,29 +64,8 @@ public class AbstractMojoTest {
                 .getOutputDirectory();
         Mockito.doReturn(mockBuild).when(project).getBuild();
 
-        var configFilePath = getBuildDirectory()
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
-
-        // Load reference EngineConfiguration
-        Files.copy(
-                Path.of(Objects
-                        .requireNonNull(getClass().getResource(
-                                EngineConfiguration.DEFAULT_CONFIG_FILE_NAME))
-                        .toURI()),
-                configFilePath);
-
-        var config = TestEngineConfigurationPathResolver.resolve(
-                EngineConfiguration.load(configFilePath.toFile()),
-                temporaryDirectory);
-
-        assertNotNull(config, "expected reference "
-                + "EngineConfiguration to load from json");
-        configurationBuilder = new EngineConfiguration.Builder(config)
-                .baseDir(getTemporaryDirectory());
-
-        // Delete reference json file from temporary directory
-        Files.delete(getBuildDirectory()
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME));
+        engineConfiguration = new EngineConfiguration();
+        engineConfiguration.setBaseDir(getTemporaryDirectory());
     }
 
     @AfterEach
@@ -107,7 +85,7 @@ public class AbstractMojoTest {
     }
 
     protected EngineConfiguration getEngineConfiguration() {
-        return configurationBuilder.create();
+        return engineConfiguration;
     }
 
     protected MavenProject getMavenProject() {

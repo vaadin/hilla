@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,8 @@ import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import com.vaadin.hilla.engine.ParserProcessor;
+
+import java.nio.file.Path;
 
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint
@@ -52,6 +55,7 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
+        configureFromOptions(options);
         if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
@@ -69,6 +73,7 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
+        configureFromOptions(options);
         if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
@@ -97,5 +102,14 @@ public class EndpointGeneratorTaskFactoryImpl
         public void execute() {
             LOGGER.debug("Skipping generating OpenAPI spec");
         }
+    }
+
+    private static void configureFromOptions(Options options) {
+        var conf = EngineConfiguration.getDefault();
+        Path buildDir = options.getBuildDirectory().toPath();
+        conf.setBaseDir(options.getNpmFolder().toPath());
+        conf.setBuildDir(buildDir);
+        conf.setClassesDir(buildDir.resolve("classes"));
+        conf.setOutputDir(options.getFrontendGeneratedFolder().toPath());
     }
 }
