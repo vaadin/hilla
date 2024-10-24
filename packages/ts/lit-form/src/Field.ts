@@ -201,6 +201,17 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
       this.element.invalid = this.#invalid;
     }
   }
+
+  override checkValidity(): boolean {
+    // Ignore the `invalid` property of the Vaadin component to avoid
+    // reading the component's internal old validation state and validate
+    // the element based on the current state.
+    const isElementInvalid = this.element.invalid;
+    this.element.invalid = false;
+    const valid = super.checkValidity();
+    this.element.invalid = isElementInvalid;
+    return valid;
+  }
 }
 
 export class GenericFieldStrategy<T = any, E extends FieldElement<T> = FieldElement<T>> extends AbstractFieldStrategy<
