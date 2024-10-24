@@ -126,7 +126,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .thenReturn(menuAccessControl);
         Mockito.when(menuAccessControl.getPopulateClientSideMenu())
                 .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
-        Mockito.doCallRealMethod().when(menuAccessControl).canAccessView(any(AvailableViewInfo.class));
+        Mockito.doCallRealMethod().when(menuAccessControl)
+                .canAccessView(any(AvailableViewInfo.class));
 
         // Add test data for production mode
         projectRoot.newFolder("META-INF", "VAADIN");
