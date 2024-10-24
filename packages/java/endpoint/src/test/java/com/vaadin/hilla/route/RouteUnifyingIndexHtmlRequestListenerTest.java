@@ -13,6 +13,7 @@ import java.util.Map;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinRequest;
 
@@ -23,6 +24,7 @@ import org.hamcrest.Matchers;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -124,6 +126,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .thenReturn(menuAccessControl);
         Mockito.when(menuAccessControl.getPopulateClientSideMenu())
                 .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
+        Mockito.doCallRealMethod().when(menuAccessControl)
+                .canAccessView(any(AvailableViewInfo.class));
 
         // Add test data for production mode
         projectRoot.newFolder("META-INF", "VAADIN");
@@ -131,6 +135,13 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 FILE_ROUTES_JSON_PROD_PATH);
 
         copyClientRoutes("clientRoutes.json", productionRouteFile);
+
+        CurrentInstance.set(VaadinRequest.class, vaadinRequest);
+    }
+
+    @After
+    public void tearDown() {
+        CurrentInstance.set(VaadinRequest.class, null);
     }
 
     private static List<RouteData> prepareServerRoutes() {
