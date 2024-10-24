@@ -99,6 +99,9 @@ describe('RouterBuilder', () => {
           children: [
             {
               path: '/child',
+              handle: {
+                flowLayout: true,
+              },
             },
           ],
         },
@@ -119,6 +122,9 @@ describe('RouterBuilder', () => {
             children: [
               {
                 path: '/child',
+                handle: {
+                  flowLayout: true,
+                },
               },
             ],
             path: '/test',
@@ -128,6 +134,9 @@ describe('RouterBuilder', () => {
           },
         ],
         element: createElement(Server),
+        handle: {
+          ignoreFallback: true,
+        },
       },
       {
         children: [
@@ -176,6 +185,12 @@ describe('RouterBuilder', () => {
                 flowLayout: true,
               },
             },
+            {
+              path: '/outside',
+              handle: {
+                flowLayout: false,
+              },
+            },
           ],
         },
         {
@@ -199,26 +214,22 @@ describe('RouterBuilder', () => {
           {
             children: [
               {
-                path: '',
                 handle: {
                   flowLayout: true,
                 },
+                path: '/nested',
               },
               {
-                path: '/nested',
                 handle: {
                   flowLayout: true,
                 },
+                path: '',
               },
             ],
             path: 'nest',
           },
           {
-            children: [
-              {
-                path: '/child',
-              },
-            ],
+            children: [],
             path: '/test',
             handle: {
               flowLayout: true,
@@ -226,6 +237,27 @@ describe('RouterBuilder', () => {
           },
         ],
         element: createElement(Server),
+        handle: {
+          ignoreFallback: true,
+        },
+      },
+      {
+        children: [
+          {
+            path: '/outside',
+            handle: {
+              flowLayout: false,
+            },
+          },
+        ],
+        path: 'nest',
+      },
+      {
+        children: [
+          {
+            path: '/child',
+          },
+        ],
       },
       {
         children: [
