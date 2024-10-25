@@ -8,7 +8,8 @@ import jakarta.persistence.Version;
 @Endpoint
 public class NullableNonNullEndpoint {
 
-    public NullableNonNullFieldModel nullableNonNullFieldModel(NullableNonNullFieldModel nullableNonNullFieldModel) {
+    public NullableNonNullFieldModel nullableNonNullFieldModel(
+            NullableNonNullFieldModel nullableNonNullFieldModel) {
         return nullableNonNullFieldModel;
     }
 
