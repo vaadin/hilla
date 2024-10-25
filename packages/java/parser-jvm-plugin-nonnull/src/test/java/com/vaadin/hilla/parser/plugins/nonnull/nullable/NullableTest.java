@@ -5,6 +5,7 @@ import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig;
+import com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint;
 import com.vaadin.hilla.parser.plugins.nonnull.test.helpers.TestHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

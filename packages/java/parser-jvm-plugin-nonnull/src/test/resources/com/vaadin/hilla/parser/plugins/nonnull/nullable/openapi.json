@@ -14,6 +14,10 @@
     {
       "name" : "NullableEndpoint",
       "x-class-name" : "com.vaadin.hilla.parser.plugins.nonnull.nullable.NullableEndpoint"
+    },
+    {
+      "name" : "NullableNonNullEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint"
     }
   ],
   "paths" : {
@@ -60,6 +64,48 @@
           }
         }
       }
+    },
+    "/NullableNonNullEndpoint/nullableNonNullFieldModel" : {
+      "post" : {
+        "tags" : [
+          "NullableNonNullEndpoint"
+        ],
+        "operationId" : "NullableNonNullEndpoint_nullableNonNullFieldModel_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "nullableNonNullFieldModel" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint$NullableNonNullFieldModel"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint$NullableNonNullFieldModel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -75,6 +121,27 @@
             "type" : "integer",
             "format" : "int64",
             "nullable" : true
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint$NullableNonNullFieldModel" : {
+        "type" : "object",
+        "properties" : {
+          "required" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64",
+            "nullable" : true
+          },
+          "notNullVersion" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       }
