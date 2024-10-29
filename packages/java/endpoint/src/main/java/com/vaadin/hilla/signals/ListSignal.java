@@ -5,6 +5,9 @@ import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
+import com.vaadin.hilla.signals.operation.ListInsertOperation;
+import com.vaadin.hilla.signals.operation.ListRemoveOperation;
+import com.vaadin.hilla.signals.operation.ValidationResult;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static com.vaadin.hilla.signals.core.event.ListStateEvent.ListEntry;
 
@@ -84,8 +88,15 @@ public class ListSignal<T> extends Signal<T> {
     private UUID head;
     private UUID tail;
 
+    private ListSignal<T> delegate;
+
     public ListSignal(Class<T> valueType) {
         super(valueType);
+    }
+
+    protected ListSignal(Class<T> valueType, ListSignal<T> delegate) {
+        this(valueType);
+        this.delegate = delegate;
     }
 
     @Override
@@ -140,7 +151,10 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
-    private ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
+    protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
+        if (delegate != null) {
+            return delegate.handleInsert(event);
+        }
         if (event.getValue() == null) {
             throw new MissingFieldException(StateEvent.Field.VALUE);
         }
@@ -183,7 +197,10 @@ public class ListSignal<T> extends Signal<T> {
         return new Entry<>(UUID.randomUUID(), value, getValueType());
     }
 
-    private ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
+    protected ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
+        if (delegate != null) {
+            return delegate.handleRemoval(event);
+        }
         if (event.getEntryId() == null) {
             throw new MissingFieldException(ListStateEvent.Field.ENTRY_ID);
         }
@@ -224,5 +241,84 @@ public class ListSignal<T> extends Signal<T> {
 
         event.setAccepted(true);
         return event;
+    }
+
+    protected ListEntry<T> getEntry(UUID entryId) {
+        return entries.get(entryId);
+    }
+
+    private static class ValidatedListSignal<T> extends ListSignal<T> {
+
+        protected ValidatedListSignal(Class<T> valueType,
+                ListSignal<T> delegate) {
+            super(valueType, delegate);
+        }
+
+        protected ListStateEvent<T> handleValidationResult(
+                ListStateEvent<T> event, ValidationResult validationResult) {
+            if (validationResult.isOk()) {
+                return super.handleInsert(event);
+            } else {
+                event.setAccepted(false);
+                event.setValidationError(validationResult.getErrorMessage());
+                return event;
+            }
+        }
+    }
+
+    private static class InsertionValidatedListSignal<T>
+            extends ValidatedListSignal<T> {
+        private final Function<ListInsertOperation<T>, ValidationResult> insertValidator;
+
+        public InsertionValidatedListSignal(Class<T> valueType,
+                ListSignal<T> delegate,
+                Function<ListInsertOperation<T>, ValidationResult> insertValidator) {
+            super(valueType, delegate);
+            this.insertValidator = insertValidator;
+        }
+
+        @Override
+        protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
+            var listInsertOperation = new ListInsertOperation<>(event.getId(),
+                    event.getPosition(), event.getValue());
+            var validationResult = insertValidator.apply(listInsertOperation);
+            return handleValidationResult(event, validationResult);
+        }
+    }
+
+    public ListSignal<T> withInsertionValidator(
+            Function<ListInsertOperation<T>, ValidationResult> operation) {
+        return new InsertionValidatedListSignal<>(getValueType(), this,
+                operation);
+    }
+
+    private static class RemovalValidatedListSignal<T>
+            extends ValidatedListSignal<T> {
+        private final Function<ListRemoveOperation<T>, ValidationResult> removalValidator;
+
+        public RemovalValidatedListSignal(Class<T> valueType,
+                ListSignal<T> delegate,
+                Function<ListRemoveOperation<T>, ValidationResult> removalValidator) {
+            super(valueType, delegate);
+            this.removalValidator = removalValidator;
+        }
+
+        @Override
+        protected ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
+            if (event.getEntryId() == null) {
+                throw new MissingFieldException(ListStateEvent.Field.ENTRY_ID);
+            }
+            var entryToRemove = getEntry(event.getEntryId());
+            var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
+                    entryToRemove);
+            var validationResult = removalValidator.apply(listRemoveOperation);
+            handleValidationResult(event, validationResult);
+        }
+    }
+
+    public ListSignal<T> withRemovalValidator(
+            Function<ListRemoveOperation<T>, ValidationResult> operation) {
+        return new RemovalValidatedListSignal<>(getValueType(), this,
+                operation);
     }
 }

@@ -27,6 +27,7 @@ public class StateEvent<T> {
         public static final String VALUE = "value";
         public static final String EXPECTED = "expected";
         public static final String ACCEPTED = "accepted";
+        public static final String VALIDATION_ERROR = "validationError";
     }
 
     /**
