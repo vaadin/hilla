@@ -2,6 +2,7 @@ package com.vaadin.hilla.startup;
 
 import java.io.IOException;
 
+import com.vaadin.flow.server.Constants;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,6 +46,8 @@ public class RouteUnifyingServiceInitListenerTest {
                 .thenReturn(mockDeploymentConfiguration);
         event = new ServiceInitEvent(mockVaadinService);
 
+        Mockito.when(mockDeploymentConfiguration.getProjectFolder()).thenReturn(projectRoot.getRoot());
+        Mockito.when(mockDeploymentConfiguration.getBuildFolder()).thenReturn(Constants.TARGET);
         var frontendGeneratedDir = projectRoot.newFolder("frontend/generated");
         Mockito.when(mockDeploymentConfiguration.getFrontendFolder())
                 .thenReturn(frontendGeneratedDir.getParentFile());
