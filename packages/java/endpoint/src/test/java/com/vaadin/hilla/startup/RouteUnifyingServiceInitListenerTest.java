@@ -46,8 +46,10 @@ public class RouteUnifyingServiceInitListenerTest {
                 .thenReturn(mockDeploymentConfiguration);
         event = new ServiceInitEvent(mockVaadinService);
 
-        Mockito.when(mockDeploymentConfiguration.getProjectFolder()).thenReturn(projectRoot.getRoot());
-        Mockito.when(mockDeploymentConfiguration.getBuildFolder()).thenReturn(Constants.TARGET);
+        Mockito.when(mockDeploymentConfiguration.getProjectFolder())
+                .thenReturn(projectRoot.getRoot());
+        Mockito.when(mockDeploymentConfiguration.getBuildFolder())
+                .thenReturn(Constants.TARGET);
         var frontendGeneratedDir = projectRoot.newFolder("frontend/generated");
         Mockito.when(mockDeploymentConfiguration.getFrontendFolder())
                 .thenReturn(frontendGeneratedDir.getParentFile());
