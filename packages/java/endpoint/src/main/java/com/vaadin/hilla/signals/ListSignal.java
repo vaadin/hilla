@@ -100,7 +100,18 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     @Override
+    public Flux<ObjectNode> subscribe() {
+        if (delegate != null) {
+            return delegate.subscribe();
+        }
+        return super.subscribe();
+    }
+
+    @Override
     public Flux<ObjectNode> subscribe(String signalId) {
+        if (delegate != null) {
+            return delegate.subscribe(signalId);
+        }
         var signalEntry = entries.get(UUID.fromString(signalId));
         return signalEntry.value.subscribe();
     }
