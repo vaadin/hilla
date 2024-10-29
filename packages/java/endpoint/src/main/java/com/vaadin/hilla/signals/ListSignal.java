@@ -312,7 +312,7 @@ public class ListSignal<T> extends Signal<T> {
             var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
                     entryToRemove);
             var validationResult = removalValidator.apply(listRemoveOperation);
-            handleValidationResult(event, validationResult);
+            return handleValidationResult(event, validationResult);
         }
     }
 
