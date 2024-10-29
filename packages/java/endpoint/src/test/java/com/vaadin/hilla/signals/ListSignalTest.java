@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
+import com.vaadin.hilla.signals.operation.ValidationResult;
 import jakarta.annotation.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -674,6 +675,107 @@ public class ListSignalTest {
             assertEquals(name + i, entry.value().getName());
             assertEquals(age + i, entry.value().getAge());
         }
+    }
+
+    @Test
+    public void withInsertionValidator_doesNotLimitTheOriginalInstance() {
+        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
+
+        unRestrictedSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        unRestrictedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        assertEquals(2, extractEntries(unRestrictedSignal.createSnapshotEvent(),
+                String.class, Entry::new).size());
+
+        ListSignal<String> noInsertionAllowedSignal = unRestrictedSignal
+                .withInsertionValidator(operation -> ValidationResult
+                        .rejected("No insertion allowed"));
+        // the restricted instance sees the same entries as the original one:
+        assertEquals(2,
+                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+
+        // the restricted instance doesn't allow insertion:
+        noInsertionAllowedSignal.submit(
+                createInsertEvent("Should-be rejected!", InsertPosition.LAST));
+        noInsertionAllowedSignal.submit(
+                createInsertEvent("Should-be rejected!", InsertPosition.LAST));
+        assertEquals(2,
+                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+
+        unRestrictedSignal.submit(
+                createInsertEvent("Emma Executive", InsertPosition.LAST));
+        assertEquals(3, extractEntries(unRestrictedSignal.createSnapshotEvent(),
+                String.class, Entry::new).size());
+        assertEquals(3,
+                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+    }
+
+    @Test
+    public void withInsertionValidator_doesNotChangeSubscriptionBehavior() {
+        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> noInsertionAllowedSignal = unRestrictedSignal
+                .withInsertionValidator(operation -> ValidationResult
+                        .rejected("No insertion allowed"));
+
+        Flux<ObjectNode> unRestrictedFlux = unRestrictedSignal.subscribe();
+        AtomicInteger unRestrictedCounter = new AtomicInteger(0);
+        unRestrictedFlux.subscribe(eventJson -> {
+            unRestrictedCounter.incrementAndGet();
+        });
+        assertEquals(1, unRestrictedCounter.get()); // initial state
+
+        Flux<ObjectNode> noInsertionAllowedFlux = noInsertionAllowedSignal
+                .subscribe();
+        AtomicInteger noInsertionAllowedCounter = new AtomicInteger(0);
+        noInsertionAllowedFlux.subscribe(eventJson -> {
+            noInsertionAllowedCounter.incrementAndGet();
+        });
+        assertEquals(1, noInsertionAllowedCounter.get()); // initial state
+
+        unRestrictedSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        assertEquals(2, unRestrictedCounter.get());
+        assertEquals(2, noInsertionAllowedCounter.get());
+
+        unRestrictedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        assertEquals(3, unRestrictedCounter.get());
+        assertEquals(3, noInsertionAllowedCounter.get());
+    }
+
+    @Test
+    public void withInsertionValidator_doesNotLimitTheRemoveOperation() {
+        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> noInsertionAllowedSignal = unRestrictedSignal
+                .withInsertionValidator(operation -> ValidationResult
+                        .rejected("No insertion allowed"));
+
+        unRestrictedSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        unRestrictedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        // make sure restriction is in-tact:
+        noInsertionAllowedSignal.submit(
+                createInsertEvent("Should-be Rejected", InsertPosition.LAST));
+
+        var entries = extractEntries(unRestrictedSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, entries.size());
+        assertEquals(2,
+                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+
+        // remove the first entry via the restricted signal:
+        noInsertionAllowedSignal.submit(createRemoveEvent(entries.get(0)));
+        assertEquals(1,
+                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+        assertEquals(1, extractEntries(unRestrictedSignal.createSnapshotEvent(),
+                String.class, Entry::new).size());
     }
 
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {
