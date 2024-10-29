@@ -127,7 +127,8 @@ public class ListSignal<T> extends Signal<T> {
 
     @Override
     protected ObjectNode createSnapshotEvent() {
-        var entries = this.entries.values().stream()
+        var entriesRef = this.delegate != null ? this.delegate.entries : this.entries;
+        var entries = entriesRef.values().stream()
                 .map(entry -> (ListEntry<T>) entry).toList();
         var event = new ListStateEvent<>(getId().toString(),
                 ListStateEvent.EventType.SNAPSHOT, entries);
