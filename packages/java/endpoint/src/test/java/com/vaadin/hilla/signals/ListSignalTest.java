@@ -91,7 +91,8 @@ public class ListSignalTest {
 
     @Test
     public void constructor_withNullArgs_doesNotAcceptNull() {
-        assertThrows(NullPointerException.class, () -> new ListSignal<>(null));
+        assertThrows(NullPointerException.class,
+                () -> new ListSignal<>((Class<?>) null));
     }
 
     @Test
@@ -679,16 +680,16 @@ public class ListSignalTest {
 
     @Test
     public void withInsertionValidator_doesNotLimitTheOriginalInstance() {
-        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
 
-        unRestrictedSignal
+        unrestrictedSignal
                 .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unRestrictedSignal.submit(
+        unrestrictedSignal.submit(
                 createInsertEvent("Jane Executive", InsertPosition.LAST));
-        assertEquals(2, extractEntries(unRestrictedSignal.createSnapshotEvent(),
+        assertEquals(2, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
 
-        ListSignal<String> noInsertionAllowedSignal = unRestrictedSignal
+        ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
                 .withInsertionValidator(operation -> ValidationResult
                         .rejected("No insertion allowed"));
         // the restricted instance sees the same entries as the original one:
@@ -705,9 +706,9 @@ public class ListSignalTest {
                 extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
                         String.class, Entry::new).size());
 
-        unRestrictedSignal.submit(
+        unrestrictedSignal.submit(
                 createInsertEvent("Emma Executive", InsertPosition.LAST));
-        assertEquals(3, extractEntries(unRestrictedSignal.createSnapshotEvent(),
+        assertEquals(3, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
         assertEquals(3,
                 extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
@@ -716,17 +717,17 @@ public class ListSignalTest {
 
     @Test
     public void withInsertionValidator_doesNotChangeSubscriptionBehavior() {
-        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
-        ListSignal<String> noInsertionAllowedSignal = unRestrictedSignal
+        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
                 .withInsertionValidator(operation -> ValidationResult
                         .rejected("No insertion allowed"));
 
-        Flux<ObjectNode> unRestrictedFlux = unRestrictedSignal.subscribe();
-        AtomicInteger unRestrictedCounter = new AtomicInteger(0);
-        unRestrictedFlux.subscribe(eventJson -> {
-            unRestrictedCounter.incrementAndGet();
+        Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
+        AtomicInteger unrestrictedCounter = new AtomicInteger(0);
+        unrestrictedFlux.subscribe(eventJson -> {
+            unrestrictedCounter.incrementAndGet();
         });
-        assertEquals(1, unRestrictedCounter.get()); // initial state
+        assertEquals(1, unrestrictedCounter.get()); // initial state
 
         Flux<ObjectNode> noInsertionAllowedFlux = noInsertionAllowedSignal
                 .subscribe();
@@ -736,33 +737,33 @@ public class ListSignalTest {
         });
         assertEquals(1, noInsertionAllowedCounter.get()); // initial state
 
-        unRestrictedSignal
+        unrestrictedSignal
                 .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        assertEquals(2, unRestrictedCounter.get());
+        assertEquals(2, unrestrictedCounter.get());
         assertEquals(2, noInsertionAllowedCounter.get());
 
-        unRestrictedSignal.submit(
+        unrestrictedSignal.submit(
                 createInsertEvent("Jane Executive", InsertPosition.LAST));
-        assertEquals(3, unRestrictedCounter.get());
+        assertEquals(3, unrestrictedCounter.get());
         assertEquals(3, noInsertionAllowedCounter.get());
     }
 
     @Test
     public void withInsertionValidator_doesNotLimitTheRemoveOperation() {
-        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
-        ListSignal<String> noInsertionAllowedSignal = unRestrictedSignal
+        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
                 .withInsertionValidator(operation -> ValidationResult
                         .rejected("No insertion allowed"));
 
-        unRestrictedSignal
+        unrestrictedSignal
                 .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unRestrictedSignal.submit(
+        unrestrictedSignal.submit(
                 createInsertEvent("Jane Executive", InsertPosition.LAST));
         // make sure restriction is in-tact:
         noInsertionAllowedSignal.submit(
                 createInsertEvent("Should-be Rejected", InsertPosition.LAST));
 
-        var entries = extractEntries(unRestrictedSignal.createSnapshotEvent(),
+        var entries = extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new);
         assertEquals(2, entries.size());
         assertEquals(2,
@@ -774,171 +775,182 @@ public class ListSignalTest {
         assertEquals(1,
                 extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
                         String.class, Entry::new).size());
-        assertEquals(1, extractEntries(unRestrictedSignal.createSnapshotEvent(),
+        assertEquals(1, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
     }
 
     @Test
     public void withRemovalValidator_doesNotLimitTheOriginalInstance() {
-        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
 
-        unRestrictedSignal
-            .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unRestrictedSignal.submit(
-            createInsertEvent("Jane Executive", InsertPosition.LAST));
-        var entries = extractEntries(unRestrictedSignal.createSnapshotEvent(),
-            String.class, Entry::new);
+        unrestrictedSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        unrestrictedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        var entries = extractEntries(unrestrictedSignal.createSnapshotEvent(),
+                String.class, Entry::new);
         assertEquals(2, entries.size());
 
-        ListSignal<String> noRemoveAllowedSignal = unRestrictedSignal
-            .withRemovalValidator(operation -> ValidationResult
-                .rejected("No removal allowed"));
+        ListSignal<String> noRemoveAllowedSignal = unrestrictedSignal
+                .withRemovalValidator(operation -> ValidationResult
+                        .rejected("No removal allowed"));
         // the restricted instance sees the same entries as the original one:
         assertEquals(2,
-            extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
-                String.class, Entry::new).size());
+                extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
 
         // the restricted instance doesn't allow removal:
         noRemoveAllowedSignal.submit(createRemoveEvent(entries.get(0)));
         noRemoveAllowedSignal.submit(createRemoveEvent(entries.get(1)));
         assertEquals(2,
-            extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
-                String.class, Entry::new).size());
+                extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
 
-        unRestrictedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(1, extractEntries(unRestrictedSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
-        assertEquals(1,
-            extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
+        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
+        assertEquals(1, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
+        assertEquals(1,
+                extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
     }
 
     @Test
     public void withRemovalValidator_doesNotChangeSubscriptionBehavior() {
-        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
-        ListSignal<String> noRemovalAllowedSignal = unRestrictedSignal
-            .withRemovalValidator(operation -> ValidationResult
-                .rejected("No removal allowed"));
+        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> noRemovalAllowedSignal = unrestrictedSignal
+                .withRemovalValidator(operation -> ValidationResult
+                        .rejected("No removal allowed"));
 
-        Flux<ObjectNode> unRestrictedFlux = unRestrictedSignal.subscribe();
-        AtomicInteger unRestrictedCounter = new AtomicInteger(0);
-        unRestrictedFlux.subscribe(eventJson -> {
-            unRestrictedCounter.incrementAndGet();
+        Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
+        AtomicInteger unrestrictedCounter = new AtomicInteger(0);
+        unrestrictedFlux.subscribe(eventJson -> {
+            unrestrictedCounter.incrementAndGet();
         });
-        assertEquals(1, unRestrictedCounter.get()); // initial state
+        assertEquals(1, unrestrictedCounter.get()); // initial state
 
         Flux<ObjectNode> noRemovalAllowedFlux = noRemovalAllowedSignal
-            .subscribe();
+                .subscribe();
         AtomicInteger noRemovalAllowedCounter = new AtomicInteger(0);
         noRemovalAllowedFlux.subscribe(eventJson -> {
             noRemovalAllowedCounter.incrementAndGet();
         });
         assertEquals(1, noRemovalAllowedCounter.get()); // initial state
 
-        unRestrictedSignal
-            .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unRestrictedSignal.submit(
-            createInsertEvent("Jane Executive", InsertPosition.LAST));
-        assertEquals(3, unRestrictedCounter.get());
+        unrestrictedSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        unrestrictedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        assertEquals(3, unrestrictedCounter.get());
         assertEquals(3, noRemovalAllowedCounter.get());
 
-        var entries = extractEntries(noRemovalAllowedSignal.createSnapshotEvent(), String.class, Entry::new);
+        var entries = extractEntries(
+                noRemovalAllowedSignal.createSnapshotEvent(), String.class,
+                Entry::new);
 
         // no updates are received for the rejected events:
         noRemovalAllowedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(3, unRestrictedCounter.get());
+        assertEquals(3, unrestrictedCounter.get());
         assertEquals(3, noRemovalAllowedCounter.get());
 
-        unRestrictedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(4, unRestrictedCounter.get());
+        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
+        assertEquals(4, unrestrictedCounter.get());
         assertEquals(4, noRemovalAllowedCounter.get());
 
-        unRestrictedSignal.submit(createRemoveEvent(entries.get(1)));
-        assertEquals(5, unRestrictedCounter.get());
+        unrestrictedSignal.submit(createRemoveEvent(entries.get(1)));
+        assertEquals(5, unrestrictedCounter.get());
         assertEquals(5, noRemovalAllowedCounter.get());
     }
 
     @Test
     public void withRemovalValidator_doesNotLimitTheInsertOperation() {
-        ListSignal<String> unRestrictedSignal = new ListSignal<>(String.class);
-        ListSignal<String> noRemovalAllowedSignal = unRestrictedSignal
-            .withRemovalValidator(operation -> ValidationResult
-                .rejected("No removal allowed"));
+        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
+        ListSignal<String> noRemovalAllowedSignal = unrestrictedSignal
+                .withRemovalValidator(operation -> ValidationResult
+                        .rejected("No removal allowed"));
 
-        unRestrictedSignal
-            .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unRestrictedSignal.submit(
-            createInsertEvent("Jane Executive", InsertPosition.LAST));
-        var entries = extractEntries(noRemovalAllowedSignal.createSnapshotEvent(), String.class, Entry::new);
+        unrestrictedSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        unrestrictedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        var entries = extractEntries(
+                noRemovalAllowedSignal.createSnapshotEvent(), String.class,
+                Entry::new);
 
         // assert that restriction is in-tact:
         noRemovalAllowedSignal.submit(createRemoveEvent(entries.get(0)));
         entries = extractEntries(noRemovalAllowedSignal.createSnapshotEvent(),
-            String.class, Entry::new);
+                String.class, Entry::new);
         assertEquals(2, entries.size());
-        assertEquals(2,
-            extractEntries(unRestrictedSignal.createSnapshotEvent(),
+        assertEquals(2, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
 
-        unRestrictedSignal.submit(createRemoveEvent(entries.get(0)));
+        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
         entries = extractEntries(noRemovalAllowedSignal.createSnapshotEvent(),
-            String.class, Entry::new);
+                String.class, Entry::new);
         assertEquals(1, entries.size());
-        assertEquals(1,
-            extractEntries(unRestrictedSignal.createSnapshotEvent(),
+        assertEquals(1, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
 
         // insert another entry through the restricted signal:
         noRemovalAllowedSignal.submit(
-            createInsertEvent("Emma Executive", InsertPosition.LAST));
+                createInsertEvent("Emma Executive", InsertPosition.LAST));
         assertEquals(2,
-            extractEntries(noRemovalAllowedSignal.createSnapshotEvent(),
+                extractEntries(noRemovalAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+        assertEquals(2, extractEntries(unrestrictedSignal.createSnapshotEvent(),
                 String.class, Entry::new).size());
-        assertEquals(2, extractEntries(unRestrictedSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
     }
 
     @Test
     public void withMultipleStructuralValidators_allValidatorsAreApplied() {
-        ListSignal<String> partiallyRestrictedSignal = new ListSignal<>(String.class)
-            .withInsertionValidator(operation -> operation.value().startsWith("Joe") ? ValidationResult
-                .rejected("No Joe is allowed") : ValidationResult.ok());
+        ListSignal<String> partiallyRestrictedSignal = new ListSignal<>(
+                String.class).withInsertionValidator(
+                        operation -> operation.value().startsWith("Joe")
+                                ? ValidationResult.rejected("No Joe is allowed")
+                                : ValidationResult.ok());
 
         ListSignal<String> readonlyStructureSignal = partiallyRestrictedSignal
-            .withInsertionValidator(operation -> ValidationResult
-                .rejected("No insertion allowed"))
-            .withRemovalValidator(operation -> ValidationResult
-                .rejected("No removal allowed"));
+                .withInsertionValidator(operation -> ValidationResult
+                        .rejected("No insertion allowed"))
+                .withRemovalValidator(operation -> ValidationResult
+                        .rejected("No removal allowed"));
 
         partiallyRestrictedSignal
-            .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
         partiallyRestrictedSignal.submit(
-            createInsertEvent("Jane Executive", InsertPosition.LAST));
-        partiallyRestrictedSignal.submit(
-            createInsertEvent("Joe Should-be-rejected", InsertPosition.LAST));
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        partiallyRestrictedSignal.submit(createInsertEvent(
+                "Joe Should-be-rejected", InsertPosition.LAST));
 
-
-        var entries = extractEntries(readonlyStructureSignal.createSnapshotEvent(),
-            String.class, Entry::new);
+        var entries = extractEntries(
+                readonlyStructureSignal.createSnapshotEvent(), String.class,
+                Entry::new);
         assertEquals(2, entries.size());
 
         readonlyStructureSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(2, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
+        assertEquals(2,
+                extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
 
         readonlyStructureSignal.submit(createRemoveEvent(entries.get(1)));
-        assertEquals(2, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
+        assertEquals(2,
+                extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
 
-        readonlyStructureSignal.submit(createInsertEvent("Emma Executive", InsertPosition.LAST));
-        assertEquals(2, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
+        readonlyStructureSignal.submit(
+                createInsertEvent("Emma Executive", InsertPosition.LAST));
+        assertEquals(2,
+                extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
 
-        partiallyRestrictedSignal.submit(createInsertEvent("Emma Executive", InsertPosition.LAST));
-        assertEquals(3, extractEntries(partiallyRestrictedSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
-        assertEquals(3, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
-            String.class, Entry::new).size());
+        partiallyRestrictedSignal.submit(
+                createInsertEvent("Emma Executive", InsertPosition.LAST));
+        assertEquals(3,
+                extractEntries(partiallyRestrictedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+        assertEquals(3,
+                extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
     }
 
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {

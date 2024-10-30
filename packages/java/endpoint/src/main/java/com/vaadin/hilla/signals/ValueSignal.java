@@ -18,8 +18,6 @@ public class ValueSignal<T> extends Signal<T> {
 
     private T value;
 
-    private final ValueSignal<T> delegate;
-
     /**
      * Creates a new ValueSignal with the provided default value.
      *
@@ -32,7 +30,8 @@ public class ValueSignal<T> extends Signal<T> {
      *             <code>null</code>
      */
     public ValueSignal(T defaultValue, Class<T> valueType) {
-        this(Objects.requireNonNull(defaultValue), valueType, null);
+        this(valueType);
+        value = Objects.requireNonNull(defaultValue);
     }
 
     /**
@@ -46,36 +45,30 @@ public class ValueSignal<T> extends Signal<T> {
      *             <code>null</code>
      */
     public ValueSignal(Class<T> valueType) {
-        this(null, valueType, null);
+        super(valueType);
     }
 
     protected ValueSignal(ValueSignal<T> delegate) {
-        this(delegate.getValue(), delegate.getValueType(), delegate);
+        super(delegate);
     }
 
-    private ValueSignal(T defaultValue, Class<T> valueType,
-            ValueSignal<T> delegate) {
-        super(valueType);
-        this.value = defaultValue;
-        this.delegate = delegate;
-    }
-
-    protected Signal<T> getDelegate() {
-        return delegate;
+    @Override
+    protected ValueSignal<T> getDelegate() {
+        return (ValueSignal<T>) super.getDelegate();
     }
 
     @Override
     public Flux<ObjectNode> subscribe() {
-        if (delegate != null) {
-            return delegate.subscribe();
+        if (getDelegate() != null) {
+            return getDelegate().subscribe();
         }
         return super.subscribe();
     }
 
     @Override
     public Flux<ObjectNode> subscribe(String signalId) {
-        if (delegate != null) {
-            return delegate.subscribe(signalId);
+        if (getDelegate() != null) {
+            return getDelegate().subscribe(signalId);
         }
         return subscribe();
     }
@@ -87,13 +80,13 @@ public class ValueSignal<T> extends Signal<T> {
      */
     @Nullable
     public T getValue() {
-        return delegate != null ? delegate.getValue() : this.value;
+        return getDelegate() != null ? getDelegate().getValue() : this.value;
     }
 
     @Override
     protected ObjectNode createSnapshotEvent() {
-        if (delegate != null) {
-            return delegate.createSnapshotEvent();
+        if (getDelegate() != null) {
+            return getDelegate().createSnapshotEvent();
         }
         var snapshot = new StateEvent<>(getId().toString(),
                 StateEvent.EventType.SNAPSHOT, this.value);
@@ -128,8 +121,8 @@ public class ValueSignal<T> extends Signal<T> {
     }
 
     protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
-        if (delegate != null) {
-            return delegate.handleSetEvent(stateEvent);
+        if (getDelegate() != null) {
+            return getDelegate().handleSetEvent(stateEvent);
         } else {
             this.value = stateEvent.getValue();
             stateEvent.setAccepted(true);
@@ -138,8 +131,8 @@ public class ValueSignal<T> extends Signal<T> {
     }
 
     protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
-        if (delegate != null) {
-            return delegate.handleReplaceEvent(stateEvent);
+        if (getDelegate() != null) {
+            return getDelegate().handleReplaceEvent(stateEvent);
         } else {
             boolean accepted = compareAndSet(stateEvent.getValue(),
                     stateEvent.getExpected());

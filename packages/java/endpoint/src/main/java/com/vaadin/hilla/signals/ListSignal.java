@@ -90,29 +90,23 @@ public class ListSignal<T> extends Signal<T> {
     private UUID head;
     private UUID tail;
 
-    private ListSignal<T> delegate;
-
     public ListSignal(Class<T> valueType) {
         super(valueType);
     }
 
-    protected ListSignal(Class<T> valueType, ListSignal<T> delegate) {
-        this(valueType);
-        this.delegate = delegate;
+    protected ListSignal(ListSignal<T> delegate) {
+        super(delegate);
     }
 
     @Override
-    public Flux<ObjectNode> subscribe() {
-        if (delegate != null) {
-            return delegate.subscribe();
-        }
-        return super.subscribe();
+    protected ListSignal<T> getDelegate() {
+        return (ListSignal<T>) super.getDelegate();
     }
 
     @Override
     public Flux<ObjectNode> subscribe(String signalId) {
-        if (delegate != null) {
-            return delegate.subscribe(signalId);
+        if (getDelegate() != null) {
+            return getDelegate().subscribe(signalId);
         }
         var signalEntry = entries.get(UUID.fromString(signalId));
         return signalEntry.value.subscribe();
@@ -140,8 +134,8 @@ public class ListSignal<T> extends Signal<T> {
 
     @Override
     protected ObjectNode createSnapshotEvent() {
-        if (delegate != null) {
-            return delegate.createSnapshotEvent();
+        if (getDelegate() != null) {
+            return getDelegate().createSnapshotEvent();
         }
         var entries = this.entries.values().stream()
                 .map(entry -> (ListEntry<T>) entry).toList();
@@ -168,8 +162,8 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
-        if (delegate != null) {
-            return delegate.handleInsert(event);
+        if (getDelegate() != null) {
+            return getDelegate().handleInsert(event);
         }
         if (event.getValue() == null) {
             throw new MissingFieldException(StateEvent.Field.VALUE);
@@ -214,15 +208,15 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     protected ValueSignal<T> createValueSignal(T value) {
-        if (delegate != null) {
-            return delegate.createValueSignal(value);
+        if (getDelegate() != null) {
+            return getDelegate().createValueSignal(value);
         }
         return new ValueSignal<>(value, getValueType());
     }
 
     protected ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
-        if (delegate != null) {
-            return delegate.handleRemoval(event);
+        if (getDelegate() != null) {
+            return getDelegate().handleRemoval(event);
         }
         if (event.getEntryId() == null) {
             throw new MissingFieldException(ListStateEvent.Field.ENTRY_ID);
@@ -272,9 +266,8 @@ public class ListSignal<T> extends Signal<T> {
 
     private static class ValidatedListSignal<T> extends ListSignal<T> {
 
-        protected ValidatedListSignal(Class<T> valueType,
-                ListSignal<T> delegate) {
-            super(valueType, delegate);
+        protected ValidatedListSignal(ListSignal<T> delegate) {
+            super(delegate);
         }
 
         protected ListStateEvent<T> handleValidationResult(
@@ -293,10 +286,9 @@ public class ListSignal<T> extends Signal<T> {
             extends ValidatedListSignal<T> {
         private final Function<ListInsertOperation<T>, ValidationResult> insertValidator;
 
-        public InsertionValidatedListSignal(Class<T> valueType,
-                ListSignal<T> delegate,
+        public InsertionValidatedListSignal(ListSignal<T> delegate,
                 Function<ListInsertOperation<T>, ValidationResult> insertValidator) {
-            super(valueType, delegate);
+            super(delegate);
             this.insertValidator = insertValidator;
         }
 
@@ -311,18 +303,16 @@ public class ListSignal<T> extends Signal<T> {
 
     public ListSignal<T> withInsertionValidator(
             Function<ListInsertOperation<T>, ValidationResult> operation) {
-        return new InsertionValidatedListSignal<>(getValueType(), this,
-                operation);
+        return new InsertionValidatedListSignal<>(this, operation);
     }
 
     private static class RemovalValidatedListSignal<T>
             extends ValidatedListSignal<T> {
         private final Function<ListRemoveOperation<T>, ValidationResult> removalValidator;
 
-        public RemovalValidatedListSignal(Class<T> valueType,
-                ListSignal<T> delegate,
+        public RemovalValidatedListSignal(ListSignal<T> delegate,
                 Function<ListRemoveOperation<T>, ValidationResult> removalValidator) {
-            super(valueType, delegate);
+            super(delegate);
             this.removalValidator = removalValidator;
         }
 
@@ -341,18 +331,16 @@ public class ListSignal<T> extends Signal<T> {
 
     public ListSignal<T> withRemovalValidator(
             Function<ListRemoveOperation<T>, ValidationResult> operation) {
-        return new RemovalValidatedListSignal<>(getValueType(), this,
-                operation);
+        return new RemovalValidatedListSignal<>(this, operation);
     }
 
     private static class ItemSetValueValidatedListSignal<T>
             extends ListSignal<T> {
         private final Function<SetValueOperation<T>, ValidationResult> itemSetValueValidator;
 
-        public ItemSetValueValidatedListSignal(Class<T> valueType,
-                ListSignal<T> delegate,
+        public ItemSetValueValidatedListSignal(ListSignal<T> delegate,
                 Function<SetValueOperation<T>, ValidationResult> itemSetValueValidator) {
-            super(valueType, delegate);
+            super(delegate);
             this.itemSetValueValidator = itemSetValueValidator;
         }
 
@@ -365,18 +353,16 @@ public class ListSignal<T> extends Signal<T> {
 
     public ListSignal<T> withItemSetValueValidator(
             Function<SetValueOperation<T>, ValidationResult> operation) {
-        return new ItemSetValueValidatedListSignal<>(getValueType(), this,
-                operation);
+        return new ItemSetValueValidatedListSignal<>(this, operation);
     }
 
     private static class ItemReplaceValueValidatedListSignal<T>
             extends ListSignal<T> {
         private final Function<ReplaceValueOperation<T>, ValidationResult> itemReplaceValueValidator;
 
-        public ItemReplaceValueValidatedListSignal(Class<T> valueType,
-                ListSignal<T> delegate,
+        public ItemReplaceValueValidatedListSignal(ListSignal<T> delegate,
                 Function<ReplaceValueOperation<T>, ValidationResult> itemReplaceValueValidator) {
-            super(valueType, delegate);
+            super(delegate);
             this.itemReplaceValueValidator = itemReplaceValueValidator;
         }
 
@@ -389,7 +375,6 @@ public class ListSignal<T> extends Signal<T> {
 
     public ListSignal<T> withItemReplaceValueValidator(
             Function<ReplaceValueOperation<T>, ValidationResult> operation) {
-        return new ItemReplaceValueValidatedListSignal<>(getValueType(), this,
-                operation);
+        return new ItemReplaceValueValidatedListSignal<>(this, operation);
     }
 }

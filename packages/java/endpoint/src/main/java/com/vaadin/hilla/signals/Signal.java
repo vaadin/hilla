@@ -24,8 +24,23 @@ public abstract class Signal<T> {
 
     private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
 
-    public Signal(Class<T> valueType) {
+    private final Signal<T> delegate;
+
+    private Signal(Class<T> valueType, Signal<T> delegate) {
         this.valueType = Objects.requireNonNull(valueType);
+        this.delegate = delegate;
+    }
+
+    public Signal(Class<T> valueType) {
+        this(valueType, null);
+    }
+
+    protected Signal(Signal<T> delegate) {
+        this(Objects.requireNonNull(delegate).getValueType(), delegate);
+    }
+
+    protected Signal<T> getDelegate() {
+        return delegate;
     }
 
     /**
@@ -52,6 +67,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe() {
+        if (delegate != null) {
+            return delegate.subscribe();
+        }
         Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
                 .onBackpressureBuffer();
 
@@ -84,6 +102,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String signalId) {
+        if (delegate != null) {
+            return delegate.subscribe(signalId);
+        }
         return subscribe();
     }
 
