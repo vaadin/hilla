@@ -53,6 +53,7 @@ public class StateEvent<T> {
     private final T value;
     private final T expected;
     private Boolean accepted;
+    private String validationError;
 
     /**
      * Creates a new state event using the given parameters.
@@ -167,6 +168,9 @@ public class StateEvent<T> {
         if (accepted != null) {
             json.put(Field.ACCEPTED, accepted);
         }
+        if (validationError != null) {
+            json.put(StateEvent.Field.VALIDATION_ERROR, validationError);
+        }
         return json;
     }
 
@@ -248,5 +252,13 @@ public class StateEvent<T> {
     @Override
     public int hashCode() {
         return Objects.hash(getId());
+    }
+
+    public String getValidationError() {
+        return validationError;
+    }
+
+    public void setValidationError(String validationError) {
+        this.validationError = validationError;
     }
 }

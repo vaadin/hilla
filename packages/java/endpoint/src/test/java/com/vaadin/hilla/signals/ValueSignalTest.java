@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.operation.ValidationResult;
 
 import reactor.core.publisher.Flux;
 
@@ -187,6 +188,156 @@ public class ValueSignalTest {
         var exception = assertThrows(UnsupportedOperationException.class,
                 () -> signal.submit(createUnknownCommandEvent()));
         assertTrue(exception.getMessage().startsWith("Unsupported JSON: "));
+    }
+
+    @Test
+    public void withSetOperationValidator_doesNotLimitTheOriginalInstance() {
+        ValueSignal<String> unRestrictedSignal = new ValueSignal<>("Foo",
+                String.class);
+
+        unRestrictedSignal.submit(createSetEvent("Bar"));
+        assertEquals("Bar", unRestrictedSignal.getValue());
+
+        ValueSignal<String> noSetAllowedSignal = unRestrictedSignal
+                .withSetOperationValidator(
+                        value -> ValidationResult.rejected("No set allowed"));
+        // the restricted instance sees the same value as the original one:
+        assertEquals("Bar", noSetAllowedSignal.getValue());
+
+        // the restricted instance doesn't allow set operation:
+        noSetAllowedSignal.submit(createSetEvent("Should-be rejected!"));
+        assertEquals("Bar", noSetAllowedSignal.getValue());
+
+        unRestrictedSignal.submit(createSetEvent("Baz"));
+        assertEquals("Baz", unRestrictedSignal.getValue());
+        assertEquals("Baz", noSetAllowedSignal.getValue());
+    }
+
+    @Test
+    public void withSetOperationValidator_doesNotChangeSubscriptionBehavior() {
+        ValueSignal<String> unRestrictedSignal = new ValueSignal<>("Foo",
+                String.class);
+        ValueSignal<String> noSetAllowedSignal = unRestrictedSignal
+                .withSetOperationValidator(
+                        value -> ValidationResult.rejected("No set allowed"));
+
+        Flux<ObjectNode> unRestrictedFlux = unRestrictedSignal.subscribe();
+        AtomicInteger unRestrictedCounter = new AtomicInteger(0);
+        unRestrictedFlux.subscribe(eventJson -> {
+            unRestrictedCounter.incrementAndGet();
+        });
+        assertEquals(1, unRestrictedCounter.get()); // initial state
+
+        Flux<ObjectNode> noSetAllowedFlux = noSetAllowedSignal.subscribe();
+        AtomicInteger noSetAllowedCounter = new AtomicInteger(0);
+        noSetAllowedFlux.subscribe(eventJson -> {
+            noSetAllowedCounter.incrementAndGet();
+        });
+        assertEquals(1, noSetAllowedCounter.get()); // initial state
+
+        unRestrictedSignal.submit(createSetEvent("Bar"));
+        assertEquals(2, unRestrictedCounter.get());
+        assertEquals(2, noSetAllowedCounter.get());
+
+        unRestrictedSignal.submit(createSetEvent("Baz"));
+        assertEquals(3, unRestrictedCounter.get());
+        assertEquals(3, noSetAllowedCounter.get());
+    }
+
+    @Test
+    public void withSetOperationValidator_doesNotLimitOtherOperations() {
+        ValueSignal<String> unRestrictedSignal = new ValueSignal<>("Foo",
+                String.class);
+        ValueSignal<String> noSetAllowedSignal = unRestrictedSignal
+                .withSetOperationValidator(
+                        value -> ValidationResult.rejected("No set allowed"));
+
+        unRestrictedSignal.submit(createSetEvent("Bar"));
+        // make sure restriction is intact:
+        noSetAllowedSignal.submit(createSetEvent("Should-be Rejected"));
+
+        assertEquals("Bar", unRestrictedSignal.getValue());
+        assertEquals("Bar", noSetAllowedSignal.getValue());
+
+        // perform another operation via the restricted signal:
+        noSetAllowedSignal.submit(createReplaceEvent("Bar", "Baz"));
+        assertEquals("Baz", noSetAllowedSignal.getValue());
+        assertEquals("Baz", unRestrictedSignal.getValue());
+    }
+
+    @Test
+    public void withReplaceOperationValidator_doesNotLimitTheOriginalInstance() {
+        ValueSignal<String> unRestrictedSignal = new ValueSignal<>("Foo",
+                String.class);
+
+        unRestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
+        assertEquals("Bar", unRestrictedSignal.getValue());
+
+        ValueSignal<String> noReplaceAllowedSignal = unRestrictedSignal
+                .withReplaceOperationValidator(
+                        (expected, value) -> ValidationResult.rejected("No replace allowed"));
+        // the restricted instance sees the same value as the original one:
+        assertEquals("Bar", noReplaceAllowedSignal.getValue());
+
+        // the restricted instance doesn't allow replace operation:
+        noReplaceAllowedSignal.submit(createReplaceEvent("Bar", "Should-be rejected!"));
+        assertEquals("Bar", noReplaceAllowedSignal.getValue());
+
+        unRestrictedSignal.submit(createReplaceEvent("Bar", "Baz"));
+        assertEquals("Baz", unRestrictedSignal.getValue());
+        assertEquals("Baz", noReplaceAllowedSignal.getValue());
+    }
+
+    @Test
+    public void withReplaceOperationValidator_doesNotChangeSubscriptionBehavior() {
+        ValueSignal<String> unRestrictedSignal = new ValueSignal<>("Foo",
+                String.class);
+        ValueSignal<String> noReplaceAllowedSignal = unRestrictedSignal
+                .withReplaceOperationValidator(
+                        (expected, value) -> ValidationResult.rejected("No replace allowed"));
+
+        Flux<ObjectNode> unRestrictedFlux = unRestrictedSignal.subscribe();
+        AtomicInteger unRestrictedCounter = new AtomicInteger(0);
+        unRestrictedFlux.subscribe(eventJson -> {
+            unRestrictedCounter.incrementAndGet();
+        });
+        assertEquals(1, unRestrictedCounter.get()); // initial state
+
+        Flux<ObjectNode> noReplaceAllowedFlux = noReplaceAllowedSignal.subscribe();
+        AtomicInteger noReplaceAllowedCounter = new AtomicInteger(0);
+        noReplaceAllowedFlux.subscribe(eventJson -> {
+            noReplaceAllowedCounter.incrementAndGet();
+        });
+        assertEquals(1, noReplaceAllowedCounter.get()); // initial state
+
+        unRestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
+        assertEquals(2, unRestrictedCounter.get());
+        assertEquals(2, noReplaceAllowedCounter.get());
+
+        unRestrictedSignal.submit(createReplaceEvent("Bar", "Baz"));
+        assertEquals(3, unRestrictedCounter.get());
+        assertEquals(3, noReplaceAllowedCounter.get());
+    }
+
+    @Test
+    public void withReplaceOperationValidator_doesNotLimitOtherOperations() {
+        ValueSignal<String> unRestrictedSignal = new ValueSignal<>("Foo",
+                String.class);
+        ValueSignal<String> noReplaceAllowedSignal = unRestrictedSignal
+                .withReplaceOperationValidator(
+                        (expected, value) -> ValidationResult.rejected("No replace allowed"));
+
+        unRestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
+        // make sure restriction is intact:
+        noReplaceAllowedSignal.submit(createReplaceEvent("Bar", "Should-be Rejected"));
+
+        assertEquals("Bar", unRestrictedSignal.getValue());
+        assertEquals("Bar", noReplaceAllowedSignal.getValue());
+
+        // perform another operation via the restricted signal:
+        noReplaceAllowedSignal.submit(createSetEvent("Baz"));
+        assertEquals("Baz", noReplaceAllowedSignal.getValue());
+        assertEquals("Baz", unRestrictedSignal.getValue());
     }
 
     private <T> ObjectNode createSetEvent(T value) {

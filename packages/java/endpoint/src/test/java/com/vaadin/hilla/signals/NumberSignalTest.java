@@ -35,7 +35,7 @@ public class NumberSignalTest {
 
     @Test
     public void constructor_withValueArg_doesNotAcceptNull() {
-        assertThrows(NullPointerException.class, () -> new NumberSignal(null));
+        assertThrows(NullPointerException.class, () -> new NumberSignal((Double) null));
     }
 
     @Test

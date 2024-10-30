@@ -1,5 +1,7 @@
 package com.vaadin.hilla.signals;
 
+import java.util.function.Function;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
@@ -30,6 +32,16 @@ public class NumberSignal extends ValueSignal<Double> {
         this(0.0);
     }
 
+    public NumberSignal(NumberSignal delegate) {
+        this();
+        setDelegate(delegate);
+    }
+
+    @Override
+    protected NumberSignal getDelegate() {
+        return (NumberSignal) super.getDelegate();
+    }
+
     /**
      * Processes the event and updates the signal value if needed. Note that
      * this method is not thread-safe and should be called from a synchronized
@@ -48,14 +60,47 @@ public class NumberSignal extends ValueSignal<Double> {
                     .equals(stateEvent.getEventType())) {
                 return super.processEvent(event);
             }
+            return handleIncrement(stateEvent);
+        } catch (InvalidEventTypeException | MissingFieldException e) {
+            throw new UnsupportedOperationException(
+                    "Unsupported JSON: " + event, e);
+        }
+    }
+
+    protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
+        if (getDelegate() != null) {
+            return getDelegate().handleIncrement(stateEvent);
+        } else {
             Double expectedValue = getValue();
             Double newValue = expectedValue + stateEvent.getValue();
             boolean accepted = super.compareAndSet(newValue, expectedValue);
             stateEvent.setAccepted(accepted);
             return stateEvent.toJson();
-        } catch (InvalidEventTypeException | MissingFieldException e) {
-            throw new UnsupportedOperationException(
-                    "Unsupported JSON: " + event, e);
+        }
+    }
+
+    public NumberSignal withIncrementOperationValidator(
+            Function<Double, Boolean> validator) {
+        return new IncrementOperationValidatedNumberSignal(this, validator);
+    }
+
+    private class IncrementOperationValidatedNumberSignal extends NumberSignal {
+
+        private final Function<Double, Boolean> validator;
+
+        public IncrementOperationValidatedNumberSignal(NumberSignal delegate,
+                Function<Double, Boolean> validator) {
+            super(delegate);
+            this.validator = validator;
+        }
+
+        @Override
+        protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
+            if (validator.apply(stateEvent.getValue())) {
+                return super.handleIncrement(stateEvent);
+            }
+            stateEvent.setAccepted(false);
+            return stateEvent.toJson();
         }
     }
 }
