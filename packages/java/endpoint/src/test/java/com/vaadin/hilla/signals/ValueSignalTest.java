@@ -62,7 +62,8 @@ public class ValueSignalTest {
 
     @Test
     public void constructor_withNullArgs_doesNotAcceptNull() {
-        assertThrows(NullPointerException.class, () -> new ValueSignal<>(null));
+        assertThrows(NullPointerException.class,
+                () -> new ValueSignal<>((Class<?>) null));
         assertThrows(NullPointerException.class,
                 () -> new ValueSignal<>(null, Double.class));
     }
@@ -250,7 +251,7 @@ public class ValueSignalTest {
                 String.class);
         ValueSignal<String> noSetAllowedSignal = unRestrictedSignal
                 .withSetOperationValidator(
-                        value -> ValidationResult.rejected("No set allowed"));
+                        op -> ValidationResult.rejected("No set allowed"));
 
         unRestrictedSignal.submit(createSetEvent("Bar"));
         // make sure restriction is intact:
@@ -275,12 +276,13 @@ public class ValueSignalTest {
 
         ValueSignal<String> noReplaceAllowedSignal = unRestrictedSignal
                 .withReplaceOperationValidator(
-                        (expected, value) -> ValidationResult.rejected("No replace allowed"));
+                        op -> ValidationResult.rejected("No replace allowed"));
         // the restricted instance sees the same value as the original one:
         assertEquals("Bar", noReplaceAllowedSignal.getValue());
 
         // the restricted instance doesn't allow replace operation:
-        noReplaceAllowedSignal.submit(createReplaceEvent("Bar", "Should-be rejected!"));
+        noReplaceAllowedSignal
+                .submit(createReplaceEvent("Bar", "Should-be rejected!"));
         assertEquals("Bar", noReplaceAllowedSignal.getValue());
 
         unRestrictedSignal.submit(createReplaceEvent("Bar", "Baz"));
@@ -294,7 +296,7 @@ public class ValueSignalTest {
                 String.class);
         ValueSignal<String> noReplaceAllowedSignal = unRestrictedSignal
                 .withReplaceOperationValidator(
-                        (expected, value) -> ValidationResult.rejected("No replace allowed"));
+                        op -> ValidationResult.rejected("No replace allowed"));
 
         Flux<ObjectNode> unRestrictedFlux = unRestrictedSignal.subscribe();
         AtomicInteger unRestrictedCounter = new AtomicInteger(0);
@@ -303,7 +305,8 @@ public class ValueSignalTest {
         });
         assertEquals(1, unRestrictedCounter.get()); // initial state
 
-        Flux<ObjectNode> noReplaceAllowedFlux = noReplaceAllowedSignal.subscribe();
+        Flux<ObjectNode> noReplaceAllowedFlux = noReplaceAllowedSignal
+                .subscribe();
         AtomicInteger noReplaceAllowedCounter = new AtomicInteger(0);
         noReplaceAllowedFlux.subscribe(eventJson -> {
             noReplaceAllowedCounter.incrementAndGet();
@@ -325,11 +328,12 @@ public class ValueSignalTest {
                 String.class);
         ValueSignal<String> noReplaceAllowedSignal = unRestrictedSignal
                 .withReplaceOperationValidator(
-                        (expected, value) -> ValidationResult.rejected("No replace allowed"));
+                        op -> ValidationResult.rejected("No replace allowed"));
 
         unRestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
         // make sure restriction is intact:
-        noReplaceAllowedSignal.submit(createReplaceEvent("Bar", "Should-be Rejected"));
+        noReplaceAllowedSignal
+                .submit(createReplaceEvent("Bar", "Should-be Rejected"));
 
         assertEquals("Bar", unRestrictedSignal.getValue());
         assertEquals("Bar", noReplaceAllowedSignal.getValue());

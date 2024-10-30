@@ -32,9 +32,8 @@ public class NumberSignal extends ValueSignal<Double> {
         this(0.0);
     }
 
-    public NumberSignal(NumberSignal delegate) {
-        this();
-        setDelegate(delegate);
+    protected NumberSignal(NumberSignal delegate) {
+        super(delegate);
     }
 
     @Override

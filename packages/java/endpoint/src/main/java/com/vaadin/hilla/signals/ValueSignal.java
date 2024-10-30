@@ -7,8 +7,10 @@ import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 import reactor.core.publisher.Flux;
 
@@ -16,7 +18,7 @@ public class ValueSignal<T> extends Signal<T> {
 
     private T value;
 
-    private ValueSignal<T> delegate;
+    private final ValueSignal<T> delegate;
 
     /**
      * Creates a new ValueSignal with the provided default value.
@@ -30,9 +32,7 @@ public class ValueSignal<T> extends Signal<T> {
      *             <code>null</code>
      */
     public ValueSignal(T defaultValue, Class<T> valueType) {
-        this(valueType);
-        Objects.requireNonNull(defaultValue);
-        this.value = defaultValue;
+        this(Objects.requireNonNull(defaultValue), valueType, null);
     }
 
     /**
@@ -46,10 +46,17 @@ public class ValueSignal<T> extends Signal<T> {
      *             <code>null</code>
      */
     public ValueSignal(Class<T> valueType) {
-        super(valueType);
+        this(null, valueType, null);
     }
 
-    protected void setDelegate(ValueSignal<T> delegate) {
+    protected ValueSignal(ValueSignal<T> delegate) {
+        this(delegate.getValue(), delegate.getValueType(), delegate);
+    }
+
+    private ValueSignal(T defaultValue, Class<T> valueType,
+            ValueSignal<T> delegate) {
+        super(valueType);
+        this.value = defaultValue;
         this.delegate = delegate;
     }
 
@@ -174,49 +181,50 @@ public class ValueSignal<T> extends Signal<T> {
     }
 
     public ValueSignal<T> withSetOperationValidator(
-            Function<T, ValidationResult> validator) {
+            Function<SetValueOperation<T>, ValidationResult> validator) {
         return new SetOperationValidatedValueSignal<>(this, validator);
     }
 
     private static class SetOperationValidatedValueSignal<T>
             extends ValueSignal<T> {
-        private final Function<T, ValidationResult> validator;
+        private final Function<SetValueOperation<T>, ValidationResult> validator;
 
         public SetOperationValidatedValueSignal(ValueSignal<T> delegate,
-                Function<T, ValidationResult> validator) {
-            super(delegate.getValueType());
-            setDelegate(delegate);
+                Function<SetValueOperation<T>, ValidationResult> validator) {
+            super(delegate);
             this.validator = validator;
         }
 
         @Override
         protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
-            var validation = validator.apply(stateEvent.getValue());
+            var operation = new SetValueOperation<>(stateEvent.getId(),
+                    stateEvent.getValue());
+            var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleSetEvent);
         }
     }
 
     public ValueSignal<T> withReplaceOperationValidator(
-            BiFunction<T, T, ValidationResult> validator) {
+            Function<ReplaceValueOperation<T>, ValidationResult> validator) {
         return new ReplaceOperationValidatedValueSignal<>(this, validator);
     }
 
     private static class ReplaceOperationValidatedValueSignal<T>
             extends ValueSignal<T> {
-        private final BiFunction<T, T, ValidationResult> validator;
+        private final Function<ReplaceValueOperation<T>, ValidationResult> validator;
 
         public ReplaceOperationValidatedValueSignal(ValueSignal<T> delegate,
-                BiFunction<T, T, ValidationResult> validator) {
-            super(delegate.getValueType());
-            setDelegate(delegate);
+                Function<ReplaceValueOperation<T>, ValidationResult> validator) {
+            super(delegate);
             this.validator = validator;
         }
 
         @Override
         protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
-            var validation = validator.apply(stateEvent.getValue(),
-                    stateEvent.getExpected());
+            var operation = new ReplaceValueOperation<>(stateEvent.getId(),
+                    stateEvent.getExpected(), stateEvent.getValue());
+            var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleReplaceEvent);
         }
