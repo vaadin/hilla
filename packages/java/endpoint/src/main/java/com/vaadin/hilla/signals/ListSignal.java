@@ -7,6 +7,8 @@ import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.operation.ListInsertOperation;
 import com.vaadin.hilla.signals.operation.ListRemoveOperation;
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -29,16 +31,16 @@ public class ListSignal<T> extends Signal<T> {
         private UUID next;
         private final ValueSignal<V> value;
 
-        public Entry(UUID id, @Nullable UUID prev, @Nullable UUID next, V value,
-                Class<V> valueType) {
+        public Entry(UUID id, @Nullable UUID prev, @Nullable UUID next,
+                ValueSignal<V> valueSignal) {
             this.id = id;
             this.prev = prev;
             this.next = next;
-            this.value = new ValueSignal<>(value, valueType);
+            this.value = valueSignal;
         }
 
-        public Entry(UUID id, V value, Class<V> valueType) {
-            this(id, null, null, value, valueType);
+        public Entry(UUID id, ValueSignal<V> valueSignal) {
+            this(id, null, null, valueSignal);
         }
 
         @Override
@@ -208,7 +210,14 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     private Entry<T> createEntry(T value) {
-        return new Entry<>(UUID.randomUUID(), value, getValueType());
+        return new Entry<>(UUID.randomUUID(), createValueSignal(value));
+    }
+
+    protected ValueSignal<T> createValueSignal(T value) {
+        if (delegate != null) {
+            return delegate.createValueSignal(value);
+        }
+        return new ValueSignal<>(value, getValueType());
     }
 
     protected ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
@@ -333,6 +342,54 @@ public class ListSignal<T> extends Signal<T> {
     public ListSignal<T> withRemovalValidator(
             Function<ListRemoveOperation<T>, ValidationResult> operation) {
         return new RemovalValidatedListSignal<>(getValueType(), this,
+                operation);
+    }
+
+    private static class ItemSetValueValidatedListSignal<T>
+            extends ListSignal<T> {
+        private final Function<SetValueOperation<T>, ValidationResult> itemSetValueValidator;
+
+        public ItemSetValueValidatedListSignal(Class<T> valueType,
+                ListSignal<T> delegate,
+                Function<SetValueOperation<T>, ValidationResult> itemSetValueValidator) {
+            super(valueType, delegate);
+            this.itemSetValueValidator = itemSetValueValidator;
+        }
+
+        @Override
+        protected ValueSignal<T> createValueSignal(T value) {
+            return super.createValueSignal(value)
+                    .withSetOperationValidator(itemSetValueValidator);
+        }
+    }
+
+    public ListSignal<T> withItemSetValueValidator(
+            Function<SetValueOperation<T>, ValidationResult> operation) {
+        return new ItemSetValueValidatedListSignal<>(getValueType(), this,
+                operation);
+    }
+
+    private static class ItemReplaceValueValidatedListSignal<T>
+            extends ListSignal<T> {
+        private final Function<ReplaceValueOperation<T>, ValidationResult> itemReplaceValueValidator;
+
+        public ItemReplaceValueValidatedListSignal(Class<T> valueType,
+                ListSignal<T> delegate,
+                Function<ReplaceValueOperation<T>, ValidationResult> itemReplaceValueValidator) {
+            super(valueType, delegate);
+            this.itemReplaceValueValidator = itemReplaceValueValidator;
+        }
+
+        @Override
+        protected ValueSignal<T> createValueSignal(T value) {
+            return super.createValueSignal(value)
+                    .withReplaceOperationValidator(itemReplaceValueValidator);
+        }
+    }
+
+    public ListSignal<T> withItemReplaceValueValidator(
+            Function<ReplaceValueOperation<T>, ValidationResult> operation) {
+        return new ItemReplaceValueValidatedListSignal<>(getValueType(), this,
                 operation);
     }
 }
