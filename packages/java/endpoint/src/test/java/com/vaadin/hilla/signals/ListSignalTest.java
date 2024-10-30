@@ -898,6 +898,49 @@ public class ListSignalTest {
             String.class, Entry::new).size());
     }
 
+    @Test
+    public void withMultipleStructuralValidators_allValidatorsAreApplied() {
+        ListSignal<String> partiallyRestrictedSignal = new ListSignal<>(String.class)
+            .withInsertionValidator(operation -> operation.value().startsWith("Joe") ? ValidationResult
+                .rejected("No Joe is allowed") : ValidationResult.ok());
+
+        ListSignal<String> readonlyStructureSignal = partiallyRestrictedSignal
+            .withInsertionValidator(operation -> ValidationResult
+                .rejected("No insertion allowed"))
+            .withRemovalValidator(operation -> ValidationResult
+                .rejected("No removal allowed"));
+
+        partiallyRestrictedSignal
+            .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        partiallyRestrictedSignal.submit(
+            createInsertEvent("Jane Executive", InsertPosition.LAST));
+        partiallyRestrictedSignal.submit(
+            createInsertEvent("Joe Should-be-rejected", InsertPosition.LAST));
+
+
+        var entries = extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+            String.class, Entry::new);
+        assertEquals(2, entries.size());
+
+        readonlyStructureSignal.submit(createRemoveEvent(entries.get(0)));
+        assertEquals(2, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+            String.class, Entry::new).size());
+
+        readonlyStructureSignal.submit(createRemoveEvent(entries.get(1)));
+        assertEquals(2, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+            String.class, Entry::new).size());
+
+        readonlyStructureSignal.submit(createInsertEvent("Emma Executive", InsertPosition.LAST));
+        assertEquals(2, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+            String.class, Entry::new).size());
+
+        partiallyRestrictedSignal.submit(createInsertEvent("Emma Executive", InsertPosition.LAST));
+        assertEquals(3, extractEntries(partiallyRestrictedSignal.createSnapshotEvent(),
+            String.class, Entry::new).size());
+        assertEquals(3, extractEntries(readonlyStructureSignal.createSnapshotEvent(),
+            String.class, Entry::new).size());
+    }
+
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {
         return new ListStateEvent<>(UUID.randomUUID().toString(),
                 ListStateEvent.EventType.INSERT, value, position).toJson();
