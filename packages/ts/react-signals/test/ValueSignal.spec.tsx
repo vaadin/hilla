@@ -11,7 +11,7 @@ import sinonChai from 'sinon-chai';
 import type { ReplaceStateEvent, StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { ValueSignal } from '../src/index.js';
-import { createSubscriptionStub, nextFrame, subscribeToSignalViaEffect } from './utils.js';
+import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
 
 use(sinonChai);
 use(chaiLike);
@@ -30,8 +30,8 @@ describe('@vaadin/hilla-react-signals', () => {
   beforeEach(() => {
     client = sinon.createStubInstance(ConnectClient);
     client.call.resolves();
-    // Mock the subscribe method
     subscription = createSubscriptionStub();
+    // Mock the subscribe method
     client.subscribe.returns(subscription);
     config = { client, endpoint: 'TestEndpoint', method: 'testMethod' };
   });
@@ -135,6 +135,49 @@ describe('@vaadin/hilla-react-signals', () => {
       onNextCallback({ id: params?.event.id, type: 'reject', value: 'dont care' });
       // verify receiving the reject event doesn't change the value:
       expect(valueSignal.value).to.equal('baz');
+    });
+
+    it('should resolve the result promise after replace', (done) => {
+      const valueSignal = new ValueSignal<string>('a', config);
+      subscribeToSignalViaEffect(valueSignal);
+      valueSignal.replace('a', 'b').result.then(done, () => done('Should not reject'));
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'replace',
+        value: 'b',
+        accepted: true,
+      });
+    });
+
+    it('should reject the result promise after rejected replace', (done) => {
+      const valueSignal = new ValueSignal<string>('a', config);
+      subscribeToSignalViaEffect(valueSignal);
+      valueSignal.replace('a', 'b').result.then(
+        () => done('Should not resolve'),
+        () => done(),
+      );
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'replace',
+        value: 'b',
+        accepted: false,
+      });
+      setTimeout(done, 100);
+    });
+
+    it('should resolve the result promise after update', (done) => {
+      const valueSignal = new ValueSignal<string>('a', config);
+      subscribeToSignalViaEffect(valueSignal);
+      valueSignal.update(() => 'b').result.then(done, () => done('Should not reject'));
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'set',
+        value: 'b',
+        accepted: true,
+      });
     });
 
     it('should send the correct event and update the value when receiving accepted event after calling update', async () => {

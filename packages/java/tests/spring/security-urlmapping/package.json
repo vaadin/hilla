@@ -89,7 +89,7 @@
     "mobx": "6.3.3"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.25.7",
+    "@babel/preset-react": "7.25.9",
     "@preact/signals-react-transform": "0.4.0",
     "@rollup/plugin-replace": "6.0.1",
     "@rollup/pluginutils": "5.1.2",
@@ -103,7 +103,7 @@
     "@vaadin/hilla-generator-plugin-signals": "file:../../../../ts/generator-plugin-signals",
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "4.3.2",
+    "@vitejs/plugin-react": "4.3.3",
     "async": "3.2.6",
     "glob": "10.4.5",
     "rollup-plugin-brotli": "3.1.0",
@@ -111,7 +111,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.6.3",
-    "vite": "5.4.8",
+    "vite": "5.4.10",
     "vite-plugin-checker": "0.8.0",
     "workbox-build": "7.1.1",
     "workbox-core": "7.1.0",
@@ -200,7 +200,7 @@
       "mobx": "6.3.3"
     },
     "devDependencies": {
-      "@babel/preset-react": "7.25.7",
+      "@babel/preset-react": "7.25.9",
       "@preact/signals-react-transform": "0.4.0",
       "@rollup/plugin-replace": "6.0.1",
       "@rollup/pluginutils": "5.1.2",
@@ -214,7 +214,7 @@
       "@vaadin/hilla-generator-plugin-signals": "24.6.0-alpha2",
       "@vaadin/hilla-generator-plugin-subtypes": "24.6.0-alpha2",
       "@vaadin/hilla-generator-utils": "24.6.0-alpha2",
-      "@vitejs/plugin-react": "4.3.2",
+      "@vitejs/plugin-react": "4.3.3",
       "async": "3.2.6",
       "glob": "10.4.5",
       "rollup-plugin-brotli": "3.1.0",
@@ -222,13 +222,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.6.3",
-      "vite": "5.4.8",
+      "vite": "5.4.10",
       "vite-plugin-checker": "0.8.0",
       "workbox-build": "7.1.1",
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "1b1e979114b347562e9dedcfc7df19d6718aba3a685287a17c931b819fdb175c"
+    "hash": "22b7a66840a8640e2881ea2abc2742fa884e95f02dbd8b3d53c111a7260d8d8c"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
