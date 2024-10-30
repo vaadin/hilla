@@ -54,8 +54,8 @@
     "vite": "5.4.8",
     "vite-plugin-checker": "0.6.4",
     "workbox-build": "7.1.1",
-    "workbox-core": "7.1.0",
-    "workbox-precaching": "7.1.0"
+    "workbox-core": "7.3.0",
+    "workbox-precaching": "7.3.0"
   },
   "vaadin": {
     "dependencies": {
@@ -110,10 +110,10 @@
       "vite": "5.4.8",
       "vite-plugin-checker": "0.6.4",
       "workbox-build": "7.1.1",
-      "workbox-core": "7.1.0",
-      "workbox-precaching": "7.1.0"
+      "workbox-core": "7.3.0",
+      "workbox-precaching": "7.3.0"
     },
-    "hash": "6bd6801af1cffbf53fabd18cd7184378498afc1a04682cb81e0f55aa5d1e7664"
+    "hash": "60a8ef0ba43d18e425cdf75d0578df219cfee4915b70e19597d2edcc0fb0dec2"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
