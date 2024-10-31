@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.vaadin.hilla.signals.core.event.ListStateEvent.ListEntry;
@@ -275,21 +276,40 @@ public class ListSignal<T> extends Signal<T> {
             super(delegate);
         }
 
-        protected ListStateEvent<T> rejectEvent(ListStateEvent<T> event,
+        protected ListStateEvent<T> handleValidationResult(
+                ListStateEvent<T> event, ValidationResult validationResult,
+                Function<ListStateEvent<T>, ListStateEvent<T>> handler) {
+            if (validationResult.isOk()) {
+                return handler.apply(event);
+            } else {
+                return rejectEvent(event, validationResult);
+            }
+        }
+
+        private ListStateEvent<T> rejectEvent(ListStateEvent<T> event,
                 ValidationResult result) {
             event.setAccepted(false);
             event.setValidationError(result.getErrorMessage());
             return event;
         }
 
-        protected ObjectNode rejectEvent(ObjectNode event,
+        protected void handleValidationResult(ObjectNode event,
+                ValidationResult validationResult,
+                Consumer<ObjectNode> handler) {
+            if (validationResult.isOk()) {
+                handler.accept(event);
+            } else {
+                handler.accept(rejectEvent(event, validationResult));
+            }
+        }
+
+        private ObjectNode rejectEvent(ObjectNode event,
                 ValidationResult result) {
             var stateEvent = new StateEvent<>(event, getValueType());
             stateEvent.setAccepted(false);
             stateEvent.setValidationError(result.getErrorMessage());
             return stateEvent.toJson();
         }
-
     }
 
     private static class InsertionValidatedListSignal<T>
@@ -307,11 +327,8 @@ public class ListSignal<T> extends Signal<T> {
             var listInsertOperation = new ListInsertOperation<>(event.getId(),
                     event.getPosition(), event.getValue());
             var validationResult = insertValidator.apply(listInsertOperation);
-            if (validationResult.isOk()) {
-                return super.handleInsert(event);
-            } else {
-                return rejectEvent(event, validationResult);
-            }
+            return handleValidationResult(event, validationResult,
+                    super::handleInsert);
         }
     }
 
@@ -339,13 +356,8 @@ public class ListSignal<T> extends Signal<T> {
             var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
                     entryToRemove);
             var validationResult = removalValidator.apply(listRemoveOperation);
-            if (validationResult.isOk()) {
-                return super.handleRemoval(event);
-            } else {
-                event.setAccepted(false);
-                event.setValidationError(validationResult.getErrorMessage());
-                return event;
-            }
+            return handleValidationResult(event, validationResult,
+                    super::handleRemoval);
         }
     }
 
@@ -374,11 +386,8 @@ public class ListSignal<T> extends Signal<T> {
             var setValueOperation = SetValueOperation.of(event, getValueType());
             var validationResult = itemSetValueValidator
                     .apply(setValueOperation);
-            if (validationResult.isOk()) {
-                super.submitToChild(event);
-            } else {
-                super.submitToChild(rejectEvent(event, validationResult));
-            }
+            handleValidationResult(event, validationResult,
+                    super::submitToChild);
         }
     }
 
@@ -408,11 +417,8 @@ public class ListSignal<T> extends Signal<T> {
                     getValueType());
             var validationResult = itemReplaceValueValidator
                     .apply(replaceValueOperation);
-            if (validationResult.isOk()) {
-                super.submitToChild(event);
-            } else {
-                super.submitToChild(rejectEvent(event, validationResult));
-            }
+            handleValidationResult(event, validationResult,
+                    super::submitToChild);
         }
     }
 
