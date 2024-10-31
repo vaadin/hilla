@@ -953,6 +953,56 @@ public class ListSignalTest {
                         String.class, Entry::new).size());
     }
 
+    @Test
+    public void withItemSetValueValidator_doesNotLimitTheOriginalInstance_norOtherOperations() {
+        ListSignal<String> signal = new ListSignal<>(String.class);
+        ListSignal<String> noItemSetValueAllowedSignal = signal
+                .withItemSetValueValidator(operation -> ValidationResult
+                        .rejected("No item set value allowed"));
+        // add items through both signal instances:
+        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        noItemSetValueAllowedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+
+        var entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        assertEquals(2, entries.size());
+        // the restricted instance sees the same entries as the original one:
+        assertEquals(2,
+                extractEntries(
+                        noItemSetValueAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+
+        var orderedEntries = buildLinkedList(entries);
+        // unrestricted instance allows item set value:
+        var firstSignalId = orderedEntries.get(0).id();
+        signal.submit(
+                createSetEvent("Should-be accepted", firstSignalId.toString()));
+        // the restricted instance doesn't allow item set value:
+        var secondSignalId = orderedEntries.get(1).id();
+        noItemSetValueAllowedSignal.submit(createSetEvent("Should-be Rejected",
+                secondSignalId.toString()));
+
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        orderedEntries = buildLinkedList(entries);
+
+        assertEquals(2, orderedEntries.size());
+        assertEquals("Should-be accepted", orderedEntries.get(0).value());
+        assertEquals("Jane Executive", orderedEntries.get(1).value());
+        assertEquals(secondSignalId, orderedEntries.get(1).id());
+        // the item SetValue validator doesn't limit item Replace operation:
+        noItemSetValueAllowedSignal.submit(createReplaceEvent("Jane Executive",
+                "Replace Accepted", secondSignalId.toString()));
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        orderedEntries = buildLinkedList(entries);
+
+        assertEquals(2, orderedEntries.size());
+        assertEquals("Should-be accepted", orderedEntries.get(0).value());
+        assertEquals("Replace Accepted", orderedEntries.get(1).value());
+    }
+
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {
         return new ListStateEvent<>(UUID.randomUUID().toString(),
                 ListStateEvent.EventType.INSERT, value, position).toJson();
@@ -983,18 +1033,13 @@ public class ListSignalTest {
     private <V> List<ListStateEvent.ListEntry<V>> buildLinkedList(
             Collection<ListStateEvent.ListEntry<V>> entries) {
         Map<UUID, ListStateEvent.ListEntry<V>> entryMap = new HashMap<>();
+        ListStateEvent.ListEntry<V> start = null;
         // Populate the map with entries, using their id as the key
         for (ListStateEvent.ListEntry<V> entry : entries) {
             entryMap.put(entry.id(), entry);
-        }
-
-        // Find the starting entry (where previous is null or a specific UUID
-        // indicating the start)
-        ListStateEvent.ListEntry<V> start = null;
-        for (ListStateEvent.ListEntry<V> entry : entries) {
             if (entry.previous() == null) {
+                // Find the starting entry where previous is null
                 start = entry;
-                break;
             }
         }
         if (start == null) {

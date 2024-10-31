@@ -115,21 +115,29 @@ public class ListSignal<T> extends Signal<T> {
     @Override
     public void submit(ObjectNode event) {
         var rawEventType = StateEvent.extractRawEventType(event);
+        // check if the event is targeting a child signal:
         if (StateEvent.EventType.find(rawEventType).isPresent()) {
-            // It is not a List structure event, find the signal to submit to.
-            // For internal signals, the signal id is the event id:
-            var signalId = StateEvent.extractId(event);
-            var signalEntry = entries.get(UUID.fromString(signalId));
-            if (signalEntry == null) {
-                LOGGER.debug(
-                        "Signal entry not found for id: {}. Ignoring the event: {}",
-                        signalId, event);
-                return;
-            }
-            signalEntry.value.submit(event);
+            submitToChild(event);
         } else {
             super.submit(event);
         }
+    }
+
+    protected void submitToChild(ObjectNode event) {
+        if (getDelegate() != null) {
+            getDelegate().submitToChild(event);
+            return;
+        }
+        // For internal signals, the signal id is the event id:
+        var entryId = StateEvent.extractId(event);
+        var signalEntry = entries.get(UUID.fromString(entryId));
+        if (signalEntry == null) {
+            LOGGER.debug(
+                    "Signal entry not found for id: {}. Ignoring the event: {}",
+                    entryId, event);
+            return;
+        }
+        signalEntry.value.submit(event);
     }
 
     @Override
@@ -207,10 +215,7 @@ public class ListSignal<T> extends Signal<T> {
         return new Entry<>(UUID.randomUUID(), createValueSignal(value));
     }
 
-    protected ValueSignal<T> createValueSignal(T value) {
-        if (getDelegate() != null) {
-            return getDelegate().createValueSignal(value);
-        }
+    private ValueSignal<T> createValueSignal(T value) {
         return new ValueSignal<>(value, getValueType());
     }
 
@@ -270,16 +275,21 @@ public class ListSignal<T> extends Signal<T> {
             super(delegate);
         }
 
-        protected ListStateEvent<T> handleValidationResult(
-                ListStateEvent<T> event, ValidationResult validationResult) {
-            if (validationResult.isOk()) {
-                return super.handleInsert(event);
-            } else {
-                event.setAccepted(false);
-                event.setValidationError(validationResult.getErrorMessage());
-                return event;
-            }
+        protected ListStateEvent<T> rejectEvent(ListStateEvent<T> event,
+                ValidationResult result) {
+            event.setAccepted(false);
+            event.setValidationError(result.getErrorMessage());
+            return event;
         }
+
+        protected ObjectNode rejectEvent(ObjectNode event,
+                ValidationResult result) {
+            var stateEvent = new StateEvent<>(event, getValueType());
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(result.getErrorMessage());
+            return stateEvent.toJson();
+        }
+
     }
 
     private static class InsertionValidatedListSignal<T>
@@ -297,7 +307,11 @@ public class ListSignal<T> extends Signal<T> {
             var listInsertOperation = new ListInsertOperation<>(event.getId(),
                     event.getPosition(), event.getValue());
             var validationResult = insertValidator.apply(listInsertOperation);
-            return handleValidationResult(event, validationResult);
+            if (validationResult.isOk()) {
+                return super.handleInsert(event);
+            } else {
+                return rejectEvent(event, validationResult);
+            }
         }
     }
 
@@ -325,7 +339,13 @@ public class ListSignal<T> extends Signal<T> {
             var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
                     entryToRemove);
             var validationResult = removalValidator.apply(listRemoveOperation);
-            return handleValidationResult(event, validationResult);
+            if (validationResult.isOk()) {
+                return super.handleRemoval(event);
+            } else {
+                event.setAccepted(false);
+                event.setValidationError(validationResult.getErrorMessage());
+                return event;
+            }
         }
     }
 
@@ -335,7 +355,7 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     private static class ItemSetValueValidatedListSignal<T>
-            extends ListSignal<T> {
+            extends ValidatedListSignal<T> {
         private final Function<SetValueOperation<T>, ValidationResult> itemSetValueValidator;
 
         public ItemSetValueValidatedListSignal(ListSignal<T> delegate,
@@ -345,9 +365,20 @@ public class ListSignal<T> extends Signal<T> {
         }
 
         @Override
-        protected ValueSignal<T> createValueSignal(T value) {
-            return super.createValueSignal(value)
-                    .withSetOperationValidator(itemSetValueValidator);
+        protected void submitToChild(ObjectNode event) {
+            // are we interested in this event:
+            if (!StateEvent.isSetEvent(event)) {
+                super.submitToChild(event);
+                return;
+            }
+            var setValueOperation = SetValueOperation.of(event, getValueType());
+            var validationResult = itemSetValueValidator
+                    .apply(setValueOperation);
+            if (validationResult.isOk()) {
+                super.submitToChild(event);
+            } else {
+                super.submitToChild(rejectEvent(event, validationResult));
+            }
         }
     }
 
@@ -357,7 +388,7 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     private static class ItemReplaceValueValidatedListSignal<T>
-            extends ListSignal<T> {
+            extends ValidatedListSignal<T> {
         private final Function<ReplaceValueOperation<T>, ValidationResult> itemReplaceValueValidator;
 
         public ItemReplaceValueValidatedListSignal(ListSignal<T> delegate,
@@ -367,9 +398,21 @@ public class ListSignal<T> extends Signal<T> {
         }
 
         @Override
-        protected ValueSignal<T> createValueSignal(T value) {
-            return super.createValueSignal(value)
-                    .withReplaceOperationValidator(itemReplaceValueValidator);
+        protected void submitToChild(ObjectNode event) {
+            // are we interested in this event:
+            if (!StateEvent.isReplaceEvent(event)) {
+                super.submitToChild(event);
+                return;
+            }
+            var replaceValueOperation = ReplaceValueOperation.of(event,
+                    getValueType());
+            var validationResult = itemReplaceValueValidator
+                    .apply(replaceValueOperation);
+            if (validationResult.isOk()) {
+                super.submitToChild(event);
+            } else {
+                super.submitToChild(rejectEvent(event, validationResult));
+            }
         }
     }
 

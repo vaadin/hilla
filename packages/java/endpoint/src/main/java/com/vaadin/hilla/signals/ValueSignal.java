@@ -101,11 +101,15 @@ public class ValueSignal<T> extends Signal<T> {
      *
      * @param event
      *            the event to process
-     * @return <code>true</code> if the event was successfully processed and the
-     *         signal value was updated, <code>false</code> otherwise.
+     * @return the processed event, with the accepted flag set to either
+     *         <code>true</code> or <code>false</code>, and the validation error
+     *         set with the validator message (if case of a failure).
      */
     @Override
     protected ObjectNode processEvent(ObjectNode event) {
+        if (StateEvent.isRejected(event)) {
+            return event;
+        }
         try {
             var stateEvent = new StateEvent<>(event, getValueType());
             return switch (stateEvent.getEventType()) {
