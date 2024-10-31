@@ -7,13 +7,13 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "24.6.0-alpha2",
-    "@vaadin/icons": "24.6.0-alpha2",
-    "@vaadin/polymer-legacy-adapter": "24.6.0-alpha2",
+    "@vaadin/icon": "24.6.0-alpha4",
+    "@vaadin/icons": "24.6.0-alpha4",
+    "@vaadin/polymer-legacy-adapter": "24.6.0-alpha4",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "24.6.0-alpha2",
-    "@vaadin/vaadin-lumo-styles": "24.6.0-alpha2",
-    "@vaadin/vaadin-themable-mixin": "24.6.0-alpha2",
+    "@vaadin/tooltip": "24.6.0-alpha4",
+    "@vaadin/vaadin-lumo-styles": "24.6.0-alpha4",
+    "@vaadin/vaadin-themable-mixin": "24.6.0-alpha4",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.2.1"
   },
@@ -43,8 +43,8 @@
     "vite": "5.4.10",
     "vite-plugin-checker": "0.8.0",
     "workbox-build": "7.1.1",
-    "workbox-core": "7.1.0",
-    "workbox-precaching": "7.1.0"
+    "workbox-core": "7.3.0",
+    "workbox-precaching": "7.3.0"
   },
   "vaadin": {
     "dependencies": {
@@ -52,13 +52,13 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.6.0-alpha2",
       "@vaadin/hilla-lit-form": "24.6.0-alpha2",
-      "@vaadin/icon": "24.6.0-alpha2",
-      "@vaadin/icons": "24.6.0-alpha2",
-      "@vaadin/polymer-legacy-adapter": "24.6.0-alpha2",
+      "@vaadin/icon": "24.6.0-alpha4",
+      "@vaadin/icons": "24.6.0-alpha4",
+      "@vaadin/polymer-legacy-adapter": "24.6.0-alpha4",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "24.6.0-alpha2",
-      "@vaadin/vaadin-lumo-styles": "24.6.0-alpha2",
-      "@vaadin/vaadin-themable-mixin": "24.6.0-alpha2",
+      "@vaadin/tooltip": "24.6.0-alpha4",
+      "@vaadin/vaadin-lumo-styles": "24.6.0-alpha4",
+      "@vaadin/vaadin-themable-mixin": "24.6.0-alpha4",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1"
     },
@@ -88,10 +88,10 @@
       "vite": "5.4.10",
       "vite-plugin-checker": "0.8.0",
       "workbox-build": "7.1.1",
-      "workbox-core": "7.1.0",
-      "workbox-precaching": "7.1.0"
+      "workbox-core": "7.3.0",
+      "workbox-precaching": "7.3.0"
     },
-    "hash": "51192ab1dc3f2f8f0205cbb6040d95e8c7c7df168304011e65884daf2a61182f"
+    "hash": "9d69f4c26911c6dee231a38f0404ff8b4e0ace4b911dde09e0e67aa8d14957fe"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
