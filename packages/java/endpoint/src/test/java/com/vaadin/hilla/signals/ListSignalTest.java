@@ -961,6 +961,8 @@ public class ListSignalTest {
                         .rejected("No item set value allowed"));
         // add items through both signal instances:
         signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        // verify that adding itemSetValueValidator doesn't affect other
+        // operations:
         noItemSetValueAllowedSignal.submit(
                 createInsertEvent("Jane Executive", InsertPosition.LAST));
 
@@ -987,10 +989,12 @@ public class ListSignalTest {
                 Entry::new);
         orderedEntries = buildLinkedList(entries);
 
+        // verify the change:
         assertEquals(2, orderedEntries.size());
         assertEquals("Should-be accepted", orderedEntries.get(0).value());
         assertEquals("Jane Executive", orderedEntries.get(1).value());
         assertEquals(secondSignalId, orderedEntries.get(1).id());
+
         // the item SetValue validator doesn't limit item Replace operation:
         noItemSetValueAllowedSignal.submit(createReplaceEvent("Jane Executive",
                 "Replace Accepted", secondSignalId.toString()));
@@ -998,9 +1002,185 @@ public class ListSignalTest {
                 Entry::new);
         orderedEntries = buildLinkedList(entries);
 
+        // verify replace operation was successful, even through the restricted
+        // instance:
         assertEquals(2, orderedEntries.size());
         assertEquals("Should-be accepted", orderedEntries.get(0).value());
         assertEquals("Replace Accepted", orderedEntries.get(1).value());
+
+        // verify the restricted instance allows removing the items:
+        noItemSetValueAllowedSignal
+                .submit(createRemoveEvent(orderedEntries.get(1)));
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        assertEquals(1, entries.size());
+    }
+
+    @Test
+    public void withItemReplaceValueValidator_doesNotLimitTheOriginalInstance_norOtherOperations() {
+        ListSignal<String> signal = new ListSignal<>(String.class);
+        ListSignal<String> noItemReplaceValueAllowedSignal = signal
+                .withItemReplaceValueValidator(operation -> ValidationResult
+                        .rejected("No item replace value allowed"));
+        // verify that adding itemSetValueValidator doesn't affect other
+        // operations:
+        noItemReplaceValueAllowedSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+        // add items through both signal instances:
+        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
+
+        var entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        assertEquals(2, entries.size());
+        // the restricted instance sees the same entries as the original one:
+        assertEquals(2,
+                extractEntries(
+                        noItemReplaceValueAllowedSignal.createSnapshotEvent(),
+                        String.class, Entry::new).size());
+
+        var orderedEntries = buildLinkedList(entries);
+        // unrestricted instance allows item set value:
+        var firstSignalId = orderedEntries.get(0).id();
+        signal.submit(createReplaceEvent("Jane Executive", "Should-be accepted",
+                firstSignalId.toString()));
+        // the restricted instance doesn't allow item set value:
+        var secondSignalId = orderedEntries.get(1).id();
+        noItemReplaceValueAllowedSignal.submit(createReplaceEvent("John Normal",
+                "Should-be Rejected", secondSignalId.toString()));
+
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        orderedEntries = buildLinkedList(entries);
+
+        // verify the change:
+        assertEquals(2, orderedEntries.size());
+        assertEquals("Should-be accepted", orderedEntries.get(0).value());
+        assertEquals("John Normal", orderedEntries.get(1).value());
+        assertEquals(secondSignalId, orderedEntries.get(1).id());
+
+        // the item ReplaceValue validator doesn't limit item set operation:
+        noItemReplaceValueAllowedSignal.submit(
+                createSetEvent("Set Accepted", secondSignalId.toString()));
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        orderedEntries = buildLinkedList(entries);
+
+        // verify replace operation was successful, even through the restricted
+        // instance:
+        assertEquals(2, orderedEntries.size());
+        assertEquals("Should-be accepted", orderedEntries.get(0).value());
+        assertEquals("Set Accepted", orderedEntries.get(1).value());
+
+        // verify the restricted instance allows removing the items:
+        noItemReplaceValueAllowedSignal
+                .submit(createRemoveEvent(orderedEntries.get(1)));
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        assertEquals(1, entries.size());
+    }
+
+    @Test
+    public void withMultipleItemValidators_allValidatorsAreApplied() {
+        ListSignal<String> signal = new ListSignal<>(String.class);
+        ListSignal<String> readOnlyItemsSignal = signal
+                .withItemSetValueValidator(operation -> ValidationResult
+                        .rejected("No item set value allowed"))
+                .withItemReplaceValueValidator(operation -> ValidationResult
+                        .rejected("No item replace value allowed"));
+
+        // add items through both signal instances:
+        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        readOnlyItemsSignal.submit(
+                createInsertEvent("Jane Executive", InsertPosition.LAST));
+
+        var entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        assertEquals(2, entries.size());
+        var orderedEntries = buildLinkedList(entries);
+
+        // the restricted instance shouldn't allow items value be changed:
+        readOnlyItemsSignal.submit(createSetEvent("Set Rejected",
+                orderedEntries.get(0).id().toString()));
+        readOnlyItemsSignal.submit(createReplaceEvent("John Normal",
+                "Should-be Rejected", orderedEntries.get(1).id().toString()));
+
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        orderedEntries = buildLinkedList(entries);
+
+        assertEquals("John Normal", orderedEntries.get(0).value());
+        assertEquals("Jane Executive", orderedEntries.get(1).value());
+
+        // original signal should allow item value to be changed:
+        signal.submit(createSetEvent("Set Accepted",
+                orderedEntries.get(0).id().toString()));
+        signal.submit(createReplaceEvent("Jane Executive", "Replace Accepted",
+                orderedEntries.get(1).id().toString()));
+
+        entries = extractEntries(signal.createSnapshotEvent(), String.class,
+                Entry::new);
+        orderedEntries = buildLinkedList(entries);
+
+        assertEquals("Set Accepted", orderedEntries.get(0).value());
+        assertEquals("Replace Accepted", orderedEntries.get(1).value());
+    }
+
+    @Test
+    public void readOnlyListSignal_shouldReceiveAllUpdates() {
+        ListSignal<String> signal = new ListSignal<>(String.class);
+        signal.submit(createInsertEvent("Jane Executive", InsertPosition.LAST));
+
+        ListSignal<String> readOnlyItemsSignal = signal
+                .withInsertionValidator(operation -> ValidationResult
+                        .rejected("No insertion allowed"))
+                .withRemovalValidator(operation -> ValidationResult
+                        .rejected("No removal allowed"))
+                .withItemSetValueValidator(operation -> ValidationResult
+                        .rejected("No item set value allowed"))
+                .withItemReplaceValueValidator(operation -> ValidationResult
+                        .rejected("No item replace value allowed"));
+
+        var entries = extractEntries(readOnlyItemsSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(1, entries.size());
+        assertEquals("Jane Executive", entries.get(0).value());
+
+        // verify all operations are blocked:
+        readOnlyItemsSignal
+                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        readOnlyItemsSignal.submit(createRemoveEvent(entries.get(0)));
+        readOnlyItemsSignal.submit(createReplaceEvent("Jane Executive",
+                "Replace Rejected", entries.get(0).id().toString()));
+        readOnlyItemsSignal.submit(
+                createSetEvent("Set Rejected", entries.get(0).id().toString()));
+
+        entries = extractEntries(readOnlyItemsSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(1, entries.size());
+        assertEquals("Jane Executive", entries.get(0).value());
+
+        var flux = readOnlyItemsSignal.subscribe();
+        AtomicInteger counter = new AtomicInteger(0);
+        flux.subscribe(eventJson -> counter.incrementAndGet());
+        assertEquals(1, counter.get()); // initial state
+
+        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        signal.submit(createInsertEvent("Joe Doe", InsertPosition.LAST));
+        signal.submit(
+                createSetEvent("Set Accepted", entries.get(0).id().toString()));
+        signal.submit(createReplaceEvent("Set Accepted", "Emma Executive",
+                entries.get(0).id().toString()));
+        signal.submit(createRemoveEvent(entries.get(0)));
+
+        // 3 more operations on list signals + 1 initial state:
+        assertEquals(4, counter.get());
+
+        entries = extractEntries(readOnlyItemsSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        var orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
+        assertEquals("John Normal", orderedEntries.get(0).value());
+        assertEquals("Joe Doe", orderedEntries.get(1).value());
     }
 
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {

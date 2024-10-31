@@ -107,9 +107,6 @@ public class ValueSignal<T> extends Signal<T> {
      */
     @Override
     protected ObjectNode processEvent(ObjectNode event) {
-        if (StateEvent.isRejected(event)) {
-            return event;
-        }
         try {
             var stateEvent = new StateEvent<>(event, getValueType());
             return switch (stateEvent.getEventType()) {

@@ -1,6 +1,7 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -118,7 +119,8 @@ public abstract class Signal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            var processedEvent = processEvent(event);
+            var processedEvent = StateEvent.isRejected(event) ? event
+                    : processEvent(event);
             // Notify subscribers
             subscribers.removeIf(sink -> {
                 boolean failure = sink.tryEmitNext(processedEvent).isFailure();
