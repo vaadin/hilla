@@ -845,7 +845,7 @@ public class ListSignalTest {
                 noRemovalAllowedSignal.createSnapshotEvent(), String.class,
                 Entry::new);
 
-        // updates are received for the rejected events:
+        // updates should be received for the rejected events:
         noRemovalAllowedSignal.submit(createRemoveEvent(entries.get(0)));
         assertEquals(4, unrestrictedCounter.get());
         assertEquals(4, noRemovalAllowedCounter.get());
@@ -1179,6 +1179,84 @@ public class ListSignalTest {
         assertEquals(2, orderedEntries.size());
         assertEquals("John Normal", orderedEntries.get(0).value());
         assertEquals("Joe Doe", orderedEntries.get(1).value());
+    }
+
+    @Test
+    public void withValidatorSignal_shouldReceiveUpdates() {
+        ListSignal<String> chatSignal = new ListSignal<>(String.class)
+                .withInsertionValidator(operation -> operation.value()
+                        .toLowerCase().contains("bad")
+                                ? ValidationResult.rejected(
+                                        "The word 'bad' is not allowed")
+                                : ValidationResult.ok());
+        ListSignal<String> adminSignal = chatSignal.withRemovalValidator(
+                operation -> ValidationResult.rejected("No removal allowed"));
+        ListSignal<String> userSignal = adminSignal
+                .withInsertionValidator(operation -> ValidationResult
+                        .rejected("Read-only signal doesn't allow removal"));
+
+        var chatFlux = chatSignal.subscribe();
+        var adminFlux = adminSignal.subscribe();
+        var userFlux = userSignal.subscribe();
+
+        AtomicInteger chatCounter = new AtomicInteger(0);
+        AtomicInteger adminCounter = new AtomicInteger(0);
+        AtomicInteger userCounter = new AtomicInteger(0);
+
+        chatFlux.subscribe(eventJson -> chatCounter.incrementAndGet());
+        adminFlux.subscribe(eventJson -> adminCounter.incrementAndGet());
+        userFlux.subscribe(eventJson -> userCounter.incrementAndGet());
+
+        assertEquals(1, chatCounter.get()); // initial snapshot
+        assertEquals(1, adminCounter.get()); // initial snapshot
+        assertEquals(1, userCounter.get()); // initial snapshot
+
+        chatSignal.submit(createInsertEvent("Hello", InsertPosition.LAST));
+        chatSignal
+                .submit(createInsertEvent("How are you?", InsertPosition.LAST));
+        // following should be rejected because of the word "bad":
+        adminSignal.submit(createInsertEvent("I'm bad", InsertPosition.LAST));
+        // following should be rejected because user signal cannot insert:
+        userSignal.submit(createInsertEvent("I'm good", InsertPosition.LAST));
+
+        var chatEntries = extractEntries(chatSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, chatEntries.size());
+        var adminEntries = extractEntries(adminSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, adminEntries.size());
+        var userEntries = extractEntries(userSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, userEntries.size());
+
+        userSignal.submit(createRemoveEvent(userEntries.get(0)));
+        adminSignal.submit(createRemoveEvent(adminEntries.get(0)));
+
+        chatEntries = extractEntries(chatSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, chatEntries.size());
+        adminEntries = extractEntries(adminSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, adminEntries.size());
+        userEntries = extractEntries(userSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(2, userEntries.size());
+
+        chatSignal.submit(createRemoveEvent(chatEntries.get(0)));
+
+        chatEntries = extractEntries(chatSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(1, chatEntries.size());
+        adminEntries = extractEntries(adminSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(1, adminEntries.size());
+        userEntries = extractEntries(userSignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        assertEquals(1, userEntries.size());
+
+        assertEquals(8, chatCounter.get());
+        assertEquals(8, adminCounter.get());
+        assertEquals(8, userCounter.get());
     }
 
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {

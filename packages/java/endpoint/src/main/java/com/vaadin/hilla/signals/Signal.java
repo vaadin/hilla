@@ -132,7 +132,6 @@ public abstract class Signal<T> {
             delegate.notifySubscribers(processedEvent);
             return;
         }
-        // Notify subscribers
         subscribers.removeIf(sink -> {
             boolean failure = sink.tryEmitNext(processedEvent).isFailure();
             if (failure) {
