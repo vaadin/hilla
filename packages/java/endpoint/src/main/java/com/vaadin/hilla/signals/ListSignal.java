@@ -426,4 +426,39 @@ public class ListSignal<T> extends Signal<T> {
             Function<ReplaceValueOperation<T>, ValidationResult> operation) {
         return new ItemReplaceValueValidatedListSignal<>(this, operation);
     }
+
+    private static class ReadonlyListSignal<T> extends ValidatedListSignal<T> {
+        private ReadonlyListSignal(ListSignal<T> delegate) {
+            super(delegate);
+        }
+
+        @Override
+        protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
+            event.setAccepted(false);
+            event.setValidationError(
+                    "Read-only signal does not allow inserting entries");
+            return event;
+        }
+
+        @Override
+        protected ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
+            event.setAccepted(false);
+            event.setValidationError(
+                    "Read-only signal does not allow removing entries");
+            return event;
+        }
+
+        @Override
+        protected void submitToChild(ObjectNode event) {
+            var validationResult = ValidationResult.rejected(
+                    "Read-only signal does not allow modifying entries");
+            handleValidationResult(event, validationResult,
+                    super::submitToChild);
+        }
+    }
+
+    @Override
+    public ListSignal<T> asReadOnly() {
+        return new ReadonlyListSignal<>(this);
+    }
 }

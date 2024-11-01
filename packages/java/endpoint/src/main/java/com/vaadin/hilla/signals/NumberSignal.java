@@ -83,7 +83,8 @@ public class NumberSignal extends ValueSignal<Double> {
         return new IncrementOperationValidatedNumberSignal(this, validator);
     }
 
-    private class IncrementOperationValidatedNumberSignal extends NumberSignal {
+    private static class IncrementOperationValidatedNumberSignal
+            extends NumberSignal {
 
         private final Function<Double, Boolean> validator;
 
@@ -101,5 +102,40 @@ public class NumberSignal extends ValueSignal<Double> {
             stateEvent.setAccepted(false);
             return stateEvent.toJson();
         }
+    }
+
+    private static class ReadonlyNumberSignal extends NumberSignal {
+        private ReadonlyNumberSignal(NumberSignal delegate) {
+            super(delegate);
+        }
+
+        @Override
+        protected ObjectNode handleSetEvent(StateEvent<Double> stateEvent) {
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(
+                    "Read-only signal does not allow setting the value");
+            return stateEvent.toJson();
+        }
+
+        @Override
+        protected ObjectNode handleReplaceEvent(StateEvent<Double> stateEvent) {
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(
+                    "Read-only signal does not allow replacing the value");
+            return stateEvent.toJson();
+        }
+
+        @Override
+        protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(
+                    "Read-only signal does not allow incrementing the value");
+            return stateEvent.toJson();
+        }
+    }
+
+    @Override
+    public NumberSignal asReadOnly() {
+        return new ReadonlyNumberSignal(this);
     }
 }

@@ -127,7 +127,7 @@ public abstract class Signal<T> {
         }
     }
 
-    protected void notifySubscribers(ObjectNode processedEvent) {
+    private void notifySubscribers(ObjectNode processedEvent) {
         if (delegate != null) {
             delegate.notifySubscribers(processedEvent);
             return;
@@ -140,6 +140,13 @@ public abstract class Signal<T> {
             return failure;
         });
     }
+
+    /**
+     * Returns a read-only version of the signal.
+     *
+     * @return the read-only signal
+     */
+    public abstract Signal<T> asReadOnly();
 
     /**
      * Creates a snapshot event reflecting the current state of the signal.
