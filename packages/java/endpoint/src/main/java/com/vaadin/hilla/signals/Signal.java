@@ -121,17 +121,25 @@ public abstract class Signal<T> {
         try {
             var processedEvent = StateEvent.isRejected(event) ? event
                     : processEvent(event);
-            // Notify subscribers
-            subscribers.removeIf(sink -> {
-                boolean failure = sink.tryEmitNext(processedEvent).isFailure();
-                if (failure) {
-                    LOGGER.debug("Failed push");
-                }
-                return failure;
-            });
+            notifySubscribers(processedEvent);
         } finally {
             lock.unlock();
         }
+    }
+
+    protected void notifySubscribers(ObjectNode processedEvent) {
+        if (delegate != null) {
+            delegate.notifySubscribers(processedEvent);
+            return;
+        }
+        // Notify subscribers
+        subscribers.removeIf(sink -> {
+            boolean failure = sink.tryEmitNext(processedEvent).isFailure();
+            if (failure) {
+                LOGGER.debug("Failed push");
+            }
+            return failure;
+        });
     }
 
     /**

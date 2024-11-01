@@ -823,17 +823,15 @@ public class ListSignalTest {
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
         AtomicInteger unrestrictedCounter = new AtomicInteger(0);
-        unrestrictedFlux.subscribe(eventJson -> {
-            unrestrictedCounter.incrementAndGet();
-        });
+        unrestrictedFlux
+                .subscribe(eventJson -> unrestrictedCounter.incrementAndGet());
         assertEquals(1, unrestrictedCounter.get()); // initial state
 
         Flux<ObjectNode> noRemovalAllowedFlux = noRemovalAllowedSignal
                 .subscribe();
         AtomicInteger noRemovalAllowedCounter = new AtomicInteger(0);
-        noRemovalAllowedFlux.subscribe(eventJson -> {
-            noRemovalAllowedCounter.incrementAndGet();
-        });
+        noRemovalAllowedFlux.subscribe(
+                eventJson -> noRemovalAllowedCounter.incrementAndGet());
         assertEquals(1, noRemovalAllowedCounter.get()); // initial state
 
         unrestrictedSignal
@@ -847,18 +845,18 @@ public class ListSignalTest {
                 noRemovalAllowedSignal.createSnapshotEvent(), String.class,
                 Entry::new);
 
-        // no updates are received for the rejected events:
+        // updates are received for the rejected events:
         noRemovalAllowedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(3, unrestrictedCounter.get());
-        assertEquals(3, noRemovalAllowedCounter.get());
-
-        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
         assertEquals(4, unrestrictedCounter.get());
         assertEquals(4, noRemovalAllowedCounter.get());
 
-        unrestrictedSignal.submit(createRemoveEvent(entries.get(1)));
+        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
         assertEquals(5, unrestrictedCounter.get());
         assertEquals(5, noRemovalAllowedCounter.get());
+
+        unrestrictedSignal.submit(createRemoveEvent(entries.get(1)));
+        assertEquals(6, unrestrictedCounter.get());
+        assertEquals(6, noRemovalAllowedCounter.get());
     }
 
     @Test
