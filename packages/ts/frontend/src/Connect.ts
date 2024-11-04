@@ -16,7 +16,7 @@ import {
 } from './FluxConnection.js';
 import type { VaadinWindow } from './types.js';
 
-const $wnd = window as VaadinWindow;
+const $wnd = self as VaadinWindow;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
@@ -300,7 +300,8 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    const csrfHeaders = getCsrfTokenHeadersForEndpointRequest(document);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const csrfHeaders = self.document ? getCsrfTokenHeadersForEndpointRequest(self.document) : {};
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
