@@ -137,6 +137,36 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('baz');
     });
 
+    it('should resolve the result promise after set', (done) => {
+      const valueSignal = new ValueSignal<string>('a', config);
+      subscribeToSignalViaEffect(valueSignal);
+      valueSignal.set('b').result.then(done, () => done('Should not reject'));
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'set',
+        value: 'b',
+        accepted: true,
+      });
+    });
+
+    it('should reject the result promise after rejected set', (done) => {
+      const valueSignal = new ValueSignal<string>('a', config);
+      subscribeToSignalViaEffect(valueSignal);
+      valueSignal.set('b').result.then(
+        () => done('Should not resolve'),
+        () => done(),
+      );
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'set',
+        value: 'b',
+        accepted: false,
+      });
+      setTimeout(done, 100);
+    });
+
     it('should resolve the result promise after replace', (done) => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
