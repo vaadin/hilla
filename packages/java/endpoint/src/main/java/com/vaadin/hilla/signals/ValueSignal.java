@@ -243,19 +243,19 @@ public class ValueSignal<T> extends Signal<T> {
         @Override
         protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
             var operation = new SetValueOperation<>(stateEvent.getId(),
-                stateEvent.getValue());
+                    stateEvent.getValue());
             var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
-                super::handleSetEvent);
+                    super::handleSetEvent);
         }
 
         @Override
         protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
             var operation = new ReplaceValueOperation<>(stateEvent.getId(),
-                stateEvent.getExpected(), stateEvent.getValue());
+                    stateEvent.getExpected(), stateEvent.getValue());
             var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
-                super::handleReplaceEvent);
+                    super::handleReplaceEvent);
         }
     }
 }

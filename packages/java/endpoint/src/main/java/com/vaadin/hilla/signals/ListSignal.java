@@ -430,11 +430,11 @@ public class ListSignal<T> extends Signal<T> {
     }
 
     private static class ValueOperationValidatedListSignal<T>
-        extends ValidatedListSignal<T> {
+            extends ValidatedListSignal<T> {
         private final Function<ValueOperation<T>, ValidationResult> valueValidator;
 
         public ValueOperationValidatedListSignal(ListSignal<T> delegate,
-                                            Function<ValueOperation<T>, ValidationResult> valueValidator) {
+                Function<ValueOperation<T>, ValidationResult> valueValidator) {
             super(delegate);
             this.valueValidator = valueValidator;
         }
@@ -442,25 +442,25 @@ public class ListSignal<T> extends Signal<T> {
         @Override
         protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
             var listInsertOperation = new ListInsertOperation<>(event.getId(),
-                event.getPosition(), event.getValue());
+                    event.getPosition(), event.getValue());
             var validationResult = valueValidator.apply(listInsertOperation);
             return handleValidationResult(event, validationResult,
-                super::handleInsert);
+                    super::handleInsert);
         }
 
         @Override
         protected void submitToChild(ObjectNode event) {
             // are we interested in this event:
-            if (!StateEvent.isSetEvent(event) && !StateEvent.isReplaceEvent(event)) {
+            if (!StateEvent.isSetEvent(event)
+                    && !StateEvent.isReplaceEvent(event)) {
                 super.submitToChild(event);
                 return;
             }
 
             var valueOperation = extractValueOperation(event);
-            var validationResult = valueValidator
-                .apply(valueOperation);
+            var validationResult = valueValidator.apply(valueOperation);
             handleValidationResult(event, validationResult,
-                super::submitToChild);
+                    super::submitToChild);
         }
 
         private ValueOperation<T> extractValueOperation(ObjectNode event) {
@@ -470,22 +470,22 @@ public class ListSignal<T> extends Signal<T> {
                 return ReplaceValueOperation.of(event, getValueType());
             } else {
                 throw new UnsupportedOperationException(
-                    "Unsupported event: " + event);
+                        "Unsupported event: " + event);
             }
         }
     }
 
     public ListSignal<T> withValueOperationValidator(
-        Function<ValueOperation<T>, ValidationResult> operation) {
+            Function<ValueOperation<T>, ValidationResult> operation) {
         return new ValueOperationValidatedListSignal<>(this, operation);
     }
 
     private static class GenericOperationValidatedListSignal<T>
-        extends ValidatedListSignal<T> {
+            extends ValidatedListSignal<T> {
         private final Function<SignalOperation, ValidationResult> operationValidator;
 
         public GenericOperationValidatedListSignal(ListSignal<T> delegate,
-                                                 Function<SignalOperation, ValidationResult> operationValidator) {
+                Function<SignalOperation, ValidationResult> operationValidator) {
             super(delegate);
             this.operationValidator = operationValidator;
         }
@@ -493,10 +493,11 @@ public class ListSignal<T> extends Signal<T> {
         @Override
         protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
             var listInsertOperation = new ListInsertOperation<>(event.getId(),
-                event.getPosition(), event.getValue());
-            var validationResult = operationValidator.apply(listInsertOperation);
+                    event.getPosition(), event.getValue());
+            var validationResult = operationValidator
+                    .apply(listInsertOperation);
             return handleValidationResult(event, validationResult,
-                super::handleInsert);
+                    super::handleInsert);
         }
 
         @Override
@@ -506,25 +507,26 @@ public class ListSignal<T> extends Signal<T> {
             }
             var entryToRemove = getEntry(event.getEntryId());
             var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
-                entryToRemove);
-            var validationResult = operationValidator.apply(listRemoveOperation);
+                    entryToRemove);
+            var validationResult = operationValidator
+                    .apply(listRemoveOperation);
             return handleValidationResult(event, validationResult,
-                super::handleRemoval);
+                    super::handleRemoval);
         }
 
         @Override
         protected void submitToChild(ObjectNode event) {
             // are we interested in this event:
-            if (!StateEvent.isSetEvent(event) && !StateEvent.isReplaceEvent(event)) {
+            if (!StateEvent.isSetEvent(event)
+                    && !StateEvent.isReplaceEvent(event)) {
                 super.submitToChild(event);
                 return;
             }
 
             var valueOperation = extractValueOperation(event);
-            var validationResult = operationValidator
-                .apply(valueOperation);
+            var validationResult = operationValidator.apply(valueOperation);
             handleValidationResult(event, validationResult,
-                super::submitToChild);
+                    super::submitToChild);
         }
 
         private ValueOperation<T> extractValueOperation(ObjectNode event) {
@@ -534,7 +536,7 @@ public class ListSignal<T> extends Signal<T> {
                 return ReplaceValueOperation.of(event, getValueType());
             } else {
                 throw new UnsupportedOperationException(
-                    "Unsupported event: " + event);
+                        "Unsupported event: " + event);
             }
         }
     }
