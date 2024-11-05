@@ -5,4 +5,4 @@ import com.vaadin.hilla.signals.core.event.ListStateEvent;
 public record ListInsertOperation<T>(
     String operationId,
     ListStateEvent.InsertPosition position,
-    T value) {}
+    T value) implements HasValue<T> {}
