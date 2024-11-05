@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.operation.ValueOperation;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -221,6 +222,40 @@ public class ValueSignal<T> extends Signal<T> {
             var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleReplaceEvent);
+        }
+    }
+
+    public ValueSignal<T> withValueOperationValidator(
+            Function<ValueOperation<T>, ValidationResult> validator) {
+        return new ValueOperationValidatedValueSignal<>(this, validator);
+    }
+
+    private static class ValueOperationValidatedValueSignal<T>
+            extends ValueSignal<T> {
+        private final Function<ValueOperation<T>, ValidationResult> validator;
+
+        public ValueOperationValidatedValueSignal(ValueSignal<T> delegate,
+                Function<ValueOperation<T>, ValidationResult> validator) {
+            super(delegate);
+            this.validator = validator;
+        }
+
+        @Override
+        protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
+            var operation = new SetValueOperation<>(stateEvent.getId(),
+                stateEvent.getValue());
+            var validation = validator.apply(operation);
+            return handleValidationResult(stateEvent, validation,
+                super::handleSetEvent);
+        }
+
+        @Override
+        protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
+            var operation = new ReplaceValueOperation<>(stateEvent.getId(),
+                stateEvent.getExpected(), stateEvent.getValue());
+            var validation = validator.apply(operation);
+            return handleValidationResult(stateEvent, validation,
+                super::handleReplaceEvent);
         }
     }
 }

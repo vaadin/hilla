@@ -9,7 +9,9 @@ import com.vaadin.hilla.signals.operation.ListInsertOperation;
 import com.vaadin.hilla.signals.operation.ListRemoveOperation;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
+import com.vaadin.hilla.signals.operation.SignalOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
+import com.vaadin.hilla.signals.operation.ValueOperation;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -425,5 +427,115 @@ public class ListSignal<T> extends Signal<T> {
     public ListSignal<T> withItemReplaceValueValidator(
             Function<ReplaceValueOperation<T>, ValidationResult> operation) {
         return new ItemReplaceValueValidatedListSignal<>(this, operation);
+    }
+
+    private static class ValueOperationValidatedListSignal<T>
+        extends ValidatedListSignal<T> {
+        private final Function<ValueOperation<T>, ValidationResult> valueValidator;
+
+        public ValueOperationValidatedListSignal(ListSignal<T> delegate,
+                                            Function<ValueOperation<T>, ValidationResult> valueValidator) {
+            super(delegate);
+            this.valueValidator = valueValidator;
+        }
+
+        @Override
+        protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
+            var listInsertOperation = new ListInsertOperation<>(event.getId(),
+                event.getPosition(), event.getValue());
+            var validationResult = valueValidator.apply(listInsertOperation);
+            return handleValidationResult(event, validationResult,
+                super::handleInsert);
+        }
+
+        @Override
+        protected void submitToChild(ObjectNode event) {
+            // are we interested in this event:
+            if (!StateEvent.isSetEvent(event) && !StateEvent.isReplaceEvent(event)) {
+                super.submitToChild(event);
+                return;
+            }
+
+            var valueOperation = extractValueOperation(event);
+            var validationResult = valueValidator
+                .apply(valueOperation);
+            handleValidationResult(event, validationResult,
+                super::submitToChild);
+        }
+
+        private ValueOperation<T> extractValueOperation(ObjectNode event) {
+            if (StateEvent.isSetEvent(event)) {
+                return SetValueOperation.of(event, getValueType());
+            } else if (StateEvent.isReplaceEvent(event)) {
+                return ReplaceValueOperation.of(event, getValueType());
+            } else {
+                throw new UnsupportedOperationException(
+                    "Unsupported event: " + event);
+            }
+        }
+    }
+
+    public ListSignal<T> withValueOperationValidator(
+        Function<ValueOperation<T>, ValidationResult> operation) {
+        return new ValueOperationValidatedListSignal<>(this, operation);
+    }
+
+    private static class GenericOperationValidatedListSignal<T>
+        extends ValidatedListSignal<T> {
+        private final Function<SignalOperation, ValidationResult> operationValidator;
+
+        public GenericOperationValidatedListSignal(ListSignal<T> delegate,
+                                                 Function<SignalOperation, ValidationResult> operationValidator) {
+            super(delegate);
+            this.operationValidator = operationValidator;
+        }
+
+        @Override
+        protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
+            var listInsertOperation = new ListInsertOperation<>(event.getId(),
+                event.getPosition(), event.getValue());
+            var validationResult = operationValidator.apply(listInsertOperation);
+            return handleValidationResult(event, validationResult,
+                super::handleInsert);
+        }
+
+        @Override
+        protected ListStateEvent<T> handleRemoval(ListStateEvent<T> event) {
+            if (event.getEntryId() == null) {
+                throw new MissingFieldException(ListStateEvent.Field.ENTRY_ID);
+            }
+            var entryToRemove = getEntry(event.getEntryId());
+            var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
+                entryToRemove);
+            var validationResult = operationValidator.apply(listRemoveOperation);
+            return handleValidationResult(event, validationResult,
+                super::handleRemoval);
+        }
+
+        @Override
+        protected void submitToChild(ObjectNode event) {
+            // are we interested in this event:
+            if (!StateEvent.isSetEvent(event) && !StateEvent.isReplaceEvent(event)) {
+                super.submitToChild(event);
+                return;
+            }
+
+            var valueOperation = extractValueOperation(event);
+            var validationResult = operationValidator
+                .apply(valueOperation);
+            handleValidationResult(event, validationResult,
+                super::submitToChild);
+        }
+
+        private ValueOperation<T> extractValueOperation(ObjectNode event) {
+            if (StateEvent.isSetEvent(event)) {
+                return SetValueOperation.of(event, getValueType());
+            } else if (StateEvent.isReplaceEvent(event)) {
+                return ReplaceValueOperation.of(event, getValueType());
+            } else {
+                throw new UnsupportedOperationException(
+                    "Unsupported event: " + event);
+            }
+        }
     }
 }

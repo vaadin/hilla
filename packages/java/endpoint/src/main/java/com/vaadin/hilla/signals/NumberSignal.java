@@ -83,7 +83,7 @@ public class NumberSignal extends ValueSignal<Double> {
         return new IncrementOperationValidatedNumberSignal(this, validator);
     }
 
-    private class IncrementOperationValidatedNumberSignal extends NumberSignal {
+    private static class IncrementOperationValidatedNumberSignal extends NumberSignal {
 
         private final Function<Double, Boolean> validator;
 
