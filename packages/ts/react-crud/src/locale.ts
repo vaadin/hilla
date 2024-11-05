@@ -66,7 +66,8 @@ export class LocaleFormatter {
   formatDate(value?: DatePickerDate | string): string {
     if (typeof value === 'object') {
       const { year, month, day } = value;
-      const date = new Date(year, month, day);
+      const date = new Date();
+      date.setFullYear(year, month, day);
       return this.#date.format(date);
     }
 
@@ -96,7 +97,8 @@ export class LocaleFormatter {
     const day = Number(match?.groups?.day);
 
     // Verify that the parsed date is valid
-    const dateInstance = new Date(year, month, day);
+    const dateInstance = new Date();
+    dateInstance.setFullYear(year, month, day);
 
     if (dateInstance.getFullYear() !== year || dateInstance.getMonth() !== month || dateInstance.getDate() !== day) {
       return undefined;
