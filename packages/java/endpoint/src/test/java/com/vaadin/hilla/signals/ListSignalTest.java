@@ -1259,6 +1259,69 @@ public class ListSignalTest {
         assertEquals(8, userCounter.get());
     }
 
+    @Test
+    public void asReadOnlySignal_blocksAllOperations_butGetsAllUpdates() {
+        ListSignal<String> signal = new ListSignal<>(String.class);
+        ListSignal<String> readOnlySignal = signal.asReadonly();
+
+        var flux = signal.subscribe();
+        AtomicInteger counter = new AtomicInteger(0);
+        flux.subscribe(eventJson -> counter.incrementAndGet());
+        assertEquals(1, counter.get()); // initial state
+        var readonlyFlux = readOnlySignal.subscribe();
+        AtomicInteger readonlyCounter = new AtomicInteger(0);
+        readonlyFlux.subscribe(eventJson -> readonlyCounter.incrementAndGet());
+        assertEquals(1, readonlyCounter.get()); // initial state
+
+        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
+        signal.submit(createInsertEvent("Jane Executive", InsertPosition.LAST));
+
+        var entries = extractEntries(readOnlySignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        var orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
+        assertEquals(3, counter.get());
+        assertEquals(3, readonlyCounter.get());
+
+        var exampleEntry = orderedEntries.get(1);
+        var entryFlux = readOnlySignal.subscribe(exampleEntry.id().toString());
+        AtomicInteger entryCounter = new AtomicInteger(0);
+        entryFlux.subscribe(eventJson -> entryCounter.incrementAndGet());
+        assertEquals(1, entryCounter.get()); // initial snapshot
+
+        // verify all operations are blocked:
+        readOnlySignal
+                .submit(createInsertEvent("Joe Doe", InsertPosition.LAST));
+        readOnlySignal.submit(createRemoveEvent(entries.get(0)));
+        assertEquals("Jane Executive", exampleEntry.value());
+        readOnlySignal.submit(createReplaceEvent("Jane Executive",
+                "Replace Rejected", exampleEntry.id().toString()));
+        readOnlySignal.submit(
+                createSetEvent("Set Rejected", exampleEntry.id().toString()));
+
+        entries = extractEntries(readOnlySignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
+        assertEquals("John Normal", orderedEntries.get(0).value());
+        assertEquals("Jane Executive", orderedEntries.get(1).value());
+
+        // parent signal does not get the updates for its entries:
+        assertEquals(5, counter.get());
+        assertEquals(5, readonlyCounter.get());
+        // child signal gets the updates:
+        signal.submit(createReplaceEvent("Jane Executive", "Replace Accepted",
+                exampleEntry.id().toString()));
+        entries = extractEntries(readOnlySignal.createSnapshotEvent(),
+                String.class, Entry::new);
+        orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
+        assertEquals("John Normal", orderedEntries.get(0).value());
+        assertEquals("Replace Accepted", orderedEntries.get(1).value());
+
+        assertEquals(4, entryCounter.get());
+    }
+
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {
         return new ListStateEvent<>(UUID.randomUUID().toString(),
                 ListStateEvent.EventType.INSERT, value, position).toJson();

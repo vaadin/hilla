@@ -258,4 +258,31 @@ public class ValueSignal<T> extends Signal<T> {
                     super::handleReplaceEvent);
         }
     }
+
+    protected static class ReadOnlyValueSignal<T> extends ValueSignal<T> {
+        public ReadOnlyValueSignal(ValueSignal<T> delegate) {
+            super(delegate);
+        }
+
+        @Override
+        protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(
+                    "Read-only signal does not allow setting the value");
+            return stateEvent.toJson();
+        }
+
+        @Override
+        protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(
+                    "Read-only signal does not allow replacing the value");
+            return stateEvent.toJson();
+        }
+    }
+
+    @Override
+    public ValueSignal<T> asReadonly() {
+        return new ReadOnlyValueSignal<>(this);
+    }
 }

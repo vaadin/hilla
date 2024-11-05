@@ -127,7 +127,7 @@ public abstract class Signal<T> {
         }
     }
 
-    protected void notifySubscribers(ObjectNode processedEvent) {
+    private void notifySubscribers(ObjectNode processedEvent) {
         if (delegate != null) {
             delegate.notifySubscribers(processedEvent);
             return;
@@ -159,6 +159,13 @@ public abstract class Signal<T> {
      *         signal value was updated, <code>false</code> otherwise.
      */
     protected abstract ObjectNode processEvent(ObjectNode event);
+
+    /**
+     * Returns a read-only view of the signal.
+     *
+     * @return the read-only signal
+     */
+    public abstract Signal<T> asReadonly();
 
     @Override
     public boolean equals(Object o) {
