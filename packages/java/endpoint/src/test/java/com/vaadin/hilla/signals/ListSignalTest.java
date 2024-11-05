@@ -1278,13 +1278,13 @@ public class ListSignalTest {
 
         var entries = extractEntries(readOnlySignal.createSnapshotEvent(),
                 String.class, Entry::new);
-        assertEquals(2, entries.size());
+        var orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
         assertEquals(3, counter.get());
         assertEquals(3, readonlyCounter.get());
 
-        var exampleEntry = entries.get(1);
-        var entrySignal = exampleEntry.getValueSignal();
-        var entryFlux = entrySignal.subscribe();
+        var exampleEntry = orderedEntries.get(1);
+        var entryFlux = readOnlySignal.subscribe(exampleEntry.id().toString());
         AtomicInteger entryCounter = new AtomicInteger(0);
         entryFlux.subscribe(eventJson -> entryCounter.incrementAndGet());
         assertEquals(1, entryCounter.get()); // initial snapshot
@@ -1293,6 +1293,7 @@ public class ListSignalTest {
         readOnlySignal
                 .submit(createInsertEvent("Joe Doe", InsertPosition.LAST));
         readOnlySignal.submit(createRemoveEvent(entries.get(0)));
+        assertEquals("Jane Executive", exampleEntry.value());
         readOnlySignal.submit(createReplaceEvent("Jane Executive",
                 "Replace Rejected", exampleEntry.id().toString()));
         readOnlySignal.submit(
@@ -1300,8 +1301,8 @@ public class ListSignalTest {
 
         entries = extractEntries(readOnlySignal.createSnapshotEvent(),
                 String.class, Entry::new);
-        var orderedEntries = buildLinkedList(entries);
-        assertEquals(2, entries.size());
+        orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
         assertEquals("John Normal", orderedEntries.get(0).value());
         assertEquals("Jane Executive", orderedEntries.get(1).value());
 
@@ -1309,7 +1310,16 @@ public class ListSignalTest {
         assertEquals(5, counter.get());
         assertEquals(5, readonlyCounter.get());
         // child signal gets the updates:
-        assertEquals(3, entryCounter.get());
+        signal.submit(createReplaceEvent("Jane Executive", "Replace Accepted",
+                exampleEntry.id().toString()));
+        entries = extractEntries(readOnlySignal.createSnapshotEvent(),
+            String.class, Entry::new);
+        orderedEntries = buildLinkedList(entries);
+        assertEquals(2, orderedEntries.size());
+        assertEquals("John Normal", orderedEntries.get(0).value());
+        assertEquals("Replace Accepted", orderedEntries.get(1).value());
+
+        assertEquals(4, entryCounter.get());
     }
 
     private <T> ObjectNode createInsertEvent(T value, InsertPosition position) {
