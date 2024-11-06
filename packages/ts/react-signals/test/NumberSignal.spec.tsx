@@ -11,7 +11,7 @@ import sinonChai from 'sinon-chai';
 import type { IncrementStateEvent, StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, NumberSignal } from '../src/index.js';
-import { createSubscriptionStub, nextFrame, subscribeToSignalViaEffect } from './utils.js';
+import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
 
 use(sinonChai);
 use(chaiLike);
@@ -156,6 +156,41 @@ describe('@vaadin/hilla-react-signals', () => {
       simulateReceivingAcceptedEvent(expectedEvent);
 
       expect(numberSignal.value).to.equal(43);
+    });
+
+    it('should resolve the result promise after incrementBy', (done) => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+      numberSignal.incrementBy(1).result.then(done, () => done('Should not reject'));
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'increment',
+        value: 43,
+        accepted: true,
+      });
+    });
+
+    it('should reject the result promise after rejected incrementBy', (done) => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+      numberSignal.incrementBy(1).result.then(
+        () => done('Should not resolve'),
+        () => done(),
+      );
+      const [, , params] = client.call.firstCall.args;
+      simulateReceivedChange(subscription, {
+        id: (params!.event as { id: string }).id,
+        type: 'increment',
+        value: 43,
+        accepted: false,
+      });
+    });
+
+    it('should resolve the result promise after incrementing by zero without server roundtrip', (done) => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+      numberSignal.incrementBy(0).result.then(done, () => done('Should not reject'));
     });
   });
 });

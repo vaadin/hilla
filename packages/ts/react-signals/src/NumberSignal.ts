@@ -1,5 +1,12 @@
 import { createIncrementStateEvent, isIncrementStateEvent, type StateEvent } from './events.js';
-import { $processServerResponse, $setValueQuietly, $update } from './FullStackSignal.js';
+import {
+  $createOperation,
+  $processServerResponse,
+  $resolveOperation,
+  $setValueQuietly,
+  $update,
+  type Operation,
+} from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
@@ -38,24 +45,28 @@ export class NumberSignal extends ValueSignal<number> {
    *
    * @param delta - The delta to increment the value by. The delta can be
    * negative.
+   * @returns An operation object that allows to perform additional actions.
    */
-  incrementBy(delta: number): void {
+  incrementBy(delta: number): Operation {
     if (delta === 0) {
-      return;
+      return { result: Promise.resolve() };
     }
     this[$setValueQuietly](this.value + delta);
     const event = createIncrementStateEvent(delta);
     this.#sentIncrementEvents.set(event.id, event);
-    this[$update](event);
+    const promise = this[$update](event);
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   protected override [$processServerResponse](event: StateEvent): void {
     if (event.accepted && isIncrementStateEvent(event)) {
-      if (this.#sentIncrementEvents.has(event.id)) {
+      const sentEvent = this.#sentIncrementEvents.get(event.id);
+      if (sentEvent) {
         this.#sentIncrementEvents.delete(event.id);
-        return;
+      } else {
+        this[$setValueQuietly](this.value + event.value);
       }
-      this[$setValueQuietly](this.value + event.value);
+      this[$resolveOperation](event.id);
     } else {
       super[$processServerResponse](event);
     }
