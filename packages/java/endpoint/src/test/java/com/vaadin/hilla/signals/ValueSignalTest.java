@@ -196,13 +196,13 @@ public class ValueSignalTest {
     @Test
     public void setOperationValidated_originalInstanceIsNotLimited() {
         ValueSignal<String> unrestrictedSignal = new ValueSignal<>("Foo",
-            String.class);
+                String.class);
 
         unrestrictedSignal.submit(createSetEvent("Bar"));
         assertEquals("Bar", unrestrictedSignal.getValue());
 
         ValueSignal<String> noSetAllowedSignal = unrestrictedSignal
-            .withOperationValidator(value -> {
+                .withOperationValidator(value -> {
                     if (value instanceof SetValueOperation) {
                         return ValidationResult.rejected("No set allowed");
                     }
@@ -223,14 +223,14 @@ public class ValueSignalTest {
     @Test
     public void setOperationValidated_subscriptionWorks() {
         ValueSignal<String> unrestrictedSignal = new ValueSignal<>("Foo",
-            String.class);
+                String.class);
         ValueSignal<String> noSetAllowedSignal = unrestrictedSignal
-            .withOperationValidator(value -> {
-                if (value instanceof SetValueOperation) {
-                    return ValidationResult.rejected("No set allowed");
-                }
-                return ValidationResult.ok();
-            });
+                .withOperationValidator(value -> {
+                    if (value instanceof SetValueOperation) {
+                        return ValidationResult.rejected("No set allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
         AtomicInteger unrestrictedCounter = new AtomicInteger(0);
@@ -258,14 +258,14 @@ public class ValueSignalTest {
     @Test
     public void setOperationValidated_otherOperationsAreNotAffected() {
         ValueSignal<String> unrestrictedSignal = new ValueSignal<>("Foo",
-            String.class);
+                String.class);
         ValueSignal<String> noSetAllowedSignal = unrestrictedSignal
-            .withOperationValidator(value -> {
-                if (value instanceof SetValueOperation) {
-                    return ValidationResult.rejected("No set allowed");
-                }
-                return ValidationResult.ok();
-            });
+                .withOperationValidator(value -> {
+                    if (value instanceof SetValueOperation) {
+                        return ValidationResult.rejected("No set allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         unrestrictedSignal.submit(createSetEvent("Bar"));
         // make sure restriction is intact:
@@ -283,24 +283,24 @@ public class ValueSignalTest {
     @Test
     public void replaceOperationValidated_originalInstanceIsNotRestricted() {
         ValueSignal<String> unrestrictedSignal = new ValueSignal<>("Foo",
-            String.class);
+                String.class);
 
         unrestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
         assertEquals("Bar", unrestrictedSignal.getValue());
 
         ValueSignal<String> noReplaceAllowedSignal = unrestrictedSignal
-            .withOperationValidator(op -> {
-                if (op instanceof ReplaceValueOperation) {
-                    return ValidationResult.rejected("No replace allowed");
-                }
-                return ValidationResult.ok();
-            });
+                .withOperationValidator(op -> {
+                    if (op instanceof ReplaceValueOperation) {
+                        return ValidationResult.rejected("No replace allowed");
+                    }
+                    return ValidationResult.ok();
+                });
         // the restricted instance sees the same value as the original one:
         assertEquals("Bar", noReplaceAllowedSignal.getValue());
 
         // the restricted instance doesn't allow replace operation:
         noReplaceAllowedSignal
-            .submit(createReplaceEvent("Bar", "Should-be rejected!"));
+                .submit(createReplaceEvent("Bar", "Should-be rejected!"));
         assertEquals("Bar", noReplaceAllowedSignal.getValue());
 
         unrestrictedSignal.submit(createReplaceEvent("Bar", "Baz"));
@@ -311,14 +311,14 @@ public class ValueSignalTest {
     @Test
     public void replaceOperationValidated_subscriptionWorks() {
         ValueSignal<String> unrestrictedSignal = new ValueSignal<>("Foo",
-            String.class);
+                String.class);
         ValueSignal<String> noReplaceAllowedSignal = unrestrictedSignal
-            .withOperationValidator(op -> {
-                if (op instanceof ReplaceValueOperation) {
-                    return ValidationResult.rejected("No replace allowed");
-                }
-                return ValidationResult.ok();
-            });
+                .withOperationValidator(op -> {
+                    if (op instanceof ReplaceValueOperation) {
+                        return ValidationResult.rejected("No replace allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
         AtomicInteger unrestrictedCounter = new AtomicInteger(0);
@@ -328,7 +328,7 @@ public class ValueSignalTest {
         assertEquals(1, unrestrictedCounter.get()); // initial state
 
         Flux<ObjectNode> noReplaceAllowedFlux = noReplaceAllowedSignal
-            .subscribe();
+                .subscribe();
         AtomicInteger noReplaceAllowedCounter = new AtomicInteger(0);
         noReplaceAllowedFlux.subscribe(eventJson -> {
             noReplaceAllowedCounter.incrementAndGet();
@@ -347,19 +347,19 @@ public class ValueSignalTest {
     @Test
     public void replaceOperationValidated_otherOperationsAreNotAffected() {
         ValueSignal<String> unrestrictedSignal = new ValueSignal<>("Foo",
-            String.class);
+                String.class);
         ValueSignal<String> noReplaceAllowedSignal = unrestrictedSignal
-            .withOperationValidator(op -> {
-                if (op instanceof ReplaceValueOperation) {
-                    return ValidationResult.rejected("No replace allowed");
-                }
-                return ValidationResult.ok();
-            });
+                .withOperationValidator(op -> {
+                    if (op instanceof ReplaceValueOperation) {
+                        return ValidationResult.rejected("No replace allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         unrestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
         // make sure restriction is intact:
         noReplaceAllowedSignal
-            .submit(createReplaceEvent("Bar", "Should-be Rejected"));
+                .submit(createReplaceEvent("Bar", "Should-be Rejected"));
 
         assertEquals("Bar", unrestrictedSignal.getValue());
         assertEquals("Bar", noReplaceAllowedSignal.getValue());
@@ -411,8 +411,9 @@ public class ValueSignalTest {
 
     @Test
     public void withOperationValidator_throws_whenValidatorIsNull() {
-         assertThrows(NullPointerException.class, () -> new ValueSignal<>("Foo", String.class)
-                .withOperationValidator(null));
+        assertThrows(NullPointerException.class,
+                () -> new ValueSignal<>("Foo", String.class)
+                        .withOperationValidator(null));
     }
 
     @Test

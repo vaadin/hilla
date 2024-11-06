@@ -274,102 +274,9 @@ public class ListSignal<T> extends Signal<T> {
 
     private static class ValidatedListSignal<T> extends ListSignal<T> {
 
-        protected ValidatedListSignal(ListSignal<T> delegate) {
-            super(delegate);
-        }
-
-        protected ListStateEvent<T> handleValidationResult(
-                ListStateEvent<T> event, ValidationResult validationResult,
-                Function<ListStateEvent<T>, ListStateEvent<T>> handler) {
-            if (validationResult.isOk()) {
-                return handler.apply(event);
-            } else {
-                return rejectEvent(event, validationResult);
-            }
-        }
-
-        private ListStateEvent<T> rejectEvent(ListStateEvent<T> event,
-                ValidationResult result) {
-            event.setAccepted(false);
-            event.setValidationError(result.getErrorMessage());
-            return event;
-        }
-
-        protected void handleValidationResult(ObjectNode event,
-                ValidationResult validationResult,
-                Consumer<ObjectNode> handler) {
-            if (validationResult.isOk()) {
-                handler.accept(event);
-            } else {
-                handler.accept(rejectEvent(event, validationResult));
-            }
-        }
-
-        private ObjectNode rejectEvent(ObjectNode event,
-                ValidationResult result) {
-            var stateEvent = new StateEvent<>(event, getValueType());
-            stateEvent.setAccepted(false);
-            stateEvent.setValidationError(result.getErrorMessage());
-            return stateEvent.toJson();
-        }
-    }
-
-    private static class ValueOperationValidatedListSignal<T>
-            extends ValidatedListSignal<T> {
-        private final Function<ValueOperation<T>, ValidationResult> valueValidator;
-
-        public ValueOperationValidatedListSignal(ListSignal<T> delegate,
-                Function<ValueOperation<T>, ValidationResult> valueValidator) {
-            super(delegate);
-            this.valueValidator = valueValidator;
-        }
-
-        @Override
-        protected ListStateEvent<T> handleInsert(ListStateEvent<T> event) {
-            var listInsertOperation = new ListInsertOperation<>(event.getId(),
-                    event.getPosition(), event.getValue());
-            var validationResult = valueValidator.apply(listInsertOperation);
-            return handleValidationResult(event, validationResult,
-                    super::handleInsert);
-        }
-
-        @Override
-        protected void submitToChild(ObjectNode event) {
-            // are we interested in this event:
-            if (!StateEvent.isSetEvent(event)
-                    && !StateEvent.isReplaceEvent(event)) {
-                super.submitToChild(event);
-                return;
-            }
-
-            var valueOperation = extractValueOperation(event);
-            var validationResult = valueValidator.apply(valueOperation);
-            handleValidationResult(event, validationResult,
-                    super::submitToChild);
-        }
-
-        private ValueOperation<T> extractValueOperation(ObjectNode event) {
-            if (StateEvent.isSetEvent(event)) {
-                return SetValueOperation.of(event, getValueType());
-            } else if (StateEvent.isReplaceEvent(event)) {
-                return ReplaceValueOperation.of(event, getValueType());
-            } else {
-                throw new UnsupportedOperationException(
-                        "Unsupported event: " + event);
-            }
-        }
-    }
-
-    public ListSignal<T> withValueOperationValidator(
-            Function<ValueOperation<T>, ValidationResult> operation) {
-        return new ValueOperationValidatedListSignal<>(this, operation);
-    }
-
-    private static class OperationValidatedListSignal<T>
-            extends ValidatedListSignal<T> {
         private final OperationValidator<T> operationValidator;
 
-        public OperationValidatedListSignal(ListSignal<T> delegate,
+        private ValidatedListSignal(ListSignal<T> delegate,
                 OperationValidator<T> operationValidator) {
             super(delegate);
             this.operationValidator = operationValidator;
@@ -424,11 +331,47 @@ public class ListSignal<T> extends Signal<T> {
                         "Unsupported event: " + event);
             }
         }
+
+        private ListStateEvent<T> handleValidationResult(
+                ListStateEvent<T> event, ValidationResult validationResult,
+                Function<ListStateEvent<T>, ListStateEvent<T>> handler) {
+            if (validationResult.isOk()) {
+                return handler.apply(event);
+            } else {
+                return rejectEvent(event, validationResult);
+            }
+        }
+
+        private ListStateEvent<T> rejectEvent(ListStateEvent<T> event,
+                ValidationResult result) {
+            event.setAccepted(false);
+            event.setValidationError(result.getErrorMessage());
+            return event;
+        }
+
+        private void handleValidationResult(ObjectNode event,
+                ValidationResult validationResult,
+                Consumer<ObjectNode> handler) {
+            if (validationResult.isOk()) {
+                handler.accept(event);
+            } else {
+                handler.accept(rejectEvent(event, validationResult));
+            }
+        }
+
+        private ObjectNode rejectEvent(ObjectNode event,
+                ValidationResult result) {
+            var stateEvent = new StateEvent<>(event, getValueType());
+            stateEvent.setAccepted(false);
+            stateEvent.setValidationError(result.getErrorMessage());
+            return stateEvent.toJson();
+        }
     }
 
     public ListSignal<T> withOperationValidator(
-            OperationValidator<T> operation) {
-        return new OperationValidatedListSignal<>(this, operation);
+            OperationValidator<T> validator) {
+        Objects.requireNonNull(validator, "Validator cannot be null");
+        return new ValidatedListSignal<>(this, validator);
     }
 
     @Override

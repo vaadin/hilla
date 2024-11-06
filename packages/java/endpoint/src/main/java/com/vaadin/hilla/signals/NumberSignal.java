@@ -10,6 +10,8 @@ import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 
+import java.util.Objects;
+
 /**
  * A signal that holds a number value.
  */
@@ -81,12 +83,12 @@ public class NumberSignal extends ValueSignal<Double> {
         }
     }
 
-    private static class OperationValidatedNumberSignal extends NumberSignal {
+    private static class ValidatedNumberSignal extends NumberSignal {
 
         private final OperationValidator<Double> validator;
 
-        public OperationValidatedNumberSignal(NumberSignal delegate,
-                OperationValidator<Double> validator) {
+        private ValidatedNumberSignal(NumberSignal delegate,
+                                     OperationValidator<Double> validator) {
             super(delegate);
             this.validator = validator;
         }
@@ -122,7 +124,8 @@ public class NumberSignal extends ValueSignal<Double> {
     @Override
     public NumberSignal withOperationValidator(
             OperationValidator<Double> validator) {
-        return new OperationValidatedNumberSignal(this, validator);
+        Objects.requireNonNull(validator, "Validator cannot be null");
+        return new ValidatedNumberSignal(this, validator);
     }
 
     @Override
