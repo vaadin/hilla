@@ -83,10 +83,10 @@ public class NumberSignal extends ValueSignal<Double> {
 
     private static class OperationValidatedNumberSignal extends NumberSignal {
 
-        private final OperationValidator validator;
+        private final OperationValidator<Double> validator;
 
         public OperationValidatedNumberSignal(NumberSignal delegate,
-                OperationValidator validator) {
+                OperationValidator<Double> validator) {
             super(delegate);
             this.validator = validator;
         }
@@ -120,7 +120,8 @@ public class NumberSignal extends ValueSignal<Double> {
     }
 
     @Override
-    public NumberSignal withOperationValidator(OperationValidator validator) {
+    public NumberSignal withOperationValidator(
+            OperationValidator<Double> validator) {
         return new OperationValidatedNumberSignal(this, validator);
     }
 

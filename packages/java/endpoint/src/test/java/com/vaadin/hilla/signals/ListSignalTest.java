@@ -766,9 +766,8 @@ public class ListSignalTest {
     public void withMultipleStructuralValidators_allValidatorsAreApplied() {
         ListSignal<String> partiallyRestrictedSignal = new ListSignal<>(
                 String.class).withOperationValidator(operation -> {
-                    if (operation instanceof ListInsertOperation
-                            && ((ListInsertOperation<String>) operation).value()
-                                    .startsWith("Joe")) {
+                    if (operation instanceof ListInsertOperation<String> insOp
+                            && insOp.value().startsWith("Joe")) {
                         return ValidationResult.rejected("No Joe is allowed");
                     }
                     return ValidationResult.ok();
@@ -944,9 +943,8 @@ public class ListSignalTest {
     public void withValidatorSignal_shouldReceiveUpdates() {
         ListSignal<String> chatSignal = new ListSignal<>(String.class)
                 .withOperationValidator(operation -> {
-                    if (operation instanceof ListInsertOperation
-                            && ((ListInsertOperation<String>) operation).value()
-                                    .toLowerCase().contains("bad")) {
+                    if (operation instanceof ListInsertOperation<String> insOp
+                            && insOp.value().toLowerCase().contains("bad")) {
                         return ValidationResult
                                 .rejected("The word 'bad' is not allowed");
                     }

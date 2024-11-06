@@ -367,10 +367,10 @@ public class ListSignal<T> extends Signal<T> {
 
     private static class OperationValidatedListSignal<T>
             extends ValidatedListSignal<T> {
-        private final OperationValidator operationValidator;
+        private final OperationValidator<T> operationValidator;
 
         public OperationValidatedListSignal(ListSignal<T> delegate,
-                OperationValidator operationValidator) {
+                OperationValidator<T> operationValidator) {
             super(delegate);
             this.operationValidator = operationValidator;
         }
@@ -426,7 +426,8 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
-    public ListSignal<T> withOperationValidator(OperationValidator operation) {
+    public ListSignal<T> withOperationValidator(
+            OperationValidator<T> operation) {
         return new OperationValidatedListSignal<>(this, operation);
     }
 

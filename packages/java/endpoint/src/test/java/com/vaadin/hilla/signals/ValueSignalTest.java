@@ -197,12 +197,9 @@ public class ValueSignalTest {
     public void withMultipleOperationValidators_allValidatorsAreApplied() {
         ValueSignal<String> partiallyRestrictedSignal = new ValueSignal<>("Foo",
                 String.class).withOperationValidator(validator -> {
-                    if (validator instanceof SetValueOperation setOp) {
-                        if (setOp.value() instanceof String
-                                && ((String) setOp.value()).startsWith("Joe")) {
-                            return ValidationResult
-                                    .rejected("No Joe is allowed");
-                        }
+                    if (validator instanceof SetValueOperation<String> setOp
+                            && setOp.value().startsWith("Joe")) {
+                        return ValidationResult.rejected("No Joe is allowed");
                     }
                     return ValidationResult.ok();
                 });
