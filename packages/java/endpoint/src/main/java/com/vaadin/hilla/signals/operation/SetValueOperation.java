@@ -10,4 +10,8 @@ public record SetValueOperation<T>(String operationId, T value) implements Value
         return new SetValueOperation<>(StateEvent.extractId(event),
             StateEvent.convertValue(rawValue, valueType));
     }
+
+    public static <T> SetValueOperation<T> of(String operationId, T value) {
+        return new SetValueOperation<>(operationId, value);
+    }
 }

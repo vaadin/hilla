@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
-import com.vaadin.hilla.signals.operation.ValueOperation;
+import com.vaadin.hilla.signals.operation.SignalOperation;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
@@ -225,17 +225,17 @@ public class ValueSignal<T> extends Signal<T> {
         }
     }
 
-    public ValueSignal<T> withValueOperationValidator(
-            Function<ValueOperation<T>, ValidationResult> validator) {
+    public ValueSignal<T> withOperationValidator(
+            Function<SignalOperation, ValidationResult> validator) {
         return new ValueOperationValidatedValueSignal<>(this, validator);
     }
 
     private static class ValueOperationValidatedValueSignal<T>
             extends ValueSignal<T> {
-        private final Function<ValueOperation<T>, ValidationResult> validator;
+        private final Function<SignalOperation, ValidationResult> validator;
 
         public ValueOperationValidatedValueSignal(ValueSignal<T> delegate,
-                Function<ValueOperation<T>, ValidationResult> validator) {
+                Function<SignalOperation, ValidationResult> validator) {
             super(delegate);
             this.validator = validator;
         }
@@ -259,30 +259,9 @@ public class ValueSignal<T> extends Signal<T> {
         }
     }
 
-    protected static class ReadOnlyValueSignal<T> extends ValueSignal<T> {
-        public ReadOnlyValueSignal(ValueSignal<T> delegate) {
-            super(delegate);
-        }
-
-        @Override
-        protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
-            stateEvent.setAccepted(false);
-            stateEvent.setValidationError(
-                    "Read-only signal does not allow setting the value");
-            return stateEvent.toJson();
-        }
-
-        @Override
-        protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
-            stateEvent.setAccepted(false);
-            stateEvent.setValidationError(
-                    "Read-only signal does not allow replacing the value");
-            return stateEvent.toJson();
-        }
-    }
-
     @Override
     public ValueSignal<T> asReadonly() {
-        return new ReadOnlyValueSignal<>(this);
+        return this.withOperationValidator(op -> ValidationResult.rejected(
+                "Read-only signal does not allow any modifications"));
     }
 }

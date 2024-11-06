@@ -12,4 +12,8 @@ public record ReplaceValueOperation<T>(String operationId, T expected, T value) 
             StateEvent.convertValue(rawExpected, valueType),
             StateEvent.convertValue(rawValue, valueType));
     }
+
+    public static <T> ReplaceValueOperation<T> of(String operationId, T expected, T value) {
+        return new ReplaceValueOperation<>(operationId, expected, value);
+    }
 }

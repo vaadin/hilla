@@ -6,6 +6,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.operation.IncrementOperation;
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
+import com.vaadin.hilla.signals.operation.SignalOperation;
+import com.vaadin.hilla.signals.operation.ValidationResult;
 
 /**
  * A signal that holds a number value.
@@ -104,38 +109,53 @@ public class NumberSignal extends ValueSignal<Double> {
         }
     }
 
-    private static class ReadonlyNumberSignal extends NumberSignal {
-        private ReadonlyNumberSignal(NumberSignal delegate) {
+    private static class GenericOperationValidatedNumberSignal
+        extends NumberSignal {
+
+        private final Function<SignalOperation, ValidationResult> validator;
+
+        public GenericOperationValidatedNumberSignal(NumberSignal delegate,
+                                                       Function<SignalOperation, ValidationResult> validator) {
             super(delegate);
-        }
-
-        @Override
-        protected ObjectNode handleSetEvent(StateEvent<Double> stateEvent) {
-            stateEvent.setAccepted(false);
-            stateEvent.setValidationError(
-                    "Read-only signal does not allow setting the value");
-            return stateEvent.toJson();
-        }
-
-        @Override
-        protected ObjectNode handleReplaceEvent(StateEvent<Double> stateEvent) {
-            stateEvent.setAccepted(false);
-            stateEvent.setValidationError(
-                    "Read-only signal does not allow replacing the value");
-            return stateEvent.toJson();
+            this.validator = validator;
         }
 
         @Override
         protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
-            stateEvent.setAccepted(false);
-            stateEvent.setValidationError(
-                    "Read-only signal does not allow incrementing the value");
-            return stateEvent.toJson();
+            var operation = IncrementOperation.of(stateEvent.getId(),
+                stateEvent.getValue());
+            var validationResult = validator.apply(operation);
+            return handleValidationResult(stateEvent, validationResult,
+                super::handleIncrement);
         }
+
+        @Override
+        protected ObjectNode handleSetEvent(StateEvent<Double> stateEvent) {
+            var operation = SetValueOperation.of(stateEvent.getId(),
+                stateEvent.getValue());
+            var validation = validator.apply(operation);
+            return handleValidationResult(stateEvent, validation,
+                super::handleSetEvent);
+        }
+
+        @Override
+        protected ObjectNode handleReplaceEvent(StateEvent<Double> stateEvent) {
+            var operation = ReplaceValueOperation.of(stateEvent.getId(),
+                stateEvent.getExpected(), stateEvent.getValue());
+            var validation = validator.apply(operation);
+            return handleValidationResult(stateEvent, validation,
+                super::handleReplaceEvent);
+        }
+    }
+
+    public NumberSignal withOperationValidator(
+        Function<SignalOperation, ValidationResult> validator) {
+        return new GenericOperationValidatedNumberSignal(this, validator);
     }
 
     @Override
     public NumberSignal asReadonly() {
-        return new ReadonlyNumberSignal(this);
+        return this.withOperationValidator(op -> ValidationResult.rejected(
+            "Read-only signal does not allow any modifications"));
     }
 }
