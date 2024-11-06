@@ -11,6 +11,7 @@ import com.vaadin.hilla.signals.operation.ListRemoveOperation;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
+import com.vaadin.hilla.signals.operation.ValueOperation;
 import jakarta.annotation.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -688,10 +689,9 @@ public class ListSignalTest {
         ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListInsertOperation) {
-                        return ValidationResult
-                                .rejected("No insertion allowed");
+                        return ValidationResult.reject("No insertion allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         unrestrictedSignal
@@ -724,10 +724,9 @@ public class ListSignalTest {
         ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListInsertOperation) {
-                        return ValidationResult
-                                .rejected("No insertion allowed");
+                        return ValidationResult.reject("No insertion allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
@@ -762,9 +761,9 @@ public class ListSignalTest {
         ListSignal<String> noRemovalAllowedSignal = unrestrictedSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListRemoveOperation) {
-                        return ValidationResult.rejected("No removal allowed");
+                        return ValidationResult.reject("No removal allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         unrestrictedSignal
@@ -806,9 +805,9 @@ public class ListSignalTest {
         ListSignal<String> noRemovalAllowedSignal = unrestrictedSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListRemoveOperation) {
-                        return ValidationResult.rejected("No removal allowed");
+                        return ValidationResult.reject("No removal allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
@@ -855,20 +854,19 @@ public class ListSignalTest {
                 String.class).withOperationValidator(operation -> {
                     if (operation instanceof ListInsertOperation<String> insOp
                             && insOp.value().startsWith("Joe")) {
-                        return ValidationResult.rejected("No Joe is allowed");
+                        return ValidationResult.reject("No Joe is allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         ListSignal<String> readonlyStructureSignal = partiallyRestrictedSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListInsertOperation) {
-                        return ValidationResult
-                                .rejected("No insertion allowed");
+                        return ValidationResult.reject("No insertion allowed");
                     } else if (operation instanceof ListRemoveOperation) {
-                        return ValidationResult.rejected("No removal allowed");
+                        return ValidationResult.reject("No removal allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         partiallyRestrictedSignal
@@ -916,9 +914,9 @@ public class ListSignalTest {
                 .withOperationValidator(operation -> {
                     if (operation instanceof SetValueOperation) {
                         return ValidationResult
-                                .rejected("No item set value allowed");
+                                .reject("No item set value allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         // add items through both signal instances:
         signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
@@ -984,9 +982,9 @@ public class ListSignalTest {
                 .withOperationValidator(operation -> {
                     if (operation instanceof ReplaceValueOperation) {
                         return ValidationResult
-                                .rejected("No item replace value allowed");
+                                .reject("No item replace value allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         // verify that adding itemSetValueValidator doesn't affect other
         // operations:
@@ -1052,12 +1050,12 @@ public class ListSignalTest {
                 .withOperationValidator(operation -> {
                     if (operation instanceof SetValueOperation) {
                         return ValidationResult
-                                .rejected("No item set value allowed");
+                                .reject("No item set value allowed");
                     } else if (operation instanceof ReplaceValueOperation) {
                         return ValidationResult
-                                .rejected("No item replace value allowed");
+                                .reject("No item replace value allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         // add items through both signal instances:
@@ -1105,18 +1103,17 @@ public class ListSignalTest {
         ListSignal<String> readOnlyItemsSignal = signal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListInsertOperation) {
-                        return ValidationResult
-                                .rejected("No insertion allowed");
+                        return ValidationResult.reject("No insertion allowed");
                     } else if (operation instanceof ListRemoveOperation) {
-                        return ValidationResult.rejected("No removal allowed");
+                        return ValidationResult.reject("No removal allowed");
                     } else if (operation instanceof SetValueOperation) {
                         return ValidationResult
-                                .rejected("No item set value allowed");
+                                .reject("No item set value allowed");
                     } else if (operation instanceof ReplaceValueOperation) {
                         return ValidationResult
-                                .rejected("No item replace value allowed");
+                                .reject("No item replace value allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         var entries = extractEntries(readOnlyItemsSignal.createSnapshotEvent(),
@@ -1169,24 +1166,24 @@ public class ListSignalTest {
                     if (operation instanceof ListInsertOperation<String> insOp
                             && insOp.value().toLowerCase().contains("bad")) {
                         return ValidationResult
-                                .rejected("The word 'bad' is not allowed");
+                                .reject("The word 'bad' is not allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         ListSignal<String> adminSignal = chatSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListRemoveOperation) {
-                        return ValidationResult.rejected("No removal allowed");
+                        return ValidationResult.reject("No removal allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         ListSignal<String> userSignal = adminSignal
                 .withOperationValidator(operation -> {
                     if (operation instanceof ListInsertOperation) {
-                        return ValidationResult.rejected(
+                        return ValidationResult.reject(
                                 "Read-only signal doesn't allow insertion");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         var chatFlux = chatSignal.subscribe();

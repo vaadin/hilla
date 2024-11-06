@@ -3,7 +3,7 @@ package com.vaadin.hilla.signals.operation;
 public class ValidationResult {
 
     public enum Status {
-        OK, REJECTED
+        ALLOWED, REJECTED
     }
 
     private final Status status;
@@ -28,18 +28,18 @@ public class ValidationResult {
     }
 
     public boolean isOk() {
-        return status == Status.OK;
+        return status == Status.ALLOWED;
     }
 
     public boolean isRejected() {
         return status == Status.REJECTED;
     }
 
-    public static ValidationResult rejected(String errorMessage) {
+    public static ValidationResult reject(String errorMessage) {
         return new ValidationResult(Status.REJECTED, errorMessage);
     }
 
-    public static ValidationResult ok() {
-        return new ValidationResult(Status.OK);
+    public static ValidationResult allow() {
+        return new ValidationResult(Status.ALLOWED);
     }
 }

@@ -204,9 +204,9 @@ public class ValueSignalTest {
         ValueSignal<String> noSetAllowedSignal = unrestrictedSignal
                 .withOperationValidator(value -> {
                     if (value instanceof SetValueOperation) {
-                        return ValidationResult.rejected("No set allowed");
+                        return ValidationResult.reject("No set allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         // the restricted instance sees the same value as the original one:
         assertEquals("Bar", noSetAllowedSignal.getValue());
@@ -227,9 +227,9 @@ public class ValueSignalTest {
         ValueSignal<String> noSetAllowedSignal = unrestrictedSignal
                 .withOperationValidator(value -> {
                     if (value instanceof SetValueOperation) {
-                        return ValidationResult.rejected("No set allowed");
+                        return ValidationResult.reject("No set allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
@@ -262,9 +262,9 @@ public class ValueSignalTest {
         ValueSignal<String> noSetAllowedSignal = unrestrictedSignal
                 .withOperationValidator(value -> {
                     if (value instanceof SetValueOperation) {
-                        return ValidationResult.rejected("No set allowed");
+                        return ValidationResult.reject("No set allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         unrestrictedSignal.submit(createSetEvent("Bar"));
@@ -291,9 +291,9 @@ public class ValueSignalTest {
         ValueSignal<String> noReplaceAllowedSignal = unrestrictedSignal
                 .withOperationValidator(op -> {
                     if (op instanceof ReplaceValueOperation) {
-                        return ValidationResult.rejected("No replace allowed");
+                        return ValidationResult.reject("No replace allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         // the restricted instance sees the same value as the original one:
         assertEquals("Bar", noReplaceAllowedSignal.getValue());
@@ -315,9 +315,9 @@ public class ValueSignalTest {
         ValueSignal<String> noReplaceAllowedSignal = unrestrictedSignal
                 .withOperationValidator(op -> {
                     if (op instanceof ReplaceValueOperation) {
-                        return ValidationResult.rejected("No replace allowed");
+                        return ValidationResult.reject("No replace allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
@@ -351,9 +351,9 @@ public class ValueSignalTest {
         ValueSignal<String> noReplaceAllowedSignal = unrestrictedSignal
                 .withOperationValidator(op -> {
                     if (op instanceof ReplaceValueOperation) {
-                        return ValidationResult.rejected("No replace allowed");
+                        return ValidationResult.reject("No replace allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         unrestrictedSignal.submit(createReplaceEvent("Foo", "Bar"));
@@ -376,18 +376,18 @@ public class ValueSignalTest {
                 String.class).withOperationValidator(validator -> {
                     if (validator instanceof SetValueOperation<String> setOp
                             && setOp.value().startsWith("Joe")) {
-                        return ValidationResult.rejected("No Joe is allowed");
+                        return ValidationResult.reject("No Joe is allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         ValueSignal<String> fullyRestrictedSignal = partiallyRestrictedSignal
                 .withOperationValidator(op -> {
                     if (op instanceof SetValueOperation) {
-                        return ValidationResult.rejected("No set allowed");
+                        return ValidationResult.reject("No set allowed");
                     } else if (op instanceof ReplaceValueOperation) {
-                        return ValidationResult.rejected("No replace allowed");
+                        return ValidationResult.reject("No replace allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         partiallyRestrictedSignal.submit(createSetEvent("John Normal"));

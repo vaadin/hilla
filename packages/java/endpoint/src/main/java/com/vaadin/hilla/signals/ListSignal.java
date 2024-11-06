@@ -368,6 +368,55 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
+    /**
+     * Returns a new signal that validates the operations with the provided
+     * validator. As the same validator is for all operations, the validator
+     * should be able to handle all operations that the signal supports.
+     * <p>
+     * For example, the following code creates a signal that disallows adding
+     * values containing the word "bad":
+     * <!-- @formatter:off -->
+     * <pre><code>
+     * ListSignal&lt;String&gt; signal = new ListSignal&lt;&gt;(String.class);
+     * ListSignal&lt;String&gt; noBadWordSignal = signal.withOperationValidator(op -&gt; {
+     *    if (op instanceof ListInsertOperation&lt;String&gt; insertOp &amp;&amp; insertOp.value().contains("bad")) {
+     *        return ValidationResult.reject("Bad words are not allowed");
+     *    }
+     *    return ValidationResult.allow();
+     * });
+     * </code></pre>
+     * <!-- @formatter:on -->
+     * In the example above, the validator does not cover the set and replace
+     * operations that can affect the entry values after insertion.
+     * A similar type checking can be done for the set and replace operation
+     * if needed. However, the <code>ValueOperation</code> type allows unifying
+     * the validation logic for all the operations that are manipulating the
+     * value.
+     * The following example shows how to define a validator that covers all the
+     * operations that can affect the entry values:
+     * <!-- @formatter:off -->
+     * <pre><code>
+     * ListSignal&lt;String&gt; signal = new ListSignal&lt;&gt;(String.class);
+     * ListSignal&lt;String&gt; noBadWordSignal = signal.withOperationValidator(op -&gt; {
+     *    if (op instanceof ValueOperation&lt;String&gt; valueOp &amp;&amp; valueOp.value().contains("bad")) {
+     *        return ValidationResult.reject("Bad words are not allowed");
+     *    }
+     *    return ValidationResult.allow();
+     * });
+     * </code></pre>
+     * <!-- @formatter:on -->
+     * As <code>ListInsertOperation</code>, <code>SetValueOperation</code>, and
+     * <code>ReplaceValueOperation</code> implement the
+     * <code>ValueOperation</code>, the validator covers all of these
+     * operations.
+     *
+     * @param validator
+     *            the operation validator, not <code>null</code>
+     * @return a new signal that validates the operations with the provided
+     *         validator
+     * @throws NullPointerException
+     *             if the validator is <code>null</code>
+     */
     public ListSignal<T> withOperationValidator(
             OperationValidator<T> validator) {
         Objects.requireNonNull(validator, "Validator cannot be null");
@@ -377,6 +426,6 @@ public class ListSignal<T> extends Signal<T> {
     @Override
     public ListSignal<T> asReadonly() {
         return this.withOperationValidator(op -> ValidationResult
-                .rejected("Read-only signal does not allow any modifications"));
+                .reject("Read-only signal does not allow any modifications"));
     }
 }

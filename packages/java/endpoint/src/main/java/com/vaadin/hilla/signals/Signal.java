@@ -161,7 +161,9 @@ public abstract class Signal<T> {
     protected abstract ObjectNode processEvent(ObjectNode event);
 
     /**
-     * Returns a read-only view of the signal.
+     * Returns a read-only instance of the signal that rejects any attempt to
+     * modify the signal value. The read-only signal, however, receives the same
+     * updates as the original signal does.
      *
      * @return the read-only signal
      */

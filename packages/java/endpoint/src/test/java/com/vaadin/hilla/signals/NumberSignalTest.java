@@ -120,9 +120,9 @@ public class NumberSignalTest {
             if (op instanceof IncrementOperation increment
                     && increment.value() > 1) {
                 return ValidationResult
-                        .rejected("Only increment by 1 is allowed");
+                        .reject("Only increment by 1 is allowed");
             }
-            return ValidationResult.ok();
+            return ValidationResult.allow();
         });
 
         counter.submit(createIncrementEvent("2"));
@@ -139,13 +139,27 @@ public class NumberSignalTest {
     @Test
     public void incrementOperationValidated_subscriptionWorks() {
         NumberSignal number = new NumberSignal(42.0);
-        NumberSignal limitedNumber = number.withOperationValidator(op -> {
-            if (op instanceof IncrementOperation increment
+        NumberSignal limitedNumber = number.withOperationValidator(operation -> {
+            return switch (operation) {
+                case IncrementOperation increment -> {
+                    if (increment.value() > 1) {
+                        yield ValidationResult
+                            .reject("Only increment by 1 is allowed");
+                    }
+                    yield ValidationResult.allow();
+                }
+                case ReplaceValueOperation<Double> ignored ->
+                            ValidationResult.reject("No setting is allowed");
+                case SetValueOperation<Double> ignored ->
+                            ValidationResult.reject("No replacing is allowed");
+                default -> ValidationResult.allow();
+            };
+            /*if (op instanceof IncrementOperation increment
                     && increment.value() > 1) {
                 return ValidationResult
                         .rejected("Only increment by 1 is allowed");
             }
-            return ValidationResult.ok();
+            return ValidationResult.ok();*/
         });
 
         Flux<ObjectNode> numberFlux = number.subscribe();
@@ -174,27 +188,27 @@ public class NumberSignalTest {
                 .withOperationValidator(op -> {
                     if (op instanceof IncrementOperation increment
                             && increment.value() % 2 == 0) {
-                        return ValidationResult.rejected(
+                        return ValidationResult.reject(
                                 "Increment by multiples of 2 is not allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         NumberSignal partiallyRestrictedSignal2 = partiallyRestrictedSignal1
                 .withOperationValidator(op -> {
                     if (op instanceof IncrementOperation increment
                             && increment.value() % 3 == 0) {
-                        return ValidationResult.rejected(
+                        return ValidationResult.reject(
                                 "Increment by multiples of 3 is not allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
         NumberSignal fullyRestrictedSignal = partiallyRestrictedSignal2
                 .withOperationValidator(op -> {
                     if (op instanceof IncrementOperation) {
                         return ValidationResult
-                                .rejected("No increment is allowed");
+                                .reject("No increment is allowed");
                     }
-                    return ValidationResult.ok();
+                    return ValidationResult.allow();
                 });
 
         // allowed:

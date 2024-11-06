@@ -121,6 +121,57 @@ public class NumberSignal extends ValueSignal<Double> {
         }
     }
 
+    /**
+     * Returns a new signal that validates the operations with the provided
+     * validator. As the same validator is for all operations, the validator
+     * should be able to handle all operations that the signal supports.
+     * <p>
+     * For example, the following code creates a signal that only allows
+     * increment by 1:
+     * <!-- @formatter:off -->
+     * <pre><code>
+     * NumberSignal number = new NumberSignal(42.0);
+     * NumberSignal limitedNumber = number.withOperationValidator(operation -&gt; {
+     *     if (op instanceof IncrementOperation increment
+     *             &amp;&amp; increment.value() != 1) {
+     *         return ValidationResult
+     *                 .reject("Only increment by 1 is allowed");
+     *     }
+     *     return ValidationResult.allow();
+     * });
+     * </code></pre>
+     * <!-- @formatter:on -->
+     * Note that the above allows other operations without any validations.
+     * If more concise restrictions are needed, specialized operation type
+     * should be used:
+     * <!-- @formatter:off -->
+     * <pre><code>
+     * NumberSignal number = new NumberSignal(42.0);
+     * NumberSignal limitedNumber = number.withOperationValidator(operation -&gt; {
+     *     return switch (operation) {
+     *         case IncrementOperation increment -&gt; {
+     *             if (increment.value() != 1) {
+     *                 yield ValidationResult
+     *                     .reject("Only increment by 1 is allowed");
+     *             }
+     *             yield ValidationResult.allow();
+     *         }
+     *         case ReplaceValueOperation&lt;Double&gt; ignored -&gt;
+     *                     ValidationResult.reject("No setting is allowed");
+     *         case SetValueOperation&lt;Double&gt; ignored -&gt;
+     *                     ValidationResult.reject("No replacing is allowed");
+     *         default -&gt; ValidationResult.allow();
+     *     };
+     * });
+     * </code></pre>
+     * <!-- @formatter:on -->
+     * @param validator
+     *            the operation validator, not <code>null</code>
+     * @return a new signal that validates the operations with the provided
+     *         validator.
+     * @throws NullPointerException
+     *             if the validator is <code>null</code>
+     */
     @Override
     public NumberSignal withOperationValidator(
             OperationValidator<Double> validator) {
@@ -131,6 +182,6 @@ public class NumberSignal extends ValueSignal<Double> {
     @Override
     public NumberSignal asReadonly() {
         return this.withOperationValidator(op -> ValidationResult
-                .rejected("Read-only signal does not allow any modifications"));
+                .reject("Read-only signal does not allow any modifications"));
     }
 }
