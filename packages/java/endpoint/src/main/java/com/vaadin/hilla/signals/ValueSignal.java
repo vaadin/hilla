@@ -177,6 +177,7 @@ public class ValueSignal<T> extends Signal<T> {
 
     public ValueSignal<T> withOperationValidator(
             OperationValidator<T> validator) {
+        Objects.requireNonNull(validator, "Validator cannot be null");
         return new OperationValidatedValueSignal<>(this, validator);
     }
 
