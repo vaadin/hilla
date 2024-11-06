@@ -139,28 +139,15 @@ public class NumberSignalTest {
     @Test
     public void incrementOperationValidated_subscriptionWorks() {
         NumberSignal number = new NumberSignal(42.0);
-        NumberSignal limitedNumber = number.withOperationValidator(operation -> {
-            return switch (operation) {
-                case IncrementOperation increment -> {
-                    if (increment.value() > 1) {
-                        yield ValidationResult
-                            .reject("Only increment by 1 is allowed");
+        NumberSignal limitedNumber = number
+                .withOperationValidator(operation -> {
+                    if (operation instanceof IncrementOperation increment
+                            && increment.value() > 1) {
+                        return ValidationResult
+                                .reject("Only increment by 1 is allowed");
                     }
-                    yield ValidationResult.allow();
-                }
-                case ReplaceValueOperation<Double> ignored ->
-                            ValidationResult.reject("No setting is allowed");
-                case SetValueOperation<Double> ignored ->
-                            ValidationResult.reject("No replacing is allowed");
-                default -> ValidationResult.allow();
-            };
-            /*if (op instanceof IncrementOperation increment
-                    && increment.value() > 1) {
-                return ValidationResult
-                        .rejected("Only increment by 1 is allowed");
-            }
-            return ValidationResult.ok();*/
-        });
+                    return ValidationResult.allow();
+                });
 
         Flux<ObjectNode> numberFlux = number.subscribe();
         AtomicInteger numberCounter = new AtomicInteger(0);
