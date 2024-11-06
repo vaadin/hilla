@@ -110,12 +110,12 @@ public class NumberSignal extends ValueSignal<Double> {
     }
 
     private static class GenericOperationValidatedNumberSignal
-        extends NumberSignal {
+            extends NumberSignal {
 
         private final Function<SignalOperation, ValidationResult> validator;
 
         public GenericOperationValidatedNumberSignal(NumberSignal delegate,
-                                                       Function<SignalOperation, ValidationResult> validator) {
+                Function<SignalOperation, ValidationResult> validator) {
             super(delegate);
             this.validator = validator;
         }
@@ -123,39 +123,39 @@ public class NumberSignal extends ValueSignal<Double> {
         @Override
         protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
             var operation = IncrementOperation.of(stateEvent.getId(),
-                stateEvent.getValue());
+                    stateEvent.getValue());
             var validationResult = validator.apply(operation);
             return handleValidationResult(stateEvent, validationResult,
-                super::handleIncrement);
+                    super::handleIncrement);
         }
 
         @Override
         protected ObjectNode handleSetEvent(StateEvent<Double> stateEvent) {
             var operation = SetValueOperation.of(stateEvent.getId(),
-                stateEvent.getValue());
+                    stateEvent.getValue());
             var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
-                super::handleSetEvent);
+                    super::handleSetEvent);
         }
 
         @Override
         protected ObjectNode handleReplaceEvent(StateEvent<Double> stateEvent) {
             var operation = ReplaceValueOperation.of(stateEvent.getId(),
-                stateEvent.getExpected(), stateEvent.getValue());
+                    stateEvent.getExpected(), stateEvent.getValue());
             var validation = validator.apply(operation);
             return handleValidationResult(stateEvent, validation,
-                super::handleReplaceEvent);
+                    super::handleReplaceEvent);
         }
     }
 
     public NumberSignal withOperationValidator(
-        Function<SignalOperation, ValidationResult> validator) {
+            Function<SignalOperation, ValidationResult> validator) {
         return new GenericOperationValidatedNumberSignal(this, validator);
     }
 
     @Override
     public NumberSignal asReadonly() {
-        return this.withOperationValidator(op -> ValidationResult.rejected(
-            "Read-only signal does not allow any modifications"));
+        return this.withOperationValidator(op -> ValidationResult
+                .rejected("Read-only signal does not allow any modifications"));
     }
 }

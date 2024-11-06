@@ -548,7 +548,7 @@ public class ListSignal<T> extends Signal<T> {
 
     @Override
     public ListSignal<T> asReadonly() {
-        return this.withOperationValidator(op -> ValidationResult.rejected(
-                "Read-only signal does not allow any modifications"));
+        return this.withOperationValidator(op -> ValidationResult
+                .rejected("Read-only signal does not allow any modifications"));
     }
 }
