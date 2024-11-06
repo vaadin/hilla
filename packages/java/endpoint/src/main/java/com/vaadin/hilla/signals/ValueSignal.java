@@ -177,14 +177,14 @@ public class ValueSignal<T> extends Signal<T> {
 
     public ValueSignal<T> withOperationValidator(
             Function<SignalOperation, ValidationResult> validator) {
-        return new ValueOperationValidatedValueSignal<>(this, validator);
+        return new OperationValidatedValueSignal<>(this, validator);
     }
 
-    private static class ValueOperationValidatedValueSignal<T>
+    private static class OperationValidatedValueSignal<T>
             extends ValueSignal<T> {
         private final Function<SignalOperation, ValidationResult> validator;
 
-        public ValueOperationValidatedValueSignal(ValueSignal<T> delegate,
+        public OperationValidatedValueSignal(ValueSignal<T> delegate,
                 Function<SignalOperation, ValidationResult> validator) {
             super(delegate);
             this.validator = validator;

@@ -365,11 +365,11 @@ public class ListSignal<T> extends Signal<T> {
         return new ValueOperationValidatedListSignal<>(this, operation);
     }
 
-    private static class GenericOperationValidatedListSignal<T>
+    private static class OperationValidatedListSignal<T>
             extends ValidatedListSignal<T> {
         private final Function<SignalOperation, ValidationResult> operationValidator;
 
-        public GenericOperationValidatedListSignal(ListSignal<T> delegate,
+        public OperationValidatedListSignal(ListSignal<T> delegate,
                 Function<SignalOperation, ValidationResult> operationValidator) {
             super(delegate);
             this.operationValidator = operationValidator;
@@ -428,7 +428,7 @@ public class ListSignal<T> extends Signal<T> {
 
     public ListSignal<T> withOperationValidator(
             Function<SignalOperation, ValidationResult> operation) {
-        return new GenericOperationValidatedListSignal<>(this, operation);
+        return new OperationValidatedListSignal<>(this, operation);
     }
 
     @Override

@@ -83,12 +83,11 @@ public class NumberSignal extends ValueSignal<Double> {
         }
     }
 
-    private static class GenericOperationValidatedNumberSignal
-            extends NumberSignal {
+    private static class OperationValidatedNumberSignal extends NumberSignal {
 
         private final Function<SignalOperation, ValidationResult> validator;
 
-        public GenericOperationValidatedNumberSignal(NumberSignal delegate,
+        public OperationValidatedNumberSignal(NumberSignal delegate,
                 Function<SignalOperation, ValidationResult> validator) {
             super(delegate);
             this.validator = validator;
@@ -122,9 +121,10 @@ public class NumberSignal extends ValueSignal<Double> {
         }
     }
 
+    @Override
     public NumberSignal withOperationValidator(
             Function<SignalOperation, ValidationResult> validator) {
-        return new GenericOperationValidatedNumberSignal(this, validator);
+        return new OperationValidatedNumberSignal(this, validator);
     }
 
     @Override
