@@ -67,9 +67,7 @@ export class LocaleFormatter {
     if (typeof value === 'object') {
       const { year, month, day } = value;
       const date = new Date();
-      date.setFullYear(year);
-      date.setMonth(month);
-      date.setDate(day);
+      date.setFullYear(year, month, day);
       return this.#date.format(date);
     }
 
@@ -100,9 +98,7 @@ export class LocaleFormatter {
 
     // Verify that the parsed date is valid
     const dateInstance = new Date();
-    dateInstance.setFullYear(year);
-    dateInstance.setMonth(month);
-    dateInstance.setDate(day);
+    dateInstance.setFullYear(year, month, day);
 
     if (dateInstance.getFullYear() !== year || dateInstance.getMonth() !== month || dateInstance.getDate() !== day) {
       return undefined;
