@@ -7,9 +7,9 @@ import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.operation.ListInsertOperation;
 import com.vaadin.hilla.signals.operation.ListRemoveOperation;
+import com.vaadin.hilla.signals.operation.OperationValidator;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
-import com.vaadin.hilla.signals.operation.SignalOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 import com.vaadin.hilla.signals.operation.ValueOperation;
 import jakarta.annotation.Nullable;
@@ -367,10 +367,10 @@ public class ListSignal<T> extends Signal<T> {
 
     private static class OperationValidatedListSignal<T>
             extends ValidatedListSignal<T> {
-        private final Function<SignalOperation, ValidationResult> operationValidator;
+        private final OperationValidator operationValidator;
 
         public OperationValidatedListSignal(ListSignal<T> delegate,
-                Function<SignalOperation, ValidationResult> operationValidator) {
+                OperationValidator operationValidator) {
             super(delegate);
             this.operationValidator = operationValidator;
         }
@@ -380,7 +380,7 @@ public class ListSignal<T> extends Signal<T> {
             var listInsertOperation = new ListInsertOperation<>(event.getId(),
                     event.getPosition(), event.getValue());
             var validationResult = operationValidator
-                    .apply(listInsertOperation);
+                    .validate(listInsertOperation);
             return handleValidationResult(event, validationResult,
                     super::handleInsert);
         }
@@ -394,7 +394,7 @@ public class ListSignal<T> extends Signal<T> {
             var listRemoveOperation = new ListRemoveOperation<>(event.getId(),
                     entryToRemove);
             var validationResult = operationValidator
-                    .apply(listRemoveOperation);
+                    .validate(listRemoveOperation);
             return handleValidationResult(event, validationResult,
                     super::handleRemoval);
         }
@@ -409,7 +409,7 @@ public class ListSignal<T> extends Signal<T> {
             }
 
             var valueOperation = extractValueOperation(event);
-            var validationResult = operationValidator.apply(valueOperation);
+            var validationResult = operationValidator.validate(valueOperation);
             handleValidationResult(event, validationResult,
                     super::submitToChild);
         }
@@ -426,8 +426,7 @@ public class ListSignal<T> extends Signal<T> {
         }
     }
 
-    public ListSignal<T> withOperationValidator(
-            Function<SignalOperation, ValidationResult> operation) {
+    public ListSignal<T> withOperationValidator(OperationValidator operation) {
         return new OperationValidatedListSignal<>(this, operation);
     }
 

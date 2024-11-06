@@ -1,15 +1,13 @@
 package com.vaadin.hilla.signals;
 
-import java.util.function.Function;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.operation.IncrementOperation;
+import com.vaadin.hilla.signals.operation.OperationValidator;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
-import com.vaadin.hilla.signals.operation.SignalOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 
 /**
@@ -85,10 +83,10 @@ public class NumberSignal extends ValueSignal<Double> {
 
     private static class OperationValidatedNumberSignal extends NumberSignal {
 
-        private final Function<SignalOperation, ValidationResult> validator;
+        private final OperationValidator validator;
 
         public OperationValidatedNumberSignal(NumberSignal delegate,
-                Function<SignalOperation, ValidationResult> validator) {
+                OperationValidator validator) {
             super(delegate);
             this.validator = validator;
         }
@@ -97,7 +95,7 @@ public class NumberSignal extends ValueSignal<Double> {
         protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
             var operation = IncrementOperation.of(stateEvent.getId(),
                     stateEvent.getValue());
-            var validationResult = validator.apply(operation);
+            var validationResult = validator.validate(operation);
             return handleValidationResult(stateEvent, validationResult,
                     super::handleIncrement);
         }
@@ -106,7 +104,7 @@ public class NumberSignal extends ValueSignal<Double> {
         protected ObjectNode handleSetEvent(StateEvent<Double> stateEvent) {
             var operation = SetValueOperation.of(stateEvent.getId(),
                     stateEvent.getValue());
-            var validation = validator.apply(operation);
+            var validation = validator.validate(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleSetEvent);
         }
@@ -115,15 +113,14 @@ public class NumberSignal extends ValueSignal<Double> {
         protected ObjectNode handleReplaceEvent(StateEvent<Double> stateEvent) {
             var operation = ReplaceValueOperation.of(stateEvent.getId(),
                     stateEvent.getExpected(), stateEvent.getValue());
-            var validation = validator.apply(operation);
+            var validation = validator.validate(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleReplaceEvent);
         }
     }
 
     @Override
-    public NumberSignal withOperationValidator(
-            Function<SignalOperation, ValidationResult> validator) {
+    public NumberSignal withOperationValidator(OperationValidator validator) {
         return new OperationValidatedNumberSignal(this, validator);
     }
 

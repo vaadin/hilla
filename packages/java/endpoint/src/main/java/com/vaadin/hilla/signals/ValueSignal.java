@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import com.vaadin.hilla.signals.core.event.StateEvent;
-import com.vaadin.hilla.signals.operation.SignalOperation;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.function.Function;
 
+import com.vaadin.hilla.signals.operation.OperationValidator;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
@@ -175,17 +175,16 @@ public class ValueSignal<T> extends Signal<T> {
         }
     }
 
-    public ValueSignal<T> withOperationValidator(
-            Function<SignalOperation, ValidationResult> validator) {
+    public ValueSignal<T> withOperationValidator(OperationValidator validator) {
         return new OperationValidatedValueSignal<>(this, validator);
     }
 
     private static class OperationValidatedValueSignal<T>
             extends ValueSignal<T> {
-        private final Function<SignalOperation, ValidationResult> validator;
+        private final OperationValidator validator;
 
         public OperationValidatedValueSignal(ValueSignal<T> delegate,
-                Function<SignalOperation, ValidationResult> validator) {
+                OperationValidator validator) {
             super(delegate);
             this.validator = validator;
         }
@@ -194,7 +193,7 @@ public class ValueSignal<T> extends Signal<T> {
         protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
             var operation = new SetValueOperation<>(stateEvent.getId(),
                     stateEvent.getValue());
-            var validation = validator.apply(operation);
+            var validation = validator.validate(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleSetEvent);
         }
@@ -203,7 +202,7 @@ public class ValueSignal<T> extends Signal<T> {
         protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
             var operation = new ReplaceValueOperation<>(stateEvent.getId(),
                     stateEvent.getExpected(), stateEvent.getValue());
-            var validation = validator.apply(operation);
+            var validation = validator.validate(operation);
             return handleValidationResult(stateEvent, validation,
                     super::handleReplaceEvent);
         }
