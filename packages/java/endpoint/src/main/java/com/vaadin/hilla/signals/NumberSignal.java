@@ -88,7 +88,7 @@ public class NumberSignal extends ValueSignal<Double> {
         private final OperationValidator<Double> validator;
 
         private ValidatedNumberSignal(NumberSignal delegate,
-                                     OperationValidator<Double> validator) {
+                OperationValidator<Double> validator) {
             super(delegate);
             this.validator = validator;
         }

@@ -3,6 +3,10 @@ package com.vaadin.hilla.signals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.operation.IncrementOperation;
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
+import com.vaadin.hilla.signals.operation.ValidationResult;
 import org.junit.Assert;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -107,6 +111,123 @@ public class NumberSignalTest {
 
         signal.submit(createIncrementEvent("-5.5"));
         assertEquals(38.5, signal.getValue(), 0.0);
+    }
+
+    @Test
+    public void incrementOperationValidated_originalInstanceIsNotRestricted() {
+        NumberSignal counter = new NumberSignal(42.0);
+        NumberSignal limitedCounter = counter.withOperationValidator(op -> {
+            if (op instanceof IncrementOperation increment
+                    && increment.value() > 1) {
+                return ValidationResult
+                        .rejected("Only increment by 1 is allowed");
+            }
+            return ValidationResult.ok();
+        });
+
+        counter.submit(createIncrementEvent("2"));
+        assertEquals(44.0, counter.getValue(), 0.0);
+
+        // the restricted instance sees the same value as the original one:
+        assertEquals(44.0, limitedCounter.getValue(), 0.0);
+
+        // the restricted instance doesn't allow replace operation:
+        limitedCounter.submit(createIncrementEvent("2"));
+        assertEquals(44.0, limitedCounter.getValue(), 0.0);
+    }
+
+    @Test
+    public void incrementOperationValidated_subscriptionWorks() {
+        NumberSignal number = new NumberSignal(42.0);
+        NumberSignal limitedNumber = number.withOperationValidator(op -> {
+            if (op instanceof IncrementOperation increment
+                    && increment.value() > 1) {
+                return ValidationResult
+                        .rejected("Only increment by 1 is allowed");
+            }
+            return ValidationResult.ok();
+        });
+
+        Flux<ObjectNode> numberFlux = number.subscribe();
+        AtomicInteger numberCounter = new AtomicInteger(0);
+        numberFlux.subscribe(eventJson -> numberCounter.incrementAndGet());
+        assertEquals(1, numberCounter.get()); // initial state
+
+        Flux<ObjectNode> limitedNumberFlux = limitedNumber.subscribe();
+        AtomicInteger limitedNumberCounter = new AtomicInteger(0);
+        limitedNumberFlux
+                .subscribe(eventJson -> limitedNumberCounter.incrementAndGet());
+        assertEquals(1, limitedNumberCounter.get()); // initial state
+
+        number.submit(createIncrementEvent("5"));
+        assertEquals(2, numberCounter.get());
+        assertEquals(2, limitedNumberCounter.get());
+
+        number.submit(createIncrementEvent("3"));
+        assertEquals(3, numberCounter.get());
+        assertEquals(3, limitedNumberCounter.get());
+    }
+
+    @Test
+    public void multipleValidators_allValidatorsAreApplied() {
+        NumberSignal partiallyRestrictedSignal1 = new NumberSignal(42.0)
+                .withOperationValidator(op -> {
+                    if (op instanceof IncrementOperation increment
+                            && increment.value() % 2 == 0) {
+                        return ValidationResult.rejected(
+                                "Increment by multiples of 2 is not allowed");
+                    }
+                    return ValidationResult.ok();
+                });
+        NumberSignal partiallyRestrictedSignal2 = partiallyRestrictedSignal1
+                .withOperationValidator(op -> {
+                    if (op instanceof IncrementOperation increment
+                            && increment.value() % 3 == 0) {
+                        return ValidationResult.rejected(
+                                "Increment by multiples of 3 is not allowed");
+                    }
+                    return ValidationResult.ok();
+                });
+        NumberSignal fullyRestrictedSignal = partiallyRestrictedSignal2
+                .withOperationValidator(op -> {
+                    if (op instanceof IncrementOperation) {
+                        return ValidationResult
+                                .rejected("No increment is allowed");
+                    }
+                    return ValidationResult.ok();
+                });
+
+        // allowed:
+        partiallyRestrictedSignal1.submit(createIncrementEvent("1"));
+        // allowed:
+        partiallyRestrictedSignal2.submit(createIncrementEvent("5"));
+        // not allowed:
+        partiallyRestrictedSignal2.submit(createIncrementEvent("6"));
+
+        assertEquals(48.0, fullyRestrictedSignal.getValue(), 0.0);
+        assertEquals(48.0, partiallyRestrictedSignal1.getValue(), 0.0);
+
+        fullyRestrictedSignal.submit(createIncrementEvent("1"));
+        assertEquals(48.0, fullyRestrictedSignal.getValue(), 0.0);
+        assertEquals(48.0, partiallyRestrictedSignal1.getValue(), 0.0);
+    }
+
+    @Test
+    public void withOperationValidator_throws_whenValidatorIsNull() {
+        assertThrows(NullPointerException.class,
+                () -> new NumberSignal(42.0).withOperationValidator(null));
+    }
+
+    @Test
+    public void readonlyInstance_doesNotAllowAnyModifications() {
+        NumberSignal signal = new NumberSignal(42.0);
+        NumberSignal readonlySignal = signal.asReadonly();
+
+        readonlySignal.submit(createIncrementEvent("2"));
+        assertEquals(42.0, readonlySignal.getValue(), 0.0);
+
+        readonlySignal.submit(createSetEvent("5"));
+        assertEquals(42.0, readonlySignal.getValue(), 0.0);
     }
 
     private ObjectNode createIncrementEvent(String value) {
