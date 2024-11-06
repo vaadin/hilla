@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
+import com.vaadin.hilla.signals.operation.ListInsertOperation;
+import com.vaadin.hilla.signals.operation.ListRemoveOperation;
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 import jakarta.annotation.Nullable;
 import org.junit.Assert;
@@ -679,81 +683,16 @@ public class ListSignalTest {
     }
 
     @Test
-    public void withInsertionValidator_doesNotLimitTheOriginalInstance() {
-        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
-
-        unrestrictedSignal
-                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unrestrictedSignal.submit(
-                createInsertEvent("Jane Executive", InsertPosition.LAST));
-        assertEquals(2, extractEntries(unrestrictedSignal.createSnapshotEvent(),
-                String.class, Entry::new).size());
-
-        ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
-                .withInsertionValidator(operation -> ValidationResult
-                        .rejected("No insertion allowed"));
-        // the restricted instance sees the same entries as the original one:
-        assertEquals(2,
-                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-
-        // the restricted instance doesn't allow insertion:
-        noInsertionAllowedSignal.submit(
-                createInsertEvent("Should-be rejected!", InsertPosition.LAST));
-        noInsertionAllowedSignal.submit(
-                createInsertEvent("Should-be rejected!", InsertPosition.LAST));
-        assertEquals(2,
-                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-
-        unrestrictedSignal.submit(
-                createInsertEvent("Emma Executive", InsertPosition.LAST));
-        assertEquals(3, extractEntries(unrestrictedSignal.createSnapshotEvent(),
-                String.class, Entry::new).size());
-        assertEquals(3,
-                extractEntries(noInsertionAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-    }
-
-    @Test
-    public void withInsertionValidator_doesNotChangeSubscriptionBehavior() {
-        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
-        ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
-                .withInsertionValidator(operation -> ValidationResult
-                        .rejected("No insertion allowed"));
-
-        Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
-        AtomicInteger unrestrictedCounter = new AtomicInteger(0);
-        unrestrictedFlux.subscribe(eventJson -> {
-            unrestrictedCounter.incrementAndGet();
-        });
-        assertEquals(1, unrestrictedCounter.get()); // initial state
-
-        Flux<ObjectNode> noInsertionAllowedFlux = noInsertionAllowedSignal
-                .subscribe();
-        AtomicInteger noInsertionAllowedCounter = new AtomicInteger(0);
-        noInsertionAllowedFlux.subscribe(eventJson -> {
-            noInsertionAllowedCounter.incrementAndGet();
-        });
-        assertEquals(1, noInsertionAllowedCounter.get()); // initial state
-
-        unrestrictedSignal
-                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        assertEquals(2, unrestrictedCounter.get());
-        assertEquals(2, noInsertionAllowedCounter.get());
-
-        unrestrictedSignal.submit(
-                createInsertEvent("Jane Executive", InsertPosition.LAST));
-        assertEquals(3, unrestrictedCounter.get());
-        assertEquals(3, noInsertionAllowedCounter.get());
-    }
-
-    @Test
     public void withInsertionValidator_doesNotLimitTheRemoveOperation() {
         ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
         ListSignal<String> noInsertionAllowedSignal = unrestrictedSignal
-                .withInsertionValidator(operation -> ValidationResult
-                        .rejected("No insertion allowed"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListInsertOperation) {
+                        return ValidationResult
+                                .rejected("No insertion allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         unrestrictedSignal
                 .submit(createInsertEvent("John Normal", InsertPosition.LAST));
@@ -780,91 +719,15 @@ public class ListSignalTest {
     }
 
     @Test
-    public void withRemovalValidator_doesNotLimitTheOriginalInstance() {
-        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
-
-        unrestrictedSignal
-                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unrestrictedSignal.submit(
-                createInsertEvent("Jane Executive", InsertPosition.LAST));
-        var entries = extractEntries(unrestrictedSignal.createSnapshotEvent(),
-                String.class, Entry::new);
-        assertEquals(2, entries.size());
-
-        ListSignal<String> noRemoveAllowedSignal = unrestrictedSignal
-                .withRemovalValidator(operation -> ValidationResult
-                        .rejected("No removal allowed"));
-        // the restricted instance sees the same entries as the original one:
-        assertEquals(2,
-                extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-
-        // the restricted instance doesn't allow removal:
-        noRemoveAllowedSignal.submit(createRemoveEvent(entries.get(0)));
-        noRemoveAllowedSignal.submit(createRemoveEvent(entries.get(1)));
-        assertEquals(2,
-                extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-
-        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(1, extractEntries(unrestrictedSignal.createSnapshotEvent(),
-                String.class, Entry::new).size());
-        assertEquals(1,
-                extractEntries(noRemoveAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-    }
-
-    @Test
-    public void withRemovalValidator_doesNotChangeSubscriptionBehavior() {
-        ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
-        ListSignal<String> noRemovalAllowedSignal = unrestrictedSignal
-                .withRemovalValidator(operation -> ValidationResult
-                        .rejected("No removal allowed"));
-
-        Flux<ObjectNode> unrestrictedFlux = unrestrictedSignal.subscribe();
-        AtomicInteger unrestrictedCounter = new AtomicInteger(0);
-        unrestrictedFlux
-                .subscribe(eventJson -> unrestrictedCounter.incrementAndGet());
-        assertEquals(1, unrestrictedCounter.get()); // initial state
-
-        Flux<ObjectNode> noRemovalAllowedFlux = noRemovalAllowedSignal
-                .subscribe();
-        AtomicInteger noRemovalAllowedCounter = new AtomicInteger(0);
-        noRemovalAllowedFlux.subscribe(
-                eventJson -> noRemovalAllowedCounter.incrementAndGet());
-        assertEquals(1, noRemovalAllowedCounter.get()); // initial state
-
-        unrestrictedSignal
-                .submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        unrestrictedSignal.submit(
-                createInsertEvent("Jane Executive", InsertPosition.LAST));
-        assertEquals(3, unrestrictedCounter.get());
-        assertEquals(3, noRemovalAllowedCounter.get());
-
-        var entries = extractEntries(
-                noRemovalAllowedSignal.createSnapshotEvent(), String.class,
-                Entry::new);
-
-        // updates should be received for the rejected events:
-        noRemovalAllowedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(4, unrestrictedCounter.get());
-        assertEquals(4, noRemovalAllowedCounter.get());
-
-        unrestrictedSignal.submit(createRemoveEvent(entries.get(0)));
-        assertEquals(5, unrestrictedCounter.get());
-        assertEquals(5, noRemovalAllowedCounter.get());
-
-        unrestrictedSignal.submit(createRemoveEvent(entries.get(1)));
-        assertEquals(6, unrestrictedCounter.get());
-        assertEquals(6, noRemovalAllowedCounter.get());
-    }
-
-    @Test
     public void withRemovalValidator_doesNotLimitTheInsertOperation() {
         ListSignal<String> unrestrictedSignal = new ListSignal<>(String.class);
         ListSignal<String> noRemovalAllowedSignal = unrestrictedSignal
-                .withRemovalValidator(operation -> ValidationResult
-                        .rejected("No removal allowed"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListRemoveOperation) {
+                        return ValidationResult.rejected("No removal allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         unrestrictedSignal
                 .submit(createInsertEvent("John Normal", InsertPosition.LAST));
@@ -902,16 +765,25 @@ public class ListSignalTest {
     @Test
     public void withMultipleStructuralValidators_allValidatorsAreApplied() {
         ListSignal<String> partiallyRestrictedSignal = new ListSignal<>(
-                String.class).withInsertionValidator(
-                        operation -> operation.value().startsWith("Joe")
-                                ? ValidationResult.rejected("No Joe is allowed")
-                                : ValidationResult.ok());
+                String.class).withOperationValidator(operation -> {
+                    if (operation instanceof ListInsertOperation
+                            && ((ListInsertOperation<String>) operation).value()
+                                    .startsWith("Joe")) {
+                        return ValidationResult.rejected("No Joe is allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         ListSignal<String> readonlyStructureSignal = partiallyRestrictedSignal
-                .withInsertionValidator(operation -> ValidationResult
-                        .rejected("No insertion allowed"))
-                .withRemovalValidator(operation -> ValidationResult
-                        .rejected("No removal allowed"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListInsertOperation) {
+                        return ValidationResult
+                                .rejected("No insertion allowed");
+                    } else if (operation instanceof ListRemoveOperation) {
+                        return ValidationResult.rejected("No removal allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         partiallyRestrictedSignal
                 .submit(createInsertEvent("John Normal", InsertPosition.LAST));
@@ -952,139 +824,19 @@ public class ListSignalTest {
     }
 
     @Test
-    public void withItemSetValueValidator_doesNotLimitTheOriginalInstance_norOtherOperations() {
-        ListSignal<String> signal = new ListSignal<>(String.class);
-        ListSignal<String> noItemSetValueAllowedSignal = signal
-                .withItemSetValueValidator(operation -> ValidationResult
-                        .rejected("No item set value allowed"));
-        // add items through both signal instances:
-        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
-        // verify that adding itemSetValueValidator doesn't affect other
-        // operations:
-        noItemSetValueAllowedSignal.submit(
-                createInsertEvent("Jane Executive", InsertPosition.LAST));
-
-        var entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        assertEquals(2, entries.size());
-        // the restricted instance sees the same entries as the original one:
-        assertEquals(2,
-                extractEntries(
-                        noItemSetValueAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-
-        var orderedEntries = buildLinkedList(entries);
-        // unrestricted instance allows item set value:
-        var firstSignalId = orderedEntries.get(0).id();
-        signal.submit(
-                createSetEvent("Should-be accepted", firstSignalId.toString()));
-        // the restricted instance doesn't allow item set value:
-        var secondSignalId = orderedEntries.get(1).id();
-        noItemSetValueAllowedSignal.submit(createSetEvent("Should-be Rejected",
-                secondSignalId.toString()));
-
-        entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        orderedEntries = buildLinkedList(entries);
-
-        // verify the change:
-        assertEquals(2, orderedEntries.size());
-        assertEquals("Should-be accepted", orderedEntries.get(0).value());
-        assertEquals("Jane Executive", orderedEntries.get(1).value());
-        assertEquals(secondSignalId, orderedEntries.get(1).id());
-
-        // the item SetValue validator doesn't limit item Replace operation:
-        noItemSetValueAllowedSignal.submit(createReplaceEvent("Jane Executive",
-                "Replace Accepted", secondSignalId.toString()));
-        entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        orderedEntries = buildLinkedList(entries);
-
-        // verify replace operation was successful, even through the restricted
-        // instance:
-        assertEquals(2, orderedEntries.size());
-        assertEquals("Should-be accepted", orderedEntries.get(0).value());
-        assertEquals("Replace Accepted", orderedEntries.get(1).value());
-
-        // verify the restricted instance allows removing the items:
-        noItemSetValueAllowedSignal
-                .submit(createRemoveEvent(orderedEntries.get(1)));
-        entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        assertEquals(1, entries.size());
-    }
-
-    @Test
-    public void withItemReplaceValueValidator_doesNotLimitTheOriginalInstance_norOtherOperations() {
-        ListSignal<String> signal = new ListSignal<>(String.class);
-        ListSignal<String> noItemReplaceValueAllowedSignal = signal
-                .withItemReplaceValueValidator(operation -> ValidationResult
-                        .rejected("No item replace value allowed"));
-        // verify that adding itemSetValueValidator doesn't affect other
-        // operations:
-        noItemReplaceValueAllowedSignal.submit(
-                createInsertEvent("Jane Executive", InsertPosition.LAST));
-        // add items through both signal instances:
-        signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
-
-        var entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        assertEquals(2, entries.size());
-        // the restricted instance sees the same entries as the original one:
-        assertEquals(2,
-                extractEntries(
-                        noItemReplaceValueAllowedSignal.createSnapshotEvent(),
-                        String.class, Entry::new).size());
-
-        var orderedEntries = buildLinkedList(entries);
-        // unrestricted instance allows item set value:
-        var firstSignalId = orderedEntries.get(0).id();
-        signal.submit(createReplaceEvent("Jane Executive", "Should-be accepted",
-                firstSignalId.toString()));
-        // the restricted instance doesn't allow item set value:
-        var secondSignalId = orderedEntries.get(1).id();
-        noItemReplaceValueAllowedSignal.submit(createReplaceEvent("John Normal",
-                "Should-be Rejected", secondSignalId.toString()));
-
-        entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        orderedEntries = buildLinkedList(entries);
-
-        // verify the change:
-        assertEquals(2, orderedEntries.size());
-        assertEquals("Should-be accepted", orderedEntries.get(0).value());
-        assertEquals("John Normal", orderedEntries.get(1).value());
-        assertEquals(secondSignalId, orderedEntries.get(1).id());
-
-        // the item ReplaceValue validator doesn't limit item set operation:
-        noItemReplaceValueAllowedSignal.submit(
-                createSetEvent("Set Accepted", secondSignalId.toString()));
-        entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        orderedEntries = buildLinkedList(entries);
-
-        // verify replace operation was successful, even through the restricted
-        // instance:
-        assertEquals(2, orderedEntries.size());
-        assertEquals("Should-be accepted", orderedEntries.get(0).value());
-        assertEquals("Set Accepted", orderedEntries.get(1).value());
-
-        // verify the restricted instance allows removing the items:
-        noItemReplaceValueAllowedSignal
-                .submit(createRemoveEvent(orderedEntries.get(1)));
-        entries = extractEntries(signal.createSnapshotEvent(), String.class,
-                Entry::new);
-        assertEquals(1, entries.size());
-    }
-
-    @Test
     public void withMultipleItemValidators_allValidatorsAreApplied() {
         ListSignal<String> signal = new ListSignal<>(String.class);
         ListSignal<String> readOnlyItemsSignal = signal
-                .withItemSetValueValidator(operation -> ValidationResult
-                        .rejected("No item set value allowed"))
-                .withItemReplaceValueValidator(operation -> ValidationResult
-                        .rejected("No item replace value allowed"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof SetValueOperation) {
+                        return ValidationResult
+                                .rejected("No item set value allowed");
+                    } else if (operation instanceof ReplaceValueOperation) {
+                        return ValidationResult
+                                .rejected("No item replace value allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         // add items through both signal instances:
         signal.submit(createInsertEvent("John Normal", InsertPosition.LAST));
@@ -1129,14 +881,21 @@ public class ListSignalTest {
         signal.submit(createInsertEvent("Jane Executive", InsertPosition.LAST));
 
         ListSignal<String> readOnlyItemsSignal = signal
-                .withInsertionValidator(operation -> ValidationResult
-                        .rejected("No insertion allowed"))
-                .withRemovalValidator(operation -> ValidationResult
-                        .rejected("No removal allowed"))
-                .withItemSetValueValidator(operation -> ValidationResult
-                        .rejected("No item set value allowed"))
-                .withItemReplaceValueValidator(operation -> ValidationResult
-                        .rejected("No item replace value allowed"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListInsertOperation) {
+                        return ValidationResult
+                                .rejected("No insertion allowed");
+                    } else if (operation instanceof ListRemoveOperation) {
+                        return ValidationResult.rejected("No removal allowed");
+                    } else if (operation instanceof SetValueOperation) {
+                        return ValidationResult
+                                .rejected("No item set value allowed");
+                    } else if (operation instanceof ReplaceValueOperation) {
+                        return ValidationResult
+                                .rejected("No item replace value allowed");
+                    }
+                    return ValidationResult.ok();
+                });
 
         var entries = extractEntries(readOnlyItemsSignal.createSnapshotEvent(),
                 String.class, Entry::new);
@@ -1184,16 +943,30 @@ public class ListSignalTest {
     @Test
     public void withValidatorSignal_shouldReceiveUpdates() {
         ListSignal<String> chatSignal = new ListSignal<>(String.class)
-                .withInsertionValidator(operation -> operation.value()
-                        .toLowerCase().contains("bad")
-                                ? ValidationResult.rejected(
-                                        "The word 'bad' is not allowed")
-                                : ValidationResult.ok());
-        ListSignal<String> adminSignal = chatSignal.withRemovalValidator(
-                operation -> ValidationResult.rejected("No removal allowed"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListInsertOperation
+                            && ((ListInsertOperation<String>) operation).value()
+                                    .toLowerCase().contains("bad")) {
+                        return ValidationResult
+                                .rejected("The word 'bad' is not allowed");
+                    }
+                    return ValidationResult.ok();
+                });
+        ListSignal<String> adminSignal = chatSignal
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListRemoveOperation) {
+                        return ValidationResult.rejected("No removal allowed");
+                    }
+                    return ValidationResult.ok();
+                });
         ListSignal<String> userSignal = adminSignal
-                .withInsertionValidator(operation -> ValidationResult
-                        .rejected("Read-only signal doesn't allow removal"));
+                .withOperationValidator(operation -> {
+                    if (operation instanceof ListInsertOperation) {
+                        return ValidationResult.rejected(
+                                "Read-only signal doesn't allow insertion");
+                    }
+                    return ValidationResult.ok();
+                });
 
         var chatFlux = chatSignal.subscribe();
         var adminFlux = adminSignal.subscribe();

@@ -83,32 +83,6 @@ public class NumberSignal extends ValueSignal<Double> {
         }
     }
 
-    public NumberSignal withIncrementOperationValidator(
-            Function<Double, Boolean> validator) {
-        return new IncrementOperationValidatedNumberSignal(this, validator);
-    }
-
-    private static class IncrementOperationValidatedNumberSignal
-            extends NumberSignal {
-
-        private final Function<Double, Boolean> validator;
-
-        public IncrementOperationValidatedNumberSignal(NumberSignal delegate,
-                Function<Double, Boolean> validator) {
-            super(delegate);
-            this.validator = validator;
-        }
-
-        @Override
-        protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
-            if (validator.apply(stateEvent.getValue())) {
-                return super.handleIncrement(stateEvent);
-            }
-            stateEvent.setAccepted(false);
-            return stateEvent.toJson();
-        }
-    }
-
     private static class GenericOperationValidatedNumberSignal
             extends NumberSignal {
 

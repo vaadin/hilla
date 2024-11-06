@@ -175,56 +175,6 @@ public class ValueSignal<T> extends Signal<T> {
         }
     }
 
-    public ValueSignal<T> withSetOperationValidator(
-            Function<SetValueOperation<T>, ValidationResult> validator) {
-        return new SetOperationValidatedValueSignal<>(this, validator);
-    }
-
-    private static class SetOperationValidatedValueSignal<T>
-            extends ValueSignal<T> {
-        private final Function<SetValueOperation<T>, ValidationResult> validator;
-
-        public SetOperationValidatedValueSignal(ValueSignal<T> delegate,
-                Function<SetValueOperation<T>, ValidationResult> validator) {
-            super(delegate);
-            this.validator = validator;
-        }
-
-        @Override
-        protected ObjectNode handleSetEvent(StateEvent<T> stateEvent) {
-            var operation = new SetValueOperation<>(stateEvent.getId(),
-                    stateEvent.getValue());
-            var validation = validator.apply(operation);
-            return handleValidationResult(stateEvent, validation,
-                    super::handleSetEvent);
-        }
-    }
-
-    public ValueSignal<T> withReplaceOperationValidator(
-            Function<ReplaceValueOperation<T>, ValidationResult> validator) {
-        return new ReplaceOperationValidatedValueSignal<>(this, validator);
-    }
-
-    private static class ReplaceOperationValidatedValueSignal<T>
-            extends ValueSignal<T> {
-        private final Function<ReplaceValueOperation<T>, ValidationResult> validator;
-
-        public ReplaceOperationValidatedValueSignal(ValueSignal<T> delegate,
-                Function<ReplaceValueOperation<T>, ValidationResult> validator) {
-            super(delegate);
-            this.validator = validator;
-        }
-
-        @Override
-        protected ObjectNode handleReplaceEvent(StateEvent<T> stateEvent) {
-            var operation = new ReplaceValueOperation<>(stateEvent.getId(),
-                    stateEvent.getExpected(), stateEvent.getValue());
-            var validation = validator.apply(operation);
-            return handleValidationResult(stateEvent, validation,
-                    super::handleReplaceEvent);
-        }
-    }
-
     public ValueSignal<T> withOperationValidator(
             Function<SignalOperation, ValidationResult> validator) {
         return new ValueOperationValidatedValueSignal<>(this, validator);
