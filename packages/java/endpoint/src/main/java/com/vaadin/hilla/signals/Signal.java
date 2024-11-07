@@ -65,7 +65,7 @@ public abstract class Signal<T> {
      * @param event
      *            the event to submit
      */
-    public synchronized void submit(ObjectNode event) {
+    public void submit(ObjectNode event) {
         var processedEvent = processEvent(event);
         mainSink.tryEmitNext(processedEvent);
     }

@@ -7,10 +7,11 @@ import com.vaadin.hilla.signals.core.event.StateEvent;
 import jakarta.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ValueSignal<T> extends Signal<T> {
 
-    private T value;
+    protected AtomicReference<T> value;
 
     /**
      * Creates a new ValueSignal with the provided default value.
@@ -26,7 +27,7 @@ public class ValueSignal<T> extends Signal<T> {
     public ValueSignal(T defaultValue, Class<T> valueType) {
         this(valueType);
         Objects.requireNonNull(defaultValue);
-        this.value = defaultValue;
+        this.value = new AtomicReference<>(defaultValue);
     }
 
     /**
@@ -50,7 +51,7 @@ public class ValueSignal<T> extends Signal<T> {
      */
     @Nullable
     public T getValue() {
-        return this.value;
+        return value.get();
     }
 
     @Override
@@ -71,18 +72,20 @@ public class ValueSignal<T> extends Signal<T> {
      * @return <code>true</code> if the event was successfully processed and the
      *         signal value was updated, <code>false</code> otherwise.
      */
+    @Override
     protected ObjectNode processEvent(ObjectNode event) {
         try {
             var stateEvent = new StateEvent<>(event, getValueType());
             return switch (stateEvent.getEventType()) {
                 case SET -> {
-                    this.value = stateEvent.getValue();
+                    value.set(stateEvent.getValue());
                     stateEvent.setAccepted(true);
                     yield stateEvent.toJson();
                 }
                 case REPLACE -> {
-                    boolean accepted = compareAndSet(stateEvent.getValue(),
-                        stateEvent.getExpected());
+                    boolean accepted = value.compareAndSet(
+                        stateEvent.getExpected(),
+                        stateEvent.getValue());
                     stateEvent.setAccepted(accepted);
                     yield stateEvent.toJson();
                 }
@@ -93,25 +96,5 @@ public class ValueSignal<T> extends Signal<T> {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
         }
-    }
-
-    /**
-     * Compares the current value with the expected value and updates the signal
-     * value if they match. Note that this method is not thread-safe and should
-     * be called from a synchronized context.
-     *
-     * @param newValue
-     *            the new value to set
-     * @param expectedValue
-     *            the expected value
-     * @return <code>true</code> if the value was successfully updated,
-     *         <code>false</code> otherwise
-     */
-    protected boolean compareAndSet(T newValue, T expectedValue) {
-        if (Objects.equals(this.value, expectedValue)) {
-            this.value = newValue;
-            return true;
-        }
-        return false;
     }
 }

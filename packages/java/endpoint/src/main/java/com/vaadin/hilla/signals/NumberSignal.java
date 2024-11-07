@@ -48,10 +48,8 @@ public class NumberSignal extends ValueSignal<Double> {
                     .equals(stateEvent.getEventType())) {
                 return super.processEvent(event);
             }
-            Double expectedValue = getValue();
-            Double newValue = expectedValue + stateEvent.getValue();
-            boolean accepted = super.compareAndSet(newValue, expectedValue);
-            stateEvent.setAccepted(accepted);
+            value.updateAndGet(v -> v + stateEvent.getValue());
+            stateEvent.setAccepted(true);
             return stateEvent.toJson();
         } catch (InvalidEventTypeException | MissingFieldException e) {
             throw new UnsupportedOperationException(
