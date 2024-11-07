@@ -1,28 +1,20 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Signal<T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Signal.class);
-
-    private final ReentrantLock lock = new ReentrantLock();
 
     private final UUID id = UUID.randomUUID();
 
     private final Class<T> valueType;
 
-    private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
+    private final Sinks.Many<ObjectNode> mainSink = Sinks.many().replay()
+            .limit(1);
 
     public Signal(Class<T> valueType) {
         this.valueType = Objects.requireNonNull(valueType);
@@ -52,28 +44,7 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe() {
-        Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
-                .onBackpressureBuffer();
-
-        return sink.asFlux().doOnSubscribe(ignore -> {
-            LOGGER.debug("New Flux subscription...");
-            lock.lock();
-            try {
-                var snapshot = createSnapshotEvent();
-                sink.tryEmitNext(snapshot);
-                subscribers.add(sink);
-            } finally {
-                lock.unlock();
-            }
-        }).doFinally(ignore -> {
-            lock.lock();
-            try {
-                LOGGER.debug("Unsubscribing from Signal...");
-                subscribers.remove(sink);
-            } finally {
-                lock.unlock();
-            }
-        });
+        return mainSink.asFlux().cache().onBackpressureBuffer();
     }
 
     /**
@@ -94,21 +65,9 @@ public abstract class Signal<T> {
      * @param event
      *            the event to submit
      */
-    public void submit(ObjectNode event) {
-        lock.lock();
-        try {
-            var processedEvent = processEvent(event);
-            // Notify subscribers
-            subscribers.removeIf(sink -> {
-                boolean failure = sink.tryEmitNext(processedEvent).isFailure();
-                if (failure) {
-                    LOGGER.debug("Failed push");
-                }
-                return failure;
-            });
-        } finally {
-            lock.unlock();
-        }
+    public synchronized void submit(ObjectNode event) {
+        var processedEvent = processEvent(event);
+        mainSink.tryEmitNext(processedEvent);
     }
 
     /**
