@@ -1,11 +1,17 @@
 package com.vaadin.hilla.signals;
 
+import java.time.Duration;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.util.Objects;
 import java.util.UUID;
+
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 public abstract class Signal<T> {
 
@@ -67,20 +73,17 @@ public abstract class Signal<T> {
      */
     public void submit(ObjectNode event) {
         var processedEvent = processEvent(event);
-        long delay = 1;
-        while (delay < 60000) {
-            if (mainSink.tryEmitNext(
-                    processedEvent) == Sinks.EmitResult.FAIL_NON_SERIALIZED) {
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                delay *= 2;
-            } else {
-                delay = 60000;
-            }
-        }
+
+        Mono.defer(() -> {
+            Sinks.EmitResult result = mainSink.tryEmitNext(processedEvent);
+            return result.isSuccess() ? Mono.just(result)
+                    : Mono.error(new RuntimeException("Emit failed"));
+        }).retryWhen(
+                Retry.backoff(100000000, Duration.ofMillis(100))
+                        .filter(ex -> ex instanceof RuntimeException)
+                        .onRetryExhaustedThrow((retryBackoffSpec,
+                                retrySignal) -> retrySignal.failure()))
+                .subscribe();
     }
 
     /**
