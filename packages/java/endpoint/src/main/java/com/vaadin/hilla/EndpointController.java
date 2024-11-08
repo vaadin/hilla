@@ -82,7 +82,6 @@ public class EndpointController {
      * A qualifier to override the request and response default json mapper.
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
-    public static final String ENDPOINT_OBJECT_MAPPER_BEAN_QUALIFIER = "endpointObjectMapper";
 
     private static final String SIGNALS_HANDLER_BEAN_NAME = "signalsHandler";
 

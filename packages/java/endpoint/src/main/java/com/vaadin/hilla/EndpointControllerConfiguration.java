@@ -111,7 +111,6 @@ public class EndpointControllerConfiguration {
      *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
      */
-    @Qualifier(EndpointController.ENDPOINT_OBJECT_MAPPER_BEAN_QUALIFIER)
     @Bean
     ObjectMapper endpointObjectMapper(ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory) {
