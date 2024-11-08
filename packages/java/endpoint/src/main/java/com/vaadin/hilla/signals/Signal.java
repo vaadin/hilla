@@ -20,7 +20,7 @@ public abstract class Signal<T> {
     private final Class<T> valueType;
 
     private final Sinks.Many<ObjectNode> mainSink = Sinks.many().replay()
-            .limit(1);
+            .limit(Duration.ZERO);
 
     public Signal(Class<T> valueType) {
         this.valueType = Objects.requireNonNull(valueType);
@@ -50,7 +50,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe() {
-        return mainSink.asFlux().cache().onBackpressureBuffer();
+        var snapshotEvent = createSnapshotEvent();
+        return mainSink.asFlux().cache().onBackpressureBuffer()
+                .startWith(snapshotEvent);
     }
 
     /**
