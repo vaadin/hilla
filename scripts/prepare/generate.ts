@@ -37,6 +37,7 @@ async function loadScripts(): Promise<readonly [Writer, Transformer]> {
       exports,
       module: { exports },
       require: req,
+      process: { env: {} },
     };
     script.runInNewContext(ctx);
 
