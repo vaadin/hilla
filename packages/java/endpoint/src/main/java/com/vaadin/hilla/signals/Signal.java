@@ -67,7 +67,20 @@ public abstract class Signal<T> {
      */
     public void submit(ObjectNode event) {
         var processedEvent = processEvent(event);
-        mainSink.tryEmitNext(processedEvent);
+        long delay = 1;
+        while (delay < 60000) {
+            if (mainSink.tryEmitNext(
+                    processedEvent) == Sinks.EmitResult.FAIL_NON_SERIALIZED) {
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                delay *= 2;
+            } else {
+                delay = 60000;
+            }
+        }
     }
 
     /**
