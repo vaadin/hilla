@@ -18,6 +18,8 @@ package com.vaadin.hilla;
 
 import java.lang.reflect.Method;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,6 +27,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -43,7 +46,9 @@ import jakarta.servlet.ServletContext;
  */
 @Configuration
 public class EndpointControllerConfiguration {
+    private static final EndpointTransferMapper ENDPOINT_TRANSFER_MAPPER = new EndpointTransferMapper();
     private final EndpointProperties endpointProperties;
+    private ObjectMapper endpointMapper;
 
     /**
      * Initializes the endpoint configuration.
@@ -94,16 +99,50 @@ public class EndpointControllerConfiguration {
     }
 
     /**
-     * Registers the endpoint invoker.
+     * Creates ObjectMapper instance that is used for Hilla endpoints'
+     * serializing and deserializing request and response bodies.
      *
      * @param applicationContext
      *            The Spring application context
      * @param endpointMapperFactory
-     *            optional bean to override the default
+     *            optional factory bean to override the default
      *            {@link JacksonObjectMapperFactory} that is used for
      *            serializing and deserializing request and response bodies Use
      *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
+     */
+    @Qualifier(EndpointController.ENDPOINT_OBJECT_MAPPER_BEAN_QUALIFIER)
+    @Bean
+    ObjectMapper endpointObjectMapper(ApplicationContext applicationContext,
+            @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory) {
+        if (this.endpointMapper == null) {
+            this.endpointMapper = endpointMapperFactory != null
+                    ? endpointMapperFactory.build()
+                    : createDefaultEndpointMapper(applicationContext);
+            if (this.endpointMapper != null) {
+                this.endpointMapper.registerModule(
+                        ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
+            }
+        }
+        return this.endpointMapper;
+    }
+
+    private static ObjectMapper createDefaultEndpointMapper(
+            ApplicationContext applicationContext) {
+        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
+        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
+                .configure(endpointMapper);
+        return endpointMapper;
+    }
+
+    /**
+     * Registers the endpoint invoker.
+     *
+     * @param applicationContext
+     *            The Spring application context
+     * @param endpointObjectMapper
+     *            ObjectMapper instance that is used for Hilla endpoints'
+     *            serializing and deserializing request and response bodies.
      * @param explicitNullableTypeChecker
      *            the method parameter and return value type checker to verify
      *            that null values are explicit
@@ -116,10 +155,10 @@ public class EndpointControllerConfiguration {
      */
     @Bean
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
-            @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory,
+            ObjectMapper endpointObjectMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
-        return new EndpointInvoker(applicationContext, endpointMapperFactory,
+        return new EndpointInvoker(applicationContext, endpointObjectMapper,
                 explicitNullableTypeChecker, servletContext, endpointRegistry);
     }
 

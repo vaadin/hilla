@@ -2,13 +2,19 @@ package com.vaadin.hilla.signals.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.Signal;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -27,6 +33,20 @@ public class SignalsHandlerTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private SignalsHandler signalsHandler;
     private SecureSignalsRegistry signalsRegistry;
+
+    @BeforeClass
+    public static void setup() {
+        var appCtx = Mockito.mock(ApplicationContext.class);
+        var endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(appCtx,
+                        new JacksonObjectMapperFactory.Json());
+        StateEvent.setMapper(endpointObjectMapper);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        StateEvent.setMapper(null);
+    }
 
     @Before
     public void setUp() {

@@ -45,7 +45,7 @@ public class StateEvent<T> {
         }
     }
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static ObjectMapper MAPPER;
 
     private final String id;
     private final EventType eventType;
@@ -99,6 +99,10 @@ public class StateEvent<T> {
 
         JsonNode expected = json.get(Field.EXPECTED);
         this.expected = convertValue(expected, valueType);
+    }
+
+    public static void setMapper(ObjectMapper mapper) {
+        MAPPER = mapper;
     }
 
     public static <X> X convertValue(JsonNode rawValue, Class<X> valueType) {

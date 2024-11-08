@@ -3,12 +3,18 @@ package com.vaadin.hilla.signals;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.event.MissingFieldException;
 import jakarta.annotation.Nullable;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
@@ -86,6 +92,20 @@ public class ListSignalTest {
         public int hashCode() {
             return Objects.hashCode(id);
         }
+    }
+
+    @BeforeClass
+    public static void setup() {
+        var appCtx = Mockito.mock(ApplicationContext.class);
+        var endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(appCtx,
+                        new JacksonObjectMapperFactory.Json());
+        StateEvent.setMapper(endpointObjectMapper);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        StateEvent.setMapper(null);
     }
 
     @Test
