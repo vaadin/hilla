@@ -31,12 +31,12 @@ public class NumberSignalTest {
         var endpointObjectMapper = EndpointControllerMockBuilder
                 .createEndpointObjectMapper(appCtx,
                         new JacksonObjectMapperFactory.Json());
-        StateEvent.setMapper(endpointObjectMapper);
+        Signal.setMapper(endpointObjectMapper);
     }
 
     @AfterClass
     public static void tearDown() {
-        StateEvent.setMapper(null);
+        Signal.setMapper(null);
     }
 
     @Test

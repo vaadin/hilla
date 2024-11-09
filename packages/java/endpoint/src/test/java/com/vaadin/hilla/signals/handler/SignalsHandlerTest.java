@@ -7,7 +7,6 @@ import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.Signal;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
-import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -40,12 +39,12 @@ public class SignalsHandlerTest {
         var endpointObjectMapper = EndpointControllerMockBuilder
                 .createEndpointObjectMapper(appCtx,
                         new JacksonObjectMapperFactory.Json());
-        StateEvent.setMapper(endpointObjectMapper);
+        Signal.setMapper(endpointObjectMapper);
     }
 
     @AfterClass
     public static void tearDown() {
-        StateEvent.setMapper(null);
+        Signal.setMapper(null);
     }
 
     @Before

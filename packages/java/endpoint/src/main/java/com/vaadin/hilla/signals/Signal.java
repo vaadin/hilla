@@ -1,6 +1,8 @@
 package com.vaadin.hilla.signals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -144,5 +146,23 @@ public abstract class Signal<T> {
     @Override
     public int hashCode() {
         return Objects.hashCode(getId());
+    }
+
+    /**
+     * Sets the object mapper to be used for JSON serialization in Signals. This
+     * is helpful for testing purposes. If not set, the default Hilla endpoint
+     * object mapper is used.
+     * <p>
+     * <strong>Note:</strong> If a custom endpointMapperFactory bean defined
+     * using the
+     * {@code EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
+     * qualifier, the mapper from that factory is used also in Signals, and
+     * there is no need to set it manually here.
+     *
+     * @param mapper
+     *            the object mapper to be used in Signals
+     */
+    public static void setMapper(ObjectMapper mapper) {
+        StateEvent.setMapper(mapper);
     }
 }

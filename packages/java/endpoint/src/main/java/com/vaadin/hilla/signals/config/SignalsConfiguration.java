@@ -3,7 +3,7 @@ package com.vaadin.hilla.signals.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.Signal;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +22,7 @@ public class SignalsConfiguration {
     public SignalsConfiguration(EndpointInvoker endpointInvoker,
             ObjectMapper endpointObjectMapper) {
         this.endpointInvoker = endpointInvoker;
-        StateEvent.setMapper(endpointObjectMapper);
+        Signal.setMapper(endpointObjectMapper);
     }
 
     /**
