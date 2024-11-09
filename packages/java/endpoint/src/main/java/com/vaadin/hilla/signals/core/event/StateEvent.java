@@ -101,6 +101,14 @@ public class StateEvent<T> {
         this.expected = convertValue(expected, valueType);
     }
 
+    /**
+     * Sets the object mapper to be used for serialization and deserialization
+     * of state events in Signal library.
+     *
+     * @param mapper
+     *            The object mapper to be used for serialization and
+     *            deserialization of state events.
+     */
     public static void setMapper(ObjectMapper mapper) {
         MAPPER = mapper;
     }
