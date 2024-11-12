@@ -268,7 +268,11 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
   set value(value: Value<M> | undefined) {
     this.initializeValue();
-    this.#setValueState(value, undefined);
+    const oldValue = this.value;
+    if (value !== oldValue) {
+      this.#setValueState(value, undefined);
+      this[_updateValidation]();
+    }
   }
 
   /**
@@ -281,7 +285,6 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   set visited(v: boolean) {
     if (this.#visited !== v) {
       this.#visited = v;
-      this[_updateValidation]().catch(() => {});
       this.dispatchEvent(CHANGED);
     }
   }
@@ -406,12 +409,8 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   }
 
   protected async [_updateValidation](): Promise<void> {
-    if (this.#visited) {
+    if (this.invalid) {
       await this.validate();
-    } else if (this.dirty || this.invalid) {
-      await Promise.all(
-        [...this.#getChildBinderNodes()].map(async (childBinderNode) => childBinderNode[_updateValidation]()),
-      );
     }
   }
 

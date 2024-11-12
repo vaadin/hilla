@@ -230,11 +230,11 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(orderViewWithTextField.requestUpdateSpy).to.be.calledOnce;
       });
 
-      it('should update binder value on blur event', async () => {
+      it('should update binder value on validated event', async () => {
         orderViewWithTextField.requestUpdateSpy.resetHistory();
         orderViewWithTextField.notesField!.value = 'foo';
         orderViewWithTextField.notesField!.dispatchEvent(
-          new CustomEvent('blur', { bubbles: true, cancelable: false, composed: true }),
+          new CustomEvent('validated', { bubbles: true, cancelable: false, composed: true, detail: { valid: true } }),
         );
         await orderViewWithTextField.updateComplete;
 
@@ -837,9 +837,6 @@ describe('@vaadin/hilla-lit-form', () => {
 
           binderNode.value = value;
           await resetBinderNodeValidation(binderNode);
-
-          binderNode.validators = [];
-          await binderNode.validate();
 
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
 
