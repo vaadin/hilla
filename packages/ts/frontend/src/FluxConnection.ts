@@ -9,8 +9,6 @@ import {
   type ServerMessage,
 } from './FluxMessages.js';
 
-let atmosphere: Atmosphere.Atmosphere;
-
 export enum State {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
@@ -73,6 +71,15 @@ type EndpointInfo = {
   reconnect?(): ActionOnLostSubscription | void;
 };
 
+const initAtmosphere = async () => {
+  if (!import.meta.env.VITE_SW_CONTEXT) {
+    return await import('atmosphere.js').then((module) => module.default);
+  }
+  return undefined;
+};
+
+const atmosphere: Atmosphere.Atmosphere | undefined = await initAtmosphere();
+
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
@@ -91,17 +98,7 @@ export class FluxConnection extends EventTarget {
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
-    if (!import.meta.env['VITE_SW_CONTEXT']) {
-      import('atmosphere.js')
-        .then((module) => {
-          atmosphere = module.default;
-          this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to load atmosphere', error);
-        });
-    }
+    this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
   #resubscribeIfWasClosed() {
@@ -198,7 +195,7 @@ export class FluxConnection extends EventTarget {
     const extraHeaders = self.document ? getCsrfTokenHeadersForEndpointRequest(self.document) : {};
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
-    this.#socket = atmosphere.subscribe?.({
+    this.#socket = atmosphere?.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
       transport: 'websocket',

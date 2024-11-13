@@ -2,7 +2,7 @@
 
 // eslint-disable-next-line import/unambiguous
 interface ImportMetaEnv {
-  readonly VITE_SW_CONTEXT: boolean;
+  readonly VITE_SW_CONTEXT?: boolean;
 }
 
 interface ImportMeta {
