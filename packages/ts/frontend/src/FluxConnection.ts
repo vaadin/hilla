@@ -1,7 +1,5 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
-
 import type Atmosphere from 'atmosphere.js';
-
 import type { Subscription } from './Connect.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import {
@@ -75,14 +73,6 @@ type EndpointInfo = {
   reconnect?(): ActionOnLostSubscription | void;
 };
 
-interface ImportMetaEnv {
-  readonly SW_CONTEXT: boolean;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
@@ -101,16 +91,16 @@ export class FluxConnection extends EventTarget {
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
-    // @ts-expect-error - vite environment variable
-    const meta: ImportMeta = import.meta;
-    if (!meta.env.SW_CONTEXT) {
-      (async () => {
-        atmosphere = await import('atmosphere.js');
-        this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
-      })().catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to load atmosphere.js', e);
-      });
+    if (!import.meta.env['VITE_SW_CONTEXT']) {
+      import('atmosphere.js')
+        .then((module) => {
+          atmosphere = module.default;
+          this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to load atmosphere', error);
+        });
     }
   }
 
