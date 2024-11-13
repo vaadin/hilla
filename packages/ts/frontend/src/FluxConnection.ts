@@ -71,14 +71,15 @@ type EndpointInfo = {
   reconnect?(): ActionOnLostSubscription | void;
 };
 
-const initAtmosphere = async () => {
-  if (!import.meta.env.VITE_SW_CONTEXT) {
-    return await import('atmosphere.js').then((module) => module.default);
-  }
-  return undefined;
-};
+let atmosphere: Atmosphere.Atmosphere | undefined;
 
-const atmosphere: Atmosphere.Atmosphere | undefined = await initAtmosphere();
+(async () => {
+  if (!import.meta.env?.VITE_SW_CONTEXT) {
+    atmosphere = await import('atmosphere.js').then((module) => module.default);
+  }
+})().catch((e) => {
+  console.error('Failed to load atmosphere.js', e);
+});
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
