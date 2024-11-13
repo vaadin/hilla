@@ -57,9 +57,9 @@ public open class EngineGenerateTask : DefaultTask() {
 
         try {
             val conf: EngineConfiguration = Objects.requireNonNull(
-                EngineConfiguration.loadDirectory(buildDir))
+                EngineConfiguration.getDefault())
 
-            val urls = conf.classPath
+            val urls = conf.classpath
                 .stream().map<URL> { classPathItem: Path ->
                     classPathItem.toUri().toURL()
                 }
