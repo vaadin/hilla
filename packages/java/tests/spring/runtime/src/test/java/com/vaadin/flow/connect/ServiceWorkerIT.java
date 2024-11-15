@@ -16,10 +16,12 @@
 package com.vaadin.flow.connect;
 
 import com.vaadin.flow.testutil.ChromeDeviceTest;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class ServiceWorkerIT extends ChromeDeviceTest {
 
@@ -29,31 +31,20 @@ public class ServiceWorkerIT extends ChromeDeviceTest {
         waitForDevServer();
         waitForServiceWorkerReady();
 
-        boolean serviceWorkerActive = (boolean) ((JavascriptExecutor) getDriver())
-                .executeAsyncScript(
-                        "const resolve = arguments[arguments.length - 1];"
-                                + "navigator.serviceWorker.ready.then( function(reg) { resolve(!!reg.active); });");
+        boolean serviceWorkerActive = (boolean) ((JavascriptExecutor) getDriver()).executeAsyncScript("const resolve = arguments[arguments.length - 1];" + "navigator.serviceWorker.ready.then( function(reg) { resolve(!!reg.active); });");
         Assert.assertTrue("service worker not installed", serviceWorkerActive);
     }
 
     @Test
-    public void offlineRoot_reload_viewReloaded() {
+    public void onlineRoot_serviceWorkerInstalled_serviceWorkerResponsive() {
         openPageAndPreCacheWhenDevelopmentMode("/");
+        Assert.assertNotNull("Should have outlet when loaded online", findElement(By.id("outlet")));
+        Assert.assertNotNull("Should have <test-view> in DOM when loaded online", findElement(By.tagName("test-view")));
+        TestBenchElement testView = $("test-view").waitForFirst();
 
-        // Confirm that app shell is loaded
-        Assert.assertNotNull("Should have outlet when loaded online",
-                findElement(By.id("outlet")));
-
-        // Confirm that client side view is loaded
-        Assert.assertNotNull(
-                "Should have <test-view> in DOM when loaded online",
-                findElement(By.tagName("test-view")));
-
-            // Reload the page in offline mode
-            executeScript("window.location.reload();");
-            waitUntil(webDriver -> ((JavascriptExecutor) driver)
-                    .executeScript("return document.readyState")
-                    .equals("complete"));
+        waitUntil(ExpectedConditions.textToBePresentInElement(
+            testView.$(TestBenchElement.class).id("sw-content"),
+            "Hey from SW"), 25);
     }
 
     private void openPageAndPreCacheWhenDevelopmentMode(String targetView) {
@@ -61,8 +52,7 @@ public class ServiceWorkerIT extends ChromeDeviceTest {
         });
     }
 
-    private void openPageAndPreCacheWhenDevelopmentMode(String targetView,
-            Runnable activateViews) {
+    private void openPageAndPreCacheWhenDevelopmentMode(String targetView, Runnable activateViews) {
         getDriver().get(getRootURL() + targetView);
         waitForDevServer();
         waitForServiceWorkerReady();
