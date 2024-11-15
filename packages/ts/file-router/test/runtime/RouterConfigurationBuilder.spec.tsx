@@ -191,6 +191,10 @@ describe('RouterBuilder', () => {
                 flowLayout: false,
               },
             },
+            {
+              path: '/nested-empty-layout',
+              children: [],
+            },
           ],
         },
         {
@@ -202,7 +206,15 @@ describe('RouterBuilder', () => {
             {
               path: '/child',
             },
+            {
+              path: '/empty-layout',
+              children: [],
+            },
           ],
+        },
+        {
+          path: '/empty-layout-outside',
+          children: [],
         },
       ])
       .withLayout(Server)
@@ -217,19 +229,27 @@ describe('RouterBuilder', () => {
                 handle: {
                   flowLayout: true,
                 },
-                path: '/nested',
+                path: '',
               },
               {
                 handle: {
                   flowLayout: true,
                 },
-                path: '',
+                path: '/nested',
               },
             ],
             path: 'nest',
           },
           {
-            children: [],
+            children: [
+              {
+                path: '/child',
+              },
+              {
+                path: '/empty-layout',
+                children: [],
+              },
+            ],
             path: '/test',
             handle: {
               flowLayout: true,
@@ -244,29 +264,30 @@ describe('RouterBuilder', () => {
       {
         children: [
           {
-            path: '/outside',
-            handle: {
-              flowLayout: false,
-            },
-          },
-        ],
-        path: 'nest',
-      },
-      {
-        children: [
-          {
-            path: '/child',
-          },
-        ],
-      },
-      {
-        children: [
-          {
             path: '/test',
             element: <div>Test</div>,
           },
         ],
         path: '',
+      },
+      {
+        children: [
+          {
+            path: '/outside',
+            handle: {
+              flowLayout: false,
+            },
+          },
+          {
+            path: '/nested-empty-layout',
+            children: [],
+          },
+        ],
+        path: 'nest',
+      },
+      {
+        path: '/empty-layout-outside',
+        children: [],
       },
     ]);
   });
