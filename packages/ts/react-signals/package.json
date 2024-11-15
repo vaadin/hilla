@@ -51,8 +51,7 @@
     "nanoid": "^5.0.7"
   },
   "peerDependencies": {
-    "react": "^18",
-    "react-router-dom": "^6.26.2"
+    "react": "^18"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
