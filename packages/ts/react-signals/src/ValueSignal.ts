@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 import {
   createReplaceStateEvent,
+  createSetStateEvent,
   isReplaceStateEvent,
   isSetStateEvent,
   isSnapshotStateEvent,
@@ -10,6 +11,7 @@ import {
   $createOperation,
   $processServerResponse,
   $resolveOperation,
+  $setValueQuietly,
   $update,
   FullStackSignal,
   type Operation,
@@ -43,8 +45,13 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param value - The new value.
    */
-  set(value: T): void {
-    this.value = value;
+  set(value: T): Operation {
+    const { parentClientSignalId } = this.server.config;
+    const signalId = parentClientSignalId !== undefined ? this.id : undefined;
+    const event = createSetStateEvent(value, signalId, parentClientSignalId);
+    const promise = this[$update](event);
+    this[$setValueQuietly](value);
+    return this[$createOperation]({ id: event.id, promise });
   }
 
   /**
