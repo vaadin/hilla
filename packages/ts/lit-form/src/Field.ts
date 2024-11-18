@@ -312,11 +312,17 @@ export class VaadinDateTimeFieldStrategy<
   }
 
   override set value(val: T | undefined) {
-    if (!val || isEmptyObject(val)) {
+    const timestamp = Date.parse(val as string);
+
+    if (!val || isEmptyObject(val) || Number.isNaN(timestamp)) {
       super.value = '' as T;
+      return;
     }
-    const date = Date.parse(val as string);
-    super.value = (Number.isNaN(date) ? '' : new Date(date).toISOString().slice(0, 19)) as T;
+
+    const date = new Date(timestamp);
+    // Convert to ISO 8601 local combined date and time representation
+    const tzOffsetMs = 60 * 1000 * date.getTimezoneOffset();
+    super.value = new Date(timestamp - tzOffsetMs).toISOString().slice(0, 19) as T;
   }
 }
 
