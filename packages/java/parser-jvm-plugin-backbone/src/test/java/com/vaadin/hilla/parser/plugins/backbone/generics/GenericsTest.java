@@ -25,6 +25,7 @@ public class GenericsTest {
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
                 .execute(List.of(GenericsBareEndpoint.class,
+                        GenericsBareEntityEndpoint.class,
                         GenericsExtendedEndpoint.class,
                         GenericsMethodsEndpoint.class,
                         GenericsRefEndpoint.class,
