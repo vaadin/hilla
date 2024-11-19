@@ -14,21 +14,15 @@ import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
 import com.vaadin.hilla.internal.fixtures.MyEndpoint;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 
-@SpringBootTest(classes = {
-    CustomEndpoint.class,
-    EndpointNoValue.class,
-    MyEndpoint.class,
-    ApplicationContextProvider.class
-})
+@SpringBootTest(classes = { CustomEndpoint.class, EndpointNoValue.class,
+        MyEndpoint.class, ApplicationContextProvider.class })
 public class TaskTest {
     private Path temporaryDirectory;
 

@@ -64,7 +64,7 @@ public class AbstractMojoTest {
                 .getOutputDirectory();
         Mockito.doReturn(mockBuild).when(project).getBuild();
 
-        engineConfiguration = new EngineConfiguration();
+        engineConfiguration = EngineConfiguration.getDefault();
         engineConfiguration.setBaseDir(getTemporaryDirectory());
     }
 

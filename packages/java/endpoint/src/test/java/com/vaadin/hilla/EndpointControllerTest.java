@@ -67,6 +67,7 @@ import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
 import com.vaadin.hilla.packages.application.ApplicationEndpoint;
+import com.vaadin.hilla.packages.library.LibraryEndpoint;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.testendpoint.BridgeMethodTestEndpoint;
 
@@ -1163,8 +1164,11 @@ public class EndpointControllerTest {
     private EndpointRegistry registerEndpoints(String openApiFilename) {
         var context = Mockito.mock(ApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
+        // Suppose that both the "regular" endpoint and the one from a library
+        // are Spring beans
         Mockito.doReturn(Map.of("regularEndpoint",
-                new ApplicationEndpoint(applicationComponent))).when(context)
+                new ApplicationEndpoint(applicationComponent),
+                "libraryEndpoint", new LibraryEndpoint())).when(context)
                 .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
         controller.registerEndpoints(getClass()
