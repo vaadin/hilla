@@ -99,6 +99,9 @@ describe('RouterBuilder', () => {
           children: [
             {
               path: '/child',
+              handle: {
+                flowLayout: true,
+              },
             },
           ],
         },
@@ -119,6 +122,9 @@ describe('RouterBuilder', () => {
             children: [
               {
                 path: '/child',
+                handle: {
+                  flowLayout: true,
+                },
               },
             ],
             path: '/test',
@@ -128,6 +134,9 @@ describe('RouterBuilder', () => {
           },
         ],
         element: createElement(Server),
+        handle: {
+          ignoreFallback: true,
+        },
       },
       {
         children: [
@@ -176,6 +185,16 @@ describe('RouterBuilder', () => {
                 flowLayout: true,
               },
             },
+            {
+              path: '/outside',
+              handle: {
+                flowLayout: false,
+              },
+            },
+            {
+              path: '/nested-empty-layout',
+              children: [],
+            },
           ],
         },
         {
@@ -187,7 +206,15 @@ describe('RouterBuilder', () => {
             {
               path: '/child',
             },
+            {
+              path: '/empty-layout',
+              children: [],
+            },
           ],
+        },
+        {
+          path: '/empty-layout-outside',
+          children: [],
         },
       ])
       .withLayout(Server)
@@ -199,16 +226,16 @@ describe('RouterBuilder', () => {
           {
             children: [
               {
-                path: '',
                 handle: {
                   flowLayout: true,
                 },
+                path: '',
               },
               {
-                path: '/nested',
                 handle: {
                   flowLayout: true,
                 },
+                path: '/nested',
               },
             ],
             path: 'nest',
@@ -218,6 +245,10 @@ describe('RouterBuilder', () => {
               {
                 path: '/child',
               },
+              {
+                path: '/empty-layout',
+                children: [],
+              },
             ],
             path: '/test',
             handle: {
@@ -226,6 +257,9 @@ describe('RouterBuilder', () => {
           },
         ],
         element: createElement(Server),
+        handle: {
+          ignoreFallback: true,
+        },
       },
       {
         children: [
@@ -235,6 +269,25 @@ describe('RouterBuilder', () => {
           },
         ],
         path: '',
+      },
+      {
+        children: [
+          {
+            path: '/outside',
+            handle: {
+              flowLayout: false,
+            },
+          },
+          {
+            path: '/nested-empty-layout',
+            children: [],
+          },
+        ],
+        path: 'nest',
+      },
+      {
+        path: '/empty-layout-outside',
+        children: [],
       },
     ]);
   });
