@@ -39,6 +39,18 @@ function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string,
   return [`${route.path ?? ''}-${route.children ? 'n' : 'i'}`, route];
 }
 
+enum RouteHandleFlags {
+  FLOW_LAYOUT = 'flowLayout',
+  IGNORE_FALLBACK = 'ignoreFallback',
+}
+
+function hasRouteHandleFlag<T extends RouteHandleFlags>(
+  route: RouteObject,
+  flag: T,
+): route is { readonly handle: Readonly<Record<T, boolean>> } {
+  return typeof route.handle === 'object' && flag in route.handle && (route.handle as Record<T, boolean>)[flag];
+}
+
 /**
  * A builder for creating a Vaadin-specific router for React with
  * authentication and server routes support.
@@ -119,8 +131,7 @@ export class RouterConfigurationBuilder {
     ];
 
     this.update(fallbackRoutes, (original, added, children) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (original && !original.handle?.ignoreFallback) {
+      if (original && !hasRouteHandleFlag(original, RouteHandleFlags.IGNORE_FALLBACK)) {
         if (!children) {
           return original;
         }
@@ -153,45 +164,78 @@ export class RouterConfigurationBuilder {
    * @param layoutComponent - layout component to use, usually Flow
    */
   withLayout(layoutComponent: ComponentType): this {
-    function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
-      if (routes.length === 0) {
-        return routes;
+    this.#modifiers.push((originalRoutes: readonly RouteObject[] | undefined) => {
+      if (originalRoutes === undefined) {
+        return originalRoutes;
       }
-      const nestedRoutes = routes.map((route) => route);
+      // Split the routes tree onto two subtrees with and without
+      // a server layout.
+      const [serverRoutesTree, clientRoutesTree]: [RouteObject[] | undefined, RouteObject[] | undefined] =
+        transformTree<readonly RouteObject[], [RouteObject[] | undefined, RouteObject[] | undefined]>(
+          originalRoutes,
+          (
+            routes: readonly RouteObject[],
+            next: (...nodes: readonly RouteObject[]) => [RouteObject[] | undefined, RouteObject[] | undefined],
+          ) =>
+            // Split single routes list onto two filtered lists
+            routes.reduce<[RouteObject[] | undefined, RouteObject[] | undefined]>(
+              ([serverRoutesList, clientRoutesList], route) => {
+                if (hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT)) {
+                  // Server layout is explicitly declared: move to the entire
+                  // route to the server list, taking also all the children.
+                  return [[...(serverRoutesList ?? []), route], clientRoutesList];
+                }
+                if (!route.children?.length) {
+                  // Leaf routes and empty layouts: move to the client list.
+                  return [serverRoutesList, [...(clientRoutesList ?? []), route]];
+                }
+                // Nested children: collect server and client subtrees, and
+                // copy the current route to either or both the server and
+                // the client lists with the respective subtree as children.
+                const [serverRouteSubtree, clientRouteSubtree] = next(...route.children);
+                return [
+                  serverRouteSubtree
+                    ? [
+                        ...(serverRoutesList ?? []),
+                        {
+                          ...route,
+                          children: serverRouteSubtree,
+                        },
+                      ]
+                    : serverRoutesList,
+                  clientRouteSubtree
+                    ? [
+                        ...(clientRoutesList ?? []),
+                        {
+                          ...route,
+                          children: clientRouteSubtree,
+                        },
+                      ]
+                    : clientRoutesList,
+                ];
+              },
+              [undefined, undefined],
+            ),
+        );
+
       return [
-        {
-          element: createElement(layoutComponent),
-          children: nestedRoutes,
-          handle: {
-            ignoreFallback: true,
-          },
-        },
+        // The server subtree is wrapped with the server layout component,
+        // which applies the top-level server layout to all matches.
+        ...(serverRoutesTree
+          ? [
+              {
+                element: createElement(layoutComponent),
+                children: serverRoutesTree,
+                handle: {
+                  [RouteHandleFlags.IGNORE_FALLBACK]: true,
+                },
+              },
+            ]
+          : []),
+        // The client route subtree is preserved without wrapping.
+        ...(clientRoutesTree ?? []),
       ];
-    }
-
-    function checkFlowLayout(route: RouteObject): boolean {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      let flowLayout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
-      // Check children if they have layout. If yes then parent should have layout also.
-      if (!flowLayout && route.children) {
-        flowLayout = route.children.filter((child) => checkFlowLayout(child)).length > 0;
-      }
-      return flowLayout;
-    }
-
-    this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
-      if (!routes) {
-        return routes;
-      }
-      const withLayout = routes.filter((route) => checkFlowLayout(route));
-      const allRoutes = routes.filter((route) => !withLayout.includes(route));
-      const catchAll = [routes.find((route) => route.path === '*')].filter((route) => route !== undefined);
-      withLayout.push(...catchAll); // Add * fallback to all child routes
-
-      allRoutes.unshift(...applyLayouts(withLayout));
-      return allRoutes;
     });
-
     return this;
   }
 
