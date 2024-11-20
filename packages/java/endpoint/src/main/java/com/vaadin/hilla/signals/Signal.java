@@ -1,6 +1,7 @@
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -24,8 +25,23 @@ public abstract class Signal<T> {
 
     private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
 
-    public Signal(Class<T> valueType) {
+    private final Signal<T> delegate;
+
+    private Signal(Class<T> valueType, Signal<T> delegate) {
         this.valueType = Objects.requireNonNull(valueType);
+        this.delegate = delegate;
+    }
+
+    public Signal(Class<T> valueType) {
+        this(valueType, null);
+    }
+
+    protected Signal(Signal<T> delegate) {
+        this(Objects.requireNonNull(delegate).getValueType(), delegate);
+    }
+
+    protected Signal<T> getDelegate() {
+        return delegate;
     }
 
     /**
@@ -52,6 +68,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe() {
+        if (delegate != null) {
+            return delegate.subscribe();
+        }
         Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
                 .onBackpressureBuffer();
 
@@ -84,6 +103,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String signalId) {
+        if (delegate != null) {
+            return delegate.subscribe(signalId);
+        }
         return subscribe();
     }
 
@@ -97,18 +119,26 @@ public abstract class Signal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            var processedEvent = processEvent(event);
-            // Notify subscribers
-            subscribers.removeIf(sink -> {
-                boolean failure = sink.tryEmitNext(processedEvent).isFailure();
-                if (failure) {
-                    LOGGER.debug("Failed push");
-                }
-                return failure;
-            });
+            var processedEvent = StateEvent.isRejected(event) ? event
+                    : processEvent(event);
+            notifySubscribers(processedEvent);
         } finally {
             lock.unlock();
         }
+    }
+
+    private void notifySubscribers(ObjectNode processedEvent) {
+        if (delegate != null) {
+            delegate.notifySubscribers(processedEvent);
+            return;
+        }
+        subscribers.removeIf(sink -> {
+            boolean failure = sink.tryEmitNext(processedEvent).isFailure();
+            if (failure) {
+                LOGGER.debug("Failed push");
+            }
+            return failure;
+        });
     }
 
     /**
@@ -129,6 +159,15 @@ public abstract class Signal<T> {
      *         signal value was updated, <code>false</code> otherwise.
      */
     protected abstract ObjectNode processEvent(ObjectNode event);
+
+    /**
+     * Returns a read-only instance of the signal that rejects any attempt to
+     * modify the signal value. The read-only signal, however, receives the same
+     * updates as the original signal does.
+     *
+     * @return the read-only signal
+     */
+    public abstract Signal<T> asReadonly();
 
     @Override
     public boolean equals(Object o) {

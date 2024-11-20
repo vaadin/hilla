@@ -37,8 +37,12 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     assertInstanceOf(URLClassLoader.class, classLoader);
                     assertEquals(classLoader.getParent(),
                             EngineGenerateMojo.class.getClassLoader());
-                    assertArrayEquals(new URL[] { getTemporaryDirectory()
-                            .resolve("build/test-classes").toUri().toURL() },
+                    assertArrayEquals(
+                            new URL[] { getTemporaryDirectory()
+                                    .resolve("build/classes").toUri().toURL(),
+                                    getTemporaryDirectory()
+                                            .resolve("build/test-classes")
+                                            .toUri().toURL() },
                             ((URLClassLoader) classLoader).getURLs());
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
