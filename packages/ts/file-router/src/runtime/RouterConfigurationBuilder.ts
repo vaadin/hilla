@@ -73,32 +73,35 @@ function split<T extends readonly RouteSplittingRule[]>(
   // a server layout.
   return transformTree<RouteGroup, readonly RouteGroup[]>(originalRoutes, (routes, next) =>
     // Split single routes list onto two filtered lists
-    routes.reduce<readonly WritableRouteGroup[]>((groups, route) => {
-      for (let i = 0; i < groups.length; i++) {
-        if (rules[i]?.(route)) {
-          groups[i].push(route);
+    routes.reduce<readonly WritableRouteGroup[]>(
+      (groups, route) => {
+        for (let i = 0; i < groups.length; i++) {
+          if (rules[i]?.(route)) {
+            groups[i].push(route);
+            return groups;
+          }
+        }
+
+        if (!route.children?.length) {
+          groups.at(-1)?.push(route);
           return groups;
         }
-      }
 
-      if (!route.children?.length) {
-        groups.at(-1)?.push(route);
-        return groups;
-      }
+        const childrenGroups = next(...route.children);
 
-      const childrenGroups = next(...route.children);
-
-      for (let i = 0; i < groups.length; i++) {
-        if (childrenGroups[i].length) {
-          groups[i].push({
-            ...route,
-            children: childrenGroups[i],
-          } as RouteObject);
+        for (let i = 0; i < groups.length; i++) {
+          if (childrenGroups[i].length) {
+            groups[i].push({
+              ...route,
+              children: childrenGroups[i],
+            } as RouteObject);
+          }
         }
-      }
 
-      return groups;
-    }, new Array(rules.length).fill([])),
+        return groups;
+      },
+      new Array(rules.length + 1).fill([]),
+    ),
   ) as readonly [...ReadonlyTuple<RouteGroup, T['length']>, RouteGroup];
 }
 
