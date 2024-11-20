@@ -60,6 +60,13 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-loader-tools</artifactId>
+      <exclusions>
+        <!-- NOTE: workaround for dependencyConvergence with flow-server -->
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-compress</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
