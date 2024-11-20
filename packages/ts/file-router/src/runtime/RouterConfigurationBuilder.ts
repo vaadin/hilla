@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/consistent-type-assertions,@typescript-eslint/no-shadow */
 import { protectRoute } from '@vaadin/hilla-react-auth';
 import { type ComponentType, createElement } from 'react';
 import {
@@ -7,6 +7,7 @@ import {
   type NonIndexRouteObject,
   type RouteObject,
 } from 'react-router-dom';
+import type { ReadonlyTuple } from 'type-fest';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type {
@@ -23,17 +24,32 @@ interface RouteBase {
   children?: readonly this[];
 }
 
-type RoutesModifier = (routes: readonly RouteObject[] | undefined) => readonly RouteObject[] | undefined;
-
 function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
   return module ? 'default' in module && typeof module.default === 'function' : true;
 }
 
-type RouteTransformer<T> = (
+export type RouteGroup = readonly RouteObject[];
+export type WritableRouteGroup = RouteObject[];
+
+export type RouteTransformer<T> = (
   original: RouteObject | undefined,
   overriding: T | undefined,
-  children?: readonly RouteObject[],
+  children?: RouteGroup,
 ) => RouteObject | undefined;
+
+export type RouteGroupSplitter = Readonly<{
+  numberOfGroups: number;
+  finalize?(groups: ReadonlyArray<RouteGroup | undefined>): RouteGroup;
+  split(
+    groups: ReadonlyArray<RouteGroup | undefined>,
+    route: RouteObject,
+    next: (...nodes: RouteGroup) => ReadonlyArray<RouteGroup | undefined>,
+  ): ReadonlyArray<RouteGroup | undefined>;
+}>;
+
+export type RouteSplittingRule = (route: RouteObject) => boolean;
+
+type RoutesModifier = (routes: RouteGroup | undefined) => RouteGroup | undefined;
 
 function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string, value: T] {
   return [`${route.path ?? ''}-${route.children ? 'n' : 'i'}`, route];
@@ -42,13 +58,51 @@ function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string,
 enum RouteHandleFlags {
   FLOW_LAYOUT = 'flowLayout',
   IGNORE_FALLBACK = 'ignoreFallback',
+  SKIP_LAYOUT = 'skipLayout',
 }
 
-function hasRouteHandleFlag<T extends RouteHandleFlags>(
-  route: RouteObject,
-  flag: T,
-): route is { readonly handle: Readonly<Record<T, boolean>> } {
+function hasRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag: T): boolean {
   return typeof route.handle === 'object' && flag in route.handle && (route.handle as Record<T, boolean>)[flag];
+}
+
+function split<T extends readonly RouteSplittingRule[]>(
+  originalRoutes: RouteGroup,
+  ...rules: T
+): readonly [...ReadonlyTuple<RouteGroup, T['length']>, RouteGroup] {
+  // Split the routes tree onto two subtrees with and without
+  // a server layout.
+  return transformTree<RouteGroup, readonly RouteGroup[]>(originalRoutes, (routes, next) =>
+    // Split single routes list onto two filtered lists
+    routes.reduce<readonly WritableRouteGroup[]>(
+      (groups, route) => {
+        for (let i = 0; i < groups.length; i++) {
+          if (rules[i]?.(route)) {
+            groups[i].push(route);
+            return groups;
+          }
+        }
+
+        if (!route.children?.length) {
+          groups.at(-1)?.push(route);
+          return groups;
+        }
+
+        const childrenGroups = next(...route.children);
+
+        for (let i = 0; i < groups.length; i++) {
+          if (childrenGroups[i].length) {
+            groups[i].push({
+              ...route,
+              children: childrenGroups[i],
+            } as RouteObject);
+          }
+        }
+
+        return groups;
+      },
+      Array.from({ length: rules.length + 1 }, () => []),
+    ),
+  ) as readonly [...ReadonlyTuple<RouteGroup, T['length']>, RouteGroup];
 }
 
 /**
@@ -64,7 +118,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withReactRoutes(routes: readonly RouteObject[]): this {
+  withReactRoutes(routes: RouteGroup): this {
     return this.update(routes);
   }
 
@@ -125,7 +179,7 @@ export class RouterConfigurationBuilder {
     this.withLayout(component);
 
     // Fallback adds two routes, so that the index (empty path) has a fallback too
-    const fallbackRoutes: readonly RouteObject[] = [
+    const fallbackRoutes: RouteGroup = [
       { path: '*', element: createElement(component), handle: config },
       { index: true, element: createElement(component), handle: config },
     ];
@@ -164,78 +218,31 @@ export class RouterConfigurationBuilder {
    * @param layoutComponent - layout component to use, usually Flow
    */
   withLayout(layoutComponent: ComponentType): this {
-    this.#modifiers.push((originalRoutes: readonly RouteObject[] | undefined) => {
-      if (originalRoutes === undefined) {
+    this.#modifiers.push((originalRoutes) => {
+      if (!originalRoutes) {
         return originalRoutes;
       }
-      // Split the routes tree onto two subtrees with and without
-      // a server layout.
-      const [serverRoutesTree, clientRoutesTree]: [RouteObject[] | undefined, RouteObject[] | undefined] =
-        transformTree<readonly RouteObject[], [RouteObject[] | undefined, RouteObject[] | undefined]>(
-          originalRoutes,
-          (
-            routes: readonly RouteObject[],
-            next: (...nodes: readonly RouteObject[]) => [RouteObject[] | undefined, RouteObject[] | undefined],
-          ) =>
-            // Split single routes list onto two filtered lists
-            routes.reduce<[RouteObject[] | undefined, RouteObject[] | undefined]>(
-              ([serverRoutesList, clientRoutesList], route) => {
-                if (hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT)) {
-                  // Server layout is explicitly declared: move to the entire
-                  // route to the server list, taking also all the children.
-                  return [[...(serverRoutesList ?? []), route], clientRoutesList];
-                }
-                if (!route.children?.length) {
-                  // Leaf routes and empty layouts: move to the client list.
-                  return [serverRoutesList, [...(clientRoutesList ?? []), route]];
-                }
-                // Nested children: collect server and client subtrees, and
-                // copy the current route to either or both the server and
-                // the client lists with the respective subtree as children.
-                const [serverRouteSubtree, clientRouteSubtree] = next(...route.children);
-                return [
-                  serverRouteSubtree
-                    ? [
-                        ...(serverRoutesList ?? []),
-                        {
-                          ...route,
-                          children: serverRouteSubtree,
-                        },
-                      ]
-                    : serverRoutesList,
-                  clientRouteSubtree
-                    ? [
-                        ...(clientRoutesList ?? []),
-                        {
-                          ...route,
-                          children: clientRouteSubtree,
-                        },
-                      ]
-                    : clientRoutesList,
-                ];
-              },
-              [undefined, undefined],
-            ),
-        );
+
+      const [serverGroup, clientGroup] = split(originalRoutes, (route) =>
+        hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT),
+      );
 
       return [
-        // The server subtree is wrapped with the server layout component,
-        // which applies the top-level server layout to all matches.
-        ...(serverRoutesTree
+        ...(serverGroup.length
           ? [
               {
                 element: createElement(layoutComponent),
-                children: serverRoutesTree,
+                children: serverGroup as RouteObject[],
                 handle: {
                   [RouteHandleFlags.IGNORE_FALLBACK]: true,
                 },
               },
             ]
           : []),
-        // The client route subtree is preserved without wrapping.
-        ...(clientRoutesTree ?? []),
+        ...clientGroup,
       ];
     });
+
     return this;
   }
 
@@ -268,7 +275,7 @@ export class RouterConfigurationBuilder {
       }) as RouteObject,
   ): this {
     this.#modifiers.push((existingRoutes) =>
-      transformTree<[readonly RouteObject[] | undefined, readonly T[] | undefined], readonly RouteObject[] | undefined>(
+      transformTree<[RouteGroup | undefined, readonly T[] | undefined], RouteGroup | undefined>(
         [existingRoutes, routes],
         ([original, added], next) => {
           if (original && added) {
@@ -299,11 +306,11 @@ export class RouterConfigurationBuilder {
           } else if (original) {
             return original
               .map((route) => callback(route, undefined, next(route.children, undefined)))
-              .filter(Boolean) as readonly RouteObject[];
+              .filter((r) => r != null);
           } else if (added) {
             return added
               .map((route) => callback(undefined, route, next(undefined, route.children)))
-              .filter(Boolean) as readonly RouteObject[];
+              .filter((r) => r != null);
           }
 
           return undefined;
@@ -317,12 +324,56 @@ export class RouterConfigurationBuilder {
    * Builds the router with the current list of routes.
    */
   build(options?: RouterBuildOptions): RouterConfiguration {
-    const routes =
-      this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
+    this.#withLayoutSkipping();
+    const routes = this.#modifiers.reduce<RouteGroup | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
     return {
       routes,
       router: createBrowserRouter([...routes], { basename: new URL(document.baseURI).pathname, ...options }),
     };
+  }
+
+  #withLayoutSkipping(): this {
+    this.#modifiers.push((originalRoutes) => {
+      if (!originalRoutes) {
+        return originalRoutes;
+      }
+
+      const [noLayoutGroup, layoutGroup] = split(originalRoutes, (route) =>
+        hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUT),
+      );
+
+      const finalNoLayoutGroup = transformTree<RouteGroup, RouteGroup>(noLayoutGroup, (routes, next) =>
+        routes.map((route) => {
+          if (hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUT)) {
+            return route;
+          }
+
+          const { element, ...rest } = route;
+          return route.children?.length
+            ? ({
+                ...rest,
+                children: next(...route.children),
+              } as RouteObject)
+            : rest;
+        }),
+      );
+
+      return [
+        ...(finalNoLayoutGroup.length
+          ? [
+              {
+                children: finalNoLayoutGroup as RouteObject[],
+                handle: {
+                  [RouteHandleFlags.IGNORE_FALLBACK]: true,
+                },
+              },
+            ]
+          : []),
+        ...layoutGroup,
+      ];
+    });
+
+    return this;
   }
 }
