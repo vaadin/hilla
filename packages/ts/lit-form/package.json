@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-lit-form",
-  "version": "24.6.0-alpha2",
+  "version": "24.6.0-alpha4",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -21,7 +21,7 @@
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src test",
     "lint:fix": "npm run lint -- --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9876",
+    "test": "echo 'Using arbitrary non-UTC timezone for VaadinDateTimePickerStrategy tests'; TZ=\"Etc/GMT-12\" karma start ../../../karma.config.cjs --port 9876",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
@@ -71,7 +71,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.6.0-alpha2",
+    "@vaadin/hilla-frontend": "24.6.0-alpha4",
     "validator": "^13.11.0"
   },
   "peerDependencies": {
