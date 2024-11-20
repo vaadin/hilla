@@ -65,12 +65,8 @@ public open class EngineGenerateTask : DefaultTask() {
                 }
                 .toList()
 
-            val classLoader = URLClassLoader(
-                urls.toTypedArray(),
-                javaClass.classLoader
-            )
             val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
-            val parserProcessor = ParserProcessor(conf, classLoader, isProductionMode)
+            val parserProcessor = ParserProcessor(conf, isProductionMode)
             val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand, isProductionMode)
 
             val endpoints = AotEndpointFinder(conf).findEndpointClasses()
