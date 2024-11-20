@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A utility class for representing state events out of an ObjectNode. This
@@ -27,6 +29,7 @@ public class StateEvent<T> {
         public static final String VALUE = "value";
         public static final String EXPECTED = "expected";
         public static final String ACCEPTED = "accepted";
+        public static final String VALIDATION_ERROR = "validationError";
     }
 
     /**
@@ -52,6 +55,7 @@ public class StateEvent<T> {
     private final T value;
     private final T expected;
     private Boolean accepted;
+    private String validationError;
 
     /**
      * Creates a new state event using the given parameters.
@@ -99,6 +103,7 @@ public class StateEvent<T> {
 
         JsonNode expected = json.get(Field.EXPECTED);
         this.expected = convertValue(expected, valueType);
+
     }
 
     /**
@@ -139,6 +144,17 @@ public class StateEvent<T> {
         return value;
     }
 
+    public static JsonNode extractExpected(JsonNode json, boolean required) {
+        var expected = json.get(Field.EXPECTED);
+        if (expected == null) {
+            if (required) {
+                throw new MissingFieldException(Field.EXPECTED);
+            }
+            return null;
+        }
+        return expected;
+    }
+
     public static String extractRawEventType(JsonNode json) {
         var rawType = json.get(Field.TYPE);
         if (rawType == null) {
@@ -163,6 +179,50 @@ public class StateEvent<T> {
     }
 
     /**
+     * Checks if the given JSON object represents a SET state event.
+     *
+     * @param event
+     *            The JSON object to check.
+     * @return <code>true</code> if the given JSON object represents a SET state
+     *         event, <code>false</code> otherwise.
+     * @throws MissingFieldException
+     *             If the event does not contain the TYPE field.
+     * @throws InvalidEventTypeException
+     *             If the event contains an invalid event type.
+     */
+    public static boolean isSetEvent(ObjectNode event) {
+        var rawEventType = StateEvent.extractRawEventType(event);
+        if (rawEventType == null) {
+            throw new MissingFieldException(Field.TYPE);
+        }
+        var eventType = StateEvent.EventType.find(rawEventType)
+                .orElseThrow(() -> new InvalidEventTypeException(rawEventType));
+        return eventType == EventType.SET;
+    }
+
+    /**
+     * Checks if the given JSON object represents a REPLACE state event.
+     *
+     * @param event
+     *            The JSON object to check.
+     * @return <code>true</code> if the given JSON object represents a REPLACE
+     *         state event, <code>false</code> otherwise.
+     * @throws MissingFieldException
+     *             If the event does not contain the TYPE field.
+     * @throws InvalidEventTypeException
+     *             If the event contains an invalid event type.
+     */
+    public static boolean isReplaceEvent(ObjectNode event) {
+        var rawEventType = StateEvent.extractRawEventType(event);
+        if (rawEventType == null) {
+            throw new MissingFieldException(Field.TYPE);
+        }
+        var eventType = StateEvent.EventType.find(rawEventType)
+                .orElseThrow(() -> new InvalidEventTypeException(rawEventType));
+        return eventType == EventType.REPLACE;
+    }
+
+    /**
      * Returns the JSON representation of the event.
      *
      * @return The JSON representation of the event.
@@ -178,12 +238,22 @@ public class StateEvent<T> {
         if (accepted != null) {
             json.put(Field.ACCEPTED, accepted);
         }
+        if (validationError != null) {
+            json.put(StateEvent.Field.VALIDATION_ERROR, validationError);
+        }
         return json;
     }
 
     public static boolean isAccepted(ObjectNode event) {
         return event.has(Field.ACCEPTED)
                 && event.get(Field.ACCEPTED).asBoolean();
+    }
+
+    public static boolean isRejected(ObjectNode event) {
+        return event.has(Field.ACCEPTED)
+                && !event.get(Field.ACCEPTED).asBoolean()
+                && event.has(Field.VALIDATION_ERROR)
+                && event.get(Field.VALIDATION_ERROR).asText() != null;
     }
 
     private static JsonNode valueAsJsonNode(Object value) {
@@ -259,5 +329,13 @@ public class StateEvent<T> {
     @Override
     public int hashCode() {
         return Objects.hash(getId());
+    }
+
+    public String getValidationError() {
+        return validationError;
+    }
+
+    public void setValidationError(String validationError) {
+        this.validationError = validationError;
     }
 }
