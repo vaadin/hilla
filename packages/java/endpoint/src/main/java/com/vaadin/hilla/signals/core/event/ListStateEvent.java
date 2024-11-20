@@ -76,6 +76,7 @@ public class ListStateEvent<T> {
     private UUID entryId;
     // Only used for insert event:
     private final InsertPosition insertPosition;
+    private String validationError;
 
     public ListStateEvent(String id, EventType eventType,
             Collection<ListEntry<T>> entries) {
@@ -200,6 +201,10 @@ public class ListStateEvent<T> {
         if (accepted != null) {
             snapshotData.put(StateEvent.Field.ACCEPTED, accepted);
         }
+        if (validationError != null) {
+            snapshotData.put(StateEvent.Field.VALIDATION_ERROR,
+                    validationError);
+        }
         return snapshotData;
     }
 
@@ -237,5 +242,13 @@ public class ListStateEvent<T> {
 
     public void setAccepted(Boolean accepted) {
         this.accepted = accepted;
+    }
+
+    public String getValidationError() {
+        return validationError;
+    }
+
+    public void setValidationError(String validationError) {
+        this.validationError = validationError;
     }
 }
