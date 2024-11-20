@@ -65,28 +65,26 @@ function hasRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag
   return typeof route.handle === 'object' && flag in route.handle && (route.handle as Record<T, boolean>)[flag];
 }
 
-function split<T extends readonly RouteSplittingRule[]>(
-  originalRoutes: RouteGroup,
-  ...rules: T
-): readonly [...ReadonlyTuple<RouteGroup, T['length']>, RouteGroup] {
-  // Split the routes tree onto two subtrees with and without
-  // a server layout.
-  return transformTree<RouteGroup, readonly RouteGroup[]>(originalRoutes, (routes, next) =>
-    // Split single routes list onto two filtered lists
-    routes.reduce<readonly WritableRouteGroup[]>(
+function split(originalRoutes: RouteGroup, rule: RouteSplittingRule): readonly [RouteGroup, RouteGroup] {
+  return transformTree<RouteGroup, readonly [RouteGroup, RouteGroup]>(originalRoutes, (routes, next) =>
+    // Split a single routes list onto two separate groups.
+    routes.reduce<readonly [WritableRouteGroup, WritableRouteGroup]>(
       (groups, route) => {
-        for (let i = 0; i < groups.length; i++) {
-          if (rules[i]?.(route)) {
-            groups[i].push(route);
-            return groups;
-          }
-        }
-
-        if (!route.children?.length) {
-          groups.at(-1)?.push(route);
+        if (rule(route)) {
+          // If the route satisfies the rule, it goes to the first group.
+          groups[0].push(route);
           return groups;
         }
 
+        if (!route.children?.length) {
+          // Leaf routes go to the second group.
+          groups[1].push(route);
+          return groups;
+        }
+
+        // Route children: separate them to different subtrees, and copy the
+        // current route to either or both the groups with the respective
+        // subtree as children.
         const childrenGroups = next(...route.children);
 
         for (let i = 0; i < groups.length; i++) {
@@ -100,9 +98,9 @@ function split<T extends readonly RouteSplittingRule[]>(
 
         return groups;
       },
-      new Array(rules.length + 1).fill([]),
+      [[], []],
     ),
-  ) as readonly [...ReadonlyTuple<RouteGroup, T['length']>, RouteGroup];
+  );
 }
 
 /**
@@ -230,6 +228,8 @@ export class RouterConfigurationBuilder {
       return [
         ...(serverGroup.length
           ? [
+              // The server subtree is wrapped with the server layout component,
+              // which applies the top-level server layout to all matches.
               {
                 element: createElement(layoutComponent),
                 children: serverGroup as RouteObject[],
@@ -239,6 +239,7 @@ export class RouterConfigurationBuilder {
               },
             ]
           : []),
+        // The client route subtree is preserved without wrapping.
         ...clientGroup,
       ];
     });
