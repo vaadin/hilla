@@ -103,20 +103,6 @@ public final class Parser {
     }
 
     /**
-     * Allows to change the class loader that the parser uses for reflection.
-     *
-     * @param classLoader
-     *            a class loader instance.
-     *
-     * @return this (for method chaining).
-     */
-    @Nonnull
-    public Parser classLoader(@Nonnull ClassLoader classLoader) {
-        config.classLoader = classLoader;
-        return this;
-    }
-
-    /**
      * Specifies the classpath where the parser will scan for endpoints.
      * Specifying the classpath is required.
      *
@@ -292,8 +278,6 @@ public final class Parser {
      */
     @Nonnull
     public OpenAPI execute(List<Class<?>> endpoints) {
-        Objects.requireNonNull(config.classLoader,
-                "[JVM Parser] classLoader is not provided.");
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
         Objects.requireNonNull(config.endpointAnnotations,
@@ -449,20 +433,9 @@ public final class Parser {
         private List<Class<? extends Annotation>> endpointExposedAnnotations;
         private Collection<String> exposedPackages;
         private OpenAPI openAPI;
-        private ClassLoader classLoader;
 
         private Config(OpenAPI openAPI) {
             this.openAPI = openAPI;
-        }
-
-        /**
-         * Gets the class loader for reflection in the parser.
-         *
-         * @return the class loader
-         */
-        @Nonnull
-        public ClassLoader getClassLoader() {
-            return classLoader;
         }
 
         /**

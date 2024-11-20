@@ -26,7 +26,7 @@ public class BasicTest {
                 .of(new AnnotationMatcher(Nonnull.class.getName(), false, 0)),
                 null));
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

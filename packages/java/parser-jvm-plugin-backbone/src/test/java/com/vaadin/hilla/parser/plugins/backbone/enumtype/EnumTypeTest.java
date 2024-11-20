@@ -19,7 +19,7 @@ public class EnumTypeTest {
     @Test
     public void should_GenerateStringType_When_ReferringToEnumTypes()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

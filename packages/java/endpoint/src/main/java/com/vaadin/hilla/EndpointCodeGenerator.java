@@ -98,7 +98,7 @@ public class EndpointCodeGenerator {
                     .map(Map::values).flatMap(Collection::stream)
                     .map(Object::getClass).distinct().toList();
             ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                    getClass().getClassLoader(), false);
+                    false);
             parser.process(endpoints);
 
             GeneratorProcessor generator = new GeneratorProcessor(

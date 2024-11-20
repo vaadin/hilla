@@ -80,11 +80,11 @@ public class TaskTest {
     }
 
     protected String getBuildDirectory() {
-        return "build";
+        return "target";
     }
 
     protected String getClassesDirectory() {
-        return "build/classes";
+        return "target/classes";
     }
 
     protected Path getOpenAPIFile() {

@@ -27,7 +27,7 @@ public class JacksonTest {
         Assumptions.assumeTrue(fieldsReturnedInDefinedOrder(),
                 "This test is skipped on JDKs that do not return declared methods in the file order");
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

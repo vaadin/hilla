@@ -1144,10 +1144,9 @@ public class EndpointControllerTest {
     public void should_Fallback_to_Spring_Context() throws Exception {
         // this also tests that an empty definition is not a problem
         var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
-        // this one is found by Spring
+        // as endpoints are find through Spring, the results are the same
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
-        // the others are outside the Spring context
-        assertNull(endpointRegistry.get("libraryEndpoint"));
+        assertNotNull(endpointRegistry.get("libraryEndpoint"));
         assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
     }
 

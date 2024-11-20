@@ -22,7 +22,7 @@ public class PageableTest {
             throws IOException, URISyntaxException {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
@@ -37,7 +37,7 @@ public class PageableTest {
             throws IOException, URISyntaxException {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

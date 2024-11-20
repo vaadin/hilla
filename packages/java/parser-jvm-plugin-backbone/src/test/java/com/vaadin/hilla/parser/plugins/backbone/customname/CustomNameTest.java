@@ -18,7 +18,7 @@ public class CustomNameTest {
     @Test
     public void should_UseCustomEndpointNames_WhenGivenInAnnotation()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

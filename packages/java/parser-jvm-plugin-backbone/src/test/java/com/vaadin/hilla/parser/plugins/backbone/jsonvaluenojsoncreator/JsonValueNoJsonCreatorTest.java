@@ -19,8 +19,7 @@ public class JsonValueNoJsonCreatorTest {
     @Test
     public void should_ThrowExceptionWhenOnlyJsonValueIsUsed() {
         assertThrows(MalformedValueTypeException.class, () -> {
-            new Parser().classLoader(getClass().getClassLoader())
-                    .classPath(Set.of(helper.getTargetDir().toString()))
+            new Parser().classPath(Set.of(helper.getTargetDir().toString()))
                     .endpointAnnotations(List.of(Endpoint.class))
                     .endpointExposedAnnotations(List.of(EndpointExposed.class))
                     .addPlugin(new BackbonePlugin())

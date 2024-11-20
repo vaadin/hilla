@@ -84,7 +84,6 @@ public class EndpointGeneratorTaskFactoryImpl
                 options.getBuildDirectoryName(),
                 options.getFrontendGeneratedFolder(),
                 options.getClassFinder()::getResource,
-                options.getClassFinder().getClassLoader(),
                 options.isProductionMode());
     }
 

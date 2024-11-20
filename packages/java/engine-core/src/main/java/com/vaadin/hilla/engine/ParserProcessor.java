@@ -21,13 +21,10 @@ import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
 import com.vaadin.hilla.parser.utils.JsonPrinter;
 
-import static com.vaadin.hilla.engine.EngineConfiguration.OPEN_API_PATH;
-
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
     private final Path baseDir;
-    private final ClassLoader classLoader;
     private final Set<Path> classPath;
     private final Path openAPIFile;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
@@ -37,17 +34,15 @@ public final class ParserProcessor {
     private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
-    public ParserProcessor(EngineConfiguration conf, ClassLoader classLoader,
-            boolean isProductionMode) {
+    public ParserProcessor(EngineConfiguration conf, boolean isProductionMode) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
-        this.classLoader = classLoader;
         this.classPath = conf.getClasspath();
         applyConfiguration(conf.getParser());
     }
 
     private String createOpenAPI(List<Class<?>> endpoints) throws IOException {
-        var parser = new Parser().classLoader(classLoader)
+        var parser = new Parser()
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
                 .endpointAnnotations(endpointAnnotations)

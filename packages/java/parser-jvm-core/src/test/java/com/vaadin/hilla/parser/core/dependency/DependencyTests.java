@@ -32,9 +32,7 @@ public class DependencyTests {
 
     @BeforeAll
     public static void setUp() {
-        openApi = new Parser()
-                .classLoader(DependencyTests.class.getClassLoader())
-                .classPath(classPath)
+        openApi = new Parser().classPath(classPath)
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new DependencyPlugin()).execute(endpoints);

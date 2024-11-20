@@ -23,7 +23,7 @@ public class PushTypeTest {
         var classpath = helper.getExtendedClassPath(Flux.class,
                 EndpointSubscription.class);
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(classpath.split(File.pathSeparator))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

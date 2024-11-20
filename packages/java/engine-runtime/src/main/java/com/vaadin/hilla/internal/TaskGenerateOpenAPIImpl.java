@@ -15,15 +15,11 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.hilla.engine.AotEndpointFinder;
-import jakarta.annotation.Nonnull;
-
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,7 +42,6 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     private static final Logger LOGGER = LoggerFactory
             .getLogger(TaskGenerateOpenAPIImpl.class);
 
-    private final ClassLoader classLoader;
     private final boolean isProductionMode;
 
     /**
@@ -73,11 +68,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
             File outputDirectory, Function<String, URL> resourceFinder,
-            @Nonnull ClassLoader classLoader, boolean isProductionMode) {
+            boolean isProductionMode) {
         super(projectDirectory, buildDirectoryName, outputDirectory,
                 resourceFinder);
-        this.classLoader = Objects.requireNonNull(classLoader,
-                "ClassLoader should not be null");
         this.isProductionMode = isProductionMode;
     }
 
@@ -92,8 +85,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         if (isProductionMode) {
             var endpoints = engineConfiguration.getOfflineEndpointProvider()
                     .findEndpoints();
-            var processor = new ParserProcessor(engineConfiguration,
-                    classLoader, true);
+            var processor = new ParserProcessor(engineConfiguration, true);
             processor.process(endpoints);
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
@@ -103,8 +95,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                         .map(Map::values).flatMap(Collection::stream)
                         .map(Object::getClass).distinct()
                         .collect(Collectors.toList());
-                var processor = new ParserProcessor(engineConfiguration,
-                        classLoader, false);
+                var processor = new ParserProcessor(engineConfiguration, false);
                 processor.process(endpoints);
             });
         }
