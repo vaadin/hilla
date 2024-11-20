@@ -530,7 +530,7 @@ describe('RouterBuilder', () => {
           {
             path: '/shallow-skip',
             handle: {
-              skipLayout: true,
+              skipLayouts: true,
             },
           },
           {
@@ -542,7 +542,7 @@ describe('RouterBuilder', () => {
                   {
                     path: '/deep-skip-2',
                     handle: {
-                      skipLayout: true,
+                      skipLayouts: true,
                     },
                   },
                   {
@@ -564,7 +564,7 @@ describe('RouterBuilder', () => {
               {
                 path: '/flow-skip-1',
                 handle: {
-                  skipLayout: true,
+                  skipLayouts: true,
                 },
               },
               {
@@ -596,7 +596,7 @@ describe('RouterBuilder', () => {
                     {
                       path: '/flow-skip-1',
                       handle: {
-                        skipLayout: true,
+                        skipLayouts: true,
                       },
                     },
                   ],
@@ -606,7 +606,7 @@ describe('RouterBuilder', () => {
             {
               path: '/shallow-skip',
               handle: {
-                skipLayout: true,
+                skipLayouts: true,
               },
             },
             {
@@ -617,7 +617,7 @@ describe('RouterBuilder', () => {
                   children: [
                     {
                       path: '/deep-skip-2',
-                      handle: { skipLayout: true },
+                      handle: { skipLayouts: true },
                     },
                   ],
                 },

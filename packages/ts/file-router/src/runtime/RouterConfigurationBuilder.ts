@@ -57,7 +57,7 @@ function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string,
 enum RouteHandleFlags {
   FLOW_LAYOUT = 'flowLayout',
   IGNORE_FALLBACK = 'ignoreFallback',
-  SKIP_LAYOUT = 'skipLayout',
+  SKIP_LAYOUTS = 'skipLayouts',
 }
 
 function hasRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag: T): boolean {
@@ -340,12 +340,12 @@ export class RouterConfigurationBuilder {
       }
 
       const [noLayoutGroup, layoutGroup] = split(originalRoutes, (route) =>
-        hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUT),
+        hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS),
       );
 
       const finalNoLayoutGroup = transformTree<RouteGroup, RouteGroup>(noLayoutGroup, (routes, next) =>
         routes.map((route) => {
-          if (hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUT)) {
+          if (hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS)) {
             return route;
           }
 
