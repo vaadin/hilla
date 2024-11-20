@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions,@typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 import { protectRoute } from '@vaadin/hilla-react-auth';
 import { type ComponentType, createElement } from 'react';
 import {
