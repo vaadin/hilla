@@ -7,7 +7,6 @@ import {
   type NonIndexRouteObject,
   type RouteObject,
 } from 'react-router-dom';
-import type { ReadonlyTuple } from 'type-fest';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type {
