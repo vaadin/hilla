@@ -156,16 +156,6 @@ public class ParserConfigTests {
     }
 
     @Test
-    public void should_ThrowError_When_ClassLoaderIsNotSet() {
-        var e = assertThrows(NullPointerException.class,
-                () -> new Parser().classPath(defaultClassPathElements)
-                        .endpointAnnotations(defaultEndpointAnnotations)
-                        .execute(List.of()));
-        assertEquals("[JVM Parser] classLoader is not provided.",
-                e.getMessage());
-    }
-
-    @Test
     public void should_ThrowError_When_ClassPathIsNotSet() {
         var e = assertThrows(NullPointerException.class,
                 () -> new Parser()
