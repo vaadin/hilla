@@ -28,28 +28,18 @@ function isReactRouteModule(module?: Module): module is RouteModule<ComponentTyp
   return module ? 'default' in module && typeof module.default === 'function' : true;
 }
 
-export type RouteGroup = readonly RouteObject[];
-export type WritableRouteGroup = RouteObject[];
+export type RouteList = readonly RouteObject[];
+export type WritableRouteList = RouteObject[];
 
 export type RouteTransformer<T> = (
   original: RouteObject | undefined,
   overriding: T | undefined,
-  children?: RouteGroup,
+  children?: RouteList,
 ) => RouteObject | undefined;
 
-export type RouteGroupSplitter = Readonly<{
-  numberOfGroups: number;
-  finalize?(groups: ReadonlyArray<RouteGroup | undefined>): RouteGroup;
-  split(
-    groups: ReadonlyArray<RouteGroup | undefined>,
-    route: RouteObject,
-    next: (...nodes: RouteGroup) => ReadonlyArray<RouteGroup | undefined>,
-  ): ReadonlyArray<RouteGroup | undefined>;
-}>;
+export type RouteListSplittingRule = (route: RouteObject) => boolean;
 
-export type RouteSplittingRule = (route: RouteObject) => boolean;
-
-type RoutesModifier = (routes: RouteGroup | undefined) => RouteGroup | undefined;
+type RoutesModifier = (routes: RouteList | undefined) => RouteList | undefined;
 
 function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string, value: T] {
   return [`${route.path ?? ''}-${route.children ? 'n' : 'i'}`, route];
@@ -69,38 +59,38 @@ const categories = ['default', 'match'] as const;
 
 type Category = TupleToUnion<typeof categories>;
 
-function split(originalRoutes: RouteGroup, rule: RouteSplittingRule): Readonly<Record<Category, RouteGroup>> {
-  return transformTree<RouteGroup, Readonly<Record<Category, RouteGroup>>>(originalRoutes, (routes, next) =>
-    // Split a single routes list onto two separate groups.
-    routes.reduce<Record<Category, WritableRouteGroup>>(
-      (groups, route) => {
+function split(originalRoutes: RouteList, rule: RouteListSplittingRule): Readonly<Record<Category, RouteList>> {
+  return transformTree<RouteList, Readonly<Record<Category, RouteList>>>(originalRoutes, (routes, next) =>
+    // Split a single routes list onto two separate lists.
+    routes.reduce<Record<Category, WritableRouteList>>(
+      (lists, route) => {
         if (rule(route)) {
-          // If the route satisfies the rule, it goes to the first group.
-          groups.match.push(route);
-          return groups;
+          // If the route satisfies the rule, it goes to the first list.
+          lists.match.push(route);
+          return lists;
         }
 
         if (!route.children?.length) {
-          // Leaf routes go to the second group.
-          groups.default.push(route);
-          return groups;
+          // Leaf routes go to the second list.
+          lists.default.push(route);
+          return lists;
         }
 
         // Route children: separate them to different subtrees, and copy the
-        // current route to either or both the groups with the respective
+        // current route to either or both the lists with the respective
         // subtree as children.
-        const childrenGroups = next(...route.children);
+        const childrenLists = next(...route.children);
 
         for (const category of categories) {
-          if (childrenGroups[category].length) {
-            groups[category].push({
+          if (childrenLists[category].length) {
+            lists[category].push({
               ...route,
-              children: childrenGroups[category],
+              children: childrenLists[category],
             } as RouteObject);
           }
         }
 
-        return groups;
+        return lists;
       },
       { match: [], default: [] },
     ),
@@ -120,7 +110,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withReactRoutes(routes: RouteGroup): this {
+  withReactRoutes(routes: RouteList): this {
     return this.update(routes);
   }
 
@@ -181,7 +171,7 @@ export class RouterConfigurationBuilder {
     this.withLayout(component);
 
     // Fallback adds two routes, so that the index (empty path) has a fallback too
-    const fallbackRoutes: RouteGroup = [
+    const fallbackRoutes: RouteList = [
       { path: '*', element: createElement(component), handle: config },
       { index: true, element: createElement(component), handle: config },
     ];
@@ -225,18 +215,18 @@ export class RouterConfigurationBuilder {
         return originalRoutes;
       }
 
-      const { match: serverGroup, default: clientGroup } = split(originalRoutes, (route) =>
+      const { match: serverList, default: clientList } = split(originalRoutes, (route) =>
         hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT),
       );
 
       return [
-        ...(serverGroup.length
+        ...(serverList.length
           ? [
               // The server subtree is wrapped with the server layout component,
               // which applies the top-level server layout to all matches.
               {
                 element: createElement(layoutComponent),
-                children: serverGroup as RouteObject[],
+                children: serverList as RouteObject[],
                 handle: {
                   [RouteHandleFlags.IGNORE_FALLBACK]: true,
                 },
@@ -244,7 +234,7 @@ export class RouterConfigurationBuilder {
             ]
           : []),
         // The client route subtree is preserved without wrapping.
-        ...clientGroup,
+        ...clientList,
       ];
     });
 
@@ -280,7 +270,7 @@ export class RouterConfigurationBuilder {
       }) as RouteObject,
   ): this {
     this.#modifiers.push((existingRoutes) =>
-      transformTree<[RouteGroup | undefined, readonly T[] | undefined], RouteGroup | undefined>(
+      transformTree<[RouteList | undefined, readonly T[] | undefined], RouteList | undefined>(
         [existingRoutes, routes],
         ([original, added], next) => {
           if (original && added) {
@@ -330,7 +320,7 @@ export class RouterConfigurationBuilder {
    */
   build(options?: RouterBuildOptions): RouterConfiguration {
     this.#withLayoutSkipping();
-    const routes = this.#modifiers.reduce<RouteGroup | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
+    const routes = this.#modifiers.reduce<RouteList | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
     return {
       routes,
@@ -344,11 +334,11 @@ export class RouterConfigurationBuilder {
         return originalRoutes;
       }
 
-      const { match: noLayoutGroup, default: layoutGroup } = split(originalRoutes, (route) =>
+      const { match: noLayoutList, default: layoutList } = split(originalRoutes, (route) =>
         hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS),
       );
 
-      const finalNoLayoutGroup = transformTree<RouteGroup, RouteGroup>(noLayoutGroup, (routes, next) =>
+      const finalNoLayoutList = transformTree<RouteList, RouteList>(noLayoutList, (routes, next) =>
         routes.map((route) => {
           if (hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS)) {
             return route;
@@ -365,17 +355,17 @@ export class RouterConfigurationBuilder {
       );
 
       return [
-        ...(finalNoLayoutGroup.length
+        ...(finalNoLayoutList.length
           ? [
               {
-                children: finalNoLayoutGroup as RouteObject[],
+                children: finalNoLayoutList as RouteObject[],
                 handle: {
                   [RouteHandleFlags.IGNORE_FALLBACK]: true,
                 },
               },
             ]
           : []),
-        ...layoutGroup,
+        ...layoutList,
       ];
     });
 
