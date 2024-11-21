@@ -160,7 +160,7 @@ public class NumberSignal extends ValueSignal<Double> {
      *                     ValidationResult.reject("No setting is allowed");
      *         case SetValueOperation&lt;Double&gt; ignored -&gt;
      *                     ValidationResult.reject("No replacing is allowed");
-     *         default -&gt; ValidationResult.allow();
+     *         default -&gt; ValidationResult.reject("Unknown operation is not allowed");
      *     };
      * });
      * </code></pre>
