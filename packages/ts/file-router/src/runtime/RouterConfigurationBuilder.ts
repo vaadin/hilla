@@ -7,6 +7,7 @@ import {
   type NonIndexRouteObject,
   type RouteObject,
 } from 'react-router-dom';
+import type { TupleToUnion } from 'type-fest';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type {
@@ -64,20 +65,24 @@ function hasRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag
   return typeof route.handle === 'object' && flag in route.handle && (route.handle as Record<T, boolean>)[flag];
 }
 
-function split(originalRoutes: RouteGroup, rule: RouteSplittingRule): readonly [RouteGroup, RouteGroup] {
-  return transformTree<RouteGroup, readonly [RouteGroup, RouteGroup]>(originalRoutes, (routes, next) =>
+const categories = ['default', 'match'] as const;
+
+type Category = TupleToUnion<typeof categories>;
+
+function split(originalRoutes: RouteGroup, rule: RouteSplittingRule): Readonly<Record<Category, RouteGroup>> {
+  return transformTree<RouteGroup, Readonly<Record<Category, RouteGroup>>>(originalRoutes, (routes, next) =>
     // Split a single routes list onto two separate groups.
-    routes.reduce<readonly [WritableRouteGroup, WritableRouteGroup]>(
+    routes.reduce<Record<Category, WritableRouteGroup>>(
       (groups, route) => {
         if (rule(route)) {
           // If the route satisfies the rule, it goes to the first group.
-          groups[0].push(route);
+          groups.match.push(route);
           return groups;
         }
 
         if (!route.children?.length) {
           // Leaf routes go to the second group.
-          groups[1].push(route);
+          groups.default.push(route);
           return groups;
         }
 
@@ -86,18 +91,18 @@ function split(originalRoutes: RouteGroup, rule: RouteSplittingRule): readonly [
         // subtree as children.
         const childrenGroups = next(...route.children);
 
-        for (let i = 0; i < groups.length; i++) {
-          if (childrenGroups[i].length) {
-            groups[i].push({
+        for (const category of categories) {
+          if (childrenGroups[category].length) {
+            groups[category].push({
               ...route,
-              children: childrenGroups[i],
+              children: childrenGroups[category],
             } as RouteObject);
           }
         }
 
         return groups;
       },
-      [[], []],
+      { match: [], default: [] },
     ),
   );
 }
@@ -220,7 +225,7 @@ export class RouterConfigurationBuilder {
         return originalRoutes;
       }
 
-      const [serverGroup, clientGroup] = split(originalRoutes, (route) =>
+      const { match: serverGroup, default: clientGroup } = split(originalRoutes, (route) =>
         hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT),
       );
 
@@ -339,7 +344,7 @@ export class RouterConfigurationBuilder {
         return originalRoutes;
       }
 
-      const [noLayoutGroup, layoutGroup] = split(originalRoutes, (route) =>
+      const { match: noLayoutGroup, default: layoutGroup } = split(originalRoutes, (route) =>
         hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS),
       );
 
