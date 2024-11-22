@@ -34,9 +34,9 @@ public final class ParserProcessor {
     private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
-    public ParserProcessor(EngineConfiguration conf, boolean isProductionMode) {
+    public ParserProcessor(EngineConfiguration conf) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
+        this.openAPIFile = conf.getOpenAPIFile();
         this.classPath = conf.getClasspath();
         applyConfiguration(conf.getParser());
     }

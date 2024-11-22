@@ -5,17 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
@@ -23,9 +21,6 @@ import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Endpoint;
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.engine.EngineConfiguration;
 
@@ -33,36 +28,6 @@ public class NodeTasksEndpointTest extends TaskTest {
     private Options options;
 
     public static class ConnectEndpointsForTesting {
-    }
-
-    @Endpoint
-    public class MyEndpoint {
-        public void foo(String bar) {
-        }
-
-        public String bar(String baz) {
-            return baz;
-        }
-    }
-
-    @Endpoint(value = "CustomEndpointName")
-    public class CustomEndpoint {
-        public void foo(String bar) {
-        }
-
-        public String bar(String baz) {
-            return baz;
-        }
-    }
-
-    @Endpoint("WithoutValueEqual")
-    public class EndpointNoValue {
-        public void foo(String bar) {
-        }
-
-        public String bar(String baz) {
-            return baz;
-        }
     }
 
     @BeforeEach
@@ -78,18 +43,6 @@ public class NodeTasksEndpointTest extends TaskTest {
                 EndpointController.class, ConnectEndpointsForTesting.class)))
                 .when(mockLookup).lookup(ClassFinder.class);
 
-        var mockApplicationContext = Mockito.mock(ApplicationContext.class);
-        Mockito.doReturn(Map.of("MyEndpoint", new MyEndpoint(),
-                "CustomEndpointName", CustomEndpoint.class, "WithoutValueEqual",
-                EndpointNoValue.class)).when(mockApplicationContext)
-                .getBeansWithAnnotation(Endpoint.class);
-        Mockito.doReturn(Map.of()).when(mockApplicationContext)
-                .getBeansWithAnnotation(BrowserCallable.class);
-        var applicationContextField = ApplicationContextProvider.class
-                .getDeclaredField("applicationContext");
-        applicationContextField.setAccessible(true);
-        applicationContextField.set(null, mockApplicationContext);
-
         options = new Options(mockLookup, getTemporaryDirectory().toFile())
                 .withFrontendDirectory(getTemporaryDirectory()
                         .resolve(getFrontendDirectory()).toFile())
@@ -102,8 +55,6 @@ public class NodeTasksEndpointTest extends TaskTest {
                         getTemporaryDirectory().resolve("api").toFile())
                 .withJarFrontendResourcesFolder(getTemporaryDirectory()
                         .resolve("jar-resources").toFile());
-
-        EngineConfiguration.getDefault().setBuildDir(getBuildDirectory());
 
         createIndexFile();
     }
@@ -126,11 +77,12 @@ public class NodeTasksEndpointTest extends TaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
-        EngineConfiguration.getDefault()
-                .setOfflineEndpointProvider(() -> List.of(MyEndpoint.class));
+        var engineConfiguration = new EngineConfiguration.Builder()
+                .offlineEndpointProvider(() -> List.of(MyEndpoint.class))
+                .create();
+        EngineConfiguration.setDefault(engineConfiguration);
 
         new NodeTasks(options).execute();
-        EngineConfiguration.getDefault().setOfflineEndpointProvider(null);
         assertEndpointFilesInProductionMode(true);
     }
 
@@ -142,7 +94,7 @@ public class NodeTasksEndpointTest extends TaskTest {
     }
 
     private void assertEndpointFiles(boolean shouldExist) {
-        Arrays.asList("target/hilla-openapi.json",
+        Arrays.asList("build/hilla-openapi.json",
                 "api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertEquals(shouldExist,
                         new File(getTemporaryDirectory().toFile(), name)
@@ -152,7 +104,7 @@ public class NodeTasksEndpointTest extends TaskTest {
     }
 
     private void assertEndpointFilesInProductionMode(boolean shouldExist) {
-        Arrays.asList("target/classes/hilla-openapi.json",
+        Arrays.asList("build/classes/hilla-openapi.json",
                 "api/connect-client.default.ts", "api/MyEndpoint.ts")
                 .forEach(name -> assertEquals(shouldExist,
                         new File(getTemporaryDirectory().toFile(), name)

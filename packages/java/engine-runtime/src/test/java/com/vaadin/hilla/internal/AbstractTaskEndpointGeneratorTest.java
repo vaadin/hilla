@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
 import com.vaadin.hilla.engine.commandrunner.MavenRunner;
 import org.junit.jupiter.api.Test;
@@ -17,29 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 class AbstractTaskEndpointGeneratorTest extends TaskTest {
     @Test
-    void shouldThrowIfProjectDirectoryIsNull() {
+    void shouldThrowIfEngineConfigurationIsNull() {
         assertThrowsExactly(NullPointerException.class, () -> {
-            new TestTaskEndpointGenerator(null, getBuildDirectory(),
-                    getTemporaryDirectory().resolve(getOutputDirectory())
-                            .toFile());
-        }, "Project directory cannot be null");
-    }
-
-    @Test
-    void shouldThrowIfBuildDirectoryNameIsNull() {
-        assertThrowsExactly(NullPointerException.class, () -> {
-            new TestTaskEndpointGenerator(getTemporaryDirectory().toFile(),
-                    null, getTemporaryDirectory().resolve(getOutputDirectory())
-                            .toFile());
-        }, "Build directory name cannot be null");
-    }
-
-    @Test
-    void shouldThrowIfOutputDirectoryIsNull() {
-        assertThrowsExactly(NullPointerException.class, () -> {
-            new TestTaskEndpointGenerator(getTemporaryDirectory().toFile(),
-                    getBuildDirectory(), null);
-        }, "Output directory cannot be null");
+            new TestTaskEndpointGenerator(null);
+        }, "Engine configuration cannot be null");
     }
 
     private final Function<String, URL> resourceFinder = Thread.currentThread()
@@ -47,10 +29,8 @@ class AbstractTaskEndpointGeneratorTest extends TaskTest {
 
     private class TestTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
-        TestTaskEndpointGenerator(File projectDirectory,
-                String buildDirectoryName, File outputDirectory) {
-            super(projectDirectory, buildDirectoryName, outputDirectory,
-                    resourceFinder);
+        TestTaskEndpointGenerator(EngineConfiguration engineConfiguration) {
+            super(engineConfiguration);
         }
 
         @Override

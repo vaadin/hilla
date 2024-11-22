@@ -59,10 +59,11 @@ public class OpenAPIUtil {
      */
     public static Optional<Path> getCurrentOpenAPIPath(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        EngineConfiguration engineConfiguration = EngineConfiguration
-                .getDefault();
-        return Optional
-                .of(engineConfiguration.getOpenAPIFile(isProductionMode));
+        var engineConfiguration = new EngineConfiguration.Builder()
+            .buildDir(buildDirectory)
+            .productionMode(isProductionMode)
+            .create();
+        return Optional.of(engineConfiguration.getOpenAPIFile());
     }
 
     /**

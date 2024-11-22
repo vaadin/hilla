@@ -46,12 +46,15 @@ public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFronten
 
     @TaskAction
     public fun exec() {
-        var engineConfiguration = EngineConfiguration.getDefault()
-        engineConfiguration.classpath = classpathElements.map { Path.of(it) }.toSet()
-        engineConfiguration.groupId = groupId
-        engineConfiguration.artifactId = artifactId
-        engineConfiguration.mainClass = mainClass
-        engineConfiguration.buildDir = buildDir.toPath()
+        var engineConfiguration = EngineConfiguration.Builder()
+            .classpath(classpathElements)
+            .groupId(groupId)
+            .artifactId(artifactId)
+            .mainClass(mainClass)
+            .buildDir(buildDir.toPath())
+            .create()
+
+        EngineConfiguration.setDefault(engineConfiguration)
 
         super.vaadinBuildFrontend()
     }

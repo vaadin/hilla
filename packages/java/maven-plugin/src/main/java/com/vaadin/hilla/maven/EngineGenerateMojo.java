@@ -1,11 +1,8 @@
 package com.vaadin.hilla.maven;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
+import java.io.File;
 
-import com.vaadin.hilla.engine.AotEndpointFinder;
+import com.vaadin.flow.server.ExecutionFailedException;
 import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -21,17 +18,32 @@ import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
 
+import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
+
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public final class EngineGenerateMojo extends AbstractMojo {
+    /**
+     * A directory with project's frontend source files.
+     */
+    @Parameter(defaultValue = "${project.basedir}/src/main/" + FRONTEND)
+    private File frontendDirectory;
+
+    @Parameter(defaultValue = "${null}")
+    private File generatedTsFolder;
 
     @Parameter(defaultValue = "node")
     private String nodeCommand;
-    @Parameter(defaultValue = "${project}", readonly = true)
+
+    @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
+
+    @Parameter(property = "spring-boot.aot.main-class")
+    private String mainClass;
 
     @Override
     public void execute() throws EngineGenerateMojoException {
@@ -44,21 +56,33 @@ public final class EngineGenerateMojo extends AbstractMojo {
             return;
         }
         try {
-            var conf = EngineConfiguration.getDefault();
             var isProduction = project.getActiveProfiles().stream()
                     .map(Profile::getId).anyMatch("production"::equals);
-            var parserProcessor = new ParserProcessor(conf, isProduction);
-            var generatorProcessor = new GeneratorProcessor(conf, nodeCommand,
-                    isProduction);
+            var conf = new EngineConfiguration.Builder()
+                    .baseDir(project.getBasedir().toPath())
+                    .buildDir(project.getBuild().getDirectory())
+                    .outputDir(generatedTsFolder().toPath())
+                    .groupId(project.getGroupId())
+                    .artifactId(project.getArtifactId()).mainClass(mainClass)
+                    .productionMode(isProduction).create();
+            var parserProcessor = new ParserProcessor(conf);
+            var generatorProcessor = new GeneratorProcessor(conf);
 
-            var endpoints = new AotEndpointFinder(conf).findEndpointClasses();
+            var endpoints = conf.getOfflineEndpointProvider().findEndpoints();
             parserProcessor.process(endpoints);
             generatorProcessor.process();
-        } catch (IOException | InterruptedException e) {
+        } catch (ExecutionFailedException e) {
             throw new EngineGenerateMojoException("Endpoint collection failed",
                     e);
         } catch (GeneratorException | ParserException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }
+    }
+
+    private File generatedTsFolder() {
+        if (generatedTsFolder != null) {
+            return generatedTsFolder;
+        }
+        return new File(frontendDirectory, GENERATED);
     }
 }

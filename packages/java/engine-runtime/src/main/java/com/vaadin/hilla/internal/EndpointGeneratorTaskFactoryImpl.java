@@ -29,8 +29,6 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import com.vaadin.hilla.engine.ParserProcessor;
 
-import java.nio.file.Path;
-
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint
  * generator tasks.
@@ -55,36 +53,26 @@ public class EndpointGeneratorTaskFactoryImpl
 
     @Override
     public TaskGenerateEndpoint createTaskGenerateEndpoint(Options options) {
-        configureFromOptions(options);
         if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateEndpoint();
         }
 
-        var nodeExecutable = buildTools(options).getNodeExecutable();
-
-        return new TaskGenerateEndpointImpl(options.getNpmFolder(),
-                options.getBuildDirectoryName(),
-                options.getFrontendGeneratedFolder(),
-                options.getClassFinder()::getResource,
-                options.isProductionMode(), nodeExecutable);
+        var engineConfiguration = configureFromOptions(options);
+        return new TaskGenerateEndpointImpl(engineConfiguration);
     }
 
     @Override
     public TaskGenerateOpenAPI createTaskGenerateOpenAPI(Options options) {
-        configureFromOptions(options);
         if (!options.isRunNpmInstall() && !options.isDevBundleBuild()
                 && !options.isProductionMode()) {
             // Skip for prepare-frontend phase and in production server
             return new SkipTaskGenerateOpenAPI();
         }
 
-        return new TaskGenerateOpenAPIImpl(options.getNpmFolder(),
-                options.getBuildDirectoryName(),
-                options.getFrontendGeneratedFolder(),
-                options.getClassFinder()::getResource,
-                options.isProductionMode());
+        var engineConfiguration = configureFromOptions(options);
+        return new TaskGenerateOpenAPIImpl(engineConfiguration);
     }
 
     private static class SkipTaskGenerateEndpoint
@@ -103,12 +91,12 @@ public class EndpointGeneratorTaskFactoryImpl
         }
     }
 
-    private static void configureFromOptions(Options options) {
-        var conf = EngineConfiguration.getDefault();
-        Path buildDir = options.getBuildDirectory().toPath();
-        conf.setBaseDir(options.getNpmFolder().toPath());
-        conf.setBuildDir(buildDir);
-        conf.setClassesDir(buildDir.resolve("classes"));
-        conf.setOutputDir(options.getFrontendGeneratedFolder().toPath());
+    private static EngineConfiguration configureFromOptions(Options options) {
+        return new EngineConfiguration.Builder()
+                .baseDir(options.getNpmFolder().toPath())
+                .buildDir(options.getBuildDirectoryName())
+                .outputDir(options.getFrontendGeneratedFolder().toPath())
+                .nodeCommand(buildTools(options).getNodeExecutable())
+                .productionMode(options.isProductionMode()).create();
     }
 }

@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -50,8 +51,9 @@ public class AbstractMojoTest {
         // Maven project is not initialized on the mojo, setup a mock manually
         project = createMavenProject();
 
-        engineConfiguration = EngineConfiguration.getDefault();
-        engineConfiguration.setBaseDir(getTemporaryDirectory());
+        engineConfiguration = new EngineConfiguration.Builder()
+                .offlineEndpointProvider(() -> List.of()).create();
+        EngineConfiguration.setDefault(engineConfiguration);
     }
 
     @AfterEach

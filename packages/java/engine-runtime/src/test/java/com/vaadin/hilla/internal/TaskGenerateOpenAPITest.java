@@ -16,16 +16,20 @@
 package com.vaadin.hilla.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
+import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
@@ -40,53 +44,47 @@ public class TaskGenerateOpenAPITest extends TaskTest {
     public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getTemporaryDirectory().toFile(), getBuildDirectory(),
-                getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
-                getClass()::getResource, false);
+                getEngineConfiguration());
 
         taskGenerateOpenApi.execute();
 
         var generatedOpenAPI = getGeneratedOpenAPI();
 
-        assertThat(generatedOpenAPI.getPaths(),
-                hasKey("/WithoutValueEqual/bar"));
-        assertThat(generatedOpenAPI.getPaths(),
-                not(hasKey("/EndpointNoValue/bar")));
-        assertThat(generatedOpenAPI.getPaths(),
-                hasKey("/WithoutValueEqual/foo"));
-        assertThat(generatedOpenAPI.getPaths(),
-                not(hasKey("/EndpointNoValue/foo")));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                hasItem("/WithoutValueEqual/bar"));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                not(hasItem("/EndpointNoValue/bar")));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                hasItem("/WithoutValueEqual/foo"));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                not(hasItem("/EndpointNoValue/foo")));
     }
 
     @Test
     public void should_UseCustomEndpointName_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getTemporaryDirectory().toFile(), getBuildDirectory(),
-                getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
-                getClass()::getResource, false);
+                getEngineConfiguration());
 
         taskGenerateOpenApi.execute();
 
         var generatedOpenAPI = getGeneratedOpenAPI();
 
-        assertThat(generatedOpenAPI.getPaths(),
-                hasKey("/CustomEndpointName/bar"));
-        assertThat(generatedOpenAPI.getPaths(),
-                not(hasKey("/CustomEndpoint/bar")));
-        assertThat(generatedOpenAPI.getPaths(),
-                hasKey("/CustomEndpointName/foo"));
-        assertThat(generatedOpenAPI.getPaths(),
-                not(hasKey("/CustomEndpoint/foo")));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                hasItem("/CustomEndpointName/bar"));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                not(hasItem("/CustomEndpoint/bar")));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                hasItem("/CustomEndpointName/foo"));
+        assertThat(generatedOpenAPI.getPaths().keySet(),
+                not(hasItem("/CustomEndpoint/foo")));
     }
 
     @Test
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getTemporaryDirectory().toFile(), getBuildDirectory(),
-                getTemporaryDirectory().resolve(getOutputDirectory()).toFile(),
-                getClass()::getResource, false);
+                getEngineConfiguration());
 
         taskGenerateOpenApi.execute();
 

@@ -29,22 +29,14 @@ import com.vaadin.hilla.engine.EngineConfiguration;
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
     private static boolean firstRun = true;
 
-    private final String buildDirectoryName;
-    protected final File outputDirectory;
-    private final File projectDirectory;
-    private final Function<String, URL> resourceFinder;
     private EngineConfiguration engineConfiguration;
 
-    AbstractTaskEndpointGenerator(File projectDirectory,
-            String buildDirectoryName, File outputDirectory,
-            Function<String, URL> resourceFinder) {
-        this.projectDirectory = Objects.requireNonNull(projectDirectory,
-                "Project directory cannot be null");
-        this.buildDirectoryName = Objects.requireNonNull(buildDirectoryName,
-                "Build directory name cannot be null");
-        this.outputDirectory = Objects.requireNonNull(outputDirectory,
-                "Output directory name cannot be null");
-        this.resourceFinder = Objects.requireNonNull(resourceFinder,
-                "Class finder cannot be null");
+    AbstractTaskEndpointGenerator(EngineConfiguration engineConfiguration) {
+        this.engineConfiguration = Objects.requireNonNull(engineConfiguration,
+                "Engine configuration cannot be null");
+    }
+
+    protected EngineConfiguration getEngineConfiguration() {
+        return engineConfiguration;
     }
 }

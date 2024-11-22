@@ -16,7 +16,6 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -24,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
@@ -51,8 +50,8 @@ public class EndpointCodeGenerator {
     private Path buildDirectory;
 
     private ApplicationConfiguration configuration;
-    private String nodeExecutable;
     private Set<String> classesUsedInOpenApi = null;
+    private EngineConfiguration engineConfiguration;
 
     /**
      * Creates the singleton.
@@ -88,35 +87,24 @@ public class EndpointCodeGenerator {
         }
 
         ApplicationContextProvider.runOnContext(applicationContext -> {
-            EngineConfiguration engineConfiguration = EngineConfiguration
-                    .getDefault();
             // TODO: extract this logic as it is also used in
             // TaskGenerateOpenAPIImpl
             List<Class<?>> endpoints = engineConfiguration.getParser()
                     .getEndpointAnnotations().stream()
                     .map(applicationContext::getBeansWithAnnotation)
                     .map(Map::values).flatMap(Collection::stream)
-                    .map(Object::getClass).distinct().toList();
-            ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                    false);
+                    .<Class<?>> map(Object::getClass).distinct().toList();
+            ParserProcessor parser = new ParserProcessor(engineConfiguration);
             parser.process(endpoints);
 
             GeneratorProcessor generator = new GeneratorProcessor(
-                    engineConfiguration, nodeExecutable, false);
+                    engineConfiguration);
             generator.process();
 
             try {
-                OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
-                        .ifPresent(openApiPath -> {
-                            try {
-                                this.endpointController.registerEndpoints(
-                                        openApiPath.toUri().toURL());
-                            } catch (IOException e) {
-                                LOGGER.error(
-                                        "Endpoints could not be registered due to an exception: ",
-                                        e);
-                            }
-                        });
+                var openApiPath = engineConfiguration.getOpenAPIFile();
+                this.endpointController
+                        .registerEndpoints(openApiPath.toUri().toURL());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -131,30 +119,36 @@ public class EndpointCodeGenerator {
             buildDirectory = projectFolder
                     .resolve(configuration.getBuildFolder());
 
-            FrontendTools tools = new FrontendTools(configuration,
+            var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());
-            nodeExecutable = tools.getNodeBinary();
+            engineConfiguration = new EngineConfiguration.Builder()
+                    .baseDir(configuration.getProjectFolder().toPath())
+                    .buildDir(configuration.getBuildFolder())
+                    .outputDir(
+                            FrontendUtils
+                                    .getFrontendGeneratedFolder(
+                                            configuration.getFrontendFolder())
+                                    .toPath())
+                    .productionMode(false)
+                    .nodeCommand(frontendTools.getNodeBinary()).create();
         }
     }
 
     public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
-                    .ifPresent(openApiPath -> {
-                        if (openApiPath.toFile().exists()) {
-                            try {
-                                classesUsedInOpenApi = OpenAPIUtil
-                                        .findOpenApiClasses(
-                                                Files.readString(openApiPath));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            LOGGER.debug(
-                                    "No OpenAPI file is available yet ...");
-                        }
-                    });
+            var conf = EngineConfiguration.getDefault();
+            var openApiPath = conf.getOpenAPIFile();
+            if (openApiPath != null && openApiPath.toFile().exists()) {
+                try {
+                    classesUsedInOpenApi = OpenAPIUtil
+                            .findOpenApiClasses(Files.readString(openApiPath));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                LOGGER.debug("No OpenAPI file is available yet ...");
+            }
         }
         return Optional.ofNullable(classesUsedInOpenApi);
     }

@@ -22,12 +22,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import java.io.IOException
-import java.net.URL
-import java.net.URLClassLoader
 import java.nio.file.Path
-import java.util.*
 
 import com.vaadin.hilla.engine.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+
 /**
  * Task that generates the endpoints.ts and model TS classes
  * needed for calling the backend in a typesafe manner.
@@ -45,6 +45,16 @@ public open class EngineGenerateTask : DefaultTask() {
         }
     }
 
+    @Input
+    public val groupId: String = project.group.toString()
+
+    @Input
+    public val artifactId: String = project.name
+
+    @Input
+    @Optional
+    public var mainClass: String? = project.findProperty("spring-boot.aot.main-class") as String?
+
     @TaskAction
     public fun engineGenerate() {
         val extension: EngineProjectExtension = EngineProjectExtension.get(project)
@@ -56,18 +66,19 @@ public open class EngineGenerateTask : DefaultTask() {
         val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
         try {
-            val conf: EngineConfiguration = Objects.requireNonNull(
-                EngineConfiguration.getDefault())
-
-            val urls = conf.classpath
-                .stream().map<URL> { classPathItem: Path ->
-                    classPathItem.toUri().toURL()
-                }
-                .toList()
-
             val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
-            val parserProcessor = ParserProcessor(conf, isProductionMode)
-            val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand, isProductionMode)
+            val conf: EngineConfiguration = EngineConfiguration.Builder()
+                .baseDir(baseDir)
+                .buildDir(buildDir)
+                .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
+                .groupId(groupId)
+                .artifactId(artifactId)
+                .mainClass(mainClass)
+                .productionMode(isProductionMode)
+                .create()
+
+            val parserProcessor = ParserProcessor(conf)
+            val generatorProcessor = GeneratorProcessor(conf)
 
             val endpoints = AotEndpointFinder(conf).findEndpointClasses()
             parserProcessor.process(endpoints)

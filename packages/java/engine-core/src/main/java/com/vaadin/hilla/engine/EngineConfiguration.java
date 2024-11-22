@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,8 @@ import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class EngineConfiguration {
-    private static final EngineConfiguration INSTANCE = new EngineConfiguration();
+    private static EngineConfiguration INSTANCE;
+
     public static final String OPEN_API_PATH = "hilla-openapi.json";
     private Set<Path> classpath = Arrays
             .stream(System.getProperty("java.class.path")
@@ -24,16 +27,16 @@ public class EngineConfiguration {
     private String mainClass;
     private Path buildDir;
     private Path baseDir;
-    private Path classesDir;
     private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
     private EndpointProvider offlineEndpointProvider;
+    private boolean productionMode = false;
+    private String nodeCommand = "node";
 
-    public EngineConfiguration() {
+    private EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
         buildDir = baseDir.resolve("target");
-        classesDir = buildDir.resolve("classes");
         generator = new GeneratorConfiguration();
         parser = new ParserConfiguration();
 
@@ -46,96 +49,53 @@ public class EngineConfiguration {
         }
     }
 
-    public static EngineConfiguration getDefault() {
-        return INSTANCE;
-    }
-
     public Set<Path> getClasspath() {
         return classpath;
-    }
-
-    public void setClasspath(Set<Path> classpath) {
-        this.classpath = classpath;
     }
 
     public String getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
     public String getArtifactId() {
         return artifactId;
-    }
-
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
     }
 
     public String getMainClass() {
         return mainClass;
     }
 
-    public void setMainClass(String mainClass) {
-        this.mainClass = mainClass;
-    }
-
     public Path getBuildDir() {
         return buildDir;
-    }
-
-    public void setBuildDir(Path buildDir) {
-        this.buildDir = buildDir;
-    }
-
-    public void setBuildDir(String buildDir) {
-        this.buildDir = baseDir.resolve(buildDir);
     }
 
     public Path getBaseDir() {
         return baseDir;
     }
 
-    public void setBaseDir(Path baseDir) {
-        this.baseDir = baseDir;
-    }
-
-    public Path getClassesDir() {
-        return classesDir;
-    }
-
-    public void setClassesDir(Path classesDir) {
-        this.classesDir = classesDir;
-    }
-
     public GeneratorConfiguration getGenerator() {
         return generator;
-    }
-
-    public void setGenerator(GeneratorConfiguration generator) {
-        this.generator = generator;
     }
 
     public Path getOutputDir() {
         return outputDir;
     }
 
-    public void setOutputDir(Path outputDir) {
-        this.outputDir = outputDir;
-    }
-
     public ParserConfiguration getParser() {
         return parser;
     }
 
-    public void setParser(ParserConfiguration parser) {
-        this.parser = parser;
+    public boolean isProductionMode() {
+        return productionMode;
     }
 
-    public Path getOpenAPIFile(boolean isProductionMode) {
-        return isProductionMode ? classesDir.resolve(OPEN_API_PATH)
+    public String getNodeCommand() {
+        return nodeCommand;
+    }
+
+    public Path getOpenAPIFile() {
+        return productionMode
+                ? buildDir.resolve("classes").resolve(OPEN_API_PATH)
                 : buildDir.resolve(OPEN_API_PATH);
     }
 
@@ -153,9 +113,118 @@ public class EngineConfiguration {
         };
     }
 
-    public void setOfflineEndpointProvider(
-            EndpointProvider offlineEndpointProvider) {
-        this.offlineEndpointProvider = offlineEndpointProvider;
+    public static EngineConfiguration getDefault() {
+        if (INSTANCE == null) {
+            INSTANCE = new EngineConfiguration();
+        }
+
+        return INSTANCE;
+    }
+
+    public static void setDefault(EngineConfiguration config) {
+        INSTANCE = config;
+    }
+
+    public static final class Builder {
+        private final EngineConfiguration configuration = new EngineConfiguration();
+
+        public Builder() {
+            this(getDefault());
+        }
+
+        public Builder(EngineConfiguration configuration) {
+            this.configuration.baseDir = configuration.baseDir;
+            this.configuration.buildDir = configuration.buildDir;
+            this.configuration.classpath = configuration.classpath;
+            this.configuration.generator = configuration.generator;
+            this.configuration.parser = configuration.parser;
+            this.configuration.outputDir = configuration.outputDir;
+            this.configuration.groupId = configuration.groupId;
+            this.configuration.artifactId = configuration.artifactId;
+            this.configuration.mainClass = configuration.mainClass;
+            this.configuration.offlineEndpointProvider = configuration.offlineEndpointProvider;
+            this.configuration.productionMode = configuration.productionMode;
+            this.configuration.nodeCommand = configuration.nodeCommand;
+        }
+
+        public Builder baseDir(Path value) {
+            configuration.baseDir = value;
+            return this;
+        }
+
+        public Builder buildDir(String value) {
+            return buildDir(Path.of(value));
+        }
+
+        public Builder buildDir(Path value) {
+            configuration.buildDir = resolve(value);
+            return this;
+        }
+
+        public Builder classpath(Collection<String> value) {
+            configuration.classpath = value.stream().map(Path::of)
+                    .map(this::resolve)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            return this;
+        }
+
+        public EngineConfiguration create() {
+            return configuration;
+        }
+
+        public Builder generator(GeneratorConfiguration value) {
+            configuration.generator = value;
+            return this;
+        }
+
+        public Builder outputDir(String value) {
+            return outputDir(Path.of(value));
+        }
+
+        public Builder outputDir(Path value) {
+            configuration.outputDir = resolve(value);
+            return this;
+        }
+
+        public Builder parser(ParserConfiguration value) {
+            configuration.parser = value;
+            return this;
+        }
+
+        public Builder groupId(String value) {
+            configuration.groupId = value;
+            return this;
+        }
+
+        public Builder artifactId(String value) {
+            configuration.artifactId = value;
+            return this;
+        }
+
+        public Builder mainClass(String value) {
+            configuration.mainClass = value;
+            return this;
+        }
+
+        public Builder offlineEndpointProvider(EndpointProvider value) {
+            configuration.offlineEndpointProvider = value;
+            return this;
+        }
+
+        public Builder productionMode(boolean value) {
+            configuration.productionMode = value;
+            return this;
+        }
+
+        public Builder nodeCommand(String value) {
+            configuration.nodeCommand = value;
+            return this;
+        }
+
+        private Path resolve(Path path) {
+            return path.isAbsolute() ? path.normalize()
+                    : configuration.baseDir.resolve(path).normalize();
+        }
     }
 
     @FunctionalInterface

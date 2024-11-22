@@ -15,10 +15,6 @@
  */
 package com.vaadin.hilla.internal;
 
-import java.io.File;
-import java.net.URL;
-import java.util.function.Function;
-
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.hilla.ApplicationContextProvider;
@@ -31,36 +27,14 @@ import com.vaadin.hilla.engine.GeneratorProcessor;
 public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
 
-    private final String nodeCommand;
-    private final boolean productionMode;
-
     /**
      * Create a task for generating OpenAPI spec.
      *
-     * @param projectDirectory
-     *            the base directory of the project.
-     *
-     * @param buildDirectoryName
-     *            Java build directory name (relative to the {@code
-     *              projectDirectory}).
-     *
-     * @param outputDirectory
-     *            the output directory for generated TypeScript code.
-     * @param resourceFinder
-     *            used internally to find resources
-     * @param productionMode
-     *            {@code true} if building for production
-     * @param nodeCommand
-     *            a command to run NodeJS, either absolute path to the
-     *            executable or PATH-related command
+     * @param engineConfiguration
+     *            Hilla engine configuration instance
      */
-    TaskGenerateEndpointImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, Function<String, URL> resourceFinder,
-            boolean productionMode, String nodeCommand) {
-        super(projectDirectory, buildDirectoryName, outputDirectory,
-                resourceFinder);
-        this.productionMode = productionMode;
-        this.nodeCommand = nodeCommand;
+    TaskGenerateEndpointImpl(EngineConfiguration engineConfiguration) {
+        super(engineConfiguration);
     }
 
     /**
@@ -70,7 +44,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        if (productionMode) {
+        if (getEngineConfiguration().isProductionMode()) {
             runProcessor();
         } else {
             // Even if we don't need the application context here, we have to
@@ -83,9 +57,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
     }
 
     private void runProcessor() {
-        var engineConfiguration = EngineConfiguration.getDefault();
-        var processor = new GeneratorProcessor(engineConfiguration, nodeCommand,
-                productionMode);
+        var processor = new GeneratorProcessor(getEngineConfiguration());
         processor.process();
     }
 }

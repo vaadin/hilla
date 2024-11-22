@@ -3,7 +3,6 @@ package com.vaadin.hilla.internal;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,10 +27,7 @@ public class TaskTest {
 
     @BeforeEach
     public void setUpTaskApplication() throws IOException, URISyntaxException,
-            FrontendUtils.CommandExecutionException, InterruptedException,
-            InvocationTargetException, NoSuchMethodException,
-            InstantiationException, IllegalAccessException,
-            NoSuchFieldException {
+            FrontendUtils.CommandExecutionException, InterruptedException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
         var userDir = temporaryDirectory.toAbsolutePath().toString();
@@ -80,11 +76,11 @@ public class TaskTest {
     }
 
     protected String getBuildDirectory() {
-        return "target";
+        return "build";
     }
 
     protected String getClassesDirectory() {
-        return "target/classes";
+        return "build/classes";
     }
 
     protected Path getOpenAPIFile() {
@@ -102,5 +98,11 @@ public class TaskTest {
 
     protected Path getTemporaryDirectory() {
         return temporaryDirectory;
+    }
+
+    protected EngineConfiguration getEngineConfiguration() {
+        return new EngineConfiguration.Builder()
+                .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
+                .outputDir(getOutputDirectory()).create();
     }
 }

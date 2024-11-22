@@ -25,42 +25,26 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 Mockito.withSettings().defaultAnswer(Answers.RETURNS_SELF),
                 (mock, context) -> {
                     // Verify ParserProcessor constructor arguments
-                    assertEquals(2, context.arguments().size(),
-                            "expected 2 ParserProcessor arguments");
+                    assertEquals(1, context.arguments().size(),
+                            "expected 1 ParserProcessor argument");
 
                     // Verify configuration argument
                     var conf = (EngineConfiguration) context.arguments().get(0);
-                    assertEquals(conf, getEngineConfiguration());
-
-                    // Verify class loader argument
-                    var classLoader = (ClassLoader) context.arguments().get(1);
-                    assertInstanceOf(URLClassLoader.class, classLoader);
-                    assertEquals(classLoader.getParent(),
-                            EngineGenerateMojo.class.getClassLoader());
-                    assertArrayEquals(
-                            new URL[] { getTemporaryDirectory()
-                                    .resolve("build/classes").toUri().toURL(),
-                                    getTemporaryDirectory()
-                                            .resolve("build/test-classes")
-                                            .toUri().toURL() },
-                            ((URLClassLoader) classLoader).getURLs());
+                    verifyConfiguration(conf);
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
                         GeneratorProcessor.class, Mockito.withSettings()
                                 .defaultAnswer(Answers.RETURNS_SELF),
                         ((mock, context) -> {
                             // Verify GeneratorProcessor arguments
-                            assertEquals(3, context.arguments().size(),
-                                    "expected 3 GeneratorProcessor arguments");
+                            assertEquals(1, context.arguments().size(),
+                                    "expected 1 GeneratorProcessor argument");
 
                             // Verify configuration argument
                             var conf = (EngineConfiguration) context.arguments()
                                     .get(0);
-                            assertEquals(conf, getEngineConfiguration());
-                        }));
-
-                var mockedStaticEngineConfiguration = Mockito
-                        .mockStatic(EngineConfiguration.class)) {
+                            verifyConfiguration(conf);
+                        }));) {
 
             // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate",
@@ -82,5 +66,11 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
             inOrder.verify(parserProcessor).process(List.of());
             inOrder.verify(generatorProcessor).process();
         }
+    }
+
+    private void verifyConfiguration(EngineConfiguration conf) {
+        assertEquals(conf.getBaseDir(), getTemporaryDirectory());
+        assertEquals(conf.getOpenAPIFile(), getTemporaryDirectory()
+                .resolve("build").resolve("hilla-openapi.json"));
     }
 }

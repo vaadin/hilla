@@ -15,12 +15,9 @@
  */
 package com.vaadin.hilla.internal;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.ApplicationContextProvider;
@@ -42,36 +39,14 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     private static final Logger LOGGER = LoggerFactory
             .getLogger(TaskGenerateOpenAPIImpl.class);
 
-    private final boolean isProductionMode;
-
     /**
      * Create a task for generating OpenAPI spec.
      *
-     * @param projectDirectory
-     *            the base directory of the project.
-     *
-     * @param buildDirectoryName
-     *            Java build directory name (relative to the {@code
-     *              projectDirectory}).
-     *
-     * @param outputDirectory
-     *            the output directory for generated TypeScript code.
-     *
-     * @param resourceFinder
-     *            used internally to find resources.
-     *
-     * @param classLoader
-     *            the Java Class Loader for the parser.
-     *
-     * @param isProductionMode
-     *            {@code true} if building for production.
+     * @param engineConfiguration
+     *            Hilla engine configuration instance
      */
-    TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, Function<String, URL> resourceFinder,
-            boolean isProductionMode) {
-        super(projectDirectory, buildDirectoryName, outputDirectory,
-                resourceFinder);
-        this.isProductionMode = isProductionMode;
+    TaskGenerateOpenAPIImpl(EngineConfiguration engineConfiguration) {
+        super(engineConfiguration);
     }
 
     /**
@@ -81,11 +56,11 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        var engineConfiguration = EngineConfiguration.getDefault();
-        if (isProductionMode) {
+        var engineConfiguration = getEngineConfiguration();
+        if (getEngineConfiguration().isProductionMode()) {
             var endpoints = engineConfiguration.getOfflineEndpointProvider()
                     .findEndpoints();
-            var processor = new ParserProcessor(engineConfiguration, true);
+            var processor = new ParserProcessor(engineConfiguration);
             processor.process(endpoints);
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
@@ -95,7 +70,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                         .map(Map::values).flatMap(Collection::stream)
                         .map(Object::getClass).distinct()
                         .collect(Collectors.toList());
-                var processor = new ParserProcessor(engineConfiguration, false);
+                var processor = new ParserProcessor(engineConfiguration);
                 processor.process(endpoints);
             });
         }
