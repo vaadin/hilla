@@ -9,22 +9,10 @@ import type { AgnosticRoute, Module } from '../types.js';
  *
  * @returns A framework-agnostic route object.
  */
-export function createRoute(path: string, flowLayout: boolean, children?: readonly AgnosticRoute[]): AgnosticRoute;
+export function createRoute(path: string, children?: readonly AgnosticRoute[]): AgnosticRoute;
+export function createRoute(path: string, module: Module, children?: readonly AgnosticRoute[]): AgnosticRoute;
 export function createRoute(
   path: string,
-  flowLayout: boolean,
-  module: Module,
-  children?: readonly AgnosticRoute[],
-): AgnosticRoute;
-export function createRoute(
-  path: string,
-  flowLayout: boolean,
-  module: Module,
-  children?: readonly AgnosticRoute[],
-): AgnosticRoute;
-export function createRoute(
-  path: string,
-  flowLayout: boolean,
   moduleOrChildren?: Module | readonly AgnosticRoute[],
   children?: readonly AgnosticRoute[],
 ): AgnosticRoute {
@@ -40,6 +28,5 @@ export function createRoute(
     path,
     module,
     children,
-    flowLayout,
   };
 }
