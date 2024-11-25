@@ -1,5 +1,4 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
-import type Atmosphere from 'atmosphere.js';
 import type { Subscription } from './Connect.js';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import {
@@ -73,13 +72,15 @@ type EndpointInfo = {
 
 let atmosphere: Atmosphere.Atmosphere | undefined;
 
-(async () => {
-  if (!import.meta.env?.VITE_SW_CONTEXT) {
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+if (globalThis.document) {
+  // In case we are in the browser environment, we have to load atmosphere.js
+  try {
     atmosphere = await import('atmosphere.js').then((module) => module.default);
+  } catch (e: unknown) {
+    console.error('Failed to load atmosphere.js', e);
   }
-})().catch((e) => {
-  console.error('Failed to load atmosphere.js', e);
-});
+}
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
