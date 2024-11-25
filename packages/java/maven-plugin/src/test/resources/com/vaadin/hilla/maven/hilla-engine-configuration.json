@@ -1,6 +1,6 @@
 {
   "baseDir": "base",
-  "classPath": ["build/test-classes"],
+  "classPath": ["build/classes","build/test-classes"],
   "generator": {
     "plugins": {
       "use": [
