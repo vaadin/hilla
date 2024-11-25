@@ -54,5 +54,6 @@ public class BuildFrontendMojo
                 .artifactId(project.getArtifactId())
                 // .mainClass(mainClass)
                 .create());
+        super.executeInternal();
     }
 }
