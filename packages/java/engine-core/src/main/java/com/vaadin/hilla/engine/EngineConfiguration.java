@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -163,8 +162,7 @@ public class EngineConfiguration {
 
         public Builder classpath(Collection<String> value) {
             configuration.classpath = value.stream().map(Path::of)
-                    .map(this::resolve)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+                    .map(this::resolve).collect(Collectors.toSet());
             return this;
         }
 

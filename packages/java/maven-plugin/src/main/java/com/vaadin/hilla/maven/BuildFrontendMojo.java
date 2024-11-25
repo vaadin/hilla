@@ -51,7 +51,8 @@ public class BuildFrontendMojo
                 .baseDir(npmFolder().toPath()).buildDir(buildFolder())
                 .outputDir(generatedTsFolder().toPath())
                 .groupId(project.getGroupId())
-                .artifactId(project.getArtifactId()).mainClass(mainClass)
+                .artifactId(project.getArtifactId())
+                .classpath(getClasspathElements(project)).mainClass(mainClass)
                 .create());
         super.executeInternal();
     }
