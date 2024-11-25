@@ -5,6 +5,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -36,9 +37,8 @@ import org.apache.maven.project.MavenProject;
 @Mojo(name = "build-frontend", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class BuildFrontendMojo
         extends com.vaadin.flow.plugin.maven.BuildFrontendMojo {
-    // FIXME(platosha): Maven only supports parameters on a single class.
-    // @Parameter(property = "spring-boot.aot.main-class")
-    // private String mainClass;
+    @Parameter(property = "spring-boot.aot.main-class")
+    private String mainClass;
 
     @Override
     protected void executeInternal()
@@ -51,8 +51,7 @@ public class BuildFrontendMojo
                 .baseDir(npmFolder().toPath()).buildDir(buildFolder())
                 .outputDir(generatedTsFolder().toPath())
                 .groupId(project.getGroupId())
-                .artifactId(project.getArtifactId())
-                // .mainClass(mainClass)
+                .artifactId(project.getArtifactId()).mainClass(mainClass)
                 .create());
         super.executeInternal();
     }
