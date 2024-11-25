@@ -301,7 +301,7 @@ export class ConnectClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const csrfHeaders = self.document ? getCsrfTokenHeadersForEndpointRequest(self.document) : {};
+    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
