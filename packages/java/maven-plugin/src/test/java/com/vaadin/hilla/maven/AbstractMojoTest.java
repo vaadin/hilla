@@ -1,25 +1,25 @@
 package com.vaadin.hilla.maven;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Base class for Engine Maven plugin tests. Delegates to
@@ -48,22 +48,9 @@ public class AbstractMojoTest {
                 buildDirectory.resolve("test-classes/com/vaadin/hilla"));
         Files.createFile(buildDirectory.resolve(
                 "test-classes/com/vaadin/hilla/EndpointController.class"));
+
         // Maven project is not initialized on the mojo, setup a mock manually
-        project = Mockito.mock(MavenProject.class);
-        // Using Path.of here to have correct separators at Windows & Unix
-        var classPathElements = List
-                .of(buildDirectory.resolve("test-classes").toString());
-        Mockito.doReturn(classPathElements).when(project)
-                .getCompileClasspathElements();
-        Mockito.doReturn(classPathElements).when(project)
-                .getRuntimeClasspathElements();
-        Mockito.doReturn(getTemporaryDirectory().toFile()).when(project)
-                .getBasedir();
-        var mockBuild = Mockito.mock(Build.class);
-        Mockito.doReturn("build").when(mockBuild).getDirectory();
-        Mockito.doReturn(Path.of("build/classes").toString()).when(mockBuild)
-                .getOutputDirectory();
-        Mockito.doReturn(mockBuild).when(project).getBuild();
+        project = createMavenProject();
 
         var configFilePath = getBuildDirectory()
                 .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
@@ -154,4 +141,25 @@ public class AbstractMojoTest {
             super.tearDown();
         }
     }
+
+    MavenProject createMavenProject() {
+        MavenProject project = new MavenProject();
+        project.setGroupId("com.vaadin.testing");
+        project.setArtifactId("my-application");
+        project.setFile(temporaryDirectory.resolve("pom.xml").toFile());
+        project.setBuild(new Build());
+        project.getBuild().setFinalName("finalName");
+        project.getBuild().setDirectory("build");
+        project.getBuild().setOutputDirectory("build/classes");
+
+        DefaultArtifactHandler artifactHandler = new DefaultArtifactHandler();
+        artifactHandler.setAddedToClasspath(true);
+        DefaultArtifact artifact = new DefaultArtifact(
+                "com.vaadin.hilla.testing", "mock-hilla", "1.0", "compile",
+                "jar", null, artifactHandler);
+        artifact.setFile(buildDirectory.resolve("test-classes").toFile());
+        project.setArtifacts(Set.of(artifact));
+        return project;
+    }
+
 }
