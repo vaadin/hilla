@@ -41,7 +41,8 @@ public class BuildFrontendMojo
     // private String mainClass;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    protected void executeInternal()
+            throws MojoExecutionException, MojoFailureException {
         var project = (MavenProject) getPluginContext().get("project");
         if (project == null) {
             throw new MojoExecutionException("No project found");
@@ -53,6 +54,5 @@ public class BuildFrontendMojo
                 .artifactId(project.getArtifactId())
                 // .mainClass(mainClass)
                 .create());
-        super.execute();
     }
 }
