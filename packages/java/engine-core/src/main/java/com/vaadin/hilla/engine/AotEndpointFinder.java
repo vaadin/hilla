@@ -31,7 +31,8 @@ public class AotEndpointFinder {
         var classesDirectory = aotOutput.resolve("classes");
         var applicationClass = (engineConfiguration.getMainClass() != null)
                 ? engineConfiguration.getMainClass()
-                : findSingleClass(classesDirectory.toFile());
+                : findSingleClass(engineConfiguration.getBuildDir()
+                        .resolve("classes").toFile());
         var settings = List.of(applicationClass,
                 aotOutput.resolve("sources").toString(),
                 aotOutput.resolve("resources").toString(),
