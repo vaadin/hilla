@@ -14,9 +14,9 @@ import {
   FluxConnection,
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
-import type { VaadinWindow } from './types.js';
+import type { VaadinGlobal } from './types.js';
 
-const $wnd = window as VaadinWindow;
+const $wnd = globalThis as VaadinGlobal;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
@@ -300,7 +300,8 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    const csrfHeaders = getCsrfTokenHeadersForEndpointRequest(document);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
