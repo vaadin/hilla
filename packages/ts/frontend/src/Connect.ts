@@ -14,9 +14,9 @@ import {
   FluxConnection,
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
-import type { VaadinWindow } from './types.js';
+import type { VaadinGlobal } from './types.js';
 
-const $wnd = self as VaadinWindow;
+const $wnd = globalThis as VaadinGlobal;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
