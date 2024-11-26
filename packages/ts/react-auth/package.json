@@ -23,7 +23,7 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9877",
+    "test": "npx --node-options=\"--import tsx\" wtr --config ../../../wtr.config.ts",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
@@ -64,6 +64,7 @@
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@types/validator": "^13.11.2",
+    "@web/test-runner": "^0.19.0",
     "chai-dom": "^1.11.0",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
