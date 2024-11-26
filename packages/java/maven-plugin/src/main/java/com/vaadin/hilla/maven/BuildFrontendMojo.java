@@ -37,7 +37,7 @@ import org.apache.maven.project.MavenProject;
 @Mojo(name = "build-frontend", requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class BuildFrontendMojo
         extends com.vaadin.flow.plugin.maven.BuildFrontendMojo {
-    @Parameter(property = "spring-boot.aot.main-class")
+    @Parameter(property = "mainClass")
     private String mainClass;
 
     @Override

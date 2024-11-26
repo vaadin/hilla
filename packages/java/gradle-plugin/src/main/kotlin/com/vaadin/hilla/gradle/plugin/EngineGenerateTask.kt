@@ -53,7 +53,7 @@ public open class EngineGenerateTask : DefaultTask() {
 
     @Input
     @Optional
-    public var mainClass: String? = project.findProperty("spring-boot.aot.main-class") as String?
+    public var mainClass: String? = project.findProperty("mainClass") as String?
 
     @TaskAction
     public fun engineGenerate() {

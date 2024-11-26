@@ -42,7 +42,7 @@ public final class EngineGenerateMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    @Parameter(property = "spring-boot.aot.main-class")
+    @Parameter(property = "mainClass")
     private String mainClass;
 
     @Override
@@ -64,7 +64,8 @@ public final class EngineGenerateMojo extends AbstractMojo {
                     .outputDir(generatedTsFolder().toPath())
                     .groupId(project.getGroupId())
                     .artifactId(project.getArtifactId()).mainClass(mainClass)
-                    .productionMode(isProduction).create();
+                    .nodeCommand(nodeCommand).productionMode(isProduction)
+                    .create();
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 

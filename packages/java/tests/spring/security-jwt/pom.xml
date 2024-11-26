@@ -64,6 +64,9 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.vaadin.flow.spring.fusionsecurity.Application</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
