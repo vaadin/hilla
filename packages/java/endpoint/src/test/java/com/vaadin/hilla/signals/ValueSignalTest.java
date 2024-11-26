@@ -1,15 +1,22 @@
 package com.vaadin.hilla.signals;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Flux;
 
 import org.junit.Assert;
@@ -25,6 +32,20 @@ import static org.junit.Assert.assertTrue;
 public class ValueSignalTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @BeforeClass
+    public static void setup() {
+        var appCtx = Mockito.mock(ApplicationContext.class);
+        var endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(appCtx,
+                        new JacksonObjectMapperFactory.Json());
+        Signal.setMapper(endpointObjectMapper);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        Signal.setMapper(null);
+    }
 
     @Test
     public void constructor_withValueArg_usesValueAsDefaultValue() {
@@ -119,6 +140,37 @@ public class ValueSignalTest {
 
         var person = new Person(name, age, adult);
         signal.submit(createSetEvent(person));
+
+        assertEquals(2, counter.get());
+    }
+
+    @Test
+    public void serialization_for_java8_datetime_is_supported() {
+        var currentTimestamp = LocalDateTime.now();
+        var signal = new ValueSignal<>(
+                new Message("Hi", "John Doe", currentTimestamp), Message.class);
+        var flux = signal.subscribe();
+        AtomicInteger counter = new AtomicInteger(0);
+        var laterTimestamp = LocalDateTime.now();
+        flux.subscribe(eventJson -> {
+            if (counter.get() == 0) {
+                assertNotNull(eventJson);
+                var stateEvent = new StateEvent<>(eventJson, Message.class);
+                assertEquals("Hi", stateEvent.getValue().text());
+                assertEquals("John Doe", stateEvent.getValue().author());
+                assertEquals(currentTimestamp,
+                        stateEvent.getValue().timestamp());
+            } else if (counter.get() == 1) {
+                var stateEvent = new StateEvent<>(eventJson, Message.class);
+                assertEquals("Hey", stateEvent.getValue().text());
+                assertEquals("Jane Smith", stateEvent.getValue().author());
+                assertEquals(laterTimestamp, stateEvent.getValue().timestamp());
+            }
+            counter.incrementAndGet();
+        });
+
+        signal.submit(createSetEvent(
+                new Message("Hey", "Jane Smith", laterTimestamp)));
 
         assertEquals(2, counter.get());
     }
