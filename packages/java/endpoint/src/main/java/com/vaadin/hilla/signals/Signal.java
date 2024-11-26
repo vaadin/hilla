@@ -1,6 +1,8 @@
 package com.vaadin.hilla.signals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.StateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -24,8 +26,23 @@ public abstract class Signal<T> {
 
     private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
 
-    public Signal(Class<T> valueType) {
+    private final Signal<T> delegate;
+
+    private Signal(Class<T> valueType, Signal<T> delegate) {
         this.valueType = Objects.requireNonNull(valueType);
+        this.delegate = delegate;
+    }
+
+    public Signal(Class<T> valueType) {
+        this(valueType, null);
+    }
+
+    protected Signal(Signal<T> delegate) {
+        this(Objects.requireNonNull(delegate).getValueType(), delegate);
+    }
+
+    protected Signal<T> getDelegate() {
+        return delegate;
     }
 
     /**
@@ -52,6 +69,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe() {
+        if (delegate != null) {
+            return delegate.subscribe();
+        }
         Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
                 .onBackpressureBuffer();
 
@@ -84,6 +104,9 @@ public abstract class Signal<T> {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String signalId) {
+        if (delegate != null) {
+            return delegate.subscribe(signalId);
+        }
         return subscribe();
     }
 
@@ -97,18 +120,26 @@ public abstract class Signal<T> {
     public void submit(ObjectNode event) {
         lock.lock();
         try {
-            var processedEvent = processEvent(event);
-            // Notify subscribers
-            subscribers.removeIf(sink -> {
-                boolean failure = sink.tryEmitNext(processedEvent).isFailure();
-                if (failure) {
-                    LOGGER.debug("Failed push");
-                }
-                return failure;
-            });
+            var processedEvent = StateEvent.isRejected(event) ? event
+                    : processEvent(event);
+            notifySubscribers(processedEvent);
         } finally {
             lock.unlock();
         }
+    }
+
+    private void notifySubscribers(ObjectNode processedEvent) {
+        if (delegate != null) {
+            delegate.notifySubscribers(processedEvent);
+            return;
+        }
+        subscribers.removeIf(sink -> {
+            boolean failure = sink.tryEmitNext(processedEvent).isFailure();
+            if (failure) {
+                LOGGER.debug("Failed push");
+            }
+            return failure;
+        });
     }
 
     /**
@@ -130,6 +161,15 @@ public abstract class Signal<T> {
      */
     protected abstract ObjectNode processEvent(ObjectNode event);
 
+    /**
+     * Returns a read-only instance of the signal that rejects any attempt to
+     * modify the signal value. The read-only signal, however, receives the same
+     * updates as the original signal does.
+     *
+     * @return the read-only signal
+     */
+    public abstract Signal<T> asReadonly();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -144,5 +184,23 @@ public abstract class Signal<T> {
     @Override
     public int hashCode() {
         return Objects.hashCode(getId());
+    }
+
+    /**
+     * Sets the object mapper to be used for JSON serialization in Signals. This
+     * is helpful for testing purposes. If not set, the default Hilla endpoint
+     * object mapper is used.
+     * <p>
+     * <strong>Note:</strong> If a custom endpointMapperFactory bean defined
+     * using the
+     * {@code EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
+     * qualifier, the mapper from that factory is used also in Signals, and
+     * there is no need to set it manually here.
+     *
+     * @param mapper
+     *            the object mapper to be used in Signals
+     */
+    public static void setMapper(ObjectMapper mapper) {
+        StateEvent.setMapper(mapper);
     }
 }
