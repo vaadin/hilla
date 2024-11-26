@@ -29,6 +29,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
@@ -68,7 +69,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                         .getEndpointAnnotations().stream()
                         .map(applicationContext::getBeansWithAnnotation)
                         .map(Map::values).flatMap(Collection::stream)
-                        .map(Object::getClass).distinct()
+                        // maps to original class when proxies are found
+                        // (also converts to class in all cases)
+                        .map(AopProxyUtils::ultimateTargetClass).distinct()
                         .collect(Collectors.toList());
                 var processor = new ParserProcessor(engineConfiguration);
                 processor.process(endpoints);
