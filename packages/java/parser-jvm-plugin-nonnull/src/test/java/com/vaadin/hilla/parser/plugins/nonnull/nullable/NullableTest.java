@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 public class NullableTest {
@@ -23,11 +24,12 @@ public class NullableTest {
         var plugin = new NonnullPlugin();
         plugin.setConfiguration(new NonnullPluginConfig());
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).addPlugin(plugin).execute();
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                .addPlugin(new BackbonePlugin()).addPlugin(plugin)
+                .execute(List.of(NullableEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
