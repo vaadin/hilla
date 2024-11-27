@@ -105,7 +105,7 @@ public class EngineConfiguration {
 
         return () -> {
             try {
-                return new AotEndpointFinder(this).findEndpointClasses();
+                return new AotEndpointProvider(this).findEndpointClasses();
             } catch (IOException | InterruptedException e) {
                 throw new ExecutionFailedException(e);
             }
@@ -228,5 +228,12 @@ public class EngineConfiguration {
     @FunctionalInterface
     public interface EndpointProvider {
         List<Class<?>> findEndpoints() throws ExecutionFailedException;
+    }
+
+    public static class EmptyEndpointProvider implements EndpointProvider {
+        @Override
+        public List<Class<?>> findEndpoints() {
+            return List.of();
+        }
     }
 }

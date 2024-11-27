@@ -16,7 +16,7 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.gradle.VaadinFlowPluginExtension
-import com.vaadin.hilla.engine.AotEndpointFinder
+import com.vaadin.hilla.engine.AotEndpointProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -80,7 +80,7 @@ public open class EngineGenerateTask : DefaultTask() {
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
 
-            val endpoints = AotEndpointFinder(conf).findEndpointClasses()
+            val endpoints = AotEndpointProvider(conf).findEndpointClasses()
             parserProcessor.process(endpoints)
             generatorProcessor.process()
 

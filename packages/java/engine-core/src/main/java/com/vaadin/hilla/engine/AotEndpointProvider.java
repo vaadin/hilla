@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 /**
  * Utility class to find endpoints in a non-running Hilla application.
  */
-public class AotEndpointFinder {
+public class AotEndpointProvider {
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private final EngineConfiguration engineConfiguration;
 
-    public AotEndpointFinder(EngineConfiguration engineConfiguration) {
+    public AotEndpointProvider(EngineConfiguration engineConfiguration) {
         this.engineConfiguration = engineConfiguration;
     }
 
