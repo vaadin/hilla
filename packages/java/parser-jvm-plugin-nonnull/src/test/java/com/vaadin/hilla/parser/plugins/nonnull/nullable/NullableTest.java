@@ -29,7 +29,8 @@ public class NullableTest {
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin()).addPlugin(plugin)
-                .execute(List.of(NullableEndpoint.class));
+                .execute(List.of(NullableEndpoint.class,
+                        NullableNonNullEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
