@@ -14,16 +14,10 @@ function stripLeadingSlash(path: string) {
 }
 
 function enableFlowLayout(route: RouteMeta): RouteMeta {
-  const routeWithFlowLayout = {
+  return {
     ...route,
     flowLayout: true,
   };
-  return route.children
-    ? {
-        ...routeWithFlowLayout,
-        children: route.children.map(enableFlowLayout),
-      }
-    : routeWithFlowLayout;
 }
 
 /**
@@ -65,14 +59,15 @@ export default async function applyLayouts(
   routeMeta: readonly RouteMeta[],
   layoutsFile: URL,
 ): Promise<readonly RouteMeta[]> {
-  if (!existsSync(layoutsFile)) {
+  try {
+    const layoutContents = await readFile(layoutsFile, 'utf-8');
+    const availableLayouts: readonly LayoutMeta[] = JSON.parse(layoutContents);
+    const layoutPaths = availableLayouts.map((layout) => stripLeadingSlash(layout.path));
+
+    return routeMeta.map((route) =>
+      layoutExists(layoutPaths, stripLeadingSlash(route.path)) ? enableFlowLayout(route) : route,
+    );
+  } catch (e: unknown) {
     return routeMeta;
   }
-  const layoutContents = await readFile(layoutsFile, 'utf-8');
-  const availableLayouts: readonly LayoutMeta[] = JSON.parse(layoutContents);
-  const layoutPaths = availableLayouts.map((layout) => stripLeadingSlash(layout.path));
-
-  return routeMeta.map((route) =>
-    layoutExists(layoutPaths, stripLeadingSlash(route.path)) ? enableFlowLayout(route) : route,
-  );
 }
