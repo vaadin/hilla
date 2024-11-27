@@ -47,9 +47,6 @@
       <plugin>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-maven-plugin</artifactId>
-        <configuration>
-          <endpointProvider>com.vaadin.hilla.engine.EngineConfiguration$EmptyEndpointProvider</endpointProvider>
-        </configuration>
       </plugin>
 
       <plugin>

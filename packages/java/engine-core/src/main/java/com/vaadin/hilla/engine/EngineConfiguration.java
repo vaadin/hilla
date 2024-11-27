@@ -229,11 +229,4 @@ public class EngineConfiguration {
     public interface EndpointProvider {
         List<Class<?>> findEndpoints() throws ExecutionFailedException;
     }
-
-    public static class EmptyEndpointProvider implements EndpointProvider {
-        @Override
-        public List<Class<?>> findEndpoints() {
-            return List.of();
-        }
-    }
 }

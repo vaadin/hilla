@@ -2,6 +2,8 @@ package com.vaadin.hilla.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.loader.tools.MainClassFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.util.stream.Collectors;
  * Utility class to find endpoints in a non-running Hilla application.
  */
 public class AotEndpointProvider {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(AotEndpointProvider.class);
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private final EngineConfiguration engineConfiguration;
 
@@ -31,8 +35,19 @@ public class AotEndpointProvider {
         var classesDirectory = aotOutput.resolve("classes");
         var applicationClass = (engineConfiguration.getMainClass() != null)
                 ? engineConfiguration.getMainClass()
-                : findSingleClass(engineConfiguration.getBuildDir()
-                        .resolve("classes").toFile());
+                : MainClassFinder
+                        .findSingleMainClass(
+                                engineConfiguration.getBuildDir()
+                                        .resolve("classes").toFile(),
+                                SPRING_BOOT_APPLICATION_CLASS_NAME);
+
+        if (applicationClass == null) {
+            LOGGER.warn("This project has not been recognized as a Spring Boot"
+                    + " application because a main class could not be found."
+                    + " Hilla services will not be available.");
+            return List.of();
+        }
+
         var settings = List.of(applicationClass,
                 aotOutput.resolve("sources").toString(),
                 aotOutput.resolve("resources").toString(),
