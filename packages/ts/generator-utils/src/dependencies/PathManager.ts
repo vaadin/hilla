@@ -39,18 +39,16 @@ export default class PathManager {
     return path;
   }
 
-  createRelativePath(path: URL | string, relativeTo = this.#options.relativeTo): string {
+  createRelativePath(path: URL | string, fileExtension?: string, relativeTo = this.#options.relativeTo): string {
     const { extension } = this.#options;
     const _path = path instanceof URL ? fileURLToPath(path) : path;
     let result = _path;
 
-    const ext = extname(_path);
-
     if (extension && !_path.endsWith(extension)) {
-      result = `${dirname(result)}/${basename(result, ext)}${extension}`;
+      result = `${dirname(result)}/${basename(result, fileExtension)}${extension}`;
     }
 
-    result = posix.relative(fileURLToPath(relativeTo), result);
+    result = posix.relative(relativeTo instanceof URL ? fileURLToPath(relativeTo) : relativeTo, result);
     return result.startsWith('.') ? result : `./${result}`;
   }
 

@@ -13,6 +13,8 @@ import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
+const extensions = ['.ts', '.tsx', '.js', '.jsx'];
+
 class RouteFromMetaProcessor {
   readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
@@ -54,9 +56,11 @@ class RouteFromMetaProcessor {
 
         let mod: Identifier | undefined;
         if (file) {
-          mod = namespace.add(paths.createRelativePath(file), `Page`);
+          const extension = extensions.find((ext) => file.pathname.endsWith(ext));
+          mod = namespace.add(paths.createRelativePath(file, extension), `Page`);
         } else if (layout) {
-          mod = namespace.add(paths.createRelativePath(layout), `Layout`);
+          const extension = extensions.find((ext) => layout.pathname.endsWith(ext));
+          mod = namespace.add(paths.createRelativePath(layout, extension), `Layout`);
         }
 
         const extension = flowLayout ? { flowLayout } : undefined;
