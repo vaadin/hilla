@@ -13,30 +13,15 @@ import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-/**
- * Convert a file URL to a relative path from the generated directory.
- *
- * @param url - The file URL to convert.
- * @param generatedDir - The directory where the generated view file will be stored.
- */
-function relativize(url: URL, generatedDir: URL): string {
-  const result = relative(fileURLToPath(generatedDir), fileURLToPath(url)).replaceAll(sep, '/');
-
-  if (!result.startsWith('.')) {
-    return `./${result}`;
-  }
-
-  return result;
-}
-
 class RouteFromMetaProcessor {
-  readonly #manager = new DependencyManager(new PathManager({ extension: '.js' }));
+  readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
-  readonly #urls: RuntimeFileUrls;
 
-  constructor(views: readonly RouteMeta[], urls: RuntimeFileUrls) {
+  constructor(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls) {
     this.#views = views;
-    this.#urls = urls;
+
+    const codeDir = new URL('./', codeFile);
+    this.#manager = new DependencyManager(new PathManager({ extension: '.js', relativeTo: codeDir }));
   }
 
   /**
@@ -46,9 +31,10 @@ class RouteFromMetaProcessor {
    * @param generatedDir - The directory where the generated view file will be stored.
    */
   process(): string {
-    const { named, namespace } = this.#manager.imports;
-    const { code: codeFile } = this.#urls;
-    const codeDir = new URL('./', codeFile);
+    const {
+      paths,
+      imports: { named, namespace },
+    } = this.#manager;
     const errors: string[] = [];
 
     const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, (metas, next) => {
@@ -68,9 +54,9 @@ class RouteFromMetaProcessor {
 
         let mod: Identifier | undefined;
         if (file) {
-          mod = namespace.add(relativize(file, codeDir), `Page`);
+          mod = namespace.add(paths.createRelativePath(file), `Page`);
         } else if (layout) {
-          mod = namespace.add(relativize(layout, codeDir), `Layout`);
+          mod = namespace.add(paths.createRelativePath(layout), `Layout`);
         }
 
         const extension = flowLayout ? { flowLayout } : undefined;

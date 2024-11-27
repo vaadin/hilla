@@ -37,20 +37,20 @@ describe('@vaadin/hilla-file-router', () => {
       expect(generated).to
         .equal(`import { createRoute as createRoute_1, extendModule as extendModule_1 } from "@vaadin/hilla-file-router/runtime.js";
 import type { AgnosticRoute as AgnosticRoute_1 } from "@vaadin/hilla-file-router/types.js";
-import * as Page_1 from "../test/issue-2928-flow-auto-layout.tsx";
-import * as Page_2 from "../views/nameToReplace.tsx";
-import * as Page_3 from "../views/profile/@index.tsx";
-import * as Layout_1 from "../views/profile/account/@layout.tsx";
-import * as Page_4 from "../views/profile/account/security/password.jsx";
-import * as Page_5 from "../views/profile/account/security/two-factor-auth.tsx";
-import * as Page_6 from "../views/profile/friends/{user}.tsx";
-import * as Layout_2 from "../views/profile/friends/@layout.tsx";
-import * as Page_7 from "../views/profile/friends/list.jsx";
-import * as Page_8 from "../views/test/{...wildcard}.tsx";
-import * as Page_9 from "../views/test/{{optional}}.tsx";
-import * as Page_10 from "../views/test/issue-002378/{requiredParam}/edit.tsx";
-import * as Layout_3 from "../views/test/issue-002571-empty-layout/@layout.tsx";
-import * as Page_11 from "../views/test/issue-002879-config-below.tsx";
+import * as Page_1 from "../test/issue-2928-flow-auto-layout.js";
+import * as Page_2 from "../views/nameToReplace.js";
+import * as Page_3 from "../views/profile/@index.js";
+import * as Layout_1 from "../views/profile/account/@layout.js";
+import * as Page_4 from "../views/profile/account/security/password.js";
+import * as Page_5 from "../views/profile/account/security/two-factor-auth.js";
+import * as Page_6 from "../views/profile/friends/{user}.js";
+import * as Layout_2 from "../views/profile/friends/@layout.js";
+import * as Page_7 from "../views/profile/friends/list.js";
+import * as Page_8 from "../views/test/{...wildcard}.js";
+import * as Page_9 from "../views/test/{{optional}}.js";
+import * as Page_10 from "../views/test/issue-002378/{requiredParam}/edit.js";
+import * as Layout_3 from "../views/test/issue-002571-empty-layout/@layout.js";
+import * as Page_11 from "../views/test/issue-002879-config-below.js";
 const routes: readonly AgnosticRoute_1[] = [
     createRoute_1("nameToReplace", Page_2),
     createRoute_1("profile", [
