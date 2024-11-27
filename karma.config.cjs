@@ -1,3 +1,4 @@
+/* eslint-disable import/unambiguous */
 const { parseArgs } = require('node:util');
 const { basename } = require('node:path');
 const { readFileSync } = require('node:fs');
@@ -13,11 +14,11 @@ const postcss = require('postcss');
 const cssnanoPlugin = require('cssnano');
 const { karmaMochaConfig } = require('./.mocharc.cjs');
 const reactPlugin = require('@vitejs/plugin-react');
-const { pathToFileURL, fileURLToPath} = require("node:url");
+const { pathToFileURL, fileURLToPath } = require('node:url');
 
 // The current package, one of the packages in the `packages` dir
 const cwd = pathToFileURL(`${process.cwd()}/`);
-const root = pathToFileURL(`${__dirname}/`)
+const root = pathToFileURL(`${__dirname}/`);
 
 function loadMockConfig() {
   try {
@@ -167,6 +168,10 @@ module.exports = (config) => {
               ...tsconfig.compilerOptions,
               useDefineForClassFields: false,
             },
+          },
+          supported: {
+            decorators: false,
+            'top-level-await': true,
           },
         },
         plugins: [
