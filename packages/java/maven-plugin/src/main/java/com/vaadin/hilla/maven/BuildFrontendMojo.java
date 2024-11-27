@@ -44,6 +44,9 @@ public class BuildFrontendMojo
     @Parameter(property = "mainClass")
     private String mainClass;
 
+    @Parameter(property = "endpointProvider")
+    private String endpointProvider;
+
     @Override
     protected void executeInternal()
             throws MojoExecutionException, MojoFailureException {
@@ -59,9 +62,22 @@ public class BuildFrontendMojo
                 .outputDir(generatedTsFolder().toPath())
                 .groupId(project.getGroupId())
                 .artifactId(project.getArtifactId())
+                .offlineEndpointProvider(createEndpointProvider())
                 .classpath(getClasspathElements(project)).mainClass(mainClass)
                 .create());
         super.executeInternal();
+    }
+
+    private EngineConfiguration.EndpointProvider createEndpointProvider() {
+        try {
+            System.out.println("endpointProvider: " + endpointProvider);
+            return endpointProvider == null ? null
+                    : (EngineConfiguration.EndpointProvider) Class
+                            .forName(endpointProvider).getDeclaredConstructor()
+                            .newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create endpoint provider", e);
+        }
     }
 
     private String getSpringBootMainClass(List<Plugin> plugins) {

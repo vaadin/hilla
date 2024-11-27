@@ -45,6 +45,7 @@
         <artifactId>hilla-maven-plugin</artifactId>
         <configuration>
           <reactEnable>false</reactEnable>
+          <endpointProvider>com.vaadin.hilla.engine.EngineConfiguration$EmptyEndpointProvider</endpointProvider>
         </configuration>
       </plugin>
 
