@@ -1,4 +1,14 @@
-import type { AgnosticRoute, Module } from '../types.js';
+import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
+
+export function extendModule(module: Module, config: ViewConfig): Module {
+  return {
+    ...module,
+    config: {
+      ...(module.config as ViewConfig),
+      ...config,
+    },
+  };
+}
 
 /**
  * Create a single framework-agnostic route object. Later, it can be transformed into a framework-specific route object,
