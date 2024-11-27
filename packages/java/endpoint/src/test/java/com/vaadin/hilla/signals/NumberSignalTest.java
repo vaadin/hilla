@@ -2,13 +2,19 @@ package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.signals.core.event.StateEvent;
 import com.vaadin.hilla.signals.operation.IncrementOperation;
 import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
 import com.vaadin.hilla.signals.operation.SetValueOperation;
 import com.vaadin.hilla.signals.operation.ValidationResult;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Flux;
 
 import java.util.UUID;
@@ -22,6 +28,20 @@ import static org.junit.Assert.assertTrue;
 public class NumberSignalTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @BeforeClass
+    public static void setup() {
+        var appCtx = Mockito.mock(ApplicationContext.class);
+        var endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(appCtx,
+                        new JacksonObjectMapperFactory.Json());
+        Signal.setMapper(endpointObjectMapper);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        Signal.setMapper(null);
+    }
 
     @Test
     public void constructor_withValueArg_usesValueAsDefaultValue() {

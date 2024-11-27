@@ -820,9 +820,10 @@ public class EndpointControllerTest {
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
                 mock(EndpointNameChecker.class));
-
-        EndpointInvoker invoker = new EndpointInvoker(contextMock, null,
-                mock(ExplicitNullableTypeChecker.class),
+        var endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(contextMock, null);
+        EndpointInvoker invoker = new EndpointInvoker(contextMock,
+                endpointObjectMapper, mock(ExplicitNullableTypeChecker.class),
                 mock(ServletContext.class), registry);
 
         new EndpointController(contextMock, registry, invoker, null)
@@ -1299,10 +1300,12 @@ public class EndpointControllerTest {
         ApplicationContext mockApplicationContext = mockApplicationContext(
                 endpoint);
         EndpointRegistry registry = new EndpointRegistry(endpointNameChecker);
-
+        ObjectMapper endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(mockApplicationContext,
+                        endpointMapperFactory);
         EndpointInvoker invoker = Mockito
                 .spy(new EndpointInvoker(mockApplicationContext,
-                        endpointMapperFactory, explicitNullableTypeChecker,
+                        endpointObjectMapper, explicitNullableTypeChecker,
                         mock(ServletContext.class), registry));
 
         Mockito.doReturn(accessChecker).when(invoker).getAccessChecker();

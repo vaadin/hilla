@@ -1,11 +1,17 @@
 package com.vaadin.hilla.signals.core.event;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.UUID;
 
 import com.vaadin.hilla.signals.Person;
+import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,6 +22,20 @@ import static org.junit.Assert.assertTrue;
 import static com.vaadin.hilla.signals.core.event.StateEvent.MAPPER;
 
 public class StateEventTest {
+
+    @BeforeClass
+    public static void setup() {
+        var appCtx = Mockito.mock(ApplicationContext.class);
+        var endpointObjectMapper = EndpointControllerMockBuilder
+                .createEndpointObjectMapper(appCtx,
+                        new JacksonObjectMapperFactory.Json());
+        StateEvent.setMapper(endpointObjectMapper);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        StateEvent.setMapper(null);
+    }
 
     @Test
     public void constructor_withoutExpected_shouldCreateStateEvent() {
