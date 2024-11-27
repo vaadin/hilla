@@ -1,11 +1,19 @@
 import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
 
-export function extendModule(module: Module, config: ViewConfig): Module {
+/**
+ * Extends a router module's config with additional properties. The original
+ * module config is preferred over the extension.
+ *
+ * @param module - The module to extend.
+ * @param config - The extension config.
+ * @returns
+ */
+export function extendModule(module: Module, config?: ViewConfig): Module {
   return {
     ...module,
     config: {
-      ...(module.config as ViewConfig),
       ...config,
+      ...(module.config as ViewConfig),
     },
   };
 }

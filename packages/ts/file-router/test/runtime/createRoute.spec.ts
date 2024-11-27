@@ -35,5 +35,15 @@ describe('@vaadin/hilla-file-router', () => {
         config: { flowLayout: true },
       });
     });
+
+    it('should prefer the original module config over the extension', () => {
+      const module = { default: 'module', config: { flowLayout: false } };
+      const extendedModule = extendModule(module, { flowLayout: true });
+
+      expect(extendedModule).to.be.like({
+        default: 'module',
+        config: { flowLayout: false },
+      });
+    });
   });
 });
