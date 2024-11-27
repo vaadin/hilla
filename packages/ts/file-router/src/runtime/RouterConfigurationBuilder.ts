@@ -7,6 +7,7 @@ import {
   type NonIndexRouteObject,
   type RouteObject,
 } from 'react-router-dom';
+import type { TupleToUnion } from 'type-fest';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type {
@@ -23,20 +24,77 @@ interface RouteBase {
   children?: readonly this[];
 }
 
-type RoutesModifier = (routes: readonly RouteObject[] | undefined) => readonly RouteObject[] | undefined;
-
 function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
   return module ? 'default' in module && typeof module.default === 'function' : true;
 }
 
-type RouteTransformer<T> = (
+export type RouteList = readonly RouteObject[];
+export type WritableRouteList = RouteObject[];
+
+export type RouteTransformer<T> = (
   original: RouteObject | undefined,
   overriding: T | undefined,
-  children?: readonly RouteObject[],
+  children?: RouteList,
 ) => RouteObject | undefined;
+
+export type RouteListSplittingRule = (route: RouteObject) => boolean;
+
+type RoutesModifier = (routes: RouteList | undefined) => RouteList | undefined;
 
 function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string, value: T] {
   return [`${route.path ?? ''}-${route.children ? 'n' : 'i'}`, route];
+}
+
+enum RouteHandleFlags {
+  FLOW_LAYOUT = 'flowLayout',
+  IGNORE_FALLBACK = 'ignoreFallback',
+  SKIP_LAYOUTS = 'skipLayouts',
+}
+
+function hasRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag: T): boolean {
+  return typeof route.handle === 'object' && flag in route.handle && (route.handle as Record<T, boolean>)[flag];
+}
+
+const categories = ['default', 'match'] as const;
+
+type Category = TupleToUnion<typeof categories>;
+
+function split(originalRoutes: RouteList, rule: RouteListSplittingRule): Readonly<Record<Category, RouteList>> {
+  return transformTree<RouteList, Readonly<Record<Category, RouteList>>>(originalRoutes, (routes, next) =>
+    // Split a single routes list onto two separate lists.
+    routes.reduce<Record<Category, WritableRouteList>>(
+      (lists, route) => {
+        if (rule(route)) {
+          // If the route satisfies the rule, it goes to the first list.
+          lists.match.push(route);
+          return lists;
+        }
+
+        if (!route.children?.length) {
+          // Leaf routes go to the second list.
+          lists.default.push(route);
+          return lists;
+        }
+
+        // Route children: separate them to different subtrees, and copy the
+        // current route to either or both the lists with the respective
+        // subtree as children.
+        const childrenLists = next(...route.children);
+
+        for (const category of categories) {
+          if (childrenLists[category].length) {
+            lists[category].push({
+              ...route,
+              children: childrenLists[category],
+            } as RouteObject);
+          }
+        }
+
+        return lists;
+      },
+      { match: [], default: [] },
+    ),
+  );
 }
 
 /**
@@ -52,7 +110,7 @@ export class RouterConfigurationBuilder {
    *
    * @param routes - A list of routes to add to the current list.
    */
-  withReactRoutes(routes: readonly RouteObject[]): this {
+  withReactRoutes(routes: RouteList): this {
     return this.update(routes);
   }
 
@@ -113,14 +171,13 @@ export class RouterConfigurationBuilder {
     this.withLayout(component);
 
     // Fallback adds two routes, so that the index (empty path) has a fallback too
-    const fallbackRoutes: readonly RouteObject[] = [
+    const fallbackRoutes: RouteList = [
       { path: '*', element: createElement(component), handle: config },
       { index: true, element: createElement(component), handle: config },
     ];
 
     this.update(fallbackRoutes, (original, added, children) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (original && !original.handle?.ignoreFallback) {
+      if (original && !hasRouteHandleFlag(original, RouteHandleFlags.IGNORE_FALLBACK)) {
         if (!children) {
           return original;
         }
@@ -153,43 +210,32 @@ export class RouterConfigurationBuilder {
    * @param layoutComponent - layout component to use, usually Flow
    */
   withLayout(layoutComponent: ComponentType): this {
-    function applyLayouts(routes: readonly RouteObject[]): readonly RouteObject[] {
-      if (routes.length === 0) {
-        return routes;
+    this.#modifiers.push((originalRoutes) => {
+      if (!originalRoutes) {
+        return originalRoutes;
       }
-      const nestedRoutes = routes.map((route) => route);
+
+      const { match: serverList, default: clientList } = split(originalRoutes, (route) =>
+        hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT),
+      );
+
       return [
-        {
-          element: createElement(layoutComponent),
-          children: nestedRoutes,
-          handle: {
-            ignoreFallback: true,
-          },
-        },
+        ...(serverList.length
+          ? [
+              // The server subtree is wrapped with the server layout component,
+              // which applies the top-level server layout to all matches.
+              {
+                element: createElement(layoutComponent),
+                children: serverList as RouteObject[],
+                handle: {
+                  [RouteHandleFlags.IGNORE_FALLBACK]: true,
+                },
+              },
+            ]
+          : []),
+        // The client route subtree is preserved without wrapping.
+        ...clientList,
       ];
-    }
-
-    function checkFlowLayout(route: RouteObject): boolean {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      let flowLayout = typeof route.handle === 'object' && 'flowLayout' in route.handle && route.handle.flowLayout;
-      // Check children if they have layout. If yes then parent should have layout also.
-      if (!flowLayout && route.children) {
-        flowLayout = route.children.filter((child) => checkFlowLayout(child)).length > 0;
-      }
-      return flowLayout;
-    }
-
-    this.#modifiers.push((routes: readonly RouteObject[] | undefined) => {
-      if (!routes) {
-        return routes;
-      }
-      const withLayout = routes.filter((route) => checkFlowLayout(route));
-      const allRoutes = routes.filter((route) => !withLayout.includes(route));
-      const catchAll = [routes.find((route) => route.path === '*')].filter((route) => route !== undefined);
-      withLayout.push(...catchAll); // Add * fallback to all child routes
-
-      allRoutes.unshift(...applyLayouts(withLayout));
-      return allRoutes;
     });
 
     return this;
@@ -224,7 +270,7 @@ export class RouterConfigurationBuilder {
       }) as RouteObject,
   ): this {
     this.#modifiers.push((existingRoutes) =>
-      transformTree<[readonly RouteObject[] | undefined, readonly T[] | undefined], readonly RouteObject[] | undefined>(
+      transformTree<[RouteList | undefined, readonly T[] | undefined], RouteList | undefined>(
         [existingRoutes, routes],
         ([original, added], next) => {
           if (original && added) {
@@ -255,11 +301,11 @@ export class RouterConfigurationBuilder {
           } else if (original) {
             return original
               .map((route) => callback(route, undefined, next(route.children, undefined)))
-              .filter(Boolean) as readonly RouteObject[];
+              .filter((r) => r != null);
           } else if (added) {
             return added
               .map((route) => callback(undefined, route, next(undefined, route.children)))
-              .filter(Boolean) as readonly RouteObject[];
+              .filter((r) => r != null);
           }
 
           return undefined;
@@ -273,12 +319,56 @@ export class RouterConfigurationBuilder {
    * Builds the router with the current list of routes.
    */
   build(options?: RouterBuildOptions): RouterConfiguration {
-    const routes =
-      this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
+    this.#withLayoutSkipping();
+    const routes = this.#modifiers.reduce<RouteList | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
     return {
       routes,
       router: createBrowserRouter([...routes], { basename: new URL(document.baseURI).pathname, ...options }),
     };
+  }
+
+  #withLayoutSkipping(): this {
+    this.#modifiers.push((originalRoutes) => {
+      if (!originalRoutes) {
+        return originalRoutes;
+      }
+
+      const { match: noLayoutList, default: layoutList } = split(originalRoutes, (route) =>
+        hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS),
+      );
+
+      const finalNoLayoutList = transformTree<RouteList, RouteList>(noLayoutList, (routes, next) =>
+        routes.map((route) => {
+          if (hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS)) {
+            return route;
+          }
+
+          const { element, ...rest } = route;
+          return route.children?.length
+            ? ({
+                ...rest,
+                children: next(...route.children),
+              } as RouteObject)
+            : rest;
+        }),
+      );
+
+      return [
+        ...(finalNoLayoutList.length
+          ? [
+              {
+                children: finalNoLayoutList as RouteObject[],
+                handle: {
+                  [RouteHandleFlags.IGNORE_FALLBACK]: true,
+                },
+              },
+            ]
+          : []),
+        ...layoutList,
+      ];
+    });
+
+    return this;
   }
 }

@@ -17,12 +17,15 @@ describe('RouterBuilder', () => {
   function Index() {
     return <></>;
   }
+
   function NextTest() {
     return <></>;
   }
+
   function AltTest() {
     return <></>;
   }
+
   function Server() {
     return <></>;
   }
@@ -46,9 +49,27 @@ describe('RouterBuilder', () => {
     reset();
   });
 
-  it('should merge React routes deeply', () => {
-    const { routes } = builder
-      .withReactRoutes([
+  describe('withReactRoutes', () => {
+    it('should merge React routes deeply', () => {
+      const { routes } = builder
+        .withReactRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '/test',
+                element: <div>AlternatedTest</div>,
+              },
+              {
+                path: '/next-test',
+                element: <div>NextTest</div>,
+              },
+            ],
+          },
+        ])
+        .build();
+
+      expect(routes).to.be.like([
         {
           path: '',
           children: [
@@ -62,53 +83,232 @@ describe('RouterBuilder', () => {
             },
           ],
         },
-      ])
-      .build();
+      ]);
+    });
 
-    expect(routes).to.be.like([
-      {
-        path: '',
-        children: [
+    it('should add server routes to children deeply', () => {
+      const { routes } = builder
+        .withReactRoutes([
           {
-            path: '/test',
-            element: <div>AlternatedTest</div>,
+            path: '',
+            children: [
+              {
+                path: '/test',
+                children: [
+                  {
+                    path: '/child-test',
+                    element: <div>ChildTest</div>,
+                  },
+                ],
+              },
+              {
+                path: '/next-test',
+                children: [
+                  {
+                    path: '/next-child-test',
+                    element: <div>ChildTest</div>,
+                  },
+                ],
+              },
+              {
+                path: '/cases',
+                children: [
+                  {
+                    path: '/index',
+                    children: [
+                      {
+                        index: true,
+                        element: <div>Index</div>,
+                      },
+                    ],
+                  },
+                  {
+                    path: '/wildcard',
+                    children: [
+                      {
+                        path: '*',
+                        element: <div>Wildcard</div>,
+                      },
+                    ],
+                  },
+                  {
+                    path: '/optional',
+                    children: [
+                      {
+                        path: ':optional?',
+                        element: <div>Optional</div>,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
-          {
-            path: '/next-test',
-            element: <div>NextTest</div>,
-          },
-        ],
-      },
-    ]);
-  });
+        ])
+        .withFallback(Server, { title: 'Server' })
+        .build();
 
-  it('should add layout routes under layout component', () => {
-    const { routes } = builder
-      .withReactRoutes([
+      const serverWildcard = {
+        path: '*',
+        element: <Server />,
+        handle: { title: 'Server' },
+      };
+      const serverIndex = {
+        index: true,
+        element: <Server />,
+        handle: { title: 'Server' },
+      };
+
+      const serverRoutes = [serverWildcard, serverIndex];
+
+      expect(routes).to.be.like([
         {
           path: '',
-          handle: {
-            flowLayout: true,
-          },
-        },
-        {
-          path: '/test',
-          handle: {
-            flowLayout: true,
-          },
           children: [
             {
-              path: '/child',
+              path: '/test',
+              element: <div>Test</div>,
+            },
+            {
+              path: '/test',
+              children: [
+                {
+                  path: '/child-test',
+                  element: <div>ChildTest</div>,
+                },
+                ...serverRoutes,
+              ],
+            },
+            {
+              path: '/next-test',
+              children: [
+                {
+                  path: '/next-child-test',
+                  element: <div>ChildTest</div>,
+                },
+                ...serverRoutes,
+              ],
+            },
+            {
+              path: '/cases',
+              children: [
+                // If we already have an index route, all we want is to add a
+                // server wildcard
+                {
+                  path: '/index',
+                  children: [
+                    {
+                      index: true,
+                      element: <div>Index</div>,
+                    },
+                    serverWildcard,
+                  ],
+                },
+                // If we already have a wildcard route, all we want is to add a
+                // server index.
+                {
+                  path: '/wildcard',
+                  children: [
+                    {
+                      path: '*',
+                      element: <div>Wildcard</div>,
+                    },
+                    serverIndex,
+                  ],
+                },
+                // If we have an optional route, we just need to add a server
+                // wildcard to cover complicated cases like
+                // "/optional/something/else/deeply/nested"
+                {
+                  path: '/optional',
+                  children: [
+                    {
+                      path: ':optional?',
+                      element: <div>Optional</div>,
+                    },
+                    serverWildcard,
+                  ],
+                },
+                ...serverRoutes,
+              ],
+            },
+            ...serverRoutes,
+          ],
+        },
+        ...serverRoutes,
+      ]);
+    });
+  });
+
+  describe('withFileRoutes', () => {
+    it('should merge file routes deeply', () => {
+      const { routes } = builder
+        .withFileRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                module: {
+                  default: Index,
+                },
+              },
+              {
+                path: '/test',
+                module: {
+                  default: AltTest,
+                  config: {
+                    route: '/alt-test',
+                  },
+                },
+              },
+              {
+                path: '/next-test',
+                module: {
+                  default: NextTest,
+                },
+              },
+            ],
+          },
+        ])
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          path: '',
+          children: [
+            {
+              path: '/alt-test',
+              element: <AltTest />,
+              handle: {
+                title: 'Alt Test',
+                route: '/alt-test',
+              },
+            },
+            {
+              element: <Index />,
+              handle: {
+                title: 'Index',
+              },
+              index: true,
+            },
+            {
+              path: '/next-test',
+              element: <NextTest />,
+              handle: {
+                title: 'Next Test',
+              },
             },
           ],
         },
-      ])
-      .withLayout(Server)
-      .build();
+      ]);
+    });
+  });
 
-    expect(routes).to.be.like([
-      {
-        children: [
+  describe('withLayout', () => {
+    it('should add layout routes under layout component', () => {
+      const { routes } = builder
+        .withReactRoutes([
           {
             path: '',
             handle: {
@@ -116,53 +316,25 @@ describe('RouterBuilder', () => {
             },
           },
           {
-            children: [
-              {
-                path: '/child',
-              },
-            ],
             path: '/test',
             handle: {
               flowLayout: true,
             },
+            children: [
+              {
+                path: '/child',
+                handle: {
+                  flowLayout: true,
+                },
+              },
+            ],
           },
-        ],
-        element: createElement(Server),
-      },
-      {
-        children: [
-          {
-            path: '/test',
-            element: <div>Test</div>,
-          },
-        ],
-        path: '',
-      },
-    ]);
-  });
+        ])
+        .withLayout(Server)
+        .build();
 
-  it('empty flowLayout array should not generate element', () => {
-    const { routes } = new RouterConfigurationBuilder()
-      .withReactRoutes([
+      expect(routes).to.be.like([
         {
-          path: '',
-        },
-      ])
-      .withLayout(Server)
-      .build();
-
-    expect(routes).to.be.like([
-      {
-        path: '',
-      },
-    ]);
-  });
-
-  it('should add layout routes for nested folder layout component', () => {
-    const { routes } = builder
-      .withReactRoutes([
-        {
-          path: 'nest',
           children: [
             {
               path: '',
@@ -171,32 +343,59 @@ describe('RouterBuilder', () => {
               },
             },
             {
-              path: '/nested',
+              children: [
+                {
+                  path: '/child',
+                  handle: {
+                    flowLayout: true,
+                  },
+                },
+              ],
+              path: '/test',
               handle: {
                 flowLayout: true,
               },
             },
           ],
+          element: createElement(Server),
+          handle: {
+            ignoreFallback: true,
+          },
         },
         {
-          path: '/test',
-          handle: {
-            flowLayout: true,
-          },
           children: [
             {
-              path: '/child',
+              path: '/test',
+              element: <div>Test</div>,
             },
           ],
+          path: '',
         },
-      ])
-      .withLayout(Server)
-      .build();
+      ]);
+    });
 
-    expect(routes).to.be.like([
-      {
-        children: [
+    it('empty flowLayout array should not generate element', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withReactRoutes([
           {
+            path: '',
+          },
+        ])
+        .withLayout(Server)
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          path: '',
+        },
+      ]);
+    });
+
+    it('should add layout routes for nested folder layout component', () => {
+      const { routes } = builder
+        .withReactRoutes([
+          {
+            path: 'nest',
             children: [
               {
                 path: '',
@@ -210,272 +409,289 @@ describe('RouterBuilder', () => {
                   flowLayout: true,
                 },
               },
-            ],
-            path: 'nest',
-          },
-          {
-            children: [
               {
-                path: '/child',
+                path: '/outside',
+                handle: {
+                  flowLayout: false,
+                },
+              },
+              {
+                path: '/nested-empty-layout',
+                children: [],
               },
             ],
+          },
+          {
             path: '/test',
             handle: {
               flowLayout: true,
             },
+            children: [
+              {
+                path: '/child',
+              },
+              {
+                path: '/empty-layout',
+                children: [],
+              },
+            ],
           },
-        ],
-        element: createElement(Server),
-      },
-      {
-        children: [
           {
-            path: '/test',
-            element: <div>Test</div>,
+            path: '/empty-layout-outside',
+            children: [],
           },
-        ],
-        path: '',
-      },
-    ]);
+        ])
+        .withLayout(Server)
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          children: [
+            {
+              children: [
+                {
+                  handle: {
+                    flowLayout: true,
+                  },
+                  path: '',
+                },
+                {
+                  handle: {
+                    flowLayout: true,
+                  },
+                  path: '/nested',
+                },
+              ],
+              path: 'nest',
+            },
+            {
+              children: [
+                {
+                  path: '/child',
+                },
+                {
+                  path: '/empty-layout',
+                  children: [],
+                },
+              ],
+              path: '/test',
+              handle: {
+                flowLayout: true,
+              },
+            },
+          ],
+          element: createElement(Server),
+          handle: {
+            ignoreFallback: true,
+          },
+        },
+        {
+          children: [
+            {
+              path: '/test',
+              element: <div>Test</div>,
+            },
+          ],
+          path: '',
+        },
+        {
+          children: [
+            {
+              path: '/outside',
+              handle: {
+                flowLayout: false,
+              },
+            },
+            {
+              path: '/nested-empty-layout',
+              children: [],
+            },
+          ],
+          path: 'nest',
+        },
+        {
+          path: '/empty-layout-outside',
+          children: [],
+        },
+      ]);
+    });
+
+    it('should not throw when no routes', () => {
+      const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
+
+      expect(routes).to.be.like([]);
+    });
   });
 
-  it('should not throw when no routes', () => {
-    const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
+  describe('withLayoutSkipping', () => {
+    it('should skip layout routes', () => {
+      const { routes } = builder
+        .withReactRoutes([
+          {
+            path: '/shallow-skip',
+            handle: {
+              skipLayouts: true,
+            },
+          },
+          {
+            path: '/deep-skip',
+            children: [
+              {
+                path: '/deep-skip-1',
+                children: [
+                  {
+                    path: '/deep-skip-2',
+                    handle: {
+                      skipLayouts: true,
+                    },
+                  },
+                  {
+                    path: '/deep-skip-excluded-1',
+                  },
+                ],
+              },
+              {
+                path: '/deep-skip-excluded-2',
+              },
+            ],
+          },
+          {
+            path: '/flow-skip',
+            handle: {
+              flowLayout: true,
+            },
+            children: [
+              {
+                path: '/flow-skip-1',
+                handle: {
+                  skipLayouts: true,
+                },
+              },
+              {
+                path: '/flow-skip-sibling',
+              },
+            ],
+          },
+        ])
+        .withLayout(Server)
+        .build();
 
-    expect(routes).to.be.like([]);
-  });
-
-  it('should merge file routes deeply', () => {
-    const { routes } = builder
-      .withFileRoutes([
+      expect(routes).to.be.like([
+        {
+          handle: {
+            ignoreFallback: true,
+          },
+          children: [
+            {
+              handle: {
+                ignoreFallback: true,
+              },
+              children: [
+                {
+                  path: '/flow-skip',
+                  handle: {
+                    flowLayout: true,
+                  },
+                  children: [
+                    {
+                      path: '/flow-skip-1',
+                      handle: {
+                        skipLayouts: true,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              path: '/shallow-skip',
+              handle: {
+                skipLayouts: true,
+              },
+            },
+            {
+              path: '/deep-skip',
+              children: [
+                {
+                  path: '/deep-skip-1',
+                  children: [
+                    {
+                      path: '/deep-skip-2',
+                      handle: { skipLayouts: true },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          element: createElement(Server),
+          handle: {
+            ignoreFallback: true,
+          },
+          children: [
+            {
+              path: '/flow-skip',
+              handle: {
+                flowLayout: true,
+              },
+              children: [
+                {
+                  path: '/flow-skip-sibling',
+                },
+              ],
+            },
+          ],
+        },
         {
           path: '',
           children: [
             {
-              path: '',
-              module: {
-                default: Index,
-              },
-            },
-            {
               path: '/test',
-              module: {
-                default: AltTest,
-                config: {
-                  route: '/alt-test',
-                },
-              },
-            },
-            {
-              path: '/next-test',
-              module: {
-                default: NextTest,
-              },
+              element: <div>Test</div>,
             },
           ],
         },
-      ])
-      .build();
-
-    expect(routes).to.be.like([
-      {
-        path: '',
-        children: [
-          {
-            path: '/alt-test',
-            element: <AltTest />,
-            handle: {
-              title: 'Alt Test',
-              route: '/alt-test',
-            },
-          },
-          {
-            element: <Index />,
-            handle: {
-              title: 'Index',
-            },
-            index: true,
-          },
-          {
-            path: '/next-test',
-            element: <NextTest />,
-            handle: {
-              title: 'Next Test',
-            },
-          },
-        ],
-      },
-    ]);
-  });
-
-  it('should add server routes to children deeply', () => {
-    const { routes } = builder
-      .withReactRoutes([
         {
-          path: '',
+          path: '/deep-skip',
           children: [
             {
-              path: '/test',
+              path: '/deep-skip-1',
               children: [
                 {
-                  path: '/child-test',
-                  element: <div>ChildTest</div>,
+                  path: '/deep-skip-excluded-1',
                 },
               ],
             },
             {
-              path: '/next-test',
-              children: [
-                {
-                  path: '/next-child-test',
-                  element: <div>ChildTest</div>,
-                },
-              ],
-            },
-            {
-              path: '/cases',
-              children: [
-                {
-                  path: '/index',
-                  children: [
-                    {
-                      index: true,
-                      element: <div>Index</div>,
-                    },
-                  ],
-                },
-                {
-                  path: '/wildcard',
-                  children: [
-                    {
-                      path: '*',
-                      element: <div>Wildcard</div>,
-                    },
-                  ],
-                },
-                {
-                  path: '/optional',
-                  children: [
-                    {
-                      path: ':optional?',
-                      element: <div>Optional</div>,
-                    },
-                  ],
-                },
-              ],
+              path: '/deep-skip-excluded-2',
             },
           ],
         },
-      ])
-      .withFallback(Server, { title: 'Server' })
-      .build();
-
-    const serverWildcard = {
-      path: '*',
-      element: <Server />,
-      handle: { title: 'Server' },
-    };
-    const serverIndex = {
-      index: true,
-      element: <Server />,
-      handle: { title: 'Server' },
-    };
-
-    const serverRoutes = [serverWildcard, serverIndex];
-
-    expect(routes).to.be.like([
-      {
-        path: '',
-        children: [
-          {
-            path: '/test',
-            element: <div>Test</div>,
-          },
-          {
-            path: '/test',
-            children: [
-              {
-                path: '/child-test',
-                element: <div>ChildTest</div>,
-              },
-              ...serverRoutes,
-            ],
-          },
-          {
-            path: '/next-test',
-            children: [
-              {
-                path: '/next-child-test',
-                element: <div>ChildTest</div>,
-              },
-              ...serverRoutes,
-            ],
-          },
-          {
-            path: '/cases',
-            children: [
-              // If we already have an index route, all we want is to add a
-              // server wildcard
-              {
-                path: '/index',
-                children: [
-                  {
-                    index: true,
-                    element: <div>Index</div>,
-                  },
-                  serverWildcard,
-                ],
-              },
-              // If we already have a wildcard route, all we want is to add a
-              // server index.
-              {
-                path: '/wildcard',
-                children: [
-                  {
-                    path: '*',
-                    element: <div>Wildcard</div>,
-                  },
-                  serverIndex,
-                ],
-              },
-              // If we have an optional route, we just need to add a server
-              // wildcard to cover complicated cases like
-              // "/optional/something/else/deeply/nested"
-              {
-                path: '/optional',
-                children: [
-                  {
-                    path: ':optional?',
-                    element: <div>Optional</div>,
-                  },
-                  serverWildcard,
-                ],
-              },
-              ...serverRoutes,
-            ],
-          },
-          ...serverRoutes,
-        ],
-      },
-      ...serverRoutes,
-    ]);
+      ]);
+    });
   });
 
-  it('should protect routes', () => {
-    const { routes } = builder.protect('/login').build();
+  describe('protect', () => {
+    it('should protect routes', () => {
+      const { routes } = builder.protect('/login').build();
 
-    const [root] = routes;
-    const [test] = root.children!;
+      const [root] = routes;
+      const [test] = root.children!;
 
-    expect(protectRoute).to.have.been.calledWith(root, '/login');
-    expect(protectRoute).to.have.been.calledWith(test, '/login');
+      expect(protectRoute).to.have.been.calledWith(root, '/login');
+      expect(protectRoute).to.have.been.calledWith(test, '/login');
+    });
   });
 
-  it('should build the router', () => {
-    const { routes, router } = builder.build();
+  describe('build', () => {
+    it('should build the router', () => {
+      const { routes, router } = builder.build();
 
-    expect(router).to.equal(browserRouter);
-    expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
-    reset();
+      expect(router).to.equal(browserRouter);
+      expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
+      reset();
+    });
   });
 });

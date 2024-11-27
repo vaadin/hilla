@@ -3,6 +3,14 @@ import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
 
+interface VaadinGlobal {
+  Vaadin?: {
+    featureFlags?: {
+      fullstackSignals?: boolean;
+    };
+  };
+}
+
 const ENDPOINT = 'SignalsHandler';
 
 /**
@@ -28,7 +36,7 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
 
   protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!(self as any).Vaadin?.featureFlags?.fullstackSignals) {
+    if (!(globalThis as VaadinGlobal).Vaadin?.featureFlags?.fullstackSignals) {
       // Remove when removing feature flag
       throw new Error(
         `The Hilla Fullstack Signals API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.fullstackSignals=true to vaadin-featureflags.properties`,

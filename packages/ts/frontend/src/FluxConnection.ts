@@ -194,7 +194,7 @@ export class FluxConnection extends EventTarget {
 
   #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const extraHeaders = self.document ? getCsrfTokenHeadersForEndpointRequest(self.document) : {};
+    const extraHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
     this.#socket = atmosphere?.subscribe?.({

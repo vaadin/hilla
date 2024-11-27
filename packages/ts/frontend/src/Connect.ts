@@ -14,9 +14,9 @@ import {
   FluxConnection,
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
-import type { VaadinWindow } from './types.js';
+import type { VaadinGlobal } from './types.js';
 
-const $wnd = self as VaadinWindow;
+const $wnd = globalThis as VaadinGlobal;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
@@ -301,7 +301,7 @@ export class ConnectClient {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const csrfHeaders = self.document ? getCsrfTokenHeadersForEndpointRequest(self.document) : {};
+    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
