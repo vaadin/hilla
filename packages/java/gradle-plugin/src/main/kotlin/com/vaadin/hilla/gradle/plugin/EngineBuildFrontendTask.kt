@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.gradle.PluginEffectiveConfiguration
 import com.vaadin.hilla.engine.EngineConfiguration
 
 import org.gradle.api.tasks.Input
@@ -46,12 +47,15 @@ public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFronten
 
     @TaskAction
     public fun exec() {
-        var engineConfiguration = EngineConfiguration.Builder()
-            .classpath(classpathElements)
+        val config = PluginEffectiveConfiguration.get(project)
+        val engineConfiguration = EngineConfiguration.Builder()
+            .baseDir(config.npmFolder.get().toPath())
+            .buildDir(buildDir.toPath())
+            .outputDir(config.generatedTsFolder.get().toPath())
             .groupId(groupId)
             .artifactId(artifactId)
+            .classpath(classpathElements)
             .mainClass(mainClass)
-            .buildDir(buildDir.toPath())
             .create()
 
         EngineConfiguration.setDefault(engineConfiguration)
