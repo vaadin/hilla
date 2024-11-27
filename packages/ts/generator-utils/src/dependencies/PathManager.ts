@@ -1,4 +1,4 @@
-import { basename, dirname, extname, posix } from 'node:path';
+import { basename, dirname, posix, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { SetRequired } from 'type-fest';
 
@@ -48,7 +48,10 @@ export default class PathManager {
       result = `${dirname(result)}/${basename(result, fileExtension)}${extension}`;
     }
 
-    result = posix.relative(relativeTo instanceof URL ? fileURLToPath(relativeTo) : relativeTo, result);
+    result = relative(relativeTo instanceof URL ? fileURLToPath(relativeTo) : relativeTo, result).replaceAll(
+      sep,
+      posix.sep,
+    );
     return result.startsWith('.') ? result : `./${result}`;
   }
 
