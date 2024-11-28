@@ -303,6 +303,22 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
+
+    it('should accept a file route module with a config only', () => {
+      expect(() =>
+        builder.withFileRoutes([{ path: 'test', module: { config: { flowLayout: true } } }]).build(),
+      ).to.not.throw();
+    });
+
+    it('should accept an undefined file route module', () => {
+      expect(() => builder.withFileRoutes([{ path: 'test', module: undefined }]).build()).to.not.throw();
+    });
+
+    it('should throw if a file route module has no component or config', () => {
+      expect(() => builder.withFileRoutes([{ path: 'test', module: {} }]).build()).to.throw(
+        `The module for the "test" section doesn't have the React component exported by default or a ViewConfig object exported as "config"`,
+      );
+    });
   });
 
   describe('withLayout', () => {

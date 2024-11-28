@@ -25,7 +25,14 @@ interface RouteBase {
 }
 
 function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
-  return module ? 'default' in module && typeof module.default === 'function' : true;
+  if (!module) {
+    return true;
+  }
+
+  return (
+    ('default' in module && typeof module.default === 'function') ||
+    ('config' in module && typeof module.config === 'object')
+  );
 }
 
 export type RouteList = readonly RouteObject[];
@@ -126,7 +133,9 @@ export class RouterConfigurationBuilder {
       if (added) {
         const { module, path, flowLayout } = added;
         if (!isReactRouteModule(module)) {
-          throw new Error(`The module for the "${path}" section doesn't have the React component exported by default`);
+          throw new Error(
+            `The module for the "${path}" section doesn't have the React component exported by default or a ViewConfig object exported as "config"`,
+          );
         }
 
         const element = module?.default ? createElement(module.default) : undefined;
