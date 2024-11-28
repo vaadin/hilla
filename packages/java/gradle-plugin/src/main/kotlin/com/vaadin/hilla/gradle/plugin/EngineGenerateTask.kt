@@ -37,6 +37,9 @@ public open class EngineGenerateTask : DefaultTask() {
         group = "Vaadin"
         description = "Hilla Generate Task"
 
+        // we need the compiled classes:
+        dependsOn("classes")
+
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
         // The inclusion rule itself is configured in the HillaPlugin class.
