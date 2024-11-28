@@ -28,8 +28,18 @@ describe('@vaadin/hilla-file-router', () => {
         ...meta,
         {
           path: 'issue-2928-flow-auto-layout',
-          file: new URL('test/issue-2928-flow-auto-layout.tsx', dir),
+          file: new URL('issue-2928-flow-auto-layout.tsx', dir),
           flowLayout: true,
+        },
+        {
+          path: 'mod-extension-only',
+          flowLayout: true,
+          children: [
+            {
+              path: 'mod-extension-only-child',
+              file: new URL('mod-extension-only-child.tsx', dir),
+            },
+          ],
         },
       ];
       const generated = createRoutesFromMeta(meta, runtimeUrls);
@@ -37,7 +47,7 @@ describe('@vaadin/hilla-file-router', () => {
       expect(generated).to
         .equal(`import { createRoute as createRoute_1, extendModule as extendModule_1 } from "@vaadin/hilla-file-router/runtime.js";
 import type { AgnosticRoute as AgnosticRoute_1 } from "@vaadin/hilla-file-router/types.js";
-import * as Page_1 from "../test/issue-2928-flow-auto-layout.js";
+import * as Page_1 from "../issue-2928-flow-auto-layout.js";
 import * as Page_2 from "../views/nameToReplace.js";
 import * as Page_3 from "../views/profile/@index.js";
 import * as Layout_1 from "../views/profile/account/@layout.js";
@@ -77,7 +87,10 @@ const routes: readonly AgnosticRoute_1[] = [
         createRoute_1("issue-002571-empty-layout", Layout_3, []),
         createRoute_1("issue-002879-config-below", Page_11)
     ]),
-    createRoute_1("issue-2928-flow-auto-layout", extendModule_1(Page_1, { "flowLayout": true }))
+    createRoute_1("issue-2928-flow-auto-layout", extendModule_1(Page_1, { "flowLayout": true })),
+    createRoute_1("mod-extension-only", extendModule_1(null, { "flowLayout": true }), [
+        createRoute_1("mod-extension-only-child", Page_2)
+    ])
 ];
 export default routes;
 `);
