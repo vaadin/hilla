@@ -31,6 +31,11 @@ export type ViewConfig = Readonly<{
    */
   flowLayout?: boolean;
 
+  /**
+   * Set to true to make the view render without enclosing in any layouts.
+   */
+  skipLayouts?: boolean;
+
   menu?: Readonly<{
     /**
      * Title to use in the menu. Falls back the title property of the view
