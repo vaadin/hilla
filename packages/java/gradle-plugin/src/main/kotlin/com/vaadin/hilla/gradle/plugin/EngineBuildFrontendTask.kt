@@ -16,46 +16,35 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.gradle.PluginEffectiveConfiguration
+import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.EngineConfiguration
 
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
-import java.io.File
-import java.nio.file.Path
 
 /**
  * Extend the VaadinBuildFrontendTask so that frontend files are not cleaned after build.
  */
 public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
-    @Input
-    public val classpathElements: List<String> = project.configurations.getByName("compileClasspath").files.map { it.absolutePath }
-
-    @Input
-    public val groupId: String = project.group.toString()
-
-    @Input
-    public val artifactId: String = project.name
-
-    @InputFile
-    public val buildDir: File = project.buildDir
-
-    @Input
-    @Optional
-    public var mainClass: String? = project.findProperty("mainClass") as String?
-
     @TaskAction
     public fun exec() {
+        val vaadinExtension = VaadinFlowPluginExtension.get(project)
+        val sourceSets: SourceSetContainer by lazy {
+            project.extensions.getByType(SourceSetContainer::class.java)
+        }
+        val classpathElements = (sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet)
+            .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
         val config = PluginEffectiveConfiguration.get(project)
         val engineConfiguration = EngineConfiguration.Builder()
             .baseDir(config.npmFolder.get().toPath())
-            .buildDir(buildDir.toPath())
+            .buildDir(project.buildDir.toPath())
             .outputDir(config.generatedTsFolder.get().toPath())
-            .groupId(groupId)
-            .artifactId(artifactId)
+            .groupId(project.group.toString())
+            .artifactId(project.name)
             .classpath(classpathElements)
-            .mainClass(mainClass)
+            .mainClass(project.findProperty("mainClass") as String?)
+            .productionMode(vaadinExtension.productionMode.getOrElse(false))
             .create()
 
         EngineConfiguration.setDefault(engineConfiguration)
