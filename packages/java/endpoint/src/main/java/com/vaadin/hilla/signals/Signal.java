@@ -133,6 +133,13 @@ public abstract class Signal<T> {
             delegate.notifySubscribers(processedEvent);
             return;
         }
+        if (StateEvent.isRejected(processedEvent)) {
+            LOGGER.warn(
+                    "Operation with id '{}' is rejected with validator message: '{}'",
+                    StateEvent.extractId(processedEvent),
+                    StateEvent.extractValidationError(processedEvent));
+            StateEvent.clearValidationError(processedEvent);
+        }
         subscribers.removeIf(sink -> {
             boolean failure = sink.tryEmitNext(processedEvent).isFailure();
             if (failure) {

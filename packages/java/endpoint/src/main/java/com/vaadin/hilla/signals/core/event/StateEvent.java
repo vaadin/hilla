@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * A utility class for representing state events out of an ObjectNode. This
@@ -254,6 +252,22 @@ public class StateEvent<T> {
                 && !event.get(Field.ACCEPTED).asBoolean()
                 && event.has(Field.VALIDATION_ERROR)
                 && event.get(Field.VALIDATION_ERROR).asText() != null;
+    }
+
+    public static String extractValidationError(ObjectNode event) {
+        if (!isRejected(event)) {
+            throw new IllegalStateException(
+                    "The event is not rejected, so it does not have a validation error");
+        }
+        return event.get(Field.VALIDATION_ERROR).asText();
+    }
+
+    public static void clearValidationError(ObjectNode event) {
+        if (!isRejected(event)) {
+            throw new IllegalStateException(
+                    "The event is not rejected, so it does not have a validation error");
+        }
+        event.remove(Field.VALIDATION_ERROR);
     }
 
     private static JsonNode valueAsJsonNode(Object value) {
