@@ -19,14 +19,12 @@ import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.AotEndpointProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import java.io.IOException
 import java.nio.file.Path
 
 import com.vaadin.hilla.engine.*
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.*
 
 /**
  * Task that generates the endpoints.ts and model TS classes
@@ -68,14 +66,22 @@ public open class EngineGenerateTask : DefaultTask() {
         val baseDir: Path = project.projectDir.toPath()
         val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
+        val sourceSets: SourceSetContainer by lazy {
+            project.extensions.getByType(SourceSetContainer::class.java)
+        }
+        val sourceSet = sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet;
+        val classpathElements = sourceSet.runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
+
         try {
             val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
             val conf: EngineConfiguration = EngineConfiguration.Builder()
                 .baseDir(baseDir)
                 .buildDir(buildDir)
+                .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
                 .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
                 .groupId(groupId)
                 .artifactId(artifactId)
+                .classpath(classpathElements)
                 .mainClass(mainClass)
                 .productionMode(isProductionMode)
                 .create()

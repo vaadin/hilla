@@ -193,7 +193,7 @@ class SingleModuleTest : AbstractGradleTest() {
                 }
             }
             plugins {
-                id 'org.springframework.boot' version '3.1.5'
+                id 'org.springframework.boot' version '3.3.6'
                 id 'io.spring.dependency-management' version '1.0.15.RELEASE'
                 id 'java'
             }

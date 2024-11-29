@@ -35,11 +35,9 @@ public class AotEndpointProvider {
         var classesDirectory = aotOutput.resolve("classes");
         var applicationClass = (engineConfiguration.getMainClass() != null)
                 ? engineConfiguration.getMainClass()
-                : MainClassFinder
-                        .findSingleMainClass(
-                                engineConfiguration.getBuildDir()
-                                        .resolve("classes").toFile(),
-                                SPRING_BOOT_APPLICATION_CLASS_NAME);
+                : MainClassFinder.findSingleMainClass(
+                        engineConfiguration.getClassesDir().toFile(),
+                        SPRING_BOOT_APPLICATION_CLASS_NAME);
 
         if (applicationClass == null) {
             LOGGER.warn("This project has not been recognized as a Spring Boot"

@@ -26,6 +26,7 @@ public class EngineConfiguration {
     private String mainClass;
     private Path buildDir;
     private Path baseDir;
+    private Path classesDir;
     private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
@@ -70,6 +71,10 @@ public class EngineConfiguration {
 
     public Path getBaseDir() {
         return baseDir;
+    }
+
+    public Path getClassesDir() {
+        return classesDir == null ? buildDir.resolve("classes") : classesDir;
     }
 
     public GeneratorConfiguration getGenerator() {
@@ -157,6 +162,11 @@ public class EngineConfiguration {
 
         public Builder buildDir(Path value) {
             configuration.buildDir = resolve(value);
+            return this;
+        }
+
+        public Builder classesDir(Path value) {
+            configuration.classesDir = resolve(value);
             return this;
         }
 
