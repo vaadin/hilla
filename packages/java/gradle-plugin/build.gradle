@@ -195,13 +195,16 @@ functionalTest {
 }
 
 kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
     explicitApi()
 }
 
 compileKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+compileFunctionalTestKotlin {
     kotlinOptions {
         jvmTarget = "17"
     }
