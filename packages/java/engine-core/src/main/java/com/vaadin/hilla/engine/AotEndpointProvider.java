@@ -108,7 +108,8 @@ public class AotEndpointProvider {
                     .getEndpointAnnotations().stream().map(Class::getName)
                     .toList();
 
-            try (var classLoader = new URLClassLoader(urls)) {
+            try (var classLoader = new URLClassLoader(urls,
+                    AotEndpointProvider.class.getClassLoader())) {
                 return candidates.stream().map(name -> {
                     try {
                         return Class.forName(name, false, classLoader);
