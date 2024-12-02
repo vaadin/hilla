@@ -16,8 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Signal<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Signal.class);
-
     private final ReentrantLock lock = new ReentrantLock();
 
     private final UUID id = UUID.randomUUID();
@@ -76,7 +74,7 @@ public abstract class Signal<T> {
                 .onBackpressureBuffer();
 
         return sink.asFlux().doOnSubscribe(ignore -> {
-            LOGGER.debug("New Flux subscription...");
+            getLogger().debug("New Flux subscription...");
             lock.lock();
             try {
                 var snapshot = createSnapshotEvent();
@@ -88,7 +86,7 @@ public abstract class Signal<T> {
         }).doFinally(ignore -> {
             lock.lock();
             try {
-                LOGGER.debug("Unsubscribing from Signal...");
+                getLogger().debug("Unsubscribing from Signal...");
                 subscribers.remove(sink);
             } finally {
                 lock.unlock();
@@ -134,7 +132,7 @@ public abstract class Signal<T> {
             return;
         }
         if (StateEvent.isRejected(processedEvent)) {
-            LOGGER.warn(
+            getLogger().warn(
                     "Operation with id '{}' is rejected with validator message: '{}'",
                     StateEvent.extractId(processedEvent),
                     StateEvent.extractValidationError(processedEvent));
@@ -143,7 +141,7 @@ public abstract class Signal<T> {
         subscribers.removeIf(sink -> {
             boolean failure = sink.tryEmitNext(processedEvent).isFailure();
             if (failure) {
-                LOGGER.debug("Failed push");
+                getLogger().debug("Failed push");
             }
             return failure;
         });
@@ -209,5 +207,9 @@ public abstract class Signal<T> {
      */
     public static void setMapper(ObjectMapper mapper) {
         StateEvent.setMapper(mapper);
+    }
+
+    private Logger getLogger() {
+        return LoggerFactory.getLogger(Signal.class);
     }
 }
