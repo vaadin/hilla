@@ -7,9 +7,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,13 +58,15 @@ public class AotEndpointProvider {
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
+        var classpath = engineConfiguration.getClasspath().stream()
+                .filter(Files::exists).map(Path::toString).toList();
 
         // Runs the SpringApplicationAotProcessor to generate the
         // reflect-config.json file. This comes from the `process-aot` goal.
         var processBuilder = new ProcessBuilder();
         processBuilder.inheritIO();
         processBuilder.command(javaExecutable, "-cp",
-                engineConfiguration.getClasspath().stream().map(Path::toString)
+                classpath.stream()
                         .collect(Collectors.joining(File.pathSeparator)),
                 "org.springframework.boot.SpringApplicationAotProcessor");
         processBuilder.command().addAll(settings);
@@ -90,22 +96,37 @@ public class AotEndpointProvider {
                 candidates.add(name);
             }
 
-            return candidates.stream().map(name -> {
+            var urls = classpath.stream().map(File::new).map(file -> {
                 try {
-                    return Class.forName(name);
-                }
-                // Must also catch NoClassDefFoundError here, exceptions are not
-                // enough.
-                catch (Throwable t) {
+                    return file.toURI().toURL();
+                } catch (Throwable t) {
                     return null;
                 }
-            }).filter(Objects::nonNull)
-                    // Filter out classes that are not annotated with any of the
-                    // endpoint annotations.
-                    .filter(cls -> engineConfiguration.getParser()
-                            .getEndpointAnnotations().stream()
-                            .anyMatch(cls::isAnnotationPresent))
-                    .collect(Collectors.toList());
+            }).filter(Objects::nonNull).toArray(URL[]::new);
+
+            var annotationNames = engineConfiguration.getParser()
+                    .getEndpointAnnotations().stream().map(Class::getName)
+                    .toList();
+
+            try (var classLoader = new URLClassLoader(urls)) {
+                return candidates.stream().map(name -> {
+                    try {
+                        return Class.forName(name, false, classLoader);
+                    }
+                    // Must also catch NoClassDefFoundError here, exceptions are
+                    // not enough.
+                    catch (Throwable t) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull)
+                        // Filter out classes that are not annotated with any of
+                        // the endpoint annotations.
+                        .filter(cls -> Arrays.stream(cls.getAnnotations())
+                                .map(Annotation::annotationType)
+                                .map(Class::getName)
+                                .anyMatch(annotationNames::contains))
+                        .collect(Collectors.toList());
+            }
         }
 
         throw new ParserException("No endpoints detected");
