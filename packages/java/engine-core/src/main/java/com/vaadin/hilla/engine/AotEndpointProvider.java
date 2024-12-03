@@ -25,8 +25,6 @@ public class AotEndpointProvider {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AotEndpointProvider.class);
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
-    private static final List<String> internalEndpoints = List
-            .of("com.vaadin.hilla.signals.handler.SignalsHandler");
     private final EngineConfiguration engineConfiguration;
 
     public AotEndpointProvider(EngineConfiguration engineConfiguration) {
@@ -112,18 +110,16 @@ public class AotEndpointProvider {
 
             try (var classLoader = new URLClassLoader(urls,
                     AotEndpointProvider.class.getClassLoader())) {
-                return candidates.stream()
-                        .filter(name -> !internalEndpoints.contains(name))
-                        .map(name -> {
-                            try {
-                                return Class.forName(name, false, classLoader);
-                            }
-                            // Must also catch NoClassDefFoundError here,
-                            // exceptions are not enough.
-                            catch (Throwable t) {
-                                return null;
-                            }
-                        }).filter(Objects::nonNull)
+                return candidates.stream().map(name -> {
+                    try {
+                        return Class.forName(name, false, classLoader);
+                    }
+                    // Must also catch NoClassDefFoundError here, exceptions are
+                    // not enough.
+                    catch (Throwable t) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull)
                         // Filter out classes that are not annotated with any of
                         // the endpoint annotations.
                         .filter(cls -> Arrays.stream(cls.getAnnotations())

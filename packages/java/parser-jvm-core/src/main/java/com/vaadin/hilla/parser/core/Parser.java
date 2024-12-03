@@ -44,6 +44,9 @@ public final class Parser {
             "jakarta.annotation.security.RolesAllowed",
             "com.vaadin.flow.server.auth.AnonymousAllowed");
 
+    private static final List<String> INTERNAL_ENDPOINTS = List
+            .of("com.vaadin.hilla.signals.handler.SignalsHandler");
+
     public Parser() {
         try {
             var basicOpenAPIString = new String(Objects
@@ -284,6 +287,10 @@ public final class Parser {
                 "[JVM Parser] endpointAnnotations is not provided.");
 
         logger.debug("JVM Parser started");
+
+        endpoints = endpoints.stream()
+                .filter(cls -> !INTERNAL_ENDPOINTS.contains(cls.getName()))
+                .toList();
 
         var storage = new SharedStorage(config);
 
