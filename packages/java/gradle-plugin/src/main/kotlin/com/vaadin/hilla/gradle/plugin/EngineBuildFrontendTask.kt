@@ -40,7 +40,7 @@ public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFronten
             .baseDir(config.npmFolder.get().toPath())
             .buildDir(project.buildDir.toPath())
             .outputDir(config.generatedTsFolder.get().toPath())
-            .groupId(project.group.toString())
+            .groupId(project.group.toString()?.takeIf { it.isNotEmpty() } ?: "unspecified")
             .artifactId(project.name)
             .classpath(classpathElements)
             .mainClass(project.findProperty("mainClass") as String?)

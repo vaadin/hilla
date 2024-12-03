@@ -79,7 +79,7 @@ public open class EngineGenerateTask : DefaultTask() {
                 .buildDir(buildDir)
                 .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
                 .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
-                .groupId(groupId)
+                .groupId(groupId?.takeIf { it.isNotEmpty() } ?: "unspecified")
                 .artifactId(artifactId)
                 .classpath(classpathElements)
                 .mainClass(mainClass)
