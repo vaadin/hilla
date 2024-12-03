@@ -249,8 +249,9 @@ export class RouterConfigurationBuilder {
       return [
         ...(result.server.length
           ? [
-              // The server subtree is wrapped with the server layout component,
-              // which applies the top-level server layout to all matches.
+              // The server routes are wrapped with the route that has a layout
+              // element. It also has the `IGNORE_FALLBACK` flag to remove the
+              // fallback route from reach.
               {
                 element: createElement(layoutComponent),
                 children: result.server as RouteObject[],
@@ -260,9 +261,9 @@ export class RouterConfigurationBuilder {
               },
             ]
           : []),
-        // The client route subtree is preserved without wrapping.
+        // The client routes are preserved without wrapping.
         ...result.client,
-        // The default routes are considered as client routes.
+        // The ambivalent routes are considered as client routes.
         ...result.ambivalent,
       ];
     });
