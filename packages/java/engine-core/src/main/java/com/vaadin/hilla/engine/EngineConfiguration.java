@@ -139,6 +139,7 @@ public class EngineConfiguration {
         public Builder(EngineConfiguration configuration) {
             this.configuration.baseDir = configuration.baseDir;
             this.configuration.buildDir = configuration.buildDir;
+            this.configuration.classesDir = configuration.classesDir;
             this.configuration.classpath = configuration.classpath;
             this.configuration.generator = configuration.generator;
             this.configuration.parser = configuration.parser;

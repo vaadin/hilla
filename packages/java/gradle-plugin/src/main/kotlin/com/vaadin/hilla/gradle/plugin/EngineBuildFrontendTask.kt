@@ -15,40 +15,8 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import com.vaadin.gradle.PluginEffectiveConfiguration
-import com.vaadin.gradle.VaadinFlowPluginExtension
-import com.vaadin.hilla.engine.EngineConfiguration
-
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.TaskAction
-
 /**
  * Extend the VaadinBuildFrontendTask so that frontend files are not cleaned after build.
  */
 public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
-    @TaskAction
-    public fun exec() {
-        val vaadinExtension = VaadinFlowPluginExtension.get(project)
-        val sourceSets: SourceSetContainer by lazy {
-            project.extensions.getByType(SourceSetContainer::class.java)
-        }
-        val classpathElements = (sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet)
-            .runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
-        val config = PluginEffectiveConfiguration.get(project)
-        val engineConfiguration = EngineConfiguration.Builder()
-            .baseDir(config.npmFolder.get().toPath())
-            .buildDir(project.buildDir.toPath())
-            .outputDir(config.generatedTsFolder.get().toPath())
-            .groupId(project.group.toString()?.takeIf { it.isNotEmpty() } ?: "unspecified")
-            .artifactId(project.name)
-            .classpath(classpathElements)
-            .mainClass(project.findProperty("mainClass") as String?)
-            .productionMode(vaadinExtension.productionMode.getOrElse(false))
-            .create()
-
-        EngineConfiguration.setDefault(engineConfiguration)
-
-        super.vaadinBuildFrontend()
-    }
 }

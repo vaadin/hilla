@@ -35,13 +35,16 @@ public class HillaPlugin : Plugin<Project> {
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
         project.pluginManager.apply(VaadinPlugin::class.java)
 
-        project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
-
         val extensionName = "hilla"
         project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
 
         project.tasks.apply {
+            register("hillaConfigure", EngineConfigureTask::class.java)
             register("hillaGenerate", EngineGenerateTask::class.java)
+        }
+
+        project.tasks.named("vaadinBuildFrontend") {
+            it.dependsOn("hillaConfigure")
         }
 
         project.tasks.named("processResources") {

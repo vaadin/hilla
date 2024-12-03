@@ -36,7 +36,7 @@ public open class EngineGenerateTask : DefaultTask() {
         description = "Hilla Generate Task"
 
         // we need the compiled classes:
-        dependsOn("classes")
+        dependsOn("classes", "hillaConfigure")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
