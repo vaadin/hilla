@@ -322,74 +322,6 @@ describe('RouterBuilder', () => {
   });
 
   describe('withLayout', () => {
-    it('should add layout routes under layout component', () => {
-      const { routes } = builder
-        .withReactRoutes([
-          {
-            path: '',
-            handle: {
-              flowLayout: true,
-            },
-          },
-          {
-            path: '/test',
-            handle: {
-              flowLayout: true,
-            },
-            children: [
-              {
-                path: '/child',
-                handle: {
-                  flowLayout: true,
-                },
-              },
-            ],
-          },
-        ])
-        .withLayout(Server)
-        .build();
-
-      expect(routes).to.be.like([
-        {
-          children: [
-            {
-              path: '',
-              handle: {
-                flowLayout: true,
-              },
-            },
-            {
-              children: [
-                {
-                  path: '/child',
-                  handle: {
-                    flowLayout: true,
-                  },
-                },
-              ],
-              path: '/test',
-              handle: {
-                flowLayout: true,
-              },
-            },
-          ],
-          element: createElement(Server),
-          handle: {
-            ignoreFallback: true,
-          },
-        },
-        {
-          children: [
-            {
-              path: '/test',
-              element: <div>Test</div>,
-            },
-          ],
-          path: '',
-        },
-      ]);
-    });
-
     it('empty flowLayout array should not generate element', () => {
       const { routes } = new RouterConfigurationBuilder()
         .withReactRoutes([
@@ -407,54 +339,95 @@ describe('RouterBuilder', () => {
       ]);
     });
 
-    it('should add layout routes for nested folder layout component', () => {
+    it('should separate flow layouts and regular layouts', () => {
       const { routes } = builder
         .withReactRoutes([
           {
-            path: 'nest',
+            path: 'mixed-nested-layouts',
             children: [
               {
-                path: '',
+                path: 'parent-flow-layout',
                 handle: {
                   flowLayout: true,
                 },
-              },
-              {
-                path: '/nested',
-                handle: {
-                  flowLayout: true,
-                },
-              },
-              {
-                path: '/outside',
-                handle: {
-                  flowLayout: false,
-                },
-              },
-              {
-                path: '/nested-empty-layout',
-                children: [],
+                children: [
+                  {
+                    path: 'flow-layout',
+                    handle: {
+                      flowLayout: true,
+                    },
+                  },
+                  {
+                    path: 'regular-layout-1',
+                    handle: {
+                      flowLayout: false,
+                    },
+                  },
+                  {
+                    path: 'not-specified-layout-1',
+                  },
+                  {
+                    path: 'not-specified-layout-2',
+                    children: [
+                      {
+                        path: 'child-regular-layout',
+                        handle: {
+                          flowLayout: false,
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    path: 'not-specified-layout-3',
+                    children: [
+                      {
+                        path: 'child-not-specifed-layout',
+                      },
+                    ],
+                  },
+                  {
+                    path: 'not-specified-layout-4',
+                    children: [
+                      {
+                        path: 'child-flow-layout-1',
+                        handle: {
+                          flowLayout: true,
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    path: 'regular-layout-2',
+                    handle: {
+                      flowLayout: false,
+                    },
+                    children: [
+                      {
+                        path: 'child-flow-layout-2',
+                        handle: {
+                          flowLayout: true,
+                        },
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },
           {
-            path: '/test',
+            path: 'flow-layout-another-branch',
             handle: {
               flowLayout: true,
             },
-            children: [
-              {
-                path: '/child',
-              },
-              {
-                path: '/empty-layout',
-                children: [],
-              },
-            ],
           },
           {
-            path: '/empty-layout-outside',
-            children: [],
+            path: 'regular-layout-outside',
+            handle: {
+              flowLayout: false,
+            },
+          },
+          {
+            path: 'not-specified-layout-outside',
           },
         ])
         .withLayout(Server)
@@ -462,72 +435,130 @@ describe('RouterBuilder', () => {
 
       expect(routes).to.be.like([
         {
+          element: createElement(Server),
+          handle: {
+            ignoreFallback: true,
+          },
           children: [
             {
+              path: 'mixed-nested-layouts',
               children: [
                 {
+                  path: 'parent-flow-layout',
                   handle: {
                     flowLayout: true,
                   },
-                  path: '',
-                },
-                {
-                  handle: {
-                    flowLayout: true,
-                  },
-                  path: '/nested',
+                  children: [
+                    {
+                      path: 'flow-layout',
+                      handle: {
+                        flowLayout: true,
+                      },
+                    },
+                    {
+                      path: 'not-specified-layout-4',
+                      children: [
+                        {
+                          path: 'child-flow-layout-1',
+                          handle: {
+                            flowLayout: true,
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      path: 'regular-layout-2',
+                      handle: {
+                        flowLayout: false,
+                      },
+                      children: [
+                        {
+                          path: 'child-flow-layout-2',
+                          handle: {
+                            flowLayout: true,
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      path: 'not-specified-layout-1',
+                    },
+                    {
+                      path: 'not-specified-layout-2',
+                    },
+                    {
+                      path: 'not-specified-layout-3',
+                      children: [
+                        {
+                          path: 'child-not-specifed-layout',
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
-              path: 'nest',
             },
             {
-              children: [
-                {
-                  path: '/child',
-                },
-                {
-                  path: '/empty-layout',
-                  children: [],
-                },
-              ],
-              path: '/test',
+              path: 'flow-layout-another-branch',
               handle: {
                 flowLayout: true,
               },
             },
           ],
-          element: createElement(Server),
+        },
+        {
+          path: 'mixed-nested-layouts',
+          children: [
+            {
+              path: 'parent-flow-layout',
+              handle: {
+                flowLayout: true,
+              },
+              children: [
+                {
+                  path: 'regular-layout-1',
+                  handle: {
+                    flowLayout: false,
+                  },
+                },
+                {
+                  path: 'not-specified-layout-2',
+                  children: [
+                    {
+                      path: 'child-regular-layout',
+                      handle: {
+                        flowLayout: false,
+                      },
+                    },
+                  ],
+                },
+                {
+                  path: 'regular-layout-2',
+                  handle: {
+                    flowLayout: false,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: 'regular-layout-outside',
           handle: {
-            ignoreFallback: true,
+            flowLayout: false,
           },
         },
         {
+          path: '',
           children: [
             {
               path: '/test',
               element: <div>Test</div>,
             },
           ],
-          path: '',
         },
         {
-          children: [
-            {
-              path: '/outside',
-              handle: {
-                flowLayout: false,
-              },
-            },
-            {
-              path: '/nested-empty-layout',
-              children: [],
-            },
-          ],
-          path: 'nest',
-        },
-        {
-          path: '/empty-layout-outside',
-          children: [],
+          path: 'not-specified-layout-outside',
         },
       ]);
     });

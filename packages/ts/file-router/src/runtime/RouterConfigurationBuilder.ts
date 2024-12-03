@@ -7,7 +7,6 @@ import {
   type NonIndexRouteObject,
   type RouteObject,
 } from 'react-router-dom';
-import type { TupleToUnion } from 'type-fest';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type {
@@ -58,50 +57,12 @@ enum RouteHandleFlags {
   SKIP_LAYOUTS = 'skipLayouts',
 }
 
-function hasRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag: T): boolean {
-  return typeof route.handle === 'object' && flag in route.handle && (route.handle as Record<T, boolean>)[flag];
-}
+function getRouteHandleFlag<T extends RouteHandleFlags>(route: RouteObject, flag: T): boolean | undefined {
+  if (typeof route.handle === 'object' && flag in route.handle) {
+    return (route.handle as Record<T, boolean>)[flag];
+  }
 
-const categories = ['default', 'match'] as const;
-
-type Category = TupleToUnion<typeof categories>;
-
-function split(originalRoutes: RouteList, rule: RouteListSplittingRule): Readonly<Record<Category, RouteList>> {
-  return transformTree<RouteList, Readonly<Record<Category, RouteList>>>(originalRoutes, (routes, next) =>
-    // Split a single routes list onto two separate lists.
-    routes.reduce<Record<Category, WritableRouteList>>(
-      (lists, route) => {
-        if (rule(route)) {
-          // If the route satisfies the rule, it goes to the first list.
-          lists.match.push(route);
-          return lists;
-        }
-
-        if (!route.children?.length) {
-          // Leaf routes go to the second list.
-          lists.default.push(route);
-          return lists;
-        }
-
-        // Route children: separate them to different subtrees, and copy the
-        // current route to either or both the lists with the respective
-        // subtree as children.
-        const childrenLists = next(...route.children);
-
-        for (const category of categories) {
-          if (childrenLists[category].length) {
-            lists[category].push({
-              ...route,
-              children: childrenLists[category],
-            } as RouteObject);
-          }
-        }
-
-        return lists;
-      },
-      { match: [], default: [] },
-    ),
-  );
+  return undefined;
 }
 
 /**
@@ -186,7 +147,7 @@ export class RouterConfigurationBuilder {
     ];
 
     this.update(fallbackRoutes, (original, added, children) => {
-      if (original && !hasRouteHandleFlag(original, RouteHandleFlags.IGNORE_FALLBACK)) {
+      if (original && !getRouteHandleFlag(original, RouteHandleFlags.IGNORE_FALLBACK)) {
         if (!children) {
           return original;
         }
@@ -224,18 +185,73 @@ export class RouterConfigurationBuilder {
         return originalRoutes;
       }
 
-      const { match: serverList, default: clientList } = split(originalRoutes, (route) =>
-        hasRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT),
+      type Accumulator<T extends RouteList> = Readonly<{
+        server: T;
+        client: T;
+        ambivalent: T;
+      }>;
+
+      const result = transformTree<RouteList, Accumulator<RouteList>>(originalRoutes, (routes, next) =>
+        // Split a single routes list onto three separate lists:
+        // - A list of server routes
+        // - A list of client routes
+        // - A list of routes which will be moved to either server or client
+        // list. It depends on the parent route.
+        routes.reduce<Accumulator<WritableRouteList>>(
+          (lists, route) => {
+            const { server, client, ambivalent } = next(...(route.children ?? []));
+
+            const flag = getRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT);
+
+            // If the route has `flowLayout` flag explicitly enabled, it goes to
+            // the server list. The children are also affected by the flag
+            // unless they have it explicitly disabled.
+            if (flag === true) {
+              lists.server.push({
+                ...route,
+                children: server.length + ambivalent.length > 0 ? [...server, ...ambivalent] : undefined,
+              } as RouteObject);
+            } else if (server.length > 0) {
+              lists.server.push({
+                ...route,
+                children: server,
+              } as RouteObject);
+            }
+
+            // If the route has `flowLayout` flag explicitly disabled, it goes
+            // to the client list. The route children are not affected by the
+            // flag.
+            if (flag === false || client.length > 0) {
+              lists.client.push({
+                ...route,
+                children: client.length > 0 ? client : undefined,
+              } as RouteObject);
+            }
+
+            if (flag === undefined && lists.server.every(({ path }) => path !== route.path)) {
+              // The route without the flag go to the `default` list. Then it will
+              // be moved to either server or client list based on the parent
+              // route.
+              lists.ambivalent.push({
+                ...route,
+                children: ambivalent.length > 0 ? ambivalent : undefined,
+              } as RouteObject);
+            }
+
+            return lists;
+          },
+          { server: [], client: [], ambivalent: [] },
+        ),
       );
 
       return [
-        ...(serverList.length
+        ...(result.server.length
           ? [
               // The server subtree is wrapped with the server layout component,
               // which applies the top-level server layout to all matches.
               {
                 element: createElement(layoutComponent),
-                children: serverList as RouteObject[],
+                children: result.server as RouteObject[],
                 handle: {
                   [RouteHandleFlags.IGNORE_FALLBACK]: true,
                 },
@@ -243,7 +259,9 @@ export class RouterConfigurationBuilder {
             ]
           : []),
         // The client route subtree is preserved without wrapping.
-        ...clientList,
+        ...result.client,
+        // The default routes are considered as client routes.
+        ...result.ambivalent,
       ];
     });
 
@@ -358,38 +376,62 @@ export class RouterConfigurationBuilder {
         return originalRoutes;
       }
 
-      const { match: noLayoutList, default: layoutList } = split(originalRoutes, (route) =>
-        hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS),
-      );
+      type Accumulator<T extends RouteList> = Readonly<{
+        skipped: T;
+        regular: T;
+      }>;
 
-      const finalNoLayoutList = transformTree<RouteList, RouteList>(noLayoutList, (routes, next) =>
-        routes.map((route) => {
-          if (hasRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS)) {
-            return route;
-          }
+      const result = transformTree<RouteList, Accumulator<RouteList>>(originalRoutes, (routes, next) =>
+        // Split a single routes list onto two separate lists.
+        routes.reduce<Accumulator<WritableRouteList>>(
+          (lists, route) => {
+            // If the route has `skipLayout` flag, it goes to the `skipped` list.
+            if (getRouteHandleFlag(route, RouteHandleFlags.SKIP_LAYOUTS)) {
+              lists.skipped.push(route);
+              return lists;
+            }
 
-          const { element, ...rest } = route;
-          return route.children?.length
-            ? ({
+            if (!route.children?.length) {
+              lists.regular.push(route);
+              return lists;
+            }
+
+            const { skipped, regular } = next(...(route.children ?? []));
+
+            if (skipped.length > 0) {
+              const { element, ...rest } = route;
+
+              lists.skipped.push({
                 ...rest,
-                children: next(...route.children),
-              } as RouteObject)
-            : rest;
-        }),
+                children: skipped,
+              } as RouteObject);
+            }
+
+            if (regular.length > 0) {
+              lists.regular.push({
+                ...route,
+                children: regular,
+              } as RouteObject);
+            }
+
+            return lists;
+          },
+          { skipped: [], regular: [] },
+        ),
       );
 
       return [
-        ...(finalNoLayoutList.length
+        ...(result.skipped.length
           ? [
               {
-                children: finalNoLayoutList as RouteObject[],
+                children: result.skipped as RouteObject[],
                 handle: {
                   [RouteHandleFlags.IGNORE_FALLBACK]: true,
                 },
               },
             ]
           : []),
-        ...layoutList,
+        ...result.regular,
       ];
     });
 
