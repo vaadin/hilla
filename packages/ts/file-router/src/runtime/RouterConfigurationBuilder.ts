@@ -212,6 +212,8 @@ export class RouterConfigurationBuilder {
                 children: server.length + ambivalent.length > 0 ? [...server, ...ambivalent] : undefined,
               } as RouteObject);
             } else if (server.length > 0) {
+              // Even if the route doesn't have the flag, it goes to the server
+              // list if any of the children has the flag enabled.
               lists.server.push({
                 ...route,
                 children: server,
@@ -228,10 +230,10 @@ export class RouterConfigurationBuilder {
               } as RouteObject);
             }
 
+            // The route without the flag go to the `default` list. Then it will
+            // be moved to either server or client list based on the parent
+            // route.
             if (flag === undefined && lists.server.every(({ path }) => path !== route.path)) {
-              // The route without the flag go to the `default` list. Then it will
-              // be moved to either server or client list based on the parent
-              // route.
               lists.ambivalent.push({
                 ...route,
                 children: ambivalent.length > 0 ? ambivalent : undefined,
@@ -391,13 +393,18 @@ export class RouterConfigurationBuilder {
               return lists;
             }
 
+            // If the route is leaf, it goes to the `regular` list.
             if (!route.children?.length) {
               lists.regular.push(route);
               return lists;
             }
 
+            // As of children, we have to split them into two lists as well.
             const { skipped, regular } = next(...(route.children ?? []));
 
+            // If we have `skipped` list of children, we have to remove the
+            // `element` property of the router to prevent the layout from
+            // rendering. Then, we add the current route to the `skipped` list.
             if (skipped.length > 0) {
               const { element, ...rest } = route;
 
@@ -407,6 +414,8 @@ export class RouterConfigurationBuilder {
               } as RouteObject);
             }
 
+            // In case of `regular` children, we just add the current route to
+            // the `regular` list if there are any children.
             if (regular.length > 0) {
               lists.regular.push({
                 ...route,
@@ -420,6 +429,8 @@ export class RouterConfigurationBuilder {
         ),
       );
 
+      // We don't need a fallback for the skipped routes, so we have to wrap
+      // them with the route with the `IGNORE_FALLBACK` flag.
       return [
         ...(result.skipped.length
           ? [
