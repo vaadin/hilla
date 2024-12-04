@@ -26,7 +26,7 @@
     "build:copy": "cd src && copyfiles *.d.ts **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "mocha test/**/applyLayouts.spec.{ts,tsx} --config ../../../.mocharc.cjs",
+    "test": "mocha test/**/*.spec.{ts,tsx} --config ../../../.mocharc.cjs",
     "test:coverage": "c8 --experimental-monocart -c ../../../.c8rc.json npm test",
     "typecheck": "tsc --noEmit"
   },
@@ -70,6 +70,7 @@
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.12",
     "chai-as-promised": "^7.1.1",
+    "chai-deep-equal-ignore-undefined": "^1.1.1",
     "chai-fs": "^2.0.0",
     "chai-like": "^1.1.1",
     "deep-equal-in-any-order": "^2.0.6",

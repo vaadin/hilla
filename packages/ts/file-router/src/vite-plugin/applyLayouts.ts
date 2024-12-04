@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path/posix';
+import { join, relative } from 'node:path/posix';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 
@@ -38,7 +38,7 @@ export default async function applyLayouts(
           const currentPath = join(ctx.path, strip(meta.path));
           const children = meta.children ? next(meta.children, { path: currentPath }) : undefined;
 
-          return layoutPaths.some((path) => currentPath.includes(path))
+          return layoutPaths.some((path) => !relative(path, currentPath).startsWith('..'))
             ? { ...meta, flowLayout: true, children }
             : { ...meta, children };
         }),

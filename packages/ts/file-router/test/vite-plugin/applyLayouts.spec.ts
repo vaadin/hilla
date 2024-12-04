@@ -1,12 +1,12 @@
 import { writeFile } from 'node:fs/promises';
 import { expect, use } from '@esm-bundle/chai';
 import chaiAsPromised from 'chai-as-promised';
-import chaiLike from 'chai-like';
+import chaiDeepEqualIgnoreUndefined from 'chai-deep-equal-ignore-undefined';
 import applyLayouts from '../../src/vite-plugin/applyLayouts.js';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import { createTmpDir } from '../utils.js';
 
-use(chaiLike);
+use(chaiDeepEqualIgnoreUndefined);
 use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
@@ -17,7 +17,7 @@ describe('@vaadin/hilla-file-router', () => {
     before(async () => {
       tmp = await createTmpDir();
       layoutsFile = new URL('./layouts.json', tmp);
-      await writeFile(layoutsFile, JSON.stringify([{ path: '/flow' }, { path: '/hilla/some/deep' }]));
+      await writeFile(layoutsFile, JSON.stringify([{ path: '/flow' }, { path: '/hilla/deep' }]));
     });
 
     it('should enable flow layout for matching routes', async () => {
@@ -31,21 +31,14 @@ describe('@vaadin/hilla-file-router', () => {
           path: 'hilla',
           children: [
             { path: '' },
-            { path: 'admin' },
-            { path: 'hello-react' },
-            { path: 'user' },
+            { path: 'foo' },
             {
-              path: 'some',
-              children: [
-                {
-                  path: 'deep',
-                  children: [
-                    {
-                      path: 'flow',
-                    },
-                  ],
-                },
-              ],
+              path: 'deep',
+              children: [{ path: 'flow' }],
+            },
+            {
+              path: 'deepend',
+              children: [{ path: 'no-layout' }],
             },
           ],
         },
@@ -54,8 +47,8 @@ describe('@vaadin/hilla-file-router', () => {
 
       const result = await applyLayouts(meta, layoutsFile);
 
-      expect(result).to.be.like([
-        { path: '' },
+      expect(result).to.deepEqualIgnoreUndefined([
+        { path: '', children: undefined },
         {
           path: 'flow',
           flowLayout: true,
@@ -68,22 +61,20 @@ describe('@vaadin/hilla-file-router', () => {
           path: 'hilla',
           children: [
             { path: '' },
-            { path: 'admin' },
-            { path: 'hello-react' },
-            { path: 'user' },
+            { path: 'foo' },
             {
-              path: 'some',
+              path: 'deep',
+              flowLayout: true,
               children: [
                 {
-                  path: 'deep',
-                  children: [
-                    {
-                      path: 'flow',
-                      flowLayout: true,
-                    },
-                  ],
+                  path: 'flow',
+                  flowLayout: true,
                 },
               ],
+            },
+            {
+              path: 'deepend',
+              children: [{ path: 'no-layout' }],
             },
           ],
         },
@@ -92,7 +83,7 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     it('should return original route metas if the file is not found', async () => {
-      await expect(applyLayouts([{ path: '/flow' }], new URL('./non-existing.json', tmp))).to.eventually.be.like([
+      await expect(applyLayouts([{ path: '/flow' }], new URL('./non-existing.json', tmp))).to.eventually.be.deep.equal([
         { path: '/flow' },
       ]);
     });
