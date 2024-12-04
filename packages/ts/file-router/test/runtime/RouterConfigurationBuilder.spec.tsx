@@ -319,6 +319,81 @@ describe('RouterBuilder', () => {
         `The module for the "test" section doesn't have the React component exported by default or a ViewConfig object exported as "config"`,
       );
     });
+
+    it('should not lose a route from the result', () => {
+      const { routes } = builder
+        .withReactRoutes([
+          {
+            path: 'home',
+            children: [
+              {
+                path: 'deep',
+                children: [
+                  {
+                    path: 'hello',
+                    handle: {
+                      flowLayout: true,
+                    },
+                  },
+                ],
+                handle: { flowLayout: true },
+              },
+              {
+                path: 'deepend',
+                children: [{ path: 'deep' }],
+              },
+            ],
+          },
+        ])
+        .withLayout(Server)
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          element: createElement(Server),
+          handle: {
+            ignoreFallback: true,
+          },
+          children: [
+            {
+              path: 'home',
+              children: [
+                {
+                  path: 'deep',
+                  children: [
+                    {
+                      path: 'hello',
+                      handle: {
+                        flowLayout: true,
+                      },
+                    },
+                  ],
+                  handle: { flowLayout: true },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: '',
+          children: [
+            {
+              path: '/test',
+              element: <div>Test</div>,
+            },
+          ],
+        },
+        {
+          path: 'home',
+          children: [
+            {
+              path: 'deepend',
+              children: [{ path: 'deep' }],
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe('withLayout', () => {

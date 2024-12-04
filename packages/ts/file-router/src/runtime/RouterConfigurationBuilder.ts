@@ -233,7 +233,10 @@ export class RouterConfigurationBuilder {
             // The route without the flag go to the `default` list. Then it will
             // be moved to either server or client list based on the parent
             // route.
-            if (flag === undefined && lists.server.every(({ path }) => path !== route.path)) {
+            if (
+              flag === undefined &&
+              (lists.server.every(({ path }) => path !== route.path) || ambivalent.length > 0)
+            ) {
               lists.ambivalent.push({
                 ...route,
                 children: ambivalent.length > 0 ? ambivalent : undefined,
