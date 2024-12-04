@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable no-void,@typescript-eslint/unbound-method */
 import {
   _fromString,
   _validity,
