@@ -1,8 +1,7 @@
-import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
 import applyLayouts from './applyLayouts.js';
-import collectRoutesFromFS from './collectRoutesFromFS.js';
+import collectRoutesFromFS, { type RouteMeta } from './collectRoutesFromFS.js';
 import createRoutesFromMeta from './createRoutesFromMeta.js';
 import createViewConfigJson from './createViewConfigJson.js';
 
@@ -72,7 +71,17 @@ export async function generateRuntimeFiles(
   logger: Logger,
   debug: boolean,
 ): Promise<void> {
-  let routeMeta = existsSync(viewsDir) ? await collectRoutesFromFS(viewsDir, { extensions, logger }) : [];
+  let routeMeta: readonly RouteMeta[];
+  try {
+    routeMeta = await collectRoutesFromFS(viewsDir, { extensions, logger });
+  } catch (e: unknown) {
+    if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
+      routeMeta = [];
+    } else {
+      throw e;
+    }
+  }
+
   if (debug) {
     logger.info('Collected file-based routes');
   }

@@ -30,10 +30,11 @@ function* walkAST(node: Node): Generator<Node> {
 export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<string> {
   const res = await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
     views,
+    null,
     async (routes, next) =>
       await Promise.all(
         routes.map(async ({ path, file, layout, children, flowLayout }) => {
-          const newChildren = children ? await next(...children) : undefined;
+          const newChildren = children ? await next(children) : undefined;
 
           if (!file && !layout) {
             return {
