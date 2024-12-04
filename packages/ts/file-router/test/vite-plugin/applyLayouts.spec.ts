@@ -48,7 +48,7 @@ describe('@vaadin/hilla-file-router', () => {
       const result = await applyLayouts(meta, layoutsFile);
 
       expect(result).to.deepEqualIgnoreUndefined([
-        { path: '', children: undefined },
+        { path: '' },
         {
           path: 'flow',
           flowLayout: true,
