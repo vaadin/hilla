@@ -38,7 +38,7 @@
     "@remcovaes/web-test-runner-vite-plugin": "^1.2.1",
     "@types/karma": "^6.3.8",
     "@types/node": "^20.11.19",
-    "@vaadin/react-components": "24.6.0-beta1",
+    "@vaadin/react-components": "24.6.0-rc1",
     "@vitejs/plugin-react": "^4.3.1",
     "@web/test-runner": "^0.19.0",
     "chai-dom": "^1.12.0",

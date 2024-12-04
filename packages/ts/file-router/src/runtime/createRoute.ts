@@ -8,12 +8,12 @@ import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
  * @param config - The extension config.
  * @returns
  */
-export function extendModule(module: Module, config?: ViewConfig): Module {
+export function extendModule(module: Module | null, config?: ViewConfig): Module {
   return {
     ...module,
     config: {
       ...config,
-      ...(module.config as ViewConfig),
+      ...(module?.config as ViewConfig),
     },
   };
 }
