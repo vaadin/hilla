@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Logger } from 'vite';
 import applyLayouts from './applyLayouts.js';
