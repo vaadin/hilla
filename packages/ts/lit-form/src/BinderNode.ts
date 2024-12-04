@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable no-void,@typescript-eslint/prefer-nullish-coalescing */
 /*
  * Copyright 2000-2020 Vaadin Ltd.
  *
@@ -271,7 +271,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     const oldValue = this.value;
     if (value !== oldValue) {
       this.#setValueState(value, undefined);
-      this[_updateValidation]();
+      void this[_updateValidation]();
     }
   }
 

@@ -1,4 +1,4 @@
-/* eslint-disable accessor-pairs,sort-keys */
+/* eslint-disable accessor-pairs,no-void,sort-keys */
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
@@ -84,7 +84,7 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
    */
   #validityFallback: ValidityState = defaultValidity;
 
-  #eventHandlers = new Map<string, EventHandler>();
+  readonly #eventHandlers = new Map<string, EventHandler>();
 
   constructor(element: E, model?: AbstractModel<T>) {
     this.#element = element;
@@ -243,7 +243,7 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
 
     // Override built-in changes of the `invalid` flag in Vaadin components
     // to keep the `invalid` property state of the web component in sync.
-    const invalid = !((e.detail ?? {}) satisfies Partial<ValidityState>).valid;
+    const invalid = !((e.detail ?? {}) as Partial<ValidityState>).valid;
     if (this.#invalid !== invalid) {
       this.element.invalid = this.#invalid;
     }
@@ -524,12 +524,12 @@ export const field = directive(
         fieldState.strategy.onInput = inputHandler;
         fieldState.strategy.onChange = () => {
           inputHandler();
-          binderNode.validate();
+          void binderNode.validate();
         };
 
         const blurHandler = () => {
           inputHandler();
-          binderNode.validate();
+          void binderNode.validate();
           binderNode.visited = true;
         };
 
@@ -539,7 +539,7 @@ export const field = directive(
       const { fieldState } = this;
 
       if (fieldState.element !== element || fieldState.model !== model) {
-        const onInput = fieldState?.strategy.onInput;
+        const { onInput } = fieldState.strategy;
         fieldState.strategy = binderNode.binder.getFieldStrategy(element, model);
         fieldState.strategy.onInput = onInput;
       }

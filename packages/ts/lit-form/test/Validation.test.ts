@@ -881,7 +881,7 @@ describe('@vaadin/hilla-lit-form', () => {
         orderView.dateStart.value = 'not a date';
         await fireEvent(orderView.dateStart, 'unparsable-change');
 
-        let errors = await binder.validate();
+        const errors = await binder.validate();
         expect(errors).to.have.length(1);
         expect(errors[0]).to.have.property('property', 'dateStart');
       });
