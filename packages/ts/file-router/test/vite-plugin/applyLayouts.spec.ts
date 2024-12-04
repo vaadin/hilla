@@ -96,5 +96,10 @@ describe('@vaadin/hilla-file-router', () => {
         { path: '/flow' },
       ]);
     });
+
+    it('should throw an error in an unexpected case', async () => {
+      await writeFile(layoutsFile, '[{path: "/flow');
+      await expect(applyLayouts([{ path: '/flow' }], layoutsFile)).to.be.rejectedWith(Error);
+    });
   });
 });
