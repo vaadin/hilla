@@ -48,7 +48,7 @@ public class StateEvent<T> {
         }
     }
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static ObjectMapper MAPPER;
 
     private final String id;
     private final EventType eventType;
@@ -104,6 +104,18 @@ public class StateEvent<T> {
         JsonNode expected = json.get(Field.EXPECTED);
         this.expected = convertValue(expected, valueType);
 
+    }
+
+    /**
+     * Sets the object mapper to be used for serialization and deserialization
+     * of state events in Signal library.
+     *
+     * @param mapper
+     *            The object mapper to be used for serialization and
+     *            deserialization of state events.
+     */
+    public static void setMapper(ObjectMapper mapper) {
+        MAPPER = mapper;
     }
 
     public static <X> X convertValue(JsonNode rawValue, Class<X> valueType) {

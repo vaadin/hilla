@@ -429,6 +429,29 @@ describe('@vaadin/hilla-react-crud', () => {
       expect(result.queryByText('just a message')).to.not.be.null;
     });
 
+    it('shows error for whole form has string property', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      const person = await getItem(service, 1);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        const valueError: ValueError = {
+          property: 'myProp',
+          message: 'message',
+          value: person,
+          validator: { message: 'message', validate: () => false },
+          validatorMessage: 'foobar',
+        };
+        throw new ValidationError([valueError]);
+      };
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(result.queryByText('message')).to.be.null;
+      expect(result.queryByText('myProp: foobar')).to.not.be.null;
+    });
+
     it('shows a predefined error message when the service returns no entity after saving', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       service.save = async (item: Person): Promise<Person | undefined> => Promise.resolve(undefined);

@@ -1,4 +1,22 @@
-import type { AgnosticRoute, Module } from '../types.js';
+import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
+
+/**
+ * Extends a router module's config with additional properties. The original
+ * module config is preferred over the extension.
+ *
+ * @param module - The module to extend.
+ * @param config - The extension config.
+ * @returns
+ */
+export function extendModule(module: Module, config?: ViewConfig): Module {
+  return {
+    ...module,
+    config: {
+      ...config,
+      ...(module.config as ViewConfig),
+    },
+  };
+}
 
 /**
  * Create a single framework-agnostic route object. Later, it can be transformed into a framework-specific route object,

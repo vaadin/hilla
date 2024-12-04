@@ -3,6 +3,6 @@
   "compilerOptions": {
     "jsx": "react-jsx"
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "test.config.js"],
   "exclude": ["test/**/*.snap.ts"]
 }

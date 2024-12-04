@@ -8,6 +8,10 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
   readonly #collator: Intl.Collator;
   readonly #map = new Map<string, DependencyRecord>();
 
+  get size(): number {
+    return this.#map.size;
+  }
+
   constructor(collator: Intl.Collator) {
     this.#collator = collator;
   }
@@ -62,6 +66,10 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
 export class NamespaceExportManager extends StatementRecordManager<ExportDeclaration> {
   readonly #map = new Map<string, Identifier | null>();
 
+  get size(): number {
+    return this.#map.size;
+  }
+
   addCombined(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? createFullyUniqueIdentifier(name);
     this.#map.set(path, id);
@@ -114,6 +122,10 @@ export class NamespaceExportManager extends StatementRecordManager<ExportDeclara
 export class DefaultExportManager implements CodeConvertable<ExportAssignment | undefined> {
   #id?: Identifier;
 
+  get isEmpty(): boolean {
+    return !this.#id;
+  }
+
   set(id: Identifier | string): Identifier {
     this.#id = typeof id === 'string' ? ts.factory.createIdentifier(id) : id;
     return this.#id;
@@ -128,6 +140,10 @@ export default class ExportManager implements CodeConvertable<readonly Statement
   readonly default = new DefaultExportManager();
   readonly named: NamedExportManager;
   readonly namespace: NamespaceExportManager;
+
+  get size(): number {
+    return (this.default.isEmpty ? 0 : 1) + this.named.size + this.namespace.size;
+  }
 
   constructor(collator: Intl.Collator) {
     this.named = new NamedExportManager(collator);

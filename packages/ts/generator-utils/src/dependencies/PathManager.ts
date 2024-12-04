@@ -1,10 +1,11 @@
-import { posix } from 'path';
+import { basename, dirname, posix, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { SetRequired } from 'type-fest';
 
 export type PathManagerOptions = Readonly<{
   aliasRoot?: string;
   extension?: string;
-  relativeTo?: string;
+  relativeTo?: URL | string;
 }>;
 
 export default class PathManager {
@@ -38,15 +39,19 @@ export default class PathManager {
     return path;
   }
 
-  createRelativePath(path: string, relativeTo = this.#options.relativeTo): string {
+  createRelativePath(path: URL | string, fileExtension?: string, relativeTo = this.#options.relativeTo): string {
     const { extension } = this.#options;
-    let result = path;
+    const _path = path instanceof URL ? fileURLToPath(path) : path;
+    let result = _path;
 
-    if (extension && !path.endsWith(extension)) {
-      result = `${result}${extension}`;
+    if (extension && !_path.endsWith(extension)) {
+      result = `${dirname(result)}/${basename(result, fileExtension)}${extension}`;
     }
 
-    result = posix.relative(relativeTo, result);
+    result = relative(relativeTo instanceof URL ? fileURLToPath(relativeTo) : relativeTo, result).replaceAll(
+      sep,
+      posix.sep,
+    );
     return result.startsWith('.') ? result : `./${result}`;
   }
 

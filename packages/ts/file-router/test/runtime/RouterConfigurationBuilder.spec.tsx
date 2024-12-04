@@ -690,7 +690,21 @@ describe('RouterBuilder', () => {
       const { routes, router } = builder.build();
 
       expect(router).to.equal(browserRouter);
-      expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
+      expect(createBrowserRouter).to.have.been.calledWith(routes, {
+        basename: '/foo',
+        future: {
+          // eslint-disable-next-line camelcase
+          v7_fetcherPersist: true,
+          // eslint-disable-next-line camelcase
+          v7_normalizeFormMethod: true,
+          // eslint-disable-next-line camelcase
+          v7_partialHydration: true,
+          // eslint-disable-next-line camelcase
+          v7_relativeSplatPath: true,
+          // eslint-disable-next-line camelcase
+          v7_skipActionErrorRevalidation: true,
+        },
+      });
       reset();
     });
   });
