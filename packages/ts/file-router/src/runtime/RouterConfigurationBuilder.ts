@@ -191,7 +191,7 @@ export class RouterConfigurationBuilder {
         ambivalent: T;
       }>;
 
-      const result = transformTree<RouteList, Accumulator<RouteList>>(originalRoutes, (routes, next) =>
+      const result = transformTree<RouteList, Accumulator<RouteList>>(originalRoutes, null, (routes, next) =>
         // Split a single routes list onto three separate lists:
         // - A list of server routes
         // - A list of client routes
@@ -199,7 +199,7 @@ export class RouterConfigurationBuilder {
         // list. It depends on the parent route.
         routes.reduce<Accumulator<WritableRouteList>>(
           (lists, route) => {
-            const { server, client, ambivalent } = next(...(route.children ?? []));
+            const { server, client, ambivalent } = next(route.children ?? []);
 
             const flag = getRouteHandleFlag(route, RouteHandleFlags.FLOW_LAYOUT);
 
@@ -302,6 +302,7 @@ export class RouterConfigurationBuilder {
     this.#modifiers.push((existingRoutes) =>
       transformTree<[RouteList | undefined, readonly T[] | undefined], RouteList | undefined>(
         [existingRoutes, routes],
+        null,
         ([original, added], next) => {
           if (original && added) {
             const originalMap = new Map(original.map((route) => createRouteEntry(route)));
@@ -315,11 +316,11 @@ export class RouterConfigurationBuilder {
 
               let route: RouteObject | undefined;
               if (originalRoute && addedRoute) {
-                route = callback(originalRoute, addedRoute, next(originalRoute.children, addedRoute.children));
+                route = callback(originalRoute, addedRoute, next([originalRoute.children, addedRoute.children]));
               } else if (originalRoute) {
-                route = callback(originalRoute, undefined, next(originalRoute.children, undefined));
+                route = callback(originalRoute, undefined, next([originalRoute.children, undefined]));
               } else {
-                route = callback(undefined, addedRoute, next(undefined, addedRoute!.children));
+                route = callback(undefined, addedRoute, next([undefined, addedRoute!.children]));
               }
 
               if (route) {
@@ -330,11 +331,11 @@ export class RouterConfigurationBuilder {
             return [...originalMap.values()];
           } else if (original) {
             return original
-              .map((route) => callback(route, undefined, next(route.children, undefined)))
+              .map((route) => callback(route, undefined, next([route.children, undefined])))
               .filter((r) => r != null);
           } else if (added) {
             return added
-              .map((route) => callback(undefined, route, next(undefined, route.children)))
+              .map((route) => callback(undefined, route, next([undefined, route.children])))
               .filter((r) => r != null);
           }
 
@@ -384,7 +385,7 @@ export class RouterConfigurationBuilder {
         regular: T;
       }>;
 
-      const result = transformTree<RouteList, Accumulator<RouteList>>(originalRoutes, (routes, next) =>
+      const result = transformTree<RouteList, Accumulator<RouteList>>(originalRoutes, null, (routes, next) =>
         // Split a single routes list onto two separate lists.
         routes.reduce<Accumulator<WritableRouteList>>(
           (lists, route) => {
@@ -401,7 +402,7 @@ export class RouterConfigurationBuilder {
             }
 
             // As of children, we have to split them into two lists as well.
-            const { skipped, regular } = next(...(route.children ?? []));
+            const { skipped, regular } = next(route.children ?? []);
 
             // If we have `skipped` list of children, we have to remove the
             // `element` property of the router to prevent the layout from

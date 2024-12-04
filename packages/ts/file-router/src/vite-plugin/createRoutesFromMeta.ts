@@ -17,7 +17,7 @@ class RouteFromMetaProcessor {
   readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
 
-  constructor(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls) {
+  constructor(views: readonly RouteMeta[], { json: jsonFile, code: codeFile }: RuntimeFileUrls) {
     this.#views = views;
 
     const codeDir = new URL('./', codeFile);
@@ -37,7 +37,7 @@ class RouteFromMetaProcessor {
     } = this.#manager;
     const errors: string[] = [];
 
-    const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, (metas, next) => {
+    const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, null, (metas, next) => {
       errors.push(
         ...metas
           .map((route) => route.path)
@@ -49,7 +49,7 @@ class RouteFromMetaProcessor {
         let _children: readonly CallExpression[] | undefined;
 
         if (children) {
-          _children = next(...children);
+          _children = next(children);
         }
 
         let mod: Identifier | undefined;
