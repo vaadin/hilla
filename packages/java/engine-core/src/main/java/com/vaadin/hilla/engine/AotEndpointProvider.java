@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility class to find endpoints in a non-running Hilla application.
@@ -50,29 +51,33 @@ public class AotEndpointProvider {
             return List.of();
         }
 
-        var settings = List.of(applicationClass,
-                aotOutput.resolve("sources").toString(),
-                aotOutput.resolve("resources").toString(),
-                classesDirectory.toString(), engineConfiguration.getGroupId(),
-                engineConfiguration.getArtifactId());
+        var classpath = engineConfiguration.getClasspath().stream()
+                .filter(Files::exists).map(Path::toString).toList();
+        var settings = Stream.of("-cp",
+                classpath.stream()
+                        .collect(Collectors.joining(File.pathSeparator)),
+                "org.springframework.boot.SpringApplicationAotProcessor",
+                applicationClass, aotOutput.resolve("sources"),
+                aotOutput.resolve("resources"), classesDirectory,
+                engineConfiguration.getGroupId(),
+                engineConfiguration.getArtifactId()).map(Object::toString)
+                .map(s -> '"' + s.replace("\\", "\\\\") + '"').toList();
+        var argsFile = engineConfiguration.getBuildDir()
+                .resolve("aot-args-" + System.currentTimeMillis() + ".txt");
+        Files.write(argsFile, settings);
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
-        var classpath = engineConfiguration.getClasspath().stream()
-                .filter(Files::exists).map(Path::toString).toList();
 
         // Runs the SpringApplicationAotProcessor to generate the
         // reflect-config.json file. This comes from the `process-aot` goal.
         var processBuilder = new ProcessBuilder();
         processBuilder.inheritIO();
-        processBuilder.command(javaExecutable,
-                "org.springframework.boot.SpringApplicationAotProcessor");
-        processBuilder.command().addAll(settings);
-        processBuilder.environment().put("CLASSPATH", classpath.stream()
-                .collect(Collectors.joining(File.pathSeparator)));
+        processBuilder.command(javaExecutable, "@" + argsFile);
 
         var process = processBuilder.start();
         process.waitFor();
+        Files.delete(argsFile);
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
                 "native-image", engineConfiguration.getGroupId(),
