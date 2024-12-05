@@ -62,8 +62,8 @@
     "@vaadin/react-components": "24.6.0-rc1"
   },
   "peerDependencies": {
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
