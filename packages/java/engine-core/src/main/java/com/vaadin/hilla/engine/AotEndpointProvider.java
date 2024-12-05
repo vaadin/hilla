@@ -65,13 +65,13 @@ public class AotEndpointProvider {
         // reflect-config.json file. This comes from the `process-aot` goal.
         var processBuilder = new ProcessBuilder();
         processBuilder.inheritIO();
-        processBuilder.command(javaExecutable, "-cp",
-                classpath.stream()
-                        .collect(Collectors.joining(File.pathSeparator)),
+        processBuilder.command(javaExecutable,
                 "org.springframework.boot.SpringApplicationAotProcessor");
         processBuilder.command().addAll(settings);
+        processBuilder.environment().put("CLASSPATH", classpath.stream()
+                .collect(Collectors.joining(File.pathSeparator)));
 
-        Process process = processBuilder.start();
+        var process = processBuilder.start();
         process.waitFor();
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
