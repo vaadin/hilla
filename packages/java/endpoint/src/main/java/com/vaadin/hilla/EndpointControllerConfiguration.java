@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -76,7 +76,7 @@ public class EndpointControllerConfiguration {
      * Registers a default {@link EndpointAccessChecker} bean instance.
      *
      * @param accessAnnotationChecker
-     *            the access controlks checker to use
+     *            the access controls checker to use
      * @return the default Vaadin endpoint access checker bean
      */
     @Bean
@@ -112,7 +112,8 @@ public class EndpointControllerConfiguration {
      *            qualifier to override the mapper.
      */
     @Bean
-    ObjectMapper endpointObjectMapper(ApplicationContext applicationContext,
+    ObjectMapper hillaEndpointObjectMapper(
+            ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory) {
         if (this.endpointMapper == null) {
             this.endpointMapper = endpointMapperFactory != null
@@ -139,7 +140,7 @@ public class EndpointControllerConfiguration {
      *
      * @param applicationContext
      *            The Spring application context
-     * @param endpointObjectMapper
+     * @param hillaEndpointObjectMapper
      *            ObjectMapper instance that is used for Hilla endpoints'
      *            serializing and deserializing request and response bodies.
      * @param explicitNullableTypeChecker
@@ -154,11 +155,12 @@ public class EndpointControllerConfiguration {
      */
     @Bean
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
-            ObjectMapper endpointObjectMapper,
+            ObjectMapper hillaEndpointObjectMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
-        return new EndpointInvoker(applicationContext, endpointObjectMapper,
-                explicitNullableTypeChecker, servletContext, endpointRegistry);
+        return new EndpointInvoker(applicationContext,
+                hillaEndpointObjectMapper, explicitNullableTypeChecker,
+                servletContext, endpointRegistry);
     }
 
     /**
@@ -275,9 +277,9 @@ public class EndpointControllerConfiguration {
     }
 
     /**
-     * Can re-generate the TypeScipt code.
+     * Can re-generate the TypeScript code.
      *
-     * @param context
+     * @param servletContext
      *            the servlet context
      * @param endpointController
      *            the endpoint controller
