@@ -267,7 +267,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   }
 
   set value(value: Value<M> | undefined) {
-    this.initializeValue();
+    this.initializeValue(true);
     this.#setValueState(value, undefined);
   }
 
@@ -500,7 +500,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       : undefined;
 
     const defaultValue: Value<M> | undefined = this.parent
-      ? (this.parent.defaultValue as { readonly [key in typeof key]: Value<M> })[this.model[_key]]
+      ? (this.parent.defaultValue as { readonly [key in typeof key]: Value<M> } | undefined)[this.model[_key]]
       : undefined;
 
     if (value === undefined) {
