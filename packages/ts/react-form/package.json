@@ -49,7 +49,7 @@
     "@vaadin/hilla-lit-form": "24.6.0-beta5"
   },
   "peerDependencies": {
-    "react": "^18"
+    "react": "^19"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
