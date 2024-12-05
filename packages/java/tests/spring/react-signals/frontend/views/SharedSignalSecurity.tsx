@@ -2,7 +2,7 @@ import { Button } from '@vaadin/react-components';
 import { useSignal } from '@vaadin/hilla-react-signals';
 import { SecureNumberSignalService } from 'Frontend/generated/endpoints.js';
 import { useAuth } from 'Frontend/util/auth.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 const userCounter = SecureNumberSignalService.userCounter();
 const adminCounter = SecureNumberSignalService.adminCounter();

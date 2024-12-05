@@ -1,4 +1,4 @@
-import {createBrowserRouter, RouteObject} from 'react-router-dom';
+import {createBrowserRouter, RouteObject} from 'react-router';
 import {ChatView} from "Frontend/views/ChatView.js";
 import {LoginView} from "Frontend/views/LoginView.js";
 import {ReadOnlyGrid} from "Frontend/views/ReadOnlyGrid";

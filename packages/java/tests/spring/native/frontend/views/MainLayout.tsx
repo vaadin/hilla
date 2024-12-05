@@ -7,7 +7,7 @@ import Placeholder from 'Frontend/components/placeholder/Placeholder';
 import { AuthContext } from 'Frontend/useAuth.js';
 import { useRouteMetadata } from 'Frontend/util/routing';
 import { Suspense, useContext } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router';
 
 const navLinkClasses = ({ isActive }: any) => {
   return `block rounded-m p-s ${isActive ? 'bg-primary-10 text-primary' : 'text-body'}`;

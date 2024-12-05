@@ -51,7 +51,7 @@
   "peerDependencies": {
     "react": "^18",
     "react-dom": "^18",
-    "react-router-dom": "^6.28.0"
+    "react-router": "^7"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
@@ -67,6 +67,7 @@
     "@types/validator": "^13.11.2",
     "@web/test-runner": "^0.19.0",
     "chai-dom": "^1.11.0",
+    "react-router": "^7.0.2",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
     "typescript": "5.6.2"
