@@ -25,12 +25,12 @@ public class ValidationResult {
     private final Status status;
     private final String errorMessage;
 
-    private ValidationResult(Status status, String errorMessage) {
+    public ValidationResult(Status status, String errorMessage) {
         this.status = status;
         this.errorMessage = errorMessage;
     }
 
-    private ValidationResult(Status status) {
+    public ValidationResult(Status status) {
         this.status = status;
         this.errorMessage = null;
     }
