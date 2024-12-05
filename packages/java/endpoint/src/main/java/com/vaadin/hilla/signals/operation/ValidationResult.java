@@ -9,12 +9,12 @@ public class ValidationResult {
     private final Status status;
     private final String errorMessage;
 
-    public ValidationResult(Status status, String errorMessage) {
+    private ValidationResult(Status status, String errorMessage) {
         this.status = status;
         this.errorMessage = errorMessage;
     }
 
-    public ValidationResult(Status status) {
+    private ValidationResult(Status status) {
         this.status = status;
         this.errorMessage = null;
     }
