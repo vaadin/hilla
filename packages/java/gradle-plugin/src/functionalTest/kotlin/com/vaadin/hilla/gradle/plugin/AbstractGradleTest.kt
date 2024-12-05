@@ -25,7 +25,7 @@ import org.junit.Before
  */
 abstract class AbstractGradleTest {
 
-    val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "24.6-SNAPSHOT"
+    val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "24.7-SNAPSHOT"
     val flowVersion = System.getenv("flow.version").takeUnless { it.isNullOrEmpty() } ?: "24.6-SNAPSHOT"
     /**
      * The testing Gradle project. Automatically deleted after every test.
