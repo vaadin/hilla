@@ -15,7 +15,10 @@ import com.vaadin.hilla.signals.operation.ValidationResult;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import reactor.core.publisher.Flux;
 
@@ -28,6 +31,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ValueSignalTest {
 
@@ -478,6 +485,28 @@ public class ValueSignalTest {
 
         readonlySignal.submit(createReplaceEvent("Foo", "Bar"));
         assertEquals("Foo", readonlySignal.getValue());
+    }
+
+    @Test
+    public void submit_eventThatIsRejected_logsTheValidationError() {
+        Logger logger = Mockito.mock(Logger.class);
+        try (MockedStatic<LoggerFactory> mockedLoggerFactory = mockStatic(
+                LoggerFactory.class)) {
+
+            mockedLoggerFactory
+                    .when(() -> LoggerFactory.getLogger(Signal.class))
+                    .thenReturn(logger);
+
+            var signal = new ValueSignal<>("Foo", String.class)
+                    .withOperationValidator(op -> ValidationResult
+                            .reject("No changes allowed"));
+            var operation = createSetEvent("Bar");
+            signal.submit(operation);
+
+            verify(logger, times(1)).warn(
+                    "Operation with id '{}' is rejected with validator message: '{}'",
+                    StateEvent.extractId(operation), "No changes allowed");
+        }
     }
 
     private <T> ObjectNode createSetEvent(T value) {
