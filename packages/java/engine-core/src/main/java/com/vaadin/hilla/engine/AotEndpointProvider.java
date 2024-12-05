@@ -5,10 +5,8 @@ import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -54,16 +52,15 @@ public class AotEndpointProvider {
         }
 
         var classpath = engineConfiguration.getClasspath().stream()
-                .filter(Files::exists).map(Path::toString).toList();
+                .filter(Files::exists).toList();
         var settings = Stream.of("-cp",
-                classpath.stream()
+                classpath.stream().map(AotEndpointProvider::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
                 "org.springframework.boot.SpringApplicationAotProcessor",
-                applicationClass, aotOutput.resolve("sources"),
-                aotOutput.resolve("resources"), classesDirectory,
-                engineConfiguration.getGroupId(),
-                engineConfiguration.getArtifactId()).map(Object::toString)
-                .map(s -> '"' + s.replace("\\", "\\\\") + '"').toList();
+                applicationClass, quotePath(aotOutput.resolve("sources")),
+                quotePath(aotOutput.resolve("resources")),
+                quotePath(classesDirectory), engineConfiguration.getGroupId(),
+                engineConfiguration.getArtifactId()).toList();
         var argsFile = engineConfiguration.getBuildDir()
                 .resolve("aot-args-" + System.currentTimeMillis() + ".txt");
         Files.write(argsFile, settings);
@@ -73,23 +70,8 @@ public class AotEndpointProvider {
 
         // Runs the SpringApplicationAotProcessor to generate the
         // reflect-config.json file. This comes from the `process-aot` goal.
-        var processBuilder = new ProcessBuilder();
-        processBuilder.inheritIO();
-        processBuilder.command(javaExecutable, "@" + argsFile);
-
-        var process = processBuilder.start();
-        var exitCode = process.waitFor();
-
-        if (exitCode != 0) {
-            try (var reader = new BufferedReader(
-                    new InputStreamReader(process.getErrorStream()))) {
-                var errorMessage = reader.lines()
-                        .collect(Collectors.joining(System.lineSeparator()));
-                throw new ParserException("SpringApplicationAotProcessor failed with exit code "
-                        + exitCode + ": " + errorMessage);
-            }
-        }
-
+        new ProcessBuilder().inheritIO().command(javaExecutable, "@" + argsFile)
+                .start().waitFor();
         Files.delete(argsFile);
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
@@ -114,7 +96,7 @@ public class AotEndpointProvider {
                 candidates.add(name);
             }
 
-            var urls = classpath.stream().map(File::new).map(file -> {
+            var urls = classpath.stream().map(Path::toFile).map(file -> {
                 try {
                     return file.toURI().toURL();
                 } catch (Throwable t) {
@@ -149,5 +131,9 @@ public class AotEndpointProvider {
         }
 
         throw new ParserException("No endpoints detected");
+    }
+
+    private static String quotePath(Path path) {
+        return '"' + path.toString().replace("\\", "\\\\") + '"';
     }
 }
