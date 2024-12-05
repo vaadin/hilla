@@ -36,9 +36,9 @@ public class SignalsConfiguration {
     private final EndpointInvoker endpointInvoker;
 
     public SignalsConfiguration(EndpointInvoker endpointInvoker,
-            ObjectMapper endpointObjectMapper) {
+            ObjectMapper hillaEndpointObjectMapper) {
         this.endpointInvoker = endpointInvoker;
-        Signal.setMapper(endpointObjectMapper);
+        Signal.setMapper(hillaEndpointObjectMapper);
     }
 
     /**
