@@ -6,7 +6,7 @@ import {
   type IndexRouteObject,
   type NonIndexRouteObject,
   type RouteObject,
-} from 'react-router-dom';
+} from 'react-router';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
 import { transformTree } from '../shared/transformTree.js';
 import type {
@@ -358,22 +358,7 @@ export class RouterConfigurationBuilder {
 
     return {
       routes,
-      router: createBrowserRouter([...routes], {
-        basename: new URL(document.baseURI).pathname,
-        future: {
-          // eslint-disable-next-line camelcase
-          v7_fetcherPersist: true,
-          // eslint-disable-next-line camelcase
-          v7_normalizeFormMethod: true,
-          // eslint-disable-next-line camelcase
-          v7_partialHydration: true,
-          // eslint-disable-next-line camelcase
-          v7_relativeSplatPath: true,
-          // eslint-disable-next-line camelcase
-          v7_skipActionErrorRevalidation: true,
-        },
-        ...options,
-      }),
+      router: createBrowserRouter([...routes], { basename: new URL(document.baseURI).pathname, ...options }),
     };
   }
 
