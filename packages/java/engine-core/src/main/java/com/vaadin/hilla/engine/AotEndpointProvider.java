@@ -5,8 +5,10 @@ import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -76,7 +78,18 @@ public class AotEndpointProvider {
         processBuilder.command(javaExecutable, "@" + argsFile);
 
         var process = processBuilder.start();
-        process.waitFor();
+        var exitCode = process.waitFor();
+
+        if (exitCode != 0) {
+            try (var reader = new BufferedReader(
+                    new InputStreamReader(process.getErrorStream()))) {
+                var errorMessage = reader.lines()
+                        .collect(Collectors.joining(System.lineSeparator()));
+                throw new ParserException("SpringApplicationAotProcessor failed with exit code "
+                        + exitCode + ": " + errorMessage);
+            }
+        }
+
         Files.delete(argsFile);
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
