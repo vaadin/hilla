@@ -18,7 +18,7 @@
     "lit": "3.2.1"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.25.9",
+    "@babel/preset-react": "7.26.3",
     "@preact/signals-react-transform": "0.4.0",
     "@rollup/plugin-replace": "6.0.1",
     "@rollup/pluginutils": "5.1.3",
@@ -63,7 +63,7 @@
       "lit": "3.2.1"
     },
     "devDependencies": {
-      "@babel/preset-react": "7.25.9",
+      "@babel/preset-react": "7.26.3",
       "@preact/signals-react-transform": "0.4.0",
       "@rollup/plugin-replace": "6.0.1",
       "@rollup/pluginutils": "5.1.3",
@@ -91,7 +91,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "951fdab543854014eb918f643718d01677d4085152649c385d2fa3d9be98a581"
+    "hash": "4aa70e77fe62ade9343f824caf6ab3f72da320d3b3de447a0873a9f148d0894f"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
