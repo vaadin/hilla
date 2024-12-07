@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.test.nodes;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.FieldInfoModel;

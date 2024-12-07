@@ -11,7 +11,8 @@ public class PushTypeEndpoint {
     }
 
     public EndpointSubscription<String> getSubscription() {
-        return new EndpointSubscription<>();
+        return EndpointSubscription.of(Flux.just(), () -> {
+        });
     }
 
 }
