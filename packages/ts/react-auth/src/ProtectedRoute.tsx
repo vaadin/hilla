@@ -1,6 +1,6 @@
 import { useContext, type JSX } from 'react';
-import type { RouteObject } from 'react-router-dom';
-import { type IndexRouteObject, Navigate, type NonIndexRouteObject, useLocation } from 'react-router-dom';
+import type { RouteObject } from 'react-router';
+import { type IndexRouteObject, Navigate, type NonIndexRouteObject, useLocation } from 'react-router';
 import { type AccessProps, AuthContext } from './useAuth.js';
 
 type CustomMetadata = Record<string, any>;

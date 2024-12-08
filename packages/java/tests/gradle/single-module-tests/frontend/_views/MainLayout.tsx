@@ -5,7 +5,7 @@ import { Scroller } from '@vaadin/react-components/Scroller.js';
 import Placeholder from 'Frontend/components/placeholder/Placeholder.js';
 import { MenuProps, routes, useViewMatches, ViewRouteObject } from 'Frontend/routes.js';
 import { Suspense } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router';
 import css from './MainLayout.module.css';
 
 type MenuRoute = ViewRouteObject &

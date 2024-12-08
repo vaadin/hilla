@@ -43,6 +43,10 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.window = { history: { replaceState: () => {} }, location: '', addEventListener: () => {} };
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.document.defaultView = globalThis.window;
   });
 
   afterEach(() => {
@@ -812,21 +816,7 @@ describe('RouterBuilder', () => {
       const { routes, router } = builder.build();
 
       expect(router).to.equal(browserRouter);
-      expect(createBrowserRouter).to.have.been.calledWith(routes, {
-        basename: '/foo',
-        future: {
-          // eslint-disable-next-line camelcase
-          v7_fetcherPersist: true,
-          // eslint-disable-next-line camelcase
-          v7_normalizeFormMethod: true,
-          // eslint-disable-next-line camelcase
-          v7_partialHydration: true,
-          // eslint-disable-next-line camelcase
-          v7_relativeSplatPath: true,
-          // eslint-disable-next-line camelcase
-          v7_skipActionErrorRevalidation: true,
-        },
-      });
+      expect(createBrowserRouter).to.have.been.calledWith(routes, { basename: '/foo' });
       reset();
     });
   });
