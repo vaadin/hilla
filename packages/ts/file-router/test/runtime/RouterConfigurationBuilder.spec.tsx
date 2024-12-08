@@ -43,6 +43,10 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.window = { history: { replaceState: () => {} }, location: '', addEventListener: () => {} };
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.document.defaultView = globalThis.window;
   });
 
   afterEach(() => {
