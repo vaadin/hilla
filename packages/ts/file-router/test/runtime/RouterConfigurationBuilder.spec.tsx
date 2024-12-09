@@ -1,5 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
-import chaiDeepEqualIgnoreUndefined from 'chai-deep-equal-ignore-undefined';
+import chaiLooseDeepEqual from '@vaadin/hilla-generator-utils/testing/looseDeepEqual.js';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
@@ -8,7 +8,8 @@ import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
-use(chaiDeepEqualIgnoreUndefined);
+use(chaiLooseDeepEqual);
+use(chaiLike);
 use(sinonChai);
 
 describe('RouterBuilder', () => {
@@ -70,7 +71,7 @@ describe('RouterBuilder', () => {
         ])
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           path: '',
           children: [
@@ -162,7 +163,7 @@ describe('RouterBuilder', () => {
 
       const serverRoutes = [serverWildcard, serverIndex];
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.looseDeepEqual([
         {
           path: '',
           children: [
@@ -271,7 +272,7 @@ describe('RouterBuilder', () => {
         ])
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           path: '',
           children: [
@@ -346,7 +347,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           element: createElement(Server),
           handle: {
@@ -405,7 +406,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           path: '',
         },
@@ -506,7 +507,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           element: createElement(Server),
           handle: {
@@ -639,7 +640,7 @@ describe('RouterBuilder', () => {
     it('should not throw when no routes', () => {
       const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([]);
+      expect(routes).to.be.to.looseDeepEqual([]);
     });
   });
 
@@ -696,7 +697,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           handle: {
             ignoreFallback: true,
@@ -830,6 +831,22 @@ describe('RouterBuilder', () => {
   });
 
   describe('issues', () => {
+    function removeUndefined(obj: unknown): unknown {
+      if (Array.isArray(obj)) {
+        return obj.map((v) => (typeof v === 'object' ? removeUndefined(v) : v));
+      }
+
+      if (obj != null && typeof obj === 'object') {
+        return Object.fromEntries(
+          Object.entries(obj)
+            .filter(([, value]) => value !== undefined)
+            .map(([key, value]) => [key, removeUndefined(value)]),
+        );
+      }
+
+      return obj;
+    }
+
     it('#2954', () => {
       const { routes } = new RouterConfigurationBuilder()
         .withFileRoutes([
@@ -862,55 +879,42 @@ describe('RouterBuilder', () => {
         .protect()
         .build();
 
-      expect(routes).to.be.deepEqualIgnoreUndefined([
+      expect(routes).to.looseDeepEqual([
         {
           path: '',
-          handle: {
-            title: 'undefined',
-          },
           children: [
             {
               path: 'login',
               handle: {
-                title: 'undefined',
-                menu: { exclude: true },
+                menu: {
+                  exclude: true,
+                },
                 flowLayout: false,
+                title: 'undefined',
               },
             },
-            {
-              path: '*',
-              element: <Server />,
-            },
-            {
-              index: true,
-              element: <Index />,
-            },
           ],
-        },
-        {
-          path: '',
           handle: {
             title: 'undefined',
           },
+        },
+        {
+          path: '',
           children: [
             {
-              path: '',
+              element: <NextTest />,
               handle: {
                 menu: { order: 0 },
                 title: 'Public view',
-                element: NextTest,
               },
-            },
-            {
-              path: '*',
-              element: <Server />,
-            },
-            {
               index: true,
-              element: <Index />,
             },
+            { path: '*', element: <Server /> },
           ],
+          handle: { title: 'undefined' },
         },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Index /> },
       ]);
     });
   });
