@@ -49,7 +49,8 @@ public open class EngineConfigureTask : DefaultTask() {
         }
         val sourceSet = sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet;
         val classpathElements = sourceSet.runtimeClasspath.elements.get().stream().map { it.toString() }
-        val pluginClasspath = project.buildscript.configurations.getByName("classpath").resolve().stream().map { it.toString() }
+        val pluginClasspath = project.buildscript.configurations.getByName("classpath")
+            .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
         val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
 
         val engineConfiguration = EngineConfiguration.Builder()
