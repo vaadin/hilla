@@ -1,4 +1,5 @@
 import { expect, use } from '@esm-bundle/chai';
+import chaiLooseDeepEqual from '@vaadin/hilla-generator-utils/testing/looseDeepEqual.js';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
@@ -6,6 +7,7 @@ import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfiguratio
 import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
+use(chaiLooseDeepEqual);
 use(chaiLike);
 use(sinonChai);
 
@@ -43,7 +45,13 @@ describe('RouterBuilder', () => {
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
     // @ts-expect-error Fake just enough so tests pass
-    globalThis.window = { history: { replaceState: () => {} }, location: '', addEventListener: () => {} };
+    globalThis.window = {
+      history: {
+        replaceState: () => {},
+      },
+      location: '',
+      addEventListener: () => {},
+    };
     // @ts-expect-error Fake just enough so tests pass
     globalThis.document.defaultView = globalThis.window;
   });
@@ -72,7 +80,7 @@ describe('RouterBuilder', () => {
         ])
         .build();
 
-      expect(routes).to.be.like([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           path: '',
           children: [
@@ -164,16 +172,13 @@ describe('RouterBuilder', () => {
 
       const serverRoutes = [serverWildcard, serverIndex];
 
-      expect(routes).to.be.like([
+      expect(routes).to.looseDeepEqual([
         {
           path: '',
           children: [
             {
               path: '/test',
               element: <div>Test</div>,
-            },
-            {
-              path: '/test',
               children: [
                 {
                   path: '/child-test',
@@ -276,7 +281,7 @@ describe('RouterBuilder', () => {
         ])
         .build();
 
-      expect(routes).to.be.like([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           path: '',
           children: [
@@ -351,7 +356,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.like([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           element: createElement(Server),
           handle: {
@@ -410,7 +415,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.like([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           path: '',
         },
@@ -511,7 +516,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.like([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           element: createElement(Server),
           handle: {
@@ -640,6 +645,12 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
+
+    it('should not throw when no routes', () => {
+      const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
+
+      expect(routes).to.be.to.looseDeepEqual([]);
+    });
   });
 
   describe('withLayoutSkipping', () => {
@@ -695,7 +706,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.like([
+      expect(routes).to.be.to.looseDeepEqual([
         {
           handle: {
             ignoreFallback: true,
@@ -801,6 +812,103 @@ describe('RouterBuilder', () => {
 
       expect(protectRoute).to.have.been.calledWith(root, '/login');
       expect(protectRoute).to.have.been.calledWith(test, '/login');
+    });
+  });
+
+  describe('build', () => {
+    it('should build the router', () => {
+      const { routes, router } = builder.build();
+
+      expect(router).to.equal(browserRouter);
+      expect(createBrowserRouter).to.have.been.calledWith(routes, {
+        basename: '/foo',
+        future: {
+          // eslint-disable-next-line camelcase
+          v7_fetcherPersist: true,
+          // eslint-disable-next-line camelcase
+          v7_normalizeFormMethod: true,
+          // eslint-disable-next-line camelcase
+          v7_partialHydration: true,
+          // eslint-disable-next-line camelcase
+          v7_relativeSplatPath: true,
+          // eslint-disable-next-line camelcase
+          v7_skipActionErrorRevalidation: true,
+        },
+      });
+      reset();
+    });
+  });
+
+  describe('issues', () => {
+    it('#2954', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                module: {
+                  config: {
+                    menu: { order: 0 },
+                    title: 'Public view',
+                  },
+                  default: NextTest,
+                },
+              },
+              {
+                path: 'login',
+                module: {
+                  config: {
+                    menu: { exclude: true },
+                    flowLayout: false,
+                  },
+                },
+              },
+            ],
+          },
+        ])
+        .withFallback(Server)
+        .protect()
+        .build();
+
+      expect(routes).to.looseDeepEqual([
+        {
+          path: '',
+          children: [
+            {
+              path: 'login',
+              handle: {
+                menu: {
+                  exclude: true,
+                },
+                flowLayout: false,
+                title: 'undefined',
+              },
+            },
+          ],
+          handle: {
+            title: 'undefined',
+          },
+        },
+        {
+          path: '',
+          children: [
+            {
+              element: <NextTest />,
+              handle: {
+                menu: { order: 0 },
+                title: 'Public view',
+              },
+              index: true,
+            },
+            { path: '*', element: <Server /> },
+          ],
+          handle: { title: 'undefined' },
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Index /> },
+      ]);
     });
   });
 });
