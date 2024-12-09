@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-models",
-  "version": "24.6.0-beta5",
+  "version": "24.7.0-alpha0",
   "description": "Generative form models for Hilla",
   "main": "index.js",
   "module": "index.js",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.6.0-beta5"
+    "@vaadin/hilla-lit-form": "24.7.0-alpha0"
   },
   "peerDependencies": {
     "react": "^18"
