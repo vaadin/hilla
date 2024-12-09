@@ -18,7 +18,7 @@
     "lit": "3.2.1"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.25.9",
+    "@babel/preset-react": "7.26.3",
     "@preact/signals-react-transform": "0.4.0",
     "@rollup/plugin-replace": "6.0.1",
     "@rollup/pluginutils": "5.1.3",
@@ -40,7 +40,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.7.2",
-    "vite": "6.0.2",
+    "vite": "6.0.3",
     "vite-plugin-checker": "0.8.0",
     "workbox-build": "7.3.0",
     "workbox-core": "7.3.0",
@@ -63,7 +63,7 @@
       "lit": "3.2.1"
     },
     "devDependencies": {
-      "@babel/preset-react": "7.25.9",
+      "@babel/preset-react": "7.26.3",
       "@preact/signals-react-transform": "0.4.0",
       "@rollup/plugin-replace": "6.0.1",
       "@rollup/pluginutils": "5.1.3",
@@ -85,13 +85,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.7.2",
-      "vite": "6.0.2",
+      "vite": "6.0.3",
       "vite-plugin-checker": "0.8.0",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "53252052c688591643e47b027dd073364931bfc727f92c4810ebe0302bf04fb5"
+    "hash": "da86c6668cba9f0e86913086f11b43cd45fda26a0a609835a03514d5a775210a"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
