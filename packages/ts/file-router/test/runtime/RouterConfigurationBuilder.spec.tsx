@@ -640,7 +640,6 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
-
   });
 
   describe('withLayoutSkipping', () => {
@@ -804,5 +803,4 @@ describe('RouterBuilder', () => {
       expect(protectRoute).to.have.been.calledWith(test, '/login');
     });
   });
-
 });
