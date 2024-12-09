@@ -25,7 +25,7 @@
     "lit": "3.2.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.28.0"
+    "react-router": "7.0.2"
   },
   "devDependencies": {
     "@babel/preset-react": "7.26.3",
@@ -82,7 +82,7 @@
       "lit": "3.2.1",
       "react": "18.3.1",
       "react-dom": "18.3.1",
-      "react-router-dom": "6.28.0"
+      "react-router": "7.0.2"
     },
     "devDependencies": {
       "@babel/preset-react": "7.26.3",
@@ -115,7 +115,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "f6089919e8e7d6c7dee22083a887dcf38a2f4835bb118137fde5ed9b8190e34c"
+    "hash": "5802ea7cafdaa7a5efea4e314ddc69fe6be2da5122e1fb1fb9cfc460a8c0ce24"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -133,7 +133,6 @@
     "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
     "@vaadin/hilla-react-form": "$@vaadin/hilla-react-form",
     "@vaadin/hilla-react-crud": "$@vaadin/hilla-react-crud",
-    "react-router-dom": "$react-router-dom",
     "@vaadin/hilla-react-auth": "$@vaadin/hilla-react-auth",
     "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
     "@vaadin/hilla-generator-plugin-subtypes": "$@vaadin/hilla-generator-plugin-subtypes",
@@ -149,6 +148,7 @@
     "@vaadin/vaadin-usage-statistics": "$@vaadin/vaadin-usage-statistics",
     "@vaadin/react-components-pro": "$@vaadin/react-components-pro",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
-    "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles"
+    "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+    "react-router": "$react-router"
   }
 }
