@@ -4,7 +4,7 @@ import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
-import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
+import { browserRouter, createBrowserRouter } from '../mocks/react-router.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
 use(chaiLike);
