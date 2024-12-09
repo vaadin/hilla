@@ -17,7 +17,7 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
-    "@vaadin/react-components": "24.4.0-alpha14",
+    "@vaadin/react-components": "24.6.0-rc1",
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
