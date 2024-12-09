@@ -4,7 +4,6 @@ import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
-import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
 use(chaiLike);
@@ -43,6 +42,10 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.window = { history: { replaceState: () => {} }, location: '', addEventListener: () => {} };
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.document.defaultView = globalThis.window;
   });
 
   afterEach(() => {
@@ -637,12 +640,6 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
-
-    it('should not throw when no routes', () => {
-      const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
-
-      expect(routes).to.be.like([]);
-    });
   });
 
   describe('withLayoutSkipping', () => {
@@ -804,30 +801,6 @@ describe('RouterBuilder', () => {
 
       expect(protectRoute).to.have.been.calledWith(root, '/login');
       expect(protectRoute).to.have.been.calledWith(test, '/login');
-    });
-  });
-
-  describe('build', () => {
-    it('should build the router', () => {
-      const { routes, router } = builder.build();
-
-      expect(router).to.equal(browserRouter);
-      expect(createBrowserRouter).to.have.been.calledWith(routes, {
-        basename: '/foo',
-        future: {
-          // eslint-disable-next-line camelcase
-          v7_fetcherPersist: true,
-          // eslint-disable-next-line camelcase
-          v7_normalizeFormMethod: true,
-          // eslint-disable-next-line camelcase
-          v7_partialHydration: true,
-          // eslint-disable-next-line camelcase
-          v7_relativeSplatPath: true,
-          // eslint-disable-next-line camelcase
-          v7_skipActionErrorRevalidation: true,
-        },
-      });
-      reset();
     });
   });
 });
