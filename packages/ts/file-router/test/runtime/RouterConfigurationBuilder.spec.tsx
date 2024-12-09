@@ -45,7 +45,13 @@ describe('RouterBuilder', () => {
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
     // @ts-expect-error Fake just enough so tests pass
-    globalThis.window = { history: { replaceState: () => {} }, location: '', addEventListener: () => {} };
+    globalThis.window = {
+      history: {
+        replaceState: () => {},
+      },
+      location: '',
+      addEventListener: () => {},
+    };
     // @ts-expect-error Fake just enough so tests pass
     globalThis.document.defaultView = globalThis.window;
   });
@@ -834,22 +840,6 @@ describe('RouterBuilder', () => {
   });
 
   describe('issues', () => {
-    function removeUndefined(obj: unknown): unknown {
-      if (Array.isArray(obj)) {
-        return obj.map((v) => (typeof v === 'object' ? removeUndefined(v) : v));
-      }
-
-      if (obj != null && typeof obj === 'object') {
-        return Object.fromEntries(
-          Object.entries(obj)
-            .filter(([, value]) => value !== undefined)
-            .map(([key, value]) => [key, removeUndefined(value)]),
-        );
-      }
-
-      return obj;
-    }
-
     it('#2954', () => {
       const { routes } = new RouterConfigurationBuilder()
         .withFileRoutes([
