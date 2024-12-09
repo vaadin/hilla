@@ -43,8 +43,6 @@ export type RouteTransformer<T> = (
   children?: RouteList,
 ) => RouteObject | undefined;
 
-export type RouteListSplittingRule = (route: RouteObject) => boolean;
-
 type RoutesModifier = (routes: RouteList | undefined) => RouteList | undefined;
 
 function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string, value: T] {
@@ -308,30 +306,26 @@ export class RouterConfigurationBuilder {
         null,
         ([original, added], next) => {
           if (original && added) {
-            const originalMap = new Map(original.map((route) => createRouteEntry(route)));
-            const addedMap = new Map(added.map((route) => createRouteEntry(route)));
-
-            const paths = new Set([...originalMap.keys(), ...addedMap.keys()]);
-
+            const final: Array<RouteObject | undefined> = [...original];
+            const paths = new Set([...original.map(({ path }) => path), ...added.map(({ path }) => path)]);
             for (const path of paths) {
-              const originalRoute = originalMap.get(path);
-              const addedRoute = addedMap.get(path);
+              const originalRoutes = original.filter((r) => r.path === path);
+              const addedRoute = added.find((r) => r.path === path);
 
-              let route: RouteObject | undefined;
-              if (originalRoute && addedRoute) {
-                route = callback(originalRoute, addedRoute, next([originalRoute.children, addedRoute.children]));
-              } else if (originalRoute) {
-                route = callback(originalRoute, undefined, next([originalRoute.children, undefined]));
+              if (originalRoutes.length > 0 && addedRoute) {
+                for (const originalRoute of originalRoutes) {
+                  final.push(callback(originalRoute, addedRoute, next([originalRoute.children, addedRoute.children])));
+                }
+              } else if (originalRoutes.length > 0) {
+                for (const originalRoute of originalRoutes) {
+                  final.push(callback(originalRoute, undefined, next([originalRoute.children, undefined])));
+                }
               } else {
-                route = callback(undefined, addedRoute, next([undefined, addedRoute!.children]));
-              }
-
-              if (route) {
-                originalMap.set(path, route);
+                final.push(callback(undefined, addedRoute, next([undefined, addedRoute!.children])));
               }
             }
 
-            return [...originalMap.values()];
+            return final.filter((r) => r != null);
           } else if (original) {
             return original
               .map((route) => callback(route, undefined, next([route.children, undefined])))
