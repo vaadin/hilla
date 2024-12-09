@@ -16,17 +16,16 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.AotEndpointProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import java.io.IOException
-import java.net.URL
-import java.net.URLClassLoader
 import java.nio.file.Path
-import java.util.*
 
 import com.vaadin.hilla.engine.*
+import org.gradle.api.tasks.*
+
 /**
  * Task that generates the endpoints.ts and model TS classes
  * needed for calling the backend in a typesafe manner.
@@ -36,7 +35,7 @@ public open class EngineGenerateTask : DefaultTask() {
         group = "Vaadin"
         description = "Hilla Generate Task"
 
-        // we need the build/hilla-engine-configuration.json and the compiled classes:
+        // we need the compiled classes:
         dependsOn("classes", "hillaConfigure")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
@@ -46,6 +45,16 @@ public open class EngineGenerateTask : DefaultTask() {
             task.mustRunAfter("generate")
         }
     }
+
+    @Input
+    public val groupId: String = project.group.toString()
+
+    @Input
+    public val artifactId: String = project.name
+
+    @Input
+    @Optional
+    public var mainClass: String? = project.findProperty("mainClass") as String?
 
     @TaskAction
     public fun engineGenerate() {
@@ -57,29 +66,37 @@ public open class EngineGenerateTask : DefaultTask() {
         val baseDir: Path = project.projectDir.toPath()
         val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
+        val sourceSets: SourceSetContainer by lazy {
+            project.extensions.getByType(SourceSetContainer::class.java)
+        }
+        val sourceSet = sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet;
+        val classpathElements = sourceSet.runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
+
         try {
-            val conf: EngineConfiguration = Objects.requireNonNull(
-                EngineConfiguration.loadDirectory(buildDir))
-
-            val urls = conf.classPath
-                .stream().map<URL> { classPathItem: Path ->
-                    classPathItem.toUri().toURL()
-                }
-                .toList()
-
-            val classLoader = URLClassLoader(
-                urls.toTypedArray(),
-                javaClass.classLoader
-            )
             val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
-            val parserProcessor = ParserProcessor(conf, classLoader, isProductionMode)
-            val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand, isProductionMode)
+            val conf: EngineConfiguration = EngineConfiguration.Builder()
+                .baseDir(baseDir)
+                .buildDir(buildDir)
+                .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
+                .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
+                .groupId(groupId?.takeIf { it.isNotEmpty() } ?: "unspecified")
+                .artifactId(artifactId)
+                .classpath(classpathElements)
+                .mainClass(mainClass)
+                .productionMode(isProductionMode)
+                .create()
 
-            parserProcessor.process()
+            val parserProcessor = ParserProcessor(conf)
+            val generatorProcessor = GeneratorProcessor(conf)
+
+            val endpoints = AotEndpointProvider(conf).findEndpointClasses()
+            parserProcessor.process(endpoints)
             generatorProcessor.process()
 
         } catch (e: IOException) {
-            throw GradleException("Loading saved configuration failed", e)
+            throw GradleException("Endpoint collection failed", e)
+        } catch (e: InterruptedException) {
+            throw GradleException("Endpoint collection failed", e)
         } catch (e: GeneratorException) {
             throw GradleException("Execution failed", e)
         } catch (e: ParserException) {

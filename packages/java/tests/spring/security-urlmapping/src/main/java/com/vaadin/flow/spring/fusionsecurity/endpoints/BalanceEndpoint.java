@@ -2,7 +2,6 @@ package com.vaadin.flow.spring.fusionsecurity.endpoints;
 
 import jakarta.annotation.security.PermitAll;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
