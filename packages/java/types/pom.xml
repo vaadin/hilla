@@ -10,9 +10,9 @@
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>hilla-annotations</artifactId>
+  <artifactId>hilla-types</artifactId>
   <packaging>jar</packaging>
-  <name>Hilla Annotations</name>
+  <name>Hilla Types</name>
 
   <properties>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>

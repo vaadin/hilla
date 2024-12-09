@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>hilla-annotations</artifactId>
+            <artifactId>hilla-types</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
