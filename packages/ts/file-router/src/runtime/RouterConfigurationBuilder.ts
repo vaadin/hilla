@@ -37,13 +37,14 @@ function isReactRouteModule(module?: Module): module is RouteModule<ComponentTyp
 export type RouteList = readonly RouteObject[];
 export type WritableRouteList = RouteObject[];
 
-export type RouteTransformer<T> = (
-  original: RouteObject | undefined,
-  overriding: T | undefined,
-  children?: RouteList,
-) => RouteObject | undefined;
+export type RouteTransformerOptions<T> = Readonly<{
+  children?: RouteList;
+  original?: RouteObject;
+  overriding?: T;
+  dupe: boolean;
+}>;
 
-export type RouteListSplittingRule = (route: RouteObject) => boolean;
+export type RouteTransformer<T> = (opts: RouteTransformerOptions<T>) => RouteObject | undefined;
 
 type RoutesModifier = (routes: RouteList | undefined) => RouteList | undefined;
 
@@ -90,7 +91,7 @@ export class RouterConfigurationBuilder {
    * @param routes - A list of routes to add to the current list.
    */
   withFileRoutes(routes: readonly AgnosticRoute[]): this {
-    return this.update(routes, (original, added, children) => {
+    return this.update(routes, ({ original, overriding: added, children }) => {
       if (added) {
         const { module, path, flowLayout } = added;
         if (!isReactRouteModule(module)) {
@@ -146,8 +147,8 @@ export class RouterConfigurationBuilder {
       { index: true, element: createElement(component), handle: config },
     ];
 
-    this.update(fallbackRoutes, (original, added, children) => {
-      if (original && !getRouteHandleFlag(original, RouteHandleFlags.IGNORE_FALLBACK)) {
+    this.update(fallbackRoutes, ({ original, overriding: added, children, dupe }) => {
+      if (original && !getRouteHandleFlag(original, RouteHandleFlags.IGNORE_FALLBACK) && !dupe) {
         if (!children) {
           return original;
         }
@@ -282,7 +283,7 @@ export class RouterConfigurationBuilder {
    * and the user is not authenticated.
    */
   protect(redirectPath?: string): this {
-    this.update(undefined, (route, _, children) => {
+    this.update(undefined, ({ original: route, children }) => {
       const finalRoute = protectRoute(route!, redirectPath);
       finalRoute.children = children as RouteObject[] | undefined;
       return finalRoute;
@@ -291,11 +292,18 @@ export class RouterConfigurationBuilder {
     return this;
   }
 
+  /**
+   * Deeply updates the current list of routes with the given routes merging
+   * them in process.
+   *
+   * @param routes - A list of routes to merge with the current list.
+   * @param callback - A callback to transform the routes during the merge.
+   */
   update<T extends RouteBase>(routes: undefined, callback: RouteTransformer<undefined>): this;
   update<T extends RouteBase>(routes: readonly T[], callback?: RouteTransformer<T>): this;
   update<T extends RouteBase>(
     routes: readonly T[] | undefined,
-    callback: RouteTransformer<T | undefined> = (original, overriding, children) =>
+    callback: RouteTransformer<T | undefined> = ({ original, overriding, children }) =>
       ({
         ...original,
         ...overriding,
@@ -303,42 +311,104 @@ export class RouterConfigurationBuilder {
       }) as RouteObject,
   ): this {
     this.#modifiers.push((existingRoutes) =>
-      transformTree<[RouteList | undefined, readonly T[] | undefined], RouteList | undefined>(
+      // Going through the existing and added list of routes.
+      transformTree<readonly [RouteList | undefined, readonly T[] | undefined], RouteList | undefined>(
         [existingRoutes, routes],
         null,
         ([original, added], next) => {
           if (original && added) {
-            const originalMap = new Map(original.map((route) => createRouteEntry(route)));
-            const addedMap = new Map(added.map((route) => createRouteEntry(route)));
-
-            const paths = new Set([...originalMap.keys(), ...addedMap.keys()]);
+            // If we have both original and added routes, we have to merge them.
+            const final: Array<RouteObject | undefined> = [];
+            const paths = new Set([...original.map(({ path }) => path), ...added.map(({ path }) => path)]);
 
             for (const path of paths) {
-              const originalRoute = originalMap.get(path);
-              const addedRoute = addedMap.get(path);
+              // We can have multiple routes with the same path, so we have to
+              // consider all of them.
+              const originalRoutes = original.filter((r) => r.path === path);
+              // We can have only one route with the same path in the added list.
+              const addedRoutes = added.filter((r) => r.path === path);
 
-              let route: RouteObject | undefined;
-              if (originalRoute && addedRoute) {
-                route = callback(originalRoute, addedRoute, next([originalRoute.children, addedRoute.children]));
-              } else if (originalRoute) {
-                route = callback(originalRoute, undefined, next([originalRoute.children, undefined]));
-              } else {
-                route = callback(undefined, addedRoute, next([undefined, addedRoute!.children]));
+              if (addedRoutes.length > 1) {
+                throw new Error('Adding multiple routes with the same path is not allowed');
               }
 
-              if (route) {
-                originalMap.set(path, route);
+              const addedRoute = addedRoutes[0] as T | undefined;
+
+              if (originalRoutes.length > 0 && addedRoute) {
+                // In case we have both original and added routes, we run
+                // the callback for each original route in pair with the added
+                // route. To make the difference, we flag all the routes except
+                // the last one as `dupe`.
+                //
+                // Why the last one is not `dupe`? According to the
+                // `react-router` logic, the last route is the fallback for all
+                // routes with the same path. So, if we apply callback to it,
+                // we implicitly apply it to all other routes with the same
+                // path.
+                //
+                // In case this logic doesn't work, the user can apply the
+                // callback without considering the `dupe` flag.
+                for (let i = 0; i < originalRoutes.length; i++) {
+                  final.push(
+                    callback({
+                      original: originalRoutes[i],
+                      overriding: addedRoute,
+                      children: next([originalRoutes[i].children, addedRoute.children]),
+                      dupe: i < originalRoutes.length - 1,
+                    }) ?? originalRoutes[i],
+                  );
+                }
+              } else if (originalRoutes.length > 0) {
+                // In case we don't have the added route with the path being
+                // processed, we run the callback for each original route.
+                for (let i = 0; i < originalRoutes.length; i++) {
+                  final.push(
+                    callback({
+                      original: originalRoutes[i],
+                      children: next([originalRoutes[i].children, undefined]),
+                      dupe: i < originalRoutes.length - 1,
+                    }) ?? originalRoutes[i],
+                  );
+                }
+              } else {
+                // In case we don't have the original route with the path being
+                // processed, we run the callback for only the added route.
+                const result = callback({
+                  overriding: addedRoute,
+                  children: next([undefined, addedRoute!.children]),
+                  dupe: false,
+                });
+
+                if (result) {
+                  final.push(result);
+                }
               }
             }
 
-            return [...originalMap.values()];
+            return final.filter((r) => r != null);
           } else if (original) {
+            // If we have only original routes, we run the callback for each
+            // original route.
             return original
-              .map((route) => callback(route, undefined, next([route.children, undefined])))
+              .map((route) =>
+                callback({
+                  original: route,
+                  children: next([route.children, undefined]),
+                  dupe: false,
+                }),
+              )
               .filter((r) => r != null);
           } else if (added) {
+            // If we have only added routes, we run the callback for each added
+            // route.
             return added
-              .map((route) => callback(undefined, route, next([undefined, route.children])))
+              .map((route) =>
+                callback({
+                  overriding: route,
+                  children: next([undefined, route.children]),
+                  dupe: false,
+                }),
+              )
               .filter((r) => r != null);
           }
 
