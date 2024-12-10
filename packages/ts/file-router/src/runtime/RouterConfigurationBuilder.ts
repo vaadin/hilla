@@ -48,8 +48,8 @@ export type RouteTransformer<T> = (opts: RouteTransformerOptions<T>) => RouteObj
 
 type RoutesModifier = (routes: RouteList | undefined) => RouteList | undefined;
 
-function createRouteEntry<T extends RouteBase>(route: T): readonly [key: string, value: T] {
-  return [`${route.path ?? ''}-${route.children ? 'n' : 'i'}`, route];
+function createRouteKey<T extends RouteBase>(route: T): string {
+  return `${route.path ?? ''}-${route.children ? 'n' : 'i'}`;
 }
 
 enum RouteHandleFlags {
@@ -319,14 +319,14 @@ export class RouterConfigurationBuilder {
           if (original && added) {
             // If we have both original and added routes, we have to merge them.
             const final: Array<RouteObject | undefined> = [];
-            const paths = new Set([...original.map(({ path }) => path), ...added.map(({ path }) => path)]);
+            const pathKeys = new Set([...original.map(createRouteKey), ...added.map(createRouteKey)]);
 
-            for (const path of paths) {
+            for (const pathKey of pathKeys) {
               // We can have multiple routes with the same path, so we have to
               // consider all of them.
-              const originalRoutes = original.filter((r) => r.path === path);
+              const originalRoutes = original.filter((r) => createRouteKey(r) === pathKey);
               // We can have only one route with the same path in the added list.
-              const addedRoutes = added.filter((r) => r.path === path);
+              const addedRoutes = added.filter((r) => createRouteKey(r) === pathKey);
 
               if (addedRoutes.length > 1) {
                 throw new Error('Adding multiple routes with the same path is not allowed');
