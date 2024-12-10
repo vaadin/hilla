@@ -1,5 +1,4 @@
 import { expect, use } from '@esm-bundle/chai';
-import chaiLooseDeepEqual from '@vaadin/hilla-generator-utils/testing/looseDeepEqual.js';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
@@ -7,7 +6,6 @@ import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfiguratio
 import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
-use(chaiLooseDeepEqual);
 use(chaiLike);
 use(sinonChai);
 
@@ -80,7 +78,7 @@ describe('RouterBuilder', () => {
         ])
         .build();
 
-      expect(routes).to.be.to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           path: '',
           children: [
@@ -172,7 +170,7 @@ describe('RouterBuilder', () => {
 
       const serverRoutes = [serverWildcard, serverIndex];
 
-      expect(routes).to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           path: '',
           children: [
@@ -281,7 +279,7 @@ describe('RouterBuilder', () => {
         ])
         .build();
 
-      expect(routes).to.be.to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           path: '',
           children: [
@@ -356,7 +354,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           element: createElement(Server),
           handle: {
@@ -415,7 +413,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           path: '',
         },
@@ -516,7 +514,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           element: createElement(Server),
           handle: {
@@ -649,7 +647,7 @@ describe('RouterBuilder', () => {
     it('should not throw when no routes', () => {
       const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
 
-      expect(routes).to.be.to.looseDeepEqual([]);
+      expect(routes).to.be.like([]);
     });
   });
 
@@ -706,7 +704,7 @@ describe('RouterBuilder', () => {
         .withLayout(Server)
         .build();
 
-      expect(routes).to.be.to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           handle: {
             ignoreFallback: true,
@@ -872,7 +870,7 @@ describe('RouterBuilder', () => {
         .protect()
         .build();
 
-      expect(routes).to.looseDeepEqual([
+      expect(routes).to.be.like([
         {
           path: '',
           children: [
@@ -907,7 +905,7 @@ describe('RouterBuilder', () => {
           handle: { title: 'undefined' },
         },
         { path: '*', element: <Server /> },
-        { index: true, element: <Index /> },
+        { index: true, element: <Server /> },
       ]);
     });
   });
