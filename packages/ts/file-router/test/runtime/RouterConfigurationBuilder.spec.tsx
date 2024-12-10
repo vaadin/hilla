@@ -42,8 +42,15 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
-    // @ts-expect-error Fake just enough so tests pass
-    globalThis.window = { history: { replaceState: () => {} }, location: '', addEventListener: () => {} };
+    globalThis.window = {
+      // @ts-expect-error Fake just enough so tests pass
+      history: {
+        replaceState: () => {},
+      },
+      // @ts-expect-error Fake just enough so tests pass
+      location: '',
+      addEventListener: () => {},
+    };
     // @ts-expect-error Fake just enough so tests pass
     globalThis.document.defaultView = globalThis.window;
   });
@@ -171,9 +178,6 @@ describe('RouterBuilder', () => {
             {
               path: '/test',
               element: <div>Test</div>,
-            },
-            {
-              path: '/test',
               children: [
                 {
                   path: '/child-test',
@@ -801,6 +805,79 @@ describe('RouterBuilder', () => {
 
       expect(protectRoute).to.have.been.calledWith(root, '/login');
       expect(protectRoute).to.have.been.calledWith(test, '/login');
+    });
+  });
+
+  describe('issues', () => {
+    it('#2954', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                module: {
+                  config: {
+                    menu: { order: 0 },
+                    title: 'Public view',
+                  },
+                  default: NextTest,
+                },
+              },
+              {
+                path: 'login',
+                module: {
+                  config: {
+                    menu: { exclude: true },
+                    flowLayout: false,
+                  },
+                },
+              },
+            ],
+          },
+        ])
+        .withFallback(Server)
+        .protect()
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          path: '',
+          children: [
+            {
+              path: 'login',
+              handle: {
+                menu: {
+                  exclude: true,
+                },
+                flowLayout: false,
+                title: 'undefined',
+              },
+            },
+          ],
+          handle: {
+            title: 'undefined',
+          },
+        },
+        {
+          path: '',
+          children: [
+            {
+              element: <NextTest />,
+              handle: {
+                menu: { order: 0 },
+                title: 'Public view',
+              },
+              index: true,
+            },
+            { path: '*', element: <Server /> },
+          ],
+          handle: { title: 'undefined' },
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Server /> },
+      ]);
     });
   });
 });
