@@ -33,51 +33,14 @@ import kotlin.test.expect
 class SingleModuleTest : AbstractGradleTest() {
 
     @Test
-    fun `hillaConfigure executed HillaEngineConfigurationJson should exist`() {
-        createProject()
-
-        testProject.build("hillaConfigure", checkTasksSuccessful = true)
-
-        expect(true, "hilla-engine-configuration.json should be created after executing hillaConfigure task!") {
-            testProject.folder("build").find("hilla-engine-configuration.json").first().exists()
-        }
-    }
-
-    @Test
-    fun `exposedPackagesToParser configured in build file hillaConfigure executed HillaEngineConfigurationJson should contain exposed packages`() {
-        val package1 = "com.example.app"
-        val package2 = "com.vaadin.hilla.foo"
-
-        createProject(package1, package2)
-
-        val buildResult: BuildResult = testProject.build("hillaConfigure", checkTasksSuccessful = true)
-
-        buildResult.expectTaskSucceded("hillaConfigure")
-
-        val hillaEngineConfigFile = testProject.folder("build").find("hilla-engine-configuration.json").first()
-        expect(true, "hilla-engine-configuration.json should be created after executing hillaConfigure task!") {
-            hillaEngineConfigFile.exists()
-        }
-
-        val configuration = EngineConfiguration.load(hillaEngineConfigFile)
-        val packages = configuration.parser.packages.orElseThrow()
-        expect(true, "Configuration json should contained exposed package '$package1'") {
-            packages.contains(package1)
-        }
-        expect(true, "Configuration json should contained exposed package '$package2'") {
-            packages.contains(package2)
-        }
-    }
-
-    @Test
     fun `endpoints ts and openapi json are generated after hillaGenerate task executed in dev mode`() {
         createProject(withNpmInstall = true)
 
         addHelloReactEndpoint()
+        addMainClass()
 
         val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
 
-        buildResult.expectTaskSucceded("hillaConfigure")
         buildResult.expectTaskSucceded("hillaGenerate")
 
         verifyOpenApiJsonFileGeneratedProperly(false)
@@ -89,10 +52,10 @@ class SingleModuleTest : AbstractGradleTest() {
         createProject(withNpmInstall = true, productionMode = true)
 
         addHelloReactEndpoint()
+        addMainClass()
 
         val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
 
-        buildResult.expectTaskSucceded("hillaConfigure")
         buildResult.expectTaskSucceded("hillaGenerate")
 
         verifyOpenApiJsonFileGeneratedProperly(true)
@@ -122,6 +85,28 @@ class SingleModuleTest : AbstractGradleTest() {
         expect(true, "Generated endpoints.ts file should contain correct endpoint import!") {
             endpointsTsFile.readText().contains("import * as HelloReactEndpoint")
         }
+    }
+
+    private fun addMainClass() : File {
+        val mainClassFile = testProject.newFile("src/main/java/com/example/application/MainClass.java",
+        """
+            package com.example.application;
+
+            import org.springframework.boot.SpringApplication;
+            import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+            @SpringBootApplication
+            public class MainClass {
+
+                public static void main(String[] args) {
+                    SpringApplication.run(MainClass.class, args);
+                }
+            }
+        """.trimIndent())
+        expect(true, "Main class 'MainClass.java' should exist!") {
+            mainClassFile.exists()
+        }
+        return mainClassFile
     }
 
     private fun addHelloReactEndpoint() : File {
@@ -208,12 +193,14 @@ class SingleModuleTest : AbstractGradleTest() {
                 }
             }
             plugins {
-                id 'org.springframework.boot' version '3.1.5'
+                id 'org.springframework.boot' version '3.3.6'
                 id 'io.spring.dependency-management' version '1.0.15.RELEASE'
                 id 'java'
             }
 
             apply plugin: 'com.vaadin.hilla'
+
+            group = 'com.vaadin.hilla'
 
             $exposedPackagesExtension
 

@@ -60,7 +60,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>hilla-endpoint</artifactId>
+            <artifactId>hilla-types</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

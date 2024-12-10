@@ -1,6 +1,6 @@
 package com.vaadin.hilla.internal.fixtures;
 
-import com.vaadin.hilla.internal.Endpoint;
+import com.vaadin.hilla.Endpoint;
 
 /**
  * A test class.
