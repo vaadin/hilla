@@ -178,6 +178,9 @@ describe('RouterBuilder', () => {
             {
               path: '/test',
               element: <div>Test</div>,
+            },
+            {
+              path: '/test',
               children: [
                 {
                   path: '/child-test',
@@ -874,6 +877,37 @@ describe('RouterBuilder', () => {
             { path: '*', element: <Server /> },
           ],
           handle: { title: 'undefined' },
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Server /> },
+      ]);
+    });
+  });
+
+  describe('combinations', () => {
+    it('should support file routes with server layout and fallback', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '/next-test',
+            module: {
+              default: NextTest,
+              config: {
+                flowLayout: true,
+              },
+            },
+          },
+        ])
+        .withFallback(Server)
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          element: <Server />,
+          handle: {
+            ignoreFallback: true,
+          },
+          children: [{ path: '/next-test', element: <NextTest /> }],
         },
         { path: '*', element: <Server /> },
         { index: true, element: <Server /> },
