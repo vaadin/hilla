@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.test.nodes;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.SignatureModel;

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.utils.Streams;
 

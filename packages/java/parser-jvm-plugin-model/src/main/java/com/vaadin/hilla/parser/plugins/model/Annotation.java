@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.model;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 public final class Annotation {

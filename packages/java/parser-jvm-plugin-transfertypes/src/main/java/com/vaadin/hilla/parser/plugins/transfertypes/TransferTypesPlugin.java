@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;

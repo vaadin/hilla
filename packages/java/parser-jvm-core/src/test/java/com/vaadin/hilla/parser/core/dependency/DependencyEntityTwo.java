@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.core.dependency;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 public class DependencyEntityTwo {
     public DependencyEntityOne foo2;

@@ -1,6 +1,6 @@
 package com.vaadin.hilla.engine;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.vaadin.hilla;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

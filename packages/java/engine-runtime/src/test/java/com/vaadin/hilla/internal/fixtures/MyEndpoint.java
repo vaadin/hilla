@@ -1,11 +1,11 @@
 package com.vaadin.hilla.internal.fixtures;
 
-import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
 
 /**
  * A test class.
  */
-@BrowserCallable
+@Endpoint
 public class MyEndpoint {
 
     /**

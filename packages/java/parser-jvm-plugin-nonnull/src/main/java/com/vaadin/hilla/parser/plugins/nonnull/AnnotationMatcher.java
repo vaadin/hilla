@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.plugins.nonnull;
 
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 /**
  * Describes annotations that make class members and their signatures nullable

@@ -10,7 +10,7 @@ import java.util.Optional;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.Endpoint;
 import com.vaadin.hilla.EndpointExposed;
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;

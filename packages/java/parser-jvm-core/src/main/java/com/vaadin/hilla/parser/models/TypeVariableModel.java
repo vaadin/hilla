@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import io.github.classgraph.TypeVariableSignature;
 

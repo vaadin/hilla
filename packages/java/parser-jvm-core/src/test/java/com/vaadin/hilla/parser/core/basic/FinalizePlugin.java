@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.core.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;

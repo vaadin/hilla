@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.core;
 
 import java.util.Objects;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.NamedModel;

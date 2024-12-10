@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.core;
 
 import java.util.List;
 
-import jakarta.annotation.Nonnull;
+import javax.annotation.Nonnull;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
