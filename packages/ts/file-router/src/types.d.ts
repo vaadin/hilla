@@ -1,4 +1,4 @@
-import type { createBrowserRouter, RouteObject } from 'react-router-dom';
+import type { createBrowserRouter, RouteObject } from 'react-router';
 
 export type ViewConfig = Readonly<{
   /**
