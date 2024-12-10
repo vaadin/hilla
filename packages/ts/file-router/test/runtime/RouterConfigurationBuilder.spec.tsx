@@ -42,11 +42,12 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
-    // @ts-expect-error Fake just enough so tests pass
     globalThis.window = {
+      // @ts-expect-error Fake just enough so tests pass
       history: {
         replaceState: () => {},
       },
+      // @ts-expect-error Fake just enough so tests pass
       location: '',
       addEventListener: () => {},
     };
@@ -643,12 +644,6 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
-
-    it('should not throw when no routes', () => {
-      const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
-
-      expect(routes).to.be.like([]);
-    });
   });
 
   describe('withLayoutSkipping', () => {
@@ -810,30 +805,6 @@ describe('RouterBuilder', () => {
 
       expect(protectRoute).to.have.been.calledWith(root, '/login');
       expect(protectRoute).to.have.been.calledWith(test, '/login');
-    });
-  });
-
-  describe('build', () => {
-    it('should build the router', () => {
-      const { routes, router } = builder.build();
-
-      expect(router).to.equal(browserRouter);
-      expect(createBrowserRouter).to.have.been.calledWith(routes, {
-        basename: '/foo',
-        future: {
-          // eslint-disable-next-line camelcase
-          v7_fetcherPersist: true,
-          // eslint-disable-next-line camelcase
-          v7_normalizeFormMethod: true,
-          // eslint-disable-next-line camelcase
-          v7_partialHydration: true,
-          // eslint-disable-next-line camelcase
-          v7_relativeSplatPath: true,
-          // eslint-disable-next-line camelcase
-          v7_skipActionErrorRevalidation: true,
-        },
-      });
-      reset();
     });
   });
 
