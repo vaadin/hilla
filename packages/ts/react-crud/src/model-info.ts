@@ -38,7 +38,12 @@ const javaTypeMap: Record<string, PropertyType> = {
   'java.lang.Double': 'decimal',
   'java.time.LocalDate': 'date',
   'java.time.LocalTime': 'time',
+  'java.time.OffsetTime': 'time',
   'java.time.LocalDateTime': 'datetime',
+  'java.time.OffsetDateTime': 'datetime',
+  'java.time.ZonedDateTime': 'datetime',
+  'java.util.Date': 'datetime',
+  'java.sql.Date': 'datetime',
 };
 
 function determinePropertyType(model: AbstractModel): PropertyType {

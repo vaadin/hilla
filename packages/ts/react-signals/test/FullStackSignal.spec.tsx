@@ -1,12 +1,23 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+// eslint-disable-next-line import/no-unassigned-import
+import './setup.js';
+
 import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
-import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { DependencyTrackingSignal, type StateEvent, StateEventType } from '../src/FullStackSignal.js';
+import type {
+  IncrementStateEvent,
+  ReplaceStateEvent,
+  SetStateEvent,
+  SnapshotStateEvent,
+  StateEvent,
+} from '../src/events.js';
+import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
-import { nextFrame } from './utils.js';
+import { createSubscriptionStub, nextFrame, simulateReceivedChange } from './utils.js';
 
 use(sinonChai);
 
@@ -49,38 +60,33 @@ describe('@vaadin/hilla-react-signals', () => {
   });
 
   describe('FullStackSignal', () => {
-    function simulateReceivedChange(
-      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>,
-      event: StateEvent<number>,
+    function createAcceptedEvent(
+      value: number,
+      type: 'increment' | 'replace' | 'set' | 'snapshot',
+    ): IncrementStateEvent | ReplaceStateEvent<number> | SetStateEvent<number> | SnapshotStateEvent<number> {
+      return { id: nanoid(), type, value, expected: 0, accepted: true };
+    }
+
+    function simulateResubscription(
+      connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<StateEvent>>,
+      client: sinon.SinonStubbedInstance<ConnectClient>,
     ) {
-      const [onNextCallback] = connectSubscriptionMock.onNext.firstCall.args;
+      const [onSubscriptionLostCallback] = connectSubscriptionMock.onSubscriptionLost.firstCall.args;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      onNextCallback(event);
+      if (onSubscriptionLostCallback() === ActionOnLostSubscription.RESUBSCRIBE) {
+        client.subscribe('TestEndpoint', 'testMethod');
+      }
     }
 
     let client: sinon.SinonStubbedInstance<ConnectClient>;
-    let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent<number>>>;
+    let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
     let signal: NumberSignal;
 
     beforeEach(() => {
       client = sinon.createStubInstance(ConnectClient);
       client.call.resolves();
 
-      subscription = sinon.spy<Subscription<StateEvent<number>>>({
-        cancel() {},
-        context() {
-          return this;
-        },
-        onComplete() {
-          return this;
-        },
-        onError() {
-          return this;
-        },
-        onNext() {
-          return this;
-        },
-      });
+      subscription = createSubscriptionStub();
       // Mock the subscribe method
       client.subscribe.returns(subscription);
 
@@ -112,6 +118,8 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 
@@ -124,6 +132,8 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: undefined,
       });
 
       const dependentSignal = computed(() => signal.value);
@@ -134,14 +144,43 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.subscribe).to.be.have.been.calledOnce;
     });
 
+    it('should retain and send the params passed to the config at the time of creating the signal the server when subscribing', async () => {
+      signal = new NumberSignal(undefined, {
+        client,
+        endpoint: 'TestEndpoint',
+        method: 'testMethod',
+        params: { foo: 'bar', baz: true },
+      });
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: { foo: 'bar', baz: true },
+        parentClientSignalId: undefined,
+      });
+    });
+
     it('should publish updates to signals handler endpoint', () => {
       signal.value = 42;
 
+      expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.call).to.be.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: signal.id,
-        event: { type: StateEventType.SET, value: 42 },
+        event: { type: 'set', value: 42 },
       });
+    });
+
+    it('should not subscribe on the fly when updating if already subscribed', () => {
+      signal.subscribe(() => {});
+      client.subscribe.resetHistory();
+      signal.value = 42;
+      expect(client.subscribe).not.to.have.been.called;
+      expect(client.call).to.have.been.calledOnce;
     });
 
     it("should update signal's value based on the received event", async () => {
@@ -151,7 +190,7 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
 
       // Simulate the event received from the server:
-      const snapshotEvent: StateEvent<number> = { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 };
+      const snapshotEvent = createAcceptedEvent(42, 'snapshot');
       simulateReceivedChange(subscription, snapshotEvent);
 
       // Check if the signal value is updated:
@@ -163,13 +202,13 @@ describe('@vaadin/hilla-react-signals', () => {
 
       let result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
-      simulateReceivedChange(subscription, { id: 'someId', type: StateEventType.SNAPSHOT, value: 42 });
+      simulateReceivedChange(subscription, createAcceptedEvent(42, 'snapshot'));
 
       result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
-      simulateReceivedChange(subscription, { id: 'someId', type: StateEventType.SNAPSHOT, value: 99 });
+      simulateReceivedChange(subscription, createAcceptedEvent(99, 'set'));
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 99');
     });
@@ -183,6 +222,8 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: signal.id,
         providerEndpoint: 'TestEndpoint',
         providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: undefined,
       });
     });
 
@@ -190,7 +231,7 @@ describe('@vaadin/hilla-react-signals', () => {
       signal.value = 42;
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        event: { type: StateEventType.SET, value: 42 },
+        event: { type: 'set', value: 42 },
       });
 
       signal.value = 0;
@@ -200,7 +241,7 @@ describe('@vaadin/hilla-react-signals', () => {
       signal.value += 1;
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        event: { type: StateEventType.SET, value: 1 },
+        event: { type: 'set', value: 1 },
       });
 
       const [, , params] = client.call.firstCall.args;
@@ -250,6 +291,82 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should throw an error when the server call fails', () => {
       client.call.rejects(new Error('Server error'));
       signal.value = 42;
+    });
+
+    it('should resubscribe when reconnecting', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+      simulateResubscription(subscription, client);
+
+      expect(client.subscribe).to.be.have.been.calledTwice;
+    });
+
+    it('should send undefined as parentClientSignalId when no parent signal is provided', async () => {
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: undefined,
+      });
+    });
+
+    it('should send parentClientSignalId when parent signal is provided', async () => {
+      signal = new NumberSignal(undefined, {
+        client,
+        endpoint: 'TestEndpoint',
+        method: 'testMethod',
+        parentClientSignalId: '1234',
+      });
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      expect(client.subscribe).to.be.have.been.calledOnce;
+      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
+        clientSignalId: signal.id,
+        providerEndpoint: 'TestEndpoint',
+        providerMethod: 'testMethod',
+        params: undefined,
+        parentClientSignalId: '1234',
+      });
+    });
+
+    it('should not generate a random id when id is provided for the constructor', () => {
+      signal = new NumberSignal(
+        undefined,
+        {
+          client,
+          endpoint: 'TestEndpoint',
+          method: 'testMethod',
+        },
+        '1234',
+      );
+      expect(signal.id).to.equal('1234');
+    });
+
+    it('should send the provided id as event id when sending set events to the server', async () => {
+      signal = new NumberSignal(
+        undefined,
+        {
+          client,
+          endpoint: 'TestEndpoint',
+          method: 'testMethod',
+          parentClientSignalId: 'a1b2c3d4',
+        },
+        '1234',
+      );
+      render(<span>Value is {signal}</span>);
+      await nextFrame();
+
+      signal.value = 42;
+      expect(client.call).to.have.been.calledWith('SignalsHandler', 'update', {
+        clientSignalId: '1234',
+        event: { id: '1234', type: 'set', value: 42, accepted: false, parentSignalId: 'a1b2c3d4' },
+      });
     });
   });
 });

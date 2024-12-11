@@ -4,6 +4,14 @@ import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
 import type { I18nOptions, Translations, TranslationsResult } from './types.js';
 
+interface VaadinGlobal {
+  Vaadin?: {
+    featureFlags?: {
+      hillaI18n?: boolean;
+    };
+  };
+}
+
 function determineInitialLanguage(options?: I18nOptions): string {
   // Use explicitly configured language if defined
   if (options?.language) {
@@ -31,11 +39,20 @@ export class I18n {
 
   constructor() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!(window as any).Vaadin?.featureFlags?.hillaI18n) {
+    if (!(globalThis as VaadinGlobal).Vaadin?.featureFlags?.hillaI18n) {
       // Remove when removing feature flag
       throw new Error(
         `The Hilla I18n API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.hillaI18n=true to vaadin-featureflags.properties`,
       );
+    }
+    // @ts-expect-error import.meta.hot does not have TS definitions
+    if (import.meta.hot) {
+      // @ts-expect-error import.meta.hot does not have TS definitions
+      // eslint-disable-next-line
+      import.meta.hot.on('translations-update', () => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.reloadTranslations();
+      });
     }
   }
 
@@ -179,6 +196,32 @@ export class I18n {
           language: newLanguage,
         });
       }
+    });
+  }
+
+  /**
+   * Reloads all translations for the current language. This method should only
+   * be used for HMR in development mode.
+   */
+  private async reloadTranslations() {
+    const currentLanguage = this.#language.value;
+    if (!currentLanguage) {
+      return;
+    }
+
+    let translationsResult: TranslationsResult;
+    try {
+      translationsResult = await this.#backend.loadTranslations(currentLanguage);
+    } catch (e) {
+      console.error(`Failed to reload translations for language: ${currentLanguage}`, e);
+      return;
+    }
+
+    // Update all signals together to avoid triggering side effects multiple times
+    batch(() => {
+      this.#translations.value = translationsResult.translations;
+      this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
+      this.#formatCache = new FormatCache(currentLanguage);
     });
   }
 

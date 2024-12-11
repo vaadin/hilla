@@ -81,6 +81,7 @@ export default function vitePluginFileSystemRouter({
       runtimeUrls = {
         json: new URL('file-routes.json', isDevMode ? _generatedDir : _outDir),
         code: new URL('file-routes.ts', _generatedDir),
+        layouts: new URL('layouts.json', _generatedDir),
       };
     },
     async buildStart() {
@@ -96,9 +97,11 @@ export default function vitePluginFileSystemRouter({
       const changeListener = (file: string): void => {
         if (!file.startsWith(dir)) {
           if (file === fileURLToPath(runtimeUrls.json)) {
-            server.hot.send({ type: 'full-reload' });
+            server.hot.send({ type: 'custom', event: 'fs-route-update' });
+          } else if (file !== fileURLToPath(runtimeUrls.layouts)) {
+            // outside views folder, only changes to layouts file should trigger files generation
+            return;
           }
-          return;
         }
 
         generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug).catch((e: unknown) =>
@@ -112,7 +115,8 @@ export default function vitePluginFileSystemRouter({
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
       let modifiedCode = code;
-      if (id.startsWith(fileURLToPath(_viewsDir)) && !basename(id).startsWith('_')) {
+      const viewsDirUsingSlashes = fileURLToPath(_viewsDir).replaceAll('\\', '/');
+      if (id.startsWith(viewsDirUsingSlashes) && !basename(id).startsWith('_')) {
         if (isDevMode) {
           // To enable HMR for route files with exported configurations, we need
           // to address a limitation in `react-refresh`. This library requires

@@ -13,6 +13,10 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     this.#collator = collator;
   }
 
+  get size(): number {
+    return this.#map.size;
+  }
+
   add(path: string, specifier: string, isType?: boolean, uniqueId?: Identifier): Identifier {
     const record = createDependencyRecord(uniqueId ?? createFullyUniqueIdentifier(specifier), isType);
 
@@ -71,17 +75,23 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
       // eslint-disable-next-line @typescript-eslint/unbound-method
       names.sort(this.#collator.compare);
 
+      const isTypeOnly = names.every((name) => specifiers.get(name)!.isType);
+
       yield [
         path,
         ts.factory.createImportDeclaration(
           undefined,
           ts.factory.createImportClause(
-            false,
+            isTypeOnly,
             undefined,
             ts.factory.createNamedImports(
               names.map((name) => {
                 const { id, isType } = specifiers.get(name)!;
-                return ts.factory.createImportSpecifier(isType, ts.factory.createIdentifier(name), id);
+                return ts.factory.createImportSpecifier(
+                  isTypeOnly ? false : isType,
+                  ts.factory.createIdentifier(name),
+                  id,
+                );
               }),
             ),
           ),
@@ -102,6 +112,10 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
 
 export class NamespaceImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, Identifier>();
+
+  get size(): number {
+    return this.#map.size;
+  }
 
   add(path: string, name: string, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? createFullyUniqueIdentifier(name);
@@ -151,6 +165,10 @@ export class NamespaceImportManager extends StatementRecordManager<ImportDeclara
 
 export class DefaultImportManager extends StatementRecordManager<ImportDeclaration> {
   readonly #map = new Map<string, DependencyRecord>();
+
+  get size(): number {
+    return this.#map.size;
+  }
 
   add(path: string, name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
     const id = uniqueId ?? createFullyUniqueIdentifier(name);
@@ -216,6 +234,10 @@ export default class ImportManager implements CodeConvertable<readonly Statement
     this.named = new NamedImportManager(collator);
     this.namespace = new NamespaceImportManager(collator);
     this.#collator = collator;
+  }
+
+  get size(): number {
+    return this.default.size + this.named.size + this.namespace.size;
   }
 
   toCode(): readonly Statement[] {

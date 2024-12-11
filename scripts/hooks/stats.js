@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 const scriptsDir = new URL('../', import.meta.url);
 
 const registerJsCall = /(?!function)\s+__REGISTER__\(.*\)/gu;
+const registerJsDef = /function\s+__REGISTER__\(.*\)/gu;
 
 const cwd = new URL(`${pathToFileURL(process.cwd())}/`);
 
@@ -13,7 +14,7 @@ export async function load(url, context, nextLoad) {
   const result = await nextLoad(url, context);
   let source = result.source?.toString('utf8');
 
-  if (registerJsCall.test(source)) {
+  if (registerJsCall.test(source) && !registerJsDef.test(source)) {
     const registerCode = await readFile(new URL('./register.js', scriptsDir), 'utf8').then((c) =>
       c
         .replaceAll('export', '')

@@ -1,7 +1,22 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.vaadin.hilla.signals.core.registry;
 
-import com.vaadin.hilla.signals.NumberSignal;
-
+import com.vaadin.hilla.signals.Signal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +35,7 @@ public final class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
-    private final Map<UUID, NumberSignal> signals = new WeakHashMap<>();
+    private final Map<UUID, Signal<?>> signals = new WeakHashMap<>();
     private final Map<String, UUID> clientSignalToSignalMapping = new HashMap<>();
 
     SignalsRegistry() {
@@ -41,8 +56,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} or {@code signal} is null
      */
-    public synchronized void register(String clientSignalId,
-            NumberSignal signal) {
+    public synchronized void register(String clientSignalId, Signal<?> signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Objects.requireNonNull(signal, "Signal must not be null");
@@ -68,7 +82,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} is null
      */
-    public synchronized NumberSignal get(String clientSignalId) {
+    public synchronized Signal<?> get(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         UUID signalId = clientSignalToSignalMapping.get(clientSignalId);
@@ -92,7 +106,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized NumberSignal getBySignalId(UUID signalId) {
+    public synchronized Signal<?> getBySignalId(UUID signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
         return signals.get(signalId);
     }

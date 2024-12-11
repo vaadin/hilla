@@ -16,15 +16,23 @@
 
 package com.vaadin.hilla.startup;
 
+import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.server.ServiceInitEvent;
+import com.vaadin.flow.server.SynchronizedRequestHandler;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.internal.menu.MenuRegistry;
+import com.vaadin.flow.shared.ApplicationConstants;
+import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.hilla.HillaStats;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUtil;
+import com.vaadin.hilla.route.ServerAndClientViewsProvider;
 import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -77,15 +86,39 @@ public class RouteUnifyingServiceInitListener
                 deploymentConfiguration.isReactEnabled());
         boolean hasHillaFsRoute = false;
         if (deploymentConfiguration.isReactEnabled()) {
-            var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+            var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
                     deploymentConfiguration, accessControl, viewAccessChecker,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
+            var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    serverAndClientViewsProvider);
             var deploymentMode = deploymentConfiguration.isProductionMode()
                     ? "PRODUCTION"
                     : "DEVELOPMENT";
             event.addIndexHtmlRequestListener(
                     routeUnifyingIndexHtmlRequestListener);
+            if (!deploymentConfiguration.isProductionMode()) {
+                // Dynamic updates are only useful during development
+                event.addRequestHandler(new SynchronizedRequestHandler() {
+
+                    @Override
+                    public boolean synchronizedHandleRequest(
+                            VaadinSession session, VaadinRequest request,
+                            VaadinResponse response) throws IOException {
+                        if ("routeinfo".equals(request.getParameter(
+                                ApplicationConstants.REQUEST_TYPE_PARAMETER))) {
+                            response.setContentType(
+                                    JsonConstants.JSON_CONTENT_TYPE);
+                            response.getWriter()
+                                    .write(serverAndClientViewsProvider
+                                            .createFileRoutesJson(request));
+                            return true;
+                        }
+                        return false;
+                    }
+
+                });
+            }
             LOGGER.debug(
                     "{} mode: Registered RouteUnifyingIndexHtmlRequestListener.",
                     deploymentMode);

@@ -12,7 +12,14 @@ import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
 import FormController from './FormController';
 import GridController from './GridController';
-import { getItem, PersonModel, personService } from './test-models-and-services.js';
+import {
+  createService,
+  getItem,
+  PersonModel,
+  personService,
+  type UserData,
+  UserDataModel,
+} from './test-models-and-services.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -323,6 +330,23 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(form.instance).to.exist;
         expect((await form.getField('First name')).value).to.equal('');
         expect((await form.getField('Last name')).value).to.equal('');
+      });
+
+      it('opens the form in a dialog when row has undefined value', async () => {
+        const nullData: UserData[] = [
+          {
+            id: 1,
+            name: undefined,
+          },
+        ];
+        const customService = createService(nullData);
+        const result = render(<AutoCrud service={customService} model={UserDataModel} />);
+        const grid = await GridController.init(result, user);
+        await grid.toggleRowSelected(0);
+
+        const form = await FormController.init(user);
+        expect(form.instance).to.exist;
+        expect(await form.getField('Name')).to.have.value('');
       });
 
       it('closes the dialog when clicking close button', async () => {

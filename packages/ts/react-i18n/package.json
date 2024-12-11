@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-i18n",
-  "version": "24.5.0-alpha11",
+  "version": "24.7.0-alpha2",
   "description": "Hilla I18n utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,8 +46,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.5.0-alpha11",
-    "@vaadin/hilla-react-signals": "24.5.0-alpha11",
+    "@vaadin/hilla-frontend": "24.7.0-alpha2",
+    "@vaadin/hilla-react-signals": "24.7.0-alpha2",
     "intl-messageformat": "^10.5.11"
   },
   "peerDependencies": {
@@ -55,8 +55,8 @@
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@testing-library/dom": "^10.2.0",
-    "@testing-library/react": "^16.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/chai": "^4.3.6",
     "@types/chai-as-promised": "^7.1.8",
@@ -71,6 +71,6 @@
     "fetch-mock": "^9.11.0",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.5.2"
+    "typescript": "5.6.2"
   }
 }

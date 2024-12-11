@@ -9,10 +9,14 @@ import {
   UnauthorizedResponseError,
   type ValidationErrorData,
 } from './EndpointErrors.js';
-import { FluxConnection } from './FluxConnection.js';
-import type { VaadinWindow } from './types.js';
+import {
+  type ActionOnLostSubscription,
+  FluxConnection,
+  type FluxSubscriptionStateChangeEvent,
+} from './FluxConnection.js';
+import type { VaadinGlobal } from './types.js';
 
-const $wnd = window as VaadinWindow;
+const $wnd = globalThis as VaadinGlobal;
 
 $wnd.Vaadin ??= {};
 $wnd.Vaadin.registrations ??= [];
@@ -42,6 +46,17 @@ export interface Subscription<T> {
 
   /** Called when a new value is available. */
   onNext(callback: (value: T) => void): Subscription<T>;
+
+  /** Called when the subscription state changes. */
+  onConnectionStateChange(callback: (event: FluxSubscriptionStateChangeEvent) => void): Subscription<T>;
+
+  /**
+   * Called when the connection is restored, but there's no longer a valid subscription. If the callback returns
+   * `ActionOnLostSubscription.RESUBSCRIBE`, the subscription will be re-established by connecting to the same
+   * server method again. If the callback returns `ActionOnLostSubscription.REMOVE`, the subscription will be
+   * forgotten. This is also the default behavior if the callback is not set or if it returns `undefined`.
+   */
+  onSubscriptionLost(callback: () => ActionOnLostSubscription | void): Subscription<T>;
 }
 
 interface ConnectExceptionData {
@@ -285,7 +300,8 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    const csrfHeaders = getCsrfTokenHeadersForEndpointRequest(document);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const headers: Record<string, string> = {
       Accept: 'application/json',
       'Content-Type': 'application/json',

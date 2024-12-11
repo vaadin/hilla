@@ -6,17 +6,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 
-import com.vaadin.hilla.Nullable;
-
 @MappedSuperclass
 public class AbstractEntity {
     @Id
-    @Nullable
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Version
-    @Nullable
     private Long version;
 
     public Long getId() {

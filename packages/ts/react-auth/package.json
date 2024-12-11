@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-auth",
-  "version": "24.5.0-alpha11",
+  "version": "24.7.0-alpha2",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9877",
+    "test": "npx --node-options=\"--import tsx\" wtr --config ../../../wtr.config.ts",
     "test:coverage": "npm run test -- --coverage",
     "test:watch": "npm run test -- --watch",
     "typecheck": "tsc --noEmit"
@@ -46,16 +46,17 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.5.0-alpha11"
+    "@vaadin/hilla-frontend": "24.7.0-alpha2"
   },
   "peerDependencies": {
     "react": "^18",
-    "react-router-dom": "^6"
+    "react-dom": "^18",
+    "react-router": "^7"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@testing-library/dom": "^10.2.0",
-    "@testing-library/react": "^16.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/chai": "^4.3.6",
     "@types/chai-dom": "^1.11.1",
@@ -64,10 +65,11 @@
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@types/validator": "^13.11.2",
+    "@web/test-runner": "^0.19.0",
     "chai-dom": "^1.11.0",
-    "react-router-dom": "^6.16.0",
+    "react-router": "^7.0.2",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.5.2"
+    "typescript": "5.6.2"
   }
 }

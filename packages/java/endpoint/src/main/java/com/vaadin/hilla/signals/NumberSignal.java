@@ -1,44 +1,49 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.vaadin.hilla.signals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.hilla.signals.core.event.InvalidEventTypeException;
+import com.vaadin.hilla.signals.core.event.MissingFieldException;
+import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.hilla.signals.operation.IncrementOperation;
+import com.vaadin.hilla.signals.operation.OperationValidator;
+import com.vaadin.hilla.signals.operation.ReplaceValueOperation;
+import com.vaadin.hilla.signals.operation.SetValueOperation;
+import com.vaadin.hilla.signals.operation.ValidationResult;
 
-import com.vaadin.hilla.signals.core.StateEvent;
-import jakarta.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
-
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A signal that holds a number value.
  */
-public class NumberSignal {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(NumberSignal.class);
-
-    private final ReentrantLock lock = new ReentrantLock();
-
-    private final UUID id = UUID.randomUUID();
-
-    private Double value;
-
-    private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
+public class NumberSignal extends ValueSignal<Double> {
 
     /**
      * Creates a new NumberSignal with the provided default value.
      *
      * @param defaultValue
      *            the default value
+     *
+     * @throws NullPointerException
+     *             if the default value is null
      */
-    public NumberSignal(@Nullable Double defaultValue) {
-        this.value = defaultValue;
+    public NumberSignal(Double defaultValue) {
+        super(defaultValue, Double.class);
     }
 
     /**
@@ -48,116 +53,151 @@ public class NumberSignal {
         this(0.0);
     }
 
-    /**
-     * Subscribes to the signal.
-     *
-     * @return a Flux of JSON events
-     */
-    public Flux<ObjectNode> subscribe() {
-        Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
-                .onBackpressureBuffer();
+    protected NumberSignal(NumberSignal delegate) {
+        super(delegate);
+    }
 
-        return sink.asFlux().doOnSubscribe(ignore -> {
-            LOGGER.debug("New Flux subscription...");
-            lock.lock();
-            try {
-                var currentValue = createSnapshot();
-                sink.tryEmitNext(currentValue);
-                subscribers.add(sink);
-            } finally {
-                lock.unlock();
-            }
-        }).doFinally(ignore -> {
-            lock.lock();
-            try {
-                LOGGER.debug("Unsubscribing from NumberSignal...");
-                subscribers.remove(sink);
-            } finally {
-                lock.unlock();
-            }
-        });
+    @Override
+    protected NumberSignal getDelegate() {
+        return (NumberSignal) super.getDelegate();
     }
 
     /**
-     * Submits an event to the signal and notifies subscribers about the change
-     * of the signal value.
+     * Processes the event and updates the signal value if needed. Note that
+     * this method is not thread-safe and should be called from a synchronized
+     * context.
      *
      * @param event
-     *            the event to submit
+     *            the event to process
+     * @return <code>true</code> if the event was successfully processed and the
+     *         signal value was updated, <code>false</code> otherwise.
      */
-    public void submit(ObjectNode event) {
-        lock.lock();
+    @Override
+    protected ObjectNode processEvent(ObjectNode event) {
         try {
-            processEvent(event);
-            // Notify subscribers
-            subscribers.removeIf(sink -> {
-                var updatedValue = createSnapshot();
-                boolean failure = sink.tryEmitNext(updatedValue).isFailure();
-                if (failure) {
-                    LOGGER.debug("Failed push");
-                }
-                return failure;
-            });
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Returns the signal UUID.
-     *
-     * @return the id
-     */
-    public UUID getId() {
-        return this.id;
-    }
-
-    /**
-     * Returns the signal's current value.
-     *
-     * @return the value
-     */
-    @Nullable
-    public Double getValue() {
-        return this.value;
-    }
-
-    private ObjectNode createSnapshot() {
-        var snapshot = new StateEvent<>(this.id.toString(),
-                StateEvent.EventType.SNAPSHOT, this.value);
-        return snapshot.toJson();
-    }
-
-    private void processEvent(ObjectNode event) {
-        try {
-            var stateEvent = new StateEvent<Double>(event);
-            if (isSetEvent(stateEvent)) {
-                this.value = stateEvent.getValue();
-            } else {
-                throw new UnsupportedOperationException(
-                        "Unsupported event: " + event);
+            var stateEvent = new StateEvent<>(event, Double.class);
+            if (!StateEvent.EventType.INCREMENT
+                    .equals(stateEvent.getEventType())) {
+                return super.processEvent(event);
             }
-        } catch (StateEvent.InvalidEventTypeException e) {
+            return handleIncrement(stateEvent);
+        } catch (InvalidEventTypeException | MissingFieldException e) {
             throw new UnsupportedOperationException(
                     "Unsupported JSON: " + event, e);
         }
     }
 
-    private boolean isSetEvent(StateEvent<?> event) {
-        return StateEvent.EventType.SET.equals(event.getEventType());
+    protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
+        if (getDelegate() != null) {
+            return getDelegate().handleIncrement(stateEvent);
+        } else {
+            Double expectedValue = getValue();
+            Double newValue = expectedValue + stateEvent.getValue();
+            boolean accepted = super.compareAndSet(newValue, expectedValue);
+            stateEvent.setAccepted(accepted);
+            return stateEvent.toJson();
+        }
+    }
+
+    private static class ValidatedNumberSignal extends NumberSignal {
+
+        private final OperationValidator<Double> validator;
+
+        private ValidatedNumberSignal(NumberSignal delegate,
+                OperationValidator<Double> validator) {
+            super(delegate);
+            this.validator = validator;
+        }
+
+        @Override
+        protected ObjectNode handleIncrement(StateEvent<Double> stateEvent) {
+            var operation = IncrementOperation.of(stateEvent.getId(),
+                    stateEvent.getValue());
+            var validationResult = validator.validate(operation);
+            return handleValidationResult(stateEvent, validationResult,
+                    super::handleIncrement);
+        }
+
+        @Override
+        protected ObjectNode handleSetEvent(StateEvent<Double> stateEvent) {
+            var operation = SetValueOperation.of(stateEvent.getId(),
+                    stateEvent.getValue());
+            var validation = validator.validate(operation);
+            return handleValidationResult(stateEvent, validation,
+                    super::handleSetEvent);
+        }
+
+        @Override
+        protected ObjectNode handleReplaceEvent(StateEvent<Double> stateEvent) {
+            var operation = ReplaceValueOperation.of(stateEvent.getId(),
+                    stateEvent.getExpected(), stateEvent.getValue());
+            var validation = validator.validate(operation);
+            return handleValidationResult(stateEvent, validation,
+                    super::handleReplaceEvent);
+        }
+    }
+
+    /**
+     * Returns a new signal that validates the operations with the provided
+     * validator. As the same validator is for all operations, the validator
+     * should be able to handle all operations that the signal supports.
+     * <p>
+     * For example, the following code creates a signal that only allows
+     * increment by 1:
+     * <!-- @formatter:off -->
+     * <pre><code>
+     * NumberSignal number = new NumberSignal(42.0);
+     * NumberSignal limitedNumber = number.withOperationValidator(operation -&gt; {
+     *     if (op instanceof IncrementOperation increment
+     *             &amp;&amp; increment.value() != 1) {
+     *         return ValidationResult
+     *                 .reject("Only increment by 1 is allowed");
+     *     }
+     *     return ValidationResult.allow();
+     * });
+     * </code></pre>
+     * <!-- @formatter:on -->
+     * Note that the above allows other operations without any validations.
+     * If more concise restrictions are needed, specialized operation type
+     * should be used:
+     * <!-- @formatter:off -->
+     * <pre><code>
+     * NumberSignal number = new NumberSignal(42.0);
+     * NumberSignal limitedNumber = number.withOperationValidator(operation -&gt; {
+     *     return switch (operation) {
+     *         case IncrementOperation increment -&gt; {
+     *             if (increment.value() != 1) {
+     *                 yield ValidationResult
+     *                     .reject("Only increment by 1 is allowed");
+     *             }
+     *             yield ValidationResult.allow();
+     *         }
+     *         case ReplaceValueOperation&lt;Double&gt; ignored -&gt;
+     *                     ValidationResult.reject("No setting is allowed");
+     *         case SetValueOperation&lt;Double&gt; ignored -&gt;
+     *                     ValidationResult.reject("No replacing is allowed");
+     *         default -&gt; ValidationResult.reject("Unknown operation is not allowed");
+     *     };
+     * });
+     * </code></pre>
+     * <!-- @formatter:on -->
+     * @param validator
+     *            the operation validator, not <code>null</code>
+     * @return a new signal that validates the operations with the provided
+     *         validator.
+     * @throws NullPointerException
+     *             if the validator is <code>null</code>
+     */
+    @Override
+    public NumberSignal withOperationValidator(
+            OperationValidator<Double> validator) {
+        Objects.requireNonNull(validator, "Validator cannot be null");
+        return new ValidatedNumberSignal(this, validator);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof NumberSignal signal))
-            return false;
-        return Objects.equals(getId(), signal.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
+    public NumberSignal asReadonly() {
+        return this.withOperationValidator(op -> ValidationResult
+                .reject("Read-only signal does not allow any modifications"));
     }
 }

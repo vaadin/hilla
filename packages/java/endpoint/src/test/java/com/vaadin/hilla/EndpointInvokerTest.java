@@ -1,5 +1,6 @@
 package com.vaadin.hilla;
 
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -66,7 +67,8 @@ public class EndpointInvokerTest {
 
         endpointRegistry = new EndpointRegistry(endpointNameChecker);
 
-        endpointInvoker = new EndpointInvoker(applicationContext, null,
+        endpointInvoker = new EndpointInvoker(applicationContext,
+                new JacksonObjectMapperFactory.Json().build(),
                 explicitNullableTypeChecker, servletContext, endpointRegistry) {
             protected EndpointAccessChecker getAccessChecker() {
                 return endpointAccessChecker;

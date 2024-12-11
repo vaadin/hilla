@@ -14,7 +14,11 @@ export type PathSignalType = Readonly<{
   signalType: string;
 }>;
 
-const SIGNAL_CLASSES = ['#/components/schemas/com.vaadin.hilla.signals.NumberSignal'];
+const SIGNAL_CLASSES = [
+  '#/components/schemas/com.vaadin.hilla.signals.NumberSignal',
+  '#/components/schemas/com.vaadin.hilla.signals.ValueSignal',
+  '#/components/schemas/com.vaadin.hilla.signals.ListSignal',
+];
 
 function extractEndpointMethodsWithSignalsAsReturnType(storage: SharedStorage): PathSignalType[] {
   return Object.entries(storage.api.paths)

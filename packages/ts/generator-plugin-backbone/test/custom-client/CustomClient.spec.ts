@@ -21,7 +21,7 @@ describe('BackbonePlugin', () => {
       expect(files.length).to.equal(1);
 
       const [endpointFile] = files;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
   });

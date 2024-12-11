@@ -1,13 +1,8 @@
-import { relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts, {
-  type CallExpression,
-  type ImportDeclaration,
-  type StringLiteral,
-  type VariableStatement,
-} from 'typescript';
+import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
+import ts, { type CallExpression, type Identifier, type VariableStatement } from 'typescript';
 
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
@@ -16,132 +11,136 @@ import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-/**
- * Convert a file URL to a relative path from the generated directory.
- *
- * @param url - The file URL to convert.
- * @param generatedDir - The directory where the generated view file will be stored.
- */
-function relativize(url: URL, generatedDir: URL): string {
-  const result = relative(fileURLToPath(generatedDir), fileURLToPath(url)).replaceAll(sep, '/');
+const fileExtensions = ['.ts', '.tsx', '.js', '.jsx'];
 
-  if (!result.startsWith('.')) {
-    return `./${result}`;
+class RouteFromMetaProcessor {
+  readonly #manager: DependencyManager;
+  readonly #views: readonly RouteMeta[];
+
+  constructor(views: readonly RouteMeta[], { json: jsonFile, code: codeFile }: RuntimeFileUrls) {
+    this.#views = views;
+
+    const codeDir = new URL('./', codeFile);
+    this.#manager = new DependencyManager(new PathManager({ extension: '.js', relativeTo: codeDir }));
   }
 
-  return result;
-}
+  /**
+   * Loads all the files from the received metadata and creates a framework-agnostic route tree.
+   *
+   * @param views - The abstract route tree.
+   * @param generatedDir - The directory where the generated view file will be stored.
+   */
+  process(): string {
+    const {
+      paths,
+      imports: { named, namespace },
+    } = this.#manager;
+    const errors: string[] = [];
 
-/**
- * Create an import declaration for a `views` module.
- *
- * @param mod - The name of the route module to import.
- * @param file - The file path of the module.
- */
-function createImport(mod: string, file: string): ImportDeclaration {
-  const path = `${file.substring(0, file.lastIndexOf('.'))}.js`;
-  return template(`import * as ${mod} from '${path}';\n`, ([statement]) => statement as ts.ImportDeclaration);
-}
+    const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, null, (metas, next) => {
+      errors.push(
+        ...metas
+          .map((route) => route.path)
+          .filter((item, index, arr) => arr.indexOf(item) !== index)
+          .map((dup) => `console.error("Two views share the same path: ${dup}");`),
+      );
 
-/**
- * Create an abstract route creation function call. The nested function calls create a route tree.
- *
- * @param path - The path of the route.
- * @param mod - The name of the route module imported as a namespace.
- * @param children - The list of child route call expressions.
- */
-function createRouteData(path: string, mod: string | undefined, children?: readonly CallExpression[]): CallExpression {
-  return template(
-    `const route = createRoute("${path}"${mod ? `, ${mod}` : ''}${children ? `, CHILDREN` : ''})`,
-    ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
-    [
-      transformer((node) =>
-        ts.isIdentifier(node) && node.text === 'CHILDREN'
-          ? ts.factory.createArrayLiteralExpression(children, true)
-          : node,
-      ),
-    ],
-  );
-}
+      return metas.map(({ file, layout, path, children, flowLayout }) => {
+        let _children: readonly CallExpression[] | undefined;
 
-/**
- * Loads all the files from the received metadata and creates a framework-agnostic route tree.
- *
- * @param views - The abstract route tree.
- * @param generatedDir - The directory where the generated view file will be stored.
- */
-export default function createRoutesFromMeta(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls): string {
-  const codeDir = new URL('./', codeFile);
-  const imports: ImportDeclaration[] = [];
-  const errors: string[] = [];
-  let id = 0;
+        if (children) {
+          _children = next(children);
+        }
 
-  const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(views, (metas, next) => {
-    errors.push(
-      ...metas
-        .map((route) => route.path)
-        .filter((item, index, arr) => arr.indexOf(item) !== index)
-        .map((dup) => `console.error("Two views share the same path: ${dup}");`),
-    );
+        let mod: Identifier | undefined;
+        if (file) {
+          const fileExt = fileExtensions.find((ext) => file.pathname.endsWith(ext));
+          mod = namespace.add(paths.createRelativePath(file, fileExt), `Page`);
+        } else if (layout) {
+          const fileExt = fileExtensions.find((ext) => layout.pathname.endsWith(ext));
+          mod = namespace.add(paths.createRelativePath(layout, fileExt), `Layout`);
+        }
 
-    return metas.map(({ file, layout, path, children }) => {
-      let _children: readonly CallExpression[] | undefined;
+        const moduleExtension = flowLayout ? { flowLayout } : undefined;
 
-      if (children) {
-        _children = next(...children);
-      }
-
-      const currentId = id;
-      id += 1;
-
-      let mod: string | undefined;
-      if (file) {
-        mod = `Page${currentId}`;
-        imports.push(createImport(mod, relativize(file, codeDir)));
-      } else if (layout) {
-        mod = `Layout${currentId}`;
-        imports.push(createImport(mod, relativize(layout, codeDir)));
-      }
-
-      return createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children);
+        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, moduleExtension, _children);
+      });
     });
-  });
 
-  // Prepend the import for `createRoute` if it was used
-  if (imports.length > 0) {
-    const createRouteImport = template(
-      'import { createRoute } from "@vaadin/hilla-file-router/runtime.js";',
-      ([statement]) => statement as ts.ImportDeclaration,
-    );
-    imports.unshift(createRouteImport);
-  }
+    const agnosticRouteId =
+      named.getIdentifier('@vaadin/hilla-file-router/types.js', 'AgnosticRoute') ??
+      named.add('@vaadin/hilla-file-router/types.js', 'AgnosticRoute', true);
 
-  imports.unshift(
-    template(
-      'import type { AgnosticRoute } from "@vaadin/hilla-file-router/types.js";',
-      ([statement]) => statement as ts.ImportDeclaration,
-    ),
-  );
+    let routeDeclaration = template(
+      `${errors.join('\n')}
 
-  const routeDeclaration = template(
-    `import a from 'IMPORTS';
-
-${errors.join('\n')}
-
-const routes: readonly AgnosticRoute[] = ROUTE;
+const routes: readonly AGNOSTIC_ROUTE[] = ROUTE;
 
 export default routes;
 `,
-    [
-      transformer((node) =>
-        ts.isImportDeclaration(node) && (node.moduleSpecifier as StringLiteral).text === 'IMPORTS' ? imports : node,
-      ),
-      transformer((node) =>
-        ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes, true) : node,
-      ),
-    ],
-  );
+      [
+        transformer((node) =>
+          ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes, true) : node,
+        ),
+        transformer((node) => (ts.isIdentifier(node) && node.text === 'AGNOSTIC_ROUTE' ? agnosticRouteId : node)),
+      ],
+    );
 
-  const file = createSourceFile(routeDeclaration, 'file-routes.ts');
-  return printer.printFile(file);
+    routeDeclaration = [...this.#manager.imports.toCode(), ...routeDeclaration];
+
+    const file = createSourceFile(routeDeclaration, 'file-routes.ts');
+    return printer.printFile(file);
+  }
+
+  /**
+   * Create an abstract route creation function call. The nested function calls
+   * create a route tree.
+   *
+   * @param path - The path of the route.
+   * @param mod - The name of the route module imported as a namespace.
+   * @param children - The list of child route call expressions.
+   */
+  #createRouteData(
+    path: string,
+    mod: Identifier | undefined,
+    extension?: Readonly<Record<string, unknown>>,
+    children?: readonly CallExpression[],
+  ): CallExpression {
+    const { named } = this.#manager.imports;
+
+    let extendModuleId: Identifier | undefined;
+    let modNode = '';
+
+    if (extension) {
+      extendModuleId =
+        named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'extendModule') ??
+        named.add('@vaadin/hilla-file-router/runtime.js', 'extendModule');
+      modNode = `, EXTEND_MODULE(MOD, ${JSON.stringify(extension)})`;
+    } else if (mod) {
+      modNode = `, MOD`;
+    }
+
+    const createRouteId =
+      named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'createRoute') ??
+      named.add('@vaadin/hilla-file-router/runtime.js', 'createRoute');
+
+    return template(
+      `const route = CREATE_ROUTE("${path}", ${modNode}${children ? `, CHILDREN` : ''})`,
+      ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
+      [
+        transformer((node) =>
+          ts.isIdentifier(node) && node.text === 'CHILDREN'
+            ? ts.factory.createArrayLiteralExpression(children, true)
+            : node,
+        ),
+        transformer((node) => (ts.isIdentifier(node) && node.text === 'MOD' ? (mod ?? ts.factory.createNull()) : node)),
+        transformer((node) => (ts.isIdentifier(node) && node.text === 'EXTEND_MODULE' ? extendModuleId : node)),
+        transformer((node) => (ts.isIdentifier(node) && node.text === 'CREATE_ROUTE' ? createRouteId : node)),
+      ],
+    );
+  }
+}
+
+export default function createRoutesFromMeta(views: readonly RouteMeta[], urls: RuntimeFileUrls): string {
+  return new RouteFromMetaProcessor(views, urls).process();
 }

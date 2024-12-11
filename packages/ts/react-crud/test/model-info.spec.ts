@@ -43,7 +43,12 @@ describe('@vaadin/hilla-react-crud', () => {
 
       expect(getPropertyType(StringModel, 'java.time.LocalDate')).to.equal('date');
       expect(getPropertyType(StringModel, 'java.time.LocalTime')).to.equal('time');
+      expect(getPropertyType(StringModel, 'java.time.OffsetTime')).to.equal('time');
       expect(getPropertyType(StringModel, 'java.time.LocalDateTime')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.time.ZonedDateTime')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.time.OffsetDateTime')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.util.Date')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.sql.Date')).to.equal('datetime');
     });
 
     describe('getProperty', () => {

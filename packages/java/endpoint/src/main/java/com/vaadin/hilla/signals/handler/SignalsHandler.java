@@ -1,10 +1,28 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.vaadin.hilla.signals.handler;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
+import jakarta.annotation.Nullable;
 import reactor.core.publisher.Flux;
 
 /**
@@ -33,19 +51,38 @@ public class SignalsHandler {
      * @return a Flux of JSON events
      */
     public Flux<ObjectNode> subscribe(String providerEndpoint,
-            String providerMethod, String clientSignalId) {
+            String providerMethod, String clientSignalId, ObjectNode body,
+            @Nullable String parentClientSignalId) {
         try {
+            if (parentClientSignalId != null) {
+                return subscribe(parentClientSignalId, clientSignalId);
+            }
             var signal = registry.get(clientSignalId);
             if (signal != null) {
-                return signal.subscribe();
+                return signal.subscribe().doFinally(
+                        (event) -> registry.unsubscribe(clientSignalId));
             }
-
-            registry.register(clientSignalId, providerEndpoint, providerMethod);
+            registry.register(clientSignalId, providerEndpoint, providerMethod,
+                    body);
             return registry.get(clientSignalId).subscribe()
                     .doFinally((event) -> registry.unsubscribe(clientSignalId));
         } catch (Exception e) {
             return Flux.error(e);
         }
+    }
+
+    private Flux<ObjectNode> subscribe(String parentClientSignalId,
+            String clientSignalId)
+            throws EndpointInvocationException.EndpointAccessDeniedException,
+            EndpointInvocationException.EndpointNotFoundException {
+        var parentSignal = registry.get(parentClientSignalId);
+        if (parentSignal == null) {
+            throw new IllegalStateException(String.format(
+                    "Parent Signal not found for parent client signal id: %s",
+                    parentClientSignalId));
+        }
+        return parentSignal.subscribe(clientSignalId)
+                .doFinally((event) -> registry.unsubscribe(clientSignalId));
     }
 
     /**
@@ -59,10 +96,21 @@ public class SignalsHandler {
     public void update(String clientSignalId, ObjectNode event)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {
-        if (registry.get(clientSignalId) == null) {
-            throw new IllegalStateException(String.format(
-                    "Signal not found for client signal: %s", clientSignalId));
+        var parentSignalId = ListStateEvent.extractParentSignalId(event);
+        if (parentSignalId != null) {
+            if (registry.get(parentSignalId) == null) {
+                throw new IllegalStateException(String.format(
+                        "Parent Signal not found for signal id: %s",
+                        parentSignalId));
+            }
+            registry.get(parentSignalId).submit(event);
+        } else {
+            if (registry.get(clientSignalId) == null) {
+                throw new IllegalStateException(
+                        String.format("Signal not found for client signal: %s",
+                                clientSignalId));
+            }
+            registry.get(clientSignalId).submit(event);
         }
-        registry.get(clientSignalId).submit(event);
     }
 }

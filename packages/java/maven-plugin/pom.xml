@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>24.5-SNAPSHOT</version>
+    <version>24.7-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -15,7 +15,7 @@
   <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
-    <maven.version>3.9.8</maven.version>
+    <maven.version>3.9.9</maven.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
@@ -98,7 +98,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.8.2</version>
+          <version>3.15.0</version>
           <configuration>
             <goalPrefix>vaadin</goalPrefix>
           </configuration>

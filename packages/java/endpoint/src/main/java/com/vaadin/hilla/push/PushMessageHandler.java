@@ -220,6 +220,19 @@ public class PushMessageHandler {
     }
 
     /**
+     * Called when the browser establishes a new connection.
+     *
+     * Only ever called once for the same connectionId parameter.
+     *
+     * @param connectionId
+     *            the id of the connection
+     */
+    public void handleBrowserReconnect(String connectionId) {
+        fluxSubscriptionInfos.putIfAbsent(connectionId,
+                new ConcurrentHashMap<>());
+    }
+
+    /**
      * Called when the browser connection has been lost.
      *
      * Only ever called once for the same connectionId parameter. The same

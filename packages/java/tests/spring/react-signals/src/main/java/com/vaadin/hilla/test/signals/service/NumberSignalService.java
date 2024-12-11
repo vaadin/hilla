@@ -13,6 +13,9 @@ public class NumberSignalService {
     private final NumberSignal counter = new NumberSignal();
     private final NumberSignal sharedValue = new NumberSignal(0.5);
 
+    private final NumberSignal high = new NumberSignal(100.0);
+    private final NumberSignal low = new NumberSignal(-100.0);
+
     public NumberSignal counter() {
         return counter;
     }
@@ -30,5 +33,9 @@ public class NumberSignalService {
     public Long fetchCounterValue() {
         return Optional.ofNullable(counter.getValue()).map(Double::longValue)
                 .orElse(null);
+    }
+
+    public NumberSignal numberSignal(boolean isHigh) {
+        return isHigh ? high : low;
     }
 }

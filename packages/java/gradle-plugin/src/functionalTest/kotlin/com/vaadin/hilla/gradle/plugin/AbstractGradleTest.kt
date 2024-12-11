@@ -25,8 +25,8 @@ import org.junit.Before
  */
 abstract class AbstractGradleTest {
 
-    val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "24.4-SNAPSHOT"
-
+    val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "24.7-SNAPSHOT"
+    val flowVersion = System.getenv("flow.version").takeUnless { it.isNullOrEmpty() } ?: "24.7-SNAPSHOT"
     /**
      * The testing Gradle project. Automatically deleted after every test.
      * Don't use TemporaryFolder JUnit `@Rule` since it will always delete the folder afterward,

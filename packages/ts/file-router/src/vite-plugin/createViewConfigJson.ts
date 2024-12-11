@@ -30,10 +30,11 @@ function* walkAST(node: Node): Generator<Node> {
 export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<string> {
   const res = await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
     views,
+    null,
     async (routes, next) =>
       await Promise.all(
-        routes.map(async ({ path, file, layout, children }) => {
-          const newChildren = children ? await next(...children) : undefined;
+        routes.map(async ({ path, file, layout, children, flowLayout }) => {
+          const newChildren = children ? await next(children) : undefined;
 
           if (!file && !layout) {
             return {
@@ -59,6 +60,12 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
                 const code = node.initializer.getText(sourceFile);
                 const script = new Script(`(${code})`);
                 config = script.runInThisContext() as ViewConfig;
+                if (config.flowLayout === undefined) {
+                  const copy = JSON.parse(JSON.stringify(config));
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  copy.flowLayout = flowLayout ?? false;
+                  config = copy;
+                }
               }
             } else if (node.getText(sourceFile).startsWith('export default')) {
               waitingForIdentifier = true;
@@ -68,9 +75,13 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             }
           }
 
+          if (config === undefined) {
+            config = { flowLayout: flowLayout ?? false };
+          }
+
           let title: string;
 
-          if (config?.title) {
+          if (config.title) {
             ({ title } = config);
           } else {
             if (!componentName) {
@@ -85,7 +96,7 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
           return {
             route: convertFSRouteSegmentToURLPatternFormat(path),
             ...config,
-            params: extractParameterFromRouteSegment(config?.route ?? path),
+            params: extractParameterFromRouteSegment(config.route ?? path),
             title,
             children: newChildren ?? (layout ? [] : undefined),
           } satisfies ServerViewConfig;

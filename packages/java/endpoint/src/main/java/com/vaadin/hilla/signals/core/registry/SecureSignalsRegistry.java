@@ -1,10 +1,27 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.vaadin.hilla.signals.core.registry;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.hilla.signals.NumberSignal;
+import com.vaadin.hilla.signals.Signal;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +50,7 @@ public class SecureSignalsRegistry {
     }
 
     public synchronized void register(String clientSignalId,
-            String endpointName, String methodName)
+            String endpointName, String methodName, ObjectNode body)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException,
             EndpointInvocationException.EndpointBadRequestException,
@@ -44,8 +61,8 @@ public class SecureSignalsRegistry {
                 .getSecurityHolderRoleChecker();
         checkAccess(endpointName, methodName, principal, isInRole);
 
-        NumberSignal signal = (NumberSignal) invoker.invoke(endpointName,
-                methodName, null, principal, isInRole);
+        Signal<?> signal = (Signal<?>) invoker.invoke(endpointName, methodName,
+                body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
         delegate.register(clientSignalId, signal);
@@ -60,7 +77,7 @@ public class SecureSignalsRegistry {
         endpointMethods.remove(clientSignalId);
     }
 
-    public synchronized NumberSignal get(String clientSignalId)
+    public synchronized Signal<?> get(String clientSignalId)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {
         var endpointMethodInfo = endpointMethods.get(clientSignalId);

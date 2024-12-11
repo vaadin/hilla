@@ -13,6 +13,7 @@ import java.util.Map;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinRequest;
 
@@ -23,6 +24,7 @@ import org.hamcrest.Matchers;
 import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,10 +44,10 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.server.menu.MenuRegistry;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 
-import static com.vaadin.flow.server.menu.MenuRegistry.FILE_ROUTES_JSON_NAME;
-import static com.vaadin.flow.server.menu.MenuRegistry.FILE_ROUTES_JSON_PROD_PATH;
+import static com.vaadin.flow.internal.menu.MenuRegistry.FILE_ROUTES_JSON_NAME;
+import static com.vaadin.flow.internal.menu.MenuRegistry.FILE_ROUTES_JSON_PROD_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
@@ -65,8 +67,11 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     @Rule
     public TemporaryFolder projectRoot = new TemporaryFolder();
 
+    private ServerAndClientViewsProvider serverClientViewsProvider;
+
     @Before
     public void setUp() throws IOException {
+        MenuRegistry.clearFileRoutesCache();
         vaadinService = Mockito.mock(VaadinService.class);
 
         VaadinContext vaadinContext = Mockito.mock(VaadinContext.class);
@@ -79,8 +84,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         deploymentConfiguration = Mockito.mock(DeploymentConfiguration.class);
         Mockito.when(vaadinService.getDeploymentConfiguration())
                 .thenReturn(deploymentConfiguration);
-        requestListener = new RouteUnifyingIndexHtmlRequestListener(
+        serverClientViewsProvider = new ServerAndClientViewsProvider(
                 deploymentConfiguration, null, null, true);
+        requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                serverClientViewsProvider);
 
         indexHtmlResponse = Mockito.mock(IndexHtmlResponse.class);
         vaadinRequest = Mockito.mock(VaadinRequest.class);
@@ -89,6 +96,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         var userPrincipal = Mockito.mock(Principal.class);
         Mockito.when(vaadinRequest.getUserPrincipal())
                 .thenReturn(userPrincipal);
+
+        Mockito.when(vaadinRequest.getService()).thenReturn(vaadinService);
+        Mockito.when(vaadinService.getDeploymentConfiguration())
+                .thenReturn(deploymentConfiguration);
 
         final Document document = Mockito.mock(Document.class);
         final Element element = new Element("head");
@@ -115,6 +126,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .thenReturn(menuAccessControl);
         Mockito.when(menuAccessControl.getPopulateClientSideMenu())
                 .thenReturn(MenuAccessControl.PopulateClientMenu.ALWAYS);
+        Mockito.doCallRealMethod().when(menuAccessControl)
+                .canAccessView(any(AvailableViewInfo.class));
 
         // Add test data for production mode
         projectRoot.newFolder("META-INF", "VAADIN");
@@ -122,6 +135,13 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 FILE_ROUTES_JSON_PROD_PATH);
 
         copyClientRoutes("clientRoutes.json", productionRouteFile);
+
+        CurrentInstance.set(VaadinRequest.class, vaadinRequest);
+    }
+
+    @After
+    public void tearDown() {
+        CurrentInstance.set(VaadinRequest.class, null);
     }
 
     private static List<RouteData> prepareServerRoutes() {
@@ -206,8 +226,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -260,8 +279,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -316,8 +334,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
 
     }
@@ -362,8 +379,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -375,7 +391,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
 
-            views = requestListener.collectServerViews(true);
+            views = serverClientViewsProvider.collectServerViews(true);
         }
         MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         MatcherAssert.assertThat(views.get("/bar").title(),
@@ -413,7 +429,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             menuRegistry.when(() -> MenuRegistry.getClassLoader())
                     .thenReturn(mockClassLoader);
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            var views = requestListener.collectClientViews(vaadinRequest);
+            var views = serverClientViewsProvider
+                    .collectClientViews(vaadinRequest);
             MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         }
     }
@@ -430,7 +447,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class)) {
             mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            var views = requestListener.collectClientViews(vaadinRequest);
+            var views = serverClientViewsProvider
+                    .collectClientViews(vaadinRequest);
             MatcherAssert.assertThat(views, Matchers.aMapWithSize(4));
         }
     }
@@ -455,8 +473,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(true);
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
-            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+            var serverClientViewsProvider = new ServerAndClientViewsProvider(
                     deploymentConfiguration, null, null, false);
+            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    serverClientViewsProvider);
 
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
@@ -492,8 +512,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 
@@ -521,8 +540,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(true);
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
-            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+            var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
                     deploymentConfiguration, null, null, true);
+            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    serverAndClientViewsProvider);
 
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
@@ -556,9 +577,22 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     @Test
     public void when_exposeServerRoutesToClient_layoutExists_serverSideRoutesAreInResponse()
             throws IOException {
+        assertServerRoutesExposedToClientWhenLayoutExists(
+                "clientRoutesWithLayout.json", "server-and-client-views.json");
+    }
 
+    @Test
+    public void when_exposeServerRoutesToClient_layoutExists_routeWithEmptyPath_serverSideRoutesAreInResponse()
+            throws IOException {
+        assertServerRoutesExposedToClientWhenLayoutExists(
+                "clientRoutesWithLayoutAndIndexView.json",
+                "server-and-client-views-layout-and-index-route.json");
+    }
+
+    private void assertServerRoutesExposedToClientWhenLayoutExists(
+            String testJsonFile, String expectedJsonFile) throws IOException {
         // Use routes with layout
-        copyClientRoutes("clientRoutesWithLayout.json", productionRouteFile);
+        copyClientRoutes(testJsonFile, productionRouteFile);
 
         try (MockedStatic<VaadinService> mocked = Mockito
                 .mockStatic(VaadinService.class);
@@ -579,8 +613,10 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     .thenReturn(true);
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
-            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+            var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
                     deploymentConfiguration, null, null, true);
+            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    serverAndClientViewsProvider);
 
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
@@ -604,8 +640,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/server-and-client-views.json"));
+        var expected = mapper.readTree(
+                getClass().getResource("/META-INF/VAADIN/" + expectedJsonFile));
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
@@ -616,8 +652,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
-                    actual.toString(),
-                    Matchers.containsString(expected.get(field).toString()));
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
         } while (elementsFields.hasNext());
     }
 

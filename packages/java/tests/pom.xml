@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.7-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <vaadin.components.version>24.5-SNAPSHOT</vaadin.components.version>
+        <vaadin.components.version>24.7-SNAPSHOT</vaadin.components.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
