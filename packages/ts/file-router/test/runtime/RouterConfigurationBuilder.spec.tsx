@@ -4,7 +4,6 @@ import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
-import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
 use(chaiLike);
@@ -43,6 +42,17 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
+    globalThis.window = {
+      // @ts-expect-error Fake just enough so tests pass
+      history: {
+        replaceState: () => {},
+      },
+      // @ts-expect-error Fake just enough so tests pass
+      location: '',
+      addEventListener: () => {},
+    };
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.document.defaultView = globalThis.window;
   });
 
   afterEach(() => {
@@ -637,12 +647,6 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
-
-    it('should not throw when no routes', () => {
-      const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
-
-      expect(routes).to.be.like([]);
-    });
   });
 
   describe('withLayoutSkipping', () => {
@@ -807,27 +811,107 @@ describe('RouterBuilder', () => {
     });
   });
 
-  describe('build', () => {
-    it('should build the router', () => {
-      const { routes, router } = builder.build();
+  describe('issues', () => {
+    it('#2954', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                module: {
+                  config: {
+                    menu: { order: 0 },
+                    title: 'Public view',
+                  },
+                  default: NextTest,
+                },
+              },
+              {
+                path: 'login',
+                module: {
+                  config: {
+                    menu: { exclude: true },
+                    flowLayout: false,
+                  },
+                },
+              },
+            ],
+          },
+        ])
+        .withFallback(Server)
+        .protect()
+        .build();
 
-      expect(router).to.equal(browserRouter);
-      expect(createBrowserRouter).to.have.been.calledWith(routes, {
-        basename: '/foo',
-        future: {
-          // eslint-disable-next-line camelcase
-          v7_fetcherPersist: true,
-          // eslint-disable-next-line camelcase
-          v7_normalizeFormMethod: true,
-          // eslint-disable-next-line camelcase
-          v7_partialHydration: true,
-          // eslint-disable-next-line camelcase
-          v7_relativeSplatPath: true,
-          // eslint-disable-next-line camelcase
-          v7_skipActionErrorRevalidation: true,
+      expect(routes).to.be.like([
+        {
+          path: '',
+          children: [
+            {
+              path: 'login',
+              handle: {
+                menu: {
+                  exclude: true,
+                },
+                flowLayout: false,
+                title: 'undefined',
+              },
+            },
+          ],
+          handle: {
+            title: 'undefined',
+          },
         },
-      });
-      reset();
+        {
+          path: '',
+          children: [
+            {
+              element: <NextTest />,
+              handle: {
+                menu: { order: 0 },
+                title: 'Public view',
+              },
+              index: true,
+            },
+            { path: '*', element: <Server /> },
+          ],
+          handle: { title: 'undefined' },
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Server /> },
+      ]);
+    });
+  });
+
+  describe('combinations', () => {
+    it('should support file routes with server layout and fallback', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '/next-test',
+            module: {
+              default: NextTest,
+              config: {
+                flowLayout: true,
+              },
+            },
+          },
+        ])
+        .withFallback(Server)
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          element: <Server />,
+          handle: {
+            ignoreFallback: true,
+          },
+          children: [{ path: '/next-test', element: <NextTest /> }],
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Server /> },
+      ]);
     });
   });
 });

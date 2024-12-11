@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-form",
-  "version": "24.6.0-beta5",
+  "version": "24.7.0-alpha2",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,15 +46,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.6.0-beta5"
+    "@vaadin/hilla-lit-form": "24.7.0-alpha2"
   },
   "peerDependencies": {
     "react": "^18"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@testing-library/dom": "^10.2.0",
-    "@testing-library/react": "^16.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/chai": "^4.3.6",
     "@types/chai-as-promised": "^7.1.8",
