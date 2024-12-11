@@ -42,7 +42,7 @@ export interface Subscription<T> {
   onComplete(callback: () => void): Subscription<T>;
 
   /** Called when an exception occured in the subscription. */
-  onError(callback: () => void): Subscription<T>;
+  onError(callback: (message: string) => void): Subscription<T>;
 
   /** Called when a new value is available. */
   onNext(callback: (value: T) => void): Subscription<T>;
