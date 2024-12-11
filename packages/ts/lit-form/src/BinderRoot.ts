@@ -118,7 +118,6 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     const oldValue = this.#value;
     this.#value = newValue;
     this[_update](oldValue);
-    this[_updateValidation]().catch(() => {});
   }
 
   /**
