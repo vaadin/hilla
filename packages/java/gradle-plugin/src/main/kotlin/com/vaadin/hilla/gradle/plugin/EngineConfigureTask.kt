@@ -66,6 +66,8 @@ public open class EngineConfigureTask : DefaultTask() {
             .classpath(classpath)
             .mainClass(project.findProperty("mainClass") as String?)
             .productionMode(vaadinExtension.productionMode.getOrElse(false))
+            .endpointAnnotations(Endpoint::class.java, BrowserCallable::class.java)
+            .endpointExposedAnnotations(EndpointExposed::class.java)
             .create()
 
         engineConfiguration.parser.endpointAnnotations = listOf(Endpoint::class.java, BrowserCallable::class.java)

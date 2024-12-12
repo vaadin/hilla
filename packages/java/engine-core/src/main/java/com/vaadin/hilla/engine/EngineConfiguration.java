@@ -2,6 +2,7 @@ package com.vaadin.hilla.engine;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -33,6 +34,9 @@ public class EngineConfiguration {
     private EndpointProvider offlineEndpointProvider;
     private boolean productionMode = false;
     private String nodeCommand = "node";
+    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
+    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
+            .of();
 
     private EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -97,6 +101,14 @@ public class EngineConfiguration {
         return nodeCommand;
     }
 
+    public List<Class<? extends Annotation>> getEndpointAnnotations() {
+        return endpointAnnotations;
+    }
+
+    public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
+        return endpointExposedAnnotations;
+    }
+
     public Path getOpenAPIFile() {
         return productionMode
                 ? buildDir.resolve("classes").resolve(OPEN_API_PATH)
@@ -150,6 +162,8 @@ public class EngineConfiguration {
             this.configuration.offlineEndpointProvider = configuration.offlineEndpointProvider;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
+            this.configuration.endpointAnnotations = configuration.endpointAnnotations;
+            this.configuration.endpointExposedAnnotations = configuration.endpointExposedAnnotations;
         }
 
         public Builder baseDir(Path value) {
@@ -227,6 +241,18 @@ public class EngineConfiguration {
 
         public Builder nodeCommand(String value) {
             configuration.nodeCommand = value;
+            return this;
+        }
+
+        public Builder endpointAnnotations(
+                Class<? extends Annotation>... value) {
+            configuration.endpointAnnotations = Arrays.asList(value);
+            return this;
+        }
+
+        public Builder endpointExposedAnnotations(
+                Class<? extends Annotation>... value) {
+            configuration.endpointExposedAnnotations = Arrays.asList(value);
             return this;
         }
 

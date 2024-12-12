@@ -38,6 +38,8 @@ public final class ParserProcessor {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
         this.classPath = conf.getClasspath();
+        this.endpointAnnotations = conf.getEndpointAnnotations();
+        this.endpointExposedAnnotations = conf.getEndpointExposedAnnotations();
         applyConfiguration(conf.getParser());
     }
 

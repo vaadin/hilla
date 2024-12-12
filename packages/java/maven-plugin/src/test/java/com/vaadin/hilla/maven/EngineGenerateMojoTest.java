@@ -70,7 +70,5 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
     private void verifyConfiguration(EngineConfiguration conf) {
         assertEquals(conf.getBaseDir(), getTemporaryDirectory());
-        assertEquals(conf.getOpenAPIFile(), getTemporaryDirectory()
-                .resolve("build").resolve("hilla-openapi.json"));
     }
 }

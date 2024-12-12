@@ -66,15 +66,11 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var endpoints = engineConfiguration.getOfflineEndpointProvider()
                     .findEndpoints();
             var processor = new ParserProcessor(engineConfiguration);
-            processor
-                    .withEndpointAnnotations(Endpoint.class,
-                            BrowserCallable.class)
-                    .withEndpointExposedAnnotations(EndpointExposed.class)
-                    .process(endpoints);
+            processor.process(endpoints);
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> endpoints = Stream
-                        .of(Endpoint.class, BrowserCallable.class)
+                List<Class<?>> endpoints = engineConfiguration
+                        .getEndpointAnnotations().stream()
                         .map(applicationContext::getBeansWithAnnotation)
                         .map(Map::values).flatMap(Collection::stream)
                         // maps to original class when proxies are found
@@ -82,11 +78,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                         .map(AopProxyUtils::ultimateTargetClass).distinct()
                         .collect(Collectors.toList());
                 var processor = new ParserProcessor(engineConfiguration);
-                processor
-                        .withEndpointAnnotations(Endpoint.class,
-                                BrowserCallable.class)
-                        .withEndpointExposedAnnotations(EndpointExposed.class)
-                        .process(endpoints);
+                processor.process(endpoints);
             });
         }
     }
