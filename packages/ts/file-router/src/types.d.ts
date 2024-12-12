@@ -1,4 +1,4 @@
-import type { createBrowserRouter, RouteObject } from 'react-router-dom';
+import type { createBrowserRouter, RouteObject } from 'react-router';
 
 export type ViewConfig = Readonly<{
   /**
@@ -30,6 +30,11 @@ export type ViewConfig = Readonly<{
    * annotated with the Layout annotation.
    */
   flowLayout?: boolean;
+
+  /**
+   * Set to true to make the view render without enclosing in any layouts.
+   */
+  skipLayouts?: boolean;
 
   menu?: Readonly<{
     /**

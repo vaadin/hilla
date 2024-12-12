@@ -1,6 +1,6 @@
 import { AccessProps, AuthContext } from 'Frontend/useAuth.js';
 import { ReactNode, useContext } from 'react';
-import { Navigate, useMatches } from 'react-router-dom';
+import { Navigate, useMatches } from 'react-router';
 
 export type AuthControlProps = Readonly<{
   fallback?: ReactNode;

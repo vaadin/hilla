@@ -4,7 +4,6 @@ import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
-import { browserRouter, createBrowserRouter } from '../mocks/react-router-dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
 use(chaiLike);
@@ -43,6 +42,17 @@ describe('RouterBuilder', () => {
       },
     ]);
     reset = mockDocumentBaseURI('https://example.com/foo');
+    globalThis.window = {
+      // @ts-expect-error Fake just enough so tests pass
+      history: {
+        replaceState: () => {},
+      },
+      // @ts-expect-error Fake just enough so tests pass
+      location: '',
+      addEventListener: () => {},
+    };
+    // @ts-expect-error Fake just enough so tests pass
+    globalThis.document.defaultView = globalThis.window;
   });
 
   afterEach(() => {
@@ -303,29 +313,44 @@ describe('RouterBuilder', () => {
         },
       ]);
     });
-  });
 
-  describe('withLayout', () => {
-    it('should add layout routes under layout component', () => {
+    it('should accept a file route module with a config only', () => {
+      expect(() =>
+        builder.withFileRoutes([{ path: 'test', module: { config: { flowLayout: true } } }]).build(),
+      ).to.not.throw();
+    });
+
+    it('should accept an undefined file route module', () => {
+      expect(() => builder.withFileRoutes([{ path: 'test', module: undefined }]).build()).to.not.throw();
+    });
+
+    it('should throw if a file route module has no component or config', () => {
+      expect(() => builder.withFileRoutes([{ path: 'test', module: {} }]).build()).to.throw(
+        `The module for the "test" section doesn't have the React component exported by default or a ViewConfig object exported as "config"`,
+      );
+    });
+
+    it('should not lose a route from the result', () => {
       const { routes } = builder
         .withReactRoutes([
           {
-            path: '',
-            handle: {
-              flowLayout: true,
-            },
-          },
-          {
-            path: '/test',
-            handle: {
-              flowLayout: true,
-            },
+            path: 'home',
             children: [
               {
-                path: '/child',
-                handle: {
-                  flowLayout: true,
-                },
+                path: 'deep',
+                children: [
+                  {
+                    path: 'hello',
+                    handle: {
+                      flowLayout: true,
+                    },
+                  },
+                ],
+                handle: { flowLayout: true },
+              },
+              {
+                path: 'deepend',
+                children: [{ path: 'deep' }],
               },
             ],
           },
@@ -335,45 +360,53 @@ describe('RouterBuilder', () => {
 
       expect(routes).to.be.like([
         {
-          children: [
-            {
-              path: '',
-              handle: {
-                flowLayout: true,
-              },
-            },
-            {
-              children: [
-                {
-                  path: '/child',
-                  handle: {
-                    flowLayout: true,
-                  },
-                },
-              ],
-              path: '/test',
-              handle: {
-                flowLayout: true,
-              },
-            },
-          ],
           element: createElement(Server),
           handle: {
             ignoreFallback: true,
           },
+          children: [
+            {
+              path: 'home',
+              children: [
+                {
+                  path: 'deep',
+                  children: [
+                    {
+                      path: 'hello',
+                      handle: {
+                        flowLayout: true,
+                      },
+                    },
+                  ],
+                  handle: { flowLayout: true },
+                },
+              ],
+            },
+          ],
         },
         {
+          path: '',
           children: [
             {
               path: '/test',
               element: <div>Test</div>,
             },
           ],
-          path: '',
+        },
+        {
+          path: 'home',
+          children: [
+            {
+              path: 'deepend',
+              children: [{ path: 'deep' }],
+            },
+          ],
         },
       ]);
     });
+  });
 
+  describe('withLayout', () => {
     it('empty flowLayout array should not generate element', () => {
       const { routes } = new RouterConfigurationBuilder()
         .withReactRoutes([
@@ -391,54 +424,95 @@ describe('RouterBuilder', () => {
       ]);
     });
 
-    it('should add layout routes for nested folder layout component', () => {
+    it('should separate flow layouts and regular layouts', () => {
       const { routes } = builder
         .withReactRoutes([
           {
-            path: 'nest',
+            path: 'mixed-nested-layouts',
             children: [
               {
-                path: '',
+                path: 'parent-flow-layout',
                 handle: {
                   flowLayout: true,
                 },
-              },
-              {
-                path: '/nested',
-                handle: {
-                  flowLayout: true,
-                },
-              },
-              {
-                path: '/outside',
-                handle: {
-                  flowLayout: false,
-                },
-              },
-              {
-                path: '/nested-empty-layout',
-                children: [],
+                children: [
+                  {
+                    path: 'flow-layout',
+                    handle: {
+                      flowLayout: true,
+                    },
+                  },
+                  {
+                    path: 'regular-layout-1',
+                    handle: {
+                      flowLayout: false,
+                    },
+                  },
+                  {
+                    path: 'not-specified-layout-1',
+                  },
+                  {
+                    path: 'not-specified-layout-2',
+                    children: [
+                      {
+                        path: 'child-regular-layout',
+                        handle: {
+                          flowLayout: false,
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    path: 'not-specified-layout-3',
+                    children: [
+                      {
+                        path: 'child-not-specifed-layout',
+                      },
+                    ],
+                  },
+                  {
+                    path: 'not-specified-layout-4',
+                    children: [
+                      {
+                        path: 'child-flow-layout-1',
+                        handle: {
+                          flowLayout: true,
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    path: 'regular-layout-2',
+                    handle: {
+                      flowLayout: false,
+                    },
+                    children: [
+                      {
+                        path: 'child-flow-layout-2',
+                        handle: {
+                          flowLayout: true,
+                        },
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },
           {
-            path: '/test',
+            path: 'flow-layout-another-branch',
             handle: {
               flowLayout: true,
             },
-            children: [
-              {
-                path: '/child',
-              },
-              {
-                path: '/empty-layout',
-                children: [],
-              },
-            ],
           },
           {
-            path: '/empty-layout-outside',
-            children: [],
+            path: 'regular-layout-outside',
+            handle: {
+              flowLayout: false,
+            },
+          },
+          {
+            path: 'not-specified-layout-outside',
           },
         ])
         .withLayout(Server)
@@ -446,80 +520,132 @@ describe('RouterBuilder', () => {
 
       expect(routes).to.be.like([
         {
+          element: createElement(Server),
+          handle: {
+            ignoreFallback: true,
+          },
           children: [
             {
+              path: 'mixed-nested-layouts',
               children: [
                 {
+                  path: 'parent-flow-layout',
                   handle: {
                     flowLayout: true,
                   },
-                  path: '',
-                },
-                {
-                  handle: {
-                    flowLayout: true,
-                  },
-                  path: '/nested',
+                  children: [
+                    {
+                      path: 'flow-layout',
+                      handle: {
+                        flowLayout: true,
+                      },
+                    },
+                    {
+                      path: 'not-specified-layout-4',
+                      children: [
+                        {
+                          path: 'child-flow-layout-1',
+                          handle: {
+                            flowLayout: true,
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      path: 'regular-layout-2',
+                      handle: {
+                        flowLayout: false,
+                      },
+                      children: [
+                        {
+                          path: 'child-flow-layout-2',
+                          handle: {
+                            flowLayout: true,
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      path: 'not-specified-layout-1',
+                    },
+                    {
+                      path: 'not-specified-layout-2',
+                    },
+                    {
+                      path: 'not-specified-layout-3',
+                      children: [
+                        {
+                          path: 'child-not-specifed-layout',
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
-              path: 'nest',
             },
             {
-              children: [
-                {
-                  path: '/child',
-                },
-                {
-                  path: '/empty-layout',
-                  children: [],
-                },
-              ],
-              path: '/test',
+              path: 'flow-layout-another-branch',
               handle: {
                 flowLayout: true,
               },
             },
           ],
-          element: createElement(Server),
+        },
+        {
+          path: 'mixed-nested-layouts',
+          children: [
+            {
+              path: 'parent-flow-layout',
+              handle: {
+                flowLayout: true,
+              },
+              children: [
+                {
+                  path: 'regular-layout-1',
+                  handle: {
+                    flowLayout: false,
+                  },
+                },
+                {
+                  path: 'not-specified-layout-2',
+                  children: [
+                    {
+                      path: 'child-regular-layout',
+                      handle: {
+                        flowLayout: false,
+                      },
+                    },
+                  ],
+                },
+                {
+                  path: 'regular-layout-2',
+                  handle: {
+                    flowLayout: false,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: 'regular-layout-outside',
           handle: {
-            ignoreFallback: true,
+            flowLayout: false,
           },
         },
         {
+          path: '',
           children: [
             {
               path: '/test',
               element: <div>Test</div>,
             },
           ],
-          path: '',
         },
         {
-          children: [
-            {
-              path: '/outside',
-              handle: {
-                flowLayout: false,
-              },
-            },
-            {
-              path: '/nested-empty-layout',
-              children: [],
-            },
-          ],
-          path: 'nest',
-        },
-        {
-          path: '/empty-layout-outside',
-          children: [],
+          path: 'not-specified-layout-outside',
         },
       ]);
-    });
-
-    it('should not throw when no routes', () => {
-      const { routes } = new RouterConfigurationBuilder().withLayout(Server).build();
-
-      expect(routes).to.be.like([]);
     });
   });
 
@@ -685,27 +811,107 @@ describe('RouterBuilder', () => {
     });
   });
 
-  describe('build', () => {
-    it('should build the router', () => {
-      const { routes, router } = builder.build();
+  describe('issues', () => {
+    it('#2954', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '',
+            children: [
+              {
+                path: '',
+                module: {
+                  config: {
+                    menu: { order: 0 },
+                    title: 'Public view',
+                  },
+                  default: NextTest,
+                },
+              },
+              {
+                path: 'login',
+                module: {
+                  config: {
+                    menu: { exclude: true },
+                    flowLayout: false,
+                  },
+                },
+              },
+            ],
+          },
+        ])
+        .withFallback(Server)
+        .protect()
+        .build();
 
-      expect(router).to.equal(browserRouter);
-      expect(createBrowserRouter).to.have.been.calledWith(routes, {
-        basename: '/foo',
-        future: {
-          // eslint-disable-next-line camelcase
-          v7_fetcherPersist: true,
-          // eslint-disable-next-line camelcase
-          v7_normalizeFormMethod: true,
-          // eslint-disable-next-line camelcase
-          v7_partialHydration: true,
-          // eslint-disable-next-line camelcase
-          v7_relativeSplatPath: true,
-          // eslint-disable-next-line camelcase
-          v7_skipActionErrorRevalidation: true,
+      expect(routes).to.be.like([
+        {
+          path: '',
+          children: [
+            {
+              path: 'login',
+              handle: {
+                menu: {
+                  exclude: true,
+                },
+                flowLayout: false,
+                title: 'undefined',
+              },
+            },
+          ],
+          handle: {
+            title: 'undefined',
+          },
         },
-      });
-      reset();
+        {
+          path: '',
+          children: [
+            {
+              element: <NextTest />,
+              handle: {
+                menu: { order: 0 },
+                title: 'Public view',
+              },
+              index: true,
+            },
+            { path: '*', element: <Server /> },
+          ],
+          handle: { title: 'undefined' },
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Server /> },
+      ]);
+    });
+  });
+
+  describe('combinations', () => {
+    it('should support file routes with server layout and fallback', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withFileRoutes([
+          {
+            path: '/next-test',
+            module: {
+              default: NextTest,
+              config: {
+                flowLayout: true,
+              },
+            },
+          },
+        ])
+        .withFallback(Server)
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          element: <Server />,
+          handle: {
+            ignoreFallback: true,
+          },
+          children: [{ path: '/next-test', element: <NextTest /> }],
+        },
+        { path: '*', element: <Server /> },
+        { index: true, element: <Server /> },
+      ]);
     });
   });
 });

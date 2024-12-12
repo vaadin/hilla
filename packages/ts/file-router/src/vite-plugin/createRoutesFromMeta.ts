@@ -1,10 +1,8 @@
-import { relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type CallExpression, type Identifier, type StringLiteral, type VariableStatement } from 'typescript';
+import ts, { type CallExpression, type Identifier, type VariableStatement } from 'typescript';
 
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
@@ -13,13 +11,13 @@ import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 
-const extensions = ['.ts', '.tsx', '.js', '.jsx'];
+const fileExtensions = ['.ts', '.tsx', '.js', '.jsx'];
 
 class RouteFromMetaProcessor {
   readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
 
-  constructor(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls) {
+  constructor(views: readonly RouteMeta[], { json: jsonFile, code: codeFile }: RuntimeFileUrls) {
     this.#views = views;
 
     const codeDir = new URL('./', codeFile);
@@ -39,7 +37,7 @@ class RouteFromMetaProcessor {
     } = this.#manager;
     const errors: string[] = [];
 
-    const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, (metas, next) => {
+    const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, null, (metas, next) => {
       errors.push(
         ...metas
           .map((route) => route.path)
@@ -51,21 +49,21 @@ class RouteFromMetaProcessor {
         let _children: readonly CallExpression[] | undefined;
 
         if (children) {
-          _children = next(...children);
+          _children = next(children);
         }
 
         let mod: Identifier | undefined;
         if (file) {
-          const extension = extensions.find((ext) => file.pathname.endsWith(ext));
-          mod = namespace.add(paths.createRelativePath(file, extension), `Page`);
+          const fileExt = fileExtensions.find((ext) => file.pathname.endsWith(ext));
+          mod = namespace.add(paths.createRelativePath(file, fileExt), `Page`);
         } else if (layout) {
-          const extension = extensions.find((ext) => layout.pathname.endsWith(ext));
-          mod = namespace.add(paths.createRelativePath(layout, extension), `Layout`);
+          const fileExt = fileExtensions.find((ext) => layout.pathname.endsWith(ext));
+          mod = namespace.add(paths.createRelativePath(layout, fileExt), `Layout`);
         }
 
-        const extension = flowLayout ? { flowLayout } : undefined;
+        const moduleExtension = flowLayout ? { flowLayout } : undefined;
 
-        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, extension, _children);
+        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, moduleExtension, _children);
       });
     });
 
@@ -113,15 +111,13 @@ export default routes;
     let extendModuleId: Identifier | undefined;
     let modNode = '';
 
-    if (mod) {
-      if (extension) {
-        extendModuleId =
-          named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'extendModule') ??
-          named.add('@vaadin/hilla-file-router/runtime.js', 'extendModule');
-        modNode = `, EXTEND_MODULE(MOD, ${JSON.stringify(extension)})`;
-      } else {
-        modNode = `, MOD`;
-      }
+    if (extension) {
+      extendModuleId =
+        named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'extendModule') ??
+        named.add('@vaadin/hilla-file-router/runtime.js', 'extendModule');
+      modNode = `, EXTEND_MODULE(MOD, ${JSON.stringify(extension)})`;
+    } else if (mod) {
+      modNode = `, MOD`;
     }
 
     const createRouteId =
@@ -137,7 +133,7 @@ export default routes;
             ? ts.factory.createArrayLiteralExpression(children, true)
             : node,
         ),
-        transformer((node) => (ts.isIdentifier(node) && node.text === 'MOD' ? mod : node)),
+        transformer((node) => (ts.isIdentifier(node) && node.text === 'MOD' ? (mod ?? ts.factory.createNull()) : node)),
         transformer((node) => (ts.isIdentifier(node) && node.text === 'EXTEND_MODULE' ? extendModuleId : node)),
         transformer((node) => (ts.isIdentifier(node) && node.text === 'CREATE_ROUTE' ? createRouteId : node)),
       ],
