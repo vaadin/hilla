@@ -35,13 +35,6 @@ export abstract class DependencyTrackingSignal<T> extends Signal<T> {
   #subscribeCount = -1;
 
   protected constructor(value: T | undefined, onFirstSubscribe: () => void, onLastUnsubscribe: () => void) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!(globalThis as VaadinGlobal).Vaadin?.featureFlags?.fullstackSignals) {
-      // Remove when removing feature flag
-      throw new Error(
-        `The Hilla Fullstack Signals API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.fullstackSignals=true to vaadin-featureflags.properties`,
-      );
-    }
     super(value);
     this.#onFirstSubscribe = onFirstSubscribe;
     this.#onLastUnsubscribe = onLastUnsubscribe;
