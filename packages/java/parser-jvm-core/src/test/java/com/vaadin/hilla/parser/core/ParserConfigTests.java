@@ -166,9 +166,9 @@ public class ParserConfigTests {
 
     @Test
     public void should_ThrowError_When_EndpointAnnotationsIsNotSet() {
-        var e = assertThrows(NullPointerException.class, () -> new Parser()
+        var e = assertThrows(IllegalArgumentException.class, () -> new Parser()
                 .classPath(defaultClassPathElements).execute(List.of()));
-        assertEquals("[JVM Parser] endpointAnnotations is not provided.",
+        assertEquals("[JVM Parser] endpoint annotations are not provided.",
                 e.getMessage());
     }
 

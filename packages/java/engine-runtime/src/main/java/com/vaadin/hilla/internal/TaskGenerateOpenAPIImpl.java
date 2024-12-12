@@ -19,8 +19,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
@@ -62,11 +66,15 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             var endpoints = engineConfiguration.getOfflineEndpointProvider()
                     .findEndpoints();
             var processor = new ParserProcessor(engineConfiguration);
-            processor.process(endpoints);
+            processor
+                    .withEndpointAnnotations(Endpoint.class,
+                            BrowserCallable.class)
+                    .withEndpointExposedAnnotations(EndpointExposed.class)
+                    .process(endpoints);
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> endpoints = engineConfiguration.getParser()
-                        .getEndpointAnnotations().stream()
+                List<Class<?>> endpoints = Stream
+                        .of(Endpoint.class, BrowserCallable.class)
                         .map(applicationContext::getBeansWithAnnotation)
                         .map(Map::values).flatMap(Collection::stream)
                         // maps to original class when proxies are found
@@ -74,7 +82,11 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                         .map(AopProxyUtils::ultimateTargetClass).distinct()
                         .collect(Collectors.toList());
                 var processor = new ParserProcessor(engineConfiguration);
-                processor.process(endpoints);
+                processor
+                        .withEndpointAnnotations(Endpoint.class,
+                                BrowserCallable.class)
+                        .withEndpointExposedAnnotations(EndpointExposed.class)
+                        .process(endpoints);
             });
         }
     }

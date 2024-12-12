@@ -283,8 +283,11 @@ public final class Parser {
     public OpenAPI execute(List<Class<?>> endpoints) {
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
-        Objects.requireNonNull(config.endpointAnnotations,
-                "[JVM Parser] endpointAnnotations is not provided.");
+        if (config.endpointAnnotations == null
+                || config.endpointAnnotations.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "[JVM Parser] endpoint annotations are not provided.");
+        }
 
         logger.debug("JVM Parser started");
 
@@ -436,8 +439,10 @@ public final class Parser {
     public static final class Config {
         private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
-        private List<Class<? extends Annotation>> endpointAnnotations;
-        private List<Class<? extends Annotation>> endpointExposedAnnotations;
+        private List<Class<? extends Annotation>> endpointAnnotations = List
+                .of();
+        private List<Class<? extends Annotation>> endpointExposedAnnotations = List
+                .of();
         private Collection<String> exposedPackages;
         private OpenAPI openAPI;
 

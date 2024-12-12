@@ -34,16 +34,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
       <scope>provided</scope>
@@ -86,13 +76,8 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-loader-tools</artifactId>
+      <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-test</artifactId>
-          <scope>test</scope>
-      </dependency>
   </dependencies>
 </project>

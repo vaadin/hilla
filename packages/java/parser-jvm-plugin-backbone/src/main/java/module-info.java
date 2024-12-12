@@ -5,7 +5,6 @@ module com.vaadin.hilla.parser.plugins.backbone {
     requires jsr305;
     requires com.fasterxml.jackson.databind;
     requires com.vaadin.hilla.parser.utils;
-    requires hilla.types;
     requires transitive com.vaadin.hilla.parser.core;
     requires jakarta.annotation;
     requires org.slf4j;

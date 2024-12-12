@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.bare;
 
-import com.vaadin.hilla.Endpoint;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

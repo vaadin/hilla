@@ -41,6 +41,18 @@ public final class ParserProcessor {
         applyConfiguration(conf.getParser());
     }
 
+    public ParserProcessor withEndpointAnnotations(
+            @Nonnull Class<? extends Annotation>... endpointAnnotations) {
+        this.endpointAnnotations = List.of(endpointAnnotations);
+        return this;
+    }
+
+    public ParserProcessor withEndpointExposedAnnotations(
+            @Nonnull Class<? extends Annotation>... endpointExposedAnnotations) {
+        this.endpointExposedAnnotations = List.of(endpointExposedAnnotations);
+        return this;
+    }
+
     private String createOpenAPI(List<Class<?>> endpoints) throws IOException {
         var parser = new Parser()
                 .classPath(classPath.stream().map(Path::toString)

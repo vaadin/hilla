@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.shadowedname;
 
-import com.vaadin.hilla.Endpoint;
-
 import java.util.ArrayList;
 
 @Endpoint

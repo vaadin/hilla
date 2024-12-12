@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.generics;
 
-import com.vaadin.hilla.Endpoint;
-
 import java.lang.reflect.Modifier;
 
 @Endpoint

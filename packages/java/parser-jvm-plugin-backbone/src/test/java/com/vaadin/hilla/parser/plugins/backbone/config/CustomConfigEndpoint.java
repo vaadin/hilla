@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.config;
 
-import com.vaadin.hilla.Endpoint;
-
 @Endpoint
 public class CustomConfigEndpoint {
     public CustomConfigEntity get() {

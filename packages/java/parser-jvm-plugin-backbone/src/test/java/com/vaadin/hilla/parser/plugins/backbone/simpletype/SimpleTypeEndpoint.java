@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.simpletype;
 
-import com.vaadin.hilla.Endpoint;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 

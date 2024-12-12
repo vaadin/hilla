@@ -16,8 +16,6 @@
 
 package com.vaadin.hilla.parser.plugins.backbone.superclassmethods;
 
-import com.vaadin.hilla.EndpointExposed;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

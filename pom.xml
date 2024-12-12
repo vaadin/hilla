@@ -32,7 +32,6 @@
     <module>packages/java/parser-jvm-test-utils</module>
     <module>packages/java/parser-jvm-utils</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
-    <module>packages/java/types</module>
   </modules>
 
   <profiles>

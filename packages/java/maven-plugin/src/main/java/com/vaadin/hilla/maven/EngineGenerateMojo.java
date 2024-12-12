@@ -12,12 +12,16 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
 
+import static com.vaadin.flow.plugin.maven.FlowModeAbstractMojo.getClasspathElements;
 import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
 import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
 
@@ -63,14 +67,19 @@ public final class EngineGenerateMojo extends AbstractMojo {
                     .buildDir(project.getBuild().getDirectory())
                     .outputDir(generatedTsFolder().toPath())
                     .groupId(project.getGroupId())
-                    .artifactId(project.getArtifactId()).mainClass(mainClass)
-                    .nodeCommand(nodeCommand).productionMode(isProduction)
-                    .create();
+                    .artifactId(project.getArtifactId())
+                    .classpath(getClasspathElements(project))
+                    .mainClass(mainClass).nodeCommand(nodeCommand)
+                    .productionMode(isProduction).create();
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 
             var endpoints = conf.getOfflineEndpointProvider().findEndpoints();
-            parserProcessor.process(endpoints);
+            parserProcessor
+                    .withEndpointAnnotations(Endpoint.class,
+                            BrowserCallable.class)
+                    .withEndpointExposedAnnotations(EndpointExposed.class)
+                    .process(endpoints);
             generatorProcessor.process();
         } catch (ExecutionFailedException e) {
             throw new EngineGenerateMojoException("Endpoint collection failed",

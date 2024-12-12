@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.EndpointExposed;
 import javax.annotation.Nonnull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
@@ -21,10 +18,9 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    private List<Class<? extends Annotation>> endpointAnnotations = List
-            .of(BrowserCallable.class, Endpoint.class);
+    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
-            .of(EndpointExposed.class);
+            .of();
     private String openAPIBasePath;
     private Plugins plugins;
 
@@ -44,12 +40,12 @@ public final class ParserConfiguration {
         return Optional.ofNullable(plugins);
     }
 
-    void setEndpointAnnotations(
+    public void setEndpointAnnotations(
             @Nonnull List<Class<? extends Annotation>> endpointAnnotations) {
         this.endpointAnnotations = endpointAnnotations;
     }
 
-    void setEndpointExposedAnnotations(
+    public void setEndpointExposedAnnotations(
             @Nonnull List<Class<? extends Annotation>> endpointExposedAnnotations) {
         this.endpointExposedAnnotations = endpointExposedAnnotations;
     }

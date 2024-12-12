@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
-import com.vaadin.hilla.Endpoint;
-
 import java.util.List;
 
 @Endpoint
