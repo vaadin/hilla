@@ -15,8 +15,8 @@ import {
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
 import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable.js';
 
 use(sinonChai);
