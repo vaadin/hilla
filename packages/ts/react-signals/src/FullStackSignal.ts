@@ -3,14 +3,6 @@ import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
 
-interface VaadinGlobal {
-  Vaadin?: {
-    featureFlags?: {
-      fullstackSignals?: boolean;
-    };
-  };
-}
-
 const ENDPOINT = 'SignalsHandler';
 
 /**
