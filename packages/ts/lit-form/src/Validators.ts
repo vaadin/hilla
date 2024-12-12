@@ -268,7 +268,8 @@ export class Negative<T> extends AbstractValidator<T> {
   }
 
   override validate(value: T): boolean {
-    return toFloat(String(value)) < 0;
+    const fv = toFloat(String(value));
+    return isNaN(fv) || fv < 0;
   }
 
   readonly name = 'Negative';
@@ -280,7 +281,7 @@ export class NegativeOrZero<T> extends AbstractValidator<T> {
   }
 
   override validate(value: T): boolean {
-    return toFloat(String(value)) <= 0;
+    return (toFloat(String(value)) || 0) <= 0;
   }
 
   readonly name = 'NegativeOrZero';
@@ -292,7 +293,8 @@ export class Positive<T> extends AbstractValidator<T> {
   }
 
   override validate(value: T): boolean {
-    return toFloat(String(value)) > 0;
+    const fv = toFloat(String(value));
+    return isNaN(fv) || fv > 0;
   }
 
   readonly name = 'Positive';
@@ -304,7 +306,7 @@ export class PositiveOrZero<T> extends AbstractValidator<T> {
   }
 
   override validate(value: T): boolean {
-    return toFloat(String(value)) >= 0;
+    return (toFloat(String(value)) || 0) >= 0;
   }
 
   readonly name = 'PositiveOrZero';
