@@ -16,9 +16,6 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.gradle.VaadinFlowPluginExtension
-import com.vaadin.hilla.BrowserCallable
-import com.vaadin.hilla.Endpoint
-import com.vaadin.hilla.EndpointExposed
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
@@ -66,12 +63,7 @@ public open class EngineConfigureTask : DefaultTask() {
             .classpath(classpath)
             .mainClass(project.findProperty("mainClass") as String?)
             .productionMode(vaadinExtension.productionMode.getOrElse(false))
-            .endpointAnnotations(Endpoint::class.java, BrowserCallable::class.java)
-            .endpointExposedAnnotations(EndpointExposed::class.java)
             .create()
-
-        engineConfiguration.parser.endpointAnnotations = listOf(Endpoint::class.java, BrowserCallable::class.java)
-        engineConfiguration.parser.endpointExposedAnnotations = listOf(EndpointExposed::class.java)
 
         EngineConfiguration.setDefault(engineConfiguration)
     }

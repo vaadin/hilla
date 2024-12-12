@@ -93,10 +93,7 @@ public open class EngineGenerateTask : DefaultTask() {
             val generatorProcessor = GeneratorProcessor(conf)
 
             val endpoints = AotEndpointProvider(conf).findEndpointClasses()
-            parserProcessor
-                .withEndpointAnnotations(Endpoint::class.java, BrowserCallable::class.java)
-                .withEndpointExposedAnnotations(EndpointExposed::class.java)
-                .process(endpoints)
+            parserProcessor.process(endpoints)
             generatorProcessor.process()
 
         } catch (e: IOException) {

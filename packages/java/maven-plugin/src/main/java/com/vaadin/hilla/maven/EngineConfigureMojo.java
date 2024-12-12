@@ -11,9 +11,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.engine.EngineConfiguration;
 
 import static com.vaadin.flow.plugin.maven.FlowModeAbstractMojo.getClasspathElements;
@@ -57,9 +54,7 @@ public final class EngineConfigureMojo extends AbstractMojo {
                 .groupId(project.getGroupId())
                 .artifactId(project.getArtifactId())
                 .classpath(getClasspathElements(project)).mainClass(mainClass)
-                .nodeCommand(nodeCommand).productionMode(isProduction)
-                .endpointAnnotations(Endpoint.class, BrowserCallable.class)
-                .endpointExposedAnnotations(EndpointExposed.class).create();
+                .nodeCommand(nodeCommand).productionMode(isProduction).create();
         EngineConfiguration.setDefault(conf);
     }
 

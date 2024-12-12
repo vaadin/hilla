@@ -13,9 +13,13 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EngineConfiguration {
     private static EngineConfiguration INSTANCE;
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(EngineConfiguration.class);
 
     public static final String OPEN_API_PATH = "hilla-openapi.json";
     private Set<Path> classpath = Arrays
@@ -34,9 +38,6 @@ public class EngineConfiguration {
     private EndpointProvider offlineEndpointProvider;
     private boolean productionMode = false;
     private String nodeCommand = "node";
-    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
-    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
-            .of();
 
     private EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -102,11 +103,11 @@ public class EngineConfiguration {
     }
 
     public List<Class<? extends Annotation>> getEndpointAnnotations() {
-        return endpointAnnotations;
+        return parser.getEndpointAnnotations();
     }
 
     public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
-        return endpointExposedAnnotations;
+        return parser.getEndpointExposedAnnotations();
     }
 
     public Path getOpenAPIFile() {
@@ -132,6 +133,18 @@ public class EngineConfiguration {
     public static EngineConfiguration getDefault() {
         if (INSTANCE == null) {
             INSTANCE = new EngineConfiguration();
+            try {
+                INSTANCE.parser.setEndpointAnnotations(List.of(
+                        (Class<? extends Annotation>) Class
+                                .forName("com.vaadin.hilla.BrowserCallable"),
+                        (Class<? extends Annotation>) Class
+                                .forName("com.vaadin.hilla.Endpoint")));
+                INSTANCE.parser.setEndpointExposedAnnotations(
+                        List.of((Class<? extends Annotation>) Class
+                                .forName("com.vaadin.hilla.EndpointExposed")));
+            } catch (Throwable t) {
+                LOGGER.warn("Default annotations not found", t);
+            }
         }
 
         return INSTANCE;
@@ -162,8 +175,10 @@ public class EngineConfiguration {
             this.configuration.offlineEndpointProvider = configuration.offlineEndpointProvider;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
-            this.configuration.endpointAnnotations = configuration.endpointAnnotations;
-            this.configuration.endpointExposedAnnotations = configuration.endpointExposedAnnotations;
+            this.configuration.parser.setEndpointAnnotations(
+                    configuration.getEndpointAnnotations());
+            this.configuration.parser.setEndpointExposedAnnotations(
+                    configuration.getEndpointExposedAnnotations());
         }
 
         public Builder baseDir(Path value) {
@@ -246,13 +261,14 @@ public class EngineConfiguration {
 
         public Builder endpointAnnotations(
                 Class<? extends Annotation>... value) {
-            configuration.endpointAnnotations = Arrays.asList(value);
+            configuration.parser.setEndpointAnnotations(Arrays.asList(value));
             return this;
         }
 
         public Builder endpointExposedAnnotations(
                 Class<? extends Annotation>... value) {
-            configuration.endpointExposedAnnotations = Arrays.asList(value);
+            configuration.parser
+                    .setEndpointExposedAnnotations(Arrays.asList(value));
             return this;
         }
 
