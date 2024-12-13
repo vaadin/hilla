@@ -83,9 +83,8 @@ public class EndpointInvoker {
      * @param applicationContext
      *            The Spring application context
      * @param endpointObjectMapper
-     *            optional factory bean to override the default
-     *            {@link JacksonObjectMapperFactory} that is used for
-     *            serializing and deserializing request and response bodies Use
+     *            The object mapper to be used for serialization and
+     *            deserialization of state events. Use the
      *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
      * @param explicitNullableTypeChecker
