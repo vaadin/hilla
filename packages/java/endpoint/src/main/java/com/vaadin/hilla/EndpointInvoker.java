@@ -84,7 +84,7 @@ public class EndpointInvoker {
      *            The Spring application context
      * @param endpointObjectMapper
      *            The object mapper to be used for serialization and
-     *            deserialization of state events. Use the
+     *            deserialization of request and response bodies. Use the
      *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
      *            qualifier to override the mapper.
      * @param explicitNullableTypeChecker
