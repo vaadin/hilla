@@ -10,9 +10,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
