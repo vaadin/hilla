@@ -1,8 +1,8 @@
 package com.vaadin.hilla.maven;
 
-import com.vaadin.flow.server.ExecutionFailedException;
+import java.io.File;
+
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -10,24 +10,43 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
+
+import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
 
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
  * TypeScript code from it.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-@Execute(goal = "configure")
-public final class EngineGenerateMojo extends AbstractMojo {
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
-    private MavenProject project;
+public final class EngineGenerateMojo extends AbstractMojo
+        implements Configurable {
+    /**
+     * A directory with project's frontend source files.
+     */
+    @Parameter(property = "frontendDirectory", defaultValue = "${project.basedir}/src/main/"
+            + FRONTEND)
+    private File frontend;
+
+    /**
+     * The folder where TypeScript endpoints are generated.
+     */
+    @Parameter(property = "generatedTsFolder")
+    private File generated;
+
+    @Parameter(property = "nodeCommand", defaultValue = "node")
+    private String node;
+
+    @Parameter(property = "mainClass")
+    private String mainClass;
 
     @Override
     public void execute() throws EngineGenerateMojoException {
+        var project = (MavenProject) getPluginContext().get("project");
         if (!FlowModeAbstractMojo.isHillaAvailable(project)) {
             getLog().warn(
                     """
@@ -37,7 +56,7 @@ public final class EngineGenerateMojo extends AbstractMojo {
             return;
         }
         try {
-            var conf = EngineConfiguration.getDefault();
+            var conf = configure();
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 
@@ -50,5 +69,25 @@ public final class EngineGenerateMojo extends AbstractMojo {
         } catch (GeneratorException | ParserException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }
+    }
+
+    @Override
+    public String getNode() {
+        return node;
+    }
+
+    @Override
+    public String getMainClass() {
+        return mainClass;
+    }
+
+    @Override
+    public File getFrontend() {
+        return frontend;
+    }
+
+    @Override
+    public File getGenerated() {
+        return generated;
     }
 }
