@@ -15,10 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Objects;
-import java.util.function.Function;
 
 import com.vaadin.flow.server.frontend.FallibleCommand;
 import com.vaadin.hilla.engine.EngineConfiguration;
@@ -27,9 +24,7 @@ import com.vaadin.hilla.engine.EngineConfiguration;
  * Abstract class for endpoint related generators.
  */
 abstract class AbstractTaskEndpointGenerator implements FallibleCommand {
-    private static boolean firstRun = true;
-
-    private EngineConfiguration engineConfiguration;
+    private final EngineConfiguration engineConfiguration;
 
     AbstractTaskEndpointGenerator(EngineConfiguration engineConfiguration) {
         this.engineConfiguration = Objects.requireNonNull(engineConfiguration,
