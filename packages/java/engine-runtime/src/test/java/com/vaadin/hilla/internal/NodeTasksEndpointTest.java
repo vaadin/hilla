@@ -78,8 +78,7 @@ public class NodeTasksEndpointTest extends TaskTest {
             throws Exception {
         options = options.withProductionMode(true);
         var engineConfiguration = new EngineConfiguration.Builder()
-                .offlineEndpointProvider(() -> List.of(MyEndpoint.class))
-                .create();
+                .endpointFinder(() -> List.of(MyEndpoint.class)).create();
         EngineConfiguration.setDefault(engineConfiguration);
 
         new NodeTasks(options).execute();

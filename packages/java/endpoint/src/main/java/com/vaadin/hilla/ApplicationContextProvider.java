@@ -29,9 +29,14 @@ public class ApplicationContextProvider implements ApplicationContextAware {
         return applicationContext;
     }
 
-    // Allows to schedule actions that should be run when the application
-    // context is available, or to run them immediately if the context is
-    // already available and still active.
+    /**
+     * Allows scheduling actions that should be run when the application context
+     * is available, or to run them immediately if the context is already
+     * available and still active.
+     *
+     * @param action
+     *            the action to be scheduled or run immediately
+     */
     public static void runOnContext(Consumer<ApplicationContext> action) {
         if (applicationContext == null
                 || (applicationContext instanceof ConfigurableApplicationContext

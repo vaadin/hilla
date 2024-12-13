@@ -22,17 +22,13 @@ import java.util.stream.Stream;
 /**
  * Utility class to find endpoints in a non-running Hilla application.
  */
-public class AotEndpointProvider {
+class AotEndpointFinder {
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(AotEndpointProvider.class);
+            .getLogger(AotEndpointFinder.class);
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
-    private final EngineConfiguration engineConfiguration;
 
-    public AotEndpointProvider(EngineConfiguration engineConfiguration) {
-        this.engineConfiguration = engineConfiguration;
-    }
-
-    public List<Class<?>> findEndpointClasses()
+    static List<Class<?>> findEndpointClasses(
+            EngineConfiguration engineConfiguration)
             throws IOException, InterruptedException {
         // Prepares all variables based on the provided configuration
         var aotOutput = engineConfiguration.getBuildDir()
@@ -54,7 +50,7 @@ public class AotEndpointProvider {
         var classpath = engineConfiguration.getClasspath().stream()
                 .filter(Files::exists).toList();
         var settings = Stream.of("-cp",
-                classpath.stream().map(AotEndpointProvider::quotePath)
+                classpath.stream().map(AotEndpointFinder::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
                 "org.springframework.boot.SpringApplicationAotProcessor",
                 applicationClass, quotePath(aotOutput.resolve("sources")),
@@ -79,7 +75,8 @@ public class AotEndpointProvider {
                 engineConfiguration.getArtifactId(), "reflect-config.json"));
 
         if (!Files.isRegularFile(json)) {
-            throw new ParserException("Aot file reflect-config.json not found");
+            throw new ParserException(
+                    "Aot output file reflect-config.json not found");
         }
 
         // The file simply contains a list of beans, we just need their names,
@@ -109,7 +106,7 @@ public class AotEndpointProvider {
                     .toList();
 
             try (var classLoader = new URLClassLoader(urls,
-                    AotEndpointProvider.class.getClassLoader())) {
+                    AotEndpointFinder.class.getClassLoader())) {
                 return candidates.stream().map(name -> {
                     try {
                         return Class.forName(name, false, classLoader);
@@ -130,7 +127,10 @@ public class AotEndpointProvider {
             }
         }
 
-        throw new ParserException("No endpoints detected");
+        throw new ParserException(
+                "Aot output file reflect-config.json does not contain"
+                        + " information about beans, so endpoint detection"
+                        + " cannot be performed");
     }
 
     private static String quotePath(Path path) {

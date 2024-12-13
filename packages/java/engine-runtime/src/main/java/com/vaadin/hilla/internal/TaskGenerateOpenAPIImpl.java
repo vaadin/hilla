@@ -63,7 +63,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         var engineConfiguration = getEngineConfiguration();
         if (engineConfiguration.isProductionMode()) {
-            var endpoints = engineConfiguration.getOfflineEndpointProvider()
+            var endpoints = engineConfiguration.getEndpointFinder()
                     .findEndpoints();
             var processor = new ParserProcessor(engineConfiguration);
             processor.process(endpoints);

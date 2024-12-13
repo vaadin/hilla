@@ -17,7 +17,6 @@ package com.vaadin.hilla;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ public class EndpointCodeGenerator {
 
     private final EndpointController endpointController;
     private final VaadinContext context;
-    private Path buildDirectory;
 
     private ApplicationConfiguration configuration;
     private Set<String> classesUsedInOpenApi = null;
@@ -114,10 +112,6 @@ public class EndpointCodeGenerator {
     private void initIfNeeded() {
         if (configuration == null) {
             configuration = ApplicationConfiguration.get(context);
-
-            Path projectFolder = configuration.getProjectFolder().toPath();
-            buildDirectory = projectFolder
-                    .resolve(configuration.getBuildFolder());
 
             var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());

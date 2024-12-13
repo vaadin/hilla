@@ -60,7 +60,7 @@ public final class EngineGenerateMojo extends AbstractMojo
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 
-            var endpoints = conf.getOfflineEndpointProvider().findEndpoints();
+            var endpoints = conf.getEndpointFinder().findEndpoints();
             parserProcessor.process(endpoints);
             generatorProcessor.process();
         } catch (ExecutionFailedException e) {

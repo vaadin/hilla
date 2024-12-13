@@ -52,8 +52,8 @@ public class AbstractMojoTest {
         project = createMavenProject();
 
         engineConfiguration = new EngineConfiguration.Builder()
-                .baseDir(temporaryDirectory)
-                .offlineEndpointProvider(() -> List.of()).create();
+                .baseDir(temporaryDirectory).endpointFinder(() -> List.of())
+                .create();
         EngineConfiguration.setDefault(engineConfiguration);
     }
 

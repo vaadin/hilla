@@ -35,7 +35,7 @@ public class EngineConfiguration {
     private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
-    private EndpointProvider offlineEndpointProvider;
+    private EndpointFinder endpointFinder;
     private boolean productionMode = false;
     private String nodeCommand = "node";
 
@@ -116,14 +116,14 @@ public class EngineConfiguration {
                 : buildDir.resolve(OPEN_API_PATH);
     }
 
-    public EndpointProvider getOfflineEndpointProvider() {
-        if (offlineEndpointProvider != null) {
-            return offlineEndpointProvider;
+    public EndpointFinder getEndpointFinder() {
+        if (endpointFinder != null) {
+            return endpointFinder;
         }
 
         return () -> {
             try {
-                return new AotEndpointProvider(this).findEndpointClasses();
+                return AotEndpointFinder.findEndpointClasses(this);
             } catch (IOException | InterruptedException e) {
                 throw new ExecutionFailedException(e);
             }
@@ -172,7 +172,7 @@ public class EngineConfiguration {
             this.configuration.groupId = configuration.groupId;
             this.configuration.artifactId = configuration.artifactId;
             this.configuration.mainClass = configuration.mainClass;
-            this.configuration.offlineEndpointProvider = configuration.offlineEndpointProvider;
+            this.configuration.endpointFinder = configuration.endpointFinder;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.parser.setEndpointAnnotations(
@@ -244,8 +244,8 @@ public class EngineConfiguration {
             return this;
         }
 
-        public Builder offlineEndpointProvider(EndpointProvider value) {
-            configuration.offlineEndpointProvider = value;
+        public Builder endpointFinder(EndpointFinder value) {
+            configuration.endpointFinder = value;
             return this;
         }
 
@@ -279,7 +279,7 @@ public class EngineConfiguration {
     }
 
     @FunctionalInterface
-    public interface EndpointProvider {
+    public interface EndpointFinder {
         List<Class<?>> findEndpoints() throws ExecutionFailedException;
     }
 }
