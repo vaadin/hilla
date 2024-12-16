@@ -71,11 +71,11 @@
             "format": "double",
             "x-validation-constraints": [
               {
+                "simpleName": "DecimalMax",
                 "attributes": {
                   "inclusive": false,
                   "value": "0.01"
-                },
-                "simpleName": "DecimalMax"
+                }
               }
             ],
             "x-java-type": "double"
@@ -85,10 +85,10 @@
             "format": "double",
             "x-validation-constraints": [
               {
+                "simpleName": "DecimalMin",
                 "attributes": {
                   "value": "0.01"
-                },
-                "simpleName": "DecimalMin"
+                }
               }
             ],
             "x-java-type": "double"
@@ -98,11 +98,11 @@
             "nullable": true,
             "x-validation-constraints": [
               {
+                "simpleName": "Digits",
                 "attributes": {
                   "integer": 5,
                   "fraction": 2
-                },
-                "simpleName": "Digits"
+                }
               }
             ],
             "x-java-type": "java.lang.String"
@@ -112,10 +112,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
+                "simpleName": "Email",
                 "attributes": {
                   "message": "foo"
-                },
-                "simpleName": "Email"
+                }
               }
             ],
             "x-java-type": "java.lang.String"
@@ -162,10 +162,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
+                "simpleName": "Max",
                 "attributes": {
                   "value": 2
-                },
-                "simpleName": "Max"
+                }
               }
             ],
             "x-java-type": "java.lang.Integer"
@@ -176,11 +176,11 @@
             "nullable": true,
             "x-validation-constraints": [
               {
+                "simpleName": "Min",
                 "attributes": {
                   "message": "foo",
                   "value": 1
-                },
-                "simpleName": "Min"
+                }
               }
             ],
             "x-java-type": "java.lang.Integer"
@@ -267,10 +267,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
+                "simpleName": "Pattern",
                 "attributes": {
                   "regexp": "\\d+\\..+"
-                },
-                "simpleName": "Pattern"
+                }
               }
             ],
             "x-java-type": "java.lang.String"
@@ -310,10 +310,10 @@
             "nullable": true,
             "x-validation-constraints": [
               {
+                "simpleName": "Size",
                 "attributes": {
                   "min": 1
-                },
-                "simpleName": "Size"
+                }
               }
             ],
             "x-java-type": "java.lang.String"
