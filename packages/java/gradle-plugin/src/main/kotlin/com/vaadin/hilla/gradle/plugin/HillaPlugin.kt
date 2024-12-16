@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Jar
 
 /**
  * The main class of the Hilla Gradle Plugin
@@ -45,6 +46,10 @@ public class HillaPlugin : Plugin<Project> {
 
         project.tasks.named("vaadinBuildFrontend") {
             it.dependsOn("hillaConfigure")
+        }
+
+        project.tasks.withType(Jar::class.java) { task: Jar ->
+            task.mustRunAfter("vaadinBuildFrontend")
         }
 
         project.tasks.named("processResources") {

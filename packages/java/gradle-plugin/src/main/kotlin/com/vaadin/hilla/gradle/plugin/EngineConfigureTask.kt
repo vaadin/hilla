@@ -22,7 +22,6 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 
 import com.vaadin.hilla.engine.*
-import org.gradle.api.tasks.bundling.Jar
 import java.util.stream.Stream
 
 /**
@@ -34,11 +33,6 @@ public open class EngineConfigureTask : DefaultTask() {
     init {
         group = "Vaadin"
         description = "Hilla Configure Task"
-
-        project.tasks.withType(Jar::class.java) { task: Jar ->
-            task.mustRunAfter("vaadinBuildFrontend")
-        }
-
     }
 
     @TaskAction
@@ -55,7 +49,7 @@ public open class EngineConfigureTask : DefaultTask() {
 
         val engineConfiguration = EngineConfiguration.Builder()
             .baseDir(vaadinExtension.npmFolder.get().toPath())
-            .buildDir(project.buildDir.toPath())
+            .buildDir(project.layout.buildDirectory.get().asFile.toPath())
             .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
             .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
             .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
