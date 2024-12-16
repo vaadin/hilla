@@ -278,6 +278,11 @@ public class EngineConfiguration {
         }
     }
 
+    /**
+     * Functional interface for finding endpoint classes. Implementations of
+     * this interface are responsible for locating and returning a list of
+     * endpoint classes.
+     */
     @FunctionalInterface
     public interface EndpointFinder {
         List<Class<?>> findEndpoints() throws ExecutionFailedException;
