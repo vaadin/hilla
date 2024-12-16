@@ -272,7 +272,7 @@ public final class TypeSignaturePlugin
         var primary = signatureToTypeString(types.get(0));
         return types.stream()
                 .filter(type -> primary.equals(signatureToTypeString(type)))
-                .collect(Collectors.toList());
+                .distinct().collect(Collectors.toList());
     }
 
     private NodeDependencies scanCompositeTypeSignature(
