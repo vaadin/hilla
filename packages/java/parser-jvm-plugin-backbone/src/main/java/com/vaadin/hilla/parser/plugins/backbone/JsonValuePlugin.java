@@ -45,8 +45,10 @@ public class JsonValuePlugin
     public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
             @Nonnull NodePath<?> parentPath) {
         if (node instanceof TypedNode typedNode) {
-            if (typedNode.getType() instanceof ClassRefSignatureModel classRefSignatureModel) {
-                var cls = (Class<?>) classRefSignatureModel.getClassInfo().get();
+            if (typedNode
+                    .getType() instanceof ClassRefSignatureModel classRefSignatureModel) {
+                var cls = (Class<?>) classRefSignatureModel.getClassInfo()
+                        .get();
                 // Check if the class has the annotations which qualify for a
                 // value type. If so, replace the type with the corresponding
                 // value type.
