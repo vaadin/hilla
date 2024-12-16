@@ -5,6 +5,7 @@ import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
 import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
+import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling';
 
 type MaybeCountService<TItem> = Partial<CountService<TItem>>;
 type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
@@ -42,6 +43,7 @@ function createSort<TItem>(params: GridDataProviderParams<TItem>): Sort {
         property: order.path,
         direction: order.direction === 'asc' ? Direction.ASC : Direction.DESC,
         ignoreCase: false,
+        nullHandling: NullHandling.NATIVE,
       })),
   };
 }
