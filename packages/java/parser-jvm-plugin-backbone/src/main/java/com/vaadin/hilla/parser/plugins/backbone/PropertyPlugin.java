@@ -219,7 +219,8 @@ public final class PropertyPlugin
 
         private Stream<JacksonPropertyModel> filterPrivateProperties(
                 Stream<JacksonPropertyModel> properties) {
-            return properties.filter(property -> !property.getAssociatedTypes().isEmpty());
+            return properties.filter(
+                    property -> !property.getAssociatedTypes().isEmpty());
         }
 
         private Stream<JacksonPropertyModel> filterSuperClassProperties(
