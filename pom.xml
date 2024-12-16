@@ -155,6 +155,13 @@
 
   <dependencyManagement>
     <dependencies>
+<dependency>
+<groupId>com.fasterxml.jackson</groupId>
+<artifactId>jackson-bom</artifactId>
+<version>${jackson.version}</version>
+<type>pom</type>
+<scope>import</scope>
+</dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-bom</artifactId>
@@ -196,16 +203,6 @@
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
         <version>${jsr305.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>org.junit</groupId>
