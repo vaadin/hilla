@@ -30,16 +30,8 @@ class AotEndpointFinder {
     static List<Class<?>> findEndpointClasses(
             EngineConfiguration engineConfiguration)
             throws IOException, InterruptedException {
-        // Prepares all variables based on the provided configuration
-        var aotOutput = engineConfiguration.getBuildDir()
-                .resolve("spring-aot/main");
-        var classesDirectory = aotOutput.resolve("classes");
-        var applicationClass = (engineConfiguration.getMainClass() != null)
-                ? engineConfiguration.getMainClass()
-                : MainClassFinder.findSingleMainClass(
-                        engineConfiguration.getClassesDir().toFile(),
-                        SPRING_BOOT_APPLICATION_CLASS_NAME);
-
+        // Determine the main application class
+        var applicationClass = determineApplicationClass(engineConfiguration);
         if (applicationClass == null) {
             LOGGER.warn("This project has not been recognized as a Spring Boot"
                     + " application because a main class could not be found."
@@ -47,8 +39,35 @@ class AotEndpointFinder {
             return List.of();
         }
 
+        // Generate the AOT artifacts, including reflect-config.json
+        var reflectConfigPath = generateAotArtifacts(engineConfiguration,
+                applicationClass);
+
+        // Load annotated classes from reflect-config.json
+        return loadAnnotatedClasses(engineConfiguration, reflectConfigPath);
+    }
+
+    private static String determineApplicationClass(
+            EngineConfiguration engineConfiguration) throws IOException {
+        var mainClass = engineConfiguration.getMainClass();
+        if (mainClass != null) {
+            return mainClass;
+        }
+
+        return MainClassFinder.findSingleMainClass(
+                engineConfiguration.getClassesDir().toFile(),
+                SPRING_BOOT_APPLICATION_CLASS_NAME);
+    }
+
+    private static Path generateAotArtifacts(
+            EngineConfiguration engineConfiguration, String applicationClass)
+            throws IOException, InterruptedException {
+        var aotOutput = engineConfiguration.getBuildDir()
+                .resolve("spring-aot/main");
+        var classesDirectory = aotOutput.resolve("classes");
         var classpath = engineConfiguration.getClasspath().stream()
                 .filter(Files::exists).toList();
+
         var settings = Stream.of("-cp",
                 classpath.stream().map(AotEndpointFinder::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
@@ -57,9 +76,11 @@ class AotEndpointFinder {
                 quotePath(aotOutput.resolve("resources")),
                 quotePath(classesDirectory), engineConfiguration.getGroupId(),
                 engineConfiguration.getArtifactId()).toList();
+
         var argsFile = engineConfiguration.getBuildDir()
                 .resolve("aot-args-" + System.currentTimeMillis() + ".txt");
         Files.write(argsFile, settings);
+
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
@@ -79,58 +100,61 @@ class AotEndpointFinder {
                     "Aot output file reflect-config.json not found");
         }
 
+        return json;
+    }
+
+    private static List<Class<?>> loadAnnotatedClasses(
+            EngineConfiguration engineConfiguration, Path reflectConfigPath)
+            throws IOException {
         // The file simply contains a list of beans, we just need their names,
         // which are class names.
-        String jsonContent = Files.readString(json);
+        var jsonContent = Files.readString(reflectConfigPath);
         var objectMapper = new ObjectMapper();
         var rootNode = objectMapper.readTree(jsonContent);
 
-        if (rootNode.isArray()) {
-            var candidates = new ArrayList<String>();
+        if (!rootNode.isArray()) {
+            throw new ParserException(
+                    "Aot output file reflect-config.json does not contain"
+                            + " information about beans, so endpoint detection"
+                            + " cannot be performed");
+        }
 
-            for (var node : rootNode) {
-                String name = node.get("name").asText();
-                candidates.add(name);
+        // Extract candidate class names
+        var candidates = new ArrayList<String>();
+        for (var node : rootNode) {
+            String name = node.get("name").asText();
+            candidates.add(name);
+        }
+
+        // Prepare classloader
+        var classpath = engineConfiguration.getClasspath().stream()
+                .filter(Files::exists).toList();
+
+        var urls = classpath.stream().map(Path::toFile).map(file -> {
+            try {
+                return file.toURI().toURL();
+            } catch (Throwable t) {
+                return null;
             }
+        }).filter(Objects::nonNull).toArray(URL[]::new);
 
-            var urls = classpath.stream().map(Path::toFile).map(file -> {
+        var annotationNames = engineConfiguration.getParser()
+                .getEndpointAnnotations().stream().map(Class::getName).toList();
+
+        try (var classLoader = new URLClassLoader(urls,
+                AotEndpointFinder.class.getClassLoader())) {
+            return candidates.stream().map(name -> {
                 try {
-                    return file.toURI().toURL();
+                    return Class.forName(name, false, classLoader);
                 } catch (Throwable t) {
                     return null;
                 }
-            }).filter(Objects::nonNull).toArray(URL[]::new);
-
-            var annotationNames = engineConfiguration.getParser()
-                    .getEndpointAnnotations().stream().map(Class::getName)
-                    .toList();
-
-            try (var classLoader = new URLClassLoader(urls,
-                    AotEndpointFinder.class.getClassLoader())) {
-                return candidates.stream().map(name -> {
-                    try {
-                        return Class.forName(name, false, classLoader);
-                    }
-                    // Must also catch NoClassDefFoundError here, exceptions are
-                    // not enough.
-                    catch (Throwable t) {
-                        return null;
-                    }
-                }).filter(Objects::nonNull)
-                        // Filter out classes that are not annotated with any of
-                        // the endpoint annotations.
-                        .filter(cls -> Arrays.stream(cls.getAnnotations())
-                                .map(Annotation::annotationType)
-                                .map(Class::getName)
-                                .anyMatch(annotationNames::contains))
-                        .collect(Collectors.toList());
-            }
+            }).filter(Objects::nonNull)
+                    .filter(cls -> Arrays.stream(cls.getAnnotations())
+                            .map(Annotation::annotationType).map(Class::getName)
+                            .anyMatch(annotationNames::contains))
+                    .collect(Collectors.toList());
         }
-
-        throw new ParserException(
-                "Aot output file reflect-config.json does not contain"
-                        + " information about beans, so endpoint detection"
-                        + " cannot be performed");
     }
 
     private static String quotePath(Path path) {
