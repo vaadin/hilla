@@ -85,7 +85,7 @@
     "@vaadin/hilla-react-auth": "24.7.0-alpha2",
     "@vaadin/hilla-react-signals": "24.7.0-alpha2",
     "react": "^18.3.1",
-    "rollup": "^4.28.1",
+    "rollup": "^4.21.0",
     "typescript": "5.7.2"
   }
 }
