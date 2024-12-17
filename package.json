@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@nx/js": "^18.0.4",
-    "@preact/signals-react-transform": "^0.4.0",
+    "@preact/signals-react-transform": "^0.5.0",
     "@remcovaes/web-test-runner-vite-plugin": "^1.2.2",
     "@types/karma": "^6.3.9",
     "@types/node": "^22.10.1",
