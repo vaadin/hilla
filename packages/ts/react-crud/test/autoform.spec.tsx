@@ -1015,7 +1015,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateField', () => {
       it('formats and parses values using localized date format', async () => {
-        viewport.set(1000,1000);
+        viewport.set(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
@@ -1036,7 +1036,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateTimeField', () => {
       it('formats and parses values using localized date format', async () => {
-        viewport.set(1000,1000);
+        viewport.set(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
