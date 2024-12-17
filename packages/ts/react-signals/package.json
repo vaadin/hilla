@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@types/react": "^18.2.23",
+    "@types/react": "^18.3.17",
     "@types/sinon": "^10.0.17",
     "@types/validator": "^13.11.2",
     "react-router-dom": "^6.16.0",
