@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-signals",
-  "version": "24.6.0-rc1",
+  "version": "24.6.0",
   "description": "Signals for Hilla React",
   "main": "index.js",
   "module": "index.js",
@@ -46,8 +46,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@preact/signals-react": "^2.0.0",
-    "@vaadin/hilla-frontend": "24.6.0-rc1",
+    "@preact/signals-react": "^2.3.0",
+    "@vaadin/hilla-frontend": "24.6.0",
     "nanoid": "^5.0.7"
   },
   "peerDependencies": {
@@ -62,7 +62,7 @@
     "@types/chai-as-promised": "^7.1.6",
     "@types/chai-dom": "^1.11.1",
     "@types/mocha": "^10.0.2",
-    "@types/react": "^18.2.23",
+    "@types/react": "^18.3.17",
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@types/validator": "^13.11.2",
@@ -73,6 +73,6 @@
     "karma-viewport": "^1.0.9",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.6.2"
+    "typescript": "5.7.2"
   }
 }

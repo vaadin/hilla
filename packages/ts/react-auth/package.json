@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-auth",
-  "version": "24.6.0-rc1",
+  "version": "24.6.0",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.6.0-rc1"
+    "@vaadin/hilla-frontend": "24.6.0"
   },
   "peerDependencies": {
     "react": "^18",
@@ -61,7 +61,7 @@
     "@types/chai": "^4.3.6",
     "@types/chai-dom": "^1.11.1",
     "@types/mocha": "^10.0.2",
-    "@types/react": "^18.2.23",
+    "@types/react": "^18.3.17",
     "@types/sinon": "^10.0.17",
     "@types/sinon-chai": "^3.2.10",
     "@types/validator": "^13.11.2",
@@ -69,6 +69,6 @@
     "chai-dom": "^1.11.0",
     "sinon": "^16.0.0",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.6.2"
+    "typescript": "5.7.2"
   }
 }

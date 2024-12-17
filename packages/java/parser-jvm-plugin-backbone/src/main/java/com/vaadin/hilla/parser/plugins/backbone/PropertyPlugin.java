@@ -141,6 +141,7 @@ public final class PropertyPlugin
         public Stream<JacksonPropertyModel> stream() {
             var properties = description.findProperties().stream()
                     .map(JacksonPropertyModel::of);
+            properties = filterPrivateProperties(properties);
             properties = filterSuperClassProperties(properties);
             properties = filterPropertiesWithIgnoredTypes(properties);
 
@@ -214,6 +215,12 @@ public final class PropertyPlugin
             // explicitly annotated ones should remain
             return properties.filter(property -> property.couldDeserialize()
                     || property.isExplicitlyIncluded());
+        }
+
+        private Stream<JacksonPropertyModel> filterPrivateProperties(
+                Stream<JacksonPropertyModel> properties) {
+            return properties.filter(
+                    property -> !property.getAssociatedTypes().isEmpty());
         }
 
         private Stream<JacksonPropertyModel> filterSuperClassProperties(

@@ -8,6 +8,7 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import jakarta.annotation.Nonnull;
 
 import java.lang.reflect.Method;
@@ -43,17 +44,17 @@ public class JsonValuePlugin
     @Override
     public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
             @Nonnull NodePath<?> parentPath) {
-        if (node instanceof TypeSignatureNode typeSignatureNode) {
-            if (typeSignatureNode
-                    .getSource() instanceof ClassRefSignatureModel classRefSignatureModel) {
+        if (node instanceof TypedNode typedNode) {
+            if (typedNode
+                    .getType() instanceof ClassRefSignatureModel classRefSignatureModel) {
                 var cls = (Class<?>) classRefSignatureModel.getClassInfo()
                         .get();
                 // Check if the class has the annotations which qualify for a
                 // value type. If so, replace the type with the corresponding
                 // value type.
-                Optional<TypeSignatureNode> valueNode = getValueType(cls)
+                Optional<Node<?, ?>> valueNode = getValueType(cls)
                         .map(SignatureModel::of).map(TypeSignatureNode::of);
-                return valueNode.orElse(typeSignatureNode);
+                return valueNode.orElse(node);
             }
         }
 
