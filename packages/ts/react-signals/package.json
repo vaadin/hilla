@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@preact/signals-react": "^2.0.0",
+    "@preact/signals-react": "^2.3.0",
     "@vaadin/hilla-frontend": "24.7.0-alpha2",
     "nanoid": "^5.0.7"
   },
