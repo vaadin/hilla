@@ -121,7 +121,7 @@ module.exports = (config) => {
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1024x768'],
+        flags: ['--no-sandbox', '--disable-setuid-sandbox'],
       },
       ChromeNoSS: {
         base: 'Chrome',
