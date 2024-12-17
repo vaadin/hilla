@@ -54,7 +54,7 @@
     "@vaadin/hilla-generator-core": "24.7.0-alpha2",
     "@vaadin/hilla-generator-plugin-backbone": "24.7.0-alpha2",
     "@vaadin/hilla-generator-utils": "24.7.0-alpha2",
-    "typescript": "5.6.2"
+    "typescript": "5.7.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.6",
