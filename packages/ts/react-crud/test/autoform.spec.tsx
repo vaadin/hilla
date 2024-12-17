@@ -1027,6 +1027,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const input = dateField.querySelector('input')!;
         expect(input.value).to.equal('31.12.1999');
 
+        console.log("Viewport size: "+window.innerWidth+"x"+window.innerHeight);
         await user.clear(input);
         await user.type(input, '01.01.2000{enter}');
         expect(dateField.value).to.equal('2000-01-01');
