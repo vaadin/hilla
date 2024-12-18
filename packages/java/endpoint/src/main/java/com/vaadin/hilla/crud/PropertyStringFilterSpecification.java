@@ -17,18 +17,16 @@ import org.springframework.data.jpa.domain.Specification;
 public class PropertyStringFilterSpecification<T> implements Specification<T> {
 
     private final PropertyStringFilter filter;
-    private final Class<?> javaType;
 
-    public PropertyStringFilterSpecification(PropertyStringFilter filter,
-            Class<?> javaType) {
+    public PropertyStringFilterSpecification(PropertyStringFilter filter) {
         this.filter = filter;
-        this.javaType = javaType;
     }
 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query,
             CriteriaBuilder criteriaBuilder) {
         String value = filter.getFilterValue();
+        Class<?> javaType = getJavaType(filter.getPropertyId(), root);
         Path<String> propertyPath = getPath(filter.getPropertyId(), root);
         if (javaType == String.class) {
             Expression<String> expr = criteriaBuilder.lower(propertyPath);
@@ -169,6 +167,21 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
             i++;
         }
         return path;
+    }
+
+    private Class<?> getJavaType(String propertyId, Root<T> root) {
+        if (propertyId.contains(".")) {
+            String[] parts = propertyId.split("\\.");
+            Path<?> path = root.get(parts[0]);
+            int i = 1;
+            while (i < parts.length) {
+                path = path.get(parts[i]);
+                i++;
+            }
+            return path.getJavaType();
+        } else {
+            return root.get(propertyId).getJavaType();
+        }
     }
 
     private boolean isBoolean(Class<?> javaType) {
