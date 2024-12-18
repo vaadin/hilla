@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -67,9 +67,9 @@ public final class TransferTypesPlugin
         return List.of(BackbonePlugin.class);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies.processChildNodes(this::processNodes)
                 .processRelatedNodes(this::processNodes);
     }

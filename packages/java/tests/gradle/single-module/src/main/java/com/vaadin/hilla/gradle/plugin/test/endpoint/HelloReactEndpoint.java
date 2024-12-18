@@ -8,8 +8,8 @@ import com.vaadin.hilla.Nonnull;
 @AnonymousAllowed
 public class HelloReactEndpoint {
 
-    @Nonnull
-    public String sayHello(@Nonnull String name) {
+    @NonNull
+    public String sayHello(@NonNull String name) {
         if (name.isEmpty()) {
             return "Hello stranger";
         } else {

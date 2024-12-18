@@ -28,7 +28,7 @@ class ChatService {
 
 	private final Flux<Message> chat = chatSink.asFlux();
 
-	public Flux<@Nonnull Message> join() {
+	public Flux<@NonNull Message> join() {
 		return chat;
 	}
 

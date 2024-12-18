@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -39,9 +39,9 @@ public final class MethodParameterPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof MethodNode) {
             var methodNode = (MethodNode) nodeDependencies.getNode();
             return nodeDependencies

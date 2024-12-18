@@ -1,5 +1,7 @@
 package com.vaadin.flow.connect;
 
+import org.jspecify.annotations.NonNull;
+
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import com.vaadin.hilla.Endpoint;
@@ -13,7 +15,7 @@ import com.vaadin.hilla.Nullable;
 @AnonymousAllowed
 public class AppEndpoint {
 
-    @Nonnull
+    @NonNull
     public String hello(@Nullable String name) {
         // This intentionally uses Java 17 syntax to ensure it works
         switch (name) {

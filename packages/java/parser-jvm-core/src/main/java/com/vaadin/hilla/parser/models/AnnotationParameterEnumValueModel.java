@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.AnnotationEnumValue;
 
@@ -11,13 +11,13 @@ public abstract class AnnotationParameterEnumValueModel implements Model {
 
     @Deprecated
     public static AnnotationParameterEnumValueModel of(
-            @Nonnull AnnotationEnumValue origin) {
+            @NonNull AnnotationEnumValue origin) {
         return new AnnotationParameterEnumValueSourceModel(
                 Objects.requireNonNull(origin));
     }
 
     public static AnnotationParameterEnumValueModel of(
-            @Nonnull Enum<?> origin) {
+            @NonNull Enum<?> origin) {
         return new AnnotationParameterEnumValueReflectionModel(
                 Objects.requireNonNull(origin));
     }

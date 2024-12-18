@@ -137,8 +137,8 @@ class SingleModuleTest : AbstractGradleTest() {
             @AnonymousAllowed
             public class HelloReactEndpoint {
 
-                @Nonnull
-                public String sayHello(@Nonnull String name) {
+                @NonNull
+                public String sayHello(@NonNull String name) {
                     if (name.isEmpty()) {
                         return "Hello stranger";
                     } else {
