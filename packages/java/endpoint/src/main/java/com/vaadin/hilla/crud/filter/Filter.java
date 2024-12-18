@@ -1,9 +1,5 @@
 package com.vaadin.hilla.crud.filter;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 /**
  * Superclass for all filters to be used with CRUD services. This specific class
  * is never used, instead a filter instance will be one of the following types:
@@ -15,11 +11,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * <li>{@link PropertyStringFilter} - Matches a specific property, or nested
  * property path, against a filter value, using a specific operator.</li>
  * </ul>
+ *
+ * @deprecated Use {@link com.vaadin.flow.spring.data.filter.Filter} instead
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @Type(value = OrFilter.class, name = "or"),
-        @Type(value = AndFilter.class, name = "and"),
-        @Type(value = PropertyStringFilter.class, name = "propertyString") })
-public class Filter {
+@Deprecated(forRemoval = true)
+public class Filter extends com.vaadin.flow.spring.data.filter.Filter {
 
 }

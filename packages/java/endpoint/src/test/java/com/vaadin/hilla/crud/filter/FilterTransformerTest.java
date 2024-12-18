@@ -2,12 +2,6 @@ package com.vaadin.hilla.crud.filter;
 
 import java.util.List;
 
-import com.vaadin.hilla.crud.JpaFilterConverter;
-import com.vaadin.hilla.crud.TestEnum;
-import com.vaadin.hilla.crud.TestObject;
-import com.vaadin.hilla.crud.TestRepository;
-import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +9,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
+import com.vaadin.flow.spring.data.filter.PropertyStringFilter.Matcher;
+import com.vaadin.flow.spring.data.jpa.JpaFilterConverter;
+import com.vaadin.hilla.crud.TestEnum;
+import com.vaadin.hilla.crud.TestObject;
+import com.vaadin.hilla.crud.TestRepository;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest()
