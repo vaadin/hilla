@@ -32,9 +32,19 @@ import reactor.core.publisher.Flux;
 @BrowserCallable
 public class SignalsHandler {
 
+    private static final String FEATURE_FLAG_ERROR_MESSAGE = """
+            %n
+            ***********************************************************************************************************************
+            *  The Hilla Fullstack Signals API is currently considered experimental and may change in the future.                 *
+            *  To use it you need to explicitly enable it in Copilot, or by adding com.vaadin.experimental.fullstackSignals=true  *
+            *    to src/main/resources/vaadin-featureflags.properties.                                                            *
+            ***********************************************************************************************************************
+            %n"""
+            .stripIndent();
+
     private final SecureSignalsRegistry registry;
 
-    public SignalsHandler(SecureSignalsRegistry registry) {
+    public SignalsHandler(@Nullable SecureSignalsRegistry registry) {
         this.registry = registry;
     }
 
@@ -53,6 +63,10 @@ public class SignalsHandler {
     public Flux<ObjectNode> subscribe(String providerEndpoint,
             String providerMethod, String clientSignalId, ObjectNode body,
             @Nullable String parentClientSignalId) {
+        if (registry == null) {
+            throw new IllegalStateException(
+                    String.format(FEATURE_FLAG_ERROR_MESSAGE));
+        }
         try {
             if (parentClientSignalId != null) {
                 return subscribe(parentClientSignalId, clientSignalId);
@@ -96,6 +110,10 @@ public class SignalsHandler {
     public void update(String clientSignalId, ObjectNode event)
             throws EndpointInvocationException.EndpointAccessDeniedException,
             EndpointInvocationException.EndpointNotFoundException {
+        if (registry == null) {
+            throw new IllegalStateException(
+                    String.format(FEATURE_FLAG_ERROR_MESSAGE));
+        }
         var parentSignalId = ListStateEvent.extractParentSignalId(event);
         if (parentSignalId != null) {
             if (registry.get(parentSignalId) == null) {

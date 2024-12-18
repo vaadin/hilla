@@ -22,6 +22,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 public class SignalsHandlerTest {
@@ -233,5 +234,20 @@ public class SignalsHandlerTest {
         // Ensure that no interaction with clientSignalId's signal occurred
         Mockito.verify(signalsRegistry, Mockito.never())
                 .get(CLIENT_SIGNAL_ID_1);
+    }
+
+    @Test
+    public void when_signalRegistryIsNull_anyInteraction_throwsException() {
+        signalsHandler = new SignalsHandler(null);
+        var exception = assertThrows(IllegalStateException.class,
+                () -> signalsHandler.subscribe("endpoint", "method",
+                        CLIENT_SIGNAL_ID_1, null, null));
+        assertTrue(exception.getMessage().contains(
+                "The Hilla Fullstack Signals API is currently considered experimental"));
+
+        exception = assertThrows(IllegalStateException.class,
+                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, null));
+        assertTrue(exception.getMessage().contains(
+                "The Hilla Fullstack Signals API is currently considered experimental"));
     }
 }
