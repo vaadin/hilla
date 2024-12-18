@@ -85,8 +85,6 @@ public class EndpointCodeGenerator {
         }
 
         ApplicationContextProvider.runOnContext(applicationContext -> {
-            // TODO: extract this logic as it is also used in
-            // TaskGenerateOpenAPIImpl
             List<Class<?>> endpoints = engineConfiguration.getParser()
                     .getEndpointAnnotations().stream()
                     .map(applicationContext::getBeansWithAnnotation)
