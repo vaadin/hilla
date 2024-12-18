@@ -86,7 +86,7 @@ public open class EngineGenerateTask : DefaultTask() {
                 .classpath(classpathElements)
                 .mainClass(mainClass)
                 .productionMode(isProductionMode)
-                .create()
+                .build()
 
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)

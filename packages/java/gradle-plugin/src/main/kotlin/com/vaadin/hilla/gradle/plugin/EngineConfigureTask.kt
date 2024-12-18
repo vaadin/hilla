@@ -46,10 +46,11 @@ public open class EngineConfigureTask : DefaultTask() {
         val pluginClasspath = project.buildscript.configurations.getByName("classpath")
             .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
         val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
+        val baseDir = vaadinExtension.npmFolder.get().toPath()
 
         val engineConfiguration = EngineConfiguration.Builder()
-            .baseDir(vaadinExtension.npmFolder.get().toPath())
-            .buildDir(project.layout.buildDirectory.get().asFile.toPath())
+            .baseDir(baseDir)
+            .buildDir(baseDir.resolve(vaadinExtension.projectBuildDir.get()))
             .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
             .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
             .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
@@ -57,7 +58,7 @@ public open class EngineConfigureTask : DefaultTask() {
             .classpath(classpath)
             .mainClass(project.findProperty("mainClass") as String?)
             .productionMode(vaadinExtension.productionMode.getOrElse(false))
-            .create()
+            .build()
 
         EngineConfiguration.setDefault(engineConfiguration)
     }
