@@ -22,18 +22,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.GeneratorProcessor;
-import com.vaadin.hilla.engine.ParserProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.FrontendTools;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.GeneratorProcessor;
+import com.vaadin.hilla.engine.ParserProcessor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * Handles (re)generation of the TypeScript code.
@@ -85,11 +87,14 @@ public class EndpointCodeGenerator {
         }
 
         ApplicationContextProvider.runOnContext(applicationContext -> {
-            List<Class<?>> browserCallables = engineConfiguration.getParser()
+            List<Class<?>> browserCallables = engineConfiguration
                     .getEndpointAnnotations().stream()
                     .map(applicationContext::getBeansWithAnnotation)
                     .map(Map::values).flatMap(Collection::stream)
-                    .<Class<?>> map(Object::getClass).distinct().toList();
+                    // maps to original class when proxies are found
+                    // (also converts to class in all cases)
+                    .map(AopProxyUtils::ultimateTargetClass).distinct()
+                    .collect(Collectors.toList());
             ParserProcessor parser = new ParserProcessor(engineConfiguration);
             parser.process(browserCallables);
 
