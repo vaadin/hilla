@@ -43,7 +43,7 @@ interface Configurable {
                 .groupId(project.getGroupId())
                 .artifactId(project.getArtifactId())
                 .classpath(getClasspathElements(project)).mainClass(mainClass)
-                .nodeCommand(getNode()).productionMode(isProduction).create();
+                .nodeCommand(getNode()).productionMode(isProduction).build();
         EngineConfiguration.setDefault(conf);
         return conf;
     }

@@ -124,7 +124,7 @@ public class EndpointCodeGenerator {
                                             configuration.getFrontendFolder())
                                     .toPath())
                     .productionMode(false)
-                    .nodeCommand(frontendTools.getNodeBinary()).create();
+                    .nodeCommand(frontendTools.getNodeBinary()).build();
         }
     }
 
