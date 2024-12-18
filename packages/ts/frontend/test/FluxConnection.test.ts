@@ -125,6 +125,7 @@ describe('@vaadin/hilla-frontend', () => {
       const msg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'it failed' };
       emitMessage(msg);
       expect(onError).to.have.been.calledOnce;
+      expect(onError).to.have.been.calledWith('it failed');
     });
 
     it('should not deliver messages after completing', () => {

@@ -44,7 +44,7 @@ function useFeatureRegistration(feature: string): void {
 export function featureRegistration<C extends (...args: any[]) => any>(Component: C, feature: string): C {
   return forwardRef<unknown, React.JSX.LibraryManagedAttributes<C, NonNullable<unknown>>>((props, ref) => {
     useFeatureRegistration(feature);
-    return <Component {...props} ref={ref} />;
+    return <Component {...(props as any)} ref={ref} />;
   }) as unknown as C;
 }
 
