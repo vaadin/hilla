@@ -19,20 +19,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
 
 /**
@@ -40,9 +34,6 @@ import org.springframework.aop.framework.AopProxyUtils;
  */
 public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(TaskGenerateOpenAPIImpl.class);
 
     /**
      * Create a task for generating OpenAPI spec.
