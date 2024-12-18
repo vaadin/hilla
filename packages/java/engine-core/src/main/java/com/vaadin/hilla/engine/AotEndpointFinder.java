@@ -26,6 +26,7 @@ class AotEndpointFinder {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AotEndpointFinder.class);
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
+    private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
     static List<Class<?>> findEndpointClasses(
             EngineConfiguration engineConfiguration)
@@ -71,8 +72,8 @@ class AotEndpointFinder {
         var settings = Stream.of("-cp",
                 classpath.stream().map(AotEndpointFinder::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
-                "org.springframework.boot.SpringApplicationAotProcessor",
-                applicationClass, quotePath(aotOutput.resolve("sources")),
+                SPRING_AOT_PROCESSOR, applicationClass,
+                quotePath(aotOutput.resolve("sources")),
                 quotePath(aotOutput.resolve("resources")),
                 quotePath(classesDirectory), engineConfiguration.getGroupId(),
                 engineConfiguration.getArtifactId()).toList();
@@ -96,8 +97,11 @@ class AotEndpointFinder {
                 engineConfiguration.getArtifactId(), "reflect-config.json"));
 
         if (!Files.isRegularFile(json)) {
-            throw new ParserException(
-                    "Aot output file reflect-config.json not found");
+            throw new ParserException(String.format(
+                    "The `%s` tool has not produced the expected"
+                            + " `reflect-config.json` file, which is used to"
+                            + " identify available endpoints.",
+                    SPRING_AOT_PROCESSOR));
         }
 
         return json;
