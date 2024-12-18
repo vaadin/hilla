@@ -3,8 +3,6 @@ package com.vaadin.hilla.parser.plugins.backbone;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 

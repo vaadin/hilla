@@ -1145,7 +1145,8 @@ public class EndpointControllerTest {
     public void should_Fallback_to_Spring_Context() throws Exception {
         // this also tests that an empty definition is not a problem
         var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
-        // as endpoints are find through Spring, the results are the same
+        // as browser callables are found through Spring, the results are the
+        // same
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
         assertNotNull(endpointRegistry.get("libraryEndpoint"));
         assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
@@ -1164,8 +1165,8 @@ public class EndpointControllerTest {
     private EndpointRegistry registerEndpoints(String openApiFilename) {
         var context = Mockito.mock(ApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
-        // Suppose that both the "regular" endpoint and the one from a library
-        // are Spring beans
+        // Suppose that both the "regular" browser callable and the one from a
+        // library are Spring beans
         Mockito.doReturn(Map.of("regularEndpoint",
                 new ApplicationEndpoint(applicationComponent),
                 "libraryEndpoint", new LibraryEndpoint())).when(context)

@@ -20,11 +20,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Utility class to find endpoints in a non-running Hilla application.
+ * Utility class to find browser callables (endpoints) in a non-running Hilla
+ * application.
  */
-class AotEndpointFinder {
+class AotBrowserCallableFinder {
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(AotEndpointFinder.class);
+            .getLogger(AotBrowserCallableFinder.class);
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
@@ -70,7 +71,7 @@ class AotEndpointFinder {
                 .filter(Files::exists).toList();
 
         var settings = Stream.of("-cp",
-                classpath.stream().map(AotEndpointFinder::quotePath)
+                classpath.stream().map(AotBrowserCallableFinder::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
                 SPRING_AOT_PROCESSOR, applicationClass,
                 quotePath(aotOutput.resolve("sources")),
@@ -146,7 +147,7 @@ class AotEndpointFinder {
                 .getEndpointAnnotations().stream().map(Class::getName).toList();
 
         try (var classLoader = new URLClassLoader(urls,
-                AotEndpointFinder.class.getClassLoader())) {
+                AotBrowserCallableFinder.class.getClassLoader())) {
             return candidates.stream().map(name -> {
                 try {
                     return Class.forName(name, false, classLoader);

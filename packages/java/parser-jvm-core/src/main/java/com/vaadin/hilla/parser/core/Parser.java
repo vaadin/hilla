@@ -44,7 +44,7 @@ public final class Parser {
             "jakarta.annotation.security.RolesAllowed",
             "com.vaadin.flow.server.auth.AnonymousAllowed");
 
-    private static final List<String> INTERNAL_ENDPOINTS = List
+    private static final List<String> INTERNAL_BROWSER_CALLABLES = List
             .of("com.vaadin.hilla.signals.handler.SignalsHandler");
 
     public Parser() {
@@ -280,7 +280,7 @@ public final class Parser {
      * @return A result OpenAPI object.
      */
     @Nonnull
-    public OpenAPI execute(List<Class<?>> endpoints) {
+    public OpenAPI execute(List<Class<?>> browserCallables) {
         Objects.requireNonNull(config.classPathElements,
                 "[JVM Parser] classPath is not provided.");
         if (config.endpointAnnotations == null
@@ -291,14 +291,14 @@ public final class Parser {
 
         logger.debug("JVM Parser started");
 
-        endpoints = endpoints.stream()
-                .filter(cls -> !INTERNAL_ENDPOINTS.contains(cls.getName()))
+        browserCallables = browserCallables.stream().filter(
+                cls -> !INTERNAL_BROWSER_CALLABLES.contains(cls.getName()))
                 .toList();
 
         var storage = new SharedStorage(config);
 
-        validateEndpointExposedClassesForAclAnnotations(endpoints);
-        var rootNode = new RootNode(endpoints, storage.getOpenAPI());
+        validateEndpointExposedClassesForAclAnnotations(browserCallables);
+        var rootNode = new RootNode(browserCallables, storage.getOpenAPI());
         var pluginManager = new PluginManager(
                 storage.getParserConfig().getPlugins());
         pluginManager.setStorage(storage);
@@ -311,11 +311,12 @@ public final class Parser {
     }
 
     private void validateEndpointExposedClassesForAclAnnotations(
-            List<Class<?>> endpoints) {
+            List<Class<?>> browserCallables) {
 
-        endpoints.stream().flatMap(Parser::getSuperclasses)
-                .flatMap(endpoint -> config.getEndpointExposedAnnotations()
-                        .stream().map(ann -> List.of(endpoint, ann)))
+        browserCallables.stream().flatMap(Parser::getSuperclasses)
+                .flatMap(browserCallable -> config
+                        .getEndpointExposedAnnotations().stream()
+                        .map(ann -> List.of(browserCallable, ann)))
                 .filter(pair -> pair.get(0).isAnnotationPresent(
                         (Class<? extends Annotation>) pair.get(1)))
                 .forEach(pair -> {
@@ -329,32 +330,32 @@ public final class Parser {
                 Class::getSuperclass);
     }
 
-    private void checkClassLevelAnnotation(Class<?> endpoint,
+    private void checkClassLevelAnnotation(Class<?> browserCallable,
             Class<?> exposedAnnotation) {
-        Arrays.stream(endpoint.getAnnotations())
+        Arrays.stream(browserCallable.getAnnotations())
                 .forEach(annotationInfo -> throwIfAnnotationIsAclAnnotation(
-                        annotationInfo.annotationType().getName(), endpoint,
-                        exposedAnnotation));
+                        annotationInfo.annotationType().getName(),
+                        browserCallable, exposedAnnotation));
     }
 
-    private void checkMethodLevelAnnotation(Class<?> endpoint,
+    private void checkMethodLevelAnnotation(Class<?> browserCallable,
             Class<?> exposedAnnotation) {
-        for (Method method : endpoint.getMethods()) {
+        for (Method method : browserCallable.getMethods()) {
             var annotations = method.getDeclaredAnnotations();
             for (Annotation annotation : annotations) {
                 throwIfAnnotationIsAclAnnotation(
-                        annotation.annotationType().getName(), endpoint,
+                        annotation.annotationType().getName(), browserCallable,
                         exposedAnnotation);
             }
         }
     }
 
     private void throwIfAnnotationIsAclAnnotation(String annotationName,
-            Class<?> endpoint, Class<?> exposedAnnotation) {
+            Class<?> browserCallable, Class<?> exposedAnnotation) {
         if (ACL_ANNOTATIONS.contains(annotationName)) {
             throw new ParserException(String.format(
                     ENDPOINT_EXPOSED_AND_ACL_ANNOTATIONS_ERROR_TEMPLATE,
-                    endpoint.getName(), exposedAnnotation.getName(),
+                    browserCallable.getName(), exposedAnnotation.getName(),
                     annotationName, exposedAnnotation.getName()));
         }
     }

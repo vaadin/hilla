@@ -22,9 +22,6 @@ import org.gradle.api.tasks.bundling.Jar
 import java.io.IOException
 import java.nio.file.Path
 
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.engine.*
 import org.gradle.api.tasks.*
 
@@ -91,7 +88,7 @@ public open class EngineGenerateTask : DefaultTask() {
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
 
-            val endpoints = conf.endpointFinder.findEndpoints();
+            val endpoints = conf.browserCallableFinder.findBrowserCallables();
             parserProcessor.process(endpoints)
             generatorProcessor.process()
 

@@ -19,17 +19,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
-import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
-import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual

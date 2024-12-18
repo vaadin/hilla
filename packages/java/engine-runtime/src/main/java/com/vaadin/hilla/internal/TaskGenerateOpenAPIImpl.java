@@ -54,13 +54,13 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         var engineConfiguration = getEngineConfiguration();
         if (engineConfiguration.isProductionMode()) {
-            var endpoints = engineConfiguration.getEndpointFinder()
-                    .findEndpoints();
+            var browserCallables = engineConfiguration
+                    .getBrowserCallableFinder().findBrowserCallables();
             var processor = new ParserProcessor(engineConfiguration);
-            processor.process(endpoints);
+            processor.process(browserCallables);
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> endpoints = engineConfiguration
+                List<Class<?>> browserCallables = engineConfiguration
                         .getEndpointAnnotations().stream()
                         .map(applicationContext::getBeansWithAnnotation)
                         .map(Map::values).flatMap(Collection::stream)
@@ -69,7 +69,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
                         .map(AopProxyUtils::ultimateTargetClass).distinct()
                         .collect(Collectors.toList());
                 var processor = new ParserProcessor(engineConfiguration);
-                processor.process(endpoints);
+                processor.process(browserCallables);
             });
         }
     }

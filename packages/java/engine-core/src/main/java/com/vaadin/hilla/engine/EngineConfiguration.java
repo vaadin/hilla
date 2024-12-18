@@ -35,7 +35,7 @@ public class EngineConfiguration {
     private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
-    private EndpointFinder endpointFinder;
+    private BrowserCallableFinder browserCallableFinder;
     private boolean productionMode = false;
     private String nodeCommand = "node";
 
@@ -116,14 +116,14 @@ public class EngineConfiguration {
                 : buildDir.resolve(OPEN_API_PATH);
     }
 
-    public EndpointFinder getEndpointFinder() {
-        if (endpointFinder != null) {
-            return endpointFinder;
+    public BrowserCallableFinder getBrowserCallableFinder() {
+        if (browserCallableFinder != null) {
+            return browserCallableFinder;
         }
 
         return () -> {
             try {
-                return AotEndpointFinder.findEndpointClasses(this);
+                return AotBrowserCallableFinder.findEndpointClasses(this);
             } catch (IOException | InterruptedException e) {
                 throw new ExecutionFailedException(e);
             }
@@ -172,7 +172,7 @@ public class EngineConfiguration {
             this.configuration.groupId = configuration.groupId;
             this.configuration.artifactId = configuration.artifactId;
             this.configuration.mainClass = configuration.mainClass;
-            this.configuration.endpointFinder = configuration.endpointFinder;
+            this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.parser.setEndpointAnnotations(
@@ -244,8 +244,8 @@ public class EngineConfiguration {
             return this;
         }
 
-        public Builder endpointFinder(EndpointFinder value) {
-            configuration.endpointFinder = value;
+        public Builder browserCallableFinder(BrowserCallableFinder value) {
+            configuration.browserCallableFinder = value;
             return this;
         }
 
@@ -279,12 +279,12 @@ public class EngineConfiguration {
     }
 
     /**
-     * Functional interface for finding endpoint classes. Implementations of
-     * this interface are responsible for locating and returning a list of
-     * endpoint classes.
+     * Functional interface for finding browser-callable classes.
+     * Implementations of this interface are responsible for locating and
+     * returning a list of endpoint classes.
      */
     @FunctionalInterface
-    public interface EndpointFinder {
-        List<Class<?>> findEndpoints() throws ExecutionFailedException;
+    public interface BrowserCallableFinder {
+        List<Class<?>> findBrowserCallables() throws ExecutionFailedException;
     }
 }
