@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
@@ -60,14 +61,9 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
             processor.process(browserCallables);
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> browserCallables = engineConfiguration
-                        .getEndpointAnnotations().stream()
-                        .map(applicationContext::getBeansWithAnnotation)
-                        .map(Map::values).flatMap(Collection::stream)
-                        // maps to original class when proxies are found
-                        // (also converts to class in all cases)
-                        .map(AopProxyUtils::ultimateTargetClass).distinct()
-                        .collect(Collectors.toList());
+                List<Class<?>> browserCallables = EndpointCodeGenerator
+                        .findBrowserCallables(engineConfiguration,
+                                applicationContext);
                 var processor = new ParserProcessor(engineConfiguration);
                 processor.process(browserCallables);
             });
