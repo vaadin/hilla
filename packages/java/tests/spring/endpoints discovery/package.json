@@ -34,7 +34,7 @@
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "4.3.4",
     "async": "3.2.6",
-    "glob": "10.4.5",
+    "glob": "11.0.0",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "5.12.0",
     "strip-css-comments": "5.0.0",
@@ -79,7 +79,7 @@
       "@vaadin/hilla-generator-utils": "24.7.0-alpha3",
       "@vitejs/plugin-react": "4.3.4",
       "async": "3.2.6",
-      "glob": "10.4.5",
+      "glob": "11.0.0",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "5.12.0",
       "strip-css-comments": "5.0.0",
@@ -91,7 +91,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "2b7e62a1c8bdf398949840e6cc112c91dfaafe106735d0705147b1e796db2188"
+    "hash": "15c81ede09efc0e492e37f3c8d8de59e91e03ad08edb59aa212b0dd35b9259aa"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
