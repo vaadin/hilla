@@ -78,13 +78,13 @@
     "lit": "^3.0.0"
   },
   "devDependencies": {
-    "@esm-bundle/chai": "^4.3.4",
     "@types/chai": "^4.3.20",
     "@types/chai-dom": "^1.11.3",
     "@types/mocha": "^10.0.10",
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
     "@types/validator": "^13.12.2",
+    "chai": "^5.1.2",
     "chai-dom": "^1.12.0",
     "sinon": "^16.1.3",
     "sinon-chai": "^3.7.0",

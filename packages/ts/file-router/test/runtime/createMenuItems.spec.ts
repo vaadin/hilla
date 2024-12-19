@@ -1,5 +1,5 @@
 import './vaadinGlobals.js'; // eslint-disable-line import/no-unassigned-import
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
 import { createMenuItems, viewsSignal } from '../../src/runtime/createMenuItems.js';
