@@ -31,9 +31,6 @@ public class FilterTest {
     @Autowired
     private TestRepository repository;
 
-    @Autowired
-    private JpaFilterConverter jpaFilterConverter;
-
     @Test
     public void filterStringPropertyUsingContains() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
@@ -304,7 +301,7 @@ public class FilterTest {
         executeFilter(filter);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = InvalidDataAccessApiUsageException.class)
     public void filterNonExistingProperty() {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = createFilter("foo", Matcher.EQUALS,
@@ -425,7 +422,7 @@ public class FilterTest {
     }
 
     private List<TestObject> executeFilter(Filter filter) {
-        Specification<TestObject> spec = jpaFilterConverter.toSpec(filter,
+        Specification<TestObject> spec = JpaFilterConverter.toSpec(filter,
                 TestObject.class);
         return repository.findAll(spec);
     }
