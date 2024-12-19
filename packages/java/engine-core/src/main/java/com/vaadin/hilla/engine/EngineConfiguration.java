@@ -244,8 +244,8 @@ public class EngineConfiguration {
             return this;
         }
 
-        public Builder browserCallableFinder(BrowserCallableFinder value) {
-            configuration.browserCallableFinder = value;
+        public Builder browserCallableFinder(BrowserCallableFinder finder) {
+            configuration.browserCallableFinder = finder;
             return this;
         }
 
