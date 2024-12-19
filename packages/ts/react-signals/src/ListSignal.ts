@@ -64,7 +64,10 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
 
   protected override [$processServerResponse](event: StateEvent): void {
     if (!event.accepted) {
-      this[$resolveOperation](event.id, 'server rejected the operation');
+      this[$resolveOperation](
+        event.id,
+        `Server rejected the operation with id '${event.id}'. See the server log for more details.`,
+      );
       return;
     }
     if (isListSnapshotStateEvent<T>(event)) {
