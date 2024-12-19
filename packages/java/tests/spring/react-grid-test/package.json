@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "@polymer/polymer": "3.5.2",
-    "@vaadin/bundles": "24.7.0-alpha1",
+    "@vaadin/bundles": "24.7.0-alpha2",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
@@ -14,12 +14,12 @@
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
-    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha1",
-    "@vaadin/react-components": "24.7.0-alpha1",
-    "@vaadin/react-components-pro": "24.7.0-alpha1",
+    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha2",
+    "@vaadin/react-components": "24.7.0-alpha2",
+    "@vaadin/react-components-pro": "24.7.0-alpha2",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
-    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha1",
-    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha1",
+    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha2",
+    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha2",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.2.1",
@@ -61,7 +61,7 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.2",
-      "@vaadin/bundles": "24.7.0-alpha1",
+      "@vaadin/bundles": "24.7.0-alpha2",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-file-router": "24.7.0-alpha2",
       "@vaadin/hilla-frontend": "24.7.0-alpha2",
@@ -71,12 +71,12 @@
       "@vaadin/hilla-react-form": "24.7.0-alpha2",
       "@vaadin/hilla-react-i18n": "24.7.0-alpha2",
       "@vaadin/hilla-react-signals": "24.7.0-alpha2",
-      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha1",
-      "@vaadin/react-components": "24.7.0-alpha1",
-      "@vaadin/react-components-pro": "24.7.0-alpha1",
+      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha2",
+      "@vaadin/react-components": "24.7.0-alpha2",
+      "@vaadin/react-components-pro": "24.7.0-alpha2",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha1",
-      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha1",
+      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha2",
+      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha2",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1",
@@ -115,7 +115,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "4c68488f8b4a2c3632f2823af25afe2a76752edb49466ce101d957985162d04c"
+    "hash": "120d29c494408dd3347fd5775daf3fd8e5b74a4c9f04cfa3a778eee737d14435"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
