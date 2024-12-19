@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.core.basic;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -45,9 +45,9 @@ final class FinalizePlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies;
     }
 }

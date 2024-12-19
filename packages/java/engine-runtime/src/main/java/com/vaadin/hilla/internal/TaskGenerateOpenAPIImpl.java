@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import java.io.File;
 import java.net.URL;
 import java.util.Objects;
@@ -66,7 +66,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
             File outputDirectory, Function<String, URL> resourceFinder,
-            @Nonnull ClassLoader classLoader, boolean isProductionMode) {
+            @NonNull ClassLoader classLoader, boolean isProductionMode) {
         super(projectDirectory, buildDirectoryName, outputDirectory,
                 resourceFinder);
         this.classLoader = Objects.requireNonNull(classLoader,

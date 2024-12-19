@@ -1,11 +1,11 @@
 package com.vaadin.hilla.parser.core.dependency;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public class DependencyEntityTwo {
     public DependencyEntityOne foo2;
 
-    @Nonnull
+    @NonNull
     public DependencyEntityOne circular() {
         return foo2;
     }

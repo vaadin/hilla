@@ -1,11 +1,11 @@
 package com.vaadin.hilla.parser.core.dependency;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public class PluginDependencyEntity {
     private String pluginDependencyField = "foo";
 
-    @Nonnull
+    @NonNull
     public String getPluginDependencyField() {
         return pluginDependencyField;
     }

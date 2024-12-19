@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.test.nodes;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.SignatureModel;
@@ -8,13 +8,13 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class TypeSignatureNode
         extends AbstractNode<SignatureModel, Schema<?>> {
-    private TypeSignatureNode(@Nonnull SignatureModel source,
-            @Nonnull Schema<?> target) {
+    private TypeSignatureNode(@NonNull SignatureModel source,
+            @NonNull Schema<?> target) {
         super(source, target);
     }
 
-    @Nonnull
-    static public TypeSignatureNode of(@Nonnull SignatureModel source) {
+    @NonNull
+    static public TypeSignatureNode of(@NonNull SignatureModel source) {
         return new TypeSignatureNode(source, new Schema<>());
     }
 }

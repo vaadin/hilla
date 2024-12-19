@@ -1,13 +1,13 @@
 package com.vaadin.hilla.parser.plugins.model;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import java.util.Map;
 
 public final class Annotation {
     private final Map<String, Object> attributes;
     private final String name;
 
-    public Annotation(@Nonnull String name, Map<String, Object> attributes) {
+    public Annotation(@NonNull String name, Map<String, Object> attributes) {
         this.name = name;
         this.attributes = attributes;
     }
@@ -16,7 +16,7 @@ public final class Annotation {
         return attributes;
     }
 
-    @Nonnull
+    @NonNull
     public String getName() {
         return name;
     }

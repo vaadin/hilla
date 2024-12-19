@@ -21,7 +21,7 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -97,9 +97,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         return List.of(BackbonePlugin.class);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (!(nodeDependencies.getNode() instanceof TypedNode)) {
             return nodeDependencies;
         }
@@ -142,13 +142,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      */
     public static class UnionNode
             extends AbstractNode<ClassInfoModel, Schema<?>> {
-        private UnionNode(@Nonnull ClassInfoModel source,
-                @Nonnull ObjectSchema target) {
+        private UnionNode(@NonNull ClassInfoModel source,
+                @NonNull ObjectSchema target) {
             super(source, target);
         }
 
-        @Nonnull
-        static public UnionNode of(@Nonnull ClassInfoModel model) {
+        @NonNull
+        static public UnionNode of(@NonNull ClassInfoModel model) {
             return new UnionNode(model, new ObjectSchema());
         }
     }

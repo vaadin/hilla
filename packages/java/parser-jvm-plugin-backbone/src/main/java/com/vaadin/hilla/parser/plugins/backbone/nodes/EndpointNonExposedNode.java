@@ -1,18 +1,18 @@
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 
 public final class EndpointNonExposedNode
         extends AbstractNode<ClassInfoModel, Void> {
-    private EndpointNonExposedNode(@Nonnull ClassInfoModel classInfo) {
+    private EndpointNonExposedNode(@NonNull ClassInfoModel classInfo) {
         super(classInfo, null);
     }
 
-    @Nonnull
-    public static EndpointNonExposedNode of(@Nonnull ClassInfoModel classInfo) {
+    @NonNull
+    public static EndpointNonExposedNode of(@NonNull ClassInfoModel classInfo) {
         return new EndpointNonExposedNode(classInfo);
     }
 }

@@ -4,31 +4,31 @@ import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class NodeDependencies {
     private final Stream<Node<?, ?>> childNodes;
     private final Node<?, ?> node;
     private final Stream<Node<?, ?>> relatedNodes;
 
-    NodeDependencies(@Nonnull Node<?, ?> node,
-            @Nonnull Stream<Node<?, ?>> childNodes,
-            @Nonnull Stream<Node<?, ?>> relatedNodes) {
+    NodeDependencies(@NonNull Node<?, ?> node,
+            @NonNull Stream<Node<?, ?>> childNodes,
+            @NonNull Stream<Node<?, ?>> relatedNodes) {
         this.node = Objects.requireNonNull(node);
         this.childNodes = Objects.requireNonNull(childNodes);
         this.relatedNodes = Objects.requireNonNull(relatedNodes);
     }
 
-    @Nonnull
+    @NonNull
     public NodeDependencies appendChildNodes(
-            @Nonnull Stream<Node<?, ?>> childNodesToAppend) {
+            @NonNull Stream<Node<?, ?>> childNodesToAppend) {
         return withChildNodes(
                 Stream.concat(getChildNodes(), childNodesToAppend));
     }
 
-    @Nonnull
+    @NonNull
     public NodeDependencies appendRelatedNodes(
-            @Nonnull Stream<Node<?, ?>> relatedNodesToAppend) {
+            @NonNull Stream<Node<?, ?>> relatedNodesToAppend) {
         return withRelatedNodes(
                 Stream.concat(getRelatedNodes(), relatedNodesToAppend));
     }
@@ -45,43 +45,43 @@ public final class NodeDependencies {
         return relatedNodes;
     }
 
-    @Nonnull
+    @NonNull
     public NodeDependencies prependChildNodes(
-            @Nonnull Stream<Node<?, ?>> childNodesToPrepend) {
+            @NonNull Stream<Node<?, ?>> childNodesToPrepend) {
         return withChildNodes(
                 Stream.concat(childNodesToPrepend, getChildNodes()));
     }
 
-    @Nonnull
+    @NonNull
     public NodeDependencies prependRelatedNodes(
-            @Nonnull Stream<Node<?, ?>> relatedNodesToPrepend) {
+            @NonNull Stream<Node<?, ?>> relatedNodesToPrepend) {
         return withRelatedNodes(
                 Stream.concat(relatedNodesToPrepend, getRelatedNodes()));
     }
 
-    @Nonnull
+    @NonNull
     public NodeDependencies processChildNodes(
-            @Nonnull UnaryOperator<Stream<Node<?, ?>>> childNodesProcessor) {
+            @NonNull UnaryOperator<Stream<Node<?, ?>>> childNodesProcessor) {
         return new NodeDependencies(getNode(),
                 childNodesProcessor.apply(getChildNodes()), getRelatedNodes());
     }
 
-    @Nonnull
+    @NonNull
     public NodeDependencies processRelatedNodes(
-            @Nonnull UnaryOperator<Stream<Node<?, ?>>> relatedNodesProcessor) {
+            @NonNull UnaryOperator<Stream<Node<?, ?>>> relatedNodesProcessor) {
         return new NodeDependencies(getNode(), getChildNodes(),
                 relatedNodesProcessor.apply(getRelatedNodes()));
     }
 
-    @Nonnull
+    @NonNull
     private NodeDependencies withChildNodes(
-            @Nonnull Stream<Node<?, ?>> childNodes) {
+            @NonNull Stream<Node<?, ?>> childNodes) {
         return new NodeDependencies(getNode(), childNodes, getRelatedNodes());
     }
 
-    @Nonnull
+    @NonNull
     private NodeDependencies withRelatedNodes(
-            @Nonnull Stream<Node<?, ?>> relatedNodes) {
+            @NonNull Stream<Node<?, ?>> relatedNodes) {
         return new NodeDependencies(getNode(), getChildNodes(), relatedNodes);
     }
 

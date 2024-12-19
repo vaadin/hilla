@@ -1,17 +1,17 @@
 package com.vaadin.hilla.parser.test.nodes;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.FieldInfoModel;
 
 public final class FieldNode extends AbstractNode<FieldInfoModel, String> {
-    private FieldNode(@Nonnull FieldInfoModel source, @Nonnull String target) {
+    private FieldNode(@NonNull FieldInfoModel source, @NonNull String target) {
         super(source, target);
     }
 
-    @Nonnull
-    static public FieldNode of(@Nonnull FieldInfoModel source) {
+    @NonNull
+    static public FieldNode of(@NonNull FieldInfoModel source) {
         return new FieldNode(source, "");
     }
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.ClassInfo;
 import org.slf4j.Logger;
@@ -62,8 +62,8 @@ public final class Parser {
         }
     }
 
-    private static OpenAPI parseOpenAPIFile(@Nonnull String source,
-            @Nonnull OpenAPIFileType type, OpenAPI origin) {
+    private static OpenAPI parseOpenAPIFile(@NonNull String source,
+            @NonNull OpenAPIFileType type, OpenAPI origin) {
         try {
             var mapper = type.getMapper();
             var reader = origin != null ? mapper.readerForUpdating(origin)
@@ -86,8 +86,8 @@ public final class Parser {
      *            An instance of the parser plugin.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser addPlugin(@Nonnull Plugin plugin) {
+    @NonNull
+    public Parser addPlugin(@NonNull Plugin plugin) {
         config.plugins.add(Objects.requireNonNull(plugin));
         return this;
     }
@@ -99,8 +99,8 @@ public final class Parser {
      *            a consumer lambda that accepts an OpenAPI instance.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser adjustOpenAPI(@Nonnull Consumer<OpenAPI> action) {
+    @NonNull
+    public Parser adjustOpenAPI(@NonNull Consumer<OpenAPI> action) {
         action.accept(config.openAPI);
         return this;
     }
@@ -113,8 +113,8 @@ public final class Parser {
      *
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser classLoader(@Nonnull ClassLoader classLoader) {
+    @NonNull
+    public Parser classLoader(@NonNull ClassLoader classLoader) {
         config.classLoader = classLoader;
         return this;
     }
@@ -130,8 +130,8 @@ public final class Parser {
      *            a list of paths forming the classpath.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser classPath(@Nonnull String... classPathElements) {
+    @NonNull
+    public Parser classPath(@NonNull String... classPathElements) {
         return classPath(classPathElements, true);
     }
 
@@ -146,8 +146,8 @@ public final class Parser {
      *            already specified.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser classPath(@Nonnull String[] classPathElements,
+    @NonNull
+    public Parser classPath(@NonNull String[] classPathElements,
             boolean override) {
         return classPath(
                 Arrays.asList(Objects.requireNonNull(classPathElements)),
@@ -165,8 +165,8 @@ public final class Parser {
      *            a list of paths forming the classpath.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser classPath(@Nonnull Collection<String> classPathElements) {
+    @NonNull
+    public Parser classPath(@NonNull Collection<String> classPathElements) {
         return classPath(classPathElements, true);
     }
 
@@ -181,8 +181,8 @@ public final class Parser {
      *            already specified.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser classPath(@Nonnull Collection<String> classPathElements,
+    @NonNull
+    public Parser classPath(@NonNull Collection<String> classPathElements,
             boolean override) {
         if (override || config.classPathElements == null) {
             config.classPathElements = new HashSet<>(
@@ -203,9 +203,9 @@ public final class Parser {
      *            The fully qualified name of the annotation
      * @return this (for method chaining).
      */
-    @Nonnull
+    @NonNull
     public Parser endpointAnnotation(
-            @Nonnull String annotationFullyQualifiedName) {
+            @NonNull String annotationFullyQualifiedName) {
         return endpointAnnotation(annotationFullyQualifiedName, true);
     }
 
@@ -221,9 +221,9 @@ public final class Parser {
      *            it is already specified.
      * @return this (for method chaining).
      */
-    @Nonnull
+    @NonNull
     public Parser endpointAnnotation(
-            @Nonnull String annotationFullyQualifiedName, boolean override) {
+            @NonNull String annotationFullyQualifiedName, boolean override) {
         if (override || config.endpointAnnotationName == null) {
             config.endpointAnnotationName = Objects
                     .requireNonNull(annotationFullyQualifiedName);
@@ -244,9 +244,9 @@ public final class Parser {
      *            The fully qualified name of the annotation
      * @return this (for method chaining).
      */
-    @Nonnull
+    @NonNull
     public Parser endpointExposedAnnotation(
-            @Nonnull String annotationFullyQualifiedName) {
+            @NonNull String annotationFullyQualifiedName) {
         return endpointExposedAnnotation(annotationFullyQualifiedName, true);
     }
 
@@ -263,9 +263,9 @@ public final class Parser {
      *            it is already specified.
      * @return this (for method chaining).
      */
-    @Nonnull
+    @NonNull
     public Parser endpointExposedAnnotation(
-            @Nonnull String annotationFullyQualifiedName, boolean override) {
+            @NonNull String annotationFullyQualifiedName, boolean override) {
         if (override || config.endpointExposedAnnotationName == null) {
             config.endpointExposedAnnotationName = Objects
                     .requireNonNull(annotationFullyQualifiedName);
@@ -273,13 +273,13 @@ public final class Parser {
         return this;
     }
 
-    @Nonnull
-    public Parser exposedPackages(@Nonnull Collection<String> exposedPackages) {
+    @NonNull
+    public Parser exposedPackages(@NonNull Collection<String> exposedPackages) {
         return exposedPackages(exposedPackages, true);
     }
 
-    @Nonnull
-    public Parser exposedPackages(@Nonnull Collection<String> exposedPackages,
+    @NonNull
+    public Parser exposedPackages(@NonNull Collection<String> exposedPackages,
             boolean override) {
         if (override || config.exposedPackages == null) {
             config.exposedPackages = Objects.requireNonNull(exposedPackages);
@@ -292,7 +292,7 @@ public final class Parser {
      *
      * @return A result OpenAPI object.
      */
-    @Nonnull
+    @NonNull
     public OpenAPI execute() {
         Objects.requireNonNull(config.classLoader,
                 "[JVM Parser] classLoader is not provided.");
@@ -390,7 +390,7 @@ public final class Parser {
      *
      * @return configuration object.
      */
-    @Nonnull
+    @NonNull
     public Config getConfig() {
         return config;
     }
@@ -414,9 +414,9 @@ public final class Parser {
      *            The parser for the OpenAPI definition
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser openAPISource(@Nonnull String source,
-            @Nonnull OpenAPIFileType type) {
+    @NonNull
+    public Parser openAPISource(@NonNull String source,
+            @NonNull OpenAPIFileType type) {
         config.openAPI = parseOpenAPIFile(Objects.requireNonNull(source),
                 Objects.requireNonNull(type), config.openAPI);
 
@@ -435,8 +435,8 @@ public final class Parser {
      *            a collection of parser plugins.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser plugins(@Nonnull Plugin... plugins) {
+    @NonNull
+    public Parser plugins(@NonNull Plugin... plugins) {
         return plugins(Arrays.asList(plugins));
     }
 
@@ -451,8 +451,8 @@ public final class Parser {
      *            a collection of parser plugins.
      * @return this (for method chaining).
      */
-    @Nonnull
-    public Parser plugins(@Nonnull Collection<? extends Plugin> plugins) {
+    @NonNull
+    public Parser plugins(@NonNull Collection<? extends Plugin> plugins) {
         config.plugins.clear();
         config.plugins.addAll(Objects.requireNonNull(plugins));
         return this;
@@ -480,7 +480,7 @@ public final class Parser {
          *
          * @return the class loader
          */
-        @Nonnull
+        @NonNull
         public ClassLoader getClassLoader() {
             return classLoader;
         }
@@ -490,7 +490,7 @@ public final class Parser {
          *
          * @return the collection of classpath elements.
          */
-        @Nonnull
+        @NonNull
         public Set<String> getClassPathElements() {
             return classPathElements;
         }
@@ -500,7 +500,7 @@ public final class Parser {
          *
          * @return the annotation name.
          */
-        @Nonnull
+        @NonNull
         public String getEndpointAnnotationName() {
             return endpointAnnotationName;
         }
@@ -510,12 +510,12 @@ public final class Parser {
          *
          * @return the annotation name.
          */
-        @Nonnull
+        @NonNull
         public String getEndpointExposedAnnotationName() {
             return endpointExposedAnnotationName;
         }
 
-        @Nonnull
+        @NonNull
         public Collection<String> getExposedPackages() {
             return exposedPackages;
         }
@@ -528,7 +528,7 @@ public final class Parser {
          *
          * @return OpenAPI object.
          */
-        @Nonnull
+        @NonNull
         public OpenAPI getOpenAPI() {
             return openAPI;
         }
@@ -538,7 +538,7 @@ public final class Parser {
          *
          * @return the collection of parser plugins.
          */
-        @Nonnull
+        @NonNull
         public Collection<Plugin> getPlugins() {
             return plugins;
         }
