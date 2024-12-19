@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
+import com.vaadin.flow.server.frontend.EndpointUsageDetector;
 import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
@@ -31,6 +32,12 @@ public class NodeTasksEndpointTest extends TaskTest {
     @BeforeEach
     public void setUp() throws IOException {
         Lookup mockLookup = Mockito.mock(Lookup.class);
+        EndpointUsageDetector endpointUsageDetector = Mockito
+                .mock(EndpointUsageDetector.class);
+        Mockito.when(endpointUsageDetector
+                .areEndpointsUsed(Mockito.any(Options.class))).thenReturn(true);
+        Mockito.doReturn(endpointUsageDetector).when(mockLookup)
+                .lookup(EndpointUsageDetector.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
                 .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
         Mockito.doReturn(new DefaultClassFinder(Set.of(
