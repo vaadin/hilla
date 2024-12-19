@@ -74,6 +74,8 @@ public class NonnullPluginConfig
                         false, 30),
                 new AnnotationMatcher("com.vaadin.hilla.Nonnull", false, 30),
                 new AnnotationMatcher("org.jspecify.annotations.NonNull", false,
+                        30),
+                new AnnotationMatcher("org.jspecify.annotations.Nullable", false,
                         30));
 
         public Processor(NonnullPluginConfig config) {
