@@ -1,5 +1,5 @@
 /* eslint-disable no-new */
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import chaiAsPromised from 'chai-as-promised';
 import fetchMock from 'fetch-mock';

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-expressions, no-shadow */
-import { assert, expect, use } from '@esm-bundle/chai';
+import { assert, expect, use } from 'chai';
 import { EndpointValidationError, ValidationErrorData } from '@vaadin/hilla-frontend';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';

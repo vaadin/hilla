@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-unassigned-import
 import './setup.js';
 
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiLike from 'chai-like';

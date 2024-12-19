@@ -1,7 +1,7 @@
 // Load feature flag file before importing any other modules
 // eslint-disable-next-line import/no-unassigned-import
 import './enable-feature-flag.js';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import { render } from '@testing-library/react';
 import CookieManager from '@vaadin/hilla-frontend/CookieManager.js';
 import { effect, useComputed, useSignalEffect } from '@vaadin/hilla-react-signals';

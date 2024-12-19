@@ -1,4 +1,4 @@
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import { act, fireEvent, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';

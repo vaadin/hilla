@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointError } from '@vaadin/hilla-frontend';

@@ -66,7 +66,6 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@esm-bundle/chai": "^4.3.4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
@@ -79,6 +78,7 @@
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
     "@types/validator": "^13.12.2",
+    "chai": "^5.1.2",
     "chai-as-promised": "^7.1.2",
     "chai-dom": "^1.12.0",
     "karma-viewport": "^1.0.9",

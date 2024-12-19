@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys */
-import { assert, expect, use } from '@esm-bundle/chai';
+import { assert, expect, use } from 'chai';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
