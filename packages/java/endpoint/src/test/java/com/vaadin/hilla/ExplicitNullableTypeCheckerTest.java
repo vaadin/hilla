@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -404,12 +402,12 @@ public class ExplicitNullableTypeCheckerTest {
         String notNullValue = "someValue";
         String error = explicitNullableTypeChecker
                 .checkValueForAnnotatedElement(notNullValue,
-                        getClass().getMethod("stringNonnull"), false);
+                        getClass().getMethod("stringNonnull"), true);
 
         Assert.assertNull("Should allow values with @Nonnull", error);
 
         verify(explicitNullableTypeChecker).checkValueForType(notNullValue,
-                String.class, false);
+                String.class, true);
     }
 
     @Test
