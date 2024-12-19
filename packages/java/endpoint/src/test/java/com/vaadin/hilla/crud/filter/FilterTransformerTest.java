@@ -26,9 +26,6 @@ public class FilterTransformerTest {
     @Autowired
     private TestRepository repository;
 
-    @Autowired
-    private JpaFilterConverter jpaFilterConverter;
-
     @Test
     public void testRemap() {
         var testObject = new TestObject();
@@ -88,7 +85,7 @@ public class FilterTransformerTest {
                 });
 
         var filter = transformer.apply(andFilter);
-        var spec = jpaFilterConverter.toSpec(filter, TestObject.class);
+        var spec = JpaFilterConverter.toSpec(filter, TestObject.class);
         var result = repository.findAll(spec);
         assertEquals(2, result.size());
 

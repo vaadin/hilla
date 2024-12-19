@@ -1,4 +1,4 @@
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
 import { createRoute, extendModule } from '../../src/runtime/createRoute.js';
 
