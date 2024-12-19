@@ -67,6 +67,7 @@
     "nx": "^18.0.4",
     "postcss": "^8.4.49",
     "prettier": "^3.2.5",
+    "react-dom": "^18.3.1",
     "simple-git-hooks": "^2.11.1",
     "sync-request": "^6.1.0",
     "tsx": "^4.19.2",
