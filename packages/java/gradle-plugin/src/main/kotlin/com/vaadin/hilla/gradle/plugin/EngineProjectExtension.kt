@@ -15,7 +15,13 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.Project
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
+import java.nio.file.Path
+import java.util.stream.Stream
 
 public open class EngineProjectExtension(project: Project) {
 
@@ -40,6 +46,32 @@ public open class EngineProjectExtension(project: Project) {
     public companion object {
         public fun get(project: Project): EngineProjectExtension =
           project.extensions.getByType(EngineProjectExtension::class.java)
+
+        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension): EngineConfiguration {
+            val baseDir: Path = project.projectDir.toPath()
+            val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
+
+            val sourceSets: SourceSetContainer by lazy {
+                project.extensions.getByType(SourceSetContainer::class.java)
+            }
+            val sourceSet = sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet
+            val classpathElements = sourceSet.runtimeClasspath.elements.get().stream().map { it.toString() }
+            val pluginClasspath = project.buildscript.configurations.getByName("classpath")
+                .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
+            val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
+
+            return EngineConfiguration.Builder()
+                .baseDir(baseDir)
+                .buildDir(buildDir)
+                .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
+                .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
+                .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
+                .artifactId(project.name)
+                .classpath(classpath)
+                .mainClass(project.findProperty("mainClass") as String?)
+                .productionMode(vaadinExtension.productionMode.getOrElse(false))
+                .build()
+        }
     }
 
     override fun toString(): String = "HillaPluginExtension(" +

@@ -20,7 +20,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.bundling.Jar
 import java.io.IOException
-import java.nio.file.Path
 
 import com.vaadin.hilla.engine.*
 import org.gradle.api.tasks.*
@@ -62,28 +61,8 @@ public open class EngineGenerateTask : DefaultTask() {
         val vaadinExtension = VaadinFlowPluginExtension.get(project)
         logger.info("Running the engineGenerate task with effective Vaadin configuration $extension")
 
-        val baseDir: Path = project.projectDir.toPath()
-        val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
-
-        val sourceSets: SourceSetContainer by lazy {
-            project.extensions.getByType(SourceSetContainer::class.java)
-        }
-        val sourceSet = sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet;
-        val classpathElements = sourceSet.runtimeClasspath.elements.get().stream().map { it.toString() }.toList()
-
         try {
-            val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
-            val conf: EngineConfiguration = EngineConfiguration.Builder()
-                .baseDir(baseDir)
-                .buildDir(buildDir)
-                .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
-                .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
-                .groupId(groupId?.takeIf { it.isNotEmpty() } ?: "unspecified")
-                .artifactId(artifactId)
-                .classpath(classpathElements)
-                .mainClass(mainClass)
-                .productionMode(isProductionMode)
-                .build()
+            val conf: EngineConfiguration = EngineProjectExtension.createEngineConfiguration(project, vaadinExtension)
 
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
@@ -91,7 +70,6 @@ public open class EngineGenerateTask : DefaultTask() {
             val endpoints = conf.browserCallableFinder.findBrowserCallables();
             parserProcessor.process(endpoints)
             generatorProcessor.process()
-
         } catch (e: IOException) {
             throw GradleException("Endpoint collection failed", e)
         } catch (e: InterruptedException) {
