@@ -1,8 +1,9 @@
 package com.vaadin.hilla.gradle.plugin.test.endpoint;
 
+import org.jspecify.annotations.NonNull;
+
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.Nonnull;
 
 @Endpoint
 @AnonymousAllowed
