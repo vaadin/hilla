@@ -51,7 +51,8 @@
     "nanoid": "^5.0.9"
   },
   "peerDependencies": {
-    "react": "^18"
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4",
@@ -63,6 +64,7 @@
     "@types/chai-dom": "^1.11.3",
     "@types/mocha": "^10.0.10",
     "@types/react": "^18.3.17",
+    "@types/react-dom": "^18",
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
     "@types/validator": "^13.12.2",
