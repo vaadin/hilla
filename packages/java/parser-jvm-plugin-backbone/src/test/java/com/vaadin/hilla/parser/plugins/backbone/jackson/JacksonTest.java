@@ -25,10 +25,11 @@ public class JacksonTest {
         Assumptions.assumeTrue(fieldsReturnedInDefinedOrder(),
                 "This test is skipped on JDKs that do not return declared methods in the file order");
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .endpointAnnotations(List.of(Endpoint.class))
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(JacksonEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
