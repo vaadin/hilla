@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -72,9 +72,9 @@ public final class MethodPlugin
                 endpointNode.getSource().getName());
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
         if (node instanceof EndpointNode
                 || node instanceof EndpointExposedNode) {

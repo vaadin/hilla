@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class NonnullEntity {
-    @Nonnull
-    private final List<@Nonnull String> nonNullableField = new ArrayList<>();
+import org.jspecify.annotations.NonNull;
 
-    @Nonnull
+public class NonnullEntity {
+    @NonNull
+    private final List<@NonNull String> nonNullableField = new ArrayList<>();
+
+    @NonNull
     public String nonNullableMethod(
-            @Nonnull Map<String, @Nonnull String> nonNullableParameter) {
+            @NonNull Map<String, @NonNull String> nonNullableParameter) {
         return nonNullableParameter.getOrDefault("test", "");
     }
 }

@@ -24,7 +24,7 @@ import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
@@ -48,9 +48,9 @@ public final class PropertyPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (!(nodeDependencies.getNode() instanceof EntityNode)) {
             return nodeDependencies;
         }
@@ -79,7 +79,7 @@ public final class PropertyPlugin
     }
 
     private Stream<JacksonPropertyModel> collectProperties(
-            @Nonnull ClassInfoModel model) {
+            @NonNull ClassInfoModel model) {
         var cls = Objects.requireNonNull(model).get();
 
         if (!(cls instanceof Class<?>)) {

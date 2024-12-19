@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.TypeVariableSignature;
 
@@ -12,11 +12,11 @@ public abstract class TypeVariableModel extends AnnotatedAbstractModel
     private TypeParameterModel typeParameter;
 
     @Deprecated
-    public static TypeVariableModel of(@Nonnull TypeVariableSignature origin) {
+    public static TypeVariableModel of(@NonNull TypeVariableSignature origin) {
         return new TypeVariableSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static TypeVariableModel of(@Nonnull AnnotatedTypeVariable origin) {
+    public static TypeVariableModel of(@NonNull AnnotatedTypeVariable origin) {
         return new TypeVariableReflectionModel(Objects.requireNonNull(origin));
     }
 

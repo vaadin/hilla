@@ -14,85 +14,13 @@ package com.vaadin.hilla.crud.filter;
  * <li>Do the actual comparison using the matcher / operator provided by
  * {@link #getMatcher()}</li>
  * </ul>
+ *
+ * @deprecated Use
+ *             {@link com.vaadin.flow.spring.data.filter.PropertyStringFilter}
+ *             instead
  */
-public class PropertyStringFilter extends Filter {
-    public enum Matcher {
-        EQUALS, CONTAINS, LESS_THAN, GREATER_THAN;
-    }
-
-    private String propertyId;
-    private String filterValue;
-    private Matcher matcher;
-
-    /**
-     * Gets the property, or nested property path, to filter by. For example
-     * {@code "name"} or {@code "address.city"}.
-     *
-     * @return the property name
-     */
-    public String getPropertyId() {
-        return propertyId;
-    }
-
-    /**
-     * Sets the property, or nested property path, to filter by.
-     *
-     * @param propertyId
-     *            the property name
-     */
-    public void setPropertyId(String propertyId) {
-        this.propertyId = propertyId;
-    }
-
-    /**
-     * Gets the filter value to compare against. The filter value is always
-     * stored as a string, but can represent multiple types of values using
-     * specific formats. For example, when filtering a property of type
-     * {@code LocalDate}, the filter value could be {@code "2020-01-01"}. The
-     * actual filter implementation is responsible for parsing the filter value
-     * into the correct type to use for querying the underlying data layer.
-     *
-     * @return the filter value
-     */
-    public String getFilterValue() {
-        return filterValue;
-    }
-
-    /**
-     * Sets the filter value to compare against.
-     *
-     * @param filterValue
-     *            the filter value
-     */
-    public void setFilterValue(String filterValue) {
-        this.filterValue = filterValue;
-    }
-
-    /**
-     * The matcher, or operator, to use when comparing the property value to the
-     * filter value.
-     *
-     * @return the matcher
-     */
-    public Matcher getMatcher() {
-        return matcher;
-    }
-
-    /**
-     * Sets the matcher, or operator, to use when comparing the property value
-     * to the filter value.
-     *
-     * @param type
-     *            the matcher
-     */
-    public void setMatcher(Matcher type) {
-        this.matcher = type;
-    }
-
-    @Override
-    public String toString() {
-        return "PropertyStringFilter [propertyId=" + propertyId + ", matcher="
-                + matcher + ", filterValue=" + filterValue + "]";
-    }
+@Deprecated(forRemoval = true)
+public class PropertyStringFilter
+        extends com.vaadin.flow.spring.data.filter.PropertyStringFilter {
 
 }

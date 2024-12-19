@@ -9,6 +9,8 @@ import java.util.Objects;
 import com.vaadin.hilla.Endpoint;
 import com.vaadin.hilla.Nonnull;
 import com.vaadin.hilla.Nullable;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +30,7 @@ public class PagedEndpoint {
     private static List<Entity> DATA = List.of(new Entity("Foo", 30),
             new Entity("Bar", 20), new Entity("Baz", 10));
 
-    public Page<@Nonnull Entity> list(@Nullable Pageable p) {
+    public Page<@NonNull Entity> list(@Nullable Pageable p) {
         if (p == null) {
             p = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "qty"));
         }
@@ -50,17 +52,17 @@ public class PagedEndpoint {
 
         private final int qty;
 
-        public Entity(@Nonnull String name, int qty) {
+        public Entity(@NonNull String name, int qty) {
             this.name = Objects.requireNonNull(name);
             this.qty = qty;
         }
 
-        @Nonnull
+        @NonNull
         public String getName() {
             return name;
         }
 
-        @Nonnull
+        @NonNull
         public int getQty() {
             return qty;
         }
@@ -73,13 +75,13 @@ public class PagedEndpoint {
         private final Page<Entity> page;
         private final Pageable pageable;
 
-        public PageOfEntities(@Nonnull Page<Entity> page,
-                @Nonnull Pageable pageable) {
+        public PageOfEntities(@NonNull Page<Entity> page,
+                @NonNull Pageable pageable) {
             this.page = page;
             this.pageable = pageable;
         }
 
-        public PageOfEntities(@Nonnull Page<Entity> page) {
+        public PageOfEntities(@NonNull Page<Entity> page) {
             this(page, page.getPageable());
         }
 

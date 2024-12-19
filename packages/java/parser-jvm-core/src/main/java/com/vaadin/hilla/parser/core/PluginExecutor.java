@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public final class PluginExecutor {
     private final RootNode rootNode;
     private final Map<Node<?, ?>, NodeScanResult> scanResults = new HashMap<>();
 
-    public PluginExecutor(@Nonnull Plugin plugin, @Nonnull RootNode rootNode) {
+    public PluginExecutor(@NonNull Plugin plugin, @NonNull RootNode rootNode) {
         this.plugin = Objects.requireNonNull(plugin);
         this.rootNode = Objects.requireNonNull(rootNode);
     }
@@ -62,7 +62,7 @@ public final class PluginExecutor {
         queue.addFirst(new ExitTask(path));
     }
 
-    @Nonnull
+    @NonNull
     private NodeScanResult scanNodeDependencies(Node<?, ?> node) {
         return scanResults.computeIfAbsent(node,
                 n -> new NodeScanResult(plugin.scan(new NodeDependencies(n,
@@ -70,7 +70,7 @@ public final class PluginExecutor {
     }
 
     private class EnterTask extends Task {
-        public EnterTask(@Nonnull NodePath<?> path) {
+        public EnterTask(@NonNull NodePath<?> path) {
             super(path);
         }
 
@@ -96,7 +96,7 @@ public final class PluginExecutor {
     }
 
     private class ExitTask extends Task {
-        public ExitTask(@Nonnull NodePath<?> path) {
+        public ExitTask(@NonNull NodePath<?> path) {
             super(path);
         }
 
@@ -110,7 +110,7 @@ public final class PluginExecutor {
         private final Node<?, ?> node;
         private final List<Node<?, ?>> relatedNodes;
 
-        public NodeScanResult(@Nonnull NodeDependencies nodeDependencies) {
+        public NodeScanResult(@NonNull NodeDependencies nodeDependencies) {
             Objects.requireNonNull(nodeDependencies);
             this.node = nodeDependencies.getNode();
             this.childNodes = nodeDependencies.getChildNodes()
@@ -119,17 +119,17 @@ public final class PluginExecutor {
                     .collect(Collectors.toList());
         }
 
-        @Nonnull
+        @NonNull
         public List<Node<?, ?>> getChildNodes() {
             return childNodes;
         }
 
-        @Nonnull
+        @NonNull
         public Node<?, ?> getNode() {
             return node;
         }
 
-        @Nonnull
+        @NonNull
         public List<Node<?, ?>> getRelatedNodes() {
             return relatedNodes;
         }
@@ -138,7 +138,7 @@ public final class PluginExecutor {
     private static abstract class Task {
         private final NodePath<?> path;
 
-        public Task(@Nonnull NodePath<?> path) {
+        public Task(@NonNull NodePath<?> path) {
             this.path = Objects.requireNonNull(path);
         }
 

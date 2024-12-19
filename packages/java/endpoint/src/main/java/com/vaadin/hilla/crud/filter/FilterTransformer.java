@@ -15,7 +15,7 @@ import org.springframework.data.domain.Sort;
 public class FilterTransformer {
 
     private final Map<String, String> mappings = new HashMap<>();
-    private Function<PropertyStringFilter, PropertyStringFilter> filterTransformation;
+    private Function<com.vaadin.flow.spring.data.filter.PropertyStringFilter, com.vaadin.flow.spring.data.filter.PropertyStringFilter> filterTransformation;
 
     /**
      * Declares a mapping from one property name to another. If a filter or
@@ -48,7 +48,7 @@ public class FilterTransformer {
      * @return This instance.
      */
     public FilterTransformer withFilterTransformation(
-            Function<PropertyStringFilter, PropertyStringFilter> filterTransformation) {
+            Function<com.vaadin.flow.spring.data.filter.PropertyStringFilter, com.vaadin.flow.spring.data.filter.PropertyStringFilter> filterTransformation) {
         this.filterTransformation = filterTransformation;
         return this;
     }
@@ -61,26 +61,27 @@ public class FilterTransformer {
      *            The filter instance to transform.
      * @return The transformed filter.
      */
-    public Filter apply(Filter filter) {
+    public com.vaadin.flow.spring.data.filter.Filter apply(
+            com.vaadin.flow.spring.data.filter.Filter filter) {
         if (filter == null) {
             return null;
         }
 
-        if (filter instanceof AndFilter andFilter) {
-            var newAndFilter = new AndFilter();
+        if (filter instanceof com.vaadin.flow.spring.data.filter.AndFilter andFilter) {
+            var newAndFilter = new com.vaadin.flow.spring.data.filter.AndFilter();
             newAndFilter.setChildren(
                     andFilter.getChildren().stream().map(this::apply).toList());
             return newAndFilter;
-        } else if (filter instanceof OrFilter orFilter) {
-            var newOrFilter = new OrFilter();
+        } else if (filter instanceof com.vaadin.flow.spring.data.filter.OrFilter orFilter) {
+            var newOrFilter = new com.vaadin.flow.spring.data.filter.OrFilter();
             newOrFilter.setChildren(
                     orFilter.getChildren().stream().map(this::apply).toList());
             return newOrFilter;
-        } else if (filter instanceof PropertyStringFilter propertyStringFilter) {
+        } else if (filter instanceof com.vaadin.flow.spring.data.filter.PropertyStringFilter propertyStringFilter) {
             var property = propertyStringFilter.getPropertyId();
             var mappedProperty = mappings.get(property);
 
-            var newFilter = new PropertyStringFilter();
+            var newFilter = new com.vaadin.flow.spring.data.filter.PropertyStringFilter();
             newFilter.setPropertyId(
                     mappedProperty == null ? property : mappedProperty);
             newFilter.setFilterValue(propertyStringFilter.getFilterValue());

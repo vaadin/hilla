@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,26 +28,26 @@ public class NonnullReflectionTest {
 
     @Test
     public void should_haveNonNullableField() {
-        assertTrue(field.getAnnotatedType().isAnnotationPresent(Nonnull.class));
+        assertTrue(field.getAnnotatedType().isAnnotationPresent(NonNull.class));
     }
 
     @Test
     public void should_haveFieldWithNonNullableCollectionItem() {
         AnnotatedType listItemType = ((AnnotatedParameterizedType) field
                 .getAnnotatedType()).getAnnotatedActualTypeArguments()[0];
-        assertTrue(listItemType.isAnnotationPresent(Nonnull.class));
+        assertTrue(listItemType.isAnnotationPresent(NonNull.class));
     }
 
     @Test
     public void should_haveMethodWithNonNullableReturnType() {
         assertTrue(method.getAnnotatedReturnType()
-                .isAnnotationPresent(Nonnull.class));
+                .isAnnotationPresent(NonNull.class));
     }
 
     @Test
     public void should_haveMethodWithNonNullableParameter() {
         assertTrue(parameter.getAnnotatedType()
-                .isAnnotationPresent(Nonnull.class));
+                .isAnnotationPresent(NonNull.class));
     }
 
     @Test
@@ -54,6 +55,6 @@ public class NonnullReflectionTest {
         AnnotatedType mapValueType = ((AnnotatedParameterizedType) parameter
                 .getAnnotatedType()).getAnnotatedActualTypeArguments()[1];
 
-        assertTrue(mapValueType.isAnnotationPresent(Nonnull.class));
+        assertTrue(mapValueType.isAnnotationPresent(NonNull.class));
     }
 }

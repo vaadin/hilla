@@ -7,13 +7,13 @@ import java.util.stream.Stream;
 
 import com.vaadin.hilla.parser.utils.PluginException;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
         extends AbstractPlugin<C> {
     private final LinkedList<Plugin> plugins = new LinkedList<>();
 
-    protected AbstractCompositePlugin(@Nonnull Plugin... plugins) {
+    protected AbstractCompositePlugin(@NonNull Plugin... plugins) {
         Stream.of(plugins).map(Objects::requireNonNull)
                 .forEachOrdered(this.plugins::add);
         verifyPluginsOrder();
@@ -31,9 +31,9 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     }
 
     @Override
-    @Nonnull
-    public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
+    @NonNull
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> parentPath) {
         for (var plugin : plugins) {
             node = plugin.resolve(node, parentPath);
         }
@@ -41,8 +41,8 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     }
 
     @Override
-    @Nonnull
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    @NonNull
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         for (var plugin : plugins) {
             nodeDependencies = plugin.scan(nodeDependencies);
         }

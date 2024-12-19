@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedArrayType;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.ArrayTypeSignature;
 
@@ -12,11 +12,11 @@ public abstract class ArraySignatureModel extends AnnotatedAbstractModel
     private SignatureModel nestedType;
 
     @Deprecated
-    public static ArraySignatureModel of(@Nonnull ArrayTypeSignature origin) {
+    public static ArraySignatureModel of(@NonNull ArrayTypeSignature origin) {
         return new ArraySignatureSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static ArraySignatureModel of(@Nonnull AnnotatedArrayType origin) {
+    public static ArraySignatureModel of(@NonNull AnnotatedArrayType origin) {
         return new ArraySignatureReflectionModel(
                 Objects.requireNonNull(origin));
     }

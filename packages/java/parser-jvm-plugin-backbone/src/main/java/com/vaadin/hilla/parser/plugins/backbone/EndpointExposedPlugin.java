@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -33,10 +33,10 @@ public final class EndpointExposedPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> parentPath) {
         if (node instanceof MethodNode
                 && parentPath.getNode() instanceof EndpointExposedNode) {
             return MethodNode.of(((MethodNode) node).getSource());
@@ -54,9 +54,9 @@ public final class EndpointExposedPlugin
                 (TypeParameterModel) signature, parentPath));
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
 
         if (node instanceof EndpointNode || node instanceof EndpointExposedNode
@@ -96,10 +96,18 @@ public final class EndpointExposedPlugin
                 .getEndpointExposedAnnotationName();
         var exposed = classInfo.getAnnotations().stream()
                 .map(AnnotationInfoModel::getName)
-                .anyMatch(endpointExposedAnnotationName::equals);
+                .anyMatch(endpointExposedAnnotationName::equals)
+                || alwaysExpose(classInfo);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
                 : EndpointNonExposedNode.of(classInfo);
         return classInfoNode;
+    }
+
+    private boolean alwaysExpose(ClassInfoModel classInfo) {
+        return classInfo
+                .is("com.vaadin.flow.spring.data.jpa.CrudRepositoryService")
+                || classInfo.is(
+                        "com.vaadin.flow.spring.data.jpa.ListRepositoryService");
     }
 
     /**

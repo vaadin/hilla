@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.core.basic;
 
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -22,9 +22,9 @@ final class RemovePlugin extends AbstractPlugin<PluginConfiguration> {
 
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies.processRelatedNodes(this::removeBazEntity);
     }
 

@@ -2,28 +2,28 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.AnnotationParameterValue;
 
 public abstract class AnnotationParameterModel implements Model, NamedModel {
     private Object value;
 
-    public static AnnotationParameterModel of(@Nonnull String name,
-            @Nonnull Object value, boolean isDefault) {
+    public static AnnotationParameterModel of(@NonNull String name,
+            @NonNull Object value, boolean isDefault) {
         return of(new ReflectionOrigin<>(Objects.requireNonNull(name),
                 Objects.requireNonNull(value), isDefault));
     }
 
     public static <T> AnnotationParameterModel of(
-            @Nonnull ReflectionOrigin<T> origin) {
+            @NonNull ReflectionOrigin<T> origin) {
         return new AnnotationParameterReflectionModel<>(
                 Objects.requireNonNull(origin));
     }
 
     @Deprecated
     public static AnnotationParameterModel of(
-            @Nonnull AnnotationParameterValue origin) {
+            @NonNull AnnotationParameterValue origin) {
         return new AnnotationParameterSourceModel(
                 Objects.requireNonNull(origin));
     }

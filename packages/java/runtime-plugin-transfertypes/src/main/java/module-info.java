@@ -1,5 +1,5 @@
 module com.vaadin.hilla.runtime.transfertypes {
-    requires jsr305;
+    requires org.jspecify;
     requires spring.data.commons;
     requires jakarta.validation;
     requires jakarta.annotation;
