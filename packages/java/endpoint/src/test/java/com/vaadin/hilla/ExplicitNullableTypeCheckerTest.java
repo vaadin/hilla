@@ -500,7 +500,7 @@ public class ExplicitNullableTypeCheckerTest {
     /**
      * Method for testing
      */
-    @NonNull
+    @javax.annotation.Nonnull
     public String stringNonnull() {
         return "";
     }

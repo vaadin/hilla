@@ -17,6 +17,7 @@ import com.vaadin.hilla.utils.TestUtils;
 import static org.junit.Assert.assertTrue;
 
 public class NonnullParserTest {
+    private static final String ANNOTATION_NAME = "NonNull";
     FieldDeclaration field;
     MethodDeclaration method;
     com.github.javaparser.ast.body.Parameter parameter;
@@ -38,32 +39,32 @@ public class NonnullParserTest {
 
     @Test
     public void should_haveNonNullableField() {
-        assertTrue(field.isAnnotationPresent("Nonnull"));
+        assertTrue(field.isAnnotationPresent(ANNOTATION_NAME));
     }
 
     @Test
     public void should_haveFieldWithNonNullableCollectionItem() {
         assertTrue(field.getVariables().get(0).getType()
                 .asClassOrInterfaceType().getTypeArguments().get().get(0)
-                .getAnnotations().stream().anyMatch(annotation -> "Nonnull"
+                .getAnnotations().stream().anyMatch(annotation -> ANNOTATION_NAME
                         .equals(annotation.getName().asString())));
     }
 
     @Test
     public void should_haveMethodWithNonNullableReturnType() {
-        assertTrue(method.isAnnotationPresent("Nonnull"));
+        assertTrue(method.isAnnotationPresent(ANNOTATION_NAME));
     }
 
     @Test
     public void should_haveMethodWithNonNullableParameter() {
-        assertTrue(parameter.isAnnotationPresent("Nonnull"));
+        assertTrue(parameter.isAnnotationPresent(ANNOTATION_NAME));
     }
 
     @Test
     public void should_haveMethodParameterWithNonNullableCollectionItemType() {
         assertTrue(parameter.getType().asClassOrInterfaceType()
                 .getTypeArguments().get().get(1).getAnnotations().stream()
-                .anyMatch(annotation -> "Nonnull"
+                .anyMatch(annotation -> ANNOTATION_NAME
                         .equals(annotation.getName().asString())));
     }
 }
