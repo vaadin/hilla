@@ -30,7 +30,7 @@ public class InternalBrowserCallableTest {
             if (!clazz.getName().contains(".test.") && !clazz
                     .isAnnotationPresent(InternalBrowserCallable.class)) {
                 Assertions.fail("Class " + clazz.getName()
-                                + " is annotated with @BrowserCallable or @Endpoint, but missing @InternalBrowserCallable.");
+                        + " is annotated with @BrowserCallable or @Endpoint, but missing @InternalBrowserCallable.");
             }
         }
     }
@@ -47,7 +47,7 @@ public class InternalBrowserCallableTest {
             if (!clazz.isAnnotationPresent(BrowserCallable.class)
                     && !clazz.isAnnotationPresent(Endpoint.class)) {
                 Assertions.fail("Class " + clazz.getName()
-                                + " is annotated with @InternalBrowserCallable and must be annotated with @BrowserCallable or @Endpoint.");
+                        + " is annotated with @InternalBrowserCallable and must be annotated with @BrowserCallable or @Endpoint.");
             }
         }
     }

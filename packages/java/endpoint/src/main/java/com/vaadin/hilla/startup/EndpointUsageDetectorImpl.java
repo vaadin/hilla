@@ -22,7 +22,8 @@ public class EndpointUsageDetectorImpl implements EndpointUsageDetector {
         return Stream.concat(
                 classFinder.getAnnotatedClasses(Endpoint.class).stream(),
                 classFinder.getAnnotatedClasses(BrowserCallable.class).stream())
-            .anyMatch(annotatedClass -> !annotatedClass.isAnnotationPresent(InternalBrowserCallable.class));
+                .anyMatch(annotatedClass -> !annotatedClass
+                        .isAnnotationPresent(InternalBrowserCallable.class));
     }
 
 }
