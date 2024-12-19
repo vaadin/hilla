@@ -24,16 +24,6 @@ public class EndpointGenerationIT {
     }
 
     /**
-     * Endpoint in configured packages should be generated
-     */
-    @Test
-    public void shouldGenerateConfiguredEndpoint() {
-        assertTrue(Files.exists(frontendDir.resolve("InvalidEndpoint.ts")));
-        assertTrue(Files.exists(frontendDir
-                .resolve("com/example/library/unpublished/SomeEntity.ts")));
-    }
-
-    /**
      * Endpoint not in configured packages should not be generated
      */
     @Test

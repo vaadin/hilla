@@ -1,98 +1,23 @@
 package com.vaadin.hilla.maven;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
-
-import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
-import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.GeneratorConfiguration;
-import com.vaadin.hilla.engine.ParserConfiguration;
 
 /**
- * Maven Plugin for Hilla. Emits Hilla engine configuration file in the build
- * directory.
- *
- * The configuration gathered from the Maven plugin is saved in a file, so that
- * further runs of the parser / generator can skip running a separate Maven
- * process to get this configuration again.
+ * This goal is no longer used, so invoking it will only print a warning.
  */
 @Mojo(name = "configure", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+@Deprecated
 public final class EngineConfigureMojo extends AbstractMojo {
-
-    @Parameter(readonly = true)
-    private final GeneratorConfiguration generator = new GeneratorConfiguration();
-
-    @Parameter(readonly = true)
-    private final ParserConfiguration parser = new ParserConfiguration();
-    /**
-     * The folder where TypeScript endpoints are generated.
-     */
-    @Parameter(defaultValue = "${project.basedir}/"
-            + FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR)
-    private File generatedTsFolder;
-
-    private static final String LEGACY_PROJECT_FRONTEND_PATH = "./frontend";
-
-    @Parameter(defaultValue = "${project}", readonly = true)
-    private MavenProject project;
-
     @Override
-    public void execute() throws EngineConfigureMojoException {
-
-        if (!FlowModeAbstractMojo.isHillaAvailable(project)) {
-            getLog().warn(
-                    "The 'configure' goal is only meant to be used in Hilla projects with endpoints."
-                            .stripIndent());
-            return;
-        }
-        try {
-            var legacyFrontendFolder = project.getBasedir().toPath()
-                    .resolve(LEGACY_PROJECT_FRONTEND_PATH).toFile();
-            if (legacyFrontendFolder.exists()) {
-                generatedTsFolder = legacyFrontendFolder.toPath()
-                        .resolve("generated").toFile();
-            }
-            var buildDir = project.getBuild().getDirectory();
-            var cp = Stream
-                    .of(project.getCompileClasspathElements(),
-                            project.getRuntimeClasspathElements(),
-                            project.getSystemClasspathElements())
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            var conf = new EngineConfiguration.Builder(
-                    project.getBasedir().toPath()).classPath(cp)
-                    .outputDir(generatedTsFolder.toPath()).generator(generator)
-                    .parser(parser).buildDir(buildDir)
-                    .classesDir(project.getBuild().getOutputDirectory())
-                    .create();
-
-            // The configuration gathered from the Maven plugin is saved in a
-            // file so that further runs can skip running a separate Maven
-            // project just to get this configuration again
-            var configDir = project.getBasedir().toPath().resolve(buildDir);
-            Files.createDirectories(configDir);
-            conf.store(configDir
-                    .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME)
-                    .toFile());
-        } catch (DependencyResolutionRequiredException e) {
-            throw new EngineConfigureMojoException("Configuration failed", e);
-        } catch (IOException e) {
-            throw new EngineConfigureMojoException(
-                    "Maven configuration has not been saved to file", e);
-        }
+    public void execute() throws MojoFailureException {
+        getLog().warn(
+                """
+                        The 'configure' goal is no longer used and will be removed in a future version.
+                        """
+                        .stripIndent());
     }
 }

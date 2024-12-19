@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone.transients;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -16,10 +17,11 @@ public class TransientTest {
     @Test
     public void should_CorrectlyHandleTransients()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .addPlugin(new BackbonePlugin()).execute();
+                .endpointAnnotations(List.of(Endpoint.class))
+                .addPlugin(new BackbonePlugin())
+                .execute(List.of(TransientEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

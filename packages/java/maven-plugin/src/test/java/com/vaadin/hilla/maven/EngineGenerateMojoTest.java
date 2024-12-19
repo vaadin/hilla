@@ -1,11 +1,9 @@
 package com.vaadin.hilla.maven;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.Map;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -24,54 +22,32 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                 Mockito.withSettings().defaultAnswer(Answers.RETURNS_SELF),
                 (mock, context) -> {
                     // Verify ParserProcessor constructor arguments
-                    assertEquals(3, context.arguments().size(),
-                            "expected 3 ParserProcessor arguments");
+                    assertEquals(1, context.arguments().size(),
+                            "expected 1 ParserProcessor argument");
 
                     // Verify configuration argument
                     var conf = (EngineConfiguration) context.arguments().get(0);
-                    assertEquals(conf, getEngineConfiguration());
-
-                    // Verify class loader argument
-                    var classLoader = (ClassLoader) context.arguments().get(1);
-                    assertInstanceOf(URLClassLoader.class, classLoader);
-                    assertEquals(classLoader.getParent(),
-                            EngineGenerateMojo.class.getClassLoader());
-                    assertArrayEquals(
-                            new URL[] { getTemporaryDirectory()
-                                    .resolve("build/classes").toUri().toURL(),
-                                    getTemporaryDirectory()
-                                            .resolve("build/test-classes")
-                                            .toUri().toURL() },
-                            ((URLClassLoader) classLoader).getURLs());
+                    verifyConfiguration(conf);
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
                         GeneratorProcessor.class, Mockito.withSettings()
                                 .defaultAnswer(Answers.RETURNS_SELF),
                         ((mock, context) -> {
                             // Verify GeneratorProcessor arguments
-                            assertEquals(3, context.arguments().size(),
-                                    "expected 3 GeneratorProcessor arguments");
+                            assertEquals(1, context.arguments().size(),
+                                    "expected 1 GeneratorProcessor argument");
 
                             // Verify configuration argument
                             var conf = (EngineConfiguration) context.arguments()
                                     .get(0);
-                            assertEquals(conf, getEngineConfiguration());
-                        }));
-
-                var mockedStaticEngineConfiguration = Mockito
-                        .mockStatic(EngineConfiguration.class)) {
-
-            // Use reference EngineConfiguration
-            mockedStaticEngineConfiguration
-                    .when(() -> EngineConfiguration
-                            .loadDirectory(Mockito.eq(getBuildDirectory())))
-                    .thenReturn(getEngineConfiguration());
+                            verifyConfiguration(conf);
+                        }));) {
 
             // Lookup and initialize mojo
             var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate",
                     getTestConfiguration());
-            setVariableValueToObject(engineGenerateMojo, "project",
-                    getMavenProject());
+            engineGenerateMojo
+                    .setPluginContext(Map.of("project", getMavenProject()));
             engineGenerateMojo.execute();
 
             assertEquals(1, mockedConstructionParser.constructed().size(),
@@ -84,8 +60,12 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                     .get(0);
 
             var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
-            inOrder.verify(parserProcessor).process();
+            inOrder.verify(parserProcessor).process(List.of());
             inOrder.verify(generatorProcessor).process();
         }
+    }
+
+    private void verifyConfiguration(EngineConfiguration conf) {
+        assertEquals(conf.getBaseDir(), getTemporaryDirectory());
     }
 }

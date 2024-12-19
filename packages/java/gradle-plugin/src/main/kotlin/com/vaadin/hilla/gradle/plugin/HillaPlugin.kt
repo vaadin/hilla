@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Jar
 
 /**
  * The main class of the Hilla Gradle Plugin
@@ -35,14 +36,20 @@ public class HillaPlugin : Plugin<Project> {
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
         project.pluginManager.apply(VaadinPlugin::class.java)
 
-        project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
-
         val extensionName = "hilla"
         project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
 
         project.tasks.apply {
             register("hillaConfigure", EngineConfigureTask::class.java)
             register("hillaGenerate", EngineGenerateTask::class.java)
+        }
+
+        project.tasks.named("vaadinBuildFrontend") {
+            it.dependsOn("hillaConfigure")
+        }
+
+        project.tasks.withType(Jar::class.java) { task: Jar ->
+            task.mustRunAfter("vaadinBuildFrontend")
         }
 
         project.tasks.named("processResources") {
