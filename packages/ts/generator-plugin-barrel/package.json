@@ -66,7 +66,7 @@
     "@vaadin/hilla-generator-plugin-backbone": "24.7.0-alpha3",
     "c8": "^10.1.3",
     "chai": "^4.5.0",
-    "concurrently": "^8.2.2",
+    "concurrently": "^9.1.0",
     "copyfiles": "^2.4.1",
     "mocha": "^10.8.2",
     "monocart-coverage-reports": "^2.11.5",
