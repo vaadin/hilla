@@ -44,10 +44,11 @@ public class NonnullParserTest {
 
     @Test
     public void should_haveFieldWithNonNullableCollectionItem() {
-        assertTrue(field.getVariables().get(0).getType()
-                .asClassOrInterfaceType().getTypeArguments().get().get(0)
-                .getAnnotations().stream().anyMatch(annotation -> ANNOTATION_NAME
-                        .equals(annotation.getName().asString())));
+        assertTrue(
+                field.getVariables().get(0).getType().asClassOrInterfaceType()
+                        .getTypeArguments().get().get(0).getAnnotations()
+                        .stream().anyMatch(annotation -> ANNOTATION_NAME
+                                .equals(annotation.getName().asString())));
     }
 
     @Test
