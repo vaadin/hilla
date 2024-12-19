@@ -1,6 +1,6 @@
 import { existsSync, watch } from 'node:fs';
 import { rm, mkdir, writeFile, readFile } from 'node:fs/promises';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import type { Logger } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from '../../src/vite-plugin/generateRuntimeFiles.js';

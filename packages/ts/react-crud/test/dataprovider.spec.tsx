@@ -1,6 +1,6 @@
-import { expect, use } from '@esm-bundle/chai';
 import { renderHook } from '@testing-library/react';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
+import { expect, use } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { CountService, ListService } from '../crud.js';

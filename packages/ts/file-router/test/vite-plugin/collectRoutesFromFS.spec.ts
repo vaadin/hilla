@@ -1,6 +1,6 @@
 import { appendFile } from 'fs/promises';
 import { mkdir, rm } from 'node:fs/promises';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import type { Writable } from 'type-fest';
