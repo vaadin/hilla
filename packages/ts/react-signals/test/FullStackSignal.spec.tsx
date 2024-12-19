@@ -2,9 +2,9 @@
 // eslint-disable-next-line import/no-unassigned-import
 import './setup.js';
 
-import { expect, use } from 'chai';
 import { render } from '@testing-library/react';
 import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { expect, use } from 'chai';
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';

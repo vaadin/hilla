@@ -1,6 +1,6 @@
-import { expect } from 'chai';
 import { render } from '@testing-library/react';
 import type { DatePickerDate } from '@vaadin/react-components/DatePicker.js';
+import { expect } from 'chai';
 import { LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
 
 describe('@vaadin/hilla-react-crud', () => {

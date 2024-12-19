@@ -1,5 +1,5 @@
-import { expect } from 'chai';
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
+import { expect } from 'chai';
 import sinon from 'sinon';
 import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, State } from '../src/FluxConnection.js';
 import type {

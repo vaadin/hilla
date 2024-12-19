@@ -1,5 +1,5 @@
-import { expect } from 'chai';
 import { render, waitFor } from '@testing-library/react';
+import { expect } from 'chai';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
 

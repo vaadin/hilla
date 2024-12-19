@@ -1,5 +1,5 @@
-import { expect } from 'chai';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
+import { expect } from 'chai';
 import sinon from 'sinon';
 import { ListSignal, ValueSignal } from '../src';
 import type { InsertLastStateEvent, RemoveStateEvent, StateEvent } from '../src/events.js';

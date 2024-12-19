@@ -1,9 +1,9 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
-import { expect, use } from 'chai';
 import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
+import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';

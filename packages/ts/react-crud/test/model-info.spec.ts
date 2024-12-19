@@ -1,5 +1,5 @@
-import { expect } from 'chai';
 import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-lit-form';
+import { expect } from 'chai';
 import { ModelInfo } from '../src/model-info.js';
 import { PersonModel } from './test-models-and-services.js';
 
