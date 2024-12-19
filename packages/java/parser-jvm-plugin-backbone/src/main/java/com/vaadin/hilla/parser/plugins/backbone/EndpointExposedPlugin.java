@@ -96,10 +96,18 @@ public final class EndpointExposedPlugin
                 .getEndpointExposedAnnotationName();
         var exposed = classInfo.getAnnotations().stream()
                 .map(AnnotationInfoModel::getName)
-                .anyMatch(endpointExposedAnnotationName::equals);
+                .anyMatch(endpointExposedAnnotationName::equals)
+                || alwaysExpose(classInfo);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
                 : EndpointNonExposedNode.of(classInfo);
         return classInfoNode;
+    }
+
+    private boolean alwaysExpose(ClassInfoModel classInfo) {
+        return classInfo
+                .is("com.vaadin.flow.spring.data.jpa.CrudRepositoryService")
+                || classInfo.is(
+                        "com.vaadin.flow.spring.data.jpa.ListRepositoryService");
     }
 
     /**
