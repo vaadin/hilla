@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { existsSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
