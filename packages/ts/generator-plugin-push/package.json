@@ -71,7 +71,7 @@
     "concurrently": "^8.2.2",
     "copyfiles": "^2.4.1",
     "mocha": "^10.8.2",
-    "monocart-coverage-reports": "^2.11.4",
+    "monocart-coverage-reports": "^2.11.5",
     "pino": "^8.21.0",
     "sinon": "^16.1.3",
     "sinon-chai": "^3.7.0",
