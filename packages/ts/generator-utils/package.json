@@ -72,9 +72,9 @@
     "chai-like": "^1.1.1",
     "concurrently": "^8.2.1",
     "copyfiles": "^2.4.1",
-    "mocha": "^10.2.0",
-    "monocart-coverage-reports": "^2.8.4",
-    "sinon": "^16.0.0",
+    "mocha": "^10.8.2",
+    "monocart-coverage-reports": "^2.11.5",
+    "sinon": "^16.1.3",
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.3.2"
   }
