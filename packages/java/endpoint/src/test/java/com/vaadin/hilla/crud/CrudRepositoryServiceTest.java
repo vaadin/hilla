@@ -1,6 +1,9 @@
 package com.vaadin.hilla.crud;
 
-import com.vaadin.hilla.BrowserCallable;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +19,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.stereotype.Repository;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
+import com.vaadin.hilla.BrowserCallable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,7 +33,6 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomCrudRepositoryService.class,
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
-@ContextConfiguration(classes = { CrudConfiguration.class })
 @EnableAutoConfiguration
 public class CrudRepositoryServiceTest {
 
