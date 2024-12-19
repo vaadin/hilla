@@ -131,7 +131,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
             import com.vaadin.flow.server.auth.AnonymousAllowed;
             import com.vaadin.hilla.Endpoint;
-            import com.vaadin.hilla.Nonnull;
+            import org.jspecify.annotations.NonNull;
 
             @Endpoint
             @AnonymousAllowed
