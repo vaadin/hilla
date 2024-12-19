@@ -20,10 +20,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
+
 @EndpointExposed
 public interface PagedData<T> {
-    default List<@Nonnull T> getNonNullablePage(int pageSize, int pageNumber,
-            Map<String, @Nonnull T> parameters) {
+    default List<@NonNull T> getNonNullablePage(int pageSize, int pageNumber,
+            Map<String, @NonNull T> parameters) {
         return Collections.emptyList();
     }
 

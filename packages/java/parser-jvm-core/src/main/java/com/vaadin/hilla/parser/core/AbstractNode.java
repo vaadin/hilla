@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.core;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.NamedModel;
@@ -13,7 +13,7 @@ public abstract class AbstractNode<S, T> implements Node<S, T> {
 
     private T target;
 
-    protected AbstractNode(@Nonnull S source, T target) {
+    protected AbstractNode(@NonNull S source, T target) {
         this.source = Objects.requireNonNull(source);
         this.target = target;
     }

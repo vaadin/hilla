@@ -1,11 +1,11 @@
 package com.vaadin.hilla.parser.core;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class RootNode extends AbstractNode<ScanResult, OpenAPI> {
-    RootNode(@Nonnull ScanResult source, @Nonnull OpenAPI target) {
+    RootNode(@NonNull ScanResult source, @NonNull OpenAPI target) {
         super(source, target);
     }
 }

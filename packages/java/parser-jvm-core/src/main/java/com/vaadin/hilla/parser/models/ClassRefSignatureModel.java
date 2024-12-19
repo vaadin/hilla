@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
@@ -80,18 +80,18 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
 
     @Deprecated
     public static ClassRefSignatureModel of(
-            @Nonnull ClassRefTypeSignature origin) {
+            @NonNull ClassRefTypeSignature origin) {
         return Objects.requireNonNull(origin).getSuffixes().size() > 0
                 ? new ClassRefSignatureSourceModel.Suffixed(origin)
                 : new ClassRefSignatureSourceModel.Regular(origin);
     }
 
-    public static ClassRefSignatureModel of(@Nonnull Class<?> origin) {
+    public static ClassRefSignatureModel of(@NonNull Class<?> origin) {
         return new ClassRefSignatureReflectionModel.Bare(
                 Objects.requireNonNull(origin));
     }
 
-    public static ClassRefSignatureModel of(@Nonnull AnnotatedType origin) {
+    public static ClassRefSignatureModel of(@NonNull AnnotatedType origin) {
         return ClassRefSignatureReflectionModel.Annotated
                 .of(Objects.requireNonNull(origin));
     }
@@ -110,9 +110,9 @@ public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
      * @deprecated
      */
     @Deprecated
-    public static ClassRefSignatureModel of(@Nonnull ClassInfoModel classInfo,
-            @Nonnull List<TypeArgumentModel> typeArguments,
-            @Nonnull List<AnnotationInfoModel> annotations) {
+    public static ClassRefSignatureModel of(@NonNull ClassInfoModel classInfo,
+            @NonNull List<TypeArgumentModel> typeArguments,
+            @NonNull List<AnnotationInfoModel> annotations) {
         return new ClassRefSignatureArtificialModel(classInfo, typeArguments,
                 annotations);
     }
