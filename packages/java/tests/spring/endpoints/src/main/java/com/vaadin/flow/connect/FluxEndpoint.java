@@ -2,6 +2,7 @@ package com.vaadin.flow.connect;
 
 import java.time.Duration;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,32 +20,32 @@ import reactor.core.publisher.Flux;
 public class FluxEndpoint {
 
     // DenyAll by default
-    @Nonnull
+    @NonNull
     public Flux<String> denied() {
         return Flux.just("Will never be accessible");
     }
 
     @PermitAll
-    @Nonnull
+    @NonNull
     public Flux<String> hello(String name, @Nullable String title) {
         return Flux.just(
                 "Hello, " + (title != null ? title + " " : "") + name + "!");
     }
 
     @AnonymousAllowed
-    @Nonnull
+    @NonNull
     public Flux<String> helloAnonymous() {
         return Flux.just("Hello, stranger!");
     }
 
     @RolesAllowed("ADMIN")
-    @Nonnull
+    @NonNull
     public Flux<String> helloAdmin() {
         return Flux.just("Hello, admin!");
     }
 
     @AnonymousAllowed
-    @Nonnull
+    @NonNull
     public Flux<String> checkUser() {
         Authentication auth = SecurityContextHolder.getContext()
                 .getAuthentication();
@@ -55,20 +56,20 @@ public class FluxEndpoint {
     }
 
     @AnonymousAllowed
-    @Nonnull
+    @NonNull
     public Flux<Integer> countTo(int n) {
         return Flux.range(1, n).delayElements(Duration.ofMillis(200));
     }
 
     @AnonymousAllowed
-    @Nonnull
+    @NonNull
     public Flux<Integer> countEvenTo(int n) {
         return Flux.range(1, n).delayElements(Duration.ofMillis(200))
                 .filter(number -> number % 2 == 0);
     }
 
     @AnonymousAllowed
-    @Nonnull
+    @NonNull
     public Flux<Integer> countThrowError(int n) {
         return Flux.range(1, n).delayElements(Duration.ofMillis(200))
                 .filter(number -> {

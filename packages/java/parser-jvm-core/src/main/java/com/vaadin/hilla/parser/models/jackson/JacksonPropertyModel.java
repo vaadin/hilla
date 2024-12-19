@@ -21,7 +21,7 @@ import com.vaadin.hilla.parser.models.OwnedModel;
 import com.vaadin.hilla.parser.models.ReflectionModel;
 
 import com.vaadin.hilla.parser.models.SignatureModel;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class JacksonPropertyModel
         extends JacksonModel<FieldInfoModel, MethodInfoModel, MethodInfoModel>
@@ -39,7 +39,7 @@ public final class JacksonPropertyModel
     }
 
     public static JacksonPropertyModel of(
-            @Nonnull BeanPropertyDefinition origin) {
+            @NonNull BeanPropertyDefinition origin) {
         return new JacksonPropertyModel(Objects.requireNonNull(origin));
     }
 

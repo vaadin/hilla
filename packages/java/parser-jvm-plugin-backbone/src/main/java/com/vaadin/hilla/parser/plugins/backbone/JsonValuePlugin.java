@@ -9,7 +9,7 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -34,16 +34,16 @@ public class JsonValuePlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> parentPath) {
         if (node instanceof TypedNode typedNode) {
             if (typedNode
                     .getType() instanceof ClassRefSignatureModel classRefSignatureModel) {

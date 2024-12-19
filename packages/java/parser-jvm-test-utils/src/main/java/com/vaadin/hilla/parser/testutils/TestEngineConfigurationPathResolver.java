@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A converter for relative paths of
@@ -24,7 +24,7 @@ public final class TestEngineConfigurationPathResolver {
     private static final String CLASS_NAME = "com.vaadin.hilla.engine.EngineConfiguration";
     private static final String CLASS_PATH_FIELD_NAME = "classPath";
 
-    public static <T> T resolve(@Nonnull T obj, @Nonnull Path baseDir)
+    public static <T> T resolve(@NonNull T obj, @NonNull Path baseDir)
             throws NoSuchMethodException, InvocationTargetException,
             InstantiationException, IllegalAccessException {
         Objects.requireNonNull(baseDir);

@@ -3,22 +3,22 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedType;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.BaseTypeSignature;
 
 public abstract class BaseSignatureModel extends AnnotatedAbstractModel
         implements SignatureModel {
     @Deprecated
-    public static BaseSignatureModel of(@Nonnull BaseTypeSignature origin) {
+    public static BaseSignatureModel of(@NonNull BaseTypeSignature origin) {
         return new BaseSignatureSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static BaseSignatureModel of(@Nonnull AnnotatedType origin) {
+    public static BaseSignatureModel of(@NonNull AnnotatedType origin) {
         return new BaseSignatureReflectionModel(Objects.requireNonNull(origin));
     }
 
-    public static BaseSignatureModel of(@Nonnull Class<?> origin) {
+    public static BaseSignatureModel of(@NonNull Class<?> origin) {
         return new BaseSignatureReflectionModel.Bare(
                 Objects.requireNonNull(origin));
     }

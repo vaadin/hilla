@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -406,7 +406,7 @@ public class ExplicitNullableTypeCheckerTest {
                 .checkValueForAnnotatedElement(notNullValue,
                         getClass().getMethod("stringNonnull"), false);
 
-        Assert.assertNull("Should allow values with @Nonnull", error);
+        Assert.assertNull("Should allow values with @NonNull", error);
 
         verify(explicitNullableTypeChecker).checkValueForType(notNullValue,
                 String.class, false);
@@ -500,7 +500,7 @@ public class ExplicitNullableTypeCheckerTest {
     /**
      * Method for testing
      */
-    @Nonnull
+    @javax.annotation.Nonnull
     public String stringNonnull() {
         return "";
     }
@@ -511,7 +511,7 @@ public class ExplicitNullableTypeCheckerTest {
         public String ignoreProperty;
         public String description;
         transient String transientProperty;
-        @Nonnull
+        @NonNull
         private String title;
 
         public Bean() {

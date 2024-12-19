@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.models;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -13,11 +13,11 @@ public abstract class FieldInfoModel extends AnnotatedAbstractModel
     private SignatureModel type;
 
     @Deprecated
-    public static FieldInfoModel of(@Nonnull FieldInfo origin) {
+    public static FieldInfoModel of(@NonNull FieldInfo origin) {
         return new FieldInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static FieldInfoModel of(@Nonnull Field origin) {
+    public static FieldInfoModel of(@NonNull Field origin) {
         return new FieldInfoReflectionModel(Objects.requireNonNull(origin));
     }
 

@@ -18,13 +18,13 @@ package com.vaadin.hilla.mappedtypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A DTO for {@code org.springframework.data.domain.Sort}.
  */
 public class Sort {
-    @Nonnull
+    @NonNull
     private List<Order> orders = new ArrayList<>();
 
     public List<Order> getOrders() {

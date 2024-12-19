@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.MethodParameterInfo;
 
@@ -15,12 +15,12 @@ public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
 
     @Deprecated
     public static MethodParameterInfoModel of(
-            @Nonnull MethodParameterInfo origin) {
+            @NonNull MethodParameterInfo origin) {
         return new MethodParameterInfoSourceModel(
                 Objects.requireNonNull(origin));
     }
 
-    public static MethodParameterInfoModel of(@Nonnull Parameter origin) {
+    public static MethodParameterInfoModel of(@NonNull Parameter origin) {
         return new MethodParameterInfoReflectionModel(
                 Objects.requireNonNull(origin));
     }

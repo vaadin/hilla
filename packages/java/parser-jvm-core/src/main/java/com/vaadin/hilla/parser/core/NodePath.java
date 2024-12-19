@@ -4,21 +4,21 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class NodePath<N extends Node<?, ?>> {
     private final N node;
     private final NodePath<?> parentPath;
     private final NodePath<RootNode> rootPath;
 
-    private NodePath(@Nonnull N node, @Nonnull NodePath<?> parentPath) {
+    private NodePath(@NonNull N node, @NonNull NodePath<?> parentPath) {
         this.node = Objects.requireNonNull(node);
         this.parentPath = Objects.requireNonNull(parentPath);
         this.rootPath = Objects.requireNonNull(parentPath.getRootPath());
     }
 
     @SuppressWarnings("unchecked")
-    private NodePath(@Nonnull N node) {
+    private NodePath(@NonNull N node) {
         if (!(node instanceof RootNode)) {
             throw new IllegalArgumentException("RootNode instance required");
         }
@@ -27,7 +27,7 @@ public final class NodePath<N extends Node<?, ?>> {
         this.rootPath = (NodePath<RootNode>) this;
     }
 
-    static NodePath<RootNode> forRoot(@Nonnull RootNode rootNode) {
+    static NodePath<RootNode> forRoot(@NonNull RootNode rootNode) {
         return new NodePath<>(rootNode);
     }
 
@@ -100,7 +100,7 @@ public final class NodePath<N extends Node<?, ?>> {
         return String.join("", list);
     }
 
-    <N extends Node<?, ?>> NodePath<N> withChildNode(@Nonnull N node) {
+    <N extends Node<?, ?>> NodePath<N> withChildNode(@NonNull N node) {
         return new NodePath<>(node, this);
     }
 }

@@ -4,7 +4,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.TypeParameter;
 
@@ -13,11 +13,11 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
     private List<SignatureModel> bounds;
 
     @Deprecated
-    public static TypeParameterModel of(@Nonnull TypeParameter origin) {
+    public static TypeParameterModel of(@NonNull TypeParameter origin) {
         return new TypeParameterSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static TypeParameterModel of(@Nonnull TypeVariable<?> origin) {
+    public static TypeParameterModel of(@NonNull TypeVariable<?> origin) {
         return new TypeParameterReflectionModel(Objects.requireNonNull(origin));
     }
 

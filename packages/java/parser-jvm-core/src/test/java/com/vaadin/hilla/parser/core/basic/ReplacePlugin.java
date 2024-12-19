@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.core.basic;
 
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -25,9 +25,9 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
 
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
         if (node instanceof EndpointNode) {
             return nodeDependencies.processChildNodes(this::removeBarMethod)
@@ -37,7 +37,7 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    @Nonnull
+    @NonNull
     private Stream<Node<?, ?>> getReplacementFields() {
         try {
             return Stream
@@ -49,9 +49,9 @@ final class ReplacePlugin extends AbstractPlugin<PluginConfiguration> {
         }
     }
 
-    @Nonnull
+    @NonNull
     private Stream<Node<?, ?>> removeBarMethod(
-            @Nonnull Stream<Node<?, ?>> nodes) {
+            @NonNull Stream<Node<?, ?>> nodes) {
         return nodes.filter(node -> !((node instanceof MethodNode)
                 && ((MethodNode) node).getSource().getName().equals("bar")));
     }
