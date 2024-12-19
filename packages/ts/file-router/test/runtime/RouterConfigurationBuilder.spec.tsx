@@ -1,4 +1,4 @@
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import sinonChai from 'sinon-chai';

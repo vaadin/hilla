@@ -1,4 +1,4 @@
-import { expect } from '@esm-bundle/chai';
+import { expect } from 'chai';
 
 export const TEST_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
 export const TEST_SPRING_CSRF_TOKEN_VALUE = 'spring-csrf-token';

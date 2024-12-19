@@ -1,7 +1,6 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 
-import { expect, use } from '@esm-bundle/chai';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointError } from '@vaadin/hilla-frontend';
@@ -11,6 +10,7 @@ import type { SelectElement } from '@vaadin/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
 import { TextField, type TextFieldElement } from '@vaadin/react-components/TextField.js';
 import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -1015,6 +1015,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateField', () => {
       it('formats and parses values using localized date format', async () => {
+        viewport.set(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
@@ -1035,6 +1036,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateTimeField', () => {
       it('formats and parses values using localized date format', async () => {
+        viewport.set(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
