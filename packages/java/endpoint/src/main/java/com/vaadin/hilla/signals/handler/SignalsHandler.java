@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.InternalBrowserCallable;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import jakarta.annotation.Nullable;
@@ -30,6 +31,7 @@ import reactor.core.publisher.Flux;
  */
 @AnonymousAllowed
 @BrowserCallable
+@InternalBrowserCallable
 public class SignalsHandler {
 
     private final SecureSignalsRegistry registry;
