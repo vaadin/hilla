@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unassigned-import
 import './setup.js';
 
-import { expect } from '@esm-bundle/chai';
+import { expect } from 'chai';
 import sinon from 'sinon';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 

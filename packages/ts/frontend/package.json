@@ -72,7 +72,6 @@
     "lit": "^3.0.0"
   },
   "devDependencies": {
-    "@esm-bundle/chai": "^4.3.4",
     "@open-wc/testing": "^3.2.2",
     "@types/atmosphere.js": "^2.1.6",
     "@types/chai": "^4.3.20",
@@ -82,6 +81,7 @@
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
     "@types/validator": "^13.12.2",
+    "chai": "^5.1.2",
     "chai-as-promised": "^7.1.2",
     "chai-dom": "^1.12.0",
     "fetch-mock": "^9.11.0",

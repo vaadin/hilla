@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDeepEqualIgnoreUndefined from 'chai-deep-equal-ignore-undefined';
 import applyLayouts from '../../src/vite-plugin/applyLayouts.js';
