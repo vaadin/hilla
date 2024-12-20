@@ -1,7 +1,8 @@
 package com.vaadin.hilla.crud;
 
-import com.vaadin.hilla.Nullable;
 import com.vaadin.hilla.crud.filter.Filter;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * A browser-callable service that can count the given type of objects with a

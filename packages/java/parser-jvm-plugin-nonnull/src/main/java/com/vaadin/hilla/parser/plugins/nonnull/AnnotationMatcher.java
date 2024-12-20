@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.plugins.nonnull;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Describes annotations that make class members and their signatures nullable
@@ -16,7 +16,7 @@ public final class AnnotationMatcher {
     public AnnotationMatcher() {
     }
 
-    public AnnotationMatcher(@Nonnull String name, boolean makesNullable,
+    public AnnotationMatcher(@NonNull String name, boolean makesNullable,
             int score) {
         this.name = Objects.requireNonNull(name);
         this.makesNullable = makesNullable;
