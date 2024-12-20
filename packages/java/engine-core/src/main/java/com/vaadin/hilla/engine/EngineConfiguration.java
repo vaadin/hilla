@@ -49,9 +49,9 @@ public class EngineConfiguration {
         generator = new GeneratorConfiguration();
         parser = new ParserConfiguration();
 
-        var legacyFrontendGeneratedDir = baseDir.resolve("frontend/generated");
-        if (Files.exists(legacyFrontendGeneratedDir)) {
-            outputDir = legacyFrontendGeneratedDir;
+        var legacyFrontendDir = baseDir.resolve("frontend");
+        if (Files.exists(legacyFrontendDir)) {
+            outputDir = legacyFrontendDir.resolve("generated");
         } else {
             outputDir = baseDir.resolve(
                     FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR);

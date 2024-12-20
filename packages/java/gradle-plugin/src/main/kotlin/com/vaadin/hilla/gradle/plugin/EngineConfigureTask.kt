@@ -35,7 +35,7 @@ public open class EngineConfigureTask : DefaultTask() {
     @TaskAction
     public fun engineConfigure() {
         val vaadinExtension = VaadinFlowPluginExtension.get(project)
-        val engineConfiguration = EngineProjectExtension.createEngineConfiguration(project, vaadinExtension)
+        val engineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
         EngineConfiguration.setDefault(engineConfiguration)
     }
 }

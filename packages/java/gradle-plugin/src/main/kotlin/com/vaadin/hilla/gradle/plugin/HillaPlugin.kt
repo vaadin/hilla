@@ -15,13 +15,19 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.gradle.VaadinPlugin
+import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
+import java.nio.file.Path
+import java.util.stream.Stream
 
 /**
  * The main class of the Hilla Gradle Plugin
@@ -35,9 +41,6 @@ public class HillaPlugin : Plugin<Project> {
         // we apply Vaadin (flow) plugin so that the users do not need to add it themselves
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
         project.pluginManager.apply(VaadinPlugin::class.java)
-
-        val extensionName = "hilla"
-        project.extensions.create(extensionName, EngineProjectExtension::class.java, project)
 
         project.tasks.apply {
             register("hillaConfigure", EngineConfigureTask::class.java)
@@ -57,6 +60,35 @@ public class HillaPlugin : Plugin<Project> {
             if (copyTask != null) {
                 copyTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
+        }
+    }
+
+    public companion object {
+        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension): EngineConfiguration {
+            val baseDir: Path = project.projectDir.toPath()
+            val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
+
+            val sourceSets: SourceSetContainer by lazy {
+                project.extensions.getByType(SourceSetContainer::class.java)
+            }
+            val sourceSet = sourceSets.getByName(vaadinExtension.sourceSetName.get()) as SourceSet
+            val classpathElements = sourceSet.runtimeClasspath.elements.get().stream().map { it.toString() }
+            val pluginClasspath = project.buildscript.configurations.getByName("classpath")
+                .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
+            val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
+
+            return EngineConfiguration.Builder()
+                .baseDir(baseDir)
+                .buildDir(buildDir)
+                .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
+                .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
+                .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
+                .artifactId(project.name)
+                .classpath(classpath)
+                .withDefaultAnnotations()
+                .mainClass(project.findProperty("mainClass") as String?)
+                .productionMode(vaadinExtension.productionMode.getOrElse(false))
+                .build()
         }
     }
 }
