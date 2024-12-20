@@ -63,7 +63,6 @@ public class SignalsConfiguration {
      *
      * @return SignalsHandler endpoint instance
      */
-    // @ConditionalOnFeatureFlag("fullstackSignals")
     @Bean
     public SignalsHandler signalsHandler(
             @Autowired(required = false) SecureSignalsRegistry signalsRegistry) {
