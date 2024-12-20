@@ -69,9 +69,10 @@ public class JsonValuePlugin
     private Optional<Class<?>> findValueType(Class<?> cls) {
         // First of all, we check that the `@JsonValue` annotation is
         // used on a method of the class.
-        var jsonValue = Arrays.stream(cls.getMethods())
+        Stream<Class<?>> candidates = Arrays.stream(cls.getMethods())
                 .filter(method -> method.isAnnotationPresent(JsonValue.class))
-                .map(Method::getReturnType).findAny();
+                .map(Method::getReturnType);
+        var jsonValue = candidates.findAny();
 
         // Then we check that the class has a `@JsonCreator` annotation
         // on a method or on a constructor. This is a basic check, we
