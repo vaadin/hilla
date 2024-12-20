@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "engines": {
-    "node": ">=16.19.0",
-    "npm": ">=9"
+    "node": ">=20.0.0",
+    "npm": ">=9.6"
   },
   "workspaces": [
     "packages/ts/*"
