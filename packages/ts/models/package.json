@@ -71,7 +71,7 @@
     "chai-as-promised": "^7.1.2",
     "chai-dom": "^1.12.0",
     "chai-like": "^1.1.3",
-    "glob": "^10.4.5",
+    "glob": "^11.0.0",
     "mocha": "^10.8.2",
     "monocart-coverage-reports": "^2.11.4",
     "sinon": "^16.1.3",
