@@ -63,7 +63,7 @@
     "chai-as-promised": "^7.1.2",
     "concurrently": "^9.1.0",
     "copyfiles": "^2.4.1",
-    "mocha": "^10.8.2",
+    "mocha": "^11.0.1",
     "monocart-coverage-reports": "^2.11.5",
     "pino": "^9.5.0",
     "sinon": "^16.1.3",
