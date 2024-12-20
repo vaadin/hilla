@@ -1,6 +1,3 @@
-// eslint-disable-next-line import/no-unassigned-import
-import './setup.js';
-
 import { expect } from 'chai';
 import {
   createIncrementStateEvent,

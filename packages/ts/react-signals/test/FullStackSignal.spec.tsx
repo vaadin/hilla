@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-// eslint-disable-next-line import/no-unassigned-import
-import './setup.js';
 
 import { render } from '@testing-library/react';
 import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
