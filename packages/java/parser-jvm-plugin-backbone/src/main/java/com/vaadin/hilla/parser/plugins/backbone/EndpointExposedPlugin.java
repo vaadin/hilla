@@ -11,7 +11,6 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.TypeArgumentModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
