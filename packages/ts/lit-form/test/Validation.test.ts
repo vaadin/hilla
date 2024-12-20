@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions, no-shadow */
-import { assert, expect, use } from '@esm-bundle/chai';
 import { EndpointValidationError, ValidationErrorData } from '@vaadin/hilla-frontend';
+import { assert, expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';

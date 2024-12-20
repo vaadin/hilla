@@ -26,9 +26,6 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
         implements ListService<T>, GetService<T, ID>, CountService {
 
     @Autowired
-    private JpaFilterConverter jpaFilterConverter;
-
-    @Autowired
     private ApplicationContext applicationContext;
 
     private R repository;
@@ -105,7 +102,7 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
      * @return a JPA specification
      */
     protected Specification<T> toSpec(@Nullable Filter filter) {
-        return jpaFilterConverter.toSpec(filter, entityClass);
+        return JpaFilterConverter.toSpec(filter, entityClass);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,6 +1,6 @@
-import { expect } from '@esm-bundle/chai';
 import { renderHook, waitFor } from '@testing-library/react';
 import { UnauthorizedResponseError } from '@vaadin/hilla-frontend';
+import { expect } from 'chai';
 import { configureAuth } from '../src';
 
 describe('@vaadin/react-auth', () => {
