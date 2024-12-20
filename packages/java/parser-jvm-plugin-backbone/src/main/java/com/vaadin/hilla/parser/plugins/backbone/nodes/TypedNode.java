@@ -5,16 +5,16 @@ import java.util.function.UnaryOperator;
 
 import com.vaadin.hilla.parser.models.SignatureModel;
 import io.swagger.v3.oas.models.media.Schema;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public interface TypedNode extends AnnotatedNode {
-    @Nonnull
+    @NonNull
     SignatureModel getType();
 
     Schema<?> getTarget();
 
     void setTarget(Schema<?> target);
 
-    @Nonnull
-    TypedNode processType(@Nonnull UnaryOperator<SignatureModel> typeProcessor);
+    @NonNull
+    TypedNode processType(@NonNull UnaryOperator<SignatureModel> typeProcessor);
 }

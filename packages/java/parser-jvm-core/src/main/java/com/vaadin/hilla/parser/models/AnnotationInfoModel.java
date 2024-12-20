@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.AnnotationInfo;
 
@@ -14,11 +14,11 @@ public abstract class AnnotationInfoModel implements Model, NamedModel {
     private Set<AnnotationParameterModel> parameters;
 
     @Deprecated
-    public static AnnotationInfoModel of(@Nonnull AnnotationInfo origin) {
+    public static AnnotationInfoModel of(@NonNull AnnotationInfo origin) {
         return new AnnotationInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static AnnotationInfoModel of(@Nonnull Annotation origin) {
+    public static AnnotationInfoModel of(@NonNull Annotation origin) {
         return new AnnotationInfoReflectionModel(
                 Objects.requireNonNull(origin));
     }

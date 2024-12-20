@@ -8,8 +8,9 @@ import java.util.Optional;
 
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.hilla.EndpointExposed;
-import com.vaadin.hilla.Nullable;
 import com.vaadin.hilla.crud.filter.Filter;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;

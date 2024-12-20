@@ -2,7 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -11,7 +11,6 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.TypeArgumentModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
@@ -33,10 +32,10 @@ public final class EndpointExposedPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> parentPath) {
         if (node instanceof MethodNode
                 && parentPath.getNode() instanceof EndpointExposedNode) {
             return MethodNode.of(((MethodNode) node).getSource());
@@ -54,9 +53,9 @@ public final class EndpointExposedPlugin
                 (TypeParameterModel) signature, parentPath));
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
 
         if (node instanceof EndpointNode || node instanceof EndpointExposedNode
