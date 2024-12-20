@@ -103,6 +103,7 @@ public class TaskTest {
     protected EngineConfiguration getEngineConfiguration() {
         return new EngineConfiguration.Builder()
                 .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
-                .outputDir(getOutputDirectory()).build();
+                .outputDir(getOutputDirectory()).withDefaultAnnotations()
+                .build();
     }
 }
