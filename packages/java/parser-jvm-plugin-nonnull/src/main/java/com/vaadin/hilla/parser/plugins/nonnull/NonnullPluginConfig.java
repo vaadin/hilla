@@ -62,6 +62,8 @@ public class NonnullPluginConfig
                 new AnnotationMatcher("org.eclipse.jdt.annotation.Nullable",
                         true, 20),
                 new AnnotationMatcher("com.vaadin.hilla.Nullable", true, 20),
+                new AnnotationMatcher("org.jspecify.annotations.Nullable", true,
+                        20),
                 // Nonnull-like annotations have the highest score for
                 // compatibility with the old generator
                 new AnnotationMatcher("jakarta.annotation.Nonnull", false, 30),
@@ -72,7 +74,9 @@ public class NonnullPluginConfig
                 new AnnotationMatcher("androidx.annotation.NonNull", false, 30),
                 new AnnotationMatcher("org.eclipse.jdt.annotation.NonNull",
                         false, 30),
-                new AnnotationMatcher("com.vaadin.hilla.Nonnull", false, 30));
+                new AnnotationMatcher("com.vaadin.hilla.Nonnull", false, 30),
+                new AnnotationMatcher("org.jspecify.annotations.NonNull", false,
+                        30));
 
         public Processor(NonnullPluginConfig config) {
             super(config, defaults);

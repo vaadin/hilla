@@ -4,7 +4,7 @@ module com.vaadin.hilla.parser.plugins.model {
     requires com.vaadin.hilla.parser.plugins.backbone;
     requires com.vaadin.hilla.parser.utils;
     requires jakarta.annotation;
-    requires jsr305;
+    requires org.jspecify;
     requires io.github.classgraph;
     requires io.swagger.v3.oas.models;
 

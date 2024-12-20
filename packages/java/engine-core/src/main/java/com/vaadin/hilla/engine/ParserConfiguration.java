@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -120,7 +120,7 @@ public final class ParserConfiguration {
             return configuration;
         }
 
-        @Nonnull
+        @NonNull
         public String getName() {
             return name;
         }
@@ -141,8 +141,8 @@ public final class ParserConfiguration {
             disableAllDefaults = false;
         }
 
-        Plugins(@Nonnull Collection<Plugin> use,
-                @Nonnull Collection<Plugin> disable,
+        Plugins(@NonNull Collection<Plugin> use,
+                @NonNull Collection<Plugin> disable,
                 boolean disableAllDefaults) {
             this.disable.addAll(disable);
             this.use.addAll(use);
