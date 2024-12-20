@@ -1,4 +1,4 @@
-import { expect } from '@esm-bundle/chai';
+import { expect } from 'chai';
 import { isFilterEmpty } from '../src/util';
 import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
