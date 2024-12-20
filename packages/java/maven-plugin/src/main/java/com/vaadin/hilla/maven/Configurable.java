@@ -2,6 +2,7 @@ package com.vaadin.hilla.maven;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
@@ -42,7 +43,8 @@ interface Configurable {
                 .outputDir(generatedOrOldLocation().toPath())
                 .groupId(project.getGroupId())
                 .artifactId(project.getArtifactId())
-                .classpath(getClasspathElements(project)).mainClass(mainClass)
+                .classpath(getClasspathElements(project))
+                .withDefaultAnnotations().mainClass(mainClass)
                 .nodeCommand(getNode()).productionMode(isProduction).build();
         EngineConfiguration.setDefault(conf);
         return conf;
@@ -79,8 +81,10 @@ interface Configurable {
                 var configuration = plugin.getConfiguration();
                 if (configuration instanceof Xpp3Dom configDom) {
                     var propertyNode = configDom.getChild(propertyName);
-                    return propertyNode != null ? propertyNode.getValue()
-                            : null;
+                    return Optional.ofNullable(propertyNode)
+                            .map(Xpp3Dom::getValue)
+                            // need to filter for property names in value
+                            .filter(v -> v.indexOf('{') < 0).orElse(null);
                 }
             }
         }

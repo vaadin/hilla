@@ -67,7 +67,7 @@ public open class EngineProjectExtension(project: Project) {
                 .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
                 .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
                 .artifactId(project.name)
-                .classpath(classpath)
+                .classpath(classpath).withDefaultAnnotations()
                 .mainClass(project.findProperty("mainClass") as String?)
                 .productionMode(vaadinExtension.productionMode.getOrElse(false))
                 .build()

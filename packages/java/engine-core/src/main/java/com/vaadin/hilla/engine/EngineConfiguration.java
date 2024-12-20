@@ -3,6 +3,9 @@ package com.vaadin.hilla.engine;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -13,6 +16,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,18 +137,6 @@ public class EngineConfiguration {
     public static EngineConfiguration getDefault() {
         if (INSTANCE == null) {
             INSTANCE = new EngineConfiguration();
-            try {
-                INSTANCE.parser.setEndpointAnnotations(List.of(
-                        (Class<? extends Annotation>) Class
-                                .forName("com.vaadin.hilla.BrowserCallable"),
-                        (Class<? extends Annotation>) Class
-                                .forName("com.vaadin.hilla.Endpoint")));
-                INSTANCE.parser.setEndpointExposedAnnotations(
-                        List.of((Class<? extends Annotation>) Class
-                                .forName("com.vaadin.hilla.EndpointExposed")));
-            } catch (Throwable t) {
-                LOGGER.warn("Default annotations not found", t);
-            }
         }
 
         return INSTANCE;
@@ -269,6 +261,41 @@ public class EngineConfiguration {
                 Class<? extends Annotation>... value) {
             configuration.parser
                     .setEndpointExposedAnnotations(Arrays.asList(value));
+            return this;
+        }
+
+        public Builder withDefaultAnnotations() {
+            if (configuration.classpath == null
+                    || configuration.classpath.isEmpty()) {
+                throw new IllegalStateException(
+                        "A valid classpath is needed to find default annotations");
+            }
+
+            var urls = configuration.classpath.stream().map(path -> {
+                try {
+                    return path.toUri().toURL();
+                } catch (MalformedURLException e) {
+                    throw new ConfigurationException(
+                            "Classpath contains invalid elements", e);
+                }
+            }).toArray(URL[]::new);
+
+            try (var classLoader = new URLClassLoader(urls,
+                    getClass().getClassLoader())) {
+                configuration.parser.setEndpointAnnotations(List.of(
+                        (Class<? extends Annotation>) Class.forName(
+                                "com.vaadin.hilla.BrowserCallable", true,
+                                classLoader),
+                        (Class<? extends Annotation>) Class.forName(
+                                "com.vaadin.hilla.Endpoint", true,
+                                classLoader)));
+                configuration.parser.setEndpointExposedAnnotations(
+                        List.of((Class<? extends Annotation>) Class.forName(
+                                "com.vaadin.hilla.EndpointExposed", true,
+                                classLoader)));
+            } catch (Throwable t) {
+                LOGGER.warn("Default annotations not found", t);
+            }
             return this;
         }
 
