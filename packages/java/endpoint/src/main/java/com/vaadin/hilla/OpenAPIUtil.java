@@ -61,7 +61,7 @@ public class OpenAPIUtil {
             boolean isProductionMode) throws IOException {
         var engineConfiguration = new EngineConfiguration.Builder()
                 .buildDir(buildDirectory).productionMode(isProductionMode)
-                .build();
+                .withDefaultAnnotations().build();
         return Optional.of(engineConfiguration.getOpenAPIFile());
     }
 

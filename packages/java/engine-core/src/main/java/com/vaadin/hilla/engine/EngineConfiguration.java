@@ -265,23 +265,21 @@ public class EngineConfiguration {
         }
 
         public Builder withDefaultAnnotations() {
-            if (configuration.classpath == null
-                    || configuration.classpath.isEmpty()) {
-                throw new IllegalStateException(
-                        "A valid classpath is needed to find default annotations");
+            ClassLoader classLoader = getClass().getClassLoader();
+            if (configuration.classpath != null) {
+                var urls = configuration.classpath.stream().map(path -> {
+                    try {
+                        return path.toUri().toURL();
+                    } catch (MalformedURLException e) {
+                        throw new ConfigurationException(
+                                "Classpath contains invalid elements", e);
+                    }
+                }).toArray(URL[]::new);
+                classLoader = new URLClassLoader(urls,
+                        getClass().getClassLoader());
             }
 
-            var urls = configuration.classpath.stream().map(path -> {
-                try {
-                    return path.toUri().toURL();
-                } catch (MalformedURLException e) {
-                    throw new ConfigurationException(
-                            "Classpath contains invalid elements", e);
-                }
-            }).toArray(URL[]::new);
-
-            try (var classLoader = new URLClassLoader(urls,
-                    getClass().getClassLoader())) {
+            try {
                 configuration.parser.setEndpointAnnotations(List.of(
                         (Class<? extends Annotation>) Class.forName(
                                 "com.vaadin.hilla.BrowserCallable", true,
