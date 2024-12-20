@@ -151,6 +151,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
   /**
    * Inserts a new value at the end of the list.
    * @param value - The value to insert.
+   * @returns An operation object that allows to perform additional actions.
    */
   insertLast(value: T): Operation {
     const event = createInsertLastStateEvent(value);
@@ -161,6 +162,7 @@ export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>
   /**
    * Removes the given item from the list.
    * @param item - The item to remove.
+   * @returns An operation object that allows to perform additional actions.
    */
   remove(item: ValueSignal<T>): Operation {
     const entryToRemove = this.#values.get(item.id);

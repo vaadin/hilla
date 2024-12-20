@@ -14,7 +14,10 @@ interface VaadinGlobal {
 const ENDPOINT = 'SignalsHandler';
 
 /**
- * A return type for signal operations.
+ * A return type for signal operations that exposes a `result` property of type
+ * Promise, that resolves when the operation is completed. It allows defining
+ * callbacks to be run after the operation is completed, or error handling when
+ * the operation fails.
  */
 export type Operation = {
   result: Promise<void>;
@@ -230,7 +233,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
     }
   >();
 
-  // creates the obejct to be returned by operations to allow defining callbacks
+  // creates the object to be returned by operations to allow defining callbacks
   protected [$createOperation]({ id, promise }: { id?: string; promise?: Promise<void> }): Operation {
     const thens = this.#operationPromises;
     const promises: Array<Promise<void>> = [];
