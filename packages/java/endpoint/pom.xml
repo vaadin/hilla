@@ -41,6 +41,10 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>hilla-engine-core</artifactId>
             <version>${project.version}</version>
         </dependency>
