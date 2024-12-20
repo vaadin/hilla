@@ -3,9 +3,9 @@ package com.vaadin.hilla.crud;
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 
-import com.vaadin.hilla.Nullable;
 import com.vaadin.hilla.crud.filter.Filter;
 
 /**

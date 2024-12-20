@@ -3,15 +3,13 @@ package com.vaadin.flow.connect;
 import java.time.Duration;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-
 import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.Nonnull;
-import com.vaadin.hilla.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import reactor.core.publisher.Flux;

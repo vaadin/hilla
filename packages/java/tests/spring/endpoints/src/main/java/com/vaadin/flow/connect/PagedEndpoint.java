@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.Nonnull;
-import com.vaadin.hilla.Nullable;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
