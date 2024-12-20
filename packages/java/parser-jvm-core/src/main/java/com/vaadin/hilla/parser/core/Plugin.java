@@ -3,7 +3,7 @@ package com.vaadin.hilla.parser.core;
 import java.util.Collection;
 import java.util.Collections;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public interface Plugin {
 
@@ -19,14 +19,14 @@ public interface Plugin {
         return Collections.emptyList();
     }
 
-    @Nonnull
-    default Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
+    @NonNull
+    default Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> parentPath) {
         return node;
     }
 
-    @Nonnull
-    NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies);
+    @NonNull
+    NodeDependencies scan(@NonNull NodeDependencies nodeDependencies);
 
     void setStorage(SharedStorage storage);
 }
