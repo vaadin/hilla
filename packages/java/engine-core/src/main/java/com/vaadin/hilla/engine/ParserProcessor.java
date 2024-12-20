@@ -31,7 +31,6 @@ public final class ParserProcessor {
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
             .of();
-    private Collection<String> exposedPackages = List.of();
     private String openAPIBasePath;
 
     public ParserProcessor(EngineConfiguration conf) {
@@ -48,8 +47,7 @@ public final class ParserProcessor {
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
                 .endpointAnnotations(endpointAnnotations)
-                .endpointExposedAnnotations(endpointExposedAnnotations)
-                .exposedPackages(exposedPackages);
+                .endpointExposedAnnotations(endpointExposedAnnotations);
 
         preparePlugins(parser);
         prepareOpenAPIBase(parser);

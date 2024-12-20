@@ -138,17 +138,8 @@ class SingleModuleTest : AbstractGradleTest() {
         return endpointFile
     }
 
-    private fun createProject(vararg exposedPackages: String, withNpmInstall: Boolean = false, productionMode: Boolean = false,
+    private fun createProject(withNpmInstall: Boolean = false, productionMode: Boolean = false,
                               disableAllTasksToSimulateDryRun: Boolean = false) {
-
-        val exposedPackagesExtension = if (exposedPackages.isNotEmpty()) {
-            val commaSeparatedPackages = exposedPackages.asList().joinToString { "\"$it\"" }
-            """
-                hilla {
-                	exposedPackagesToParser = [$commaSeparatedPackages]
-                }
-            """.trimIndent()
-        } else "";
 
         val npmInstallTask = if (withNpmInstall) {
             """
@@ -201,8 +192,6 @@ class SingleModuleTest : AbstractGradleTest() {
             apply plugin: 'com.vaadin.hilla'
 
             group = 'com.vaadin.hilla'
-
-            $exposedPackagesExtension
 
             $npmInstallTask
 

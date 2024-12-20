@@ -6,10 +6,6 @@ plugins {
 
 apply plugin: 'com.vaadin.hilla'
 
-hilla {
-	exposedPackagesToParser = ["com.vaadin.hilla.gradle.plugin.test"]
-}
-
 repositories {
 	mavenLocal()
 	mavenCentral()

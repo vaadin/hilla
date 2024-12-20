@@ -21,8 +21,6 @@ public class ValidationTest {
     public void should_GenerateValidations()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
-                .exposedPackages(Set
-                        .of("com.vaadin.hilla.parser.plugins.model.validation"))
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))

@@ -260,20 +260,6 @@ public final class Parser {
         return this;
     }
 
-    @Nonnull
-    public Parser exposedPackages(@Nonnull Collection<String> exposedPackages) {
-        return exposedPackages(exposedPackages, true);
-    }
-
-    @Nonnull
-    public Parser exposedPackages(@Nonnull Collection<String> exposedPackages,
-            boolean override) {
-        if (override || config.exposedPackages == null) {
-            config.exposedPackages = Objects.requireNonNull(exposedPackages);
-        }
-        return this;
-    }
-
     /**
      * Scans the classpath, blocking until the scan is complete.
      *
@@ -444,7 +430,6 @@ public final class Parser {
                 .of();
         private List<Class<? extends Annotation>> endpointExposedAnnotations = List
                 .of();
-        private Collection<String> exposedPackages;
         private OpenAPI openAPI;
 
         private Config(OpenAPI openAPI) {
