@@ -1,8 +1,8 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
-import java.util.stream.Stream;
-
 import javax.annotation.Nonnull;
+
+import java.util.stream.Stream;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -11,7 +11,6 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.TypeArgumentModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
