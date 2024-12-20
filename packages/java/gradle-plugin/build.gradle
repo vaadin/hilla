@@ -26,6 +26,7 @@ archivesBaseName = pom.artifactId
 sourceCompatibility = 17
 targetCompatibility = 17
 def rootPom = new XmlSlurper().parse(rootProject.file('../../../pom.xml'))
+def springBootVersion = rootPom.properties['spring.boot.version']
 def flowVersion = rootPom.properties['flow.version']
 
 /***********************************************************************************************************************
@@ -65,12 +66,14 @@ repositories {
 }
 
 dependencies {
-    implementation('org.jetbrains.kotlin:kotlin-stdlib:1.7.20')
-    implementation("com.vaadin:hilla-engine-core:${pom.parent.version}")
+    implementation('org.jetbrains.kotlin:kotlin-stdlib:1.9.20')
+    implementation("com.vaadin:hilla-endpoint:$version")
+    implementation("com.vaadin:hilla-engine-core:$version")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
+    implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.7.20")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.20")
 }
 
 idea {
@@ -195,13 +198,16 @@ functionalTest {
 }
 
 kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
     explicitApi()
 }
 
 compileKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+compileFunctionalTestKotlin {
     kotlinOptions {
         jvmTarget = "17"
     }

@@ -70,8 +70,6 @@ final class DependencyPlugin extends AbstractPlugin<PluginConfiguration> {
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
             return nodeDependencies.appendChildNodes(rootNode.getSource()
-                    .getClassesWithAnnotation(getStorage().getParserConfig()
-                            .getEndpointAnnotationName())
                     .stream().map(ClassInfoModel::of).map(EndpointNode::of));
         } else if ((node instanceof EndpointNode)) {
             var cls = (ClassInfoModel) node.getSource();
