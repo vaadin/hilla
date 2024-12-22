@@ -376,4 +376,55 @@ public class StateEventTest {
                 eventJson.get(StateEvent.Field.VALUE), Person.class);
         assertEquals(new Person("John Doe", 42, true), person);
     }
+
+    @Test
+    public void extractValidationError_throws_whenEventIsNotRejected() {
+        var eventJson = MAPPER.createObjectNode();
+        assertThrows(IllegalStateException.class,
+                () -> StateEvent.extractValidationError(eventJson));
+    }
+
+    @Test
+    public void extractValidationError_throws_whenEventIsRejectedButDoesNotHaveValidationError() {
+        var event = new StateEvent<>("id", StateEvent.EventType.SET, "value");
+        event.setAccepted(false);
+        event.setValidationError("");
+        assertThrows(IllegalStateException.class,
+                () -> StateEvent.extractValidationError(event.toJson()));
+    }
+
+    @Test
+    public void extractValidationError_returnsValidationError() {
+        var eventJson = MAPPER.createObjectNode();
+        eventJson.put(StateEvent.Field.VALIDATION_ERROR, "error");
+        eventJson.put(StateEvent.Field.ACCEPTED, false);
+        assertEquals("error", StateEvent.extractValidationError(eventJson));
+
+        var event = new StateEvent<>("id", StateEvent.EventType.SET, "value");
+        event.setAccepted(false);
+        event.setValidationError("error");
+        assertEquals("error",
+                StateEvent.extractValidationError(event.toJson()));
+    }
+
+    @Test
+    public void clearValidationError_removesValidationError() {
+        var eventJson = MAPPER.createObjectNode();
+        eventJson.put(StateEvent.Field.VALIDATION_ERROR, "error");
+        eventJson.put(StateEvent.Field.ACCEPTED, false);
+        assertEquals("error", StateEvent.extractValidationError(eventJson));
+        StateEvent.clearValidationError(eventJson);
+        assertFalse(eventJson.has(StateEvent.Field.VALIDATION_ERROR));
+
+        var event = new StateEvent<>("id", StateEvent.EventType.SET, "value");
+        event.setAccepted(false);
+        event.setValidationError("error");
+        assertEquals("error",
+                StateEvent.extractValidationError(event.toJson()));
+        assertEquals("error", event.getValidationError());
+        event.clearValidationError();
+        var eventAsJson = event.toJson();
+        assertNull(event.getValidationError());
+        assertFalse(eventAsJson.has(StateEvent.Field.VALIDATION_ERROR));
+    }
 }
