@@ -3,11 +3,11 @@ package com.vaadin.hilla.crud;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.hilla.EndpointExposed;
-import com.vaadin.hilla.Nullable;
-import com.vaadin.hilla.crud.filter.Filter;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
+import org.jspecify.annotations.Nullable;
+
+import com.vaadin.hilla.EndpointExposed;
 
 /**
  * A browser-callable service that delegates crud operations to a JPA

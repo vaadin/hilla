@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -194,10 +194,10 @@ public class ParserConfigTests {
         public void exit(NodePath<?> nodePath) {
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public NodeDependencies scan(
-                @Nonnull NodeDependencies nodeDependencies) {
+                @NonNull NodeDependencies nodeDependencies) {
             return nodeDependencies;
         }
     }
@@ -214,10 +214,10 @@ public class ParserConfigTests {
         public void exit(NodePath<?> nodePath) {
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public NodeDependencies scan(
-                @Nonnull NodeDependencies nodeDependencies) {
+                @NonNull NodeDependencies nodeDependencies) {
             return nodeDependencies;
         }
     }
@@ -237,10 +237,10 @@ public class ParserConfigTests {
         public void exit(NodePath<?> nodePath) {
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public NodeDependencies scan(
-                @Nonnull NodeDependencies nodeDependencies) {
+                @NonNull NodeDependencies nodeDependencies) {
             return nodeDependencies;
         }
     }

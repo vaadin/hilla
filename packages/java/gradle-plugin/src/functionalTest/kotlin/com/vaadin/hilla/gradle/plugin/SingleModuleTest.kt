@@ -131,14 +131,14 @@ class SingleModuleTest : AbstractGradleTest() {
 
             import com.vaadin.flow.server.auth.AnonymousAllowed;
             import com.vaadin.hilla.Endpoint;
-            import com.vaadin.hilla.Nonnull;
+            import org.jspecify.annotations.NonNull;
 
             @Endpoint
             @AnonymousAllowed
             public class HelloReactEndpoint {
 
-                @Nonnull
-                public String sayHello(@Nonnull String name) {
+                @NonNull
+                public String sayHello(@NonNull String name) {
                     if (name.isEmpty()) {
                         return "Hello stranger";
                     } else {

@@ -7,9 +7,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-
 import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.Nullable;
+
+import org.jspecify.annotations.Nullable;
+
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
