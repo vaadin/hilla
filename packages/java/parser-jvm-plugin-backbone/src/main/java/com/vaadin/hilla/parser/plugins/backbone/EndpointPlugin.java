@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import org.slf4j.Logger;
@@ -59,9 +59,9 @@ public final class EndpointPlugin
         }
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof RootNode) {
             var rootNode = (RootNode) nodeDependencies.getNode();
             var endpoints = rootNode.getSource().stream()

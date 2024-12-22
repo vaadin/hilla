@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.engine.commandrunner.CommandNotFoundException;
 import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
@@ -79,7 +79,7 @@ public final class GeneratorProcessor {
         return this;
     }
 
-    private void applyPlugins(@Nonnull GeneratorConfiguration.Plugins plugins) {
+    private void applyPlugins(GeneratorConfiguration.@NonNull Plugins plugins) {
         pluginsProcessor.setConfig(plugins);
     }
 

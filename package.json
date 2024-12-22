@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "engines": {
-    "node": ">=16.19.0",
-    "npm": ">=9"
+    "node": ">=20.0.0",
+    "npm": ">=9.6"
   },
   "workspaces": [
     "packages/ts/*"
@@ -63,7 +63,7 @@
     "magic-string": "^0.30.17",
     "meow": "^13.2.0",
     "micromatch": "^4.0.8",
-    "mocha": "^10.8.2",
+    "mocha": "^11.0.1",
     "nx": "^20.2.2",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",

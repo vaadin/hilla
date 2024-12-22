@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,21 +100,21 @@ public final class ParserProcessor {
     }
 
     private void applyEndpointAnnotations(
-            @Nonnull List<Class<? extends Annotation>> endpointAnnotations) {
+            @NonNull List<Class<? extends Annotation>> endpointAnnotations) {
         this.endpointAnnotations = Objects.requireNonNull(endpointAnnotations);
     }
 
     private void applyEndpointExposedAnnotations(
-            @Nonnull List<Class<? extends Annotation>> endpointExposedAnnotations) {
+            @NonNull List<Class<? extends Annotation>> endpointExposedAnnotations) {
         this.endpointExposedAnnotations = Objects
                 .requireNonNull(endpointExposedAnnotations);
     }
 
-    private void applyOpenAPIBase(@Nonnull String openAPIBasePath) {
+    private void applyOpenAPIBase(@NonNull String openAPIBasePath) {
         this.openAPIBasePath = openAPIBasePath;
     }
 
-    private void applyPlugins(@Nonnull ParserConfiguration.Plugins plugins) {
+    private void applyPlugins(ParserConfiguration.@NonNull Plugins plugins) {
         this.pluginsProcessor.setConfig(plugins);
     }
 

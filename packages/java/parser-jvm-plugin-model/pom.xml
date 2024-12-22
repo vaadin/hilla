@@ -21,8 +21,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
     </dependency>
     <dependency>
       <groupId>io.github.classgraph</groupId>

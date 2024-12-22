@@ -1,5 +1,5 @@
 module com.vaadin.hilla.parser.utils {
-    requires jsr305;
+    requires org.jspecify;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires io.swagger.v3.core;

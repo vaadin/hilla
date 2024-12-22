@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,20 +18,20 @@ public final class CompositeTypeSignatureNode extends
 
     private final List<AnnotationInfoModel> annotations;
 
-    private CompositeTypeSignatureNode(@Nonnull List<SignatureModel> source,
-            @Nonnull Schema<?> target, List<AnnotationInfoModel> annotations) {
+    private CompositeTypeSignatureNode(@NonNull List<SignatureModel> source,
+            @NonNull Schema<?> target, List<AnnotationInfoModel> annotations) {
         super(source, target);
         this.annotations = annotations;
     }
 
-    private CompositeTypeSignatureNode(@Nonnull List<SignatureModel> source,
-            @Nonnull Schema<?> target) {
+    private CompositeTypeSignatureNode(@NonNull List<SignatureModel> source,
+            @NonNull Schema<?> target) {
         this(source, target, extractAnnotations(source));
     }
 
-    @Nonnull
+    @NonNull
     static public CompositeTypeSignatureNode of(
-            @Nonnull List<SignatureModel> source) {
+            @NonNull List<SignatureModel> source) {
         return new CompositeTypeSignatureNode(source, new Schema<>());
     }
 
@@ -47,7 +47,7 @@ public final class CompositeTypeSignatureNode extends
 
     @Override
     public TypedNode processType(
-            @Nonnull UnaryOperator<SignatureModel> typeProcessor) {
+            @NonNull UnaryOperator<SignatureModel> typeProcessor) {
         var processedTypes = getSource().stream().map(typeProcessor)
                 .collect(Collectors.toList());
         if (processedTypes.equals(getSource())) {
