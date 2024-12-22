@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * An artificial ClassRefSignatureModel implementation.
@@ -14,9 +14,9 @@ final class ClassRefSignatureArtificialModel extends ClassRefSignatureModel {
     private final ClassInfoModel classInfo;
     private final List<TypeArgumentModel> typeArguments;
 
-    ClassRefSignatureArtificialModel(@Nonnull ClassInfoModel classInfo,
-            @Nonnull List<TypeArgumentModel> typeArguments,
-            @Nonnull List<AnnotationInfoModel> annotations) {
+    ClassRefSignatureArtificialModel(@NonNull ClassInfoModel classInfo,
+            @NonNull List<TypeArgumentModel> typeArguments,
+            @NonNull List<AnnotationInfoModel> annotations) {
         this.classInfo = Objects.requireNonNull(classInfo);
         this.typeArguments = Objects.requireNonNull(typeArguments);
         this.annotations = Objects.requireNonNull(annotations);

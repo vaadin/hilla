@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -132,14 +132,14 @@ public final class NonnullPlugin extends AbstractPlugin<NonnullPluginConfig> {
         return List.of(BackbonePlugin.class);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies;
     }
 
     @Override
-    public void setConfiguration(@Nonnull PluginConfiguration configuration) {
+    public void setConfiguration(@NonNull PluginConfiguration configuration) {
         super.setConfiguration(configuration);
         this.annotationsMap = mapByName(
                 new NonnullPluginConfig.Processor(getConfiguration())

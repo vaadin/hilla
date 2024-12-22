@@ -5,7 +5,7 @@ module com.vaadin.hilla.parser.core {
     requires io.github.classgraph;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
-    requires jsr305;
+    requires org.jspecify;
     requires jakarta.annotation;
     requires org.slf4j;
 
