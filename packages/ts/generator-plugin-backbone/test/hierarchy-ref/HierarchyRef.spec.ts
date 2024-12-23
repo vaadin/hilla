@@ -1,15 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { describe, it, expect, chai } from 'vitest';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput, pathBase } from '../utils/common.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('BackbonePlugin', () => {
-  context('when there is an entity referring its superclass', () => {
+  describe('when there is an entity referring its superclass', () => {
     const sectionName = 'HierarchyRef';
     const modelSectionPath = `${pathBase}/${sectionName.toLowerCase()}/${sectionName}Endpoint`;
 
@@ -20,8 +17,8 @@ describe('BackbonePlugin', () => {
       expect(files.length).to.equal(3);
 
       const [endpointFile, entity] = files;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
-      await expect(await entity.text()).toMatchSnapshot('HierarchyRef.entity.snap.ts', import.meta.url);
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`./fixtures/${sectionName}Endpoint.snap.ts`);
+      await expect(await entity.text()).toMatchFileSnapshot('./fixtures/HierarchyRef.entity.snap.ts');
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
       expect(entity.name).to.equal(`${modelSectionPath}/HierarchyRef.ts`);
     });

@@ -1,15 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { describe, it, expect, chai } from 'vitest';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput, pathBase } from '../utils/common.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('BackbonePlugin', () => {
-  context('when there is a complex type', () => {
+  describe('when there is a complex type', () => {
     const sectionName = 'ComplexType';
     const modelSectionPath = `${pathBase}/${sectionName.toLowerCase()}/${sectionName}Endpoint`;
 
@@ -20,8 +17,8 @@ describe('BackbonePlugin', () => {
       expect(files.length).to.equal(2);
 
       const [endpointFile, enumEntity] = files;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
-      await expect(await enumEntity.text()).toMatchSnapshot('ComplexTypeModel.entity.snap.ts', import.meta.url);
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`./fixtures/${sectionName}Endpoint.snap.ts`);
+      await expect(await enumEntity.text()).toMatchFileSnapshot('./fixtures/ComplexTypeModel.entity.snap.ts');
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
       expect(enumEntity.name).to.equal(`${modelSectionPath}/ComplexTypeModel.ts`);
     });

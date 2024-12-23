@@ -1,15 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { describe, it, expect, chai } from 'vitest';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput, pathBase } from '../utils/common.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('BackbonePlugin', () => {
-  context('when there is a complex hierarchy of entities', () => {
+  describe('when there is a complex hierarchy of entities', () => {
     const sectionName = 'ComplexHierarchy';
     const modelSectionPath = `${pathBase}/${sectionName.toLowerCase()}/models`;
 
@@ -20,12 +17,11 @@ describe('BackbonePlugin', () => {
       expect(files.length).to.equal(4);
 
       const [endpointFile, grandParentModelEntityFile, modelEntityFile, parentModelEntityFile] = files;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
-      await expect(await modelEntityFile.text()).toMatchSnapshot('Model.entity.snap.ts', import.meta.url);
-      await expect(await parentModelEntityFile.text()).toMatchSnapshot('ParentModel.entity.snap.ts', import.meta.url);
-      await expect(await grandParentModelEntityFile.text()).toMatchSnapshot(
-        'GrandParentModel.entity.snap.ts',
-        import.meta.url,
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`./fixtures/${sectionName}Endpoint.snap.ts`);
+      await expect(await modelEntityFile.text()).toMatchFileSnapshot('./fixtures/Model.entity.snap.ts');
+      await expect(await parentModelEntityFile.text()).toMatchFileSnapshot('./fixtures/ParentModel.entity.snap.ts');
+      await expect(await grandParentModelEntityFile.text()).toMatchFileSnapshot(
+        './fixtures/GrandParentModel.entity.snap.ts',
       );
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
       expect(modelEntityFile.name).to.equal(`${modelSectionPath}/ComplexHierarchyModel.ts`);

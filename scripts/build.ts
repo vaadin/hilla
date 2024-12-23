@@ -49,13 +49,13 @@ const cssConstructPlugin: Plugin = {
 
 await build({
   define: {
-    __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
+    __NAME__: `'${packageJson.name ?? '@vaadin/hilla-unknown'}'`,
     __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
   },
   // Adds a __REGISTER__ function definition everywhere in the built code where
   // the call for that function exists.
   inject: [fileURLToPath(new URL('./register.js', scriptsDir))],
-  entryPoints: srcFiles.map((file) => new URL(file, packageRoot)).map(fileURLToPath),
+  entryPoints: srcFiles.map((file) => new URL(file, packageRoot)).map((file) => fileURLToPath(file)),
   format: 'esm',
   outdir: fileURLToPath(packageRoot),
   packages: 'external',

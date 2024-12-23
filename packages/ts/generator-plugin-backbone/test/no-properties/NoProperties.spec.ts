@@ -1,15 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { describe, it, expect, chai } from 'vitest';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput } from '../utils/common.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('BackbonePlugin', () => {
-  context('when an entity with no properties is processed', () => {
+  describe('when an entity with no properties is processed', () => {
     const sectionName = 'NoProperties';
 
     it('creates an empty TS interface without errors', async () => {
@@ -20,13 +17,13 @@ describe('BackbonePlugin', () => {
 
       const [endpointFile, entity1, entity2] = files;
 
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`./fixtures/${sectionName}Endpoint.snap.ts`);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
 
-      await expect(await entity1.text()).toMatchSnapshot(`ExampleEntity.snap.ts`, import.meta.url);
+      await expect(await entity1.text()).toMatchFileSnapshot(`./fixtures/ExampleEntity.snap.ts`);
       expect(entity1.name).to.equal(`com/example/application/entities/ExampleEntity.ts`);
 
-      await expect(await entity2.text()).toMatchSnapshot(`CoreEntity.snap.ts`, import.meta.url);
+      await expect(await entity2.text()).toMatchFileSnapshot(`./fixtures/CoreEntity.snap.ts`);
       expect(entity2.name).to.equal(`com/example/application/entities/CoreEntity.ts`);
     });
   });

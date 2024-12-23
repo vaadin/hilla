@@ -7,6 +7,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "lib": ["es2021", "dom"],
+    "types": ["@vitest/browser/providers/playwright"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "strict": true,

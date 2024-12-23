@@ -1,9 +1,13 @@
 /* eslint-disable import/no-extraneous-dependencies,camelcase */
-import meow from 'meow';
+import { parseArgs } from 'node:util';
 
 const {
-  input: [response],
-} = meow({ importMeta: import.meta });
+  positionals: [response],
+} = parseArgs({
+  args: process.argv.slice(2),
+  allowPositionals: true,
+  strict: false,
+});
 
 const {
   required_status_checks,

@@ -1,17 +1,14 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { join } from 'node:path';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { describe, it, expect, chai } from 'vitest';
 import BackbonePlugin from '../../src/index.js';
 import { createGenerator, loadInput } from '../utils/common.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('BackbonePlugin', () => {
-  context('when a custom client file is available', () => {
+  describe('when a custom client file is available', () => {
     const sectionName = 'CustomClient';
 
     it('correctly generates code', async () => {
@@ -21,7 +18,7 @@ describe('BackbonePlugin', () => {
       expect(files.length).to.equal(1);
 
       const [endpointFile] = files;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`./fixtures/${sectionName}Endpoint.snap.ts`);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
   });
