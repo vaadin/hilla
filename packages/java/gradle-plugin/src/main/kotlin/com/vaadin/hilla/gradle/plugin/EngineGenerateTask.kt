@@ -56,10 +56,8 @@ public open class EngineGenerateTask : DefaultTask() {
 
     @TaskAction
     public fun engineGenerate() {
-        val extension: EngineConfiguration = HillaPlugin.createEngineConfiguration(project, VaadinFlowPluginExtension.get(project))
-        logger.info("Running the engineGenerate task with effective Hilla configuration $extension")
         val vaadinExtension = VaadinFlowPluginExtension.get(project)
-        logger.info("Running the engineGenerate task with effective Vaadin configuration $extension")
+        logger.info("Running the engineGenerate task with effective Vaadin configuration $vaadinExtension")
 
         try {
             val conf: EngineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
