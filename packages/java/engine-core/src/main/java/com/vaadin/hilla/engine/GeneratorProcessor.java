@@ -27,17 +27,16 @@ public final class GeneratorProcessor {
     private final Path outputDirectory;
     private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
 
-    public GeneratorProcessor(EngineConfiguration conf, String nodeCommand,
-            boolean isProductionMode) {
+    public GeneratorProcessor(EngineConfiguration conf) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
+        this.openAPIFile = conf.getOpenAPIFile();
         this.outputDirectory = conf.getOutputDir();
-        this.nodeCommand = nodeCommand;
+        this.nodeCommand = conf.getNodeCommand();
         applyConfiguration(conf.getGenerator());
     }
 
     public void process() throws GeneratorException {
-        var arguments = new ArrayList<>();
+        var arguments = new ArrayList<Object>();
         arguments.add(TSGEN_PATH);
         prepareOutputDir(arguments);
         preparePlugins(arguments);

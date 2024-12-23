@@ -30,6 +30,11 @@
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>hilla-endpoint</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>flow-server</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -67,6 +72,11 @@
       <groupId>com.vaadin</groupId>
       <artifactId>hilla-parser-jvm-test-utils</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
