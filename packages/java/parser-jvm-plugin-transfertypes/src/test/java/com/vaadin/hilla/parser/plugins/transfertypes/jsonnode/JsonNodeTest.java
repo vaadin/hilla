@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 public class JsonNodeTest {
@@ -16,11 +17,12 @@ public class JsonNodeTest {
     @Test
     public void should_ReplaceJsonNodeClassWithObject()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new BackbonePlugin())
-                .addPlugin(new TransferTypesPlugin()).execute();
+                .addPlugin(new TransferTypesPlugin())
+                .execute(List.of(JsonNodeEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
