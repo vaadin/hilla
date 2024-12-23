@@ -19,6 +19,7 @@ public class EndpointExposedMethodAndSecurityAnnotationTest {
     private final List<String> classPath;
     private final ResourceLoader resourceLoader = new ResourceLoader(
             getClass());
+    private final List<Class<?>> endpoints = List.of(AnotherEndpoint.class);
 
     {
         try {
@@ -30,13 +31,12 @@ public class EndpointExposedMethodAndSecurityAnnotationTest {
 
     @Test
     public void throws_when_parentEndpointMethod_annotatedWithSecurityAnnotations() {
-        var exception = assertThrows(ParserException.class, () -> new Parser()
-                .classLoader(getClass().getClassLoader()).classPath(classPath)
-                .exposedPackages(Set.of(
-                        "com.vaadin.hilla.parser.core.security.methodlevel"))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .execute());
+        var exception = assertThrows(ParserException.class,
+                () -> new Parser().classPath(classPath)
+                        .endpointAnnotations(List.of(Endpoint.class))
+                        .endpointExposedAnnotations(
+                                List.of(EndpointExposed.class))
+                        .execute(endpoints));
 
         assertTrue(exception.getMessage().startsWith(
                 "Class `com.vaadin.hilla.parser.core.security.methodlevel.ParentEndpoint` is annotated with `com.vaadin.hilla.parser.core.security.EndpointExposed` and `jakarta.annotation.security.RolesAllowed` annotation."));

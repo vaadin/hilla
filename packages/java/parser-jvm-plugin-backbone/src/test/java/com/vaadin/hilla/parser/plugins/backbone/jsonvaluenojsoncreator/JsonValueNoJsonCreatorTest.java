@@ -6,6 +6,7 @@ import com.vaadin.hilla.parser.plugins.backbone.JsonValuePlugin.MalformedValueTy
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,10 +17,10 @@ public class JsonValueNoJsonCreatorTest {
     @Test
     public void should_ThrowExceptionWhenOnlyJsonValueIsUsed() {
         assertThrows(MalformedValueTypeException.class, () -> {
-            new Parser().classLoader(getClass().getClassLoader())
-                    .classPath(Set.of(helper.getTargetDir().toString()))
-                    .endpointAnnotation(Endpoint.class.getName())
-                    .addPlugin(new BackbonePlugin()).execute();
+            new Parser().classPath(Set.of(helper.getTargetDir().toString()))
+                    .endpointAnnotations(List.of(Endpoint.class))
+                    .addPlugin(new BackbonePlugin())
+                    .execute(List.of(JsonValueNoJsonCreatorEndpoint.class));
         });
     }
 }

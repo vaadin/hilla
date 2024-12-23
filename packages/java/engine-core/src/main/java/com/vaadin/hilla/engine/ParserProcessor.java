@@ -1,6 +1,7 @@
 package com.vaadin.hilla.engine;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -20,54 +21,50 @@ import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.PluginManager;
 import com.vaadin.hilla.parser.utils.JsonPrinter;
 
-import static com.vaadin.hilla.engine.EngineConfiguration.OPEN_API_PATH;
-
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(ParserProcessor.class);
     private final Path baseDir;
-    private final ClassLoader classLoader;
     private final Set<Path> classPath;
     private final Path openAPIFile;
     private final ParserConfiguration.PluginsProcessor pluginsProcessor = new ParserConfiguration.PluginsProcessor();
-    private String endpointAnnotationName = "com.vaadin.hilla.Endpoint";
-    private String endpointExposedAnnotationName = "com.vaadin.hilla.EndpointExposed";
-    private Collection<String> exposedPackages = List.of();
+    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
+    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
+            .of();
     private String openAPIBasePath;
 
-    public ParserProcessor(EngineConfiguration conf, ClassLoader classLoader,
-            boolean isProductionMode) {
+    public ParserProcessor(EngineConfiguration conf) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile(isProductionMode);
-        this.classLoader = classLoader;
-        this.classPath = conf.getClassPath();
+        this.openAPIFile = conf.getOpenAPIFile();
+        this.classPath = conf.getClasspath();
+        this.endpointAnnotations = conf.getEndpointAnnotations();
+        this.endpointExposedAnnotations = conf.getEndpointExposedAnnotations();
         applyConfiguration(conf.getParser());
     }
 
-    public String createOpenAPI() throws IOException {
-        var parser = new Parser().classLoader(classLoader)
+    private String createOpenAPI(List<Class<?>> endpoints) throws IOException {
+        var parser = new Parser()
                 .classPath(classPath.stream().map(Path::toString)
                         .collect(Collectors.toSet()))
-                .endpointAnnotation(endpointAnnotationName)
-                .endpointExposedAnnotation(endpointExposedAnnotationName)
-                .exposedPackages(exposedPackages);
+                .endpointAnnotations(endpointAnnotations)
+                .endpointExposedAnnotations(endpointExposedAnnotations);
 
         preparePlugins(parser);
         prepareOpenAPIBase(parser);
 
         logger.debug("Starting JVM Parser");
 
-        var openAPI = parser.execute();
+        var openAPI = parser.execute(endpoints);
 
         return new JsonPrinter().pretty().writeAsString(openAPI);
     }
 
-    public void process() throws ParserException {
+    public void process(List<Class<?>> endpoints) throws ParserException {
         String openAPIString;
 
         try {
             Files.createDirectories(openAPIFile.getParent());
-            openAPIString = createOpenAPI();
+            openAPIString = createOpenAPI(endpoints);
         } catch (IOException e) {
             throw new ParserException("Unable to prepare OpenAPI definition",
                     e);
@@ -94,30 +91,23 @@ public final class ParserProcessor {
             return;
         }
 
-        parserConfiguration.getEndpointAnnotation()
-                .ifPresent(this::applyEndpointAnnotation);
-        parserConfiguration.getEndpointExposedAnnotation()
-                .ifPresent(this::applyEndpointExposedAnnotation);
+        applyEndpointAnnotations(parserConfiguration.getEndpointAnnotations());
+        applyEndpointExposedAnnotations(
+                parserConfiguration.getEndpointExposedAnnotations());
         parserConfiguration.getOpenAPIBasePath()
                 .ifPresent(this::applyOpenAPIBase);
         parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
-        parserConfiguration.getPackages().ifPresent(this::applyExposedPackages);
     }
 
-    private void applyEndpointAnnotation(
-            @NonNull String endpointAnnotationName) {
-        this.endpointAnnotationName = Objects
-                .requireNonNull(endpointAnnotationName);
+    private void applyEndpointAnnotations(
+            @NonNull List<Class<? extends Annotation>> endpointAnnotations) {
+        this.endpointAnnotations = Objects.requireNonNull(endpointAnnotations);
     }
 
-    private void applyEndpointExposedAnnotation(
-            @NonNull String endpointExposedAnnotationName) {
-        this.endpointExposedAnnotationName = Objects
-                .requireNonNull(endpointExposedAnnotationName);
-    }
-
-    private void applyExposedPackages(@NonNull List<String> exposedPackages) {
-        this.exposedPackages = exposedPackages;
+    private void applyEndpointExposedAnnotations(
+            @NonNull List<Class<? extends Annotation>> endpointExposedAnnotations) {
+        this.endpointExposedAnnotations = Objects
+                .requireNonNull(endpointExposedAnnotations);
     }
 
     private void applyOpenAPIBase(@NonNull String openAPIBasePath) {

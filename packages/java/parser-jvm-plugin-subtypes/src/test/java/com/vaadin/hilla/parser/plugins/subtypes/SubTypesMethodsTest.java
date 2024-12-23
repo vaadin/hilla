@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.subtypes;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -16,12 +17,12 @@ public class SubTypesMethodsTest {
     @Test
     public void should_CorrectlyHandleSuperClassMethods()
             throws IOException, URISyntaxException {
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin()).addPlugin(new SubTypesPlugin())
-                .execute();
+                .execute(List.of(SubTypesEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
