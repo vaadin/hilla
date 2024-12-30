@@ -88,9 +88,9 @@ public class JsonValuePlugin
                         .isAnnotationPresent(JsonCreator.class))
                 .findAny();
 
-        // Classes having only one of those annotation are malformed in Hilla as
-        // they break the generator or, at least, make data transfer impossible,
-        // so we throw an exception for those.
+        // Classes having only one of those annotations cannot be treated as
+        // domain objects. As there's no general rule about they have to be
+        // treated, the best guess is to generate them as usual.
         if (jsonValue.isPresent() ^ jsonCreator.isPresent()) {
             logger.debug("Class {} is annotated with only one of @JsonValue or"
                     + " @JsonCreator. Hilla requires both annotations to"
