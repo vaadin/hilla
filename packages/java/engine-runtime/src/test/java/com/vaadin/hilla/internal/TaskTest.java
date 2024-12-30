@@ -41,13 +41,17 @@ public class TaskTest {
                 .resolve(getFrontendDirectory());
         Files.createDirectories(frontendDir);
 
-        var packagesDirectory = Path
+        Path packagesPath = Path
                 .of(getClass().getClassLoader().getResource("").toURI())
                 .getParent() // target
                 .getParent() // engine-runtime
                 .getParent() // java
-                .getParent() // packages
-                .resolve("ts");
+                .getParent(); // packages
+
+        Path projectRoot = packagesPath.getParent();
+        Files.copy(projectRoot.resolve(".npmrc"),
+                temporaryDirectory.resolve(".npmrc"));
+        var tsPackagesDirectory = packagesPath.resolve("ts");
 
         var shellCmd = FrontendUtils.isWindows() ? Stream.of("cmd.exe", "/c")
                 : Stream.<String> empty();
@@ -55,7 +59,8 @@ public class TaskTest {
         var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
                 "install", "--no-save", "--install-links");
 
-        var generatorFiles = Files.list(packagesDirectory).map(Path::toString);
+        var generatorFiles = Files.list(tsPackagesDirectory)
+                .map(Path::toString);
 
         var command = Stream.of(shellCmd, npmCmd, generatorFiles)
                 .flatMap(Function.identity()).toList();
