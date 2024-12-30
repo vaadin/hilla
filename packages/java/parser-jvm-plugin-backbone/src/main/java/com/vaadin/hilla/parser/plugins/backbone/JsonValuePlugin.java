@@ -10,6 +10,8 @@ import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -24,6 +26,8 @@ import java.util.stream.Stream;
  */
 public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
+    private static final Logger logger = LoggerFactory
+            .getLogger(JsonValuePlugin.class);
     private final Map<Class<?>, Optional<Class<?>>> jsonValues = new HashMap<>();
 
     @Override
@@ -88,9 +92,12 @@ public class JsonValuePlugin
         // they break the generator or, at least, make data transfer impossible,
         // so we throw an exception for those.
         if (jsonValue.isPresent() ^ jsonCreator.isPresent()) {
-            throw new MalformedValueTypeException("Class " + cls.getName()
-                    + " has only one of @JsonValue and @JsonCreator."
-                    + " Hilla only supports classes with both annotations.");
+            logger.debug("Class {} is annotated with only one of @JsonValue or"
+                    + " @JsonCreator. Hilla requires both annotations to"
+                    + " translate it to a value type; this class will be"
+                    + " processed as if neither annotation is present.",
+                    cls.getName());
+            jsonValue = Optional.empty();
         }
 
         return jsonValue;
