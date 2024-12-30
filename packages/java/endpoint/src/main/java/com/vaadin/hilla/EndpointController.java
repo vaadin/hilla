@@ -17,16 +17,10 @@ package com.vaadin.hilla;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,10 +123,6 @@ public class EndpointController {
         endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
         endpointBeans
                 .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
-
-        // By default, only register those endpoints included in the Hilla
-        // OpenAPI definition file
-        registerEndpointsFromApiDefinition(endpointBeans, openApiResource);
 
         if (endpointRegistry.isEmpty() && !endpointBeans.isEmpty()) {
             LOGGER.debug("No endpoints found in openapi.json:"
@@ -307,46 +297,6 @@ public class EndpointController {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(endpointInvoker.createResponseErrorObject(
                             messages.caption() + ". " + messages.message()));
-        }
-    }
-
-    /**
-     * Parses the <code>openapi.json</code> file to discover defined endpoints.
-     *
-     * @param knownEndpointBeans
-     *            the endpoint beans found in the Spring context
-     */
-    private void registerEndpointsFromApiDefinition(
-            Map<String, Object> knownEndpointBeans, URL openApiResource) {
-
-        if (openApiResource == null) {
-            LOGGER.debug(
-                    "Resource 'hilla-openapi.json' is not available: endpoints cannot be registered yet");
-        } else {
-            try (var stream = openApiResource.openStream()) {
-                // Read the openapi.json file and extract the tags, which in
-                // turn define the endpoints and their implementation classes
-                var rootNode = new ObjectMapper().readTree(stream);
-                var tagsNode = (ArrayNode) rootNode.get("tags");
-
-                if (tagsNode != null) {
-                    // Declared endpoints are first searched as Spring Beans. If
-                    // not found, they are, if possible, instantiated as regular
-                    // classes using their default constructor
-                    tagsNode.forEach(tag -> {
-                        Optional.ofNullable(tag.get("name"))
-                                .map(JsonNode::asText)
-                                .map(knownEndpointBeans::get)
-                                .or(() -> Optional
-                                        .ofNullable(tag.get("x-class-name"))
-                                        .map(JsonNode::asText)
-                                        .map(this::instantiateEndpointByClassName))
-                                .ifPresent(endpointRegistry::registerEndpoint);
-                    });
-                }
-            } catch (IOException e) {
-                LOGGER.warn("Failed to read openapi.json", e);
-            }
         }
     }
 

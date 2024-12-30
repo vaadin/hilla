@@ -15,20 +15,25 @@
  */
 package com.vaadin.hilla.internal;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 import java.io.File;
 import java.net.URL;
 import java.util.Objects;
 import java.util.function.Function;
 
-import com.vaadin.hilla.engine.ParserException;
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.EndpointCodeGenerator;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.
@@ -36,42 +41,14 @@ import org.slf4j.LoggerFactory;
 public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(TaskGenerateOpenAPIImpl.class);
-
-    private final ClassLoader classLoader;
-    private final boolean isProductionMode;
-
     /**
      * Create a task for generating OpenAPI spec.
      *
-     * @param projectDirectory
-     *            the base directory of the project.
-     *
-     * @param buildDirectoryName
-     *            Java build directory name (relative to the {@code
-     *              projectDirectory}).
-     *
-     * @param outputDirectory
-     *            the output directory for generated TypeScript code.
-     *
-     * @param resourceFinder
-     *            used internally to find resources.
-     *
-     * @param classLoader
-     *            the Java Class Loader for the parser.
-     *
-     * @param isProductionMode
-     *            {@code true} if building for production.
+     * @param engineConfiguration
+     *            Hilla engine configuration instance
      */
-    TaskGenerateOpenAPIImpl(File projectDirectory, String buildDirectoryName,
-            File outputDirectory, Function<String, URL> resourceFinder,
-            @NonNull ClassLoader classLoader, boolean isProductionMode) {
-        super(projectDirectory, buildDirectoryName, outputDirectory,
-                resourceFinder);
-        this.classLoader = Objects.requireNonNull(classLoader,
-                "ClassLoader should not be null");
-        this.isProductionMode = isProductionMode;
+    TaskGenerateOpenAPIImpl(EngineConfiguration engineConfiguration) {
+        super(engineConfiguration);
     }
 
     /**
@@ -81,15 +58,20 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        try {
-            var engineConfiguration = getEngineConfiguration();
-            var processor = new ParserProcessor(engineConfiguration,
-                    classLoader, isProductionMode);
-            processor.process();
-        } catch (ParserException e) {
-            // Make sure the exception is printed in the logs
-            LOGGER.error("Java code parsing failed", e);
-            throw new ExecutionFailedException("Java code parsing failed");
+        var engineConfiguration = getEngineConfiguration();
+        if (engineConfiguration.isProductionMode()) {
+            var browserCallables = engineConfiguration
+                    .getBrowserCallableFinder().findBrowserCallables();
+            var processor = new ParserProcessor(engineConfiguration);
+            processor.process(browserCallables);
+        } else {
+            ApplicationContextProvider.runOnContext(applicationContext -> {
+                List<Class<?>> browserCallables = EndpointCodeGenerator
+                        .findBrowserCallables(engineConfiguration,
+                                applicationContext);
+                var processor = new ParserProcessor(engineConfiguration);
+                processor.process(browserCallables);
+            });
         }
     }
 }

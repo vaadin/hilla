@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
@@ -8,7 +9,6 @@ import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
@@ -91,11 +91,11 @@ public final class EndpointExposedPlugin
      */
     private Node<?, ?> createEndpointHierarchyClassNode(
             ClassInfoModel classInfo) {
-        var endpointExposedAnnotationName = getStorage().getParserConfig()
-                .getEndpointExposedAnnotationName();
+        var endpointExposedAnnotations = getStorage().getParserConfig()
+                .getEndpointExposedAnnotations();
         var exposed = classInfo.getAnnotations().stream()
-                .map(AnnotationInfoModel::getName)
-                .anyMatch(endpointExposedAnnotationName::equals)
+                .map(annInfo -> ((Annotation) annInfo.get()).annotationType())
+                .anyMatch(endpointExposedAnnotations::contains)
                 || alwaysExpose(classInfo);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
                 : EndpointNonExposedNode.of(classInfo);

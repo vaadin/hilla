@@ -45,15 +45,6 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
-                <configuration>
-                    <parser>
-                        <packages>
-                            <package>com.example.application</package>
-                            <package>com.invalid</package>
-                            <package>com.example.library.unpublished</package>
-                        </packages>
-                    </parser>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
