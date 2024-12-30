@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -154,6 +155,7 @@ public class EndpointControllerConfiguration {
      * @return the endpoint invoker
      */
     @Bean
+    @DependsOn("hillaEndpointObjectMapper")
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
             ObjectMapper hillaEndpointObjectMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
