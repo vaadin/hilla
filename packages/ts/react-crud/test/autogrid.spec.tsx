@@ -1,4 +1,4 @@
-import { screen, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
@@ -1167,8 +1167,10 @@ describe('@vaadin/hilla-react-crud', () => {
       });
 
       it('uses custom column options on top of the type defaults', async () => {
-        const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
-        const StreetRenderer = ({ item }: { item: Person }): JSX.Element => (
+        const NameRenderer = ({ item }: { item: Person }): React.JSX.Element => (
+          <span>{item.firstName.toUpperCase()}</span>
+        );
+        const StreetRenderer = ({ item }: { item: Person }): React.JSX.Element => (
           <span>{item.address?.street.toUpperCase()}</span>
         );
         const grid = await GridController.init(
@@ -1247,12 +1249,12 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     describe('custom columns', () => {
-      const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+      const FullNameRenderer = ({ item }: { item: Person }): React.JSX.Element => (
         <span>
           {item.firstName} {item.lastName}
         </span>
       );
-      const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
+      const FullNameHyphenRenderer = ({ item }: { item: Person }): React.JSX.Element => (
         <span>
           {item.firstName}-{item.lastName}
         </span>
