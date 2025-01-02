@@ -25,6 +25,7 @@ import org.gradle.api.tasks.TaskAction
 public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
     @TaskAction
     public fun hillaBuildFrontend() {
+        logger.info("Creating Hilla engine configuration")
         val vaadinExtension = VaadinFlowPluginExtension.get(project)
         val engineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
         EngineConfiguration.setDefault(engineConfiguration)
