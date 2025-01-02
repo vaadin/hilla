@@ -15,8 +15,20 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.EngineConfiguration
+import org.gradle.api.tasks.TaskAction
+
 /**
  * Extend the VaadinBuildFrontendTask so that frontend files are not cleaned after build.
  */
 public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
+    @TaskAction
+    public fun hillaBuildFrontend() {
+        val vaadinExtension = VaadinFlowPluginExtension.get(project)
+        val engineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
+        EngineConfiguration.setDefault(engineConfiguration)
+
+        vaadinBuildFrontend()
+    }
 }

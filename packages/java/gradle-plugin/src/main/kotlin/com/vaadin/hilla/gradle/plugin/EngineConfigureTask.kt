@@ -25,6 +25,7 @@ import com.vaadin.hilla.engine.*
  * Task that generates the configuration json which is needed
  * for next task of generating the endpoints and model classes.
  */
+@Deprecated("The 'configure' goal is no longer used and will be removed in a future version.")
 public open class EngineConfigureTask : DefaultTask() {
 
     init {
@@ -34,8 +35,6 @@ public open class EngineConfigureTask : DefaultTask() {
 
     @TaskAction
     public fun engineConfigure() {
-        val vaadinExtension = VaadinFlowPluginExtension.get(project)
-        val engineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
-        EngineConfiguration.setDefault(engineConfiguration)
+        logger.warn("The 'configure' goal is no longer used and will be removed in a future version.")
     }
 }

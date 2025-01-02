@@ -47,10 +47,6 @@ public class HillaPlugin : Plugin<Project> {
             register("hillaGenerate", EngineGenerateTask::class.java)
         }
 
-        project.tasks.named("vaadinBuildFrontend") {
-            it.dependsOn("hillaConfigure")
-        }
-
         project.tasks.withType(Jar::class.java) { task: Jar ->
             task.mustRunAfter("vaadinBuildFrontend")
         }
