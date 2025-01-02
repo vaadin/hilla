@@ -6,7 +6,7 @@ import Matcher from 'Frontend/generated/com/vaadin/hilla/crud/filter/PropertyStr
 import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import { PersonService } from 'Frontend/generated/endpoints.js';
 
-export function ReadOnlyGridSinglePropertyFilter(): JSX.Element {
+export function ReadOnlyGridSinglePropertyFilter(): React.JSX.Element {
   const [filter, setFilter] = useState<FilterUnion | undefined>(undefined);
   return (
     <div>
