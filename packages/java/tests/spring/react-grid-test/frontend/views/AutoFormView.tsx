@@ -4,7 +4,7 @@ import type Appointment from 'Frontend/generated/com/vaadin/hilla/test/reactgrid
 import AppointmentModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/AppointmentModel.js';
 import { AppointmentService } from 'Frontend/generated/endpoints.js';
 
-export function AutoFormView(): JSX.Element {
+export function AutoFormView(): React.JSX.Element {
   const [submitted, setSubmitted] = useState<Appointment | undefined>(undefined);
 
   function handleSubmit({ item }: SubmitEvent<Appointment>) {

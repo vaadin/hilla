@@ -6,7 +6,7 @@ import CompanyModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Com
 import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import { CompanyService, PersonService } from 'Frontend/generated/endpoints.js';
 
-export function ReadOnlyGridWithHeaderFilters(): JSX.Element {
+export function ReadOnlyGridWithHeaderFilters(): React.JSX.Element {
   const [model, setModel] = useState<Array<DetachedModelConstructor<AbstractModel>>>([PersonModel]);
   const [service, setService] = useState<CrudService<any>>(PersonService);
   const [noHeaderFilters, setNoHeaderFilters] = useState(false);

@@ -7,12 +7,12 @@ type GridBodyReactRendererProps<TItem> = {
   item: TItem;
 };
 
-function LuckyNumberRenderer({ item }: GridBodyReactRendererProps<Person>): JSX.Element {
+function LuckyNumberRenderer({ item }: GridBodyReactRendererProps<Person>): React.JSX.Element {
   const value = item.luckyNumber;
   return <span style={{ fontWeight: 'bold', color: value % 2 === 0 ? 'green' : 'red' }}>{value}</span>;
 }
 
-export function ReadOnlyGrid(): JSX.Element {
+export function ReadOnlyGrid(): React.JSX.Element {
   return (
     <AutoGrid
       pageSize={10}

@@ -42,6 +42,8 @@ public class HillaPlugin : Plugin<Project> {
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
         project.pluginManager.apply(VaadinPlugin::class.java)
 
+        project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
+
         project.tasks.apply {
             register("hillaConfigure", EngineConfigureTask::class.java)
             register("hillaGenerate", EngineGenerateTask::class.java)

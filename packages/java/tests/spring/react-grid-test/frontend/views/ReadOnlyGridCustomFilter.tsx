@@ -36,7 +36,7 @@ const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
   ></TextField>
 );
 
-const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+const FullNameRenderer = ({ item }: { item: Person }): React.JSX.Element => (
   <span>
     {item.firstName} {item.lastName}
   </span>
@@ -44,7 +44,7 @@ const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
 
 const HeaderRenderer = () => <div>Full Name (currently: {new Date().toLocaleString()})</div>;
 
-export function ReadOnlyGridCustomFilter(): JSX.Element {
+export function ReadOnlyGridCustomFilter(): React.JSX.Element {
   return (
     <div>
       <AutoGrid
