@@ -157,7 +157,7 @@ public class EndpointControllerConfiguration {
     @Bean
     @DependsOn("hillaEndpointObjectMapper")
     EndpointInvoker endpointInvoker(ApplicationContext applicationContext,
-            ObjectMapper hillaEndpointObjectMapper,
+            @Qualifier("hillaEndpointObjectMapper") ObjectMapper hillaEndpointObjectMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         return new EndpointInvoker(applicationContext,
