@@ -89,9 +89,15 @@ class AotBrowserCallableFinder {
 
         // Runs the SpringApplicationAotProcessor to generate the
         // reflect-config.json file. This comes from the `process-aot` goal.
-        new ProcessBuilder().inheritIO().command(javaExecutable, "@" + argsFile)
-                .start().waitFor();
-        Files.delete(argsFile);
+        int exitCode = new ProcessBuilder().inheritIO()
+                .command(javaExecutable, "@" + argsFile).start().waitFor();
+
+        if (exitCode == 0) {
+            Files.delete(argsFile);
+        } else {
+            LOGGER.error(
+                    SPRING_AOT_PROCESSOR + " exited with code: " + exitCode);
+        }
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
                 "native-image", engineConfiguration.getGroupId(),
