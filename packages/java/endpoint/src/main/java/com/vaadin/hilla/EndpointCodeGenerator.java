@@ -96,14 +96,7 @@ public class EndpointCodeGenerator {
             GeneratorProcessor generator = new GeneratorProcessor(
                     engineConfiguration);
             generator.process();
-
-            try {
-                var openApiPath = engineConfiguration.getOpenAPIFile();
-                this.endpointController
-                        .registerEndpoints(openApiPath.toUri().toURL());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            this.endpointController.registerEndpoints();
         });
     }
 

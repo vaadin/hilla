@@ -827,7 +827,7 @@ public class EndpointControllerTest {
                 mock(ServletContext.class), registry);
 
         new EndpointController(contextMock, registry, invoker, null)
-                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+                .registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1172,8 +1172,7 @@ public class EndpointControllerTest {
                 "libraryEndpoint", new LibraryEndpoint())).when(context)
                 .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
-        controller.registerEndpoints(getClass()
-                .getResource("/com/vaadin/hilla/packages/" + openApiFilename));
+        controller.registerEndpoints();
         return controller.endpointRegistry;
     }
 
@@ -1314,8 +1313,7 @@ public class EndpointControllerTest {
         EndpointController connectController = Mockito
                 .spy(new EndpointController(mockApplicationContext, registry,
                         invoker, csrfChecker));
-        connectController
-                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+        connectController.registerEndpoints();
         return connectController;
     }
 
@@ -1343,8 +1341,7 @@ public class EndpointControllerTest {
         EndpointController hillaController = controllerMockBuilder
                 .withObjectMapperFactory(new JacksonObjectMapperFactory.Json())
                 .withApplicationContext(applicationContext).build();
-        hillaController
-                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+        hillaController.registerEndpoints();
         return hillaController;
     }
 
