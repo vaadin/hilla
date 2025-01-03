@@ -160,7 +160,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    */
   get defaultValue(): Value<M> | undefined {
     const key = this.model[_key];
-    const parentDefaultValue = this.parent!.defaultValue as { readonly [key in typeof key]?: Value<M> };
+    const parentDefaultValue = (this.parent!.defaultValue ?? {}) as { readonly [key in typeof key]?: Value<M> };
 
     if (this.#isArrayItem() && !(key in parentDefaultValue)) {
       if (defaultArrayItemCache.has(this.parent)) {
@@ -499,7 +499,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       ? (this.parent.value as { [key in typeof key]: Value<M> })[this.model[_key]]
       : undefined;
 
-    const defaultValue: Value<M> | undefined = this.parent
+    const defaultValue: Value<M> | undefined = this.parent?.defaultValue
       ? (this.parent.defaultValue as { readonly [key in typeof key]: Value<M> })[this.model[_key]]
       : undefined;
 
