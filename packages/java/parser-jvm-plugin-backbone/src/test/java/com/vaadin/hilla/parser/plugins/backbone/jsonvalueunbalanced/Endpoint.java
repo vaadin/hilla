@@ -1,4 +1,4 @@
-package com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator;
+package com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
