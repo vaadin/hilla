@@ -292,7 +292,8 @@ public class EngineConfiguration {
                                 "com.vaadin.hilla.EndpointExposed", true,
                                 classLoader)));
             } catch (Throwable t) {
-                LOGGER.warn("Default annotations not found", t);
+                LOGGER.debug(
+                        "Default annotations not found. Hilla is probably not in the classpath.");
             }
             return this;
         }
