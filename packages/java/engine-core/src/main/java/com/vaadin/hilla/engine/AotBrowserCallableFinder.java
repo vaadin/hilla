@@ -80,7 +80,7 @@ class AotBrowserCallableFinder {
                 engineConfiguration.getArtifactId()).toList();
 
         var argsFile = engineConfiguration.getBuildDir()
-                .resolve("aot-args-" + System.currentTimeMillis() + ".txt");
+                .resolve("hilla-aot-args.txt");
         Files.write(argsFile, settings);
 
         var javaExecutable = ProcessHandle.current().info().command()
@@ -92,9 +92,7 @@ class AotBrowserCallableFinder {
         int exitCode = new ProcessBuilder().inheritIO()
                 .command(javaExecutable, "@" + argsFile).start().waitFor();
 
-        if (exitCode == 0) {
-            Files.delete(argsFile);
-        } else {
+        if (exitCode != 0) {
             LOGGER.error(
                     SPRING_AOT_PROCESSOR + " exited with code: " + exitCode);
         }
