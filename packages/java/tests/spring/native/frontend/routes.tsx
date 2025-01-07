@@ -9,4 +9,17 @@ export const routes: RouteObject[] = [
       { path: '/login', element: <LoginView /> }
 ];
 
-export default createBrowserRouter(routes);
+export default createBrowserRouter(routes, {
+  future: {
+    // eslint-disable-next-line camelcase
+    v7_fetcherPersist: true,
+    // eslint-disable-next-line camelcase
+    v7_normalizeFormMethod: true,
+    // eslint-disable-next-line camelcase
+    v7_partialHydration: true,
+    // eslint-disable-next-line camelcase
+    v7_relativeSplatPath: true,
+    // eslint-disable-next-line camelcase
+    v7_skipActionErrorRevalidation: true,
+  },
+});
