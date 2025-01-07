@@ -152,8 +152,15 @@ class AotBrowserCallableFinder {
         var annotationNames = engineConfiguration.getParser()
                 .getEndpointAnnotations().stream().map(Class::getName).toList();
 
-        try (var classLoader = new URLClassLoader(urls,
-                AotBrowserCallableFinder.class.getClassLoader())) {
+        ClassLoader parent;
+        try {
+            parent = Class.forName("com.vaadin.hilla.BrowserCallable")
+                    .getClassLoader();
+        } catch (Throwable t) {
+            parent = AotBrowserCallableFinder.class.getClassLoader();
+        }
+
+        try (var classLoader = new URLClassLoader(urls, parent)) {
             return candidates.stream().map(name -> {
                 try {
                     return Class.forName(name, false, classLoader);
