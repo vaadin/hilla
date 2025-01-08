@@ -14,7 +14,7 @@ public class JsonValueNoJsonCreatorTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_useDefaultSerializationWhenOnlyOneAnnotationIsUsed()
+    public void should_notChangeOutcomeAccordingToJsonCreator()
             throws IOException, URISyntaxException {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
