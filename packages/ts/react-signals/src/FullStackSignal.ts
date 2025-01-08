@@ -7,13 +7,21 @@ const ENDPOINT = 'SignalsHandler';
 
 /**
  * A return type for signal operations that exposes a `result` property of type
- * Promise, that resolves when the operation is completed. It allows defining
+ * `Promise`, that resolves when the operation is completed. It allows defining
  * callbacks to be run after the operation is completed, or error handling when
  * the operation fails.
+ *
+ * @example
+ * ```ts
+ * const sharedName = NameService.sharedName({ defaultValue: '' });
+ * sharedName.replace('John').result
+ *    .then(() => console.log('Name updated successfully'))
+ *    .catch((error) => console.error('Failed to update the name:', error));
+ * ```
  */
-export type Operation = {
+export interface Operation {
   result: Promise<void>;
-};
+}
 
 /**
  * An abstraction of a signal that tracks the number of subscribers, and calls
