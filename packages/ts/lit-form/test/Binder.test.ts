@@ -303,7 +303,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should support optional array', async () => {
-        let arrayBinderNode = binder.for(binder.model.colleagues);
+        const arrayBinderNode = binder.for(binder.model.colleagues);
         assert.isUndefined(arrayBinderNode.value);
         assert.isUndefined(arrayBinderNode.defaultValue);
 
