@@ -5,7 +5,7 @@ import type FilterUnion from 'Frontend/generated/com/vaadin/hilla/crud/filter/Fi
 import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
 import { PersonService } from 'Frontend/generated/endpoints.js';
 
-export function ReadOnlyGridOrFilter(): JSX.Element {
+export function ReadOnlyGridOrFilter(): React.JSX.Element {
   const [filter, setFilter] = useState<FilterUnion | undefined>(undefined);
 
   return (
