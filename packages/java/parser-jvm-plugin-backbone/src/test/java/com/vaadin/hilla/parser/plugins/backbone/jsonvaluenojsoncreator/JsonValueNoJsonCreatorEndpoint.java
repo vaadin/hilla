@@ -1,4 +1,4 @@
-package com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced;
+package com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

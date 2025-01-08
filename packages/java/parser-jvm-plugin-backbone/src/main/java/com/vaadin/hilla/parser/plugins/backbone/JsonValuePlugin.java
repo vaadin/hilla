@@ -1,6 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -10,24 +9,18 @@ import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
- * Adds support for Jackson's {@code JsonValue} and {@code JsonCreator}
- * annotations.
+ * Adds support for Jackson's {@code JsonValue} annotation.
  */
 public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    private static final Logger logger = LoggerFactory
-            .getLogger(JsonValuePlugin.class);
     private final Map<Class<?>, Optional<Class<?>>> jsonValues = new HashMap<>();
 
     @Override
@@ -71,43 +64,8 @@ public class JsonValuePlugin
     }
 
     private Optional<Class<?>> findValueType(Class<?> cls) {
-        // First of all, we check that the `@JsonValue` annotation is
-        // used on a method of the class.
-        Stream<Class<?>> candidates = Arrays.stream(cls.getMethods())
+        return Arrays.stream(cls.getMethods())
                 .filter(method -> method.isAnnotationPresent(JsonValue.class))
-                .map(Method::getReturnType);
-        var jsonValue = candidates.findAny();
-
-        // Then we check that the class has a `@JsonCreator` annotation
-        // on a method or on a constructor. This is a basic check, we
-        // could also check that they use the same type.
-        var jsonCreator = Stream
-                .concat(Arrays.stream(cls.getMethods()),
-                        Arrays.stream(cls.getConstructors()))
-                .filter(executable -> executable
-                        .isAnnotationPresent(JsonCreator.class))
-                .findAny();
-
-        // Classes having only one of those annotations cannot be treated as
-        // domain objects. As there's no general rule about they have to be
-        // treated, the best guess is to generate them as usual.
-        if (jsonValue.isPresent() ^ jsonCreator.isPresent()) {
-            logger.debug("Class {} is annotated with only one of @JsonValue or"
-                    + " @JsonCreator. Hilla requires both annotations to"
-                    + " translate it to a value type; this class will be"
-                    + " processed as if neither annotation is present.",
-                    cls.getName());
-            jsonValue = Optional.empty();
-        }
-
-        return jsonValue;
-    }
-
-    // this shouldn't be a runtime exception, but `resolve` doesn't allow
-    // checked exceptions
-    public static class MalformedValueTypeException extends RuntimeException {
-        public MalformedValueTypeException(String message) {
-            super(message);
-        }
+                .map(Method::getReturnType).findAny();
     }
 }

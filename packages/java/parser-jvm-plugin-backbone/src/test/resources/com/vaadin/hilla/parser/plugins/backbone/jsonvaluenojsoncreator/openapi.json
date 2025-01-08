@@ -13,11 +13,11 @@
   "tags": [
     {
       "name": "JsonValueNoJsonCreatorEndpoint",
-      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonValueNoJsonCreatorEndpoint"
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonValueNoJsonCreatorEndpoint"
     },
     {
       "name": "JsonCreatorNoJsonValueEndpoint",
-      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonCreatorNoJsonValueEndpoint"
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint"
     }
   ],
   "paths": {
@@ -33,12 +33,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true,
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonValueNoJsonCreatorEndpoint$Email"
-                    }
-                  ]
+                  "type": "string",
+                  "nullable": true
                 }
               }
             }
@@ -59,12 +55,8 @@
                 "type": "object",
                 "properties": {
                   "email": {
-                    "nullable": true,
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonValueNoJsonCreatorEndpoint$Email"
-                      }
-                    ]
+                    "type": "string",
+                    "nullable": true
                   }
                 }
               }
@@ -93,7 +85,7 @@
                   "nullable": true,
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonCreatorNoJsonValueEndpoint$User"
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint$User"
                     }
                   ]
                 }
@@ -119,7 +111,7 @@
                     "nullable": true,
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonCreatorNoJsonValueEndpoint$User"
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint$User"
                       }
                     ]
                   }
@@ -138,16 +130,7 @@
   },
   "components": {
     "schemas": {
-      "com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonValueNoJsonCreatorEndpoint$Email": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "com.vaadin.hilla.parser.plugins.backbone.jsonvalueunbalanced.JsonCreatorNoJsonValueEndpoint$User": {
+      "com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint$User": {
         "type": "object",
         "properties": {
           "name": {
