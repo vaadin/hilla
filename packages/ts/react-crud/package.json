@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-crud",
-  "version": "24.7.0-alpha3",
+  "version": "24.7.0-alpha4",
   "description": "Hilla CRUD utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -56,10 +56,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.7.0-alpha3",
-    "@vaadin/hilla-lit-form": "24.7.0-alpha3",
-    "@vaadin/hilla-react-form": "24.7.0-alpha3",
-    "@vaadin/react-components": "24.7.0-alpha2"
+    "@vaadin/hilla-frontend": "24.7.0-alpha4",
+    "@vaadin/hilla-lit-form": "24.7.0-alpha4",
+    "@vaadin/hilla-react-form": "24.7.0-alpha4",
+    "@vaadin/react-components": "24.7.0-alpha3"
   },
   "peerDependencies": {
     "react": "^18",
@@ -73,7 +73,7 @@
     "@types/chai-as-promised": "^7.1.8",
     "@types/chai-dom": "^1.11.3",
     "@types/mocha": "^10.0.10",
-    "@types/react": "^18.3.17",
+    "@types/react": "^18.3.18",
     "@types/react-dom": "^18",
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",

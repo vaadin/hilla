@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-models",
-  "version": "24.7.0-alpha3",
+  "version": "24.7.0-alpha4",
   "description": "Generative form models for Hilla",
   "main": "index.js",
   "module": "index.js",
@@ -46,7 +46,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.7.0-alpha3"
+    "@vaadin/hilla-lit-form": "24.7.0-alpha4"
   },
   "peerDependencies": {
     "react": "^18",
@@ -61,7 +61,7 @@
     "@types/chai-like": "^1.1.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.17.10",
-    "@types/react": "^18.3.17",
+    "@types/react": "^18.3.18",
     "@types/react-dom": "^18",
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
@@ -71,8 +71,8 @@
     "chai-as-promised": "^7.1.2",
     "chai-dom": "^1.12.0",
     "chai-like": "^1.1.3",
-    "glob": "^10.4.5",
-    "mocha": "^10.8.2",
+    "glob": "^11.0.0",
+    "mocha": "^11.0.1",
     "monocart-coverage-reports": "^2.11.4",
     "sinon": "^16.1.3",
     "sinon-chai": "^3.7.0",

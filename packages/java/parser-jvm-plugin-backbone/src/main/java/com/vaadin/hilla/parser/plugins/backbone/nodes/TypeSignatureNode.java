@@ -9,7 +9,7 @@ import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 
 import io.swagger.v3.oas.models.media.Schema;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class TypeSignatureNode
         extends AbstractNode<SignatureModel, Schema<?>> implements TypedNode {
@@ -47,13 +47,13 @@ public final class TypeSignatureNode
                 getTarget(), annotations, position);
     }
 
-    @Nonnull
-    static public TypeSignatureNode of(@Nonnull SignatureModel source) {
+    @NonNull
+    static public TypeSignatureNode of(@NonNull SignatureModel source) {
         return new TypeSignatureNode(source, new Schema<>(), null);
     }
 
-    @Nonnull
-    static public TypeSignatureNode of(@Nonnull SignatureModel source,
+    @NonNull
+    static public TypeSignatureNode of(@NonNull SignatureModel source,
             int position) {
         return new TypeSignatureNode(source, new Schema<>(), position);
     }

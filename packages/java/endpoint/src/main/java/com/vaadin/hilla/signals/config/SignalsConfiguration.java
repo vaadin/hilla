@@ -22,6 +22,7 @@ import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.Signal;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -62,11 +63,11 @@ public class SignalsConfiguration {
      *
      * @return SignalsHandler endpoint instance
      */
-    @ConditionalOnFeatureFlag("fullstackSignals")
     @Bean
-    public SignalsHandler signalsHandler() {
+    public SignalsHandler signalsHandler(
+            @Autowired(required = false) SecureSignalsRegistry signalsRegistry) {
         if (signalsHandler == null) {
-            signalsHandler = new SignalsHandler(signalsRegistry());
+            signalsHandler = new SignalsHandler(signalsRegistry);
         }
         return signalsHandler;
     }

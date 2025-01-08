@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -30,17 +30,14 @@ final class AddPlugin extends AbstractPlugin<PluginConfiguration> {
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
         if (node instanceof RootNode) {
             var rootNode = (RootNode) node;
-            var endpoints = rootNode.getSource()
-                    .getClassesWithAnnotation(getStorage().getParserConfig()
-                            .getEndpointAnnotationName())
-                    .stream().map(ClassInfoModel::of)
-                    .collect(Collectors.toList());
+            var endpoints = rootNode.getSource().stream()
+                    .map(ClassInfoModel::of).collect(Collectors.toList());
             return nodeDependencies
                     .appendChildNodes(endpoints.stream().map(EndpointNode::of))
                     .appendRelatedNodes(endpoints.stream()

@@ -1,12 +1,13 @@
 package com.vaadin.hilla.engine;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -17,18 +18,18 @@ import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
 public final class ParserConfiguration {
-    private String endpointAnnotation;
-    private String endpointExposedAnnotation;
+    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
+    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
+            .of();
     private String openAPIBasePath;
     private Plugins plugins;
-    private List<String> packages;
 
-    public Optional<String> getEndpointAnnotation() {
-        return Optional.ofNullable(endpointAnnotation);
+    public List<Class<? extends Annotation>> getEndpointAnnotations() {
+        return endpointAnnotations;
     }
 
-    public Optional<String> getEndpointExposedAnnotation() {
-        return Optional.ofNullable(endpointExposedAnnotation);
+    public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
+        return endpointExposedAnnotations;
     }
 
     public Optional<String> getOpenAPIBasePath() {
@@ -39,39 +40,14 @@ public final class ParserConfiguration {
         return Optional.ofNullable(plugins);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        var that = (ParserConfiguration) o;
-        return Objects.equals(endpointAnnotation, that.endpointAnnotation)
-                && Objects.equals(endpointExposedAnnotation,
-                        that.endpointExposedAnnotation)
-                && Objects.equals(openAPIBasePath, that.openAPIBasePath)
-                && Objects.equals(plugins, that.plugins)
-                && Objects.equals(packages, that.packages);
+    public void setEndpointAnnotations(
+            @NonNull List<Class<? extends Annotation>> endpointAnnotations) {
+        this.endpointAnnotations = endpointAnnotations;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(endpointAnnotation, endpointExposedAnnotation,
-                openAPIBasePath, plugins, packages);
-    }
-
-    public Optional<List<String>> getPackages() {
-        return Optional.ofNullable(packages);
-    }
-
-    void setEndpointAnnotation(String endpointAnnotation) {
-        this.endpointAnnotation = endpointAnnotation;
-    }
-
-    void setEndpointExposedAnnotation(String endpointExposedAnnotation) {
-        this.endpointExposedAnnotation = endpointExposedAnnotation;
+    public void setEndpointExposedAnnotations(
+            @NonNull List<Class<? extends Annotation>> endpointExposedAnnotations) {
+        this.endpointExposedAnnotations = endpointExposedAnnotations;
     }
 
     void setOpenAPIBasePath(String openAPIBasePath) {
@@ -80,10 +56,6 @@ public final class ParserConfiguration {
 
     void setPlugins(Plugins plugins) {
         this.plugins = plugins;
-    }
-
-    public void setPackages(List<String> packages) {
-        this.packages = packages;
     }
 
     public static class Plugin {
@@ -120,7 +92,7 @@ public final class ParserConfiguration {
             return configuration;
         }
 
-        @Nonnull
+        @NonNull
         public String getName() {
             return name;
         }
@@ -141,8 +113,8 @@ public final class ParserConfiguration {
             disableAllDefaults = false;
         }
 
-        Plugins(@Nonnull Collection<Plugin> use,
-                @Nonnull Collection<Plugin> disable,
+        Plugins(@NonNull Collection<Plugin> use,
+                @NonNull Collection<Plugin> disable,
                 boolean disableAllDefaults) {
             this.disable.addAll(disable);
             this.use.addAll(use);

@@ -2,10 +2,11 @@ package com.vaadin.hilla.crud;
 
 import java.util.List;
 
-import com.vaadin.hilla.Nonnull;
-import com.vaadin.hilla.Nullable;
-import com.vaadin.hilla.crud.filter.Filter;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
+
+import com.vaadin.hilla.crud.filter.Filter;
 
 /**
  * A browser-callable service that can list the given type of object.
@@ -21,7 +22,7 @@ public interface ListService<T> {
      *            the filter to apply or {@code null} to not filter
      * @return a list of objects or an empty list if no objects were found
      */
-    @Nonnull
-    List<@Nonnull T> list(Pageable pageable, @Nullable Filter filter);
+    @NonNull
+    List<@NonNull T> list(Pageable pageable, @Nullable Filter filter);
 
 }

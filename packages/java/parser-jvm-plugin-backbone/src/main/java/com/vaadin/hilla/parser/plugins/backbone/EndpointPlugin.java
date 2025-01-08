@@ -1,11 +1,10 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import org.slf4j.Logger;
@@ -60,17 +59,13 @@ public final class EndpointPlugin
         }
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (nodeDependencies.getNode() instanceof RootNode) {
             var rootNode = (RootNode) nodeDependencies.getNode();
-            var endpointAnnotationName = getStorage().getParserConfig()
-                    .getEndpointAnnotationName();
-            var endpoints = rootNode.getSource()
-                    .getClassesWithAnnotation(endpointAnnotationName,
-                            "com.vaadin.hilla.BrowserCallable")
-                    .stream().map(ClassInfoModel::of).toList();
+            var endpoints = rootNode.getSource().stream()
+                    .map(ClassInfoModel::of).toList();
             checkIfJavaCompilerParametersFlagIsEnabled(endpoints);
             return nodeDependencies.appendChildNodes(
                     endpoints.stream().filter(ClassInfoModel::isNonJDKClass)
@@ -80,11 +75,11 @@ public final class EndpointPlugin
     }
 
     private String getEndpointName(ClassInfoModel endpointCls) {
-        var endpointAnnotationName = getStorage().getParserConfig()
-                .getEndpointAnnotationName();
+        var endpointAnnotations = getStorage().getParserConfig()
+                .getEndpointAnnotations();
         var endpointAnnotation = endpointCls.getAnnotations().stream()
-                .filter(annotation -> annotation.getName()
-                        .equals(endpointAnnotationName))
+                .filter(annotation -> endpointAnnotations.contains(
+                        ((Annotation) annotation.get()).annotationType()))
                 .findFirst();
         return endpointAnnotation.flatMap(this::getEndpointAnnotationValue)
                 .filter(name -> !name.isEmpty())

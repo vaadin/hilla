@@ -113,7 +113,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     if (event.accepted || isSnapshotStateEvent<T>(event)) {
       this.#applyAcceptedEvent(event);
     } else {
-      reason = 'server rejected the operation';
+      reason = `Server rejected the operation with id '${event.id}'. See the server log for more details.`;
     }
     // `then` callbacks can be associated to the record or the event
     // it depends on the operation that was performed

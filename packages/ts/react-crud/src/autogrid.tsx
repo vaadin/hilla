@@ -319,7 +319,7 @@ function AutoGridInner<TItem>(
   const [internalFilter, setInternalFilter] = useState<AndFilter>({ '@type': 'and', children: [] });
   const [itemCounts, setItemCounts] = useState<ItemCounts | undefined>();
   const gridRef = useRef<GridElement<TItem>>(null);
-  const dataProviderRef = useRef<DataProvider<TItem>>();
+  const dataProviderRef = useRef<DataProvider<TItem>>(undefined);
 
   useImperativeHandle(
     ref,
