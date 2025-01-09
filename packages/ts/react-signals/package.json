@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-signals",
-  "version": "24.7.0-alpha3",
+  "version": "24.7.0-alpha4",
   "description": "Signals for Hilla React",
   "main": "index.js",
   "module": "index.js",
@@ -46,8 +46,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@preact/signals-react": "^2.3.0",
-    "@vaadin/hilla-frontend": "24.7.0-alpha3",
+    "@preact/signals-react": "^3.0.0",
+    "@vaadin/hilla-frontend": "24.7.0-alpha4",
     "nanoid": "^5.0.9"
   },
   "peerDependencies": {
@@ -58,23 +58,23 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
-    "@types/chai": "^5.0.1",
-    "@types/chai-as-promised": "^8.0.1",
+    "@types/chai": "^4.3.20",
+    "@types/chai-as-promised": "^7.1.8",
     "@types/chai-dom": "^1.11.3",
     "@types/mocha": "^10.0.10",
-    "@types/react": "^18.3.17",
+    "@types/react": "^18.3.18",
     "@types/react-dom": "^18",
-    "@types/sinon": "^17.0.3",
-    "@types/sinon-chai": "^4.0.0",
+    "@types/sinon": "^10.0.20",
+    "@types/sinon-chai": "^3.2.12",
     "@types/validator": "^13.12.2",
     "chai": "^5.1.2",
-    "chai-as-promised": "^8.0.1",
+    "chai-as-promised": "^7.1.2",
     "chai-dom": "^1.12.0",
     "chai-like": "^1.1.3",
     "karma": "^6.4.4",
     "karma-viewport": "^1.0.9",
-    "sinon": "^19.0.2",
-    "sinon-chai": "^4.0.0",
+    "sinon": "^16.1.3",
+    "sinon-chai": "^3.7.0",
     "typescript": "5.7.2"
   }
 }
