@@ -99,7 +99,7 @@ public class EndpointRegistry {
         // BrowserCallable has no value so this works
         return Optional.ofNullable(beanType.getAnnotation(Endpoint.class))
                 .map(Endpoint::value).filter(value -> !value.isEmpty())
-                .orElse(beanType.getSimpleName());
+                .orElse(beanType.getSimpleName()).toLowerCase(Locale.ENGLISH);
     }
 
     String registerEndpoint(Object endpointBean) {
@@ -129,7 +129,7 @@ public class EndpointRegistry {
         Method[] endpointPublicMethods = beanType.getMethods();
         AccessibleObject.setAccessible(endpointPublicMethods, true);
 
-        vaadinEndpoints.put(endpointName.toLowerCase(Locale.ENGLISH),
+        vaadinEndpoints.put(endpointName,
                 new VaadinEndpointData(endpointBean, endpointPublicMethods));
         LOGGER.debug("Registered endpoint '{}' with class '{}'", endpointName,
                 beanType);
