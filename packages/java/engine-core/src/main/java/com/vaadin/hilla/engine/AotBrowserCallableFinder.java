@@ -150,20 +150,19 @@ class AotBrowserCallableFinder {
         var annotationNames = engineConfiguration.getParser()
                 .getEndpointAnnotations().stream().map(Class::getName).toList();
 
-        try (var classLoader = new URLClassLoader(urls,
-                AotBrowserCallableFinder.class.getClassLoader())) {
-            return candidates.stream().map(name -> {
-                try {
-                    return Class.forName(name, false, classLoader);
-                } catch (Throwable t) {
-                    return null;
-                }
-            }).filter(Objects::nonNull)
-                    .filter(cls -> Arrays.stream(cls.getAnnotations())
-                            .map(Annotation::annotationType).map(Class::getName)
-                            .anyMatch(annotationNames::contains))
-                    .collect(Collectors.toList());
-        }
+        var classLoader = new URLClassLoader(urls,
+                AotBrowserCallableFinder.class.getClassLoader());
+        return candidates.stream().map(name -> {
+            try {
+                return Class.forName(name, false, classLoader);
+            } catch (Throwable t) {
+                return null;
+            }
+        }).filter(Objects::nonNull)
+                .filter(cls -> Arrays.stream(cls.getAnnotations())
+                        .map(Annotation::annotationType).map(Class::getName)
+                        .anyMatch(annotationNames::contains))
+                .collect(Collectors.toList());
     }
 
     private static String quotePath(Path path) {
