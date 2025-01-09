@@ -102,7 +102,7 @@ public class EndpointRegistry {
                 .orElse(beanType.getSimpleName());
     }
 
-    void registerEndpoint(Object endpointBean) {
+    String registerEndpoint(Object endpointBean) {
         // Check the bean type instead of the implementation type in
         // case of e.g. proxies
         Class<?> beanType = ClassUtils.getUserClass(endpointBean.getClass());
@@ -133,6 +133,7 @@ public class EndpointRegistry {
                 new VaadinEndpointData(endpointBean, endpointPublicMethods));
         LOGGER.debug("Registered endpoint '{}' with class '{}'", endpointName,
                 beanType);
+        return endpointName;
     }
 
     /**
