@@ -17,8 +17,8 @@ package com.vaadin.hilla;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.URL;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -114,7 +114,7 @@ public class EndpointController {
      * Initializes the controller by registering all endpoints found in the
      * OpenApi definition or, as a fallback, in the Spring context.
      */
-    public void registerEndpoints(URL openApiResource) {
+    public void registerEndpoints() {
         // Spring returns bean names in lower camel case, while Hilla names
         // endpoints in upper camel case, so a case-insensitive map is used to
         // ease searching
@@ -124,27 +124,16 @@ public class EndpointController {
         endpointBeans
                 .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
 
-        if (endpointRegistry.isEmpty() && !endpointBeans.isEmpty()) {
-            LOGGER.debug("No endpoints found in openapi.json:"
-                    + " registering all endpoints found using the Spring context");
+        var currentEndpointNames = endpointBeans.values().stream()
+                .map(endpointRegistry::registerEndpoint)
+                .collect(Collectors.toSet());
+        // remove obsolete endpoints
+        endpointRegistry.getEndpoints().keySet()
+                .retainAll(currentEndpointNames);
 
-            endpointBeans.forEach((name, endpointBean) -> endpointRegistry
-                    .registerEndpoint(endpointBean));
-        }
-
-        if (!endpointRegistry.isEmpty()) {
-            HillaStats.reportHasEndpoint();
-        }
-
-        // make sure that signalsHandler endpoint is always registered, but not
-        // counted as a regular endpoint in stats:
-        if (endpointRegistry.get(SIGNALS_HANDLER_BEAN_NAME) == null) {
-            var signalHandlerBean = endpointBeans
-                    .get(SIGNALS_HANDLER_BEAN_NAME);
-            if (signalHandlerBean != null) {
-                endpointRegistry.registerEndpoint(signalHandlerBean);
-            }
-        }
+        endpointBeans.keySet().stream()
+                .filter(name -> !name.equals(SIGNALS_HANDLER_BEAN_NAME))
+                .findAny().ifPresent(name -> HillaStats.reportHasEndpoint());
 
         // Temporary Hack
         VaadinService vaadinService = VaadinService.getCurrent();
