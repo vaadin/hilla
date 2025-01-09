@@ -1,7 +1,5 @@
 package com.vaadin.hilla;
 
-import java.util.Arrays;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,16 +36,22 @@ public class EndpointControllerConfigurationTest {
     }
 
     @Test
-    public void testEndpointInvokerDependsOnHillaObjectMapper() {
-        // Fetch the BeanDefinition for endpointInvoker
-        var endpointInvokerDefinition = context.getBeanFactory()
-                .getBeanDefinition("endpointInvoker");
+    public void testEndpointInvokerUsesQualifiedObjectMapper()
+            throws NoSuchFieldException, IllegalAccessException {
+        var endpointInvoker = context.getBean(EndpointInvoker.class);
+        var objectMapper = context.getBean("hillaEndpointObjectMapper");
 
-        var dependsOn = endpointInvokerDefinition.getDependsOn();
+        Assert.assertNotNull("EndpointInvoker should not be null",
+                endpointInvoker);
+        Assert.assertNotNull("hillaEndpointObjectMapper should not be null",
+                objectMapper);
 
-        Assert.assertNotNull("dependsOn should not be null", dependsOn);
-        Assert.assertTrue(
-                "endpointInvoker should depend on hillaEndpointObjectMapper",
-                Arrays.asList(dependsOn).contains("hillaEndpointObjectMapper"));
+        var field = EndpointInvoker.class
+                .getDeclaredField("endpointObjectMapper");
+        field.setAccessible(true);
+
+        Assert.assertSame(
+                "EndpointInvoker should use the qualified hillaEndpointObjectMapper",
+                objectMapper, field.get(endpointInvoker));
     }
 }
