@@ -1,4 +1,4 @@
-import { useMatches } from 'react-router-dom';
+import { useMatches } from 'react-router';
 
 type RouteMetadata = {
   [key: string]: any;

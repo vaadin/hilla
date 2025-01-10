@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router';
 import MainLayout from './MainLayout.js';
 import { AutoCrudView } from 'Frontend/views/AutoCrudView.js';
 import { AutoFormView } from 'Frontend/views/AutoFormView.js';

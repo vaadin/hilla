@@ -16,6 +16,6 @@ export interface Vaadin {
   registrations?: VaadinRegistration[];
 }
 
-export interface VaadinWindow extends Window {
+export interface VaadinGlobal {
   Vaadin?: Vaadin;
 }

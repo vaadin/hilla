@@ -9,6 +9,7 @@ export type RouteMeta = Readonly<{
   path: string;
   file?: URL;
   layout?: URL;
+  flowLayout?: boolean;
   children?: readonly RouteMeta[];
 }>;
 

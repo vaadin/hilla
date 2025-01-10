@@ -94,7 +94,7 @@ function useFilterState(initialMatcher: Matcher) {
 }
 
 // Workaround for https://github.com/vaadin/react-components/issues/148
-function useSelectInitWorkaround(selectRef: RefObject<SelectElement>) {
+function useSelectInitWorkaround(selectRef: RefObject<SelectElement | null>) {
   useEffect(() => {
     setTimeout(() => {
       if (selectRef.current) {

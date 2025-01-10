@@ -1,5 +1,5 @@
-import { expect } from '@esm-bundle/chai';
 import { _getPropertyModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-lit-form';
+import { expect } from 'chai';
 import { ModelInfo } from '../src/model-info.js';
 import { PersonModel } from './test-models-and-services.js';
 
@@ -43,7 +43,12 @@ describe('@vaadin/hilla-react-crud', () => {
 
       expect(getPropertyType(StringModel, 'java.time.LocalDate')).to.equal('date');
       expect(getPropertyType(StringModel, 'java.time.LocalTime')).to.equal('time');
+      expect(getPropertyType(StringModel, 'java.time.OffsetTime')).to.equal('time');
       expect(getPropertyType(StringModel, 'java.time.LocalDateTime')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.time.ZonedDateTime')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.time.OffsetDateTime')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.util.Date')).to.equal('datetime');
+      expect(getPropertyType(StringModel, 'java.sql.Date')).to.equal('datetime');
     });
 
     describe('getProperty', () => {

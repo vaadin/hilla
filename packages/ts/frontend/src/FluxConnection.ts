@@ -12,6 +12,7 @@ import {
 export enum State {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
+  RECONNECTING = 'reconnecting',
 }
 
 type ActiveEvent = CustomEvent<{ active: boolean }>;
@@ -27,21 +28,90 @@ type ListenerType<T extends keyof EventMap> =
   | null;
 
 /**
+ * Possible options for dealing with lost subscriptions after a websocket is reopened.
+ */
+export enum ActionOnLostSubscription {
+  /**
+   * The subscription should be resubscribed using the same server method and parameters.
+   */
+  RESUBSCRIBE = 'resubscribe',
+  /**
+   * The subscription should be removed.
+   */
+  REMOVE = 'remove',
+}
+
+/**
+ * Possible states of a flux subscription.
+ */
+export enum FluxSubscriptionState {
+  /**
+   * The subscription is not connected and is trying to connect.
+   */
+  CONNECTING = 'connecting',
+  /**
+   * The subscription is connected and receiving updates.
+   */
+  CONNECTED = 'connected',
+  /**
+   * The subscription is closed and is not trying to reconnect.
+   */
+  CLOSED = 'closed',
+}
+
+/**
+ * Event wrapper for flux subscription connection state change callback
+ */
+export type FluxSubscriptionStateChangeEvent = CustomEvent<{ state: FluxSubscriptionState }>;
+
+type EndpointInfo = {
+  endpointName: string;
+  methodName: string;
+  params: unknown[] | undefined;
+  reconnect?(): ActionOnLostSubscription | void;
+};
+
+/**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
  */
 export class FluxConnection extends EventTarget {
   state: State = State.INACTIVE;
-  readonly #endpointInfos = new Map<string, string>();
+  wasClosed = false;
+  readonly #endpointInfos = new Map<string, EndpointInfo>();
   #nextId = 0;
   readonly #onCompleteCallbacks = new Map<string, () => void>();
-  readonly #onErrorCallbacks = new Map<string, () => void>();
+  readonly #onErrorCallbacks = new Map<string, (message: string) => void>();
   readonly #onNextCallbacks = new Map<string, (value: any) => void>();
+  readonly #onStateChangeCallbacks = new Map<string, (event: FluxSubscriptionStateChangeEvent) => void>();
+  readonly #statusOfSubscriptions = new Map<string, FluxSubscriptionState>();
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
     this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
+  }
+
+  #resubscribeIfWasClosed() {
+    if (this.wasClosed) {
+      this.wasClosed = false;
+      const toBeRemoved: string[] = [];
+      this.#endpointInfos.forEach((endpointInfo, id) => {
+        if (endpointInfo.reconnect?.() === ActionOnLostSubscription.RESUBSCRIBE) {
+          this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
+          this.#send({
+            '@type': 'subscribe',
+            endpointName: endpointInfo.endpointName,
+            id,
+            methodName: endpointInfo.methodName,
+            params: endpointInfo.params,
+          });
+        } else {
+          toBeRemoved.push(id);
+        }
+      });
+      toBeRemoved.forEach((id) => this.#removeSubscription(id));
+    }
   }
 
   /**
@@ -58,9 +128,9 @@ export class FluxConnection extends EventTarget {
     const params = parameters ?? [];
 
     const msg: ServerConnectMessage = { '@type': 'subscribe', endpointName, id, methodName, params };
-    const endpointInfo = `${endpointName}.${methodName}(${JSON.stringify(params)})`;
     this.#send(msg);
-    this.#endpointInfos.set(id, endpointInfo);
+    this.#endpointInfos.set(id, { endpointName, methodName, params });
+    this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
     const hillaSubscription: Subscription<any> = {
       cancel: () => {
         if (!this.#endpointInfos.has(id)) {
@@ -84,7 +154,7 @@ export class FluxConnection extends EventTarget {
         this.#onCompleteCallbacks.set(id, callback);
         return hillaSubscription;
       },
-      onError: (callback: () => void): Subscription<any> => {
+      onError: (callback: (message: string) => void): Subscription<any> => {
         this.#onErrorCallbacks.set(id, callback);
         return hillaSubscription;
       },
@@ -92,23 +162,44 @@ export class FluxConnection extends EventTarget {
         this.#onNextCallbacks.set(id, callback);
         return hillaSubscription;
       },
+      onSubscriptionLost: (callback: () => ActionOnLostSubscription | void): Subscription<any> => {
+        if (this.#endpointInfos.has(id)) {
+          this.#endpointInfos.get(id)!.reconnect = callback;
+        } else {
+          console.warn(`"onReconnect" value not set for subscription "${id}" because it was already canceled`);
+        }
+        return hillaSubscription;
+      },
+      onConnectionStateChange: (callback: (event: FluxSubscriptionStateChangeEvent) => void): Subscription<any> => {
+        this.#onStateChangeCallbacks.set(id, callback);
+        callback(
+          new CustomEvent('subscription-state-change', { detail: { state: this.#statusOfSubscriptions.get(id)! } }),
+        );
+        return hillaSubscription;
+      },
     };
     return hillaSubscription;
   }
 
   #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
-    const extraHeaders = getCsrfTokenHeadersForEndpointRequest(document);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const extraHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
     this.#socket = atmosphere.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
-      fallbackTransport: 'long-polling',
+      transport: 'websocket',
+      fallbackTransport: 'websocket',
       headers: extraHeaders,
       maxReconnectOnClose: 10000000,
-      onClose: (_) => {
-        // https://socket.io/docs/v4/client-api/#event-disconnect
-        if (this.state === State.ACTIVE) {
+      reconnectInterval: 5000,
+      timeout: -1,
+      trackMessageLength: true,
+      url,
+      onClose: () => {
+        this.wasClosed = true;
+        if (this.state !== State.INACTIVE) {
           this.state = State.INACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
         }
@@ -122,50 +213,87 @@ export class FluxConnection extends EventTarget {
           this.#handleMessage(JSON.parse(response.responseBody));
         }
       },
-      onOpen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
+      onMessagePublished: (response) => {
+        if (response?.responseBody) {
+          this.#handleMessage(JSON.parse(response.responseBody));
+        }
+      },
+      onOpen: () => {
+        if (this.state !== State.ACTIVE) {
+          this.#resubscribeIfWasClosed();
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
-      onReopen: (_response: any) => {
-        if (this.state === State.INACTIVE) {
+      onReopen: () => {
+        if (this.state !== State.ACTIVE) {
+          this.#resubscribeIfWasClosed();
           this.state = State.ACTIVE;
           this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
           this.#sendPendingMessages();
         }
       },
-      reconnectInterval: 5000,
-      timeout: -1,
-      trackMessageLength: true,
-      transport: 'websocket',
-      url,
+      onReconnect: () => {
+        if (this.state !== State.RECONNECTING) {
+          this.state = State.RECONNECTING;
+          this.#endpointInfos.forEach((_, id) => {
+            this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
+          });
+        }
+      },
+      onFailureToReconnect: () => {
+        if (this.state !== State.INACTIVE) {
+          this.state = State.INACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+          this.#endpointInfos.forEach((_, id) => this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED));
+        }
+      },
       ...atmosphereOptions,
     } satisfies Atmosphere.Request);
+  }
+
+  #setSubscriptionConnState(id: string, state: FluxSubscriptionState) {
+    const currentState = this.#statusOfSubscriptions.get(id);
+    if (!currentState) {
+      this.#statusOfSubscriptions.set(id, state);
+      this.#onStateChangeCallbacks.get(id)?.(
+        new CustomEvent('subscription-state-change', { detail: { state: this.#statusOfSubscriptions.get(id)! } }),
+      );
+    } else if (currentState !== state) {
+      this.#statusOfSubscriptions.set(id, state);
+      this.#onStateChangeCallbacks.get(id)?.(
+        new CustomEvent('subscription-state-change', { detail: { state: this.#statusOfSubscriptions.get(id)! } }),
+      );
+    }
   }
 
   #handleMessage(message: unknown) {
     if (isClientMessage(message)) {
       const { id } = message;
-      const endpointInfo = this.#endpointInfos.get(id) ?? 'unknown';
+      const endpointInfo = this.#endpointInfos.get(id);
 
       if (message['@type'] === 'update') {
         const callback = this.#onNextCallbacks.get(id);
         if (callback) {
           callback(message.item);
         }
+        this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTED);
       } else if (message['@type'] === 'complete') {
         this.#onCompleteCallbacks.get(id)?.();
         this.#removeSubscription(id);
       } else {
         const callback = this.#onErrorCallbacks.get(id);
         if (callback) {
-          callback();
+          callback(message.message);
         }
         this.#removeSubscription(id);
         if (!callback) {
-          throw new Error(`Error in ${endpointInfo}: ${message.message}`);
+          throw new Error(
+            endpointInfo
+              ? `Error in ${endpointInfo.endpointName}.${endpointInfo.methodName}(${JSON.stringify(endpointInfo.params)}): ${message.message}`
+              : `Error in unknown subscription: ${message.message}`,
+          );
         }
       }
     } else {
@@ -174,6 +302,9 @@ export class FluxConnection extends EventTarget {
   }
 
   #removeSubscription(id: string) {
+    this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED);
+    this.#statusOfSubscriptions.delete(id);
+    this.#onStateChangeCallbacks.delete(id);
     this.#onNextCallbacks.delete(id);
     this.#onCompleteCallbacks.delete(id);
     this.#onErrorCallbacks.delete(id);

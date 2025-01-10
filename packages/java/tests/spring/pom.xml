@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>tests</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.7-SNAPSHOT</version>
     </parent>
 
     <artifactId>tests-spring</artifactId>
@@ -18,11 +18,18 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <formatter.basedir>${project.parent.parent.basedir}</formatter.basedir>
-        <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-bom</artifactId>
+                <type>pom</type>
+                <scope>import</scope>
+                <version>${flow.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-testbench-bom</artifactId>
@@ -189,6 +196,7 @@
             <id>it-modules-group-1</id>
             <modules>
                 <module>endpoints</module>
+                <module>endpoints-contextpath</module>
                 <module>endpoints discovery</module>
                 <module>endpoints-custom-client</module>
                 <!--
@@ -196,8 +204,6 @@
         <module>endpoints-maven-engine</module>
         -->
                 <module>endpoints-latest-java</module>
-                <module>react-grid-test</module>
-                <module>react-signals</module>
                 <module>react-i18n</module>
             </modules>
         </profile>
@@ -218,6 +224,7 @@
                 <module>endpoints</module>
                 <module>endpoints discovery</module>
                 <module>react-grid-test</module>
+                <module>react-signals</module>
             </modules>
         </profile>
 

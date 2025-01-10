@@ -1,4 +1,4 @@
-import type { createBrowserRouter, RouteObject } from 'react-router-dom';
+import type { createBrowserRouter, RouteObject } from 'react-router';
 
 export type ViewConfig = Readonly<{
   /**
@@ -24,6 +24,17 @@ export type ViewConfig = Readonly<{
    * that conflicts with the file name conventions, e.g. /foo/index.
    */
   route?: string;
+
+  /**
+   * Set to true to indicate that the view is using server side parent layout
+   * annotated with the Layout annotation.
+   */
+  flowLayout?: boolean;
+
+  /**
+   * Set to true to make the view render without enclosing in any layouts.
+   */
+  skipLayouts?: boolean;
 
   menu?: Readonly<{
     /**
@@ -71,6 +82,7 @@ export type AgnosticRoute = Readonly<{
   path: string;
   module?: Module;
   children?: readonly AgnosticRoute[];
+  flowLayout?: boolean;
 }>;
 
 /**

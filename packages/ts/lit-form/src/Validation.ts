@@ -1,8 +1,9 @@
+import isNumeric from 'validator/es/lib/isNumeric.js';
 import type { BinderNode } from './BinderNode.js';
 import { getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
-import { type AbstractModel, NumberModel, type Value } from './Models.js';
-import { Required } from './Validators.js';
+import { AbstractModel, NumberModel, type Value } from './Models.js';
+import { IsNumber, Required, ValidityStateValidator } from './Validators.js';
 
 export interface ValueError<T = unknown> {
   property: AbstractModel | string;
@@ -24,9 +25,10 @@ export class ValidationError extends Error {
     super(
       [
         'There are validation errors in the form.',
-        ...errors.map(
-          (e) => `${e.property.toString()} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`,
-        ),
+        ...errors.map((e) => {
+          const property = e.property instanceof AbstractModel ? String(getBinderNode(e.property).value) : e.property;
+          return `${property} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`;
+        }),
       ].join('\n - '),
     );
     this.errors = errors;
@@ -91,7 +93,12 @@ export async function runValidator<M extends AbstractModel>(
   // If model is not required and value empty, do not run any validator. Except
   // always validate NumberModel, which has a mandatory builtin validator
   // to indicate NaN input.
-  if (!binderNode.required && !new Required().validate(value) && !(model instanceof NumberModel)) {
+  if (
+    !binderNode.required &&
+    !new Required().validate(value) &&
+    !(validator instanceof IsNumber) &&
+    !(validator instanceof ValidityStateValidator)
+  ) {
     return [];
   }
 

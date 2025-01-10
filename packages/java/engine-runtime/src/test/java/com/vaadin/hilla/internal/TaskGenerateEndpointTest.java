@@ -31,8 +31,8 @@ public class TaskGenerateEndpointTest extends TaskTest {
                 .toURI());
         Files.createDirectories(getOpenAPIFile().getParent());
         Files.copy(referenceOpenAPIJsonFile, getOpenAPIFile());
-        outputDirectory = Files
-                .createDirectory(getTemporaryDirectory().resolve("output"));
+        outputDirectory = Files.createDirectory(
+                getTemporaryDirectory().resolve(getOutputDirectory()));
     }
 
     @Test
@@ -47,9 +47,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
         assertFalse(client.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile(), getClass()::getResource, false,
-                "node");
+                getEngineConfiguration());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -82,9 +80,7 @@ public class TaskGenerateEndpointTest extends TaskTest {
         assertTrue(customConnectClient.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                getTemporaryDirectory().toFile(), getBuildDirectory(),
-                outputDirectory.toFile(), getClass()::getResource, false,
-                "node");
+                getEngineConfiguration());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());

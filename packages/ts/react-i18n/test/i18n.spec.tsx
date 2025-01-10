@@ -1,10 +1,10 @@
 // Load feature flag file before importing any other modules
 // eslint-disable-next-line import/no-unassigned-import
 import './enable-feature-flag.js';
-import { expect, use } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
 import CookieManager from '@vaadin/hilla-frontend/CookieManager.js';
 import { effect, useComputed, useSignalEffect } from '@vaadin/hilla-react-signals';
+import { expect, use } from 'chai';
 import fetchMock from 'fetch-mock';
 import { useEffect, useMemo } from 'react';
 import sinon from 'sinon';
@@ -179,6 +179,151 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.language.value).to.equal('unknown');
         expect(i18n.resolvedLanguage.value).to.equal(undefined);
         verifyLoadTranslations('unknown');
+      });
+    });
+
+    describe('chunked loading', () => {
+      const language = 'en';
+
+      beforeEach(() => {
+        fetchMock
+          .reset()
+          .get('/?v-r=i18n&langtag=en&chunks=city', {
+            body: {
+              'addresses.form.city.label': 'City Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en&chunks=street', {
+            body: {
+              'addresses.form.street.label': 'Street Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en&chunks=city&chunks=street', {
+            body: {
+              'addresses.form.city.label': 'City Chunked',
+              'addresses.form.street.label': 'Street Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en-AU&chunks=city', {
+            body: {
+              'addresses.form.city.label': 'Australian City Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en-AU&chunks=street', {
+            body: {
+              'addresses.form.street.label': 'Australian Street Chunked',
+            },
+          })
+          .get('/?v-r=i18n&langtag=en-AU&chunks=city&chunks=street', {
+            body: {
+              'addresses.form.city.label': 'Australian City Chunked',
+              'addresses.form.street.label': 'Australian Street Chunked',
+            },
+          });
+      });
+
+      function getLastUrlParams() {
+        return new URLSearchParams(new URL(fetchMock.lastUrl() ?? '', document.baseURI).search);
+      }
+
+      it('should not load chunks unless configured', async () => {
+        await i18n.registerChunk('city');
+
+        // Neither chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(fetchMock.called()).to.be.false;
+      });
+
+      it('should load registered chunk after configured', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+
+        // City chunk is loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+
+        // Street chunk is not loaded yet
+        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
+      });
+
+      it('should load all chunks after configured', async () => {
+        await i18n.registerChunk('city');
+        await i18n.registerChunk('street');
+        await i18n.configure({ language });
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
+      });
+
+      it('should load additional chunks after configured', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        fetchMock.resetHistory();
+
+        await i18n.registerChunk('street');
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
+      });
+
+      it('should load registered chunk when switching language', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        fetchMock.resetHistory();
+
+        await i18n.setLanguage('en-AU');
+
+        // City chunk is loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
+
+        // Street chunk is not loaded yet
+        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
+      });
+
+      it('should load all chunks when switching language', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        await i18n.registerChunk('street');
+        fetchMock.resetHistory();
+
+        await i18n.setLanguage('en-AU');
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Australian Street Chunked');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
+      });
+
+      it('should load additional chunks after switching language', async () => {
+        await i18n.registerChunk('city');
+        await i18n.configure({ language });
+        await i18n.setLanguage('en-AU');
+        fetchMock.resetHistory();
+
+        await i18n.registerChunk('street');
+
+        // Both chunks are loaded
+        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
+        expect(i18n.translate('addresses.form.street.label')).to.equal('Australian Street Chunked');
+        expect(fetchMock.called()).to.be.true;
+        expect(fetchMock.calls()).to.have.length(1);
+        expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
       });
     });
 
@@ -458,6 +603,62 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.translate('param.number', { value: 123.456 })).to.equal('Value: 123,456');
         expect(i18n.translate('param.date.medium', { value: sampleDate })).to.equal('Value: 12. Nov. 2024');
         expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 22:33:44');
+      });
+    });
+
+    describe('hmr', () => {
+      async function triggerHmrEvent() {
+        // @ts-expect-error import.meta.hot does not have TS definitions
+        // eslint-disable-next-line
+        import.meta.hot.hmrClient.notifyListeners('translations-update');
+        // No promise to wait for, just delay the next test step a bit
+        await new Promise((resolve) => {
+          setTimeout(resolve, 10);
+        });
+      }
+
+      it('should not update translations if not initialized', async () => {
+        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+        await triggerHmrEvent();
+        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+      });
+
+      it('should update translations on HMR event', async () => {
+        await i18n.configure({ language: 'en-US' });
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City');
+
+        fetchMock
+          .resetHistory()
+          .reset()
+          .get('./?v-r=i18n&langtag=en-US', {
+            body: {
+              'addresses.form.city.label': 'City updated',
+            },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+          });
+
+        await triggerHmrEvent();
+
+        expect(i18n.translate('addresses.form.city.label')).to.equal('City updated');
+      });
+
+      it('should update resolved language on HMR event', async () => {
+        await i18n.configure({ language: 'en-US' });
+        expect(i18n.resolvedLanguage.value).to.equal('und');
+
+        fetchMock
+          .resetHistory()
+          .reset()
+          .get('*', {
+            body: {},
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'en' },
+          });
+
+        await triggerHmrEvent();
+
+        expect(i18n.resolvedLanguage.value).to.equal('en');
       });
     });
   });

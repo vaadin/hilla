@@ -1,5 +1,6 @@
+/* eslint-disable import/unambiguous */
 const { parseArgs } = require('node:util');
-const { basename, join, resolve } = require('node:path');
+const { basename } = require('node:path');
 const { readFileSync } = require('node:fs');
 const { readFile } = require('node:fs/promises');
 const karmaChromeLauncher = require('karma-chrome-launcher');
@@ -12,16 +13,19 @@ const MagicString = require('magic-string');
 const postcss = require('postcss');
 const cssnanoPlugin = require('cssnano');
 const { karmaMochaConfig } = require('./.mocharc.cjs');
+const reactPlugin = require('@vitejs/plugin-react');
+const { pathToFileURL, fileURLToPath } = require('node:url');
 
 // The current package, one of the packages in the `packages` dir
-const cwd = process.cwd();
+const cwd = pathToFileURL(`${process.cwd()}/`);
+const root = pathToFileURL(`${__dirname}/`);
 
 function loadMockConfig() {
   try {
-    const content = readFileSync(join(cwd, 'test/mocks/config.json'), 'utf8');
+    const content = readFileSync(new URL('test/mocks/config.json', cwd), 'utf8');
     return JSON.parse(content);
   } catch {
-    console.log(`No mock files found for ${basename(cwd)}. Skipping...`);
+    console.log(`No mock files found for ${basename(fileURLToPath(cwd))}. Skipping...`);
     return {};
   }
 }
@@ -34,7 +38,7 @@ function loadRegisterJs() {
     name: 'vite-hilla-register',
     async transform(code) {
       if (code.includes('__REGISTER__()') && !code.includes('function __REGISTER__')) {
-        const registerCode = await readFile(resolve(cwd, '../../../scripts/register.js'), 'utf8').then((c) =>
+        const registerCode = await readFile(new URL('scripts/register.js', root), 'utf8').then((c) =>
           c.replace('export', ''),
         );
 
@@ -101,11 +105,11 @@ const watch = !!_watch && !isCI;
 
 module.exports = (config) => {
   const mocks = loadMockConfig();
-  const tsconfig = JSON.parse(readFileSync(join(cwd, 'tsconfig.json'), 'utf8'));
-  const packageJson = JSON.parse(readFileSync(join(cwd, 'package.json'), 'utf8'));
+  const tsconfig = JSON.parse(readFileSync(new URL('tsconfig.json', cwd), 'utf8'));
+  const packageJson = JSON.parse(readFileSync(new URL('package.json', cwd), 'utf8'));
 
   config.set({
-    basePath: cwd,
+    basePath: fileURLToPath(cwd),
 
     plugins: [karmaVite, karmaMocha, karmaChromeLauncher, karmaCoverage, karmaSpecReporter, karmaViewport],
     middleware: ['vite'],
@@ -118,6 +122,10 @@ module.exports = (config) => {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox', '--disable-setuid-sandbox'],
+      },
+      ChromeNoSS: {
+        base: 'Chrome',
+        flags: ['-disable-search-engine-choice-screen'],
       },
     },
 
@@ -161,11 +169,31 @@ module.exports = (config) => {
               useDefineForClassFields: false,
             },
           },
+          supported: {
+            decorators: false,
+            'top-level-await': true,
+          },
         },
-        plugins: [loadRegisterJs(), constructCss()],
+        plugins: [
+          loadRegisterJs(),
+          constructCss(),
+          reactPlugin({
+            include: '**/*.tsx',
+            babel: {
+              plugins: [
+                [
+                  'module:@preact/signals-react-transform',
+                  {
+                    mode: 'all',
+                  },
+                ],
+              ],
+            },
+          }),
+        ],
         resolve: {
           alias: Object.entries(mocks).map(([find, file]) => {
-            const replacement = join(cwd, `test/mocks/${file}`);
+            const replacement = fileURLToPath(new URL(`test/mocks/${file}`, cwd));
 
             return {
               customResolver(_, importer) {
@@ -186,7 +214,8 @@ module.exports = (config) => {
     client: {
       mocha: karmaMochaConfig,
     },
-
+    customContextFile: fileURLToPath(new URL('karma-context.html', root)),
+    customDebugFile: fileURLToPath(new URL('karma-debug.html', root)),
     // Viewport configuration
     viewport: {
       breakpoints: [

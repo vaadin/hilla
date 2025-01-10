@@ -27,7 +27,6 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointRegistry.VaadinEndpointData;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
-import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
@@ -40,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.NonNullApi;
 import org.springframework.util.ClassUtils;
 
@@ -72,10 +70,8 @@ import java.util.stream.Stream;
  * For internal use only. May be renamed or removed in a future release.
  */
 public class EndpointInvoker {
-
-    private static final EndpointTransferMapper endpointTransferMapper = new EndpointTransferMapper();
     private final ApplicationContext applicationContext;
-    private final ObjectMapper endpointMapper;
+    private final ObjectMapper endpointObjectMapper;
     private final EndpointRegistry endpointRegistry;
     private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
     private final ServletContext servletContext;
@@ -86,12 +82,12 @@ public class EndpointInvoker {
      *
      * @param applicationContext
      *            The Spring application context
-     * @param endpointMapperFactory
-     *            optional factory bean to override the default
-     *            {@link JacksonObjectMapperFactory} that is used for
-     *            serializing and deserializing request and response bodies Use
+     * @param endpointObjectMapper
+     *            The object mapper to be used for serialization and
+     *            deserialization of request and response bodies. To override
+     *            the mapper, use the
      *            {@link EndpointController#ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER}
-     *            qualifier to override the mapper.
+     *            qualifier on a JacksonObjectMapperFactory bean definition.
      * @param explicitNullableTypeChecker
      *            the method parameter and return value type checker to verify
      *            that null values are explicit
@@ -101,18 +97,12 @@ public class EndpointInvoker {
      *            the registry used to store endpoint information
      */
     public EndpointInvoker(ApplicationContext applicationContext,
-            JacksonObjectMapperFactory endpointMapperFactory,
+            ObjectMapper endpointObjectMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         this.applicationContext = applicationContext;
         this.servletContext = servletContext;
-        this.endpointMapper = endpointMapperFactory != null
-                ? endpointMapperFactory.build()
-                : createDefaultEndpointMapper(applicationContext);
-        if (this.endpointMapper != null) {
-            this.endpointMapper
-                    .registerModule(endpointTransferMapper.getJacksonModule());
-        }
+        this.endpointObjectMapper = endpointObjectMapper;
         this.explicitNullableTypeChecker = explicitNullableTypeChecker;
         this.endpointRegistry = endpointRegistry;
 
@@ -126,15 +116,6 @@ public class EndpointInvoker {
         this.validator = validator == null
                 ? Validation.buildDefaultValidatorFactory().getValidator()
                 : validator;
-    }
-
-    private static ObjectMapper createDefaultEndpointMapper(
-            ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-
-        return endpointMapper;
     }
 
     private static Logger getLogger() {
@@ -190,12 +171,8 @@ public class EndpointInvoker {
             Function<String, Boolean> rolesChecker)
             throws EndpointNotFoundException, EndpointAccessDeniedException,
             EndpointBadRequestException, EndpointInternalException {
-        VaadinEndpointData vaadinEndpointData = endpointRegistry
-                .get(endpointName);
-        if (vaadinEndpointData == null) {
-            getLogger().debug("Endpoint '{}' not found", endpointName);
-            throw new EndpointNotFoundException();
-        }
+        VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
+                endpointName);
 
         Method methodToInvoke = getMethod(endpointName, methodName);
         if (methodToInvoke == null) {
@@ -210,15 +187,26 @@ public class EndpointInvoker {
 
     }
 
+    public VaadinEndpointData getVaadinEndpointData(String endpointName)
+            throws EndpointNotFoundException {
+        VaadinEndpointData vaadinEndpointData = endpointRegistry
+                .get(endpointName);
+        if (vaadinEndpointData == null) {
+            getLogger().debug("Endpoint '{}' not found", endpointName);
+            throw new EndpointNotFoundException();
+        }
+        return vaadinEndpointData;
+    }
+
     String createResponseErrorObject(String errorMessage) {
-        ObjectNode objectNode = endpointMapper.createObjectNode();
+        ObjectNode objectNode = endpointObjectMapper.createObjectNode();
         objectNode.put(EndpointException.ERROR_MESSAGE_FIELD, errorMessage);
         return objectNode.toString();
     }
 
     String createResponseErrorObject(Map<String, Object> serializationData)
             throws JsonProcessingException {
-        return endpointMapper.writeValueAsString(serializationData);
+        return endpointObjectMapper.writeValueAsString(serializationData);
     }
 
     EndpointAccessChecker getAccessChecker() {
@@ -235,7 +223,7 @@ public class EndpointInvoker {
 
     String writeValueAsString(Object returnValue)
             throws JsonProcessingException {
-        return endpointMapper.writeValueAsString(returnValue);
+        return endpointObjectMapper.writeValueAsString(returnValue);
     }
 
     private List<ValidationErrorData> createBeanValidationErrors(
@@ -336,8 +324,8 @@ public class EndpointInvoker {
             Type parameterType = javaParameters[i];
             Type incomingType = parameterType;
             try {
-                Object parameter = endpointMapper
-                        .readerFor(endpointMapper.getTypeFactory()
+                Object parameter = endpointObjectMapper
+                        .readerFor(endpointObjectMapper.getTypeFactory()
                                 .constructType(incomingType))
                         .readValue(requestParameters.get(parameterNames[i]));
                 endpointParameters[i] = parameter;
@@ -381,19 +369,13 @@ public class EndpointInvoker {
         }
     }
 
-    private Object invokeVaadinEndpointMethod(String endpointName,
-            String methodName, Method methodToInvoke, ObjectNode body,
-            VaadinEndpointData vaadinEndpointData, Principal principal,
-            Function<String, Boolean> rolesChecker)
-            throws EndpointAccessDeniedException, EndpointBadRequestException,
-            EndpointInternalException {
-        HillaStats.reportEndpointActive();
-        EndpointAccessChecker accessChecker = getAccessChecker();
-
+    public String checkAccess(EndpointRegistry.VaadinEndpointData endpointData,
+            Method methodToInvoke, Principal principal,
+            Function<String, Boolean> rolesChecker) {
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
         var invokedEndpointClass = ClassUtils
-                .getUserClass(vaadinEndpointData.getEndpointObject());
-
+                .getUserClass(endpointData.getEndpointObject());
+        EndpointAccessChecker accessChecker = getAccessChecker();
         String checkError;
         if (methodDeclaringClass.equals(invokedEndpointClass)) {
             checkError = accessChecker.check(methodToInvoke, principal,
@@ -402,6 +384,19 @@ public class EndpointInvoker {
             checkError = accessChecker.check(invokedEndpointClass, principal,
                     rolesChecker);
         }
+        return checkError;
+    }
+
+    private Object invokeVaadinEndpointMethod(String endpointName,
+            String methodName, Method methodToInvoke, ObjectNode body,
+            VaadinEndpointData vaadinEndpointData, Principal principal,
+            Function<String, Boolean> rolesChecker)
+            throws EndpointAccessDeniedException, EndpointBadRequestException,
+            EndpointInternalException {
+        HillaStats.reportEndpointActive();
+
+        var checkError = checkAccess(vaadinEndpointData, methodToInvoke,
+                principal, rolesChecker);
         if (checkError != null) {
             throw new EndpointAccessDeniedException(String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",

@@ -1,21 +1,19 @@
 /* eslint-disable sort-keys */
-import { assert, expect, use } from '@esm-bundle/chai';
+import { assert, expect, use } from 'chai';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 // API to test
-import { Binder, type BinderConfiguration } from '../src/index.js';
+import { Binder, type BinderConfiguration, m } from '../src/index.js';
 import {
   type Employee,
   EmployeeModel,
-  type Order,
-  OrderModel,
-  type TestEntity,
-  TestModel,
-  type Level1,
   Level1Model,
   Level2Model,
+  type Order,
+  OrderModel,
+  TestModel,
 } from './TestModels.js';
 
 use(sinonChai);
@@ -126,22 +124,11 @@ describe('@vaadin/hilla-lit-form', () => {
         assert.deepEqual(binder.defaultValue, expectedEmptyOrder);
       });
 
-      it('should have valueOf', () => {
-        assert.equal(binder.model.notes.valueOf(), '');
-      });
-
-      it('should have toString', () => {
-        assert.equal(binder.model.notes.toString(), '');
-      });
-
       it('should have initial value', () => {
         assert.equal(binder.value, binder.defaultValue);
         assert.equal(binder.for(binder.model).value, binder.value);
         assert.equal(binder.for(binder.model.notes).value, '');
         assert.equal(binder.for(binder.model.customer.fullName).value, '');
-        assert.equal(binder.model.valueOf(), binder.value);
-        assert.equal(binder.model.notes.valueOf(), '');
-        assert.equal(binder.model.customer.fullName.valueOf(), '');
       });
 
       it('should change value on setValue', () => {
@@ -313,6 +300,21 @@ describe('@vaadin/hilla-lit-form', () => {
         assert.isUndefined(binder.value.supervisor);
         assert.deepEqual(binder.value, expectedEmptyEmployee);
         assert.isTrue('supervisor' in binder.value);
+      });
+
+      it('should support optional array', async () => {
+        const arrayBinderNode = binder.for(binder.model.colleagues);
+        assert.isUndefined(arrayBinderNode.value);
+        assert.isUndefined(arrayBinderNode.defaultValue);
+
+        arrayBinderNode.value = [EmployeeModel.createEmptyValue()];
+        const [itemModel] = m.items(arrayBinderNode.model);
+        assert.deepEqual(binder.for(itemModel).value, expectedEmptyEmployee);
+        assert.deepEqual(arrayBinderNode.defaultValue, []);
+        assert.isTrue(arrayBinderNode.dirty);
+
+        await binder.validate();
+        assert.isFalse(binder.invalid);
       });
 
       it('should initialize parent optional on child binderNode access', () => {

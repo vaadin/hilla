@@ -1,6 +1,6 @@
 /* eslint-disable no-new */
-import { expect, use } from '@esm-bundle/chai';
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
@@ -18,7 +18,7 @@ import {
   UnauthorizedResponseError,
   type FluxConnection,
 } from '../src/index.js';
-import type { Vaadin, VaadinWindow } from '../src/types.js';
+import type { Vaadin, VaadinGlobal } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
 import { fluxConnectionSubscriptionStubs } from './mocks/FluxConnection.js';
 import {

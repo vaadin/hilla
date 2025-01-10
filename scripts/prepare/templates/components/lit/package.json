@@ -1,6 +1,5 @@
 {
-  "name": "hilla-components-dependencies",
-  "version": "1.0.0",
+  "private": true,
   "description": "A list of Hilla Lit components that are added by Flow automatically to package.json",
   "main": "index.js",
   "scripts": {
@@ -21,6 +20,7 @@
     "@vaadin/hilla-generator-plugin-barrel": "{{version}}",
     "@vaadin/hilla-generator-plugin-model": "{{version}}",
     "@vaadin/hilla-generator-plugin-push": "{{version}}",
+    "@vaadin/hilla-generator-plugin-signals": "{{version}}",
     "@vaadin/hilla-generator-plugin-subtypes": "{{version}}"
   }
 }

@@ -1,4 +1,4 @@
-import { expect } from '@esm-bundle/chai';
+import { expect } from 'chai';
 import { calculatePath } from '../src/CookieManager.js';
 
 describe('@vaadin/hilla-frontend', () => {

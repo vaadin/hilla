@@ -1,8 +1,8 @@
-import { expect, use } from '@esm-bundle/chai';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
@@ -17,6 +17,7 @@ import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFil
 import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
+import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
 import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
@@ -138,7 +139,11 @@ describe('@vaadin/hilla-react-crud', () => {
         const service = personService();
         const grid = await GridController.init(render(<TestAutoGridNoHeaderFilters service={service} />), user);
 
-        const expectedSort: Sort = { orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }] };
+        const expectedSort: Sort = {
+          orders: [
+            { property: 'firstName', direction: Direction.ASC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
+          ],
+        };
         expect(service.lastSort).to.deep.equal(expectedSort);
         await expect(grid.getSortOrder()).to.eventually.deep.equal([
           { property: 'firstName', direction: Direction.ASC },
@@ -166,7 +171,9 @@ describe('@vaadin/hilla-react-crud', () => {
         await grid.sort('firstName', 'desc');
 
         const expectedSort: Sort = {
-          orders: [{ property: 'firstName', direction: Direction.DESC, ignoreCase: false }],
+          orders: [
+            { property: 'firstName', direction: Direction.DESC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
+          ],
         };
         expect(service.lastSort).to.deep.equal(expectedSort);
         await expect(grid.getSortOrder()).to.eventually.deep.equal([
@@ -490,9 +497,12 @@ describe('@vaadin/hilla-react-crud', () => {
         });
 
         it('sorts according to first column by default', async () => {
-          expect(service.lastSort).to.deep.equal({
-            orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
-          });
+          const expectedSort = {
+            orders: [
+              { property: 'firstName', direction: Direction.ASC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
+            ],
+          };
+          expect(service.lastSort).to.deep.equal(expectedSort);
 
           await expect(grid.getSortOrder()).to.eventually.deep.equal([
             { property: 'firstName', direction: Direction.ASC },
@@ -503,8 +513,8 @@ describe('@vaadin/hilla-react-crud', () => {
           await grid.sort('lastName', 'asc');
           expect(service.lastSort).to.deep.equal({
             orders: [
-              { property: 'firstName', direction: Direction.ASC, ignoreCase: false },
-              { property: 'lastName', direction: Direction.ASC, ignoreCase: false },
+              { property: 'firstName', direction: Direction.ASC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
+              { property: 'lastName', direction: Direction.ASC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
             ],
           });
 
@@ -516,8 +526,8 @@ describe('@vaadin/hilla-react-crud', () => {
           await grid.sort('lastName', 'desc');
           expect(service.lastSort).to.deep.equal({
             orders: [
-              { property: 'firstName', direction: Direction.ASC, ignoreCase: false },
-              { property: 'lastName', direction: Direction.DESC, ignoreCase: false },
+              { property: 'firstName', direction: Direction.ASC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
+              { property: 'lastName', direction: Direction.DESC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
             ],
           });
 
@@ -528,7 +538,9 @@ describe('@vaadin/hilla-react-crud', () => {
 
           await grid.sort('lastName', null);
           expect(service.lastSort).to.deep.equal({
-            orders: [{ property: 'firstName', direction: Direction.ASC, ignoreCase: false }],
+            orders: [
+              { property: 'firstName', direction: Direction.ASC, ignoreCase: false, nullHandling: NullHandling.NATIVE },
+            ],
           });
 
           await expect(grid.getSortOrder()).to.eventually.deep.equal([
@@ -567,23 +579,29 @@ describe('@vaadin/hilla-react-crud', () => {
           );
           // Number type
           await user.click(grid.getHeaderCellContent(1, 0).querySelector('vaadin-select-value-button')!);
-          let filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          let findResult = await screen.findByText('> Greater than');
+          let filterOptions = findResult.closest('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
-          expect(filterOptions[0]).to.have.rendered.text('> Greater than');
+          expect(filterOptions[1]).to.have.rendered.text('< Less than');
 
           await user.keyboard('{Escape}');
 
           // Date type
           await user.click(grid.getHeaderCellContent(1, 2).querySelector('vaadin-select-value-button')!);
-          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          // When the previous filter options is closing, for a short period of time there are two overlays in the DOM
+          // (because of animation), and to avoid selecting the wrong one, we need to first find the correct text and
+          // go up in the DOM to find the correct overlay.
+          findResult = await screen.findByText('> After');
+          filterOptions = findResult.closest('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
-          expect(filterOptions[0]).to.have.rendered.text('> After');
+          expect(filterOptions[1]).to.have.rendered.text('< Before');
 
           await user.keyboard('{Escape}');
 
           // Time type
           await user.click(grid.getHeaderCellContent(1, 3).querySelector('vaadin-select-value-button')!);
-          filterOptions = document.querySelector('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
+          findResult = await screen.findByText('> After');
+          filterOptions = findResult.closest('vaadin-select-overlay')!.querySelectorAll('vaadin-item');
           expect(filterOptions).to.have.length(3);
           expect(filterOptions[1]).to.have.rendered.text('< Before');
         });
@@ -1149,8 +1167,10 @@ describe('@vaadin/hilla-react-crud', () => {
       });
 
       it('uses custom column options on top of the type defaults', async () => {
-        const NameRenderer = ({ item }: { item: Person }): JSX.Element => <span>{item.firstName.toUpperCase()}</span>;
-        const StreetRenderer = ({ item }: { item: Person }): JSX.Element => (
+        const NameRenderer = ({ item }: { item: Person }): React.JSX.Element => (
+          <span>{item.firstName.toUpperCase()}</span>
+        );
+        const StreetRenderer = ({ item }: { item: Person }): React.JSX.Element => (
           <span>{item.address?.street.toUpperCase()}</span>
         );
         const grid = await GridController.init(
@@ -1229,12 +1249,12 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     describe('custom columns', () => {
-      const FullNameRenderer = ({ item }: { item: Person }): JSX.Element => (
+      const FullNameRenderer = ({ item }: { item: Person }): React.JSX.Element => (
         <span>
           {item.firstName} {item.lastName}
         </span>
       );
-      const FullNameHyphenRenderer = ({ item }: { item: Person }): JSX.Element => (
+      const FullNameHyphenRenderer = ({ item }: { item: Person }): React.JSX.Element => (
         <span>
           {item.firstName}-{item.lastName}
         </span>

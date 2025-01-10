@@ -1,6 +1,6 @@
 package com.vaadin.hilla.engine;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -81,8 +81,8 @@ public final class GeneratorConfiguration {
             disableAllDefaults = false;
         }
 
-        Plugins(@Nonnull Collection<Plugin> use,
-                @Nonnull Collection<Plugin> disable,
+        Plugins(@NonNull Collection<Plugin> use,
+                @NonNull Collection<Plugin> disable,
                 boolean disableAllDefaults) {
             this.use.addAll(use);
             this.disable.addAll(disable);
@@ -143,6 +143,7 @@ public final class GeneratorConfiguration {
                 new Plugin("@vaadin/hilla-generator-plugin-barrel"),
                 new Plugin("@vaadin/hilla-generator-plugin-model"),
                 new Plugin("@vaadin/hilla-generator-plugin-push"),
+                new Plugin("@vaadin/hilla-generator-plugin-signals"),
                 new Plugin("@vaadin/hilla-generator-plugin-subtypes"));
 
         PluginsProcessor() {

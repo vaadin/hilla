@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.7-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <artifactId>hilla-endpoint</artifactId>
-    <version>24.5-SNAPSHOT</version>
+    <version>24.7-SNAPSHOT</version>
     <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 
@@ -44,6 +44,10 @@
             <artifactId>hilla-engine-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
 
         <!-- API DEPENDENCIES -->
 
@@ -65,14 +69,6 @@
             <artifactId>hibernate-validator</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
-            <scope>test</scope>
-        </dependency>
-
 
         <!--  Fusion Dependencies -->
         <dependency>
@@ -243,11 +239,21 @@
             <artifactId>hamcrest-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
             <version>${flow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
             <scope>test</scope>
         </dependency>
 

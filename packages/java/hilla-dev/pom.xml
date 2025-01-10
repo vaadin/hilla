@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.7-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -27,12 +27,6 @@
             <artifactId>hilla-endpoint</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.hotswapagent</groupId>
-            <artifactId>hotswap-agent</artifactId>
-            <version>1.4.1</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
@@ -66,10 +60,6 @@
                     <failOnError>false</failOnError>
                     <quiet>true</quiet>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>hilla-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

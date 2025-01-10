@@ -1,6 +1,6 @@
-import { expect } from '@esm-bundle/chai';
 import { render, waitFor } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { expect } from 'chai';
+import { createMemoryRouter, RouterProvider } from 'react-router';
 import { configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
 
 function TestView({ route }: { route: string }) {

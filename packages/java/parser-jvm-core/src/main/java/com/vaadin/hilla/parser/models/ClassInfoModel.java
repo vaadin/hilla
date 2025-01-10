@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -15,7 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.ClassInfo;
 
@@ -27,7 +29,8 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     private static final Class<?>[] DATE_CLASSES = { Date.class,
             LocalDate.class };
     private static final Class<?>[] DATE_TIME_CLASSES = { LocalDateTime.class,
-            Instant.class, LocalTime.class };
+            Instant.class, LocalTime.class, OffsetDateTime.class,
+            ZonedDateTime.class };
     private List<FieldInfoModel> fields;
     private List<ClassInfoModel> innerClasses;
     private List<ClassRefSignatureModel> interfaces;
@@ -206,11 +209,11 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     @Deprecated
-    public static ClassInfoModel of(@Nonnull ClassInfo origin) {
+    public static ClassInfoModel of(@NonNull ClassInfo origin) {
         return new ClassInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static ClassInfoModel of(@Nonnull Class<?> origin) {
+    public static ClassInfoModel of(@NonNull Class<?> origin) {
         return new ClassInfoReflectionModel(Objects.requireNonNull(origin));
     }
 

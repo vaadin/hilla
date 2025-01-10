@@ -8,8 +8,9 @@ import java.util.Optional;
 
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.hilla.EndpointExposed;
-import com.vaadin.hilla.Nullable;
 import com.vaadin.hilla.crud.filter.Filter;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +25,6 @@ import org.springframework.data.repository.CrudRepository;
 @EndpointExposed
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {
-
-    @Autowired
-    private JpaFilterConverter jpaFilterConverter;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -105,7 +103,7 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
      * @return a JPA specification
      */
     protected Specification<T> toSpec(@Nullable Filter filter) {
-        return jpaFilterConverter.toSpec(filter, entityClass);
+        return JpaFilterConverter.toSpec(filter, entityClass);
     }
 
     @SuppressWarnings("unchecked")

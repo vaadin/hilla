@@ -1,12 +1,12 @@
-import { expect, use } from '@esm-bundle/chai';
 import { act, fireEvent, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src/index.js';
+import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src';
 import {
   type Contract,
   EntityModel,
@@ -17,6 +17,7 @@ import {
   type Project,
   TeamModel,
   type Player,
+  PostalAddressModel,
 } from './models.js';
 
 use(sinonChai);
@@ -369,6 +370,19 @@ describe('@vaadin/hilla-react-form', () => {
       fireEvent.change(projectInput);
       const count = await findByTestId('count');
       expect(count).to.have.text('1');
+    });
+
+    it('should work with optional hierarchy with optional values', async () => {
+      function StreetAddressView() {
+        const { model, field } = useForm(PostalAddressModel);
+        useFormPart(model.streetAddress.name);
+
+        return <input data-testid="street-name" {...field(model.streetAddress.name)} />;
+      }
+
+      const { container } = render(<StreetAddressView />);
+      const streetNameField = await waitFor(() => container.querySelector('input')!);
+      expect(streetNameField.value).to.equal('');
     });
   });
 

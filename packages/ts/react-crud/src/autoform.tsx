@@ -12,6 +12,7 @@ import {
   type ReactElement,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './autoform-field.js';
@@ -278,6 +279,7 @@ export function AutoForm<M extends AbstractModel>({
   const form = useForm(model, {
     onSubmit: async (formItem) => service.save(formItem),
   });
+  const formErrorRef = useRef<HTMLDivElement>(null);
   const [formError, setFormError] = useState<JSX.Element | string>('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
@@ -294,21 +296,33 @@ export function AutoForm<M extends AbstractModel>({
     }
   }, [item]);
 
+  useEffect(() => {
+    formErrorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [formError]);
+
   function handleSubmitError(error: unknown) {
     if (error instanceof ValidationError) {
       const nonPropertyErrorMessages = error.errors
-        .filter((validationError) => !validationError.property)
-        .map((validationError) => validationError.validatorMessage ?? validationError.message);
+        .filter((validationError) => !validationError.property || typeof validationError.property === 'string')
+        .map((validationError) => {
+          const property =
+            validationError.property && typeof validationError.property === 'string'
+              ? `${validationError.property}: `
+              : '';
+          return `${property}${
+            validationError.validatorMessage ? validationError.validatorMessage : validationError.message
+          }`;
+        });
       if (nonPropertyErrorMessages.length > 0) {
         setFormError(
-          <>
+          <div ref={formErrorRef}>
             Validation errors:
             <ul>
               {nonPropertyErrorMessages.map((message, index) => (
                 <li key={index}>{message}</li>
               ))}
             </ul>
-          </>,
+          </div>,
         );
       }
     } else if (error instanceof EndpointError) {
@@ -379,6 +393,9 @@ export function AutoForm<M extends AbstractModel>({
   }
 
   const handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.target instanceof HTMLTextAreaElement) {
+      return;
+    }
     if (event.key === 'Enter' && !isSubmitDisabled) {
       // eslint-disable-next-line no-void
       void handleSubmit();

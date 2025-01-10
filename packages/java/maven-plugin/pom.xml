@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>hilla-project</artifactId>
-    <version>24.5-SNAPSHOT</version>
+    <version>24.7-SNAPSHOT</version>
     <relativePath>../../../pom.xml</relativePath>
   </parent>
 
@@ -15,7 +15,7 @@
   <name>Maven Plugin for Hilla Engine</name>
 
   <properties>
-    <maven.version>3.9.7</maven.version>
+    <maven.version>3.9.9</maven.version>
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
@@ -49,13 +49,24 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>hilla-engine-core</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-loader-tools</artifactId>
+      <exclusions>
+        <!-- NOTE: workaround for dependencyConvergence with flow-server -->
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-compress</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -98,7 +109,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.8.2</version>
+          <version>3.15.0</version>
           <configuration>
             <goalPrefix>vaadin</goalPrefix>
           </configuration>

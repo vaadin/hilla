@@ -1,5 +1,5 @@
 import { appendFile, mkdir, rm } from 'node:fs/promises';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import { RouteParamType } from '../../src/shared/routeParamType.js';
@@ -87,6 +87,18 @@ describe('@vaadin/hilla-file-router', () => {
               params: { ':optional?': RouteParamType.Optional },
             },
             { route: '*', title: 'Wildcard', params: { '*': RouteParamType.Wildcard } },
+            {
+              route: 'issue-002378',
+              params: {},
+              children: [
+                {
+                  route: ':requiredParam',
+                  params: { ':requiredParam': RouteParamType.Required },
+                  children: [{ route: 'edit', params: {}, title: 'Issue002378 Required Param' }],
+                },
+              ],
+            },
+            { route: 'issue-002571-empty-layout', params: {}, title: 'Issue002571 Empty Layout', children: [] },
             { route: 'issue-002879-config-below', title: 'Config Below', params: {} },
           ],
         },

@@ -1,12 +1,13 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -23,12 +24,17 @@ import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
     private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
-            .build().getSerializationConfig();
+            .build()
+            .setVisibility(PropertyAccessor.SETTER,
+                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
+            .setVisibility(PropertyAccessor.GETTER,
+                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
+            .getSerializationConfig();
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -42,9 +48,9 @@ public final class PropertyPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (!(nodeDependencies.getNode() instanceof EntityNode)) {
             return nodeDependencies;
         }
@@ -73,7 +79,7 @@ public final class PropertyPlugin
     }
 
     private Stream<JacksonPropertyModel> collectProperties(
-            @Nonnull ClassInfoModel model) {
+            @NonNull ClassInfoModel model) {
         var cls = Objects.requireNonNull(model).get();
 
         if (!(cls instanceof Class<?>)) {
@@ -135,6 +141,7 @@ public final class PropertyPlugin
         public Stream<JacksonPropertyModel> stream() {
             var properties = description.findProperties().stream()
                     .map(JacksonPropertyModel::of);
+            properties = filterPrivateProperties(properties);
             properties = filterSuperClassProperties(properties);
             properties = filterPropertiesWithIgnoredTypes(properties);
 
@@ -208,6 +215,12 @@ public final class PropertyPlugin
             // explicitly annotated ones should remain
             return properties.filter(property -> property.couldDeserialize()
                     || property.isExplicitlyIncluded());
+        }
+
+        private Stream<JacksonPropertyModel> filterPrivateProperties(
+                Stream<JacksonPropertyModel> properties) {
+            return properties.filter(
+                    property -> !property.getAssociatedTypes().isEmpty());
         }
 
         private Stream<JacksonPropertyModel> filterSuperClassProperties(

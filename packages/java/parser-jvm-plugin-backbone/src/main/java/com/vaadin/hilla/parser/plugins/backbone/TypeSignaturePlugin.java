@@ -9,11 +9,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
+import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.ReflectionSignatureModel;
@@ -45,9 +46,39 @@ public final class TypeSignaturePlugin
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof TypedNode) {
             var typedNode = (TypedNode) nodePath.getNode();
-            typedNode.setTarget(
-                    new SchemaProcessor(typedNode.getType()).process());
+            var schema = new SchemaProcessor(typedNode.getType(),
+                    // Only deal with generics in entities: endpoint methods are
+                    // not allowed to emit generic type parameters and arguments
+                    isInEntity(nodePath)).process();
+
+            // Prepare a schema for type arguments if the current node is a
+            // class reference and if its type arguments are not processed
+            // differently
+            if (typedNode.getType() instanceof ClassRefSignatureModel) {
+                var signature = ((ClassRefSignatureModel) typedNode.getType());
+
+                if (!(signature.isIterable() || signature.isMap()
+                        || signature.isOptional()
+                        || signature.getTypeArguments().isEmpty())) {
+                    schema.addExtension("x-type-arguments",
+                            new ComposedSchema());
+                }
+            }
+
+            typedNode.setTarget(schema);
         }
+    }
+
+    // Checks if the current node is inside an entity
+    private boolean isInEntity(NodePath<?> nodePath) {
+        for (var np = nodePath; !(np.getNode() instanceof RootNode); np = np
+                .getParentPath()) {
+            if (np.getNode() instanceof EntityNode) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -82,9 +113,9 @@ public final class TypeSignaturePlugin
         }
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         var node = nodeDependencies.getNode();
         if (node instanceof MethodNode) {
             return scanMethodNode((MethodNode) node, nodeDependencies);
@@ -127,6 +158,11 @@ public final class TypeSignaturePlugin
             ((ArraySchema) parentSchema).setItems(schema);
         } else if (parentSchema instanceof MapSchema) {
             parentSchema.additionalProperties(schema);
+        } else if (parentSchema.getExtensions() != null && parentSchema
+                .getExtensions().get("x-type-arguments") != null) {
+            // The nested schema is added to the type arguments of the parent
+            ((ComposedSchema) parentSchema.getExtensions()
+                    .get("x-type-arguments")).addAllOfItem(schema);
         } else {
             // The nested schema replaces parent for type argument, type
             // parameter, type variable, and optional signatures
@@ -219,6 +255,9 @@ public final class TypeSignaturePlugin
             }
         } else if (signature.isTypeVariable()) {
             items = List.of(((TypeVariableModel) signature).resolve());
+        } else if (signature.isClassRef()) {
+            items = ((ClassRefSignatureModel) signature).getTypeArguments()
+                    .stream().map(SignatureModel.class::cast).toList();
         }
 
         return items;
@@ -300,8 +339,14 @@ public final class TypeSignaturePlugin
             NodeDependencies nodeDependencies) {
         var signature = node.getSource();
         var referredTypes = getReferredTypes(signature);
-        return nodeDependencies.appendChildNodes(
-                referredTypes.stream().map(TypeSignatureNode::of));
+
+        for (var i = 0; i < referredTypes.size(); i++) {
+            var referredType = referredTypes.get(i);
+            nodeDependencies = nodeDependencies.appendChildNodes(
+                    Stream.of(TypeSignatureNode.of(referredType, i)));
+        }
+
+        return nodeDependencies;
     }
 
     private String signatureToTypeString(SignatureModel type) {

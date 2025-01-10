@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.mappedtypes;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.data.domain.Sort.Direction;
@@ -25,9 +25,9 @@ import org.springframework.data.domain.Sort.NullHandling;
  * A DTO for {@code org.springframework.data.domain.Sort.Order}.
  */
 public class Order {
-    @Nonnull
+    @NonNull
     private Direction direction;
-    @Nonnull
+    @NonNull
     @NotBlank
     private String property;
     private boolean ignoreCase;

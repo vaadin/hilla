@@ -177,3 +177,34 @@ export class TeamModel<T extends Team = Team> extends ObjectModel<T> {
     );
   }
 }
+
+export interface StreetAddress {
+  number?: string;
+  name?: string;
+}
+export interface PostalAddress {
+  streetAddress?: StreetAddress;
+}
+export class StreetAddressModel<T extends StreetAddress = StreetAddress> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(StreetAddressModel);
+
+  get number(): StringModel {
+    return this[_getPropertyModel](
+      'number',
+      (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+    );
+  }
+
+  get name(): StringModel {
+    return this[_getPropertyModel](
+      'name',
+      (parent, key) => new StringModel(parent, key, true, { meta: { javaType: 'java.lang.String' } }),
+    );
+  }
+}
+export class PostalAddressModel<T extends PostalAddress = PostalAddress> extends ObjectModel<T> {
+  static override createEmptyValue = makeObjectEmptyValueCreator(PostalAddressModel);
+  get streetAddress(): StreetAddressModel {
+    return this[_getPropertyModel]('streetAddress', (parent, key) => new StreetAddressModel(parent, key, true));
+  }
+}

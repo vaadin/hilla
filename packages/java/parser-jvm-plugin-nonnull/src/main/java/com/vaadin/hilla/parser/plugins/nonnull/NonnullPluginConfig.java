@@ -47,6 +47,11 @@ public class NonnullPluginConfig
                 // Package-level annotations have low score
                 new AnnotationMatcher("org.springframework.lang.NonNullApi",
                         false, 10),
+                // Id and Version annotation usually mark nullable fields for
+                // CRUD operations.
+                // Low score allows other annotations to override them.
+                new AnnotationMatcher("jakarta.persistence.Id", true, 20),
+                new AnnotationMatcher("jakarta.persistence.Version", true, 20),
                 // Nullable-like annotations get a higher score. This should
                 // only matter when they are used in conjunction with
                 // package-level annotations
@@ -57,6 +62,8 @@ public class NonnullPluginConfig
                 new AnnotationMatcher("org.eclipse.jdt.annotation.Nullable",
                         true, 20),
                 new AnnotationMatcher("com.vaadin.hilla.Nullable", true, 20),
+                new AnnotationMatcher("org.jspecify.annotations.Nullable", true,
+                        20),
                 // Nonnull-like annotations have the highest score for
                 // compatibility with the old generator
                 new AnnotationMatcher("jakarta.annotation.Nonnull", false, 30),
@@ -67,7 +74,9 @@ public class NonnullPluginConfig
                 new AnnotationMatcher("androidx.annotation.NonNull", false, 30),
                 new AnnotationMatcher("org.eclipse.jdt.annotation.NonNull",
                         false, 30),
-                new AnnotationMatcher("com.vaadin.hilla.Nonnull", false, 30));
+                new AnnotationMatcher("com.vaadin.hilla.Nonnull", false, 30),
+                new AnnotationMatcher("org.jspecify.annotations.NonNull", false,
+                        30));
 
         public Processor(NonnullPluginConfig config) {
             super(config, defaults);

@@ -4,12 +4,13 @@ import jakarta.annotation.security.PermitAll;
 
 import java.time.Instant;
 
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.Nonnull;
+
+import org.jspecify.annotations.NonNull;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-
-import com.vaadin.flow.spring.security.AuthenticationContext;
 
 @Endpoint
 @PermitAll
@@ -28,7 +29,7 @@ class ChatService {
 
 	private final Flux<Message> chat = chatSink.asFlux();
 
-	public Flux<@Nonnull Message> join() {
+	public Flux<@NonNull Message> join() {
 		return chat;
 	}
 

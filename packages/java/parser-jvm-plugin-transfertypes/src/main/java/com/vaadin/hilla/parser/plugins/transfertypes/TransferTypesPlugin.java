@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
@@ -44,6 +46,8 @@ public final class TransferTypesPlugin
         classMap.put("com.vaadin.hilla.EndpointSubscription",
                 EndpointSubscription.class);
         classMap.put(JsonNode.class.getName(), Object.class);
+        classMap.put(ObjectNode.class.getName(), Object.class);
+        classMap.put(ArrayNode.class.getName(), List.class);
     }
 
     public TransferTypesPlugin() {
@@ -63,9 +67,9 @@ public final class TransferTypesPlugin
         return List.of(BackbonePlugin.class);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies.processChildNodes(this::processNodes)
                 .processRelatedNodes(this::processNodes);
     }

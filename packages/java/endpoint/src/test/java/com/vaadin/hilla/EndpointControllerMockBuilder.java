@@ -2,6 +2,8 @@ package com.vaadin.hilla;
 
 import static org.mockito.Mockito.mock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 
@@ -10,11 +12,13 @@ import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 import jakarta.servlet.ServletContext;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * A helper class to build a mocked EndpointController.
  */
 public class EndpointControllerMockBuilder {
+    private static final EndpointTransferMapper ENDPOINT_TRANSFER_MAPPER = new EndpointTransferMapper();
     private ApplicationContext applicationContext;
     private EndpointNameChecker endpointNameChecker = mock(
             EndpointNameChecker.class);
@@ -28,14 +32,36 @@ public class EndpointControllerMockBuilder {
         ServletContext servletContext = Mockito.mock(ServletContext.class);
         Mockito.when(csrfChecker.validateCsrfTokenInRequest(Mockito.any()))
                 .thenReturn(true);
-        EndpointInvoker invoker = Mockito
-                .spy(new EndpointInvoker(applicationContext, factory,
+        ObjectMapper endpointObjectMapper = createEndpointObjectMapper(
+                applicationContext, factory);
+        EndpointInvoker invoker = Mockito.spy(
+                new EndpointInvoker(applicationContext, endpointObjectMapper,
                         explicitNullableTypeChecker, servletContext, registry));
         EndpointController controller = Mockito.spy(new EndpointController(
                 applicationContext, registry, invoker, csrfChecker));
         Mockito.doReturn(mock(EndpointAccessChecker.class)).when(invoker)
                 .getAccessChecker();
         return controller;
+    }
+
+    public static ObjectMapper createEndpointObjectMapper(
+            ApplicationContext applicationContext,
+            JacksonObjectMapperFactory factory) {
+        ObjectMapper endpointObjectMapper = factory != null ? factory.build()
+                : createDefaultEndpointMapper(applicationContext);
+        if (endpointObjectMapper != null) {
+            endpointObjectMapper.registerModule(
+                    ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
+        }
+        return endpointObjectMapper;
+    }
+
+    private static ObjectMapper createDefaultEndpointMapper(
+            ApplicationContext applicationContext) {
+        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
+        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
+                .configure(endpointMapper);
+        return endpointMapper;
     }
 
     public EndpointControllerMockBuilder withApplicationContext(

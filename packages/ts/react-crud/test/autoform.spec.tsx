@@ -1,7 +1,6 @@
 // eslint-disable-next-line
 /// <reference types="karma-viewport" />
 
-import { expect, use } from '@esm-bundle/chai';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointError } from '@vaadin/hilla-frontend';
@@ -9,8 +8,9 @@ import { ValidationError } from '@vaadin/hilla-lit-form';
 import type { ValueError } from '@vaadin/hilla-lit-form/Validation.js';
 import type { SelectElement } from '@vaadin/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
-import type { TextFieldElement } from '@vaadin/react-components/TextField.js';
+import { TextField, type TextFieldElement } from '@vaadin/react-components/TextField.js';
 import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -427,6 +427,29 @@ describe('@vaadin/hilla-react-crud', () => {
       expect(result.queryByText('message')).to.be.null;
       expect(result.queryByText('foobar')).to.not.be.null;
       expect(result.queryByText('just a message')).to.not.be.null;
+    });
+
+    it('shows error for whole form has string property', async () => {
+      const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
+      const person = await getItem(service, 1);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      service.save = async (_item: Person): Promise<Person | undefined> => {
+        const valueError: ValueError = {
+          property: 'myProp',
+          message: 'message',
+          value: person,
+          validator: { message: 'message', validate: () => false },
+          validatorMessage: 'foobar',
+        };
+        throw new ValidationError([valueError]);
+      };
+
+      const result = render(<AutoForm service={service} model={PersonModel} item={person} />);
+      const form = await FormController.init(user, result.container);
+      await form.typeInField('First name', 'J'); // to enable the submit button
+      await form.submit();
+      expect(result.queryByText('message')).to.be.null;
+      expect(result.queryByText('myProp: foobar')).to.not.be.null;
     });
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
@@ -992,6 +1015,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateField', () => {
       it('formats and parses values using localized date format', async () => {
+        viewport.set(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
@@ -1012,6 +1036,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateTimeField', () => {
       it('formats and parses values using localized date format', async () => {
+        viewport.set(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
@@ -1164,6 +1189,55 @@ describe('@vaadin/hilla-react-crud', () => {
 
           const field = result.queryField('Custom last name');
           expect(field).to.exist;
+        });
+
+        it('should submit when the enter key is pressed on a custom renderer field', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
+
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  label: 'Custom last name',
+                  renderer: ({ field }) => <TextField key={field.name} {...field} />,
+                },
+              },
+            },
+            undefined,
+            false,
+            service,
+          );
+
+          await result.typeInField('Custom last name', 'Maxwell Smart{enter}');
+
+          expect(saveSpy).to.have.calledOnce;
+          expect(saveSpy).to.have.been.calledWith(sinon.match.hasNested('lastName', 'Maxwell Smart'));
+        });
+
+        it('should not submit when the enter key pressed on a textarea', async () => {
+          const service = personService();
+          const saveSpy = sinon.spy(service, 'save');
+
+          const result = await populatePersonForm(
+            1,
+            {
+              fieldOptions: {
+                lastName: {
+                  label: 'Custom last name',
+                  renderer: ({ field }) => <TextArea key={field.name} {...field} />,
+                },
+              },
+            },
+            undefined,
+            false,
+            service,
+          );
+
+          await result.typeInField('Custom last name', 'Maxwell\nSmart{enter}');
+
+          expect(saveSpy).to.have.not.called;
         });
       });
 

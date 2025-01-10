@@ -33,51 +33,14 @@ import kotlin.test.expect
 class SingleModuleTest : AbstractGradleTest() {
 
     @Test
-    fun `hillaConfigure executed HillaEngineConfigurationJson should exist`() {
-        createProject()
-
-        testProject.build("hillaConfigure", checkTasksSuccessful = true)
-
-        expect(true, "hilla-engine-configuration.json should be created after executing hillaConfigure task!") {
-            testProject.folder("build").find("hilla-engine-configuration.json").first().exists()
-        }
-    }
-
-    @Test
-    fun `exposedPackagesToParser configured in build file hillaConfigure executed HillaEngineConfigurationJson should contain exposed packages`() {
-        val package1 = "com.example.app"
-        val package2 = "com.vaadin.hilla.foo"
-
-        createProject(package1, package2)
-
-        val buildResult: BuildResult = testProject.build("hillaConfigure", checkTasksSuccessful = true)
-
-        buildResult.expectTaskSucceded("hillaConfigure")
-
-        val hillaEngineConfigFile = testProject.folder("build").find("hilla-engine-configuration.json").first()
-        expect(true, "hilla-engine-configuration.json should be created after executing hillaConfigure task!") {
-            hillaEngineConfigFile.exists()
-        }
-
-        val configuration = EngineConfiguration.load(hillaEngineConfigFile)
-        val packages = configuration.parser.packages.orElseThrow()
-        expect(true, "Configuration json should contained exposed package '$package1'") {
-            packages.contains(package1)
-        }
-        expect(true, "Configuration json should contained exposed package '$package2'") {
-            packages.contains(package2)
-        }
-    }
-
-    @Test
     fun `endpoints ts and openapi json are generated after hillaGenerate task executed in dev mode`() {
         createProject(withNpmInstall = true)
 
         addHelloReactEndpoint()
+        addMainClass()
 
         val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
 
-        buildResult.expectTaskSucceded("hillaConfigure")
         buildResult.expectTaskSucceded("hillaGenerate")
 
         verifyOpenApiJsonFileGeneratedProperly(false)
@@ -89,10 +52,10 @@ class SingleModuleTest : AbstractGradleTest() {
         createProject(withNpmInstall = true, productionMode = true)
 
         addHelloReactEndpoint()
+        addMainClass()
 
         val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
 
-        buildResult.expectTaskSucceded("hillaConfigure")
         buildResult.expectTaskSucceded("hillaGenerate")
 
         verifyOpenApiJsonFileGeneratedProperly(true)
@@ -124,6 +87,28 @@ class SingleModuleTest : AbstractGradleTest() {
         }
     }
 
+    private fun addMainClass() : File {
+        val mainClassFile = testProject.newFile("src/main/java/com/example/application/MainClass.java",
+        """
+            package com.example.application;
+
+            import org.springframework.boot.SpringApplication;
+            import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+            @SpringBootApplication
+            public class MainClass {
+
+                public static void main(String[] args) {
+                    SpringApplication.run(MainClass.class, args);
+                }
+            }
+        """.trimIndent())
+        expect(true, "Main class 'MainClass.java' should exist!") {
+            mainClassFile.exists()
+        }
+        return mainClassFile
+    }
+
     private fun addHelloReactEndpoint() : File {
         val endpointFile = testProject.newFile("src/main/java/com/example/application/HelloReactEndpoint.java",
         """
@@ -131,14 +116,14 @@ class SingleModuleTest : AbstractGradleTest() {
 
             import com.vaadin.flow.server.auth.AnonymousAllowed;
             import com.vaadin.hilla.Endpoint;
-            import com.vaadin.hilla.Nonnull;
+            import org.jspecify.annotations.NonNull;
 
             @Endpoint
             @AnonymousAllowed
             public class HelloReactEndpoint {
 
-                @Nonnull
-                public String sayHello(@Nonnull String name) {
+                @NonNull
+                public String sayHello(@NonNull String name) {
                     if (name.isEmpty()) {
                         return "Hello stranger";
                     } else {
@@ -153,17 +138,8 @@ class SingleModuleTest : AbstractGradleTest() {
         return endpointFile
     }
 
-    private fun createProject(vararg exposedPackages: String, withNpmInstall: Boolean = false, productionMode: Boolean = false,
+    private fun createProject(withNpmInstall: Boolean = false, productionMode: Boolean = false,
                               disableAllTasksToSimulateDryRun: Boolean = false) {
-
-        val exposedPackagesExtension = if (exposedPackages.isNotEmpty()) {
-            val commaSeparatedPackages = exposedPackages.asList().joinToString { "\"$it\"" }
-            """
-                hilla {
-                	exposedPackagesToParser = [$commaSeparatedPackages]
-                }
-            """.trimIndent()
-        } else "";
 
         val npmInstallTask = if (withNpmInstall) {
             """
@@ -208,14 +184,14 @@ class SingleModuleTest : AbstractGradleTest() {
                 }
             }
             plugins {
-                id 'org.springframework.boot' version '3.1.5'
+                id 'org.springframework.boot' version '3.3.6'
                 id 'io.spring.dependency-management' version '1.0.15.RELEASE'
                 id 'java'
             }
 
             apply plugin: 'com.vaadin.hilla'
 
-            $exposedPackagesExtension
+            group = 'com.vaadin.hilla'
 
             $npmInstallTask
 
@@ -231,14 +207,15 @@ class SingleModuleTest : AbstractGradleTest() {
             }
 
             dependencies {
-                implementation 'com.vaadin.hilla:hilla'
+                implementation 'com.vaadin:hilla'
                 implementation 'com.vaadin:vaadin-spring'
                 implementation 'org.springframework.boot:spring-boot-starter-web'
             }
 
             dependencyManagement {
                 imports {
-                    mavenBom "com.vaadin.hilla:hilla-bom:$hillaVersion"
+                    mavenBom "com.vaadin:hilla-bom:$hillaVersion"
+                    mavenBom "com.vaadin:flow-bom:$flowVersion"
                 }
             }
         """.trimIndent()
