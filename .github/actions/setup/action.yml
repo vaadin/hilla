@@ -33,7 +33,25 @@ runs:
           node_modules
           packages/ts/*/node_modules
         key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+    - name: Get all changed package*.json files
+      id: changed-package-json-files
+      uses: tj-actions/changed-files@v45
+      with:
+        files: |
+          package.json
+          packages/ts/*/package.json
+
+    - name: List all changed json files
+      if: steps.changed-package-json-files.outputs.any_changed == 'true'
+      env:
+        ALL_CHANGED_FILES: ${{ steps.changed-package-json-files.outputs.all_changed_files }}
+      shell: bash
+      run: |
+        for file in ${ALL_CHANGED_FILES}; do
+          echo "$file was changed"
+        done
+
     - name: Install npm dependencies
-      if: ${{ steps.cache-node_modules.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-node_modules.outputs.cache-hit != 'true' }} && {{ steps.changed-json-files.outputs.any_changed == 'true' }}
       shell: bash
       run: npm ci
