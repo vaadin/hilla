@@ -1,7 +1,7 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { expect } from '@esm-bundle/chai';
+import { expect } from 'chai';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import createRoutesFromMeta from '../../src/vite-plugin/createRoutesFromMeta.js';
 import type { RuntimeFileUrls } from '../../src/vite-plugin/generateRuntimeFiles.js';

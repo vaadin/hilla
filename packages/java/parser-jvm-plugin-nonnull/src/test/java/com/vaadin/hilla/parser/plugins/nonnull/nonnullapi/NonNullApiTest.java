@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.nonnull.nonnullapi;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -30,11 +31,12 @@ public class NonNullApiTest {
                         20)),
                 null));
 
-        var openAPI = new Parser().classLoader(getClass().getClassLoader())
+        var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
-                .endpointAnnotation(Endpoint.class.getName())
-                .endpointExposedAnnotation(EndpointExposed.class.getName())
-                .addPlugin(new BackbonePlugin()).addPlugin(plugin).execute();
+                .endpointAnnotations(List.of(Endpoint.class))
+                .endpointExposedAnnotations(List.of(EndpointExposed.class))
+                .addPlugin(new BackbonePlugin()).addPlugin(plugin)
+                .execute(List.of(NonNullApiEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }

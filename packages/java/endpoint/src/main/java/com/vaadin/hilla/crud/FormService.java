@@ -1,6 +1,6 @@
 package com.vaadin.hilla.crud;
 
-import com.vaadin.hilla.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A browser-callable service that can create, update, and delete a given type

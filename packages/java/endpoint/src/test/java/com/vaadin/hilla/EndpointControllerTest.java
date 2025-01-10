@@ -67,6 +67,7 @@ import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
 import com.vaadin.hilla.packages.application.ApplicationEndpoint;
+import com.vaadin.hilla.packages.library.LibraryEndpoint;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.testendpoint.BridgeMethodTestEndpoint;
 
@@ -826,7 +827,7 @@ public class EndpointControllerTest {
                 mock(ServletContext.class), registry);
 
         new EndpointController(contextMock, registry, invoker, null)
-                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+                .registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1144,10 +1145,10 @@ public class EndpointControllerTest {
     public void should_Fallback_to_Spring_Context() throws Exception {
         // this also tests that an empty definition is not a problem
         var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
-        // this one is found by Spring
+        // as browser callables are found through Spring, the results are the
+        // same
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
-        // the others are outside the Spring context
-        assertNull(endpointRegistry.get("libraryEndpoint"));
+        assertNotNull(endpointRegistry.get("libraryEndpoint"));
         assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
     }
 
@@ -1164,12 +1165,14 @@ public class EndpointControllerTest {
     private EndpointRegistry registerEndpoints(String openApiFilename) {
         var context = Mockito.mock(ApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
+        // Suppose that both the "regular" browser callable and the one from a
+        // library are Spring beans
         Mockito.doReturn(Map.of("regularEndpoint",
-                new ApplicationEndpoint(applicationComponent))).when(context)
+                new ApplicationEndpoint(applicationComponent),
+                "libraryEndpoint", new LibraryEndpoint())).when(context)
                 .getBeansWithAnnotation(Endpoint.class);
         var controller = createVaadinControllerWithApplicationContext(context);
-        controller.registerEndpoints(getClass()
-                .getResource("/com/vaadin/hilla/packages/" + openApiFilename));
+        controller.registerEndpoints();
         return controller.endpointRegistry;
     }
 
@@ -1310,8 +1313,7 @@ public class EndpointControllerTest {
         EndpointController connectController = Mockito
                 .spy(new EndpointController(mockApplicationContext, registry,
                         invoker, csrfChecker));
-        connectController
-                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+        connectController.registerEndpoints();
         return connectController;
     }
 
@@ -1339,8 +1341,7 @@ public class EndpointControllerTest {
         EndpointController hillaController = controllerMockBuilder
                 .withObjectMapperFactory(new JacksonObjectMapperFactory.Json())
                 .withApplicationContext(applicationContext).build();
-        hillaController
-                .registerEndpoints(getDefaultOpenApiResourcePathInDevMode());
+        hillaController.registerEndpoints();
         return hillaController;
     }
 

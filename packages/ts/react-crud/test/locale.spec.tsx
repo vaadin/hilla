@@ -1,6 +1,6 @@
-import { expect } from '@esm-bundle/chai';
 import { render } from '@testing-library/react';
 import type { DatePickerDate } from '@vaadin/react-components/DatePicker.js';
+import { expect } from 'chai';
 import { LocaleContext, LocaleFormatter, useDatePickerI18n } from '../src/locale.js';
 
 describe('@vaadin/hilla-react-crud', () => {
@@ -90,7 +90,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     it('uses "formatDate" and "parse" correctly', () => {
       const { getByText } = render(
-        <LocaleContext.Provider value={'en-US'}>
+        <LocaleContext.Provider value="en-US">
           <I18nTestComponent />
         </LocaleContext.Provider>,
       );

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-expressions, no-shadow, @typescript-eslint/unbound-method */
-import { assert, expect, use } from '@esm-bundle/chai';
+import { assert, expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import { LitElement, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';

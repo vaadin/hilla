@@ -3,32 +3,31 @@ package com.vaadin.hilla.internal;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
+import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest(classes = { CustomEndpoint.class, EndpointNoValue.class,
+        MyEndpoint.class, ApplicationContextProvider.class })
 public class TaskTest {
     private Path temporaryDirectory;
 
     @BeforeEach
     public void setUpTaskApplication() throws IOException, URISyntaxException,
-            FrontendUtils.CommandExecutionException, InterruptedException,
-            InvocationTargetException, NoSuchMethodException,
-            InstantiationException, IllegalAccessException,
-            NoSuchFieldException {
+            FrontendUtils.CommandExecutionException, InterruptedException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
         var userDir = temporaryDirectory.toAbsolutePath().toString();
@@ -42,34 +41,17 @@ public class TaskTest {
                 .resolve(getFrontendDirectory());
         Files.createDirectories(frontendDir);
 
-        // Create hilla-engine-configuration.json from template
-        var configPath = buildDir
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
-        Files.copy(
-                Path.of(Objects
-                        .requireNonNull(getClass().getResource(
-                                EngineConfiguration.DEFAULT_CONFIG_FILE_NAME))
-                        .toURI()),
-                configPath);
-
-        var config = prepareConfiguration(buildDir);
-
-        Files.delete(configPath);
-        config.store(configPath.toFile());
-
-        // Let Hilla know that the file has been generated
-        var field = AbstractTaskEndpointGenerator.class
-                .getDeclaredField("firstRun");
-        field.setAccessible(true);
-        field.set(null, false);
-
-        var packagesDirectory = Path
+        Path packagesPath = Path
                 .of(getClass().getClassLoader().getResource("").toURI())
                 .getParent() // target
                 .getParent() // engine-runtime
                 .getParent() // java
-                .getParent() // packages
-                .resolve("ts");
+                .getParent(); // packages
+
+        Path projectRoot = packagesPath.getParent();
+        Files.copy(projectRoot.resolve(".npmrc"),
+                temporaryDirectory.resolve(".npmrc"));
+        var tsPackagesDirectory = packagesPath.resolve("ts");
 
         var shellCmd = FrontendUtils.isWindows() ? Stream.of("cmd.exe", "/c")
                 : Stream.<String> empty();
@@ -77,7 +59,8 @@ public class TaskTest {
         var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
                 "install", "--no-save", "--install-links");
 
-        var generatorFiles = Files.list(packagesDirectory).map(Path::toString);
+        var generatorFiles = Files.list(tsPackagesDirectory)
+                .map(Path::toString);
 
         var command = Stream.of(shellCmd, npmCmd, generatorFiles)
                 .flatMap(Function.identity()).toList();
@@ -122,23 +105,10 @@ public class TaskTest {
         return temporaryDirectory;
     }
 
-    /**
-     * Modifies runtime settings (paths, class path)
-     */
-    private EngineConfiguration prepareConfiguration(Path buildDir)
-            throws URISyntaxException, IOException, InvocationTargetException,
-            NoSuchMethodException, InstantiationException,
-            IllegalAccessException {
-        var classPath = new LinkedHashSet<>(List
-                .of(Path.of(getClass().getClassLoader().getResource("").toURI())
-                        .toString()));
-
-        var config = EngineConfiguration.loadDirectory(buildDir);
-
-        config = TestEngineConfigurationPathResolver.resolve(config,
-                temporaryDirectory);
-
-        return new EngineConfiguration.Builder(config).classPath(classPath)
-                .create();
+    protected EngineConfiguration getEngineConfiguration() {
+        return new EngineConfiguration.Builder()
+                .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
+                .outputDir(getOutputDirectory()).withDefaultAnnotations()
+                .build();
     }
 }

@@ -1,5 +1,5 @@
 import { appendFile, mkdir, rm } from 'node:fs/promises';
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import { RouteParamType } from '../../src/shared/routeParamType.js';
