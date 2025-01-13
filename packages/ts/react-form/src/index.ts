@@ -1,4 +1,4 @@
-/* eslint-disable no-void,@typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/unbound-method */
 import {
   _fromString,
   _validity,
@@ -148,7 +148,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
         fieldState = {
           changeHandler() {
             fieldState!.inputHandler();
-            void n.validate();
+            n.validate().catch(() => {});
           },
           element: undefined,
           errorMessage: '',
@@ -166,7 +166,7 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
           invalid: false,
           blurHandler() {
             fieldState!.inputHandler();
-            void n.validate();
+            n.validate().catch(() => {});
             n.visited = true;
           },
           ref(element: HTMLElement | null) {
