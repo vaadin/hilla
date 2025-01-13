@@ -64,6 +64,7 @@
     "meow": "^13.2.0",
     "micromatch": "^4.0.8",
     "mocha": "^10.3.0",
+    "monocart-coverage-reports": "^2.11.6",
     "nx": "^18.0.4",
     "postcss": "^8.4.49",
     "prettier": "^3.2.5",
