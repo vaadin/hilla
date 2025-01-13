@@ -267,7 +267,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   }
 
   set value(value: Value<M> | undefined) {
-    this.initializeValue();
+    this.initializeValue(true);
     this.#setValueState(value, undefined);
   }
 
