@@ -64,9 +64,8 @@ public class HillaPlugin : Plugin<Project> {
                 if (compilerOptions != null) {
                     val freeCompilerArgs = compilerOptions.javaClass.methods.find { it.name == "getFreeCompilerArgs" }
                         ?.invoke(compilerOptions) as? DefaultListProperty<String>
-                    freeCompilerArgs?.let {
-                        it.addAll(listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations"))
-                    } ?: project.logger.warn("""
+                    freeCompilerArgs?.addAll(listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations")) ?:
+                    project.logger.warn("""
                         Kotlin JVM plugin is applied and 'compilerOption' was not null, but could not acquire the
                         'freeCompilerArgs' instance from the 'compilerOption' to configure Kotlin compiler options by
                          adding '-Xjsr305=strict' and '-Xemit-jvm-type-annotations'. To make sure annotation based form
