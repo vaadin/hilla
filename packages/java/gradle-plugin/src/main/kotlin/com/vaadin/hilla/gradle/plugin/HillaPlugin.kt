@@ -60,10 +60,24 @@ public class HillaPlugin : Plugin<Project> {
         // Configure Kotlin-specific tasks only if Kotlin JVM plugin is applied
         project.plugins.withId("org.jetbrains.kotlin.jvm") {
             project.tasks.named("compileKotlin").configure { task ->
-                val compilerOptions = task.javaClass.getMethod("getCompilerOptions").invoke(task)
-                val freeCompilerArgs = compilerOptions.javaClass.getMethod("getFreeCompilerArgs")
-                    .invoke(compilerOptions) as DefaultListProperty<String>
-                freeCompilerArgs.addAll(listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations"))
+                val compilerOptions = task.javaClass.methods.find { it.name == "getCompilerOptions" }?.invoke(task)
+                if (compilerOptions != null) {
+                    val freeCompilerArgs = compilerOptions.javaClass.methods.find { it.name == "getFreeCompilerArgs" }
+                        ?.invoke(compilerOptions) as? DefaultListProperty<String>
+                    freeCompilerArgs?.let {
+                        it.addAll(listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations"))
+                    } ?: project.logger.warn("""
+                        Kotlin JVM plugin is applied and 'compilerOption' was not null, but could not acquire the
+                        'freeCompilerArgs' instance from the 'compilerOption' to configure Kotlin compiler options by
+                         adding '-Xjsr305=strict' and '-Xemit-jvm-type-annotations'. To make sure annotation based form
+                         validations are enabled, add the above compiler args in the build file explicitly.""".trimIndent())
+                } else {
+                    project.logger.warn("""
+                        Kotlin JVM plugin is applied, but could not acquire the 'compilerOption' instance from the
+                        'compileKotlin' task instance to configure Kotlin compiler options by adding '-Xjsr305=strict'
+                         and '-Xemit-jvm-type-annotations' to the 'freeCompilerArgs'. To make sure annotation based form
+                         validations are enabled, add the above compiler args in the build file explicitly.""".trimIndent())
+                }
             }
         }
 
