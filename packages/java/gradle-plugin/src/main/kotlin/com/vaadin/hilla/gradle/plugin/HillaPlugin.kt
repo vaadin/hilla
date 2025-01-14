@@ -21,6 +21,7 @@ import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.internal.provider.DefaultListProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
@@ -53,6 +54,16 @@ public class HillaPlugin : Plugin<Project> {
 
             project.tasks.named("vaadinBuildFrontend") {
                 it.dependsOn("hillaConfigure")
+            }
+        }
+
+        // Configure Kotlin-specific tasks only if Kotlin JVM plugin is applied
+        project.plugins.withId("org.jetbrains.kotlin.jvm") {
+            project.tasks.named("compileKotlin").configure { task ->
+                val compilerOptions = task.javaClass.getMethod("getCompilerOptions").invoke(task)
+                val freeCompilerArgs = compilerOptions.javaClass.getMethod("getFreeCompilerArgs")
+                    .invoke(compilerOptions) as DefaultListProperty<String>
+                freeCompilerArgs.addAll(listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations"))
             }
         }
 
