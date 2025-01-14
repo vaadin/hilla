@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
@@ -12,13 +14,10 @@ import org.atmosphere.handler.AtmosphereHandlerAdapter;
 import org.atmosphere.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -28,10 +27,14 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
  */
 public class PushEndpoint extends AtmosphereHandlerAdapter {
 
-    @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
     private PushMessageHandler pushMessageHandler;
+
+    PushEndpoint(ObjectMapper objectMapper,
+            PushMessageHandler pushMessageHandler) {
+        this.objectMapper = objectMapper;
+        this.pushMessageHandler = pushMessageHandler;
+    }
 
     @Override
     public void onRequest(AtmosphereResource resource) throws IOException {

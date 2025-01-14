@@ -1,5 +1,5 @@
-import { expect } from '@esm-bundle/chai';
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
+import { expect } from 'chai';
 import sinon from 'sinon';
 import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, State } from '../src/FluxConnection.js';
 import type {
@@ -125,6 +125,7 @@ describe('@vaadin/hilla-frontend', () => {
       const msg: ClientErrorMessage = { '@type': 'error', id: '0', message: 'it failed' };
       emitMessage(msg);
       expect(onError).to.have.been.calledOnce;
+      expect(onError).to.have.been.calledWith('it failed');
     });
 
     it('should not deliver messages after completing', () => {

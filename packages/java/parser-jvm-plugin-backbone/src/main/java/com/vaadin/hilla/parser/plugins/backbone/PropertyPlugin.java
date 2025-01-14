@@ -24,7 +24,7 @@ import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
@@ -48,9 +48,9 @@ public final class PropertyPlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         if (!(nodeDependencies.getNode() instanceof EntityNode)) {
             return nodeDependencies;
         }
@@ -79,7 +79,7 @@ public final class PropertyPlugin
     }
 
     private Stream<JacksonPropertyModel> collectProperties(
-            @Nonnull ClassInfoModel model) {
+            @NonNull ClassInfoModel model) {
         var cls = Objects.requireNonNull(model).get();
 
         if (!(cls instanceof Class<?>)) {
@@ -141,6 +141,7 @@ public final class PropertyPlugin
         public Stream<JacksonPropertyModel> stream() {
             var properties = description.findProperties().stream()
                     .map(JacksonPropertyModel::of);
+            properties = filterPrivateProperties(properties);
             properties = filterSuperClassProperties(properties);
             properties = filterPropertiesWithIgnoredTypes(properties);
 
@@ -214,6 +215,12 @@ public final class PropertyPlugin
             // explicitly annotated ones should remain
             return properties.filter(property -> property.couldDeserialize()
                     || property.isExplicitlyIncluded());
+        }
+
+        private Stream<JacksonPropertyModel> filterPrivateProperties(
+                Stream<JacksonPropertyModel> properties) {
+            return properties.filter(
+                    property -> !property.getAssociatedTypes().isEmpty());
         }
 
         private Stream<JacksonPropertyModel> filterSuperClassProperties(

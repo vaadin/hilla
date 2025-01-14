@@ -1,11 +1,12 @@
 package com.vaadin.flow.connect;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.hilla.Nonnull;
 import jakarta.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.NonNull;
+
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.Endpoint;
 
 /**
  * Endpoint to verify Jackson annotations support.
@@ -25,13 +26,13 @@ public class AnnotatedEndpoint {
         private String defaultName = "value";
 
         @JsonProperty("customName")
-        @Nonnull
+        @NonNull
         public String getDefaultName() {
             return "value";
         }
 
         @JsonProperty("customName")
-        public void setDefaultName(@Nonnull String defaultName) {
+        public void setDefaultName(@NonNull String defaultName) {
             this.defaultName = defaultName;
         }
     }

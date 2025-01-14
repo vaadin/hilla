@@ -8,7 +8,8 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
-import jakarta.annotation.Nonnull;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import org.jspecify.annotations.NonNull;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -33,27 +34,27 @@ public class JsonValuePlugin
     public void exit(NodePath<?> nodePath) {
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public NodeDependencies scan(@Nonnull NodeDependencies nodeDependencies) {
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Node<?, ?> resolve(@Nonnull Node<?, ?> node,
-            @Nonnull NodePath<?> parentPath) {
-        if (node instanceof TypeSignatureNode typeSignatureNode) {
-            if (typeSignatureNode
-                    .getSource() instanceof ClassRefSignatureModel classRefSignatureModel) {
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> parentPath) {
+        if (node instanceof TypedNode typedNode) {
+            if (typedNode
+                    .getType() instanceof ClassRefSignatureModel classRefSignatureModel) {
                 var cls = (Class<?>) classRefSignatureModel.getClassInfo()
                         .get();
                 // Check if the class has the annotations which qualify for a
                 // value type. If so, replace the type with the corresponding
                 // value type.
-                Optional<TypeSignatureNode> valueNode = getValueType(cls)
+                Optional<Node<?, ?>> valueNode = getValueType(cls)
                         .map(SignatureModel::of).map(TypeSignatureNode::of);
-                return valueNode.orElse(typeSignatureNode);
+                return valueNode.orElse(node);
             }
         }
 
@@ -68,9 +69,10 @@ public class JsonValuePlugin
     private Optional<Class<?>> findValueType(Class<?> cls) {
         // First of all, we check that the `@JsonValue` annotation is
         // used on a method of the class.
-        var jsonValue = Arrays.stream(cls.getMethods())
+        Stream<Class<?>> candidates = Arrays.stream(cls.getMethods())
                 .filter(method -> method.isAnnotationPresent(JsonValue.class))
-                .map(Method::getReturnType).findAny();
+                .map(Method::getReturnType);
+        var jsonValue = candidates.findAny();
 
         // Then we check that the class has a `@JsonCreator` annotation
         // on a method or on a constructor. This is a basic check, we

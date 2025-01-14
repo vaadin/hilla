@@ -91,7 +91,7 @@ export class FluxConnection extends EventTarget {
   readonly #endpointInfos = new Map<string, EndpointInfo>();
   #nextId = 0;
   readonly #onCompleteCallbacks = new Map<string, () => void>();
-  readonly #onErrorCallbacks = new Map<string, () => void>();
+  readonly #onErrorCallbacks = new Map<string, (message: string) => void>();
   readonly #onNextCallbacks = new Map<string, (value: any) => void>();
   readonly #onStateChangeCallbacks = new Map<string, (event: FluxSubscriptionStateChangeEvent) => void>();
   readonly #statusOfSubscriptions = new Map<string, FluxSubscriptionState>();
@@ -165,7 +165,7 @@ export class FluxConnection extends EventTarget {
         this.#onCompleteCallbacks.set(id, callback);
         return hillaSubscription;
       },
-      onError: (callback: () => void): Subscription<any> => {
+      onError: (callback: (message: string) => void): Subscription<any> => {
         this.#onErrorCallbacks.set(id, callback);
         return hillaSubscription;
       },
@@ -296,7 +296,7 @@ export class FluxConnection extends EventTarget {
       } else {
         const callback = this.#onErrorCallbacks.get(id);
         if (callback) {
-          callback();
+          callback(message.message);
         }
         this.#removeSubscription(id);
         if (!callback) {

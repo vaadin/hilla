@@ -2,7 +2,7 @@ module com.vaadin.hilla.parser.plugins.backbone {
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
     requires io.github.classgraph;
-    requires jsr305;
+    requires org.jspecify;
     requires com.fasterxml.jackson.databind;
     requires com.vaadin.hilla.parser.utils;
     requires transitive com.vaadin.hilla.parser.core;

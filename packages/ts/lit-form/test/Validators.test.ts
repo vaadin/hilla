@@ -1,4 +1,4 @@
-import { assert } from '@esm-bundle/chai';
+import { assert } from 'chai';
 // API to test
 import {
   AssertFalse,
@@ -211,6 +211,9 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isTrue(validator.validate(-0.01));
       assert.isFalse(validator.validate(0));
       assert.isFalse(validator.validate(1));
+      assert.isTrue(validator.validate(undefined));
+      assert.isTrue(validator.validate(null));
+      assert.isTrue(validator.validate(''));
     });
 
     it('NegativeOrZero', () => {
@@ -221,6 +224,9 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isTrue(validator.validate(-0.01));
       assert.isTrue(validator.validate(0));
       assert.isFalse(validator.validate(1));
+      assert.isTrue(validator.validate(undefined));
+      assert.isTrue(validator.validate(null));
+      assert.isTrue(validator.validate(''));
     });
 
     it('Positive', () => {
@@ -231,6 +237,9 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isFalse(validator.validate(-0.01));
       assert.isFalse(validator.validate(0));
       assert.isTrue(validator.validate(0.01));
+      assert.isTrue(validator.validate(undefined));
+      assert.isTrue(validator.validate(null));
+      assert.isTrue(validator.validate(''));
     });
 
     it('PositiveOrZero', () => {
@@ -241,6 +250,9 @@ describe('@vaadin/hilla-lit-form', () => {
       assert.isFalse(validator.validate(-0.01));
       assert.isTrue(validator.validate(0));
       assert.isTrue(validator.validate(0.01));
+      assert.isTrue(validator.validate(undefined));
+      assert.isTrue(validator.validate(null));
+      assert.isTrue(validator.validate(''));
     });
 
     it('Size', () => {

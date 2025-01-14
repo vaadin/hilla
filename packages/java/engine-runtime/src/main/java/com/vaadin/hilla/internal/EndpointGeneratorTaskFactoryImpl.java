@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
+import com.vaadin.hilla.engine.EngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,13 +59,8 @@ public class EndpointGeneratorTaskFactoryImpl
             return new SkipTaskGenerateEndpoint();
         }
 
-        var nodeExecutable = buildTools(options).getNodeExecutable();
-
-        return new TaskGenerateEndpointImpl(options.getNpmFolder(),
-                options.getBuildDirectoryName(),
-                options.getFrontendGeneratedFolder(),
-                options.getClassFinder()::getResource,
-                options.isProductionMode(), nodeExecutable);
+        var engineConfiguration = configureFromOptions(options);
+        return new TaskGenerateEndpointImpl(engineConfiguration);
     }
 
     @Override
@@ -75,12 +71,8 @@ public class EndpointGeneratorTaskFactoryImpl
             return new SkipTaskGenerateOpenAPI();
         }
 
-        return new TaskGenerateOpenAPIImpl(options.getNpmFolder(),
-                options.getBuildDirectoryName(),
-                options.getFrontendGeneratedFolder(),
-                options.getClassFinder()::getResource,
-                options.getClassFinder().getClassLoader(),
-                options.isProductionMode());
+        var engineConfiguration = configureFromOptions(options);
+        return new TaskGenerateOpenAPIImpl(engineConfiguration);
     }
 
     private static class SkipTaskGenerateEndpoint
@@ -97,5 +89,15 @@ public class EndpointGeneratorTaskFactoryImpl
         public void execute() {
             LOGGER.debug("Skipping generating OpenAPI spec");
         }
+    }
+
+    private static EngineConfiguration configureFromOptions(Options options) {
+        return new EngineConfiguration.Builder()
+                .baseDir(options.getNpmFolder().toPath())
+                .buildDir(options.getBuildDirectoryName())
+                .outputDir(options.getFrontendGeneratedFolder().toPath())
+                .nodeCommand(buildTools(options).getNodeExecutable())
+                .productionMode(options.isProductionMode())
+                .withDefaultAnnotations().build();
     }
 }

@@ -7,7 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.MethodInfo;
 
@@ -21,11 +21,11 @@ public abstract class MethodInfoModel extends AnnotatedAbstractModel
     private List<TypeParameterModel> typeParameters;
 
     @Deprecated
-    public static MethodInfoModel of(@Nonnull MethodInfo origin) {
+    public static MethodInfoModel of(@NonNull MethodInfo origin) {
         return new MethodInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static MethodInfoModel of(@Nonnull Executable origin) {
+    public static MethodInfoModel of(@NonNull Executable origin) {
         return Objects.requireNonNull(origin) instanceof Constructor<?>
                 ? new MethodInfoReflectionModel.Constructor(
                         (Constructor<?>) origin)

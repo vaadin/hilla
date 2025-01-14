@@ -5,11 +5,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.parser.testutils.TestEngineConfigurationPathResolver;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.model.Build;
@@ -19,7 +18,7 @@ import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 /**
  * Base class for Engine Maven plugin tests. Delegates to
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class AbstractMojoTest {
     private final DelegateMojoTestCase testCase = new DelegateMojoTestCase();
     private Path buildDirectory;
-    private EngineConfiguration.Builder configurationBuilder;
+    private EngineConfiguration engineConfiguration;
     private Path outputDirectory;
     private MavenProject project;
     private Path temporaryDirectory;
@@ -52,29 +51,10 @@ public class AbstractMojoTest {
         // Maven project is not initialized on the mojo, setup a mock manually
         project = createMavenProject();
 
-        var configFilePath = getBuildDirectory()
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME);
-
-        // Load reference EngineConfiguration
-        Files.copy(
-                Path.of(Objects
-                        .requireNonNull(getClass().getResource(
-                                EngineConfiguration.DEFAULT_CONFIG_FILE_NAME))
-                        .toURI()),
-                configFilePath);
-
-        var config = TestEngineConfigurationPathResolver.resolve(
-                EngineConfiguration.load(configFilePath.toFile()),
-                temporaryDirectory);
-
-        assertNotNull(config, "expected reference "
-                + "EngineConfiguration to load from json");
-        configurationBuilder = new EngineConfiguration.Builder(config)
-                .baseDir(getTemporaryDirectory());
-
-        // Delete reference json file from temporary directory
-        Files.delete(getBuildDirectory()
-                .resolve(EngineConfiguration.DEFAULT_CONFIG_FILE_NAME));
+        engineConfiguration = new EngineConfiguration.Builder()
+                .baseDir(temporaryDirectory)
+                .browserCallableFinder(() -> List.of()).build();
+        EngineConfiguration.setDefault(engineConfiguration);
     }
 
     @AfterEach
@@ -94,7 +74,7 @@ public class AbstractMojoTest {
     }
 
     protected EngineConfiguration getEngineConfiguration() {
-        return configurationBuilder.create();
+        return engineConfiguration;
     }
 
     protected MavenProject getMavenProject() {

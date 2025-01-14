@@ -1,17 +1,18 @@
-import { expect, use } from '@esm-bundle/chai';
 import { renderHook } from '@testing-library/react';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
+import { expect, use } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { CountService, ListService } from '../crud.js';
-import { DataProvider } from '../src/data-provider.js';
 import {
   createDataProvider,
+  DataProvider,
   FixedSizeDataProvider,
   InfiniteDataProvider,
   useDataProvider,
   type ItemCounts,
 } from '../src/data-provider.js';
+import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
 import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
@@ -203,11 +204,15 @@ describe('@hilla/react-crud', () => {
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
       pageable = listSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false }] });
+      expect(pageable.sort).to.eql({
+        orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
+      });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
       pageable = listSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false }] });
+      expect(pageable.sort).to.eql({
+        orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
+      });
     });
 
     it('utilizes count from listAndCountService and call it only once', async () => {
@@ -308,11 +313,15 @@ describe('@hilla/react-crud', () => {
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
       pageable = listSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false }] });
+      expect(pageable.sort).to.eql({
+        orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
+      });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
       pageable = listSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false }] });
+      expect(pageable.sort).to.eql({
+        orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
+      });
     });
 
     it('passes filter to service', async () => {
@@ -438,11 +447,15 @@ describe('@hilla/react-crud', () => {
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
       pageable = listSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false }] });
+      expect(pageable.sort).to.eql({
+        orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
+      });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
       pageable = listSpy.lastCall.args[0];
-      expect(pageable.sort).to.eql({ orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false }] });
+      expect(pageable.sort).to.eql({
+        orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
+      });
     });
 
     it('passes filter to service', async () => {

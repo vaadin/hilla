@@ -44,6 +44,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * `replace` method instead.
    *
    * @param value - The new value.
+   * @returns An operation object that allows to perform additional actions.
    */
   set(value: T): Operation {
     const { parentClientSignalId } = this.server.config;
@@ -81,7 +82,8 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    *
    * @param callback - The function that is applied on the current value to
    *                   produce the new value.
-   * @returns An operation object that allows to perform additional actions, including cancellation.
+   * @returns An operation object that allows to perform additional actions,
+   *                   including cancellation.
    */
   update(callback: (value: T) => T): OperationSubscription {
     const newValue = callback(this.value);
@@ -111,7 +113,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     if (event.accepted || isSnapshotStateEvent<T>(event)) {
       this.#applyAcceptedEvent(event);
     } else {
-      reason = 'server rejected the operation';
+      reason = `Server rejected the operation with id '${event.id}'. See the server log for more details.`;
     }
     // `then` callbacks can be associated to the record or the event
     // it depends on the operation that was performed

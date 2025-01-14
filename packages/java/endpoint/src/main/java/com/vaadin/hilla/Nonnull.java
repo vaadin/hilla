@@ -28,9 +28,13 @@ import java.lang.annotation.Target;
  *
  * This annotation exists only for convenience because the traditional
  * `jakarta.annotation.Nonnull` annotation is not applicable to type parameters.
+ *
+ * @deprecated use the standardized {@link org.jspecify.annotations.NonNull}
+ *             instead
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_USE })
+@Deprecated(forRemoval = true)
 public @interface Nonnull {
 }

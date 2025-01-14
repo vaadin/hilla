@@ -1,4 +1,4 @@
-import { expect, use } from '@esm-bundle/chai';
+import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
