@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.vaadin.hilla.EndpointProperties;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
 import org.atmosphere.cpr.ApplicationConfig;
@@ -14,6 +16,7 @@ import org.atmosphere.cpr.ContainerInitializer;
 import org.atmosphere.interceptor.AtmosphereResourceLifecycleInterceptor;
 import org.atmosphere.interceptor.SuspendTrackerInterceptor;
 import org.atmosphere.util.SimpleBroadcaster;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -46,8 +49,10 @@ public class PushConfigurer {
     }
 
     @Bean
-    PushEndpoint pushEndpoint() {
-        return new PushEndpoint();
+    PushEndpoint pushEndpoint(
+            @Qualifier("hillaEndpointObjectMapper") ObjectMapper objectMapper,
+            PushMessageHandler pushMessageHandler) {
+        return new PushEndpoint(objectMapper, pushMessageHandler);
     }
 
     @Bean
