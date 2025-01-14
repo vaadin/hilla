@@ -42,13 +42,18 @@ public class HillaPlugin : Plugin<Project> {
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
         project.pluginManager.apply(VaadinPlugin::class.java)
 
-        project.tasks.apply {
-            register("hillaConfigure", EngineConfigureTask::class.java)
-            register("hillaGenerate", EngineGenerateTask::class.java)
-        }
+        // only register Hilla tasks in projects that use Spring Boot
+        if (project.plugins.hasPlugin("org.springframework.boot")) {
+            project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
 
-        project.tasks.named("vaadinBuildFrontend") {
-            it.dependsOn("hillaConfigure")
+            project.tasks.apply {
+                register("hillaConfigure", EngineConfigureTask::class.java)
+                register("hillaGenerate", EngineGenerateTask::class.java)
+            }
+
+            project.tasks.named("vaadinBuildFrontend") {
+                it.dependsOn("hillaConfigure")
+            }
         }
 
         project.tasks.withType(Jar::class.java) { task: Jar ->

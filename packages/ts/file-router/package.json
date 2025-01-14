@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.7.0-alpha3",
+  "version": "24.7.0-alpha6",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -57,37 +57,37 @@
     "access": "public"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18 || 19",
+    "react-dom": "18 || 19",
     "react-router": "^7"
   },
   "devDependencies": {
-    "@types/chai-as-promised": "^8.0.1",
+    "@types/chai-as-promised": "^7.1.8",
     "@types/chai-fs": "^2.0.5",
     "@types/chai-like": "^1.1.3",
     "@types/deep-equal-in-any-order": "^1.0.4",
     "@types/mocha": "^10.0.10",
-    "@types/sinon": "^17.0.3",
-    "@types/sinon-chai": "^4.0.0",
+    "@types/sinon": "^10.0.20",
+    "@types/sinon-chai": "^3.2.12",
     "chai": "^5.1.2",
-    "chai-as-promised": "^8.0.1",
+    "chai-as-promised": "^7.1.2",
     "chai-deep-equal-ignore-undefined": "^1.1.1",
     "chai-fs": "^2.0.0",
     "chai-like": "^1.1.3",
     "deep-equal-in-any-order": "^2.0.6",
-    "mocha": "^11.0.1",
-    "sinon": "^19.0.2",
-    "sinon-chai": "^4.0.0",
-    "type-fest": "^4.30.2"
+    "mocha": "^11.1.0",
+    "sinon": "^16.1.3",
+    "sinon-chai": "^3.7.0",
+    "type-fest": "^4.32.0"
   },
   "dependencies": {
     "@types/chai": "^5.0.1",
-    "@vaadin/hilla-generator-utils": "24.7.0-alpha3",
-    "@vaadin/hilla-react-auth": "24.7.0-alpha3",
-    "@vaadin/hilla-react-signals": "24.7.0-alpha3",
+    "@vaadin/hilla-generator-utils": "24.7.0-alpha6",
+    "@vaadin/hilla-react-auth": "24.7.0-alpha6",
+    "@vaadin/hilla-react-signals": "24.7.0-alpha6",
     "c8": "^10.1.3",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "rollup": "^4.21.0",
-    "typescript": "5.7.2"
+    "typescript": "5.7.3"
   }
 }
