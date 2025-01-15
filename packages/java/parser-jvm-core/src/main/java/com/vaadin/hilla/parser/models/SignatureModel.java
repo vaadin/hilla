@@ -8,7 +8,7 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.TypeVariable;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.BaseTypeSignature;
@@ -21,7 +21,7 @@ import io.github.classgraph.TypeVariableSignature;
 public interface SignatureModel
         extends Model, SpecializedModel, AnnotatedModel {
     @Deprecated
-    static SignatureModel of(@Nonnull HierarchicalTypeSignature signature) {
+    static SignatureModel of(@NonNull HierarchicalTypeSignature signature) {
         if (signature instanceof BaseTypeSignature) {
             return BaseSignatureModel.of((BaseTypeSignature) signature);
         } else if (signature instanceof ArrayTypeSignature) {
@@ -37,7 +37,7 @@ public interface SignatureModel
         }
     }
 
-    static SignatureModel of(@Nonnull AnnotatedElement signature) {
+    static SignatureModel of(@NonNull AnnotatedElement signature) {
         if (signature instanceof AnnotatedParameterizedType) {
             return ClassRefSignatureModel
                     .of((AnnotatedParameterizedType) signature);

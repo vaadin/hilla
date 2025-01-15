@@ -17,20 +17,26 @@ package com.vaadin.hilla;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import com.vaadin.hilla.engine.EngineConfiguration;
-import com.vaadin.hilla.engine.GeneratorProcessor;
-import com.vaadin.hilla.engine.ParserProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.FrontendTools;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.GeneratorProcessor;
+import com.vaadin.hilla.engine.ParserProcessor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * Handles (re)generation of the TypeScript code.
@@ -43,11 +49,10 @@ public class EndpointCodeGenerator {
 
     private final EndpointController endpointController;
     private final VaadinContext context;
-    private Path buildDirectory;
 
     private ApplicationConfiguration configuration;
-    private String nodeExecutable;
     private Set<String> classesUsedInOpenApi = null;
+    private EngineConfiguration engineConfiguration;
 
     /**
      * Creates the singleton.
@@ -74,71 +79,84 @@ public class EndpointCodeGenerator {
     /**
      * Re-generates the endpoint TypeScript and re-registers the endpoints in
      * Java.
-     *
-     * @throws IOException
-     *             if something went wrong
      */
-    public void update() throws IOException {
+    public void update() {
         initIfNeeded();
         if (configuration.isProductionMode()) {
             throw new IllegalStateException(
                     "This method is not available in production mode");
         }
 
-        EngineConfiguration engineConfiguration = EngineConfiguration
-                .loadDirectory(buildDirectory);
-        ParserProcessor parser = new ParserProcessor(engineConfiguration,
-                getClass().getClassLoader(), false);
-        parser.process();
-        GeneratorProcessor generator = new GeneratorProcessor(
-                engineConfiguration, nodeExecutable, false);
-        generator.process();
+        ApplicationContextProvider.runOnContext(applicationContext -> {
+            List<Class<?>> browserCallables = findBrowserCallables(
+                    engineConfiguration, applicationContext);
+            ParserProcessor parser = new ParserProcessor(engineConfiguration);
+            parser.process(browserCallables);
 
-        OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
-                .ifPresent(openApiPath -> {
-                    try {
-                        this.endpointController
-                                .registerEndpoints(openApiPath.toUri().toURL());
-                    } catch (IOException e) {
-                        LOGGER.error(
-                                "Endpoints could not be registered due to an exception: ",
-                                e);
-                    }
-                });
+            GeneratorProcessor generator = new GeneratorProcessor(
+                    engineConfiguration);
+            generator.process();
+            this.endpointController.registerEndpoints();
+        });
+    }
+
+    /**
+     * Finds all beans in the application context that have a browser callable
+     * annotation.
+     *
+     * @param engineConfiguration
+     *            the engine configuration that provides the annotations to
+     *            search for
+     * @param applicationContext
+     *            the application context to search for beans in
+     * @return a list of classes that qualify as browser callables
+     */
+    public static List<Class<?>> findBrowserCallables(
+            EngineConfiguration engineConfiguration,
+            ApplicationContext applicationContext) {
+        return engineConfiguration.getEndpointAnnotations().stream()
+                .map(applicationContext::getBeansWithAnnotation)
+                .map(Map::values).flatMap(Collection::stream)
+                // maps to original class when proxies are found
+                // (also converts to class in all cases)
+                .map(AopProxyUtils::ultimateTargetClass).distinct()
+                .collect(Collectors.toList());
     }
 
     private void initIfNeeded() {
         if (configuration == null) {
             configuration = ApplicationConfiguration.get(context);
 
-            Path projectFolder = configuration.getProjectFolder().toPath();
-            buildDirectory = projectFolder
-                    .resolve(configuration.getBuildFolder());
-
-            FrontendTools tools = new FrontendTools(configuration,
+            var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());
-            nodeExecutable = tools.getNodeBinary();
+            engineConfiguration = new EngineConfiguration.Builder()
+                    .baseDir(configuration.getProjectFolder().toPath())
+                    .buildDir(configuration.getBuildFolder())
+                    .outputDir(
+                            FrontendUtils
+                                    .getFrontendGeneratedFolder(
+                                            configuration.getFrontendFolder())
+                                    .toPath())
+                    .productionMode(false).withDefaultAnnotations()
+                    .nodeCommand(frontendTools.getNodeBinary()).build();
         }
     }
 
     public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            OpenAPIUtil.getCurrentOpenAPIPath(buildDirectory, false)
-                    .ifPresent(openApiPath -> {
-                        if (openApiPath.toFile().exists()) {
-                            try {
-                                classesUsedInOpenApi = OpenAPIUtil
-                                        .findOpenApiClasses(
-                                                Files.readString(openApiPath));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            LOGGER.debug(
-                                    "No OpenAPI file is available yet ...");
-                        }
-                    });
+            var conf = EngineConfiguration.getDefault();
+            var openApiPath = conf.getOpenAPIFile();
+            if (openApiPath != null && openApiPath.toFile().exists()) {
+                try {
+                    classesUsedInOpenApi = OpenAPIUtil
+                            .findOpenApiClasses(Files.readString(openApiPath));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                LOGGER.debug("No OpenAPI file is available yet ...");
+            }
         }
         return Optional.ofNullable(classesUsedInOpenApi);
     }

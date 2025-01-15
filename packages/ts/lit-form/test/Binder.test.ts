@@ -5,7 +5,7 @@ import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 // API to test
-import { Binder, type BinderConfiguration } from '../src/index.js';
+import { Binder, type BinderConfiguration, m } from '../src/index.js';
 import {
   type Employee,
   EmployeeModel,
@@ -300,6 +300,21 @@ describe('@vaadin/hilla-lit-form', () => {
         assert.isUndefined(binder.value.supervisor);
         assert.deepEqual(binder.value, expectedEmptyEmployee);
         assert.isTrue('supervisor' in binder.value);
+      });
+
+      it('should support optional array', async () => {
+        const arrayBinderNode = binder.for(binder.model.colleagues);
+        assert.isUndefined(arrayBinderNode.value);
+        assert.isUndefined(arrayBinderNode.defaultValue);
+
+        arrayBinderNode.value = [EmployeeModel.createEmptyValue()];
+        const [itemModel] = m.items(arrayBinderNode.model);
+        assert.deepEqual(binder.for(itemModel).value, expectedEmptyEmployee);
+        assert.deepEqual(arrayBinderNode.defaultValue, []);
+        assert.isTrue(arrayBinderNode.dirty);
+
+        await binder.validate();
+        assert.isFalse(binder.invalid);
       });
 
       it('should initialize parent optional on child binderNode access', () => {

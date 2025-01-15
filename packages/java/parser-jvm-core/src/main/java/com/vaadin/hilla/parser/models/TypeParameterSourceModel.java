@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.utils.Streams;
 
@@ -45,7 +45,7 @@ final class TypeParameterSourceModel extends TypeParameterModel
                 .distinct().collect(Collectors.toList());
     }
 
-    @Nonnull
+    @NonNull
     private SignatureModel getClassBoundSignature() {
         // FIXME: param class bound is sometimes null and sometimes Object.
         // Possibly a bug in ClassGraph. Use Object to align with reflection.

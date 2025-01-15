@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-form",
-  "version": "24.7.0-alpha3",
+  "version": "24.7.0-alpha6",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -46,11 +46,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.7.0-alpha3"
+    "@vaadin/hilla-lit-form": "24.7.0-alpha6"
   },
   "peerDependencies": {
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "18 || 19",
+    "react-dom": "18 || 19"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
@@ -60,7 +60,7 @@
     "@types/chai-as-promised": "^7.1.8",
     "@types/chai-dom": "^1.11.3",
     "@types/mocha": "^10.0.10",
-    "@types/react": "^18.3.17",
+    "@types/react": "^18.3.18",
     "@types/react-dom": "^18",
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
@@ -70,6 +70,6 @@
     "chai-dom": "^1.12.0",
     "sinon": "^16.1.3",
     "sinon-chai": "^3.7.0",
-    "typescript": "5.7.2"
+    "typescript": "5.7.3"
   }
 }

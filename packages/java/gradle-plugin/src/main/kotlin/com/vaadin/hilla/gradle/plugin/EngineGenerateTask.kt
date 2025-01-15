@@ -18,15 +18,12 @@ package com.vaadin.hilla.gradle.plugin
 import com.vaadin.gradle.VaadinFlowPluginExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import java.io.IOException
-import java.net.URL
-import java.net.URLClassLoader
-import java.nio.file.Path
-import java.util.*
 
 import com.vaadin.hilla.engine.*
+import org.gradle.api.tasks.*
+
 /**
  * Task that generates the endpoints.ts and model TS classes
  * needed for calling the backend in a typesafe manner.
@@ -36,8 +33,8 @@ public open class EngineGenerateTask : DefaultTask() {
         group = "Vaadin"
         description = "Hilla Generate Task"
 
-        // we need the build/hilla-engine-configuration.json and the compiled classes:
-        dependsOn("classes", "hillaConfigure")
+        // we need the compiled classes:
+        dependsOn("classes")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
@@ -47,39 +44,34 @@ public open class EngineGenerateTask : DefaultTask() {
         }
     }
 
+    @Input
+    public val groupId: String = project.group.toString()
+
+    @Input
+    public val artifactId: String = project.name
+
+    @Input
+    @Optional
+    public var mainClass: String? = project.findProperty("mainClass") as String?
+
     @TaskAction
     public fun engineGenerate() {
-        val extension: EngineProjectExtension = EngineProjectExtension.get(project)
-        logger.info("Running the engineGenerate task with effective Hilla configuration $extension")
         val vaadinExtension = VaadinFlowPluginExtension.get(project)
-        logger.info("Running the engineGenerate task with effective Vaadin configuration $extension")
-
-        val baseDir: Path = project.projectDir.toPath()
-        val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
+        logger.info("Running the engineGenerate task with effective Vaadin configuration $vaadinExtension")
 
         try {
-            val conf: EngineConfiguration = Objects.requireNonNull(
-                EngineConfiguration.loadDirectory(buildDir))
+            val conf: EngineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
 
-            val urls = conf.classPath
-                .stream().map<URL> { classPathItem: Path ->
-                    classPathItem.toUri().toURL()
-                }
-                .toList()
+            val parserProcessor = ParserProcessor(conf)
+            val generatorProcessor = GeneratorProcessor(conf)
 
-            val classLoader = URLClassLoader(
-                urls.toTypedArray(),
-                javaClass.classLoader
-            )
-            val isProductionMode = vaadinExtension.productionMode.getOrElse(false);
-            val parserProcessor = ParserProcessor(conf, classLoader, isProductionMode)
-            val generatorProcessor = GeneratorProcessor(conf, extension.nodeCommand, isProductionMode)
-
-            parserProcessor.process()
+            val endpoints = conf.browserCallableFinder.findBrowserCallables();
+            parserProcessor.process(endpoints)
             generatorProcessor.process()
-
         } catch (e: IOException) {
-            throw GradleException("Loading saved configuration failed", e)
+            throw GradleException("Endpoint collection failed", e)
+        } catch (e: InterruptedException) {
+            throw GradleException("Endpoint collection failed", e)
         } catch (e: GeneratorException) {
             throw GradleException("Execution failed", e)
         } catch (e: ParserException) {

@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +23,17 @@ import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 public class NodeTasksEndpointTest extends TaskTest {
     private Options options;
 
-    @Endpoint
     public static class ConnectEndpointsForTesting {
     }
 
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp()
+            throws IOException, NoSuchFieldException, IllegalAccessException {
         Lookup mockLookup = Mockito.mock(Lookup.class);
         EndpointUsageDetector endpointUsageDetector = Mockito
                 .mock(EndpointUsageDetector.class);
@@ -81,6 +84,9 @@ public class NodeTasksEndpointTest extends TaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
+        var engineConfiguration = new EngineConfiguration.Builder()
+                .browserCallableFinder(() -> List.of(MyEndpoint.class)).build();
+        EngineConfiguration.setDefault(engineConfiguration);
 
         new NodeTasks(options).execute();
         assertEndpointFilesInProductionMode(true);
@@ -89,7 +95,6 @@ public class NodeTasksEndpointTest extends TaskTest {
     @Test
     public void should_GenerateEndpointFilesInDevServerTask() throws Exception {
         options = options.withRunNpmInstall(true);
-
         new NodeTasks(options).execute();
         assertEndpointFiles(true);
     }

@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 import io.github.classgraph.ClassInfo;
 
@@ -209,11 +209,11 @@ public abstract class ClassInfoModel extends AnnotatedAbstractModel
     }
 
     @Deprecated
-    public static ClassInfoModel of(@Nonnull ClassInfo origin) {
+    public static ClassInfoModel of(@NonNull ClassInfo origin) {
         return new ClassInfoSourceModel(Objects.requireNonNull(origin));
     }
 
-    public static ClassInfoModel of(@Nonnull Class<?> origin) {
+    public static ClassInfoModel of(@NonNull Class<?> origin) {
         return new ClassInfoReflectionModel(Objects.requireNonNull(origin));
     }
 
