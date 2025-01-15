@@ -1011,6 +1011,67 @@ describe('@vaadin/hilla-lit-form', () => {
         });
       });
 
+      describe('Event listeners cleanup', () => {
+        function renderElement(elementName: string) {
+          const tag = unsafeStatic(elementName);
+          render(html`<${tag} />`, div);
+          return div.firstElementChild as HTMLElement;
+        }
+
+        it('should remove event standard listeners for <input>', () => {
+          const inputHandler = () => {};
+          const changeHandler = () => {};
+          const element: HTMLElement = renderElement('input');
+          const addEventListenerSpy = sinon.spy(element, 'addEventListener');
+          const removeEventListenerSpy = sinon.spy(element, 'removeEventListener');
+
+          const strategy = binder.getFieldStrategy(element, binder.model.fieldString);
+          strategy.onInput = inputHandler;
+          strategy.onChange = changeHandler;
+
+          expect(addEventListenerSpy).to.be.calledWith('input', inputHandler);
+          expect(addEventListenerSpy).to.be.calledWith('change', changeHandler);
+
+          strategy.onInput = undefined;
+          strategy.onChange = undefined;
+
+          expect(removeEventListenerSpy).to.be.calledWith('input', inputHandler);
+          expect(removeEventListenerSpy).to.be.calledWith('change', changeHandler);
+        });
+
+        it('should remove event standard listeners for <input> on removeEventListeners()', () => {
+          const inputHandler = () => {};
+          const changeHandler = () => {};
+          const element: HTMLElement = renderElement('input');
+          const removeEventListenerSpy = sinon.spy(element, 'removeEventListener');
+
+          const strategy = binder.getFieldStrategy(element, binder.model.fieldString);
+          strategy.onInput = inputHandler;
+          strategy.onChange = changeHandler;
+
+          strategy.removeEventListeners();
+
+          expect(removeEventListenerSpy).to.be.calledWith('input', inputHandler);
+          expect(removeEventListenerSpy).to.be.calledWith('change', changeHandler);
+        });
+
+        it('should remove custom event listeners for <vaadin-text-field> on removeEventListeners()', () => {
+          const element: HTMLElement = renderElement('mock-text-field');
+          const addEventListenerSpy = sinon.spy(element, 'addEventListener');
+          const removeEventListenerSpy = sinon.spy(element, 'removeEventListener');
+
+          const strategy = binder.getFieldStrategy(element, binder.model.fieldString);
+
+          expect(addEventListenerSpy).to.be.calledWith('validated');
+          expect(addEventListenerSpy).to.be.calledWith('unparsable-change');
+
+          strategy.removeEventListeners();
+
+          expect(removeEventListenerSpy).to.be.calledWith('validated');
+          expect(removeEventListenerSpy).to.be.calledWith('unparsable-change');
+        });
+      });
+
       describe('Dynamic strategy', () => {
         function renderElement<T extends HTMLElement>(tag: string, renderModel: AbstractModel): T {
           const tagName = unsafeStatic(tag);
