@@ -292,22 +292,6 @@ export default class SignalProcessor {
     }
   }
 
-  /*
-  static #createDefaultValueParameter(returnType: ts.TypeNode) {
-    const alias = createFullyUniqueIdentifier('defaultValue');
-    const bindingPattern = ts.factory.createObjectBindingPattern([
-      ts.factory.createBindingElement(undefined, ts.factory.createIdentifier('defaultValue'), alias, undefined),
-    ]);
-    const paramType = ts.factory.createTypeLiteralNode([
-      ts.factory.createPropertySignature(undefined, ts.factory.createIdentifier('defaultValue'), undefined, returnType),
-    ]);
-    // Return both the alias and the full parameter
-    return {
-      alias,
-      param: ts.factory.createParameterDeclaration(undefined, undefined, bindingPattern, undefined, paramType),
-    };
-  }*/
-
   #replaceSignalImport(method: FunctionDeclaration): Identifier {
     const { imports } = this.#dependencyManager;
 
