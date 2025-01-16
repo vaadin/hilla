@@ -1,5 +1,6 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
+import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
@@ -64,7 +65,7 @@ export default class SignalProcessor {
             if (!isCollectionSignal) {
               const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
               if (defaultValueType) {
-                const { modelName, createEmptyValueExpression, param } =
+                const { entityName, modelName, modelNameUniqueId, createEmptyValueExpression, param } =
                   SignalProcessor.#createDefaultValueParameter(defaultValueType);
                 initialValue = ts.factory.createBinaryExpression(
                   ts.factory.createPropertyAccessChain(
@@ -76,6 +77,7 @@ export default class SignalProcessor {
                   createEmptyValueExpression,
                 );
                 filteredParams.push(param);
+                SignalProcessor.#addModelImport(entityName, modelName, modelNameUniqueId, imports);
               }
             }
           }
@@ -181,10 +183,14 @@ export default class SignalProcessor {
     }
 
     let emptyValueGeneratorResult: {
+      entityName: string | undefined;
       modelName: string | undefined;
+      modelNameUniqueId: ts.Identifier | undefined;
       callExpression: ts.CallExpression | ts.Identifier;
     } = {
+      entityName: undefined,
       modelName: undefined,
+      modelNameUniqueId: undefined,
       callExpression: ts.factory.createIdentifier('undefined'),
     };
 
@@ -193,7 +199,9 @@ export default class SignalProcessor {
     }
     // Return the model name that is needed for the imports along with the parameter and empty value creation expression
     return {
+      entityName: emptyValueGeneratorResult.entityName,
       modelName: emptyValueGeneratorResult.modelName,
+      modelNameUniqueId: emptyValueGeneratorResult.modelNameUniqueId,
       createEmptyValueExpression: emptyValueGeneratorResult.callExpression,
       param: ts.factory.createParameterDeclaration(
         undefined,
@@ -207,6 +215,7 @@ export default class SignalProcessor {
 
   static #createEmptyValueGeneratorExpression(returnType: ts.TypeNode) {
     let modelName = '';
+    let entityName: string | undefined;
     const typeNodeObject = returnType as ts.UnionTypeNode;
     switch (typeNodeObject.types[0].kind) {
       case ts.SyntaxKind.StringKeyword:
@@ -218,21 +227,69 @@ export default class SignalProcessor {
       case ts.SyntaxKind.BooleanKeyword:
         modelName = 'BooleanModel';
         break;
-      case ts.SyntaxKind.ArrayType: // for [] but doesn't work for Array<T>
+      case ts.SyntaxKind.ArrayType: // check whether this is supported at all!
         modelName = 'ArrayModel';
         break;
       default:
-        modelName = 'ObjectModel';
+        if (ts.isTypeReferenceNode(typeNodeObject.types[0])) {
+          const typeIdentifier = typeNodeObject.types[0].typeName;
+          if (ts.isIdentifier(typeIdentifier)) {
+            entityName = typeIdentifier.text;
+            modelName = `${entityName}Model`;
+          }
+        }
     }
+    const modelNameUniqueId = createFullyUniqueIdentifier(modelName);
     const callExpression = ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier(modelName), 'createEmptyValue'),
+      ts.factory.createPropertyAccessExpression(modelNameUniqueId, 'createEmptyValue'),
       undefined,
       [],
     );
     return {
+      entityName,
       modelName,
+      modelNameUniqueId,
       callExpression,
     };
+  }
+
+  static #addModelImport(
+    entityName: string | undefined,
+    modelName: string | undefined,
+    modelNameUniqueId: ts.Identifier | undefined,
+    imports: DependencyManager['imports'],
+  ) {
+    if (modelName === undefined) {
+      return;
+    }
+    if (primitiveModels.includes(modelName)) {
+      const importedModel = imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName);
+      if (importedModel === undefined) {
+        imports.named.add('@vaadin/hilla-lit-form', modelName, false, modelNameUniqueId);
+      }
+    } else {
+      SignalProcessor.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!, imports);
+    }
+  }
+
+  static #addObjectModelImport(
+    entityName: string,
+    modelName: string,
+    modelNameUniqueId: ts.Identifier,
+    imports: DependencyManager['imports'],
+  ) {
+    const entityImport = imports.default
+      .iter()
+      .map(([path]) => path)
+      .find((path) => path.startsWith('./') && path.endsWith(`${entityName}.js`));
+    if (entityImport === undefined) {
+      throw new Error(`Import for Entity '${entityName}' not found`);
+    }
+    const entityModelImportPath = entityImport.replace(entityName, modelName);
+    const importedModel = imports.default.paths().find((path) => path === entityModelImportPath);
+    if (importedModel === undefined) {
+      imports.default.add(entityModelImportPath, modelName, false, modelNameUniqueId);
+    }
   }
 
   /*
