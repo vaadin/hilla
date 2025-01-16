@@ -1,6 +1,5 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
-import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
@@ -17,6 +16,8 @@ const INITIAL_VALUE = '$INITIAL_VALUE$';
 const signals = ['NumberSignal', 'ValueSignal', 'ListSignal'];
 const genericSignals = ['ValueSignal', 'ListSignal'];
 const collectionSignals = ['ListSignal'];
+
+const primitiveModels = ['StringModel', 'NumberModel', 'BooleanModel', 'ArrayModel'];
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -48,7 +49,7 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
-          let initialValue: ts.Expression = signalId.text.startsWith('NumberSignal')
+          let initialValue: ts.CallExpression | ts.Expression | ts.Identifier = signalId.text.startsWith('NumberSignal')
             ? ts.factory.createNumericLiteral('0')
             : ts.factory.createIdentifier('undefined');
           const filteredParams = tsNode.parameters.filter(
@@ -63,8 +64,17 @@ export default class SignalProcessor {
             if (!isCollectionSignal) {
               const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
               if (defaultValueType) {
-                const { alias, param } = SignalProcessor.#createDefaultValueParameter(defaultValueType);
-                initialValue = alias;
+                const { modelName, createEmptyValueExpression, param } =
+                  SignalProcessor.#createDefaultValueParameter(defaultValueType);
+                initialValue = ts.factory.createBinaryExpression(
+                  ts.factory.createPropertyAccessChain(
+                    ts.factory.createIdentifier('options'),
+                    ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+                    ts.factory.createIdentifier('defaultValue'),
+                  ),
+                  ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+                  createEmptyValueExpression,
+                );
                 filteredParams.push(param);
               }
             }
@@ -149,6 +159,83 @@ export default class SignalProcessor {
     return undefined;
   }
 
+  static #createDefaultValueParameter(defaultValueType: ts.TypeNode) {
+    const paramType = ts.factory.createTypeLiteralNode([
+      ts.factory.createPropertySignature(
+        undefined,
+        ts.factory.createIdentifier('defaultValue'),
+        undefined,
+        defaultValueType,
+      ),
+    ]);
+
+    let undefinedDefaultValue: ts.Identifier | undefined;
+
+    if (
+      ts.isUnionTypeNode(defaultValueType) &&
+      defaultValueType.types.length &&
+      defaultValueType.types.length > 1 &&
+      defaultValueType.types.map((t) => t.kind).includes(ts.SyntaxKind.UndefinedKeyword)
+    ) {
+      undefinedDefaultValue = ts.factory.createIdentifier('undefined');
+    }
+
+    let emptyValueGeneratorResult: {
+      modelName: string | undefined;
+      callExpression: ts.CallExpression | ts.Identifier;
+    } = {
+      modelName: undefined,
+      callExpression: ts.factory.createIdentifier('undefined'),
+    };
+
+    if (undefinedDefaultValue === undefined) {
+      emptyValueGeneratorResult = SignalProcessor.#createEmptyValueGeneratorExpression(defaultValueType);
+    }
+    // Return the model name that is needed for the imports along with the parameter and empty value creation expression
+    return {
+      modelName: emptyValueGeneratorResult.modelName,
+      createEmptyValueExpression: emptyValueGeneratorResult.callExpression,
+      param: ts.factory.createParameterDeclaration(
+        undefined,
+        undefined,
+        'options',
+        ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+        paramType,
+      ),
+    };
+  }
+
+  static #createEmptyValueGeneratorExpression(returnType: ts.TypeNode) {
+    let modelName = '';
+    const typeNodeObject = returnType as ts.UnionTypeNode;
+    switch (typeNodeObject.types[0].kind) {
+      case ts.SyntaxKind.StringKeyword:
+        modelName = 'StringModel';
+        break;
+      case ts.SyntaxKind.NumberKeyword:
+        modelName = 'NumberModel';
+        break;
+      case ts.SyntaxKind.BooleanKeyword:
+        modelName = 'BooleanModel';
+        break;
+      case ts.SyntaxKind.ArrayType: // for [] but doesn't work for Array<T>
+        modelName = 'ArrayModel';
+        break;
+      default:
+        modelName = 'ObjectModel';
+    }
+    const callExpression = ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(ts.factory.createIdentifier(modelName), 'createEmptyValue'),
+      undefined,
+      [],
+    );
+    return {
+      modelName,
+      callExpression,
+    };
+  }
+
+  /*
   static #createDefaultValueParameter(returnType: ts.TypeNode) {
     const alias = createFullyUniqueIdentifier('defaultValue');
     const bindingPattern = ts.factory.createObjectBindingPattern([
@@ -162,7 +249,7 @@ export default class SignalProcessor {
       alias,
       param: ts.factory.createParameterDeclaration(undefined, undefined, bindingPattern, undefined, paramType),
     };
-  }
+  }*/
 
   #replaceSignalImport(method: FunctionDeclaration): Identifier {
     const { imports } = this.#dependencyManager;

@@ -22,6 +22,10 @@
     {
       "name" : "PersonService",
       "x-class-name" : "com.github.taefi.services.PersonService"
+    },
+    {
+      "name" : "NameSignalService",
+      "x-class-name" : "com.github.taefi.services.NameSignalService"
     }
   ],
   "paths" : {
@@ -163,6 +167,38 @@
                       "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
                     }
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/NameSignalService/name" : {
+      "post" : {
+        "tags" : [
+          "NameSignalService"
+        ],
+        "operationId" : "NameSignalService_name_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "string",
+                        "x-java-type" : "java.lang.String"
+                      }
+                    ]
+                  }
                 }
               }
             }
