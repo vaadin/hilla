@@ -51,6 +51,12 @@ class NumberOutput extends HTMLElement {
 }
 customElements.define('number-output', NumberOutput);
 
+class MockDatePickerElement extends HTMLElement {
+  // pretend it’s a Vaadin component to use VaadinFieldStrategy
+  static readonly version = '0.0.0';
+}
+customElements.define('mock-date-picker', MockDatePickerElement);
+
 @customElement('order-view')
 class OrderView extends LitElement {
   static override readonly styles = css`
@@ -104,7 +110,7 @@ class OrderView extends LitElement {
       <input id="notes" ...="${field(notes)}" />
       <input id="fullName" ...="${field(fullName)}" />
       <input id="nickName" ...="${field(nickName)}" />
-      <vaadin-date-picker id="dateStart" ...="${field(dateStart)}" />
+      <mock-date-picker id="dateStart" ...="${field(dateStart)}" />
       <button id="add" @click=${() => this.binder.for(products).appendItem()}>+</button>
       ${repeat(
         products,
@@ -596,14 +602,24 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(orderView.notes).to.not.have.attribute('invalid');
       });
 
-      it(`should validate field on input after first visit`, async () => {
+      it(`should not validate field on input after first visit`, async () => {
         orderView.notes.value = 'foo';
         await fireEvent(orderView.notes, 'blur');
         expect(orderView.notes).to.not.have.attribute('invalid');
 
         orderView.notes.value = '';
         await fireEvent(orderView.notes, 'input');
+        expect(orderView.notes).to.not.have.attribute('invalid');
+      });
+
+      it(`should revalidate field on input after invalid change`, async () => {
+        orderView.notes.value = '';
+        await fireEvent(orderView.notes, 'change');
         expect(orderView.notes).to.have.attribute('invalid');
+
+        orderView.notes.value = 'foo';
+        await fireEvent(orderView.notes, 'input');
+        expect(orderView.notes).to.not.have.attribute('invalid');
       });
 
       it(`should validate fields on submit`, async () => {
@@ -738,6 +754,32 @@ describe('@vaadin/hilla-lit-form', () => {
         }
       });
 
+      it('should display server validation error for product description', async () => {
+        binder.for(binder.model.customer.fullName).value = 'foobar';
+        binder.for(binder.model.notes).value = 'whatever';
+        await fireEvent(orderView.add, 'click');
+        const productModel = [...binder.model.products][0].model;
+        binder.for(productModel.description).value = 'foobar';
+        binder.for(productModel.price).value = 10;
+        const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
+        try {
+          await binder.submitTo(() => {
+            requestUpdateSpy.resetHistory();
+            throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
+              new ValidationErrorData('Invalid description', 'products[0].description', 'Invalid description'),
+            ]);
+          });
+          expect.fail();
+        } catch (error) {
+          sinon.assert.calledOnce(requestUpdateSpy);
+          await orderView.updateComplete;
+          const binderInArray = binder.for([...binder.model.products][0].model.description);
+          expect(binderInArray.invalid).to.be.true;
+          expect(binderInArray.ownErrors[0].message).to.equal('Invalid description');
+          expect(binderInArray.ownErrors[0].validatorMessage).to.equal('Invalid description');
+        }
+      });
+
       it('should display submitting state during submission', async () => {
         binder.for(binder.model.customer.fullName).value = 'Jane Doe';
         binder.for(binder.model.notes).value = 'foo';
@@ -849,6 +891,25 @@ describe('@vaadin/hilla-lit-form', () => {
 
         errors = await binder.validate();
         expect(errors).to.have.length(0);
+      });
+
+      it('should track unparsable-change event and fail validation', async () => {
+        const value = binder.defaultValue;
+        value.customer.fullName = 'Jane Doe';
+        value.notes = '42';
+        value.total = 1;
+        value.priority = 0;
+        value.dateStart = '02-11-2099';
+        binder.value = value;
+        await orderView.updateComplete;
+
+        // Simulate bad user date input with unparsable-change event
+        orderView.dateStart.value = 'not a date';
+        await fireEvent(orderView.dateStart, 'unparsable-change');
+
+        const errors = await binder.validate();
+        expect(errors).to.have.length(1);
+        expect(errors[0]).to.have.property('property', 'dateStart');
       });
     });
 

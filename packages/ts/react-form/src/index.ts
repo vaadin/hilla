@@ -91,9 +91,9 @@ type FieldState<T = unknown> = {
   errorMessage: string;
   strategy?: FieldStrategy<T>;
   element?: HTMLElement;
-  changeBlurHandler(): void;
-  updateValue(): void;
-  markVisited(): void;
+  inputHandler(): void;
+  changeHandler(): void;
+  blurHandler(): void;
   ref(element: HTMLElement | null): void;
 };
 
@@ -146,21 +146,32 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 
       if (!fieldState) {
         fieldState = {
+          changeHandler() {
+            fieldState!.inputHandler();
+            n.validate().catch(() => {});
+          },
           element: undefined,
           errorMessage: '',
-          invalid: false,
-          changeBlurHandler() {
-            fieldState!.updateValue();
-            fieldState!.markVisited();
+          inputHandler() {
+            if (fieldState!.strategy) {
+              // Remove invalid flag, so that .checkValidity() in Vaadin Components
+              // does not interfere with errors from Hilla.
+              fieldState!.strategy.invalid = false;
+              // When bad input is detected, skip reading new value in binder state
+              fieldState!.strategy.checkValidity();
+              n[_validity] = fieldState!.strategy.validity;
+              n.value = convertFieldValue(model, fieldState!.strategy.value);
+            }
           },
-          markVisited() {
+          invalid: false,
+          blurHandler() {
+            fieldState!.inputHandler();
+            n.validate().catch(() => {});
             n.visited = true;
           },
           ref(element: HTMLElement | null) {
             if (!element) {
-              fieldState!.element?.removeEventListener('change', fieldState!.changeBlurHandler);
-              fieldState!.element?.removeEventListener('input', fieldState!.updateValue);
-              fieldState!.element?.removeEventListener('blur', fieldState!.changeBlurHandler);
+              fieldState!.element?.removeEventListener('blur', fieldState!.blurHandler);
               fieldState!.strategy?.removeEventListeners();
               fieldState!.element = undefined;
               fieldState!.strategy = undefined;
@@ -174,26 +185,15 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
 
             if (fieldState!.element !== element) {
               fieldState!.element = element;
-              fieldState!.element.addEventListener('change', fieldState!.changeBlurHandler);
-              fieldState!.element.addEventListener('input', fieldState!.updateValue);
-              fieldState!.element.addEventListener('blur', fieldState!.changeBlurHandler);
+              fieldState!.element.addEventListener('blur', fieldState!.blurHandler);
               fieldState!.strategy = getDefaultFieldStrategy(element, model);
+              fieldState!.strategy.onInput = fieldState!.inputHandler;
+              fieldState!.strategy.onChange = fieldState!.changeHandler;
               update();
             }
           },
           required: false,
           strategy: undefined,
-          updateValue() {
-            if (fieldState!.strategy) {
-              // Remove invalid flag, so that .checkValidity() in Vaadin Components
-              // does not interfere with errors from Hilla.
-              fieldState!.strategy.invalid = false;
-              // When bad input is detected, skip reading new value in binder state
-              fieldState!.strategy.checkValidity();
-              n[_validity] = fieldState!.strategy.validity;
-              n.value = convertFieldValue(model, fieldState!.strategy.value);
-            }
-          },
         };
 
         registry.set(model, fieldState);
