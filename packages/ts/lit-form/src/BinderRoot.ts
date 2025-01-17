@@ -1,12 +1,5 @@
 import { EndpointValidationError, type ValidationErrorData } from '@vaadin/hilla-frontend/EndpointErrors.js';
-import {
-  _clearValidation,
-  _setErrorsWithDescendants,
-  _update,
-  _updateValidation,
-  BinderNode,
-  CHANGED,
-} from './BinderNode.js';
+import { _clearValidation, _setErrorsWithDescendants, _update, BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import {
   _parent,
@@ -118,7 +111,6 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     const oldValue = this.#value;
     this.#value = newValue;
     this[_update](oldValue);
-    this[_updateValidation]().catch(() => {});
   }
 
   /**
