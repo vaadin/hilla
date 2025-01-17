@@ -15,15 +15,13 @@
  */
 package com.vaadin.hilla;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -33,7 +31,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
@@ -46,6 +50,10 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
@@ -87,6 +95,8 @@ public class EndpointController {
 
     private final EndpointInvoker endpointInvoker;
 
+    private final ObjectMapper objectMapper;
+
     VaadinService vaadinService;
 
     /**
@@ -101,13 +111,16 @@ public class EndpointController {
      * @param csrfChecker
      *            the csrf checker to use
      */
+
     public EndpointController(ApplicationContext context,
             EndpointRegistry endpointRegistry, EndpointInvoker endpointInvoker,
-            CsrfChecker csrfChecker) {
+            CsrfChecker csrfChecker,
+            @Qualifier("hillaEndpointObjectMapper") ObjectMapper objectMapper) {
         this.context = context;
         this.endpointInvoker = endpointInvoker;
         this.csrfChecker = csrfChecker;
         this.endpointRegistry = endpointRegistry;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -169,13 +182,23 @@ public class EndpointController {
      *            the current response
      * @return execution result as a JSON string or an error message string
      */
-    @PostMapping(path = ENDPOINT_METHODS, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> serveEndpoint(
             @PathVariable("endpoint") String endpointName,
             @PathVariable("method") String methodName,
             @RequestBody(required = false) ObjectNode body,
             HttpServletRequest request, HttpServletResponse response) {
         return doServeEndpoint(endpointName, methodName, body, request,
+                response);
+    }
+
+    @PostMapping(path = "/{endpoint}/{method}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> serveMultipartEndpoint(
+            @PathVariable("endpoint") String endpointName,
+            @PathVariable("method") String methodName,
+            HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        return doServeEndpoint(endpointName, methodName, null, request,
                 response);
     }
 
@@ -227,6 +250,38 @@ public class EndpointController {
             if (enforcementResult.isEnforcementNeeded()) {
                 return buildEnforcementResponseEntity(enforcementResult);
             }
+
+            if (isMultipartRequest(request)) {
+                try {
+                    var multipartRequest = (MultipartHttpServletRequest) request;
+                    var fileMap = multipartRequest.getFileMap();
+                    var bodyPart = multipartRequest.getParts().stream()
+                            .filter(part -> part.getSubmittedFileName() == null)
+                            .filter(part -> MediaType.APPLICATION_JSON_VALUE
+                                    .equals(part.getContentType()))
+                            .findAny().orElseThrow();
+
+                    body = objectMapper.readValue(bodyPart.getInputStream(),
+                            ObjectNode.class);
+
+                    for (var entry : fileMap.entrySet()) {
+                        var partName = entry.getKey();
+                        var file = entry.getValue();
+                        var pointer = JsonPointer.valueOf(partName);
+                        var parent = pointer.head();
+                        var property = pointer.last().getMatchingProperty();
+                        var parentObject = body.withObject(parent);
+                        parentObject.putPOJO(property, file);
+                    }
+                } catch (IOException | ServletException e) {
+                    LOGGER.error("Error processing multipart request parts", e);
+                    return ResponseEntity
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(endpointInvoker.createResponseErrorObject(
+                                    "Error processing multipart request parts"));
+                }
+            }
+
             Object returnValue = endpointInvoker.invoke(endpointName,
                     methodName, body, request.getUserPrincipal(),
                     request::isUserInRole);
@@ -271,6 +326,12 @@ public class EndpointController {
                 CurrentInstance.set(VaadinRequest.class, null);
             }
         }
+    }
+
+    private boolean isMultipartRequest(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        return contentType != null
+                && contentType.startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
     }
 
     private ResponseEntity<String> buildEnforcementResponseEntity(

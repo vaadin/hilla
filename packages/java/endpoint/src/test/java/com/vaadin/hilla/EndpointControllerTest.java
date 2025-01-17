@@ -826,8 +826,8 @@ public class EndpointControllerTest {
                 endpointObjectMapper, mock(ExplicitNullableTypeChecker.class),
                 mock(ServletContext.class), registry);
 
-        new EndpointController(contextMock, registry, invoker, null)
-                .registerEndpoints();
+        new EndpointController(contextMock, registry, invoker, null,
+                mockOwnObjectMapper).registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1312,7 +1312,7 @@ public class EndpointControllerTest {
 
         EndpointController connectController = Mockito
                 .spy(new EndpointController(mockApplicationContext, registry,
-                        invoker, csrfChecker));
+                        invoker, csrfChecker, endpointObjectMapper));
         connectController.registerEndpoints();
         return connectController;
     }

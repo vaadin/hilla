@@ -15,19 +15,27 @@
  */
 package com.vaadin.hilla.endpointransfermapper;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.deser.std.StdDelegatingDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.POJONode;
 import com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.StdConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Defines mappings for certain endpoint types to corresponding transfer types.
@@ -174,6 +182,8 @@ public class EndpointTransferMapper {
                 });
 
         jacksonModule.addDeserializer(endpointType, deserializer);
+        jacksonModule.addDeserializer(MultipartFile.class,
+                new MultipartFileDeserializer());
     }
 
     /**
@@ -318,4 +328,24 @@ public class EndpointTransferMapper {
         return LoggerFactory.getLogger(getClass());
     }
 
+    public static class MultipartFileDeserializer
+            extends JsonDeserializer<MultipartFile> {
+
+        @Override
+        public MultipartFile deserialize(JsonParser p,
+                DeserializationContext ctxt) throws IOException {
+            JsonNode node = p.getCodec().readTree(p);
+
+            if (node instanceof POJONode) {
+                Object pojo = ((POJONode) node).getPojo();
+
+                if (pojo instanceof MultipartFile) {
+                    return (MultipartFile) pojo;
+                }
+            }
+
+            throw new IOException(
+                    "Expected a POJONode wrapping a MultipartFile");
+        }
+    }
 }

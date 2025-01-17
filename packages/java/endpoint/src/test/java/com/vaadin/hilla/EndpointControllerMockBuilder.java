@@ -37,8 +37,9 @@ public class EndpointControllerMockBuilder {
         EndpointInvoker invoker = Mockito.spy(
                 new EndpointInvoker(applicationContext, endpointObjectMapper,
                         explicitNullableTypeChecker, servletContext, registry));
-        EndpointController controller = Mockito.spy(new EndpointController(
-                applicationContext, registry, invoker, csrfChecker));
+        EndpointController controller = Mockito
+                .spy(new EndpointController(applicationContext, registry,
+                        invoker, csrfChecker, endpointObjectMapper));
         Mockito.doReturn(mock(EndpointAccessChecker.class)).when(invoker)
                 .getAccessChecker();
         return controller;
