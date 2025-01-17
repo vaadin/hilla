@@ -211,7 +211,9 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
           const [property, value, message] = res ? res.splice(2) : [data.parameterName ?? '', undefined, data.message];
           valueErrors.push({
             message,
-            property,
+            // Convert property from bracket notation to dot notation
+            // Example: 'orders[0].description' becomes 'orders.0.description'
+            property: property.replace(/\[(\d+)\]/gu, '.$1'),
             validator: new ServerValidator(message),
             value,
             validatorMessage: data.validatorMessage,
