@@ -86,5 +86,19 @@ describe('SignalsPlugin', () => {
         import.meta.url,
       );
     });
+
+    it('correctly generates service with automatic default values for value signals of primitive types', async () => {
+      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
+        logger: new LoggerFactory({ name: 'signals-plugin-test', verbose: true }),
+      });
+      const input = await readFile(new URL('./hilla-openapi-default-value.json', import.meta.url), 'utf8');
+      const files = await generator.process(input);
+
+      const generatedValueSignalService = files.find((f) => f.name === 'PrimitiveTypeValueSignalService.ts')!;
+      await expect(await generatedValueSignalService.text()).toMatchSnapshot(
+        `PrimitiveTypeValueSignalService.snap.ts`,
+        import.meta.url,
+      );
+    });
   });
 });

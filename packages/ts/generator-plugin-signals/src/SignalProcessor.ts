@@ -45,6 +45,7 @@ export default class SignalProcessor {
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
     let initTypeUsageCount = 0;
     const functionParams: Map<string, ts.ParameterDeclaration[]> = new Map<string, ts.ParameterDeclaration[]>();
+    const modelNameToIdentifierMap: Map<string, ts.Identifier> = new Map<string, ts.Identifier>();
 
     const [file] = ts.transform<SourceFile>(this.#sourceFile, [
       transform((tsNode) => {
@@ -66,7 +67,7 @@ export default class SignalProcessor {
               const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
               if (defaultValueType) {
                 const { entityName, modelName, modelNameUniqueId, createEmptyValueExpression, param } =
-                  SignalProcessor.#createDefaultValueParameter(defaultValueType);
+                  SignalProcessor.#createDefaultValueParameter(defaultValueType, modelNameToIdentifierMap);
                 initialValue = ts.factory.createBinaryExpression(
                   ts.factory.createPropertyAccessChain(
                     ts.factory.createIdentifier('options'),
@@ -161,7 +162,10 @@ export default class SignalProcessor {
     return undefined;
   }
 
-  static #createDefaultValueParameter(defaultValueType: ts.TypeNode) {
+  static #createDefaultValueParameter(
+    defaultValueType: ts.TypeNode,
+    modelNameToIdentifierMap: Map<string, ts.Identifier>,
+  ) {
     const paramType = ts.factory.createTypeLiteralNode([
       ts.factory.createPropertySignature(
         undefined,
@@ -195,7 +199,10 @@ export default class SignalProcessor {
     };
 
     if (undefinedDefaultValue === undefined) {
-      emptyValueGeneratorResult = SignalProcessor.#createEmptyValueGeneratorExpression(defaultValueType);
+      emptyValueGeneratorResult = SignalProcessor.#createEmptyValueGeneratorExpression(
+        defaultValueType,
+        modelNameToIdentifierMap,
+      );
     }
     // Return the model name that is needed for the imports along with the parameter and empty value creation expression
     return {
@@ -213,7 +220,10 @@ export default class SignalProcessor {
     };
   }
 
-  static #createEmptyValueGeneratorExpression(returnType: ts.TypeNode) {
+  static #createEmptyValueGeneratorExpression(
+    returnType: ts.TypeNode,
+    modelNameToIdentifierMap: Map<string, ts.Identifier>,
+  ) {
     let modelName = '';
     let entityName: string | undefined;
     const typeNodeObject = returnType as ts.UnionTypeNode;
@@ -227,7 +237,7 @@ export default class SignalProcessor {
       case ts.SyntaxKind.BooleanKeyword:
         modelName = 'BooleanModel';
         break;
-      case ts.SyntaxKind.ArrayType: // check whether this is supported at all!
+      case ts.SyntaxKind.ArrayType:
         modelName = 'ArrayModel';
         break;
       default:
@@ -239,7 +249,10 @@ export default class SignalProcessor {
           }
         }
     }
-    const modelNameUniqueId = createFullyUniqueIdentifier(modelName);
+    const modelNameUniqueId = modelNameToIdentifierMap.get(modelName) ?? createFullyUniqueIdentifier(modelName);
+    if (!modelNameToIdentifierMap.has(modelName)) {
+      modelNameToIdentifierMap.set(modelName, modelNameUniqueId);
+    }
     const callExpression = ts.factory.createCallExpression(
       ts.factory.createPropertyAccessExpression(modelNameUniqueId, 'createEmptyValue'),
       undefined,
@@ -281,11 +294,11 @@ export default class SignalProcessor {
     const entityImport = imports.default
       .iter()
       .map(([path]) => path)
-      .find((path) => path.startsWith('./') && path.endsWith(`${entityName}.js`));
+      .find((path) => path.startsWith('./') && path.endsWith(`/${entityName}.js`));
     if (entityImport === undefined) {
       throw new Error(`Import for Entity '${entityName}' not found`);
     }
-    const entityModelImportPath = entityImport.replace(entityName, modelName);
+    const entityModelImportPath = entityImport.replace(`/${entityName}.js`, `/${modelName}.js`);
     const importedModel = imports.default.paths().find((path) => path === entityModelImportPath);
     if (importedModel === undefined) {
       imports.default.add(entityModelImportPath, modelName, false, modelNameUniqueId);
