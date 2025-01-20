@@ -738,6 +738,32 @@ describe('@vaadin/hilla-lit-form', () => {
         }
       });
 
+      it('should display server validation error for product description', async () => {
+        binder.for(binder.model.customer.fullName).value = 'foobar';
+        binder.for(binder.model.notes).value = 'whatever';
+        await fireEvent(orderView.add, 'click');
+        const productModel = [...binder.model.products][0].model;
+        binder.for(productModel.description).value = 'foobar';
+        binder.for(productModel.price).value = 10;
+        const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
+        try {
+          await binder.submitTo(() => {
+            requestUpdateSpy.resetHistory();
+            throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
+              new ValidationErrorData('Invalid description', 'products[0].description', 'Invalid description'),
+            ]);
+          });
+          expect.fail();
+        } catch (error) {
+          sinon.assert.calledOnce(requestUpdateSpy);
+          await orderView.updateComplete;
+          const binderInArray = binder.for([...binder.model.products][0].model.description);
+          expect(binderInArray.invalid).to.be.true;
+          expect(binderInArray.ownErrors[0].message).to.equal('Invalid description');
+          expect(binderInArray.ownErrors[0].validatorMessage).to.equal('Invalid description');
+        }
+      });
+
       it('should display submitting state during submission', async () => {
         binder.for(binder.model.customer.fullName).value = 'Jane Doe';
         binder.for(binder.model.notes).value = 'foo';
