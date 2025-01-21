@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.hilla.parser.core.OpenAPIFileType;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.engine.commandrunner.CommandNotFoundException;
@@ -16,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GeneratorProcessor {
+    public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";
+
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
 
@@ -36,6 +40,11 @@ public final class GeneratorProcessor {
     }
 
     public void process() throws GeneratorException {
+        if (isOpenAPIEmpty()) {
+            cleanup();
+            return;
+        }
+
         var arguments = new ArrayList<Object>();
         arguments.add(TSGEN_PATH);
         prepareOutputDir(arguments);
@@ -59,6 +68,25 @@ public final class GeneratorProcessor {
             throw new GeneratorException("Node command not found", e);
         } catch (CommandRunnerException e) {
             throw new GeneratorException("Node execution failed", e);
+        }
+    }
+
+    private void cleanup() throws GeneratorException {
+        var generatedFilesListFile = outputDirectory.resolve(GENERATED_FILE_LIST_NAME);
+        try {
+            var generatedFilesList = Files.readAllLines(generatedFilesListFile);
+            for (var line : generatedFilesList) {
+                var path = outputDirectory.resolve(line);
+                Files.deleteIfExists(path);
+                // Also remove any empty parent directories
+                var dir = path.getParent();
+                while (dir.startsWith(outputDirectory) && !dir.equals(outputDirectory) && Files.isDirectory(dir) && Objects.requireNonNull(dir.toFile().list()).length == 0) {
+                    Files.deleteIfExists(dir);
+                }
+            }
+            Files.deleteIfExists(generatedFilesListFile);
+        } catch (IOException e) {
+            throw new GeneratorException("Unable to cleanup generated files", e);
         }
     }
 
@@ -102,6 +130,23 @@ public final class GeneratorProcessor {
     private void prepareVerbose(List<Object> arguments) {
         if (logger.isDebugEnabled()) {
             arguments.add("-v");
+        }
+    }
+
+    private OpenAPI getOpenAPI() throws IOException {
+        String source = Files.readString(openAPIFile);
+        var mapper = OpenAPIFileType.JSON.getMapper();
+        var reader = mapper.reader();
+        return reader.readValue(source, OpenAPI.class);
+    }
+
+    private boolean isOpenAPIEmpty() {
+        try {
+            var openApi = getOpenAPI();
+            return (openApi.getPaths() == null || openApi.getPaths().isEmpty())
+                && (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null || openApi.getComponents().getSchemas().isEmpty());
+        } catch (IOException e) {
+            throw new GeneratorException("Unable to read OpenAPI json file", e);
         }
     }
 }

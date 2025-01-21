@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
+import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
 import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,15 +20,21 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
-import com.vaadin.flow.server.frontend.EndpointUsageDetector;
 import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.engine.EngineConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
-public class NodeTasksEndpointTest extends TaskTest {
+@ContextConfiguration(classes = {
+    CustomEndpoint.class,
+    EndpointNoValue.class,
+    MyEndpoint.class,
+    ApplicationContextProvider.class
+})
+public class NodeTasksEndpointTest extends EndpointsTaskTest {
     private Options options;
 
     public static class ConnectEndpointsForTesting {
@@ -35,12 +44,6 @@ public class NodeTasksEndpointTest extends TaskTest {
     public void setUp()
             throws IOException, NoSuchFieldException, IllegalAccessException {
         Lookup mockLookup = Mockito.mock(Lookup.class);
-        EndpointUsageDetector endpointUsageDetector = Mockito
-                .mock(EndpointUsageDetector.class);
-        Mockito.when(endpointUsageDetector
-                .areEndpointsUsed(Mockito.any(Options.class))).thenReturn(true);
-        Mockito.doReturn(endpointUsageDetector).when(mockLookup)
-                .lookup(EndpointUsageDetector.class);
         Mockito.doReturn(new EndpointGeneratorTaskFactoryImpl())
                 .when(mockLookup).lookup(EndpointGeneratorTaskFactory.class);
         Mockito.doReturn(new DefaultClassFinder(Set.of(
