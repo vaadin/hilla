@@ -1,12 +1,6 @@
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts, { type PropertyName, type SourceFile } from 'typescript';
-
-function propertyNameToString(node: PropertyName): string | null {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
-    return node.text;
-  }
-  return null;
-}
+import ts, { type SourceFile } from 'typescript';
+import { propertyNameToString } from './utils.js';
 
 export class ModelFixProcessor {
   readonly #source: SourceFile;
