@@ -34,7 +34,7 @@ export type EmptyObjectSchema = ObjectSchema & Readonly<Nullified<ObjectSchema, 
 export type NonEmptyObjectSchema = ObjectSchema & Readonly<Required<Pick<ObjectSchema, 'properties'>>>;
 export type MapSchema = EmptyObjectSchema & Readonly<Required<Pick<ObjectSchema, 'additionalProperties'>>>;
 
-export type Schema = ReferenceSchema | RegularSchema;
+export type Schema = ReadonlyDeep<ReferenceSchema | RegularSchema>;
 
 export function isReferenceSchema(schema: Schema): schema is ReferenceSchema {
   return '$ref' in schema;

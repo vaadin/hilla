@@ -1,5 +1,4 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
 import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -46,8 +45,6 @@ export default class EndpointMethodResponseProcessor {
   #processOk(): readonly TypeNode[] {
     const rawSchema = this.#response.content?.[defaultMediaType]?.schema;
 
-    return rawSchema
-      ? new TypeSchemaProcessor(rawSchema as Schema, this.#dependencies, this.#transferTypes).process()
-      : [];
+    return rawSchema ? new TypeSchemaProcessor(rawSchema, this.#dependencies, this.#transferTypes).process() : [];
   }
 }
