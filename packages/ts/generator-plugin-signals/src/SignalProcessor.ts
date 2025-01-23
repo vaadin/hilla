@@ -18,7 +18,14 @@ const signals = ['NumberSignal', 'ValueSignal', 'ListSignal'];
 const genericSignals = ['ValueSignal', 'ListSignal'];
 const collectionSignals = ['ListSignal'];
 
-const primitiveModels = ['StringModel', 'NumberModel', 'BooleanModel', 'ArrayModel'];
+const primitiveModels = Object.freeze(
+  new Map<ts.SyntaxKind, string>([
+    [ts.SyntaxKind.StringKeyword, 'StringModel'],
+    [ts.SyntaxKind.NumberKeyword, 'NumberModel'],
+    [ts.SyntaxKind.BooleanKeyword, 'BooleanModel'],
+    [ts.SyntaxKind.ArrayType, 'ArrayModel'],
+  ]),
+);
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -51,37 +58,22 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
-          let initialValue: ts.CallExpression | ts.Expression | ts.Identifier = signalId.text.startsWith('NumberSignal')
-            ? ts.factory.createNumericLiteral('0')
-            : ts.factory.createIdentifier('undefined');
           const filteredParams = tsNode.parameters.filter(
             (p) => !p.type || !ts.isTypeReferenceNode(p.type) || p.type.typeName !== initTypeId,
           );
           // `filteredParams` can be altered after, need to store the param names now
           const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
           const isCollectionSignal = collectionSignals.includes(signalId.text);
-          let genericReturnType;
-          if (genericSignals.includes(signalId.text)) {
-            genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
-            if (!isCollectionSignal) {
-              const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
-              if (defaultValueType) {
-                const { entityName, modelName, modelNameUniqueId, createEmptyValueExpression, param } =
-                  SignalProcessor.#createDefaultValueParameter(defaultValueType, modelNameToIdentifierMap);
-                initialValue = ts.factory.createBinaryExpression(
-                  ts.factory.createPropertyAccessChain(
-                    ts.factory.createIdentifier('options'),
-                    ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
-                    ts.factory.createIdentifier('defaultValue'),
-                  ),
-                  ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-                  createEmptyValueExpression,
-                );
-                filteredParams.push(param);
-                SignalProcessor.#addModelImport(entityName, modelName, modelNameUniqueId, imports);
-              }
-            }
+
+          const { defaultValueExpression, defaultValueParam, genericReturnType } = this.#createDefaultValue(
+            signalId,
+            tsNode,
+            modelNameToIdentifierMap,
+          );
+          if (defaultValueParam) {
+            filteredParams.push(defaultValueParam);
           }
+
           const returnType = genericReturnType ?? signalId;
           if (filteredParams.length > 0) {
             functionParams.set(tsNode.name.text, filteredParams);
@@ -96,7 +88,9 @@ export default class SignalProcessor {
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === RETURN_TYPE ? returnType : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
-              transform((node) => (ts.isIdentifier(node) && node.text === INITIAL_VALUE ? initialValue : node)),
+              transform((node) =>
+                ts.isIdentifier(node) && node.text === INITIAL_VALUE ? defaultValueExpression : node,
+              ),
             ],
           );
         }
@@ -148,6 +142,55 @@ export default class SignalProcessor {
     );
   }
 
+  #createDefaultValue(
+    signalId: ts.Identifier,
+    functionDeclaration: FunctionDeclaration,
+    modelNameToIdentifierMap: Map<string, ts.Identifier>,
+  ) {
+    let defaultValueExpression: ts.CallExpression | ts.Expression | ts.Identifier = signalId.text.startsWith(
+      'NumberSignal',
+    )
+      ? ts.factory.createNumericLiteral('0')
+      : ts.factory.createIdentifier('undefined');
+    let defaultValueParam: ts.ParameterDeclaration | undefined;
+    let genericReturnType;
+    if (genericSignals.includes(signalId.text)) {
+      genericReturnType = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments![0];
+      if (!collectionSignals.includes(signalId.text)) {
+        const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
+        if (defaultValueType) {
+          let createEmptyValueExpression: ts.CallExpression | ts.Identifier;
+          if (SignalProcessor.#isDefaultValueTypeNullable(defaultValueType)) {
+            createEmptyValueExpression = ts.factory.createIdentifier('undefined');
+          } else {
+            const { entityName, modelName, modelNameUniqueId } = SignalProcessor.#determineModelType(
+              defaultValueType,
+              modelNameToIdentifierMap,
+            );
+            createEmptyValueExpression = ts.factory.createCallExpression(
+              ts.factory.createPropertyAccessExpression(modelNameUniqueId, 'createEmptyValue'),
+              undefined,
+              [],
+            );
+            this.#addModelImport(entityName, modelName, modelNameUniqueId);
+          }
+
+          defaultValueParam = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+          defaultValueExpression = ts.factory.createBinaryExpression(
+            ts.factory.createPropertyAccessChain(
+              ts.factory.createIdentifier('options'),
+              ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+              ts.factory.createIdentifier('defaultValue'),
+            ),
+            ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+            createEmptyValueExpression,
+          );
+        }
+      }
+    }
+    return { defaultValueExpression, defaultValueParam, genericReturnType };
+  }
+
   static #getDefaultValueType(node: ts.Node) {
     if (
       ts.isUnionTypeNode(node) &&
@@ -162,10 +205,7 @@ export default class SignalProcessor {
     return undefined;
   }
 
-  static #createDefaultValueParameter(
-    defaultValueType: ts.TypeNode,
-    modelNameToIdentifierMap: Map<string, ts.Identifier>,
-  ) {
+  static #createDefaultValueParameter(defaultValueType: ts.TypeNode) {
     const paramType = ts.factory.createTypeLiteralNode([
       ts.factory.createPropertySignature(
         undefined,
@@ -175,122 +215,83 @@ export default class SignalProcessor {
       ),
     ]);
 
-    let undefinedDefaultValue: ts.Identifier | undefined;
+    return ts.factory.createParameterDeclaration(
+      undefined,
+      undefined,
+      'options',
+      ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+      paramType,
+    );
+  }
 
-    if (
+  static #isDefaultValueTypeNullable(defaultValueType: ts.TypeNode) {
+    return (
       ts.isUnionTypeNode(defaultValueType) &&
       defaultValueType.types.length &&
       defaultValueType.types.length > 1 &&
       defaultValueType.types.map((t) => t.kind).includes(ts.SyntaxKind.UndefinedKeyword)
-    ) {
-      undefinedDefaultValue = ts.factory.createIdentifier('undefined');
-    }
-
-    let emptyValueGeneratorResult: {
-      entityName: string | undefined;
-      modelName: string | undefined;
-      modelNameUniqueId: ts.Identifier | undefined;
-      callExpression: ts.CallExpression | ts.Identifier;
-    } = {
-      entityName: undefined,
-      modelName: undefined,
-      modelNameUniqueId: undefined,
-      callExpression: ts.factory.createIdentifier('undefined'),
-    };
-
-    if (undefinedDefaultValue === undefined) {
-      emptyValueGeneratorResult = SignalProcessor.#createEmptyValueGeneratorExpression(
-        defaultValueType,
-        modelNameToIdentifierMap,
-      );
-    }
-    // Return the model name that is needed for the imports along with the parameter and empty value creation expression
-    return {
-      entityName: emptyValueGeneratorResult.entityName,
-      modelName: emptyValueGeneratorResult.modelName,
-      modelNameUniqueId: emptyValueGeneratorResult.modelNameUniqueId,
-      createEmptyValueExpression: emptyValueGeneratorResult.callExpression,
-      param: ts.factory.createParameterDeclaration(
-        undefined,
-        undefined,
-        'options',
-        ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-        paramType,
-      ),
-    };
+    );
   }
 
-  static #createEmptyValueGeneratorExpression(
-    returnType: ts.TypeNode,
-    modelNameToIdentifierMap: Map<string, ts.Identifier>,
-  ) {
-    let modelName = '';
-    let entityName: string | undefined;
-    const typeNodeObject = returnType as ts.UnionTypeNode;
-    switch (typeNodeObject.types[0].kind) {
-      case ts.SyntaxKind.StringKeyword:
-        modelName = 'StringModel';
-        break;
-      case ts.SyntaxKind.NumberKeyword:
-        modelName = 'NumberModel';
-        break;
-      case ts.SyntaxKind.BooleanKeyword:
-        modelName = 'BooleanModel';
-        break;
-      case ts.SyntaxKind.ArrayType:
-        modelName = 'ArrayModel';
-        break;
-      default:
-        if (ts.isTypeReferenceNode(typeNodeObject.types[0])) {
-          const typeIdentifier = typeNodeObject.types[0].typeName;
-          if (ts.isIdentifier(typeIdentifier)) {
-            entityName = typeIdentifier.text;
-            modelName = `${entityName}Model`;
-          }
-        }
+  static #determineModelType(returnTypeNode: ts.UnionTypeNode, modelNameToIdentifierMap: Map<string, ts.Identifier>) {
+    let modelName = primitiveModels.get(returnTypeNode.types[0].kind);
+    let entityName;
+    if (modelName === undefined) {
+      const { entityName: e, modelName: m } = SignalProcessor.#extractModelNameFromTypeNode(returnTypeNode);
+      modelName = m;
+      entityName = e;
     }
     const modelNameUniqueId = modelNameToIdentifierMap.get(modelName) ?? createFullyUniqueIdentifier(modelName);
     if (!modelNameToIdentifierMap.has(modelName)) {
       modelNameToIdentifierMap.set(modelName, modelNameUniqueId);
     }
-    const callExpression = ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(modelNameUniqueId, 'createEmptyValue'),
-      undefined,
-      [],
-    );
+
     return {
       entityName,
       modelName,
       modelNameUniqueId,
-      callExpression,
     };
   }
 
-  static #addModelImport(
+  static #extractModelNameFromTypeNode(returnTypeNode: ts.UnionTypeNode) {
+    if (ts.isTypeReferenceNode(returnTypeNode.types[0])) {
+      const typeIdentifier = returnTypeNode.types[0].typeName;
+      if (ts.isIdentifier(typeIdentifier)) {
+        const entityName = typeIdentifier.text;
+        const modelName = `${entityName}Model`;
+        return { entityName, modelName };
+      }
+    }
+    throw new Error('Unsupported type reference node');
+  }
+
+  /*
+  #getExistingModelImportForModel(modelName: string) {
+    const { imports } = this.#dependencyManager;
+    return imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName) ?? imports.default.getIdentifier(modelName);
+  }*/
+
+  #addModelImport(
     entityName: string | undefined,
     modelName: string | undefined,
     modelNameUniqueId: ts.Identifier | undefined,
-    imports: DependencyManager['imports'],
   ) {
     if (modelName === undefined) {
       return;
     }
-    if (primitiveModels.includes(modelName)) {
+    if (primitiveModels.values().find((primitiveModel) => primitiveModel === modelName)) {
+      const { imports } = this.#dependencyManager;
       const importedModel = imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName);
       if (importedModel === undefined) {
         imports.named.add('@vaadin/hilla-lit-form', modelName, false, modelNameUniqueId);
       }
     } else {
-      SignalProcessor.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!, imports);
+      this.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!);
     }
   }
 
-  static #addObjectModelImport(
-    entityName: string,
-    modelName: string,
-    modelNameUniqueId: ts.Identifier,
-    imports: DependencyManager['imports'],
-  ) {
+  #addObjectModelImport(entityName: string, modelName: string, modelNameUniqueId: ts.Identifier) {
+    const { imports } = this.#dependencyManager;
     const entityImport = imports.default
       .iter()
       .map(([path]) => path)
