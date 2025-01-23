@@ -52,7 +52,6 @@ export default class SignalProcessor {
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
     let initTypeUsageCount = 0;
     const functionParams: Map<string, ts.ParameterDeclaration[]> = new Map<string, ts.ParameterDeclaration[]>();
-    const modelNameToIdentifierMap: Map<string, ts.Identifier> = new Map<string, ts.Identifier>();
 
     const [file] = ts.transform<SourceFile>(this.#sourceFile, [
       transform((tsNode) => {
@@ -68,7 +67,6 @@ export default class SignalProcessor {
           const { defaultValueExpression, defaultValueParam, genericReturnType } = this.#createDefaultValue(
             signalId,
             tsNode,
-            modelNameToIdentifierMap,
           );
           if (defaultValueParam) {
             filteredParams.push(defaultValueParam);
@@ -142,14 +140,8 @@ export default class SignalProcessor {
     );
   }
 
-  #createDefaultValue(
-    signalId: ts.Identifier,
-    functionDeclaration: FunctionDeclaration,
-    modelNameToIdentifierMap: Map<string, ts.Identifier>,
-  ) {
-    let defaultValueExpression: ts.CallExpression | ts.Expression | ts.Identifier = signalId.text.startsWith(
-      'NumberSignal',
-    )
+  #createDefaultValue(signalId: ts.Identifier, functionDeclaration: FunctionDeclaration) {
+    let defaultValueExpression: ts.Expression | ts.Identifier = signalId.text.startsWith('NumberSignal')
       ? ts.factory.createNumericLiteral('0')
       : ts.factory.createIdentifier('undefined');
     let defaultValueParam: ts.ParameterDeclaration | undefined;
@@ -163,10 +155,7 @@ export default class SignalProcessor {
           if (SignalProcessor.#isDefaultValueTypeNullable(defaultValueType)) {
             createEmptyValueExpression = ts.factory.createIdentifier('undefined');
           } else {
-            const { entityName, modelName, modelNameUniqueId } = SignalProcessor.#determineModelType(
-              defaultValueType,
-              modelNameToIdentifierMap,
-            );
+            const { entityName, modelName, modelNameUniqueId } = this.#determineModelType(defaultValueType);
             createEmptyValueExpression = ts.factory.createCallExpression(
               ts.factory.createPropertyAccessExpression(modelNameUniqueId, 'createEmptyValue'),
               undefined,
@@ -233,7 +222,7 @@ export default class SignalProcessor {
     );
   }
 
-  static #determineModelType(returnTypeNode: ts.UnionTypeNode, modelNameToIdentifierMap: Map<string, ts.Identifier>) {
+  #determineModelType(returnTypeNode: ts.UnionTypeNode) {
     let modelName = primitiveModels.get(returnTypeNode.types[0].kind);
     let entityName;
     if (modelName === undefined) {
@@ -241,10 +230,8 @@ export default class SignalProcessor {
       modelName = m;
       entityName = e;
     }
-    const modelNameUniqueId = modelNameToIdentifierMap.get(modelName) ?? createFullyUniqueIdentifier(modelName);
-    if (!modelNameToIdentifierMap.has(modelName)) {
-      modelNameToIdentifierMap.set(modelName, modelNameUniqueId);
-    }
+    const modelNameUniqueId =
+      this.#getExistingEntityModelUniqueIdentifier(modelName) ?? createFullyUniqueIdentifier(modelName);
 
     return {
       entityName,
@@ -265,11 +252,13 @@ export default class SignalProcessor {
     throw new Error('Unsupported type reference node');
   }
 
-  /*
-  #getExistingModelImportForModel(modelName: string) {
+  #getExistingEntityModelUniqueIdentifier(modelName: string) {
     const { imports } = this.#dependencyManager;
-    return imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName) ?? imports.default.getIdentifier(modelName);
-  }*/
+    return (
+      imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName) ??
+      imports.default.iter().find(([path]) => path.endsWith(`/${modelName}.js`))?.[1]
+    );
+  }
 
   #addModelImport(
     entityName: string | undefined,
