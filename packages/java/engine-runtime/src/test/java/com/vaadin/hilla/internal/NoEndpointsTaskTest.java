@@ -22,7 +22,8 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {NoEndpointsTaskTest.NoopApplicationContextProvider.class})
+@SpringBootTest(classes = {
+        NoEndpointsTaskTest.NoopApplicationContextProvider.class })
 public class NoEndpointsTaskTest extends TaskTest {
     private TaskGenerateOpenAPI taskGenerateOpenApi;
     private TaskGenerateEndpoint taskGenerateEndpoint;
@@ -31,23 +32,34 @@ public class NoEndpointsTaskTest extends TaskTest {
     ApplicationContext applicationContext;
 
     @Test
-    public void should_GenerateEmptySchema_when_NoEndpointsFound() throws ExecutionFailedException, IOException, URISyntaxException {
+    public void should_GenerateEmptySchema_when_NoEndpointsFound()
+            throws ExecutionFailedException, IOException, URISyntaxException {
         // Mock ApplicationContextProvider static API to prevent interference
         // with other tests.
-        try (var mockApplicationContextProvider = Mockito.mockStatic(ApplicationContextProvider.class)) {
-            mockApplicationContextProvider.when(ApplicationContextProvider::getApplicationContext)
-                .thenReturn(applicationContext);
-            mockApplicationContextProvider.when(() -> ApplicationContextProvider.runOnContext(Mockito.any()))
-                .thenAnswer(invocationOnMock -> {
-                    invocationOnMock.<Consumer<ApplicationContext>>getArgument(0).accept(applicationContext);
-                    return null;
-                });
+        try (var mockApplicationContextProvider = Mockito
+                .mockStatic(ApplicationContextProvider.class)) {
+            mockApplicationContextProvider
+                    .when(ApplicationContextProvider::getApplicationContext)
+                    .thenReturn(applicationContext);
+            mockApplicationContextProvider
+                    .when(() -> ApplicationContextProvider
+                            .runOnContext(Mockito.any()))
+                    .thenAnswer(invocationOnMock -> {
+                        invocationOnMock
+                                .<Consumer<ApplicationContext>> getArgument(0)
+                                .accept(applicationContext);
+                        return null;
+                    });
 
             // Create files resembling output for previously existing endpoints
             var outputDirectory = Files.createDirectory(
-                getTemporaryDirectory().resolve(getOutputDirectory()));
-            var generatedFileListPath = outputDirectory.resolve(GeneratorProcessor.GENERATED_FILE_LIST_NAME);
-            var referenceFileListPath = Path.of(Objects.requireNonNull(getClass().getResource(GeneratorProcessor.GENERATED_FILE_LIST_NAME)).toURI());
+                    getTemporaryDirectory().resolve(getOutputDirectory()));
+            var generatedFileListPath = outputDirectory
+                    .resolve(GeneratorProcessor.GENERATED_FILE_LIST_NAME);
+            var referenceFileListPath = Path.of(Objects
+                    .requireNonNull(getClass().getResource(
+                            GeneratorProcessor.GENERATED_FILE_LIST_NAME))
+                    .toURI());
             Files.copy(referenceFileListPath, generatedFileListPath);
             var referenceFileList = Files.readAllLines(referenceFileListPath);
             for (String line : referenceFileList) {
@@ -58,31 +70,43 @@ public class NoEndpointsTaskTest extends TaskTest {
             var arbitraryGeneratedFile = outputDirectory.resolve("vaadin.ts");
             Files.createFile(arbitraryGeneratedFile);
 
-            taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(getEngineConfiguration());
-            taskGenerateEndpoint = new TaskGenerateEndpointImpl(getEngineConfiguration());
+            taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
+                    getEngineConfiguration());
+            taskGenerateEndpoint = new TaskGenerateEndpointImpl(
+                    getEngineConfiguration());
 
             taskGenerateOpenApi.execute();
 
             var generatedOpenAPI = getGeneratedOpenAPI();
 
-            assertNull(generatedOpenAPI.getTags(), "Expected OpenAPI tags to be null");
-            assertTrue(generatedOpenAPI.getPaths().isEmpty(), "Expected OpenAPI paths to be empty");
-            assertNull(generatedOpenAPI.getComponents(), "Expected OpenAPI schemas to be null");
+            assertNull(generatedOpenAPI.getTags(),
+                    "Expected OpenAPI tags to be null");
+            assertTrue(generatedOpenAPI.getPaths().isEmpty(),
+                    "Expected OpenAPI paths to be empty");
+            assertNull(generatedOpenAPI.getComponents(),
+                    "Expected OpenAPI schemas to be null");
 
-            assertDoesNotThrow(taskGenerateEndpoint::execute, "Expected to not fail without npm dependencies");
+            assertDoesNotThrow(taskGenerateEndpoint::execute,
+                    "Expected to not fail without npm dependencies");
 
-            assertFalse(generatedFileListPath.toFile().exists(), "Expected file list to be deleted");
+            assertFalse(generatedFileListPath.toFile().exists(),
+                    "Expected file list to be deleted");
             for (String line : referenceFileList) {
                 var path = outputDirectory.resolve(line);
-                assertFalse(path.toFile().exists(), String.format("Expected file %s to be deleted", path));
+                assertFalse(path.toFile().exists(),
+                        String.format("Expected file %s to be deleted", path));
             }
-            assertTrue(arbitraryGeneratedFile.toFile().exists(), "Expected non-Hilla generated file to not be deleted");
+            assertTrue(arbitraryGeneratedFile.toFile().exists(),
+                    "Expected non-Hilla generated file to not be deleted");
         }
     }
 
-    static class NoopApplicationContextProvider extends ApplicationContextProvider {
+    static class NoopApplicationContextProvider
+            extends ApplicationContextProvider {
         @Override
-        public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
+        public void setApplicationContext(
+                @Nonnull ApplicationContext applicationContext)
+                throws BeansException {
             // do nothing
         }
     }

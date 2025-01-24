@@ -80,7 +80,8 @@ public class EndpointController {
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
-    private static final Set<Class<?>> INTERNAL_BROWSER_CALLABLES = Set.of(SignalsHandler.class);
+    private static final Set<Class<?>> INTERNAL_BROWSER_CALLABLES = Set
+            .of(SignalsHandler.class);
 
     private final ApplicationContext context;
 
@@ -130,7 +131,8 @@ public class EndpointController {
             HillaStats.reportHasEndpoint();
         }
 
-        INTERNAL_BROWSER_CALLABLES.stream().map(context::getBeansOfType).forEach(endpointBeans::putAll);
+        INTERNAL_BROWSER_CALLABLES.stream().map(context::getBeansOfType)
+                .forEach(endpointBeans::putAll);
         var currentEndpointNames = endpointBeans.values().stream()
                 .map(endpointRegistry::registerEndpoint)
                 .collect(Collectors.toSet());

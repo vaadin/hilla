@@ -72,6 +72,6 @@ public class TaskTest {
 
     protected OpenAPI getGeneratedOpenAPI() {
         return new OpenAPIV3Parser()
-            .read(getOpenAPIFile().toFile().getAbsolutePath());
+                .read(getOpenAPIFile().toFile().getAbsolutePath());
     }
 }

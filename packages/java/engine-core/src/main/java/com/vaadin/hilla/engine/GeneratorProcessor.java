@@ -72,7 +72,8 @@ public final class GeneratorProcessor {
     }
 
     private void cleanup() throws GeneratorException {
-        var generatedFilesListFile = outputDirectory.resolve(GENERATED_FILE_LIST_NAME);
+        var generatedFilesListFile = outputDirectory
+                .resolve(GENERATED_FILE_LIST_NAME);
         try {
             var generatedFilesList = Files.readAllLines(generatedFilesListFile);
             for (var line : generatedFilesList) {
@@ -80,13 +81,17 @@ public final class GeneratorProcessor {
                 Files.deleteIfExists(path);
                 // Also remove any empty parent directories
                 var dir = path.getParent();
-                while (dir.startsWith(outputDirectory) && !dir.equals(outputDirectory) && Files.isDirectory(dir) && Objects.requireNonNull(dir.toFile().list()).length == 0) {
+                while (dir.startsWith(outputDirectory)
+                        && !dir.equals(outputDirectory)
+                        && Files.isDirectory(dir) && Objects.requireNonNull(
+                                dir.toFile().list()).length == 0) {
                     Files.deleteIfExists(dir);
                 }
             }
             Files.deleteIfExists(generatedFilesListFile);
         } catch (IOException e) {
-            throw new GeneratorException("Unable to cleanup generated files", e);
+            throw new GeneratorException("Unable to cleanup generated files",
+                    e);
         }
     }
 
@@ -144,7 +149,9 @@ public final class GeneratorProcessor {
         try {
             var openApi = getOpenAPI();
             return (openApi.getPaths() == null || openApi.getPaths().isEmpty())
-                && (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null || openApi.getComponents().getSchemas().isEmpty());
+                    && (openApi.getComponents() == null
+                            || openApi.getComponents().getSchemas() == null
+                            || openApi.getComponents().getSchemas().isEmpty());
         } catch (IOException e) {
             throw new GeneratorException("Unable to read OpenAPI json file", e);
         }

@@ -28,12 +28,8 @@ import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.engine.EngineConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = {
-    CustomEndpoint.class,
-    EndpointNoValue.class,
-    MyEndpoint.class,
-    ApplicationContextProvider.class
-})
+@ContextConfiguration(classes = { CustomEndpoint.class, EndpointNoValue.class,
+        MyEndpoint.class, ApplicationContextProvider.class })
 public class NodeTasksEndpointTest extends EndpointsTaskTest {
     private Options options;
 
