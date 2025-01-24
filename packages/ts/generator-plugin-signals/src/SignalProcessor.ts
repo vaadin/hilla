@@ -151,20 +151,9 @@ export default class SignalProcessor {
       if (!collectionSignals.includes(signalId.text)) {
         const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
         if (defaultValueType) {
-          let createEmptyValueExpression: ts.CallExpression | ts.Identifier;
-          if (SignalProcessor.#isDefaultValueTypeNullable(defaultValueType)) {
-            createEmptyValueExpression = ts.factory.createIdentifier('undefined');
-          } else {
-            const { entityName, modelName, modelNameUniqueId } = this.#determineModelType(defaultValueType);
-            createEmptyValueExpression = ts.factory.createCallExpression(
-              ts.factory.createPropertyAccessExpression(modelNameUniqueId, 'createEmptyValue'),
-              undefined,
-              [],
-            );
-            this.#addModelImport(entityName, modelName, modelNameUniqueId);
-          }
-
           defaultValueParam = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+
+          const emptyValueExpression = this.#createEmptyValueExpression(defaultValueType);
           defaultValueExpression = ts.factory.createBinaryExpression(
             ts.factory.createPropertyAccessChain(
               ts.factory.createIdentifier('options'),
@@ -172,7 +161,7 @@ export default class SignalProcessor {
               ts.factory.createIdentifier('defaultValue'),
             ),
             ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-            createEmptyValueExpression,
+            emptyValueExpression,
           );
         }
       }
@@ -190,7 +179,6 @@ export default class SignalProcessor {
     ) {
       return node.types[0].typeArguments[0];
     }
-
     return undefined;
   }
 
@@ -222,7 +210,19 @@ export default class SignalProcessor {
     );
   }
 
-  #determineModelType(returnTypeNode: ts.UnionTypeNode) {
+  #createEmptyValueExpression(defaultValueType: ts.UnionTypeNode) {
+    if (SignalProcessor.#isDefaultValueTypeNullable(defaultValueType)) {
+      return ts.factory.createIdentifier('undefined');
+    }
+    const importedModelUniqueId = this.#determineModelImportUniqueIdentifier(defaultValueType);
+    return ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(importedModelUniqueId, 'createEmptyValue'),
+      undefined,
+      [],
+    );
+  }
+
+  #determineModelImportUniqueIdentifier(returnTypeNode: ts.UnionTypeNode) {
     let modelName = primitiveModels.get(returnTypeNode.types[0].kind);
     let entityName;
     if (modelName === undefined) {
@@ -230,14 +230,11 @@ export default class SignalProcessor {
       modelName = m;
       entityName = e;
     }
-    const modelNameUniqueId =
+    const modelImportUniqueId =
       this.#getExistingEntityModelUniqueIdentifier(modelName) ?? createFullyUniqueIdentifier(modelName);
 
-    return {
-      entityName,
-      modelName,
-      modelNameUniqueId,
-    };
+    this.#addModelImport(entityName, modelName, modelImportUniqueId);
+    return modelImportUniqueId;
   }
 
   static #extractModelNameFromTypeNode(returnTypeNode: ts.UnionTypeNode) {
