@@ -10,17 +10,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InternalEndpointIT {
-    Path frontendDir = Paths.get("frontend", "generated");
+    Path frontedDir = Path.of("src", "main", "frontend");
+    Path generatedDir = frontedDir.resolve("generated");
 
     @Test
     public void shouldNotRunEndpointGeneratorForOnlyInternalEndpointsPresent() {
-        assertFalse(Files.exists(frontendDir.resolve("InternalBrowserCallableExample.ts")));
-        assertFalse(Files.exists(frontendDir.resolve("InternalEndpointExample.ts")));
-        assertFalse(Files.exists(frontendDir
-                .resolve("com/example/application/InternalBrowserCallableExample.ts")));
-        assertFalse(Files.exists(frontendDir
-            .resolve("com/example/application/InternalEndpointExample.ts")));
+        assertTrue(Files.exists(frontedDir.resolve("index.html")),
+                "Expected the frontend directory to have the index.html file");
+        assertFalse(Files.exists(generatedDir.resolve("endpoints.ts")),
+                "Expected the endpoints.ts file to not be generated");
+        assertFalse(
+                Files.exists(generatedDir
+                        .resolve(Path.of("com", "vaadin", "hilla"))),
+                "Expected the Hilla directory to not be generated");
     }
-
 
 }
