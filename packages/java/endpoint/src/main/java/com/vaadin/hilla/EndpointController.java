@@ -145,7 +145,6 @@ public class EndpointController {
         if (vaadinService != null) {
             this.vaadinService = vaadinService;
         }
-
     }
 
     /**
