@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>24.6-SNAPSHOT</version>
+        <version>24.7-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-no-endpoints</artifactId>
     <name>ITs for No Endpoints cases</name>
@@ -34,13 +34,6 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
-                <configuration>
-                    <parser>
-                        <packages>
-                            <package>com.example.application</package>
-                        </packages>
-                    </parser>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
