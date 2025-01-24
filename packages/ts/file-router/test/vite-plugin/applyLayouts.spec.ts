@@ -1,12 +1,10 @@
 import { writeFile } from 'node:fs/promises';
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import chaiDeepEqualIgnoreUndefined from 'chai-deep-equal-ignore-undefined';
 import applyLayouts from '../../src/vite-plugin/applyLayouts.js';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import { createTmpDir } from '../utils.js';
 
-use(chaiDeepEqualIgnoreUndefined);
 use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
@@ -47,7 +45,7 @@ describe('@vaadin/hilla-file-router', () => {
 
       const result = await applyLayouts(meta, layoutsFile);
 
-      expect(result).to.deepEqualIgnoreUndefined([
+      expect(result).to.deep.equal([
         { path: '' },
         {
           path: 'flow',
