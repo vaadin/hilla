@@ -262,17 +262,16 @@ export default class SignalProcessor {
     modelName: string | undefined,
     modelNameUniqueId: ts.Identifier | undefined,
   ) {
-    if (modelName === undefined) {
-      return;
-    }
-    if (primitiveModels.values().find((primitiveModel) => primitiveModel === modelName)) {
-      const { imports } = this.#dependencyManager;
-      const importedModel = imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName);
-      if (importedModel === undefined) {
-        imports.named.add('@vaadin/hilla-lit-form', modelName, false, modelNameUniqueId);
+    if (modelName) {
+      if (primitiveModels.values().find((primitiveModel) => primitiveModel === modelName)) {
+        const { imports } = this.#dependencyManager;
+        const importedModel = imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName);
+        if (importedModel === undefined) {
+          imports.named.add('@vaadin/hilla-lit-form', modelName, false, modelNameUniqueId);
+        }
+      } else {
+        this.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!);
       }
-    } else {
-      this.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!);
     }
   }
 
@@ -282,13 +281,12 @@ export default class SignalProcessor {
       .iter()
       .map(([path]) => path)
       .find((path) => path.startsWith('./') && path.endsWith(`/${entityName}.js`));
-    if (entityImport === undefined) {
-      throw new Error(`Import for Entity '${entityName}' not found`);
-    }
-    const entityModelImportPath = entityImport.replace(`/${entityName}.js`, `/${modelName}.js`);
-    const importedModel = imports.default.paths().find((path) => path === entityModelImportPath);
-    if (importedModel === undefined) {
-      imports.default.add(entityModelImportPath, modelName, false, modelNameUniqueId);
+    if (entityImport) {
+      const entityModelImportPath = entityImport.replace(`/${entityName}.js`, `/${modelName}.js`);
+      const importedModel = imports.default.paths().find((path) => path === entityModelImportPath);
+      if (importedModel === undefined) {
+        imports.default.add(entityModelImportPath, modelName, false, modelNameUniqueId);
+      }
     }
   }
 
