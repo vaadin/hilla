@@ -31,8 +31,6 @@
   "overrides": {
     "esbuild": "$esbuild",
     "prettier": "$prettier",
-    "react": "$react",
-    "react-dom": "$react-dom",
     "vite": "$vite"
   },
   "devDependencies": {
