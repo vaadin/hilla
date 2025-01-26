@@ -70,23 +70,5 @@
   },
   "peerDependencies": {
     "lit": "^3.0.0"
-  },
-  "devDependencies": {
-    "@open-wc/testing": "3.2.2",
-    "@types/atmosphere.js": "2.1.6",
-    "@types/chai": "5.0.1",
-    "@types/chai-as-promised": "8.0.1",
-    "@types/js-cookie": "3.0.6",
-    "@types/mocha": "10.0.10",
-    "@types/sinon": "17.0.3",
-    "@types/sinon-chai": "4.0.0",
-    "@types/validator": "13.12.2",
-    "chai": "5.1.2",
-    "chai-as-promised": "8.0.1",
-    "chai-dom": "1.12.1",
-    "fetch-mock": "^12.2.0",
-    "sinon": "19.0.2",
-    "sinon-chai": "4.0.0",
-    "typescript": "5.7.3"
   }
 }

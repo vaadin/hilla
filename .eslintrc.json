@@ -14,6 +14,7 @@
     "@typescript-eslint/return-await": "off",
     "class-methods-use-this": "off",
     "import/no-duplicates": "off",
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": false }],
     "import/prefer-default-export": "off",
     "max-params": "off",
     "max-classes-per-file": "off",

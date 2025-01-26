@@ -76,18 +76,5 @@
   },
   "peerDependencies": {
     "lit": "^3.0.0"
-  },
-  "devDependencies": {
-    "@types/chai": "5.0.1",
-    "@types/chai-dom": "1.11.3",
-    "@types/mocha": "10.0.10",
-    "@types/sinon": "17.0.3",
-    "@types/sinon-chai": "4.0.0",
-    "@types/validator": "13.12.2",
-    "chai": "5.1.2",
-    "chai-dom": "1.12.1",
-    "sinon": "19.0.2",
-    "sinon-chai": "4.0.0",
-    "typescript": "5.7.3"
   }
 }
