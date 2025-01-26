@@ -576,10 +576,7 @@ describe('@vaadin/hilla-react-crud', () => {
       });
 
       it('shows aria-control with default id', async () => {
-        const { grid, form } = await CrudController.init(
-          render(<TestAutoCrud formProps={{ id: 'custom-form-id' }} />),
-          user,
-        );
+        const { grid } = await CrudController.init(render(<TestAutoCrud formProps={{ id: 'custom-form-id' }} />), user);
         await grid.toggleRowSelected(0);
         expect(grid.instance.getAttribute('aria-controls')).to.equal(`custom-form-id`);
       });
