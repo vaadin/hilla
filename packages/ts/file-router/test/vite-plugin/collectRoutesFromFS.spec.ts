@@ -1,5 +1,4 @@
-import { appendFile } from 'fs/promises';
-import { mkdir, rm } from 'node:fs/promises';
+import { appendFile, mkdir, rm } from 'node:fs/promises';
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
@@ -56,7 +55,10 @@ describe('@vaadin/hilla-file-router', () => {
       expect(routes).to.deep.equal(expected);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(logger.error).to.be.calledOnceWithExactly(
-        `The file "${new URL('./test/no-default-export.tsx', tmp).toString()}" should contain a default export of a component`,
+        `The file "${new URL(
+          './test/no-default-export.tsx',
+          tmp,
+        ).toString()}" should contain a default export of a component`,
       );
     });
 
