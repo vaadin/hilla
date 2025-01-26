@@ -43,7 +43,7 @@ describe('@vaadin/hilla-file-router', () => {
         { path: 'login' },
       ];
 
-      const result = await applyLayouts(meta, layoutsFile);
+      const result = JSON.parse(JSON.stringify(await applyLayouts(meta, layoutsFile)));
 
       expect(result).to.deep.equal([
         { path: '' },
