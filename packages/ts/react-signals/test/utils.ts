@@ -12,7 +12,7 @@ export async function nextFrame(): Promise<void> {
   });
 }
 
-export function createSubscriptionStub<T>(): sinon.SinonSpiedInstance<Subscription<StateEvent>> {
+export function createSubscriptionStub(): sinon.SinonSpiedInstance<Subscription<StateEvent>> {
   return sinon.spy<Subscription<StateEvent>>({
     cancel() {},
     context() {

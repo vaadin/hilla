@@ -6,7 +6,7 @@ export const routeParamTypeMap: ReadonlyMap<RouteParamType, RegExp> = new Map([
   [RouteParamType.Required, /\{(.+)\}/gu], // e.g. "{param}"
 ]);
 
-// eslint-disable-next-line consistent-return
+// eslint-disable-next-line @typescript-eslint/consistent-return
 function getReplacer(type: RouteParamType): string {
   // eslint-disable-next-line default-case
   switch (type) {

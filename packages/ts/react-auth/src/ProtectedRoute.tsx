@@ -26,7 +26,7 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps): JSX.Element | null {
   const {
-    state: { initializing, loading, user },
+    state: { initializing, loading },
     hasAccess,
   } = useContext(AuthContext);
 
@@ -42,6 +42,7 @@ function ProtectedRoute({ redirectPath, access, element }: ProtectedRouteProps):
 
   return element;
 }
+
 ProtectedRoute.type = 'ProtectedRoute'; // This is for copilot to recognize this
 
 function* traverse<T extends RouteObject>(routes: T[]): Generator<T, undefined, undefined> {

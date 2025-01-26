@@ -59,7 +59,7 @@ export default class SignalProcessor {
           const isCollectionSignal = collectionSignals.includes(signalId.text);
           let genericReturnType;
           if (genericSignals.includes(signalId.text)) {
-            genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
+            [genericReturnType] = (tsNode.type as ts.TypeReferenceNode).typeArguments!;
             if (!isCollectionSignal) {
               const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
               if (defaultValueType) {
@@ -75,7 +75,11 @@ export default class SignalProcessor {
           }
           return template(
             `function ${METHOD_NAME}(): ${RETURN_TYPE} {
-  return new ${SIGNAL}(${isCollectionSignal ? '' : `${INITIAL_VALUE}, `}{ client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${paramNames.length ? `, params: { ${paramNames} }` : ''} });
+  return new ${SIGNAL}(${
+    isCollectionSignal ? '' : `${INITIAL_VALUE}, `
+  }{ client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${
+    paramNames.length ? `, params: { ${paramNames} }` : ''
+  } });
 }`,
             (statements) => statements,
             [

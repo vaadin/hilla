@@ -19,7 +19,6 @@ import {
   type Validator,
   type ValueError,
 } from '../src/index.js';
-import { Future } from '../Validators';
 import {
   type Customer,
   IdEntityModel,
@@ -49,12 +48,14 @@ class NumberOutput extends HTMLElement {
     return !Number.isNaN(numericValue) && numericValue.toString() === this.inputElement.value;
   }
 }
+
 customElements.define('number-output', NumberOutput);
 
 class MockDatePickerElement extends HTMLElement {
   // pretend it’s a Vaadin component to use VaadinFieldStrategy
   static readonly version = '0.0.0';
 }
+
 customElements.define('mock-date-picker', MockDatePickerElement);
 
 @customElement('order-view')
@@ -115,7 +116,7 @@ class OrderView extends LitElement {
       ${repeat(
         products,
         ({ model: { description, price } }, index) =>
-          html`<div>
+          html` <div>
             <input id="description${index}" ...="${field(description)}" />
             <input id="price${index}" ...="${field(price)}" />
             <output id="priceError${index}">
@@ -126,7 +127,10 @@ class OrderView extends LitElement {
             </output>
           </div>`,
       )}
-      <h4>Total: <number-output id="total" ${field(total)}></number-output></h4>
+      <h4>
+        Total:
+        <number-output id="total" ${field(total)}></number-output>
+      </h4>
       <div id="submitting">${this.binder.submitting}</div>
     `;
   }
@@ -223,7 +227,7 @@ describe('@vaadin/hilla-lit-form', () => {
     describe('clearing', () => {
       (['reset', 'clear'] as const).forEach((methodName) => {
         it(`should reset validation on ${methodName}`, async () => {
-          const errors = await binder.validate();
+          await binder.validate();
           expect(binder.invalid).to.be.true;
           expect(binder.for(binder.model.customer.fullName).invalid).to.be.true;
 
@@ -563,7 +567,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
       beforeEach(async () => {
         orderView = new OrderView();
-        // eslint-disable-next-line prefer-destructuring
+        // eslint-disable-next-line @typescript-eslint/prefer-destructuring
         binder = orderView.binder;
         document.body.append(orderView);
         await orderView.updateComplete;
@@ -631,7 +635,7 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
 
@@ -681,7 +685,7 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
 
@@ -704,7 +708,7 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
       });
@@ -745,7 +749,7 @@ describe('@vaadin/hilla-lit-form', () => {
             ]);
           });
           expect.fail();
-        } catch (error) {
+        } catch {
           sinon.assert.calledOnce(requestUpdateSpy);
           await orderView.updateComplete;
           expect(binder.for(binder.model.notes).invalid).to.be.true;
@@ -770,7 +774,7 @@ describe('@vaadin/hilla-lit-form', () => {
             ]);
           });
           expect.fail();
-        } catch (error) {
+        } catch {
           sinon.assert.calledOnce(requestUpdateSpy);
           await orderView.updateComplete;
           const binderInArray = binder.for([...binder.model.products][0].model.description);
@@ -809,7 +813,7 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
         const errorsOnSubmit = binder.errors.length;

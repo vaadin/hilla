@@ -1,6 +1,6 @@
 import { signal } from '@vaadin/hilla-react-signals';
 import type { VaadinWindow } from '../shared/internal.js';
-import type { MenuItem, ViewConfig } from '../types.js';
+import type { MenuItem } from '../types.js';
 
 export const viewsSignal = signal((window as VaadinWindow).Vaadin?.views);
 
@@ -50,7 +50,7 @@ if (import.meta.hot) {
       .then((json) => {
         viewsSignal.value = json;
       })
-      .catch((e) => {
+      .catch((e: unknown) => {
         console.error('Failed to fetch route info', e);
       });
   });

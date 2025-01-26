@@ -15,6 +15,7 @@ export const INIT_TYPE_NAME = 'EndpointRequestInit';
 export const HILLA_FRONTEND_NAME = '@vaadin/hilla-frontend';
 
 export default abstract class EndpointMethodOperationProcessor {
+  // eslint-disable-next-line @typescript-eslint/max-params
   static createProcessor(
     httpMethod: OpenAPIV3.HttpMethods,
     endpointName: string,
@@ -23,8 +24,9 @@ export default abstract class EndpointMethodOperationProcessor {
     dependencies: DependencyManager,
     owner: Plugin,
   ): EndpointMethodOperationProcessor | undefined {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (httpMethod) {
-      case OpenAPIV3.HttpMethods.POST:
+      case OpenAPIV3.HttpMethods.POST: {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return new EndpointMethodOperationPOSTProcessor(
           endpointName,
@@ -33,6 +35,7 @@ export default abstract class EndpointMethodOperationProcessor {
           dependencies,
           owner,
         );
+      }
       default:
         owner.logger.warn(`Processing ${httpMethod.toUpperCase()} currently is not supported`);
         return undefined;
@@ -49,6 +52,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
   readonly #operation: EndpointMethodOperation;
   readonly #owner: Plugin;
 
+  // eslint-disable-next-line @typescript-eslint/max-params
   constructor(
     endpointName: string,
     endpointMethodName: string,

@@ -1,8 +1,7 @@
-import isNumeric from 'validator/es/lib/isNumeric.js';
 import type { BinderNode } from './BinderNode.js';
 import { getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
-import { AbstractModel, NumberModel, type Value } from './Models.js';
+import { AbstractModel, type Value } from './Models.js';
 import { IsNumber, Required, ValidityStateValidator } from './Validators.js';
 
 export interface ValueError<T = unknown> {
@@ -46,6 +45,7 @@ export interface Validator<T = unknown> {
   message: string;
   impliesRequired?: boolean;
   name?: string;
+
   validate(
     value: T,
     binder: BinderRoot,

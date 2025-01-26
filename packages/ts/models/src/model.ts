@@ -203,6 +203,7 @@ export const Model: Model = Object.create(null, {
   },
   toString: {
     value(this: Model) {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       return `[${String(this[$owner])} / ${String(this[$key])}${this[$optional] ? '?' : ''}] ${this[$name]}`;
     },
   },

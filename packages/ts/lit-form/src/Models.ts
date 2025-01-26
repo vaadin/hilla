@@ -135,7 +135,9 @@ export class NumberModel extends PrimitiveModel<number> implements HasFromString
   [_fromString](str: string): number | undefined {
     // Returning undefined is needed to support passing the validation when the value of an optional number field is
     // an empty string
-    if (str === '') return undefined;
+    if (str === '') {
+      return undefined;
+    }
     return isNumeric(str) ? Number.parseFloat(str) : NaN;
   }
 }
@@ -145,6 +147,7 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
   [_fromString] = String;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare enum Enum {}
 
 export function makeEnumEmptyValueCreator<M extends EnumModel>(type: DetachedModelConstructor<M>): () => Value<M> {
@@ -174,6 +177,7 @@ export function* getObjectModelOwnAndParentGetters<M extends ObjectModel>(
     proto = Object.getPrototypeOf(proto)
   ) {
     const descriptors = Object.getOwnPropertyDescriptors(proto);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     for (const [name, { get }] of Object.entries(descriptors)) {
       if (get) {
         yield [name as keyof Value<M>, get];
@@ -235,6 +239,7 @@ export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends Abs
   readonly #createItem: (parent: AbstractModel, index: number) => MItem;
   #items: Array<MItem | undefined> = [];
 
+  // eslint-disable-next-line @typescript-eslint/max-params
   constructor(
     parent: ModelParent,
     key: keyof any,

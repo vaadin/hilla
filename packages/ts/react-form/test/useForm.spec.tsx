@@ -169,7 +169,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
-        const { read } = (useForm as UseFormSpy).returnValues[0];
+        const [{ read }] = (useForm as UseFormSpy).returnValues;
         read({
           rememberMe: true,
           user: {
@@ -233,7 +233,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
-        const { read } = (useForm as UseFormSpy).returnValues[0];
+        const [{ read }] = (useForm as UseFormSpy).returnValues;
         read({
           user: {
             id: 1,
@@ -280,12 +280,12 @@ describe('@vaadin/hilla-react-form', () => {
 
     it('should be updatable', async () => {
       function UpdatableForm() {
-        const [projects, setProjects] = useState<Project[]>([
+        const [projects] = useState<Project[]>([
           { id: 1, name: 'P1' },
           { id: 2, name: 'P2' },
         ]);
         const [contracts, setContracts] = useState<Contract[]>([]);
-        const { model, value, field, clear, read, update } = useForm(EntityModel);
+        const { model, value, field, read, update } = useForm(EntityModel);
         const contractField = useFormPart(model.contractId);
 
         useEffect(() => {

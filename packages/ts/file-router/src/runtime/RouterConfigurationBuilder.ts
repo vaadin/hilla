@@ -294,7 +294,7 @@ export class RouterConfigurationBuilder {
    * @param routes - A list of routes to merge with the current list.
    * @param callback - A callback to transform the routes during the merge.
    */
-  update<T extends RouteBase>(routes: undefined, callback: RouteTransformer<undefined>): this;
+  update(routes: undefined, callback: RouteTransformer<undefined>): this;
   update<T extends RouteBase>(routes: readonly T[], callback?: RouteTransformer<T>): this;
   update<T extends RouteBase>(
     routes: readonly T[] | undefined,
