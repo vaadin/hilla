@@ -7,9 +7,9 @@ import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling';
 
-type MaybeCountService<TItem> = Partial<CountService<TItem>>;
-type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
-type ListAndCountService<TItem> = CountService<TItem> & ListService<TItem>;
+type MaybeCountService = Partial<CountService>;
+type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService;
+type ListAndCountService<TItem> = CountService & ListService<TItem>;
 
 type PageRequest = {
   pageNumber: number;

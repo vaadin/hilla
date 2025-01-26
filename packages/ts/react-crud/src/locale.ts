@@ -20,7 +20,7 @@ function getFormatRegex(format: Intl.DateTimeFormat) {
 function tryFormatDate(formatter: Intl.DateTimeFormat, value?: string): string {
   try {
     return value ? formatter.format(new Date(value)) : '';
-  } catch (e) {
+  } catch {
     return '';
   }
 }

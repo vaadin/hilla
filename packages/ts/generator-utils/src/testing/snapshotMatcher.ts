@@ -29,7 +29,7 @@ export default function snapshotMatcher(chai: Chai.ChaiStatic, utils: Chai.ChaiU
         let snapshot;
         try {
           snapshot = await readFile(snapshotPath, 'utf8');
-        } catch (e) {
+        } catch {
           throw new Error(
             `Snapshot does not exist yet: ${snapshotURL.toString()}.\nConsider running tests with --update flag.`,
           );

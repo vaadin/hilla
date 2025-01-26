@@ -24,7 +24,6 @@ export default abstract class EndpointMethodOperationProcessor {
     dependencies: DependencyManager,
     owner: Plugin,
   ): EndpointMethodOperationProcessor | undefined {
-    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (httpMethod) {
       case OpenAPIV3.HttpMethods.POST: {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define

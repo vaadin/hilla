@@ -76,7 +76,7 @@ const assertResponseIsOk = async (response: Response): Promise<void> => {
     let errorJson: ConnectExceptionData | null;
     try {
       errorJson = JSON.parse(errorText);
-    } catch (ignored) {
+    } catch {
       // not a json
       errorJson = null;
     }
@@ -351,7 +351,7 @@ export class ConnectClient {
         } else {
           $wnd.Vaadin?.connectionState?.loadingFailed();
         }
-        return Promise.reject(error);
+        throw error;
       }
     }
 

@@ -41,7 +41,7 @@ class MockGrid {
 
   async requestPage(page: number, sortOrders: GridSorterDefinition[] = []): Promise<void> {
     return new Promise((resolve) => {
-      this.dataProvider({ page, pageSize: this.pageSize, sortOrders, filters: [] }, (_, size) => {
+      this.dataProvider({ page, pageSize: this.pageSize, sortOrders, filters: [] }, () => {
         resolve();
       });
     });
@@ -51,14 +51,14 @@ class MockGrid {
 const data = Array.from({ length: 25 }, (_, i) => i);
 
 const listService: ListService<number> = {
-  async list(request: Pageable, filter: FilterUnion | undefined): Promise<number[]> {
+  async list(request: Pageable): Promise<number[]> {
     const offset = request.pageNumber * request.pageSize;
     return Promise.resolve(data.slice(offset, offset + request.pageSize));
   },
 };
 
 const listAndCountService: CountService<number> & ListService<number> = {
-  async list(request: Pageable, filter: FilterUnion | undefined): Promise<number[]> {
+  async list(request: Pageable): Promise<number[]> {
     const offset = request.pageNumber * request.pageSize;
     return Promise.resolve(data.slice(offset, offset + request.pageSize));
   },
@@ -91,6 +91,7 @@ function createTestFilter(): FilterUnion {
   return andFilter;
 }
 
+// eslint-disable-next-line @typescript-eslint/max-params
 async function testPageLoad(
   grid: MockGrid,
   listSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>,
@@ -107,7 +108,7 @@ async function testPageLoad(
   expect(grid.loadSpy).to.have.been.calledWith(expectedItems, expectedSize);
 
   expect(listSpy).to.have.been.calledOnce;
-  const pageable = listSpy.lastCall.args[0];
+  const [pageable] = listSpy.lastCall.args;
   expect(pageable.pageNumber).to.equal(pageNumber);
   expect(pageable.pageSize).to.equal(grid.pageSize);
 }
@@ -116,7 +117,7 @@ async function testPageLoadForUseDataProvider(
   grid: MockGrid,
   serviceSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>,
   pageNumber: number,
-  filter?: FilterUnion | undefined,
+  filter?: FilterUnion,
 ) {
   serviceSpy.resetHistory();
 
@@ -124,7 +125,7 @@ async function testPageLoadForUseDataProvider(
 
   expect(serviceSpy).to.have.been.calledOnce;
   expect(serviceSpy.lastCall.args[1]).to.equal(filter);
-  const pageable = serviceSpy.lastCall.args[0];
+  const [pageable] = serviceSpy.lastCall.args;
   expect(pageable.pageNumber).to.equal(pageNumber);
   expect(pageable.pageSize).to.equal(grid.pageSize);
 }
@@ -203,13 +204,13 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(result.current.dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
@@ -312,13 +313,13 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
@@ -332,7 +333,7 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0);
-      const passedFilter = listSpy.lastCall.args[1];
+      const [, passedFilter] = listSpy.lastCall.args;
       expect(passedFilter).to.equal(filter);
     });
 
@@ -375,7 +376,7 @@ describe('@hilla/react-crud', () => {
 
     it('does not work with a ListService', () => {
       expect(() => {
-        const dataProvider = new FixedSizeDataProvider(listService);
+        const _dataProvider = new FixedSizeDataProvider(listService);
       }).to.throw('The provided service does not implement the CountService interface.');
     });
 
@@ -446,13 +447,13 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
@@ -466,7 +467,7 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0);
-      const passedFilter = listSpy.lastCall.args[1];
+      const [, passedFilter] = listSpy.lastCall.args;
       expect(passedFilter).to.equal(filter);
       expect(countSpy).to.have.been.calledOnceWithExactly(filter);
     });

@@ -3,6 +3,7 @@ import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
 
 export interface FormService<T> {
   save(value: T): Promise<T | undefined>;
+
   delete(id: any): Promise<void>;
 }
 
@@ -10,7 +11,7 @@ export interface ListService<T> {
   list(request: Pageable, filter: FilterUnion | undefined): Promise<T[]>;
 }
 
-export interface CountService<T> {
+export interface CountService {
   count(filter: FilterUnion | undefined): Promise<number>;
 }
 

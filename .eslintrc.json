@@ -12,6 +12,10 @@
     "@typescript-eslint/no-invalid-void-type": "off",
     "@typescript-eslint/member-ordering": "off",
     "@typescript-eslint/return-await": "off",
+    "@typescript-eslint/switch-exhaustiveness-check": [
+      "error",
+      { "allowDefaultCaseForExhaustiveSwitch": true, "considerDefaultExhaustiveForUnions": true }
+    ],
     "class-methods-use-this": "off",
     "import/no-duplicates": "off",
     "import/no-extraneous-dependencies": "off",

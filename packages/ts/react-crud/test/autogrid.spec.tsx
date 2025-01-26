@@ -251,7 +251,7 @@ describe('@vaadin/hilla-react-crud', () => {
       describe('Grid item count', () => {
         let autoGridRef: AutoGridRef;
 
-        const AutoGridWithCountAndRefresh = ({ service }: { service: CountService<any> & ListService<any> }) => {
+        const AutoGridWithCountAndRefresh = ({ service }: { service: CountService & ListService<any> }) => {
           const ref = useRef<AutoGridRef>(null);
           useEffect(() => {
             if (ref.current) {
@@ -918,7 +918,7 @@ describe('@vaadin/hilla-react-crud', () => {
           );
 
           const someNumberFilter = grid.getHeaderCellContent(1, 4);
-          const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
+          const [someNumberFilterField] = await Promise.all([
             TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
             SelectController.init(someNumberFilter, user),
           ]);
@@ -1019,6 +1019,7 @@ describe('@vaadin/hilla-react-crud', () => {
           expect(firstNameFilterField.placeholder).to.deep.equal('Custom filter');
         });
 
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         const CustomFirstNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
           <TextField
             id="firstNameFilter"
@@ -1259,6 +1260,7 @@ describe('@vaadin/hilla-react-crud', () => {
           {item.firstName}-{item.lastName}
         </span>
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       const FullNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
         <TextField
           id="full-name-filter"

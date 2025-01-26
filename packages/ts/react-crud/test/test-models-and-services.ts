@@ -384,7 +384,7 @@ type HasIdVersion = {
 
 export const createService = <T extends HasIdVersion>(
   initialData: T[],
-): CountService<T> & CrudService<T> & HasTestInfo => {
+): CountService & CrudService<T> & HasTestInfo => {
   let _lastSort: Sort | undefined;
   let _lastFilter: FilterUnion | undefined;
   let data = initialData;
@@ -589,13 +589,11 @@ export type HasTestInfo = {
   callCount: number;
 };
 
-export const personService = (): CountService<Person> & CrudService<Person> & HasTestInfo => createService(personData);
+export const personService = (): CountService & CrudService<Person> & HasTestInfo => createService(personData);
 export const personListService = (): ListService<Person> => createListService(personData);
-export const companyService = (): CountService<Company> & CrudService<Company> & HasTestInfo =>
-  createService(companyData);
-export const columnRendererTestService = (): CountService<ColumnRendererTestValues> &
-  CrudService<ColumnRendererTestValues> &
-  HasTestInfo => createService(columnRendererTestData);
+export const companyService = (): CountService & CrudService<Company> & HasTestInfo => createService(companyData);
+export const columnRendererTestService = (): CountService & CrudService<ColumnRendererTestValues> & HasTestInfo =>
+  createService(columnRendererTestData);
 
 const noSort: Sort = { orders: [] };
 

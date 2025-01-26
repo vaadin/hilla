@@ -105,6 +105,7 @@ describe('@vaadin/hilla-react-crud', () => {
       return expect(formElement).to.have.attribute('colspan', expectedColSpan);
     }
 
+    // eslint-disable-next-line @typescript-eslint/max-params
     async function populatePersonForm(
       personId: number,
       formProps?: Omit<AutoFormProps<PersonModel>, 'item' | 'model' | 'service'>,
@@ -240,7 +241,7 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.submit();
 
       expect(saveSpy).to.have.been.calledOnce;
-      const newItem = saveSpy.getCall(0).args[0];
+      const [newItem] = saveSpy.getCall(0).args;
       expect(newItem.firstName).to.equal('Joe');
       expect(newItem.lastName).to.equal('Quinby');
       expect(newItem.someInteger).to.equal(12);
@@ -454,7 +455,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
-      service.save = async (item: Person): Promise<Person | undefined> => Promise.resolve(undefined);
+      service.save = async (): Promise<Person | undefined> => Promise.resolve(undefined);
       const person = await getItem(service, 1);
       const errorSpy = sinon.spy();
       const submitSpy = sinon.spy();
@@ -511,6 +512,7 @@ describe('@vaadin/hilla-react-crud', () => {
           model={PersonModel}
           item={person}
           onSubmitSuccess={submitSpy}
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           onSubmitError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
         />,
       );
@@ -691,7 +693,8 @@ describe('@vaadin/hilla-react-crud', () => {
           { minWidth: '20em', columns: 1 },
           { minWidth: '40em', columns: 2 },
         ]);
-        expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
+        expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version
+        // fields
         await expectFieldColSpan(form, 'First name', null);
         await expectFieldColSpan(form, 'Last name', null);
         await expectFieldColSpan(form, 'Email', null);
@@ -999,6 +1002,7 @@ describe('@vaadin/hilla-react-crud', () => {
           item={person}
           deleteButtonVisible={true}
           onDeleteSuccess={deleteSpy}
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           onDeleteError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
         />,
       );
