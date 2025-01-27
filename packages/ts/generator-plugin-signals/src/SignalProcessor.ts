@@ -141,33 +141,49 @@ export default class SignalProcessor {
   }
 
   #createDefaultValue(signalId: ts.Identifier, functionDeclaration: FunctionDeclaration) {
-    let defaultValueExpression: ts.Expression | ts.Identifier = signalId.text.startsWith('NumberSignal')
-      ? ts.factory.createNumericLiteral('0')
-      : ts.factory.createIdentifier('undefined');
-    let defaultValueParam: ts.ParameterDeclaration | undefined;
-    let genericReturnType;
-    if (genericSignals.includes(signalId.text)) {
-      genericReturnType = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments![0];
-      if (!collectionSignals.includes(signalId.text)) {
-        const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
-        if (defaultValueType) {
-          defaultValueParam = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+    const defaultValue: {
+      defaultValueExpression: ts.Expression | ts.Identifier;
+      defaultValueParam: ts.ParameterDeclaration | undefined;
+      genericReturnType: ts.TypeNode | undefined;
+    } = {
+      defaultValueExpression: signalId.text.startsWith('NumberSignal')
+        ? ts.factory.createNumericLiteral('0')
+        : ts.factory.createIdentifier('undefined'),
+      defaultValueParam: undefined,
+      genericReturnType: undefined,
+    };
 
-          const emptyValueExpression = this.#createEmptyValueExpression(defaultValueType);
-          defaultValueExpression = ts.factory.createBinaryExpression(
-            ts.factory.createPropertyAccessChain(
-              ts.factory.createIdentifier('options'),
-              ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
-              ts.factory.createIdentifier('defaultValue'),
-            ),
-            ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-            emptyValueExpression,
-          );
-        }
-      }
+    if (!genericSignals.includes(signalId.text)) {
+      return defaultValue;
     }
-    return { defaultValueExpression, defaultValueParam, genericReturnType };
+
+    defaultValue.genericReturnType = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments![0];
+
+    if (collectionSignals.includes(signalId.text)) {
+      return defaultValue;
+    }
+
+    const defaultValueType = SignalProcessor.#getDefaultValueType(defaultValue.genericReturnType);
+    if (!defaultValueType) {
+      return defaultValue;
+    }
+
+    defaultValue.defaultValueParam = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+    const emptyValueExpression = this.#createEmptyValueExpression(defaultValueType);
+
+    defaultValue.defaultValueExpression = ts.factory.createBinaryExpression(
+      ts.factory.createPropertyAccessChain(
+        ts.factory.createIdentifier('options'),
+        ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+        ts.factory.createIdentifier('defaultValue'),
+      ),
+      ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+      emptyValueExpression,
+    );
+
+    return defaultValue;
   }
+
 
   static #getDefaultValueType(node: ts.Node) {
     if (
