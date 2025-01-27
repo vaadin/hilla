@@ -311,27 +311,33 @@ public class EndpointInvoker {
 
     private Map<String, JsonNode> getRequestParameters(ObjectNode body,
             List<String> parameterNames) {
+        // Respect the order of parameters in the request body
         Map<String, JsonNode> parametersData = new LinkedHashMap<>();
         if (body != null) {
             body.fields().forEachRemaining(entry -> parametersData
                     .put(entry.getKey(), entry.getValue()));
         }
 
-        // restore the order of parameters
+        // Try to adapt to the order of parameters in the method
         var orderedData = new LinkedHashMap<String, JsonNode>();
-
         for (String parameterName : parameterNames) {
             JsonNode parameterData = parametersData.get(parameterName);
             if (parameterData != null) {
                 parametersData.remove(parameterName);
                 orderedData.put(parameterName, parameterData);
-            } else {
-                getLogger().debug("Parameter '{}' not found in request body",
-                        parameterName);
+            }
+        }
+        orderedData.putAll(parametersData);
+
+        if (getLogger().isDebugEnabled()) {
+            var returnedParameterNames = List.copyOf(orderedData.keySet());
+            if (!parameterNames.equals(returnedParameterNames)) {
+                getLogger().debug(
+                        "The parameter names in the request body do not match the method parameters. Expected: {}, but got: {}",
+                        parameterNames, returnedParameterNames);
             }
         }
 
-        orderedData.putAll(parametersData);
         return orderedData;
     }
 

@@ -166,11 +166,19 @@ public class EndpointControllerTest {
         }
 
         @AnonymousAllowed
-        public String checkFileLength(MultipartFile fileToCheck,
+        public String checkFileLength1(MultipartFile fileToCheck,
                 long expectedLength) {
             return fileToCheck.getSize() == expectedLength
-                    ? "Check file length OK"
-                    : "Check file length FAILED";
+                    ? "Check file length 1 OK"
+                    : "Check file length 1 FAILED";
+        }
+
+        @AnonymousAllowed
+        public String checkFileLength2(long expectedLength,
+                MultipartFile fileToCheck) {
+            return fileToCheck.getSize() == expectedLength
+                    ? "Check file length 2 OK"
+                    : "Check file length 2 FAILED";
         }
     }
 
@@ -486,11 +494,17 @@ public class EndpointControllerTest {
                 new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
+        
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkFileLength", request, null);
-
+                TEST_ENDPOINT_NAME, "checkFileLength1", request, null);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().contains("Check file length OK"));
+        assertTrue(response.getBody().contains("Check file length 1 OK"));
+
+        // chech that the ordero of the parameters does not matter
+        response = vaadinController.serveMultipartEndpoint(TEST_ENDPOINT_NAME,
+                "checkFileLength2", request, null);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check file length 2 OK"));
     }
 
     @Test
