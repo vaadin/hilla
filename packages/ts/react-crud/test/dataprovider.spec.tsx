@@ -3,7 +3,7 @@ import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-compo
 import { expect, use } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { CountService, ListService } from '../crud.js';
+import type { CountService, ListService } from '../src/crud.js';
 import {
   createDataProvider,
   DataProvider,
@@ -12,12 +12,12 @@ import {
   useDataProvider,
   type ItemCounts,
 } from '../src/data-provider.js';
+import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
-import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
-import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable.js';
 
 use(sinonChai);
 
@@ -57,7 +57,7 @@ const listService: ListService<number> = {
   },
 };
 
-const listAndCountService: CountService<number> & ListService<number> = {
+const listAndCountService: CountService & ListService<number> = {
   async list(request: Pageable): Promise<number[]> {
     const offset = request.pageNumber * request.pageSize;
     return Promise.resolve(data.slice(offset, offset + request.pageSize));
