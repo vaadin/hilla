@@ -1,7 +1,5 @@
 package com.vaadin.hilla;
 
-import java.io.ByteArrayInputStream;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -80,7 +78,6 @@ import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
@@ -468,8 +465,7 @@ public class EndpointControllerTest {
     }
 
     @Test
-    public void should_AcceptMultipartFile()
-            throws IOException, ServletException {
+    public void should_AcceptMultipartFile() throws IOException {
         var request = mock(MultipartHttpServletRequest.class);
         when(request.getUserPrincipal()).thenReturn(mock(Principal.class));
         when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
@@ -494,7 +490,7 @@ public class EndpointControllerTest {
                 new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
-        
+
         var response = vaadinController.serveMultipartEndpoint(
                 TEST_ENDPOINT_NAME, "checkFileLength1", request, null);
         assertEquals(HttpStatus.OK, response.getStatusCode());
