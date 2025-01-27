@@ -22,7 +22,7 @@ import {
   TEST_SPRING_CSRF_TOKEN_VALUE,
   TEST_VAADIN_CSRF_TOKEN_VALUE,
   verifySpringCsrfTokenIsCleared,
-} from './SpringCsrfTestUtils.test.js';
+} from './SpringCsrfTestUtils.js';
 
 use(sinonChai);
 use(chaiDom);
@@ -70,6 +70,14 @@ describe('@vaadin/hilla-frontend', () => {
         ...(logoutOptions ?? {}),
       });
 
+    before(() => {
+      fetchMock.mockGlobal();
+    });
+
+    after(() => {
+      fetchMock.unmockGlobal();
+    });
+
     beforeEach(() => {
       setupSpringCsrfMetaTags();
       requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
@@ -85,7 +93,7 @@ describe('@vaadin/hilla-frontend', () => {
 
     describe('login', () => {
       it('should return an error on invalid credentials', async () => {
-        fetchMock.post('/login', { redirectUrl: '/login?error' }, { headers: requestHeaders });
+        fetchMock.post('login', { redirectUrl: 'login?error' }, { headers: requestHeaders });
         const result = await login('invalid-username', 'invalid-password', { onSuccess });
         const expectedResult: LoginResult = {
           error: true,
@@ -101,7 +109,7 @@ describe('@vaadin/hilla-frontend', () => {
 
       it('should return a CSRF token on valid credentials', async () => {
         fetchMock.post(
-          '/login',
+          'login',
           {
             body: happyCaseLoginResponseText,
             headers: happyCaseResponseHeaders,
@@ -126,7 +134,7 @@ describe('@vaadin/hilla-frontend', () => {
         // request cache, so after login, it should redirect the user to that
         // request
         fetchMock.post(
-          '/login',
+          'login',
           {
             body: happyCaseLoginResponseText,
             // mock the unthenticated attempt, which would be
@@ -157,23 +165,23 @@ describe('@vaadin/hilla-frontend', () => {
 
       it('should set the csrf token on logout', async () => {
         fetchMock.post(
-          '/logout',
+          'logout',
           {
             body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
+            redirectUrl: 'logout?login',
           },
           { headers: requestHeaders },
         );
         await logout();
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
         verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
-        expect(navigate).to.be.calledOnceWithExactly('/logout?login');
+        expect(navigate).to.be.calledOnceWithExactly('logout?login');
       });
 
       it('should clear the csrf tokens on failed server logout', async () => {
         const fakeError = new Error('unable to connect');
         fetchMock.post(
-          '/logout',
+          'logout',
           () => {
             throw fakeError;
           },
@@ -197,10 +205,10 @@ describe('@vaadin/hilla-frontend', () => {
 
       it('should clear the JWT cookie on logout', async () => {
         fetchMock.post(
-          '/logout',
+          'logout',
           {
             body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
+            redirectUrl: 'logout?login',
           },
           { headers: requestHeaders },
         );
@@ -210,12 +218,12 @@ describe('@vaadin/hilla-frontend', () => {
 
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
         expect(CookieManager.get(JWT_COOKIE_NAME)).to.be.undefined;
-        expect(navigate).to.be.calledOnceWithExactly('/logout?login');
+        expect(navigate).to.be.calledOnceWithExactly('logout?login');
       });
 
       it('should clear the JWT cookie on failed server logout', async () => {
         const fakeError = new Error('unable to connect');
-        fetchMock.post('/logout', () => {
+        fetchMock.post('logout', () => {
           throw fakeError;
         });
         fetchMock.get('?nocache', () => {
@@ -239,22 +247,22 @@ describe('@vaadin/hilla-frontend', () => {
         clearSpringCsrfMetaTags();
 
         verifySpringCsrfTokenIsCleared();
-        fetchMock.post('/logout', 403, { repeat: 1 });
+        fetchMock.post('logout', 403, { repeat: 1 });
         fetchMock.get('?nocache', {
           body: happyCaseLogoutResponseText,
         });
         fetchMock.post(
-          '/logout',
+          'logout',
           {
             body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
+            redirectUrl: 'logout?login',
           },
           { headers: requestHeaders, repeat: 1 },
         );
         await logout();
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(3);
         verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
-        expect(navigate).to.be.calledOnceWithExactly('/logout?login');
+        expect(navigate).to.be.calledOnceWithExactly('logout?login');
       });
 
       // when started the app offline, the spring csrf meta tags are not available
@@ -263,13 +271,13 @@ describe('@vaadin/hilla-frontend', () => {
 
         verifySpringCsrfTokenIsCleared();
 
-        fetchMock.post('/logout', 403, { repeat: 1 });
+        fetchMock.post('logout', 403, { repeat: 1 });
         fetchMock.get('?nocache', {
           body: happyCaseLogoutResponseText,
         });
         const fakeError = new Error('server error');
         fetchMock.post(
-          '/logout',
+          'logout',
           () => {
             throw fakeError;
           },
@@ -298,15 +306,15 @@ describe('@vaadin/hilla-frontend', () => {
         const headersWithExpiredSpringCsrfToken: Record<string, string> = {};
         headersWithExpiredSpringCsrfToken[TEST_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
 
-        fetchMock.post('/logout', 403, { headers: headersWithExpiredSpringCsrfToken, repeat: 1 });
+        fetchMock.post('logout', 403, { headers: headersWithExpiredSpringCsrfToken, repeat: 1 });
         fetchMock.get('?nocache', {
           body: happyCaseLogoutResponseText,
         });
         fetchMock.post(
-          '/logout',
+          'logout',
           {
             body: happyCaseLogoutResponseText,
-            redirectUrl: '/logout?login',
+            redirectUrl: 'logout?login',
           },
           { headers: requestHeaders, repeat: 1 },
         );
@@ -314,7 +322,7 @@ describe('@vaadin/hilla-frontend', () => {
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(3);
         verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
         expect(onSuccess).to.be.calledBefore(navigate);
-        expect(navigate).to.be.calledOnceWithExactly('/logout?login');
+        expect(navigate).to.be.calledOnceWithExactly('logout?login');
       });
     });
 

@@ -2,6 +2,7 @@
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import chaiLike from 'chai-like';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
 import type { WritableDeep } from 'type-fest';
@@ -25,9 +26,10 @@ import {
   setupSpringCsrfMetaTags,
   TEST_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
-} from './SpringCsrfTestUtils.test.js';
+} from './SpringCsrfTestUtils.js';
 
 use(chaiAsPromised);
+use(chaiLike);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -42,6 +44,14 @@ const $wnd = window as TestVaadinWindow;
 describe('@vaadin/hilla-frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
+
+    before(() => {
+      fetchMock.mockGlobal();
+    });
+
+    after(() => {
+      fetchMock.unmockGlobal();
+    });
 
     beforeEach(() => {
       subscribeStub.resetHistory();
@@ -380,7 +390,12 @@ describe('@vaadin/hilla-frontend', () => {
         }
         expect(thrownError).to.be.instanceOf(EndpointResponseError);
         expect(thrownError).to.have.property('message').that.is.string(body);
-        expect(thrownError).to.have.deep.property('response', errorResponse);
+        expect(thrownError)
+          .to.have.deep.property('response')
+          .that.satisfies(
+            (response: Response) =>
+              response.status === errorResponse.status && response.statusText === errorResponse.statusText,
+          );
       });
 
       it('should reject with unauthorized error', async () => {
