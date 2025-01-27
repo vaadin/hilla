@@ -45,7 +45,7 @@ describe('@vaadin/hilla-react-i18n', () => {
       i18n = new I18n();
       fetchMock
         .mockGlobal()
-        .get('?v-r=i18n&langtag=de-DE', {
+        .get(/\?v-r=i18n&langtag=de-DE/u, {
           body: {
             'addresses.form.city.label': 'Stadt',
             'addresses.form.street.label': 'Strasse',
@@ -53,15 +53,15 @@ describe('@vaadin/hilla-react-i18n', () => {
           status: 200,
           headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
         })
-        .get('?v-r=i18n&langtag=not-found', 404)
-        .get('?v-r=i18n&langtag=unknown', {
+        .get(/\?v-r=i18n&langtag=not-found/u, 404)
+        .get(/\?v-r=i18n&langtag=unknown/u, {
           body: {
             'addresses.form.city.label': 'Sehir',
             'addresses.form.street.label': 'Sokak',
           },
           status: 200,
         })
-        .get('*', {
+        .get(/\?v-r=i18n&.*/u, {
           body: {
             'addresses.form.city.label': 'City',
             'addresses.form.street.label': 'Street',
