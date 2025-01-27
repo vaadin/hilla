@@ -74,10 +74,25 @@ public final class GeneratorProcessor {
     private void cleanup() throws GeneratorException {
         var generatedFilesListFile = outputDirectory
                 .resolve(GENERATED_FILE_LIST_NAME);
+        if (!generatedFilesListFile.toFile().exists()) {
+            logger.debug(
+                    "Generated file list file does not exist, skipping cleanup.");
+            return;
+        }
+
+        logger.debug("Cleaning up old output.");
+        var generatedFilesList = List.<String> of();
         try {
-            var generatedFilesList = Files.readAllLines(generatedFilesListFile);
+            generatedFilesList = Files.readAllLines(generatedFilesListFile);
+        } catch (IOException e) {
+            throw new GeneratorException(
+                    "Unable to read generated file list file", e);
+        }
+
+        try {
             for (var line : generatedFilesList) {
                 var path = outputDirectory.resolve(line);
+                logger.debug("Removing generated file: {}", path);
                 Files.deleteIfExists(path);
                 // Also remove any empty parent directories
                 var dir = path.getParent();
@@ -85,13 +100,21 @@ public final class GeneratorProcessor {
                         && !dir.equals(outputDirectory)
                         && Files.isDirectory(dir) && Objects.requireNonNull(
                                 dir.toFile().list()).length == 0) {
+                    logger.debug("Removing unused generated directory: {}",
+                            dir);
                     Files.deleteIfExists(dir);
                 }
             }
-            Files.deleteIfExists(generatedFilesListFile);
         } catch (IOException e) {
             throw new GeneratorException("Unable to cleanup generated files",
                     e);
+        }
+
+        try {
+            Files.deleteIfExists(generatedFilesListFile);
+        } catch (IOException e) {
+            throw new GeneratorException(
+                    "Unable to remove the generated file list file", e);
         }
     }
 
