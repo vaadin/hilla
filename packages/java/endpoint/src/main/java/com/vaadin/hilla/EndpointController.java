@@ -37,7 +37,6 @@ import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
@@ -51,7 +50,6 @@ import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -77,6 +75,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class EndpointController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EndpointController.class);
+
+    public static final String BODY_PART_NAME = "hilla_body_part";
 
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
@@ -192,7 +192,7 @@ public class EndpointController {
                 response);
     }
 
-    @PostMapping(path = "/{endpoint}/{method}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> serveMultipartEndpoint(
             @PathVariable("endpoint") String endpointName,
             @PathVariable("method") String methodName,
@@ -252,33 +252,34 @@ public class EndpointController {
             }
 
             if (isMultipartRequest(request)) {
+                var multipartRequest = (MultipartHttpServletRequest) request;
+                var bodyPart = multipartRequest.getParameter(BODY_PART_NAME);
+
+                if (bodyPart == null) {
+                    return ResponseEntity.badRequest()
+                            .body(endpointInvoker.createResponseErrorObject(
+                                    "Missing body part in multipart request"));
+                }
+
                 try {
-                    var multipartRequest = (MultipartHttpServletRequest) request;
-                    var fileMap = multipartRequest.getFileMap();
-                    var bodyPart = multipartRequest.getParts().stream()
-                            .filter(part -> part.getSubmittedFileName() == null)
-                            .filter(part -> MediaType.APPLICATION_JSON_VALUE
-                                    .equals(part.getContentType()))
-                            .findAny().orElseThrow();
-
-                    body = objectMapper.readValue(bodyPart.getInputStream(),
-                            ObjectNode.class);
-
-                    for (var entry : fileMap.entrySet()) {
-                        var partName = entry.getKey();
-                        var file = entry.getValue();
-                        var pointer = JsonPointer.valueOf(partName);
-                        var parent = pointer.head();
-                        var property = pointer.last().getMatchingProperty();
-                        var parentObject = body.withObject(parent);
-                        parentObject.putPOJO(property, file);
-                    }
-                } catch (IOException | ServletException e) {
-                    LOGGER.error("Error processing multipart request parts", e);
+                    body = objectMapper.readValue(bodyPart, ObjectNode.class);
+                } catch (IOException e) {
+                    LOGGER.error("Request body does not contain valid JSON", e);
                     return ResponseEntity
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(endpointInvoker.createResponseErrorObject(
-                                    "Error processing multipart request parts"));
+                                    "Request body does not contain valid JSON"));
+                }
+
+                var fileMap = multipartRequest.getFileMap();
+                for (var entry : fileMap.entrySet()) {
+                    var partName = entry.getKey();
+                    var file = entry.getValue();
+                    var pointer = JsonPointer.valueOf(partName);
+                    var parent = pointer.head();
+                    var property = pointer.last().getMatchingProperty();
+                    var parentObject = body.withObject(parent);
+                    parentObject.putPOJO(property, file);
                 }
             }
 

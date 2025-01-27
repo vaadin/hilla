@@ -1,5 +1,7 @@
 package com.vaadin.hilla;
 
+import java.io.ByteArrayInputStream;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.vaadin.hilla.engine.EngineConfiguration;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -44,6 +47,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -75,6 +80,7 @@ import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
@@ -157,6 +163,14 @@ public class EndpointControllerTest {
         public String getUserName() {
             return VaadinService.getCurrentRequest().getUserPrincipal()
                     .getName();
+        }
+
+        @AnonymousAllowed
+        public String checkFileLength(MultipartFile fileToCheck,
+                long expectedLength) {
+            return fileToCheck.getSize() == expectedLength
+                    ? "Check file length OK"
+                    : "Check file length FAILED";
         }
     }
 
@@ -443,6 +457,40 @@ public class EndpointControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertTrue(response.getBody()
                 .contains(EndpointAccessChecker.ACCESS_DENIED_MSG));
+    }
+
+    @Test
+    public void should_AcceptMultipartFile()
+            throws IOException, ServletException {
+        var request = mock(MultipartHttpServletRequest.class);
+        when(request.getUserPrincipal()).thenReturn(mock(Principal.class));
+        when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
+        when(request.getContentType()).thenReturn("multipart/form-data");
+
+        // hilla request body
+        when(request.getParameter(EndpointController.BODY_PART_NAME))
+                .thenReturn("{\"expectedLength\":5}");
+
+        // uploaded file
+        var file = mock(MultipartFile.class);
+        when(request.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileToCheck", file));
+        when(file.getOriginalFilename()).thenReturn("hello.txt");
+        when(file.getSize()).thenReturn(5L);
+        when(file.getInputStream())
+                .thenReturn(new ByteArrayInputStream("Hello".getBytes()));
+
+        ServletContext servletContext = mockServletContext();
+        when(request.getServletContext()).thenReturn(servletContext);
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+
+        var vaadinController = createVaadinController(TEST_ENDPOINT);
+        var response = vaadinController.serveMultipartEndpoint(
+                TEST_ENDPOINT_NAME, "checkFileLength", request, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check file length OK"));
     }
 
     @Test
