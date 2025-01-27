@@ -184,7 +184,6 @@ export default class SignalProcessor {
     return defaultValue;
   }
 
-
   static #getDefaultValueType(node: ts.Node) {
     if (
       ts.isUnionTypeNode(node) &&
