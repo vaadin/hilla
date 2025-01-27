@@ -92,6 +92,8 @@ public class EndpointControllerTest {
     private HttpServletRequest requestMock;
     private Principal principal;
     private ApplicationConfiguration appConfig;
+    private MultipartHttpServletRequest multipartRequest;
+    private MultipartFile multipartFile;
 
     @Rule
     public TemporaryFolder projectFolder = new TemporaryFolder();
@@ -226,7 +228,7 @@ public class EndpointControllerTest {
     public final ExpectedException exception = ExpectedException.none();
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         requestMock = mock(HttpServletRequest.class);
         principal = mock(Principal.class);
 
@@ -238,6 +240,25 @@ public class EndpointControllerTest {
 
         when(requestMock.getCookies()).thenReturn(new Cookie[] {
                 new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+
+        multipartRequest = mock(MultipartHttpServletRequest.class);
+        when(multipartRequest.getUserPrincipal())
+                .thenReturn(mock(Principal.class));
+        when(multipartRequest.getHeader("X-CSRF-Token"))
+                .thenReturn("Vaadin Fusion");
+        when(multipartRequest.getContentType())
+                .thenReturn("multipart/form-data");
+        var multipartServletContext = mockServletContext();
+        when(multipartRequest.getServletContext())
+                .thenReturn(multipartServletContext);
+        when(multipartRequest.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+
+        multipartFile = mock(MultipartFile.class);
+        when(multipartFile.getOriginalFilename()).thenReturn("hello.txt");
+        when(multipartFile.getSize()).thenReturn(5L);
+        when(multipartFile.getInputStream())
+                .thenReturn(new ByteArrayInputStream("Hello".getBytes()));
     }
 
     @Test
@@ -482,39 +503,25 @@ public class EndpointControllerTest {
 
     @Test
     public void should_AcceptMultipartFile() throws IOException {
-        var request = mock(MultipartHttpServletRequest.class);
-        when(request.getUserPrincipal()).thenReturn(mock(Principal.class));
-        when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
-        when(request.getContentType()).thenReturn("multipart/form-data");
-
         // hilla request body
-        when(request.getParameter(EndpointController.BODY_PART_NAME))
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
                 .thenReturn("{\"expectedLength\":5}");
 
         // uploaded file
-        var file = mock(MultipartFile.class);
-        when(request.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileToCheck", file));
-        when(file.getOriginalFilename()).thenReturn("hello.txt");
-        when(file.getSize()).thenReturn(5L);
-        when(file.getInputStream())
-                .thenReturn(new ByteArrayInputStream("Hello".getBytes()));
-
-        ServletContext servletContext = mockServletContext();
-        when(request.getServletContext()).thenReturn(servletContext);
-        when(request.getCookies()).thenReturn(new Cookie[] {
-                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+        when(multipartRequest.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
-
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkFileLength1", request, null);
+                TEST_ENDPOINT_NAME, "checkFileLength1", multipartRequest, null);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check file length 1 OK"));
 
-        // chech that the ordero of the parameters does not matter
+        // check that the parameter order does not matter
         response = vaadinController.serveMultipartEndpoint(TEST_ENDPOINT_NAME,
-                "checkFileLength2", request, null);
+                "checkFileLength2", multipartRequest, null);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check file length 2 OK"));
     }
@@ -522,33 +529,18 @@ public class EndpointControllerTest {
     @Test
     public void should_AcceptMultipartFile_WithSingleParameter()
             throws IOException {
-        var request = mock(MultipartHttpServletRequest.class);
-        when(request.getUserPrincipal()).thenReturn(mock(Principal.class));
-        when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
-        when(request.getContentType()).thenReturn("multipart/form-data");
-
         // hilla request body
-        when(request.getParameter(EndpointController.BODY_PART_NAME))
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
                 .thenReturn("{}");
 
         // uploaded file
-        var file = mock(MultipartFile.class);
-        when(request.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileToCheck", file));
-        when(file.getOriginalFilename()).thenReturn("hello.txt");
-        when(file.getSize()).thenReturn(5L);
-        when(file.getInputStream())
-                .thenReturn(new ByteArrayInputStream("Hello".getBytes()));
-
-        ServletContext servletContext = mockServletContext();
-        when(request.getServletContext()).thenReturn(servletContext);
-        when(request.getCookies()).thenReturn(new Cookie[] {
-                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+        when(multipartRequest.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
-
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "getFileLength", request, null);
+                TEST_ENDPOINT_NAME, "getFileLength", multipartRequest, null);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("5", response.getBody());
     }
@@ -556,34 +548,19 @@ public class EndpointControllerTest {
     @Test
     public void should_AcceptMultipartFile_InComplexObjects()
             throws IOException {
-        var request = mock(MultipartHttpServletRequest.class);
-        when(request.getUserPrincipal()).thenReturn(mock(Principal.class));
-        when(request.getHeader("X-CSRF-Token")).thenReturn("Vaadin Fusion");
-        when(request.getContentType()).thenReturn("multipart/form-data");
-
         // hilla request body
-        when(request.getParameter(EndpointController.BODY_PART_NAME))
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
                 .thenReturn(
                         "{\"fileData\":{\"owner\":\"John\"},\"expectedLength\":5}");
 
         // uploaded file
-        var file = mock(MultipartFile.class);
-        when(request.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileData/file", file));
-        when(file.getOriginalFilename()).thenReturn("hello.txt");
-        when(file.getSize()).thenReturn(5L);
-        when(file.getInputStream())
-                .thenReturn(new ByteArrayInputStream("Hello".getBytes()));
-
-        ServletContext servletContext = mockServletContext();
-        when(request.getServletContext()).thenReturn(servletContext);
-        when(request.getCookies()).thenReturn(new Cookie[] {
-                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+        when(multipartRequest.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileData/file", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
-
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkOwnedFileLength", request, null);
+                TEST_ENDPOINT_NAME, "checkOwnedFileLength", multipartRequest, null);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check John's file length OK"));
     }
