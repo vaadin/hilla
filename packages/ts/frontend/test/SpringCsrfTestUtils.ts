@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai';
 
 export const TEST_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';

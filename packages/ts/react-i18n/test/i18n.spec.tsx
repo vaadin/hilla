@@ -37,14 +37,15 @@ describe('@vaadin/hilla-react-i18n', () => {
     }
 
     function verifyLoadTranslations(language: string) {
-      expect(fetchMock.callHistory.called(`./?v-r=i18n&langtag=${language}`)).to.be.true;
+      expect(fetchMock.callHistory.called(`?v-r=i18n&langtag=${language}`)).to.be.true;
     }
 
     beforeEach(() => {
       clearSettingsCookie();
       i18n = new I18n();
       fetchMock
-        .get('./?v-r=i18n&langtag=de-DE', {
+        .mockGlobal()
+        .get('?v-r=i18n&langtag=de-DE', {
           body: {
             'addresses.form.city.label': 'Stadt',
             'addresses.form.street.label': 'Strasse',
@@ -52,8 +53,8 @@ describe('@vaadin/hilla-react-i18n', () => {
           status: 200,
           headers: { 'X-Vaadin-Retrieved-Locale': 'de-DE' },
         })
-        .get('./?v-r=i18n&langtag=not-found', 404)
-        .get('./?v-r=i18n&langtag=unknown', {
+        .get('?v-r=i18n&langtag=not-found', 404)
+        .get('?v-r=i18n&langtag=unknown', {
           body: {
             'addresses.form.city.label': 'Sehir',
             'addresses.form.street.label': 'Sokak',
@@ -189,33 +190,33 @@ describe('@vaadin/hilla-react-i18n', () => {
         fetchMock
           .removeRoutes()
           .clearHistory()
-          .get('/?v-r=i18n&langtag=en&chunks=city', {
+          .get('?v-r=i18n&langtag=en&chunks=city', {
             body: {
               'addresses.form.city.label': 'City Chunked',
             },
           })
-          .get('/?v-r=i18n&langtag=en&chunks=street', {
+          .get('?v-r=i18n&langtag=en&chunks=street', {
             body: {
               'addresses.form.street.label': 'Street Chunked',
             },
           })
-          .get('/?v-r=i18n&langtag=en&chunks=city&chunks=street', {
+          .get('?v-r=i18n&langtag=en&chunks=city&chunks=street', {
             body: {
               'addresses.form.city.label': 'City Chunked',
               'addresses.form.street.label': 'Street Chunked',
             },
           })
-          .get('/?v-r=i18n&langtag=en-AU&chunks=city', {
+          .get('?v-r=i18n&langtag=en-AU&chunks=city', {
             body: {
               'addresses.form.city.label': 'Australian City Chunked',
             },
           })
-          .get('/?v-r=i18n&langtag=en-AU&chunks=street', {
+          .get('?v-r=i18n&langtag=en-AU&chunks=street', {
             body: {
               'addresses.form.street.label': 'Australian Street Chunked',
             },
           })
-          .get('/?v-r=i18n&langtag=en-AU&chunks=city&chunks=street', {
+          .get('?v-r=i18n&langtag=en-AU&chunks=city&chunks=street', {
             body: {
               'addresses.form.city.label': 'Australian City Chunked',
               'addresses.form.street.label': 'Australian Street Chunked',
@@ -631,7 +632,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         fetchMock
           .removeRoutes()
           .clearHistory()
-          .get('./?v-r=i18n&langtag=en-US', {
+          .get('?v-r=i18n&langtag=en-US', {
             body: {
               'addresses.form.city.label': 'City updated',
             },
