@@ -40,11 +40,18 @@ describe('@vaadin/hilla-react-i18n', () => {
       expect(fetchMock.callHistory.called(`?v-r=i18n&langtag=${language}`)).to.be.true;
     }
 
+    before(() => {
+      fetchMock.mockGlobal();
+    });
+
+    after(() => {
+      fetchMock.unmockGlobal();
+    });
+
     beforeEach(() => {
       clearSettingsCookie();
       i18n = new I18n();
       fetchMock
-        .mockGlobal()
         .get(/\?v-r=i18n&langtag=de-DE$/u, {
           body: {
             'addresses.form.city.label': 'Stadt',
