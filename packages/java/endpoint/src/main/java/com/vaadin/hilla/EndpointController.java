@@ -191,6 +191,25 @@ public class EndpointController {
                 response);
     }
 
+    /**
+     * Captures and processes the Vaadin multipart endpoint requests. They are
+     * used when there are uploaded files.
+     * <p>
+     * This method works as
+     * {@link #serveEndpoint(String, String, ObjectNode, HttpServletRequest, HttpServletResponse)},
+     * but it also captures the files uploaded in the request.
+     *
+     * @param endpointName
+     *            the name of an endpoint to address the calls to, not case
+     *            sensitive
+     * @param methodName
+     *            the method name to execute on an endpoint, not case sensitive
+     * @param request
+     *            the current multipart request which triggers the endpoint call
+     * @param response
+     *            the current response
+     * @return execution result as a JSON string or an error message string
+     */
     @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> serveMultipartEndpoint(
             @PathVariable("endpoint") String endpointName,
@@ -252,8 +271,9 @@ public class EndpointController {
 
             if (isMultipartRequest(request)) {
                 var multipartRequest = (MultipartHttpServletRequest) request;
-                var bodyPart = multipartRequest.getParameter(BODY_PART_NAME);
 
+                // retrieve the body from a part having the correct name
+                var bodyPart = multipartRequest.getParameter(BODY_PART_NAME);
                 if (bodyPart == null) {
                     return ResponseEntity.badRequest()
                             .body(endpointInvoker.createResponseErrorObject(
@@ -270,11 +290,16 @@ public class EndpointController {
                                     "Request body does not contain valid JSON"));
                 }
 
+                // parse uploaded files and add them to the body
                 var fileMap = multipartRequest.getFileMap();
                 for (var entry : fileMap.entrySet()) {
                     var partName = entry.getKey();
                     var file = entry.getValue();
+
+                    // parse the part name as JSON pointer, e.g.
+                    // "/orders/1/invoice"
                     var pointer = JsonPointer.valueOf(partName);
+                    // split the path in parent and property name
                     var parent = pointer.head();
                     var property = pointer.last().getMatchingProperty();
                     var parentObject = body.withObject(parent);

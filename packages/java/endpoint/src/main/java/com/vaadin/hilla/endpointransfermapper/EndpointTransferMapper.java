@@ -327,6 +327,10 @@ public class EndpointTransferMapper {
         return LoggerFactory.getLogger(getClass());
     }
 
+    /**
+     * A deserializer for MultipartFile. It is needed because otherwise Jackson
+     * tries to deserialize the object which is already a POJO.
+     */
     public static class MultipartFileDeserializer
             extends JsonDeserializer<MultipartFile> {
 
