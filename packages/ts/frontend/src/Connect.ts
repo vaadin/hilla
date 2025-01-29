@@ -187,6 +187,30 @@ function isFlowLoaded(): boolean {
   return $wnd.Vaadin?.Flow?.clients?.TypeScript !== undefined;
 }
 
+function extractFiles(obj: Record<string, unknown>): [Record<string, unknown>, Map<string, File>] {
+  const fileMap = new Map<string, File>();
+
+  function recursiveExtract(prop: unknown, path: string): unknown {
+    if (prop !== null && typeof prop === 'object' && !(prop instanceof File)) {
+      if (Array.isArray(prop)) {
+        return prop.map((item, index) => recursiveExtract(item, `${path}/${index}`));
+      }
+      return Object.entries(prop).reduce<Record<string, unknown>>((acc, [key, value]) => {
+        const newPath = `${path}/${key}`;
+        if (value instanceof File) {
+          fileMap.set(newPath, value);
+        } else {
+          acc[key] = recursiveExtract(value, newPath);
+        }
+        return acc;
+      }, {});
+    }
+    return prop;
+  }
+
+  return [recursiveExtract(obj, '') as Record<string, unknown>, fileMap];
+}
+
 /**
  * A list of parameters supported by {@link ConnectClient.call | the call() method in ConnectClient}.
  */
@@ -308,9 +332,29 @@ export class ConnectClient {
       ...csrfHeaders,
     };
 
+    const [paramsWithoutFiles, files] = extractFiles(params ?? {});
+    let body;
+
+    if (files.size > 0) {
+      // in this case params is not undefined, otherwise there would be no files
+      body = new FormData();
+      body.append(
+        'data',
+        JSON.stringify(paramsWithoutFiles, (_, value) => (value === undefined ? null : value)),
+      );
+
+      for (const [path, file] of files) {
+        body.append(path, file);
+      }
+
+      headers['Content-Type'] = 'multipart/form-data';
+    } else {
+      body =
+        params !== undefined ? JSON.stringify(params, (_, value) => (value === undefined ? null : value)) : undefined;
+    }
+
     const request = new Request(`${this.prefix}/${endpoint}/${method}`, {
-      body:
-        params !== undefined ? JSON.stringify(params, (_, value) => (value === undefined ? null : value)) : undefined,
+      body,
       headers,
       method: 'POST',
     });
