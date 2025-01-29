@@ -156,6 +156,9 @@ module.exports = (config) => {
         build: {
           target: 'esnext',
         },
+        optimizeDeps: {
+          force: true,
+        },
         cacheDir: '.vite',
         esbuild: {
           define: {
