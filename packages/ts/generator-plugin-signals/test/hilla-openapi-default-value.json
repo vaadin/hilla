@@ -1,0 +1,378 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "PrimitiveTypeValueSignalService",
+      "x-class-name" : "com.github.taefi.services.PrimitiveTypeValueSignalService"
+    }
+  ],
+  "paths" : {
+    "/PrimitiveTypeValueSignalService/anotherStringValueSignal" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_anotherStringValueSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "string",
+                        "x-java-type" : "java.lang.String"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/booleanValueSignal" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_booleanValueSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "boolean",
+                        "x-java-type" : "java.lang.Boolean"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/booleanValueSignalNullable" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_booleanValueSignalNullable_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "boolean",
+                        "nullable" : true,
+                        "x-java-type" : "java.lang.Boolean"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/doubleValueSignal" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_doubleValueSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "number",
+                        "format" : "double",
+                        "x-java-type" : "java.lang.Double"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/doubleValueSignalNullable" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_doubleValueSignalNullable_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "number",
+                        "format" : "double",
+                        "nullable" : true,
+                        "x-java-type" : "java.lang.Double"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/stringArrayValueSignal" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_stringArrayValueSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string",
+                          "x-java-type" : "java.lang.String"
+                        },
+                        "x-java-type" : "java.lang.String[]"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/stringArrayValueSignalNullable" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_stringArrayValueSignalNullable_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string",
+                          "nullable" : true,
+                          "x-java-type" : "java.lang.String"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/stringValueSignal" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_stringValueSignal_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "string",
+                        "x-java-type" : "java.lang.String"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PrimitiveTypeValueSignalService/stringValueSignalNullable" : {
+      "post" : {
+        "tags" : [
+          "PrimitiveTypeValueSignalService"
+        ],
+        "operationId" : "PrimitiveTypeValueSignalService_stringValueSignalNullable_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "type" : "string",
+                        "nullable" : true,
+                        "x-java-type" : "java.lang.String"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.signals.Signal" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
+          },
+          "valueType" : {
+            "type" : "object",
+            "x-type-arguments" : {
+              "allOf" : [
+                {
+                  "type" : "object",
+                  "x-type-variable" : "T"
+                }
+              ]
+            },
+            "x-java-type" : "java.lang.Class"
+          }
+        },
+        "x-type-parameters" : [
+          "T"
+        ]
+      },
+      "com.vaadin.hilla.signals.ValueSignal" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.Signal"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "value" : {
+                "type" : "object",
+                "nullable" : true,
+                "x-type-variable" : "T"
+              }
+            },
+            "x-type-parameters" : [
+              "T"
+            ]
+          }
+        ],
+        "x-type-arguments" : {
+          "allOf" : [
+            {
+              "type" : "object",
+              "x-type-variable" : "T"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

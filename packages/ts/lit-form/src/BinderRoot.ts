@@ -1,12 +1,5 @@
 import { EndpointValidationError, type ValidationErrorData } from '@vaadin/hilla-frontend/EndpointErrors.js';
-import {
-  _clearValidation,
-  _setErrorsWithDescendants,
-  _update,
-  _updateValidation,
-  BinderNode,
-  CHANGED,
-} from './BinderNode.js';
+import { _clearValidation, _setErrorsWithDescendants, _update, BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import {
   _parent,
@@ -118,7 +111,6 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     const oldValue = this.#value;
     this.#value = newValue;
     this[_update](oldValue);
-    this[_updateValidation]().catch(() => {});
   }
 
   /**
@@ -219,7 +211,9 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
           const [property, value, message] = res ? res.splice(2) : [data.parameterName ?? '', undefined, data.message];
           valueErrors.push({
             message,
-            property,
+            // Convert property from bracket notation to dot notation
+            // Example: 'orders[0].description' becomes 'orders.0.description'
+            property: property.replace(/\[(\d+)\]/gu, '.$1'),
             validator: new ServerValidator(message),
             value,
             validatorMessage: data.validatorMessage,
