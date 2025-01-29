@@ -18,6 +18,15 @@ const signals = ['NumberSignal', 'ValueSignal', 'ListSignal'];
 const genericSignals = ['ValueSignal', 'ListSignal'];
 const collectionSignals = ['ListSignal'];
 
+const primitiveModels = Object.freeze(
+  new Map<ts.SyntaxKind, string>([
+    [ts.SyntaxKind.StringKeyword, 'StringModel'],
+    [ts.SyntaxKind.NumberKeyword, 'NumberModel'],
+    [ts.SyntaxKind.BooleanKeyword, 'BooleanModel'],
+    [ts.SyntaxKind.ArrayType, 'ArrayModel'],
+  ]),
+);
+
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
   readonly #owner: Plugin;
@@ -48,27 +57,21 @@ export default class SignalProcessor {
       transform((tsNode) => {
         if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
           const signalId = this.#replaceSignalImport(tsNode);
-          let initialValue: ts.Expression = signalId.text.startsWith('NumberSignal')
-            ? ts.factory.createNumericLiteral('0')
-            : ts.factory.createIdentifier('undefined');
           const filteredParams = tsNode.parameters.filter(
             (p) => !p.type || !ts.isTypeReferenceNode(p.type) || p.type.typeName !== initTypeId,
           );
           // `filteredParams` can be altered after, need to store the param names now
           const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
           const isCollectionSignal = collectionSignals.includes(signalId.text);
-          let genericReturnType;
-          if (genericSignals.includes(signalId.text)) {
-            genericReturnType = (tsNode.type as ts.TypeReferenceNode).typeArguments![0];
-            if (!isCollectionSignal) {
-              const defaultValueType = SignalProcessor.#getDefaultValueType(genericReturnType);
-              if (defaultValueType) {
-                const { alias, param } = SignalProcessor.#createDefaultValueParameter(defaultValueType);
-                initialValue = alias;
-                filteredParams.push(param);
-              }
-            }
+
+          const { defaultValueExpression, defaultValueParam, genericReturnType } = this.#createDefaultValue(
+            signalId,
+            tsNode,
+          );
+          if (defaultValueParam) {
+            filteredParams.push(defaultValueParam);
           }
+
           const returnType = genericReturnType ?? signalId;
           if (filteredParams.length > 0) {
             functionParams.set(tsNode.name.text, filteredParams);
@@ -83,7 +86,9 @@ export default class SignalProcessor {
               transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === RETURN_TYPE ? returnType : node)),
               transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
-              transform((node) => (ts.isIdentifier(node) && node.text === INITIAL_VALUE ? initialValue : node)),
+              transform((node) =>
+                ts.isIdentifier(node) && node.text === INITIAL_VALUE ? defaultValueExpression : node,
+              ),
             ],
           );
         }
@@ -135,6 +140,50 @@ export default class SignalProcessor {
     );
   }
 
+  #createDefaultValue(signalId: ts.Identifier, functionDeclaration: FunctionDeclaration) {
+    const defaultValue: {
+      defaultValueExpression: ts.Expression | ts.Identifier;
+      defaultValueParam: ts.ParameterDeclaration | undefined;
+      genericReturnType: ts.TypeNode | undefined;
+    } = {
+      defaultValueExpression: signalId.text.startsWith('NumberSignal')
+        ? ts.factory.createNumericLiteral('0')
+        : ts.factory.createIdentifier('undefined'),
+      defaultValueParam: undefined,
+      genericReturnType: undefined,
+    };
+
+    if (!genericSignals.includes(signalId.text)) {
+      return defaultValue;
+    }
+
+    defaultValue.genericReturnType = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments![0];
+
+    if (collectionSignals.includes(signalId.text)) {
+      return defaultValue;
+    }
+
+    const defaultValueType = SignalProcessor.#getDefaultValueType(defaultValue.genericReturnType);
+    if (!defaultValueType) {
+      return defaultValue;
+    }
+
+    defaultValue.defaultValueParam = SignalProcessor.#createDefaultValueParameter(defaultValueType);
+    const emptyValueExpression = this.#createEmptyValueExpression(defaultValueType);
+
+    defaultValue.defaultValueExpression = ts.factory.createBinaryExpression(
+      ts.factory.createPropertyAccessChain(
+        ts.factory.createIdentifier('options'),
+        ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
+        ts.factory.createIdentifier('defaultValue'),
+      ),
+      ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
+      emptyValueExpression,
+    );
+
+    return defaultValue;
+  }
+
   static #getDefaultValueType(node: ts.Node) {
     if (
       ts.isUnionTypeNode(node) &&
@@ -145,23 +194,115 @@ export default class SignalProcessor {
     ) {
       return node.types[0].typeArguments[0];
     }
-
     return undefined;
   }
 
-  static #createDefaultValueParameter(returnType: ts.TypeNode) {
-    const alias = createFullyUniqueIdentifier('defaultValue');
-    const bindingPattern = ts.factory.createObjectBindingPattern([
-      ts.factory.createBindingElement(undefined, ts.factory.createIdentifier('defaultValue'), alias, undefined),
-    ]);
+  static #createDefaultValueParameter(defaultValueType: ts.TypeNode) {
     const paramType = ts.factory.createTypeLiteralNode([
-      ts.factory.createPropertySignature(undefined, ts.factory.createIdentifier('defaultValue'), undefined, returnType),
+      ts.factory.createPropertySignature(
+        undefined,
+        ts.factory.createIdentifier('defaultValue'),
+        undefined,
+        defaultValueType,
+      ),
     ]);
-    // Return both the alias and the full parameter
-    return {
-      alias,
-      param: ts.factory.createParameterDeclaration(undefined, undefined, bindingPattern, undefined, paramType),
-    };
+
+    return ts.factory.createParameterDeclaration(
+      undefined,
+      undefined,
+      'options',
+      ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+      paramType,
+    );
+  }
+
+  static #isDefaultValueTypeNullable(defaultValueType: ts.TypeNode) {
+    return (
+      ts.isUnionTypeNode(defaultValueType) &&
+      defaultValueType.types.length &&
+      defaultValueType.types.length > 1 &&
+      defaultValueType.types.map((t) => t.kind).includes(ts.SyntaxKind.UndefinedKeyword)
+    );
+  }
+
+  #createEmptyValueExpression(defaultValueType: ts.UnionTypeNode) {
+    if (SignalProcessor.#isDefaultValueTypeNullable(defaultValueType)) {
+      return ts.factory.createIdentifier('undefined');
+    }
+    const importedModelUniqueId = this.#determineModelImportUniqueIdentifier(defaultValueType);
+    return ts.factory.createCallExpression(
+      ts.factory.createPropertyAccessExpression(importedModelUniqueId, 'createEmptyValue'),
+      undefined,
+      [],
+    );
+  }
+
+  #determineModelImportUniqueIdentifier(returnTypeNode: ts.UnionTypeNode) {
+    let modelName = primitiveModels.get(returnTypeNode.types[0].kind);
+    let entityName;
+    if (modelName === undefined) {
+      const { entityName: e, modelName: m } = SignalProcessor.#extractModelNameFromTypeNode(returnTypeNode);
+      modelName = m;
+      entityName = e;
+    }
+    const modelImportUniqueId =
+      this.#getExistingEntityModelUniqueIdentifier(modelName) ?? createFullyUniqueIdentifier(modelName);
+
+    this.#addModelImport(entityName, modelName, modelImportUniqueId);
+    return modelImportUniqueId;
+  }
+
+  static #extractModelNameFromTypeNode(returnTypeNode: ts.UnionTypeNode) {
+    if (ts.isTypeReferenceNode(returnTypeNode.types[0])) {
+      const typeIdentifier = returnTypeNode.types[0].typeName;
+      if (ts.isIdentifier(typeIdentifier)) {
+        const entityName = typeIdentifier.text;
+        const modelName = `${entityName}Model`;
+        return { entityName, modelName };
+      }
+    }
+    throw new Error('Unsupported type reference node');
+  }
+
+  #getExistingEntityModelUniqueIdentifier(modelName: string) {
+    const { imports } = this.#dependencyManager;
+    return (
+      imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName) ??
+      imports.default.iter().find(([path]) => path.endsWith(`/${modelName}.js`))?.[1]
+    );
+  }
+
+  #addModelImport(
+    entityName: string | undefined,
+    modelName: string | undefined,
+    modelNameUniqueId: ts.Identifier | undefined,
+  ) {
+    if (modelName) {
+      if (primitiveModels.values().find((primitiveModel) => primitiveModel === modelName)) {
+        const { imports } = this.#dependencyManager;
+        const importedModel = imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName);
+        if (importedModel === undefined) {
+          imports.named.add('@vaadin/hilla-lit-form', modelName, false, modelNameUniqueId);
+        }
+      } else {
+        this.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!);
+      }
+    }
+  }
+
+  #addObjectModelImport(entityName: string, modelName: string, modelNameUniqueId: ts.Identifier) {
+    const { imports } = this.#dependencyManager;
+    const entityImport = imports.default
+      .iter()
+      .map(([path]) => path)
+      .find((path) => path.startsWith('./') && path.endsWith(`/${entityName}.js`));
+    if (entityImport) {
+      const entityModelImportPath = entityImport.replace(`/${entityName}.js`, `/${modelName}.js`);
+      const importedModel = imports.default.paths().find((path) => path === entityModelImportPath);
+      if (importedModel === undefined) {
+        imports.default.add(entityModelImportPath, modelName, false, modelNameUniqueId);
+      }
+    }
   }
 
   #replaceSignalImport(method: FunctionDeclaration): Identifier {
