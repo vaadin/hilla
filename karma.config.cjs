@@ -153,18 +153,20 @@ module.exports = (config) => {
     vite: {
       autoInit: false,
       config: {
+        define: {
+          __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
+          __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
+        },
         build: {
           target: 'esnext',
         },
-        optimizeDeps: {
-          force: true,
+        server: {
+          warmup: {
+            clientFiles: ['src/**/*', 'test/**/*'],
+          },
         },
         cacheDir: '.vite',
         esbuild: {
-          define: {
-            __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
-            __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
-          },
           tsconfigRaw: {
             ...tsconfig,
             compilerOptions: {
