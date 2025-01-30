@@ -27,7 +27,6 @@ const watch = !!_watch && !isCI;
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   concurrency: 10,
-  // nodeResolve: true,
   watch,
   coverage,
   rootDir: fileURLToPath(cwd),
