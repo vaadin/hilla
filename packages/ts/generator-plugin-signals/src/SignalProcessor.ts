@@ -161,7 +161,7 @@ export default class SignalProcessor {
       return defaultValue;
     }
 
-    defaultValue.genericReturnType = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments![0];
+    [defaultValue.genericReturnType] = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments!;
 
     if (collectionSignals.includes(signalId.text)) {
       return defaultValue;
