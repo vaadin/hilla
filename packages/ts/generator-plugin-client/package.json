@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-plugin-client",
-  "version": "24.7.0-alpha8",
+  "version": "24.7.0-alpha9",
   "description": "A Hilla TypeScript Generator plugin to generate default client implementation",
   "main": "index.js",
   "type": "module",
@@ -51,8 +51,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-core": "24.7.0-alpha8",
-    "@vaadin/hilla-generator-utils": "24.7.0-alpha8",
+    "@vaadin/hilla-generator-core": "24.7.0-alpha9",
+    "@vaadin/hilla-generator-utils": "24.7.0-alpha9",
     "typescript": "5.7.3"
   }
 }
