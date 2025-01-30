@@ -38,17 +38,23 @@ export default function SharedNumberSignal() {
         )}
       </div>
       <div>
-        <span id="userCounter">{userCounter}</span>
+        <span id="userCounter">
+          <>{userCounter}</>
+        </span>
         <Button id="increaseUserCounter" onClick={() => userCounter.value++}>
           Increment
         </Button>
         <br />
-        <span id="adminCounter">{adminCounter}</span>
+        <span id="adminCounter">
+          <>{adminCounter}</>
+        </span>
         <Button id="incrementAdminCounter" onClick={() => adminCounter.value++}>
           Increment
         </Button>
         <br />
-        <span id="UserCounterFromServer">{userCounterFromServer}</span>
+        <span id="UserCounterFromServer">
+          <>{userCounterFromServer}</>
+        </span>
         <Button
           id="fetchUserCounter"
           onClick={async () => {
@@ -58,7 +64,9 @@ export default function SharedNumberSignal() {
           Fetch User Counter from server
         </Button>
         <br />
-        <span id="AdminCounterFromServer">{adminCounterFromServer}</span>
+        <span id="AdminCounterFromServer">
+          <>{adminCounterFromServer}</>
+        </span>
         <Button
           id="fetchAdminCounter"
           onClick={async () => {

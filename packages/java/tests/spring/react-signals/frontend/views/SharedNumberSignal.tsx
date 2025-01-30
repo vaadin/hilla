@@ -11,12 +11,16 @@ export default function SharedNumberSignal() {
 
   return (
     <div>
-      <span id="sharedValue">{sharedValue}</span>
+      <span id="sharedValue">
+        <>{sharedValue}</>
+      </span>
       <Button id="increaseSharedValue" onClick={() => (sharedValue.value += 2)}>
         Increase by 2
       </Button>
       <br />
-      <span id="counter">{counter}</span>
+      <span id="counter">
+        <>{counter}</>
+      </span>
       <Button id="incrementCounter" onClick={() => counter.value++}>
         Increment
       </Button>
@@ -31,7 +35,9 @@ export default function SharedNumberSignal() {
         Reset
       </Button>
       <br />
-      <span id="sharedValueFromServer">{sharedValueFromServer}</span>
+      <span id="sharedValueFromServer">
+        <>{sharedValueFromServer}</>
+      </span>
       <Button
         id="fetchSharedValue"
         onClick={async () => {
@@ -41,7 +47,9 @@ export default function SharedNumberSignal() {
         Fetch shared value from server
       </Button>
       <br />
-      <span id="counterValueFromServer">{counterValueFromServer}</span>
+      <span id="counterValueFromServer">
+        <>{counterValueFromServer}</>
+      </span>
       <Button
         id="fetchCounterValue"
         onClick={async () => {
