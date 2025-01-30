@@ -514,6 +514,24 @@ describe('@vaadin/hilla-frontend', () => {
         expect(body).to.equal('{"fooParam":{"a":"abc"}}');
       });
 
+      it('should use multipart if a File is found in array', async () => {
+        const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
+        await client.call('FooEndpoint', 'fooMethod', { fooParam: ['a', file, 'c'], other: 'abc' });
+
+        const request = fetchMock.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        const formData = await request!.formData();
+
+        const uploadedFile = formData.get('/fooParam/1') as File | null;
+        expect(uploadedFile).to.be.instanceOf(File);
+        expect(uploadedFile!.name).to.equal('foo.txt');
+        expect(await uploadedFile!.text()).to.equal('foo');
+
+        const body = formData.get(bodyPartName);
+        expect(body).to.equal('{"fooParam":["a",null,"c"],"other":"abc"}');
+      });
+
       describe('middleware invocation', () => {
         it('should not invoke middleware before call', () => {
           const spyMiddleware = sinon.spy(async (context: MiddlewareContext, next: MiddlewareNext) => next(context));

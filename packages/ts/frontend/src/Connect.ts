@@ -189,11 +189,21 @@ function isFlowLoaded(): boolean {
   return $wnd.Vaadin?.Flow?.clients?.TypeScript !== undefined;
 }
 
+/**
+ * Extracts file objects from the object that is used to build the request body.
+ *
+ * @param obj - The object to extract files from.
+ * @returns A tuple with the object without files and a map of files.
+ */
 function extractFiles(obj: Record<string, unknown>): [Record<string, unknown>, Map<string, File>] {
   const fileMap = new Map<string, File>();
 
   function recursiveExtract(prop: unknown, path: string): unknown {
-    if (prop !== null && typeof prop === 'object' && !(prop instanceof File)) {
+    if (prop !== null && typeof prop === 'object') {
+      if (prop instanceof File) {
+        fileMap.set(path, prop);
+        return null;
+      }
       if (Array.isArray(prop)) {
         return prop.map((item, index) => recursiveExtract(item, `${path}/${index}`));
       }
