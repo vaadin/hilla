@@ -153,10 +153,6 @@ module.exports = (config) => {
     vite: {
       autoInit: false,
       config: {
-        define: {
-          __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
-          __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
-        },
         build: {
           target: 'esnext',
         },
@@ -167,6 +163,10 @@ module.exports = (config) => {
         },
         cacheDir: '.vite',
         esbuild: {
+          define: {
+            __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
+            __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
+          },
           tsconfigRaw: {
             ...tsconfig,
             compilerOptions: {
