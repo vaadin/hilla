@@ -497,7 +497,7 @@ describe('@vaadin/hilla-frontend', () => {
         const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
         await client.call('FooEndpoint', 'fooMethod', { fooParam: file });
 
-        const request = fetchMock.lastCall()?.request;
+        const request = fetchMock.callHistory.lastCall()?.request;
         expect(request).to.exist;
         expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
         const formData = await request!.formData();
@@ -515,7 +515,7 @@ describe('@vaadin/hilla-frontend', () => {
         const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
         await client.call('FooEndpoint', 'fooMethod', { fooParam: { a: 'abc', b: file } });
 
-        const request = fetchMock.lastCall()?.request;
+        const request = fetchMock.callHistory.lastCall()?.request;
         expect(request).to.exist;
         expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
         const formData = await request!.formData();
@@ -533,7 +533,7 @@ describe('@vaadin/hilla-frontend', () => {
         const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
         await client.call('FooEndpoint', 'fooMethod', { fooParam: ['a', file, 'c'], other: 'abc' });
 
-        const request = fetchMock.lastCall()?.request;
+        const request = fetchMock.callHistory.lastCall()?.request;
         expect(request).to.exist;
         expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
         const formData = await request!.formData();
