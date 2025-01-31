@@ -3,13 +3,11 @@ import { readFile } from 'node:fs/promises';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { chai, describe, expect, it } from 'vitest';
 import BarrelPlugin from '../../src/index.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('BarrelPlugin', () => {
   const sectionName = 'BasicBarrel';
@@ -23,7 +21,7 @@ describe('BarrelPlugin', () => {
 
     const barrelFile = files[files.length - 1];
 
-    await expect(await barrelFile.text()).toMatchSnapshot(`barrel.snap.ts`, import.meta.url);
+    await expect(await barrelFile.text()).toMatchFileSnapshot(`fixtures/barrel.snap.ts`);
     expect(barrelFile.name).to.equal(`endpoints.ts`);
   });
 });
