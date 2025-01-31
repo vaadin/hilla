@@ -13,8 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import { assert } from 'chai';
+import { assert, describe, it } from 'vitest';
 import type { VaadinWindow } from './types.js';
+// eslint-disable-next-line import/no-unassigned-import
+import '../src/index.js';
 
 describe('@vaadin/hilla-lit-form', () => {
   describe('Index', () => {
