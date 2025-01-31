@@ -30,7 +30,8 @@ describe('@vaadin/hilla-frontend', () => {
     }
 
     let fluxConnection: FluxConnection;
-    let fluxConnectionHelper: {
+    // TODO: Do we need this helper?
+    let _fluxConnectionHelper: {
       nrSentMessages(): number;
       sentMessage(i: number): AbstractMessage | undefined;
       handleMessage(msg: AbstractMessage): unknown;
@@ -39,7 +40,7 @@ describe('@vaadin/hilla-frontend', () => {
     beforeEach(() => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/connect');
-      fluxConnectionHelper = {
+      _fluxConnectionHelper = {
         handleMessage(msg) {
           getSubscriptionEventSpies()?.onMessage?.({ responseBody: JSON.stringify(msg) });
         },
@@ -359,7 +360,7 @@ describe('@vaadin/hilla-frontend', () => {
     });
 
     it('should update state while reconnecting', () => {
-      const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+      fluxConnection.subscribe('MyEndpoint', 'myMethod');
       fluxConnection.state = State.INACTIVE;
       getSubscriptionEventSpies()?.onReconnect?.();
       expect(fluxConnection.state).to.equal(State.RECONNECTING);

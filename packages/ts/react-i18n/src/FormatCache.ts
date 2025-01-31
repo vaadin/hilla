@@ -10,7 +10,7 @@ export class FormatCache {
     let supportedLocales: string[] = [];
     try {
       supportedLocales = Intl.NumberFormat.supportedLocalesOf(language);
-    } catch (e) {}
+    } catch {}
     this.#language = supportedLocales.length > 0 ? supportedLocales[0] : navigator.language;
   }
 
