@@ -1,14 +1,14 @@
 import { appendFile, mkdir, rm } from 'node:fs/promises';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
+import { afterAll, beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import { RouteParamType } from '../../src/shared/routeParamType.js';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import createViewConfigJson from '../../src/vite-plugin/createViewConfigJson.js';
 import { createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
-use(chaiLike);
-use(chaiAsPromised);
+chai.use(chaiLike);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('createViewConfigJson', () => {
@@ -17,7 +17,7 @@ describe('@vaadin/hilla-file-router', () => {
     let layoutOnlyDir: URL;
     let layoutOnlyDirLayout: URL;
 
-    before(async () => {
+    beforeAll(async () => {
       tmp = await createTmpDir();
 
       layoutOnlyDir = new URL('layout-only/', tmp);
@@ -28,7 +28,7 @@ describe('@vaadin/hilla-file-router', () => {
       await appendFile(layoutOnlyDirLayout, 'export default function LayoutOnly() {};');
     });
 
-    after(async () => {
+    afterAll(async () => {
       await rm(tmp, { recursive: true, force: true });
     });
 

@@ -17,7 +17,7 @@ export function loadRegisterJs({ root }: LoadRegisterOptions): Plugin {
     enforce: 'pre',
     name: 'vite-hilla-register',
     async transform(code) {
-      if (code.includes('__REGISTER__()') && !code.includes('function __REGISTER__')) {
+      if (/__REGISTER__\(.*\)/u.test(code) && !code.includes('function __REGISTER__')) {
         const registerCode = await readFile(new URL('scripts/register.js', root), 'utf8').then((c) =>
           c.replace('export', ''),
         );

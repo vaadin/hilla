@@ -1,12 +1,12 @@
 import { existsSync, watch } from 'node:fs';
-import { rm, mkdir, writeFile, readFile } from 'node:fs/promises';
-import { expect, use } from 'chai';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import chaiAsPromised from 'chai-as-promised';
 import type { Logger } from 'vite';
+import { afterAll, beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import { generateRuntimeFiles, type RuntimeFileUrls } from '../../src/vite-plugin/generateRuntimeFiles.js';
 import { createLogger, createTestingRouteFiles, createTmpDir } from '../utils.js';
 
-use(chaiAsPromised);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('generateRuntimeFiles', () => {
@@ -15,7 +15,7 @@ describe('@vaadin/hilla-file-router', () => {
     let runtimeUrls: RuntimeFileUrls;
     let logger: Logger;
 
-    before(async () => {
+    beforeAll(async () => {
       tmp = await createTmpDir();
 
       viewsDir = new URL('views/', tmp);
@@ -28,7 +28,7 @@ describe('@vaadin/hilla-file-router', () => {
       await createTestingRouteFiles(viewsDir);
     });
 
-    after(async () => {
+    afterAll(async () => {
       await rm(tmp, { recursive: true, force: true });
     });
 
