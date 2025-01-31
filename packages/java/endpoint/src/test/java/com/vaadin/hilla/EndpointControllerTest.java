@@ -195,6 +195,14 @@ public class EndpointControllerTest {
                     fileData.file().getSize() == expectedLength ? "OK"
                             : "FAILED");
         }
+
+        @AnonymousAllowed
+        public String checkMultipleFiles(MultipartFile file1,
+                MultipartFile file2, long expectedLength) {
+            return file1.getSize() + file2.getSize() == expectedLength
+                    ? "Check multiple files OK"
+                    : "Check multiple files FAILED";
+        }
     }
 
     @Endpoint("CustomEndpoint")
@@ -563,11 +571,35 @@ public class EndpointControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check John's file length OK"));
-    }
+}
 
     @Test
-    @Ignore("FIXME: this test is flaky, it fails when executed fast enough")
-    public void should_bePossibeToGetPrincipalInEndpoint() {
+    public void should_AcceptMultipleMultipartFiles() throws IOException {
+        // hilla request body
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
+                .thenReturn("{\"expectedLength\":9}");
+
+        // uploaded files
+        var otherMultipartFile = mock(MultipartFile.class);
+        when(otherMultipartFile.getOriginalFilename()).thenReturn("hello.txt");
+        when(otherMultipartFile.getSize()).thenReturn(4L);
+        when(otherMultipartFile.getInputStream())
+                .thenReturn(new ByteArrayInputStream ("Ciao".getBytes()));
+
+        when(multipartRequest.getFileMap())
+                .thenReturn(Map.of("/file1", multipartFile, "/file2", otherMultipartFile));
+
+        var vaadinController = createVaadinController(TEST_ENDPOINT);
+        var response = vaadinController.serveMultipartEndpoint(
+                TEST_ENDPOINT_NAME, "checkMultipleFiles", multipartRequest, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check multiple files OK"));
+}
+
+@Test
+@Ignore("FIXME: this test is flaky, it fails when executed fast enough")
+public void should_bePossibeToGetPrincipalInEndpoint() {
         when(principal.getName()).thenReturn("foo");
 
         EndpointController vaadinController = createVaadinController(
