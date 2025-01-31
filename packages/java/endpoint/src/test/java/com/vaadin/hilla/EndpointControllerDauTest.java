@@ -57,12 +57,13 @@ public class EndpointControllerDauTest {
         EndpointRegistry endpointRegistry = new EndpointRegistry(
                 new EndpointNameChecker());
         ApplicationContext appCtx = Mockito.mock(ApplicationContext.class);
+        ObjectMapper objectMapper = new JacksonObjectMapperFactory.Json()
+                .build();
         EndpointInvoker endpointInvoker = new EndpointInvoker(appCtx,
-                new JacksonObjectMapperFactory.Json().build(),
-                new ExplicitNullableTypeChecker(), servletContext,
+                objectMapper, new ExplicitNullableTypeChecker(), servletContext,
                 endpointRegistry);
         controller = new EndpointController(appCtx, endpointRegistry,
-                endpointInvoker, csrfChecker);
+                endpointInvoker, csrfChecker, objectMapper);
     }
 
     @Test
