@@ -60,7 +60,7 @@ interface User {
 }
 
 function TestApp({ user, initialRoute }: { user?: User; initialRoute: string }) {
-  const { AuthProvider, useAuth } = configureAuth(async () => Promise.resolve(user));
+  const { AuthProvider } = configureAuth(async () => Promise.resolve(user));
   const protectedRoutes = protectRoutes(testRoutes);
   const router = createMemoryRouter(protectedRoutes, {
     initialEntries: [initialRoute],

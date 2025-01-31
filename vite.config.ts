@@ -18,6 +18,11 @@ export default defineConfig({
   build: {
     target: 'esnext',
   },
+  server: {
+    warmup: {
+      clientFiles: ['src/**/*', 'test/**/*'],
+    },
+  },
   cacheDir: '.vite',
   esbuild: {
     define: {
