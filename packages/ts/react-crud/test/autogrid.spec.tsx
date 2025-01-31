@@ -250,7 +250,7 @@ describe('@vaadin/hilla-react-crud', () => {
       describe('Grid item count', () => {
         let autoGridRef: AutoGridRef;
 
-        const AutoGridWithCountAndRefresh = ({ service }: { service: CountService & ListService<any> }) => {
+        const AutoGridWithCountAndRefresh = ({ service }: { service: CountService<any> & ListService<any> }) => {
           const ref = useRef<AutoGridRef>(null);
           useEffect(() => {
             if (ref.current) {

@@ -57,7 +57,7 @@ const listService: ListService<number> = {
   },
 };
 
-const listAndCountService: CountService & ListService<number> = {
+const listAndCountService: CountService<number> & ListService<number> = {
   async list(request: Pageable): Promise<number[]> {
     const offset = request.pageNumber * request.pageSize;
     return Promise.resolve(data.slice(offset, offset + request.pageSize));
