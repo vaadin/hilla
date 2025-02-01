@@ -1,4 +1,4 @@
-import { mergeConfig } from 'vitest/config.js';
+import { mergeConfig } from 'vitest/config';
 import sharedConfig from '../../../scripts/vite/browser.vitest.config.js';
 
 export default mergeConfig(sharedConfig, {
