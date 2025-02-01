@@ -1,9 +1,14 @@
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
-import { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
-import { ListSignal, ValueSignal } from '../src';
+import sinonChai from 'sinon-chai';
+import { beforeEach, describe, expect, it, chai } from 'vitest';
 import type { InsertLastStateEvent, RemoveStateEvent, StateEvent } from '../src/events.js';
+import { ListSignal, ValueSignal } from '../src/index.js';
 import { createSubscriptionStub, subscribeToSignalViaEffect } from './utils.js';
+
+chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('ListSignal', () => {
@@ -418,9 +423,9 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(listSignal.value).to.have.length(4);
     });
 
-    it('should resolve the result promise after insertLast', (done) => {
+    it('should resolve the result promise after insertLast', async () => {
       subscribeToSignalViaEffect(listSignal);
-      listSignal.insertLast('Alice').result.then(done, () => done('Should not reject'));
+      const { result } = listSignal.insertLast('Alice');
       const [, , params] = client.call.firstCall.args;
       const insertEvent: InsertLastStateEvent<string> = {
         id: (params!.event as { id: string }).id,
@@ -431,9 +436,10 @@ describe('@vaadin/hilla-react-signals', () => {
         accepted: true,
       };
       simulateReceivingEvent(insertEvent);
+      await expect(result).to.be.fulfilled;
     });
 
-    it('should resolve the result promise after remove', (done) => {
+    it('should resolve the result promise after remove', async () => {
       subscribeToSignalViaEffect(listSignal);
       const snapshot = {
         id: '123',
@@ -444,7 +450,7 @@ describe('@vaadin/hilla-react-signals', () => {
       };
       simulateReceivingEvent(snapshot);
       const firstElement = listSignal.value.values().next().value!;
-      listSignal.remove(firstElement).result.then(done, () => done('Should not reject'));
+      const { result } = listSignal.remove(firstElement);
       const [, , params] = client.call.firstCall.args;
       const removeEvent: RemoveStateEvent = {
         id: (params!.event as { id: string }).id,
@@ -454,16 +460,19 @@ describe('@vaadin/hilla-react-signals', () => {
         accepted: true,
       };
       simulateReceivingEvent(removeEvent);
+      await expect(result).to.be.fulfilled;
     });
 
-    it('should resolve the result promise after removing a non-existing entry', (done) => {
+    it('should resolve the result promise after removing a non-existing entry', async () => {
       subscribeToSignalViaEffect(listSignal);
+
       const nonExistentSignal = new ValueSignal<string>('', {
         client,
         endpoint: 'NameService',
         method: 'nameListSignal',
       });
-      listSignal.remove(nonExistentSignal).result.then(done, () => done('Should not reject'));
+
+      await expect(listSignal.remove(nonExistentSignal).result).to.be.fulfilled;
     });
   });
 });
