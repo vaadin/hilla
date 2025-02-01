@@ -58,7 +58,7 @@ export function constructCss(): Plugin {
     },
     async transform(_, id) {
       if (id.endsWith('.obj.css')) {
-        const { content } = await cssTransformer.process(css.get(id));
+        const { content } = await cssTransformer.process(css.get(id), { from: id });
 
         return {
           code: `const css = new CSSStyleSheet();css.replaceSync(${JSON.stringify(content)});export default css;`,
