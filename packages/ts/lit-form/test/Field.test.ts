@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions, no-shadow, @typescript-eslint/unbound-method */
-import { assert, expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import { LitElement, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -7,6 +6,7 @@ import { html, unsafeStatic } from 'lit/static-html.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import isLength from 'validator/es/lib/isLength.js';
+import { afterEach, assert, beforeEach, chai, describe, expect, it } from 'vitest';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test
 import {
@@ -14,6 +14,7 @@ import {
   type AbstractModel,
   Binder,
   CheckedFieldStrategy,
+  CheckedGroupFieldStrategy,
   ComboBoxFieldStrategy,
   field,
   type FieldElement,
@@ -24,12 +25,11 @@ import {
   SelectedFieldStrategy,
   VaadinDateTimeFieldStrategy,
   VaadinFieldStrategy,
-  CheckedGroupFieldStrategy,
 } from '../src/index.js';
 import { OrderModel, TestModel } from './TestModels.js';
 
-use(sinonChai);
-use(chaiDom);
+chai.use(sinonChai);
+chai.use(chaiDom);
 
 describe('@vaadin/hilla-lit-form', () => {
   describe('Field', () => {
@@ -39,31 +39,31 @@ describe('@vaadin/hilla-lit-form', () => {
         // pretend it’s a Vaadin component to use VaadinFieldStrategy
         static readonly version = '0.0.0';
 
-        __value = '';
+        #value = '';
 
         valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
-        __required = false;
+        #required = false;
 
         requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
 
         setAttributeSpy = sinon.spy(this, 'setAttribute');
 
         get value() {
-          return this.__value;
+          return this.#value;
         }
 
         set value(value) {
           // Native inputs stringify incoming values
-          this.__value = String(value);
+          this.#value = String(value);
         }
 
         get required() {
-          return this.__required;
+          return this.#required;
         }
 
         set required(value) {
-          this.__required = value;
+          this.#required = value;
         }
       }
 
@@ -76,16 +76,16 @@ describe('@vaadin/hilla-lit-form', () => {
         binder = new Binder(this, OrderModel);
 
         @query('#notesField')
-        notesField?: MockTextFieldElement;
+        accessor notesField: MockTextFieldElement | null = null;
 
         @query('#customerFullNameField')
-        customerFullNameField?: MockTextFieldElement;
+        accessor customerFullNameField: MockTextFieldElement | null = null;
 
         @query('#customerNickNameField')
-        customerNickNameField?: MockTextFieldElement;
+        accessor customerNickNameField: MockTextFieldElement | null = null;
 
         @query('#priorityField')
-        priorityField?: MockTextFieldElement;
+        accessor priorityField: MockTextFieldElement | null = null;
 
         override render() {
           return html`
@@ -329,19 +329,19 @@ describe('@vaadin/hilla-lit-form', () => {
     describe('field with input', () => {
       @customElement('mock-input')
       class MockInputElement extends HTMLElement {
-        __value = '';
+        #value = '';
 
         valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
         setAttributeSpy = sinon.spy(this, 'setAttribute');
 
         get value() {
-          return this.__value;
+          return this.#value;
         }
 
         set value(value) {
           // Native inputs stringify incoming values
-          this.__value = String(value);
+          this.#value = String(value);
         }
       }
 
@@ -352,16 +352,16 @@ describe('@vaadin/hilla-lit-form', () => {
         binder = new Binder(this, OrderModel);
 
         @query('#notesField')
-        notesField?: MockInputElement;
+        accessor notesField: MockInputElement | null = null;
 
         @query('#customerFullNameField')
-        customerFullNameField?: MockInputElement;
+        accessor customerFullNameField: MockInputElement | null = null;
 
         @query('#customerNickNameField')
-        customerNickNameField?: MockInputElement;
+        accessor customerNickNameField: MockInputElement | null = null;
 
         @query('#priorityField')
-        priorityField?: MockInputElement;
+        accessor priorityField: MockInputElement | null = null;
 
         override render() {
           return html`

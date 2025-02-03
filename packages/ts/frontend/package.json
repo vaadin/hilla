@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-frontend",
-  "version": "24.7.0-alpha9",
+  "version": "24.7.0-alpha10",
   "description": "Hilla core frontend utils",
   "main": "index.js",
   "module": "index.js",
@@ -20,9 +20,9 @@
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9875",
-    "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "exports": {

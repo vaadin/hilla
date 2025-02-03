@@ -1,12 +1,10 @@
-import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
 import ts from 'typescript';
+import { beforeEach, chai, describe, expect, it } from 'vitest';
 import createSourceFile from '../src/createSourceFile.js';
 import ImportManager from '../src/dependencies/ImportManager.js';
-import snapshotMatcher from '../src/testing/snapshotMatcher.js';
 
-use(snapshotMatcher);
-use(chaiLike);
+chai.use(chaiLike);
 
 describe('ImportManager', () => {
   describe('default', () => {
@@ -24,7 +22,7 @@ describe('ImportManager', () => {
       const file = createSourceFile(code, 'foo.ts');
       const printer = ts.createPrinter();
 
-      await expect(printer.printFile(file)).toMatchSnapshot('ImportManager.snap', import.meta.url);
+      await expect(printer.printFile(file)).toMatchFileSnapshot('fixtures/ImportManager.snap.ts');
     });
 
     it('should extract imports from a code', () => {

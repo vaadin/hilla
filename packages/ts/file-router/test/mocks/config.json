@@ -1,4 +1,0 @@
-{
-  "@vaadin/hilla-react-auth": "./vaadin-hilla-react-auth.ts",
-  "react-router-dom": "./react-router-dom.ts"
-}

@@ -1,8 +1,8 @@
-import { expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import CookieManager from '../src/CookieManager.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
@@ -24,8 +24,8 @@ import {
   verifySpringCsrfTokenIsCleared,
 } from './SpringCsrfTestUtils.js';
 
-use(sinonChai);
-use(chaiDom);
+chai.use(sinonChai);
+chai.use(chaiDom);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -70,11 +70,11 @@ describe('@vaadin/hilla-frontend', () => {
         ...(logoutOptions ?? {}),
       });
 
-    before(() => {
+    beforeAll(() => {
       fetchMock.mockGlobal();
     });
 
-    after(() => {
+    afterAll(() => {
       fetchMock.unmockGlobal();
     });
 

@@ -1,11 +1,19 @@
-import { act, fireEvent, render, type RenderResult, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { expect, use } from 'chai';
+import {
+  act,
+  fireEvent,
+  render,
+  type RenderResult,
+  waitFor,
+  waitForElementToBeRemoved,
+  cleanup,
+} from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src';
 import {
   type Contract,
@@ -13,16 +21,16 @@ import {
   type FormUserModel,
   type Login,
   LoginModel,
+  type Player,
   type PlayerModel,
+  PostalAddressModel,
   type Project,
   TeamModel,
-  type Player,
-  PostalAddressModel,
 } from './models.js';
 
-use(sinonChai);
-use(chaiDom);
-use(chaiAsPromised);
+chai.use(sinonChai);
+chai.use(chaiDom);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
@@ -89,6 +97,10 @@ describe('@vaadin/hilla-react-form', () => {
     onSubmit = sinon.stub();
     onChange = sinon.stub();
     (useForm as UseFormSpy).resetHistory();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   describe('useForm', () => {

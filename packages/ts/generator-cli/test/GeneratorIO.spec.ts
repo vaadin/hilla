@@ -3,16 +3,14 @@ import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { expect, chai, describe, it, beforeEach, afterEach } from 'vitest';
 import GeneratorIO from '../src/GeneratorIO.js';
 
-use(chaiAsPromised);
+chai.use(chaiAsPromised);
 
 // eslint-disable-next-line func-names,prefer-arrow-callback
-describe('Testing GeneratorIO', function (this: Mocha.Suite) {
-  this.timeout(5000);
-
+describe('Testing GeneratorIO', () => {
   const logger = new LoggerFactory({ verbose: true });
   const generatedFilenames = [1, 2, 3].map((i) => `file${i}.ts`);
   let tmpDir: string;
@@ -65,18 +63,21 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
         }),
       );
     });
+
     it('should return the file index', async () => {
       await io.createFileIndex(generatedFilenames);
 
       expect(await io.getGeneratedFiles()).to.eql(new Set(['file1.ts', 'file2.ts', 'file3.ts']));
     });
-    xit('should fail when IO error happens', async () => {
+
+    it.skip('should fail when IO error happens', async () => {
       await io.createFileIndex(generatedFilenames);
       await chmod(tmpDir, 0o666);
       await expect(io.getGeneratedFiles()).to.eventually.be.rejectedWith(Error, /^(?!ENOENT).*/u);
       await chmod(tmpDir, 0o777);
     });
   });
+
   describe('Testing GeneratorIO.cleanOutputDir', () => {
     it('should delete all given files and report them', async () => {
       await io.createFileIndex(generatedFilenames);
@@ -112,6 +113,7 @@ describe('Testing GeneratorIO', function (this: Mocha.Suite) {
       await expect(GeneratorIO.exists(join(tmpDir, name))).to.eventually.be.true;
     });
   });
+
   describe('Testing GeneratorIO.writeChangedFiles', () => {
     it('should write changed file and sync file index', async () => {
       const f: File = new File([''], 'file1.ts');

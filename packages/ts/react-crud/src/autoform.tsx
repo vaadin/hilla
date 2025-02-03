@@ -309,9 +309,7 @@ export function AutoForm<M extends AbstractModel>({
             validationError.property && typeof validationError.property === 'string'
               ? `${validationError.property}: `
               : '';
-          return `${property}${
-            validationError.validatorMessage ? validationError.validatorMessage : validationError.message
-          }`;
+          return `${property}${validationError.validatorMessage ?? validationError.message}`;
         });
       if (nonPropertyErrorMessages.length > 0) {
         setFormError(

@@ -1,8 +1,8 @@
-import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
+import { expect, chai, describe, it } from 'vitest';
 import { createRoute, extendModule } from '../../src/runtime/createRoute.js';
 
-use(chaiLike);
+chai.use(chaiLike);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('createRoute', () => {

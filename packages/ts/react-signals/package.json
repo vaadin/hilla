@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-signals",
-  "version": "24.7.0-alpha9",
+  "version": "24.7.0-alpha10",
   "description": "Signals for Hilla React",
   "main": "index.js",
   "module": "index.js",
@@ -23,9 +23,9 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9881",
-    "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@preact/signals-react": "3.0.1",
-    "@vaadin/hilla-frontend": "24.7.0-alpha9",
+    "@vaadin/hilla-frontend": "24.7.0-alpha10",
     "nanoid": "5.0.9"
   },
   "peerDependencies": {
