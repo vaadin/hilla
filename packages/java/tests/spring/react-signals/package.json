@@ -25,11 +25,11 @@
     "lit": "3.2.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.28.2"
+    "react-router-dom": "6.29.0"
   },
   "devDependencies": {
     "@babel/preset-react": "7.26.3",
-    "@preact/signals-react-transform": "0.5.0",
+    "@preact/signals-react-transform": "0.5.1",
     "@rollup/plugin-replace": "6.0.2",
     "@rollup/pluginutils": "5.1.4",
     "@types/react": "18.3.18",
@@ -48,7 +48,7 @@
     "async": "3.2.6",
     "glob": "10.4.5",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "5.13.1",
+    "rollup-plugin-visualizer": "5.14.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.7.3",
@@ -82,11 +82,11 @@
       "lit": "3.2.1",
       "react": "18.3.1",
       "react-dom": "18.3.1",
-      "react-router-dom": "6.28.0"
+      "react-router-dom": "6.29.0"
     },
     "devDependencies": {
       "@babel/preset-react": "7.26.3",
-      "@preact/signals-react-transform": "0.5.0",
+      "@preact/signals-react-transform": "0.5.1",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.1.4",
       "@types/react": "18.3.18",
@@ -105,7 +105,7 @@
       "async": "3.2.6",
       "glob": "10.4.5",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "5.13.1",
+      "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.7.3",
@@ -115,7 +115,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "915a5e2ed974a9c56ec616eb5aa96ff0483562b338d6642dffe39881c1ef7f49"
+    "hash": "677dbe577c419e83b873267492514ea86cf48a2f324efe7c97dbcc7957f87a02"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
