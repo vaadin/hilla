@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.26.3",
-    "@preact/signals-react-transform": "0.5.0",
+    "@preact/signals-react-transform": "0.5.1",
     "@rollup/plugin-replace": "6.0.2",
     "@rollup/pluginutils": "5.1.4",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -36,7 +36,7 @@
     "async": "3.2.6",
     "glob": "10.4.5",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "5.13.1",
+    "rollup-plugin-visualizer": "5.14.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.7.3",
@@ -64,7 +64,7 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.26.3",
-      "@preact/signals-react-transform": "0.5.0",
+      "@preact/signals-react-transform": "0.5.1",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.1.4",
       "@vaadin/hilla-generator-cli": "24.6.4",
@@ -81,7 +81,7 @@
       "async": "3.2.6",
       "glob": "10.4.5",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "5.13.1",
+      "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.7.3",
@@ -91,7 +91,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "79e186add3eaddf0087381a53632dcd0a30029ccdf10b4dc2d103875bb1f7a26"
+    "hash": "a32d6ea57ad7c41b34d5807110fd8e113f5d4c2474980962045d5f5c93bc6cd9"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
