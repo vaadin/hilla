@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { expect } from 'chai';
+import { expect } from 'vitest';
 
 export const TEST_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
 export const TEST_SPRING_CSRF_TOKEN_VALUE = 'spring-csrf-token';

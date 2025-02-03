@@ -20,9 +20,9 @@
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "karma start ../../../karma.config.cjs --port 9875",
-    "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "exports": {

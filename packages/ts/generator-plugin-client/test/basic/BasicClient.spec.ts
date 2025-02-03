@@ -1,13 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { chai, describe, expect, it } from 'vitest';
 import ClientPlugin from '../../src/index.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('ClientPlugin', () => {
   const sectionName = 'BasicClient';
@@ -21,7 +19,7 @@ describe('ClientPlugin', () => {
 
     const [clientFile] = files;
 
-    await expect(await clientFile.text()).toMatchSnapshot(`client.snap.ts`, import.meta.url);
+    await expect(await clientFile.text()).toMatchFileSnapshot(`fixtures/client.snap.ts`);
     expect(clientFile.name).to.equal(`connect-client.default.ts`);
   });
 });

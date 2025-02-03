@@ -2,17 +2,19 @@
 
 import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
-import { expect, use } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { beforeEach, describe, expect, it, chai } from 'vitest';
 import type { IncrementStateEvent, StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
 
-use(sinonChai);
-use(chaiLike);
+chai.use(sinonChai);
+chai.use(chaiLike);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
@@ -156,10 +158,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(43);
     });
 
-    it('should resolve the result promise after incrementBy', (done) => {
+    it('should resolve the result promise after incrementBy', async () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
-      numberSignal.incrementBy(1).result.then(done, () => done('Should not reject'));
+      const { result } = numberSignal.incrementBy(1);
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -167,15 +169,13 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 43,
         accepted: true,
       });
+      await expect(result).to.be.fulfilled;
     });
 
-    it('should reject the result promise after rejected incrementBy', (done) => {
+    it('should reject the result promise after rejected incrementBy', async () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
-      numberSignal.incrementBy(1).result.then(
-        () => done('Should not resolve'),
-        () => done(),
-      );
+      const { result } = numberSignal.incrementBy(1);
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -183,12 +183,13 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 43,
         accepted: false,
       });
+      await expect(result).to.be.rejected;
     });
 
-    it('should resolve the result promise after incrementing by zero without server roundtrip', (done) => {
+    it('should resolve the result promise after incrementing by zero without server roundtrip', async () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
-      numberSignal.incrementBy(0).result.then(done, () => done('Should not reject'));
+      await expect(numberSignal.incrementBy(0).result).to.be.fulfilled;
     });
   });
 });

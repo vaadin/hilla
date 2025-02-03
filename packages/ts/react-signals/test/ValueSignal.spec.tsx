@@ -1,18 +1,19 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-
-import { render } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
-import { expect, use } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, describe, expect, it, chai } from 'vitest';
 import type { ReplaceStateEvent, StateEvent } from '../src/events.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { ValueSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
 
-use(sinonChai);
-use(chaiLike);
+chai.use(sinonChai);
+chai.use(chaiLike);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-signals', () => {
   type Person = {
@@ -32,6 +33,10 @@ describe('@vaadin/hilla-react-signals', () => {
     // Mock the subscribe method
     client.subscribe.returns(subscription);
     config = { client, endpoint: 'TestEndpoint', method: 'testMethod' };
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   describe('ValueSignal', () => {
@@ -135,10 +140,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('baz');
     });
 
-    it('should resolve the result promise after set', (done) => {
+    it('should resolve the result promise after set', async () => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.set('b').result.then(done, () => done('Should not reject'));
+      const { result } = valueSignal.set('b');
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -146,15 +151,13 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 'b',
         accepted: true,
       });
+      await expect(result).to.be.fulfilled;
     });
 
-    it('should reject the result promise after rejected set', (done) => {
+    it('should reject the result promise after rejected set', async () => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.set('b').result.then(
-        () => done('Should not resolve'),
-        () => done(),
-      );
+      const { result } = valueSignal.set('b');
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -162,13 +165,13 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 'b',
         accepted: false,
       });
-      setTimeout(done, 100);
+      await expect(result).to.be.rejected;
     });
 
-    it('should resolve the result promise after replace', (done) => {
+    it('should resolve the result promise after replace', async () => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.replace('a', 'b').result.then(done, () => done('Should not reject'));
+      const { result } = valueSignal.replace('a', 'b');
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -176,15 +179,13 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 'b',
         accepted: true,
       });
+      await expect(result).to.be.fulfilled;
     });
 
-    it('should reject the result promise after rejected replace', (done) => {
+    it('should reject the result promise after rejected replace', async () => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.replace('a', 'b').result.then(
-        () => done('Should not resolve'),
-        () => done(),
-      );
+      const { result } = valueSignal.replace('a', 'b');
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -192,13 +193,13 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 'b',
         accepted: false,
       });
-      setTimeout(done, 100);
+      await expect(result).to.be.rejected;
     });
 
-    it('should resolve the result promise after update', (done) => {
+    it('should resolve the result promise after update', async () => {
       const valueSignal = new ValueSignal<string>('a', config);
       subscribeToSignalViaEffect(valueSignal);
-      valueSignal.update(() => 'b').result.then(done, () => done('Should not reject'));
+      const { result } = valueSignal.update(() => 'b');
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
         id: (params!.event as { id: string }).id,
@@ -206,6 +207,7 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 'b',
         accepted: true,
       });
+      await expect(result).to.be.fulfilled;
     });
 
     it('should send the correct event and update the value when receiving accepted event after calling update', async () => {

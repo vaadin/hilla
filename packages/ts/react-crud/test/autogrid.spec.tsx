@@ -1,12 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import chaiDom from 'chai-dom';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
 import type { CountService, CrudService, ListService } from '../src/crud.js';
 import type { HeaderFilterRendererProps } from '../src/header-filter.js';
@@ -37,18 +38,12 @@ import {
   PersonWithoutIdPropertyModel,
   PersonWithSimpleIdPropertyModel,
 } from './test-models-and-services.js';
+import { nextFrame } from './test-utils.js';
 import TextFieldController from './TextFieldController.js';
 
-use(sinonChai);
-use(chaiAsPromised);
-
-export async function nextFrame(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-}
+chai.use(sinonChai);
+chai.use(chaiDom);
+chai.use(chaiAsPromised);
 
 async function assertColumnsOrder(grid: GridController, ...ids: string[]) {
   const columns = await grid.getColumns();
@@ -86,6 +81,7 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     afterEach(() => {
+      cleanup();
       sinon.restore();
     });
 

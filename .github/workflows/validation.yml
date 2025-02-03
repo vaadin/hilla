@@ -34,6 +34,7 @@ jobs:
     timeout-minutes: 5
     env:
       NX_SKIP_NX_CACHE: true
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 
     steps:
       - uses: actions-cool/check-user-permission@main

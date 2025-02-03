@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { describe, expect, it } from 'vitest';
 import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import { isFilterEmpty } from '../src/util.js';

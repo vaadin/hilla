@@ -21,9 +21,9 @@
     "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
     "lint": "eslint src test",
     "lint:fix": "npm run lint -- --fix",
-    "test": "echo 'Using arbitrary non-UTC timezone for VaadinDateTimePickerStrategy tests'; TZ=\"Etc/GMT-12\" karma start ../../../karma.config.cjs --port 9876",
-    "test:coverage": "npm run test -- --coverage",
-    "test:watch": "npm run test -- --watch",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
