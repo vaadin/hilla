@@ -37,7 +37,7 @@ export default class SubTypesPlugin extends Plugin {
         sources.splice(sources.indexOf(source), 1, newSource);
 
         // mentioned types in the oneOf need to be fixed as well
-        baseComponent.oneOf.forEach((schema) => {
+        (baseComponent.oneOf as OpenAPIV3.ReferenceObject[]).forEach((schema) => {
           if ('$ref' in schema) {
             const path = schema.$ref;
             Object.entries(components).forEach(([subKey, subComponent]) => {
