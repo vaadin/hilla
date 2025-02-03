@@ -1,15 +1,15 @@
 import { EventEmitter } from 'node:events';
 import { existsSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import vitePluginFileSystemRouter from '../../src/vite-plugin';
 import { createTestingRouteFiles, createTmpDir } from '../utils';
 
-use(chaiAsPromised);
-use(sinonChai);
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('vite-plugin', () => {
@@ -29,7 +29,7 @@ describe('@vaadin/hilla-file-router', () => {
       expect(mockServer.hot.send).to.not.be.called;
     }
 
-    before(async () => {
+    beforeAll(async () => {
       // const rootDir = pathToFileURL('/path/to/project/');
       const rootDir = await createTmpDir();
       const outDir = new URL('dist/', rootDir);

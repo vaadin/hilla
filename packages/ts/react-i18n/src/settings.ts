@@ -8,11 +8,13 @@ export interface LanguageSettings {
 
 export function getLanguageSettings(): LanguageSettings | undefined {
   const cookie = CookieManager.get(VAADIN_LANGUAGE_SETTINGS_COOKIE_NAME);
-  if (!cookie) return undefined;
+  if (!cookie) {
+    return undefined;
+  }
 
   try {
     return JSON.parse(cookie);
-  } catch (e) {
+  } catch {
     // Ignore
     return undefined;
   }

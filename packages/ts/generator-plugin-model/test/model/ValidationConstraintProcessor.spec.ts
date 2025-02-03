@@ -1,11 +1,11 @@
 import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
-import { expect } from 'chai';
 import sinon from 'sinon';
 import ts, { type NewExpression } from 'typescript';
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
-  ValidationConstraintProcessor,
-  type ValidationConstraint,
   hasValidationConstraints,
+  type ValidationConstraint,
+  ValidationConstraintProcessor,
 } from '../../src/ValidationConstraintProcessor.js';
 
 type AnnotationPack = Readonly<{

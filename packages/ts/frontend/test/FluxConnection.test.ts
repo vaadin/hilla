@@ -1,6 +1,7 @@
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
-import { expect } from 'chai';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import { beforeEach, chai, describe, expect, it } from 'vitest';
 import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
@@ -9,6 +10,8 @@ import type {
   ClientUpdateMessage,
 } from '../src/FluxMessages.js';
 import { getSubscriptionEventSpies, subscribeStub } from './mocks/atmosphere.js';
+
+chai.use(sinonChai);
 
 describe('@vaadin/hilla-frontend', () => {
   describe('FluxConnection', () => {
@@ -30,7 +33,8 @@ describe('@vaadin/hilla-frontend', () => {
     }
 
     let fluxConnection: FluxConnection;
-    let fluxConnectionHelper: {
+    // TODO: Do we need this helper?
+    let _fluxConnectionHelper: {
       nrSentMessages(): number;
       sentMessage(i: number): AbstractMessage | undefined;
       handleMessage(msg: AbstractMessage): unknown;
@@ -39,7 +43,7 @@ describe('@vaadin/hilla-frontend', () => {
     beforeEach(() => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/connect');
-      fluxConnectionHelper = {
+      _fluxConnectionHelper = {
         handleMessage(msg) {
           getSubscriptionEventSpies()?.onMessage?.({ responseBody: JSON.stringify(msg) });
         },
@@ -359,7 +363,7 @@ describe('@vaadin/hilla-frontend', () => {
     });
 
     it('should update state while reconnecting', () => {
-      const sub = fluxConnection.subscribe('MyEndpoint', 'myMethod');
+      fluxConnection.subscribe('MyEndpoint', 'myMethod');
       fluxConnection.state = State.INACTIVE;
       getSubscriptionEventSpies()?.onReconnect?.();
       expect(fluxConnection.state).to.equal(State.RECONNECTING);

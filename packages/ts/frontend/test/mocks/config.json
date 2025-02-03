@@ -1,4 +1,0 @@
-{
-  "./FluxConnection.js": "./FluxConnection.ts",
-  "atmosphere.js": "./atmosphere.ts"
-}
