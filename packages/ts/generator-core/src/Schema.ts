@@ -1,10 +1,9 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import { convertFullyQualifiedNameToRelativePath, simplifyFullyQualifiedName, type Nullified } from './utils.js';
 
-export type ReferenceSchema = ReadonlyDeep<OpenAPIV3.ReferenceObject>;
-export type ArraySchema = ReadonlyDeep<OpenAPIV3.ArraySchemaObject>;
-export type NonArraySchema = ReadonlyDeep<OpenAPIV3.NonArraySchemaObject>;
+export type ReferenceSchema = OpenAPIV3.ReferenceObject;
+export type ArraySchema = OpenAPIV3.ArraySchemaObject;
+export type NonArraySchema = OpenAPIV3.NonArraySchemaObject;
 export type RegularSchema = ArraySchema | NonArraySchema;
 
 export type NullableSchema = Readonly<Required<Pick<RegularSchema, 'nullable'>>> & RegularSchema;
@@ -139,7 +138,7 @@ export function convertReferenceSchemaToPath({ $ref }: ReferenceSchema): string 
 }
 
 export function resolveReference(
-  schemas: ReadonlyDeep<OpenAPIV3.ComponentsObject>['schemas'],
+  schemas: OpenAPIV3.ComponentsObject['schemas'],
   { $ref }: ReferenceSchema,
 ): Schema | undefined {
   if (schemas) {
