@@ -19,7 +19,7 @@ export default class ClientPlugin extends Plugin {
 
     try {
       return !!(dir && (await open(`${dir}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`, 'r')));
-    } catch (e) {
+    } catch {
       return false;
     }
   }

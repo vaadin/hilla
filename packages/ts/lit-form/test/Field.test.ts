@@ -262,7 +262,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
         beforeEach(() => {
           view = orderViewWithTextField;
-          // eslint-disable-next-line prefer-destructuring
+          // eslint-disable-next-line @typescript-eslint/prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
@@ -414,7 +414,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
         beforeEach(() => {
           view = orderViewWithInput;
-          // eslint-disable-next-line prefer-destructuring
+          // eslint-disable-next-line @typescript-eslint/prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
@@ -498,8 +498,10 @@ describe('@vaadin/hilla-lit-form', () => {
       }
 
       @customElement('validity-vaadin-element-tag')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class ValidityVaadinElement extends AnyVaadinElement {
         invalid = false;
+
         checkValidity() {
           return !this.invalid;
         }
@@ -614,7 +616,7 @@ describe('@vaadin/hilla-lit-form', () => {
         function renderTag(model: AbstractModel) {
           render(
             html`
-                <${tagName} ${field(model)}></${tagName}>`,
+              <${tagName} ${field(model)}></${tagName}>`,
             div,
           );
           currentStrategy = getFieldStrategySpy.lastCall.returnValue;
@@ -648,7 +650,7 @@ describe('@vaadin/hilla-lit-form', () => {
         const renderElement = () => {
           render(
             html`
-                <validity-vaadin-element-tag ${field(stringModel)}"></validity-vaadin-element-tag>`,
+              <validity-vaadin-element-tag ${field(stringModel)}"></validity-vaadin-element-tag>`,
             div,
           );
           return div.firstElementChild as HTMLInputElement & {
@@ -758,7 +760,7 @@ describe('@vaadin/hilla-lit-form', () => {
           const renderElement = () => {
             render(
               html`
-                  <${tagName} ${field(model)}></${tagName}>`,
+                <${tagName} ${field(model)}></${tagName}>`,
               div,
             );
             return div.firstElementChild as Element & { checked?: boolean };
@@ -1014,7 +1016,7 @@ describe('@vaadin/hilla-lit-form', () => {
       describe('Event listeners cleanup', () => {
         function renderElement(elementName: string) {
           const tag = unsafeStatic(elementName);
-          render(html`<${tag} />`, div);
+          render(html` <${tag} />`, div);
           return div.firstElementChild as HTMLElement;
         }
 
