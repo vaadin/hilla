@@ -1,5 +1,5 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type { ReferenceSchema } from '@vaadin/hilla-generator-core/Schema.js';
+import { isReferenceSchema } from '@vaadin/hilla-generator-core/Schema.js';
 import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
 import { convertFullyQualifiedNameToRelativePath } from '@vaadin/hilla-generator-core/utils.js';
 import { ModelFixProcessor } from './ModelFixProcessor.js';
@@ -25,7 +25,11 @@ export default class SubTypesPlugin extends Plugin {
 
     Object.entries(components).forEach(([baseKey, baseComponent]) => {
       // search for components with oneOf: those are union types
-      if ('oneOf' in baseComponent && Array.isArray(baseComponent.oneOf)) {
+      if (
+        'oneOf' in baseComponent &&
+        Array.isArray(baseComponent.oneOf) &&
+        baseComponent.oneOf.every((schema) => isReferenceSchema(schema))
+      ) {
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
         const source = sources.find(({ fileName }) => fileName === fn)!;
         // replace the (empty) source with a newly-generated one
@@ -35,7 +39,7 @@ export default class SubTypesPlugin extends Plugin {
         // mentioned types in the oneOf need to be fixed as well
         baseComponent.oneOf.forEach((schema) => {
           if ('$ref' in schema) {
-            const path = (schema as ReferenceSchema).$ref;
+            const path = schema.$ref;
             Object.entries(components).forEach(([subKey, subComponent]) => {
               if ('anyOf' in subComponent && subKey === path.substring('#/components/schemas/'.length)) {
                 subComponent.anyOf?.forEach((s) => {
