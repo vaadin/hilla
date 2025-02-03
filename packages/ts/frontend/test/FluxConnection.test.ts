@@ -1,6 +1,7 @@
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element';
-import { expect } from 'chai';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import { beforeEach, chai, describe, expect, it } from 'vitest';
 import { ActionOnLostSubscription, FluxConnection, FluxSubscriptionState, State } from '../src/FluxConnection.js';
 import type {
   AbstractMessage,
@@ -9,6 +10,8 @@ import type {
   ClientUpdateMessage,
 } from '../src/FluxMessages.js';
 import { getSubscriptionEventSpies, subscribeStub } from './mocks/atmosphere.js';
+
+chai.use(sinonChai);
 
 describe('@vaadin/hilla-frontend', () => {
   describe('FluxConnection', () => {

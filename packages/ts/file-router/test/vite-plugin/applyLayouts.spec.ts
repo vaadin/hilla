@@ -1,18 +1,18 @@
 import { writeFile } from 'node:fs/promises';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import { expect, chai, describe, it, beforeAll } from 'vitest';
 import applyLayouts from '../../src/vite-plugin/applyLayouts.js';
 import type { RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import { createTmpDir } from '../utils.js';
 
-use(chaiAsPromised);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-file-router', () => {
   describe('applyLayouts', () => {
     let tmp: URL;
     let layoutsFile: URL;
 
-    before(async () => {
+    beforeAll(async () => {
       tmp = await createTmpDir();
       layoutsFile = new URL('./layouts.json', tmp);
       await writeFile(layoutsFile, JSON.stringify([{ path: '/flow' }, { path: '/hilla/deep' }]));

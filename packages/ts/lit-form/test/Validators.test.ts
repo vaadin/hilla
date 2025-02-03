@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert, describe, it } from 'vitest';
 // API to test
 import {
   AssertFalse,

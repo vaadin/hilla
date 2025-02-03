@@ -1,16 +1,14 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone/index.js';
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { chai, describe, expect, it } from 'vitest';
 import PushPlugin from '../../src/index.js';
 import { createGenerator, loadInput } from '../utils/common.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('PushPlugin', () => {
-  context('when the endpoint method has a return type related to push support', () => {
+  describe('when the endpoint method has a return type related to push support', () => {
     it('correctly replaces types', async () => {
       const sectionName = 'PushType';
       const generator = createGenerator([BackbonePlugin, PushPlugin]);
@@ -23,7 +21,7 @@ describe('PushPlugin', () => {
 
       const endpointFile = files.find((f) => f.name === 'PushTypeEndpoint.ts')!;
       expect(endpointFile).to.exist;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`fixtures/${sectionName}Endpoint.snap.ts`);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
 
@@ -39,7 +37,7 @@ describe('PushPlugin', () => {
 
       const endpointFile = files.find((f) => f.name === 'PushTypeOnlyEndpoint.ts')!;
       expect(endpointFile).to.exist;
-      await expect(await endpointFile.text()).toMatchSnapshot(`${sectionName}Endpoint.snap.ts`, import.meta.url);
+      await expect(await endpointFile.text()).toMatchFileSnapshot(`fixtures/${sectionName}Endpoint.snap.ts`);
       expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
     });
   });

@@ -1,11 +1,11 @@
 import './vaadinGlobals.js'; // eslint-disable-line import/no-unassigned-import
-import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
+import { expect, chai, describe, it } from 'vitest';
 import { createMenuItems, viewsSignal } from '../../src/runtime/createMenuItems.js';
 import type { MenuItem } from '../../src/types.js';
 
-use(chaiLike);
+chai.use(chaiLike);
 
 const collator = new Intl.Collator('en-US');
 

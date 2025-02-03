@@ -1,5 +1,5 @@
-import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
+import { beforeEach, chai, describe, expect, it } from 'vitest';
 import m, {
   $defaultValue,
   $enum,
@@ -11,7 +11,6 @@ import m, {
   $optional,
   $owner,
   ArrayModel,
-  type Target,
   BooleanModel,
   type EnumModel,
   Model,
@@ -19,9 +18,10 @@ import m, {
   ObjectModel,
   PrimitiveModel,
   StringModel,
+  type Target,
 } from '../src/index.js';
 
-use(chaiLike);
+chai.use(chaiLike);
 
 describe('@vaadin/hilla-form-models', () => {
   enum Role {
@@ -188,6 +188,7 @@ describe('@vaadin/hilla-form-models', () => {
 
   it('should allow adding a metadata to a property', () => {
     const meta = { jvmType: 'com.example.CustomString' };
+
     interface NamedWithMeta {
       name: string;
     }

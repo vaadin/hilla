@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
-import { expect } from 'chai';
 import { createMemoryRouter, RouterProvider } from 'react-router';
+import { describe, expect, it } from 'vitest';
 import { configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
 
 function TestView({ route }: { route: string }) {

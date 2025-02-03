@@ -1,11 +1,12 @@
 /* eslint-disable no-new */
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import type { WritableDeep } from 'type-fest';
+import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import type { MiddlewareContext, MiddlewareNext } from '../src/Connect.js';
 import CookieManager from '../src/CookieManager.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
@@ -29,8 +30,9 @@ import {
   TEST_SPRING_CSRF_TOKEN_VALUE,
 } from './SpringCsrfTestUtils.js';
 
-use(chaiAsPromised);
-use(chaiLike);
+chai.use(chaiAsPromised);
+chai.use(chaiLike);
+chai.use(sinonChai);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -46,11 +48,11 @@ describe('@vaadin/hilla-frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
 
-    before(() => {
+    beforeAll(() => {
       fetchMock.mockGlobal();
     });
 
-    after(() => {
+    afterAll(() => {
       fetchMock.unmockGlobal();
     });
 

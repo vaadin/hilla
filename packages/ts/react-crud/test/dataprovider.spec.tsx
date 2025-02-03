@@ -1,8 +1,8 @@
-import { renderHook } from '@testing-library/react';
+import { cleanup, renderHook } from '@testing-library/react';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
-import { expect, use } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import type { CountService, ListService } from '../src/crud.js';
 import {
   createDataProvider,
@@ -19,7 +19,7 @@ import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter
 import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
 
-use(sinonChai);
+chai.use(sinonChai);
 
 class MockGrid {
   pageSize = 10;
@@ -163,6 +163,7 @@ describe('@hilla/react-crud', () => {
     });
 
     afterEach(() => {
+      cleanup();
       listSpy.restore();
       countServiceListSpy.restore();
       countServiceCountSpy.restore();
