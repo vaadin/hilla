@@ -11,8 +11,12 @@ const scriptsDir = new URL('./', import.meta.url);
 const packageRoot = pathToFileURL(process.cwd() + sep);
 const [packageJsonFile, srcFiles] = await Promise.all([
   readFile(new URL('package.json', packageRoot), 'utf8'),
-  glob('src/**/*.{ts,tsx,obj.css}', { ignore: ['**/*.d.ts'] }),
+  glob('src/**/*.{ts,tsx,obj.css}', { ignore: ['**/*.t.ts'] }),
 ]);
+
+if (srcFiles.some((file) => file.endsWith('.d.ts'))) {
+  throw new Error('TypeScript declaration files are not allowed in the src directory.');
+}
 
 const packageJson: PackageJson = JSON.parse(packageJsonFile);
 
