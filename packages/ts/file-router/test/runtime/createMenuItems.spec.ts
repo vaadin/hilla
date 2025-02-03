@@ -3,7 +3,7 @@ import chaiLike from 'chai-like';
 import type { Writable } from 'type-fest';
 import { expect, chai, describe, it } from 'vitest';
 import { createMenuItems, viewsSignal } from '../../src/runtime/createMenuItems.js';
-import type { MenuItem } from '../../src/types.js';
+import type { MenuItem } from '../../src/types.t.js';
 
 chai.use(chaiLike);
 

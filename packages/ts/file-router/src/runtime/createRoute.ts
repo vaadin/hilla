@@ -1,4 +1,4 @@
-import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
+import type { AgnosticRoute, Module, ViewConfig } from '../types.t.js';
 
 /**
  * Extends a router module's config with additional properties. The original

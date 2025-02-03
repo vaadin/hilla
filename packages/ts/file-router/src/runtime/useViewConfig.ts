@@ -1,6 +1,6 @@
 import type { UIMatch } from 'react-router';
 import { useMatches } from 'react-router';
-import type { ViewConfig } from '../types.js';
+import type { ViewConfig } from '../types.t.js';
 
 /**
  * Hook to return the {@link ViewConfig} for the current route.

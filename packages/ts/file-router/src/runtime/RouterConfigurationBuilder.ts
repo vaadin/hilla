@@ -11,7 +11,7 @@ import type {
   RouterBuildOptions,
   RouterConfiguration,
   ViewConfig,
-} from '../types.js';
+} from '../types.t.js';
 
 interface RouteBase {
   path?: string;
