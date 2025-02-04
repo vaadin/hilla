@@ -9,7 +9,7 @@ export default class PluginManager {
 
   constructor(plugins: readonly PluginConstructor[], resolver: ReferenceResolver, logger: LoggerFactory) {
     const standardPlugins = [
-      'TransferTypesPlugin',
+      'TransferTypesPlugin', // should go before Backbone Plugin
       'BackbonePlugin',
       'ClientPlugin',
       'BarrelPlugin',
