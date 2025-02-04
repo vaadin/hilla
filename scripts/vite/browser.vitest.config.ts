@@ -2,10 +2,32 @@
 /// <reference types="vitest/node" />
 import react from '@vitejs/plugin-react';
 import { mergeConfig, type ViteUserConfig } from 'vitest/config';
+import type { BrowserProviderOptions } from 'vitest/node';
 import nodeConfig, { isCI, packageJson, root, cwd } from './node.vitest.config.js';
 import { constructCss } from './plugins.js';
 
 export { root, cwd, isCI, packageJson };
+
+function getBrowserProviderOptions(): BrowserProviderOptions {
+  const { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD, CHROME_BIN } = process.env;
+
+  if (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD === '1') {
+    if (typeof CHROME_BIN === 'string') {
+      return {
+        launch: {
+          executablePath: CHROME_BIN,
+        },
+      };
+    }
+
+    throw new Error(
+      'You have to set CHROME_BIN along with PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD to make tests working,' +
+        'or disable PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD to use browser provided by Playwright',
+    );
+  }
+
+  return {};
+}
 
 export default mergeConfig(nodeConfig, {
   plugins: [
@@ -35,9 +57,7 @@ export default mergeConfig(nodeConfig, {
       instances: [
         {
           browser: 'chromium',
-          launch: {
-            executablePath: process.env.CHROME_BIN,
-          },
+          ...getBrowserProviderOptions(),
         },
       ],
     },
