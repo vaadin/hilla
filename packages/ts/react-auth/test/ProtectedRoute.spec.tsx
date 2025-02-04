@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
-import { expect } from 'chai';
 import { createMemoryRouter, RouterProvider } from 'react-router';
+import { describe, expect, it } from 'vitest';
 import { configureAuth, protectRoutes, type RouteObjectWithAuth } from '../src';
 
 function TestView({ route }: { route: string }) {
@@ -60,7 +60,7 @@ interface User {
 }
 
 function TestApp({ user, initialRoute }: { user?: User; initialRoute: string }) {
-  const { AuthProvider, useAuth } = configureAuth(async () => Promise.resolve(user));
+  const { AuthProvider } = configureAuth(async () => Promise.resolve(user));
   const protectedRoutes = protectRoutes(testRoutes);
   const router = createMemoryRouter(protectedRoutes, {
     initialEntries: [initialRoute],

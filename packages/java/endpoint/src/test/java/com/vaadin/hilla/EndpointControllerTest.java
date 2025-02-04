@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,6 +45,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -89,6 +92,8 @@ public class EndpointControllerTest {
     private HttpServletRequest requestMock;
     private Principal principal;
     private ApplicationConfiguration appConfig;
+    private MultipartHttpServletRequest multipartRequest;
+    private MultipartFile multipartFile;
 
     @Rule
     public TemporaryFolder projectFolder = new TemporaryFolder();
@@ -158,6 +163,46 @@ public class EndpointControllerTest {
             return VaadinService.getCurrentRequest().getUserPrincipal()
                     .getName();
         }
+
+        @AnonymousAllowed
+        public String checkFileLength1(MultipartFile fileToCheck,
+                long expectedLength) {
+            return fileToCheck.getSize() == expectedLength
+                    ? "Check file length 1 OK"
+                    : "Check file length 1 FAILED";
+        }
+
+        @AnonymousAllowed
+        public String checkFileLength2(long expectedLength,
+                MultipartFile fileToCheck) {
+            return fileToCheck.getSize() == expectedLength
+                    ? "Check file length 2 OK"
+                    : "Check file length 2 FAILED";
+        }
+
+        @AnonymousAllowed
+        public long getFileLength(MultipartFile fileToCheck) {
+            return fileToCheck.getSize();
+        }
+
+        public record FileData(String owner, MultipartFile file) {
+        }
+
+        @AnonymousAllowed
+        public String checkOwnedFileLength(FileData fileData,
+                long expectedLength) {
+            return String.format("Check %s's file length %s", fileData.owner(),
+                    fileData.file().getSize() == expectedLength ? "OK"
+                            : "FAILED");
+        }
+
+        @AnonymousAllowed
+        public String checkMultipleFiles(MultipartFile file1,
+                MultipartFile file2, long expectedLength) {
+            return file1.getSize() + file2.getSize() == expectedLength
+                    ? "Check multiple files OK"
+                    : "Check multiple files FAILED";
+        }
     }
 
     @Endpoint("CustomEndpoint")
@@ -191,7 +236,7 @@ public class EndpointControllerTest {
     public final ExpectedException exception = ExpectedException.none();
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         requestMock = mock(HttpServletRequest.class);
         principal = mock(Principal.class);
 
@@ -203,6 +248,25 @@ public class EndpointControllerTest {
 
         when(requestMock.getCookies()).thenReturn(new Cookie[] {
                 new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+
+        multipartRequest = mock(MultipartHttpServletRequest.class);
+        when(multipartRequest.getUserPrincipal())
+                .thenReturn(mock(Principal.class));
+        when(multipartRequest.getHeader("X-CSRF-Token"))
+                .thenReturn("Vaadin Fusion");
+        when(multipartRequest.getContentType())
+                .thenReturn("multipart/form-data");
+        var multipartServletContext = mockServletContext();
+        when(multipartRequest.getServletContext())
+                .thenReturn(multipartServletContext);
+        when(multipartRequest.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(ApplicationConstants.CSRF_TOKEN, "Vaadin Fusion") });
+
+        multipartFile = mock(MultipartFile.class);
+        when(multipartFile.getOriginalFilename()).thenReturn("hello.txt");
+        when(multipartFile.getSize()).thenReturn(5L);
+        when(multipartFile.getInputStream())
+                .thenReturn(new ByteArrayInputStream("Hello".getBytes()));
     }
 
     @Test
@@ -446,8 +510,96 @@ public class EndpointControllerTest {
     }
 
     @Test
-    @Ignore("FIXME: this test is flaky, it fails when executed fast enough")
-    public void should_bePossibeToGetPrincipalInEndpoint() {
+    public void should_AcceptMultipartFile() throws IOException {
+        // hilla request body
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
+                .thenReturn("{\"expectedLength\":5}");
+
+        // uploaded file
+        when(multipartRequest.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
+
+        var vaadinController = createVaadinController(TEST_ENDPOINT);
+        var response = vaadinController.serveMultipartEndpoint(
+                TEST_ENDPOINT_NAME, "checkFileLength1", multipartRequest, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check file length 1 OK"));
+
+        // check that the parameter order does not matter
+        response = vaadinController.serveMultipartEndpoint(TEST_ENDPOINT_NAME,
+                "checkFileLength2", multipartRequest, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check file length 2 OK"));
+    }
+
+    @Test
+    public void should_AcceptMultipartFile_WithSingleParameter()
+            throws IOException {
+        // hilla request body
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
+                .thenReturn("{}");
+
+        // uploaded file
+        when(multipartRequest.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
+
+        var vaadinController = createVaadinController(TEST_ENDPOINT);
+        var response = vaadinController.serveMultipartEndpoint(
+                TEST_ENDPOINT_NAME, "getFileLength", multipartRequest, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("5", response.getBody());
+    }
+
+    @Test
+    public void should_AcceptMultipartFile_InComplexObjects()
+            throws IOException {
+        // hilla request body
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
+                .thenReturn(
+                        "{\"fileData\":{\"owner\":\"John\"},\"expectedLength\":5}");
+
+        // uploaded file
+        when(multipartRequest.getFileMap())
+                .thenReturn(Collections.singletonMap("/fileData/file", multipartFile));
+
+        var vaadinController = createVaadinController(TEST_ENDPOINT);
+        var response = vaadinController.serveMultipartEndpoint(
+                TEST_ENDPOINT_NAME, "checkOwnedFileLength", multipartRequest, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check John's file length OK"));
+}
+
+    @Test
+    public void should_AcceptMultipleMultipartFiles() throws IOException {
+        // hilla request body
+        when(multipartRequest.getParameter(EndpointController.BODY_PART_NAME))
+                .thenReturn("{\"expectedLength\":9}");
+
+        // uploaded files
+        var otherMultipartFile = mock(MultipartFile.class);
+        when(otherMultipartFile.getOriginalFilename()).thenReturn("hello.txt");
+        when(otherMultipartFile.getSize()).thenReturn(4L);
+        when(otherMultipartFile.getInputStream())
+                .thenReturn(new ByteArrayInputStream ("Ciao".getBytes()));
+
+        when(multipartRequest.getFileMap())
+                .thenReturn(Map.of("/file1", multipartFile, "/file2", otherMultipartFile));
+
+        var vaadinController = createVaadinController(TEST_ENDPOINT);
+        var response = vaadinController.serveMultipartEndpoint(
+                TEST_ENDPOINT_NAME, "checkMultipleFiles", multipartRequest, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Check multiple files OK"));
+}
+
+@Test
+@Ignore("FIXME: this test is flaky, it fails when executed fast enough")
+public void should_bePossibeToGetPrincipalInEndpoint() {
         when(principal.getName()).thenReturn("foo");
 
         EndpointController vaadinController = createVaadinController(
@@ -826,8 +978,8 @@ public class EndpointControllerTest {
                 endpointObjectMapper, mock(ExplicitNullableTypeChecker.class),
                 mock(ServletContext.class), registry);
 
-        new EndpointController(contextMock, registry, invoker, null)
-                .registerEndpoints();
+        new EndpointController(contextMock, registry, invoker, null,
+                mockOwnObjectMapper).registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
         verify(contextMock, times(1))
@@ -1312,7 +1464,7 @@ public class EndpointControllerTest {
 
         EndpointController connectController = Mockito
                 .spy(new EndpointController(mockApplicationContext, registry,
-                        invoker, csrfChecker));
+                        invoker, csrfChecker, endpointObjectMapper));
         connectController.registerEndpoints();
         return connectController;
     }

@@ -1,13 +1,13 @@
-import { expect, use } from 'chai';
 import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
+import { expect, chai, describe, it, beforeEach, afterEach } from 'vitest';
 import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
-use(chaiLike);
-use(sinonChai);
+chai.use(chaiLike);
+chai.use(sinonChai);
 
 describe('RouterBuilder', () => {
   let builder: RouterConfigurationBuilder;
@@ -51,7 +51,7 @@ describe('RouterBuilder', () => {
       location: '',
       addEventListener: () => {},
     };
-    // @ts-expect-error Fake just enough so tests pass
+    // @ts-expect-error: Fake just enough so tests pass
     globalThis.document.defaultView = globalThis.window;
   });
 
