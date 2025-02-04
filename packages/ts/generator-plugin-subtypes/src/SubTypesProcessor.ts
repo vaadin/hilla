@@ -13,10 +13,10 @@ import ts, { type SourceFile } from 'typescript';
 export class SubTypesProcessor {
   readonly #typeName: string;
   readonly #source: SourceFile;
-  readonly #oneOf: ReferenceSchema[];
-  readonly #dependencies;
+  readonly #oneOf: readonly ReferenceSchema[];
+  readonly #dependencies: DependencyManager;
 
-  constructor(typeName: string, source: SourceFile, oneOf: ReferenceSchema[]) {
+  constructor(typeName: string, source: SourceFile, oneOf: readonly ReferenceSchema[]) {
     this.#typeName = typeName;
     this.#source = source;
     this.#oneOf = oneOf;

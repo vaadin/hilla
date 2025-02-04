@@ -1,7 +1,6 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import { convertFullyQualifiedNameToRelativePath } from '@vaadin/hilla-generator-core/Schema.js';
+import { isReferenceSchema, convertFullyQualifiedNameToRelativePath } from '@vaadin/hilla-generator-core/Schema.js';
 import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.js';
-import type { OpenAPIV3 } from 'openapi-types';
 import { ModelFixProcessor } from './ModelFixProcessor.js';
 import { SubTypesProcessor } from './SubTypesProcessor.js';
 import { TypeFixProcessor } from './TypeFixProcessor.js';
@@ -25,19 +24,19 @@ export default class SubTypesPlugin extends Plugin {
 
     Object.entries(components).forEach(([baseKey, baseComponent]) => {
       // search for components with oneOf: those are union types
-      if ('oneOf' in baseComponent && Array.isArray(baseComponent.oneOf)) {
+      if (
+        'oneOf' in baseComponent &&
+        Array.isArray(baseComponent.oneOf) &&
+        baseComponent.oneOf.every((schema) => isReferenceSchema(schema))
+      ) {
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
         const source = sources.find(({ fileName }) => fileName === fn)!;
         // replace the (empty) source with a newly-generated one
-        const newSource = new SubTypesProcessor(
-          baseKey,
-          source,
-          baseComponent.oneOf as OpenAPIV3.ReferenceObject[],
-        ).process();
+        const newSource = new SubTypesProcessor(baseKey, source, baseComponent.oneOf).process();
         sources.splice(sources.indexOf(source), 1, newSource);
 
         // mentioned types in the oneOf need to be fixed as well
-        (baseComponent.oneOf as OpenAPIV3.ReferenceObject[]).forEach((schema) => {
+        baseComponent.oneOf.forEach((schema) => {
           if ('$ref' in schema) {
             const path = schema.$ref;
             Object.entries(components).forEach(([subKey, subComponent]) => {
