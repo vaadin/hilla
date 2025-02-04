@@ -18,7 +18,7 @@ import {
   ForbiddenResponseError,
   type MiddlewareFunction,
   UnauthorizedResponseError,
-  bodyPartName,
+  BODY_PART_NAME,
 } from '../src/index.js';
 import type { Vaadin } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
@@ -486,6 +486,13 @@ describe('@vaadin/hilla-frontend', () => {
         expect(fetchMock.callHistory.lastCall()?.url).to.equal(`${base}/fooPrefix/BarEndpoint/barMethod`);
       });
 
+      async function verifyRequest() {
+        const request = fetchMock.callHistory.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        return request!.formData();
+      }
+
       it('should pass 3rd argument as JSON request body', async () => {
         await client.call('FooEndpoint', 'fooMethod', { fooParam: 'foo' });
 
@@ -499,17 +506,13 @@ describe('@vaadin/hilla-frontend', () => {
         const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
         await client.call('FooEndpoint', 'fooMethod', { fooParam: file });
 
-        const request = fetchMock.callHistory.lastCall()?.request;
-        expect(request).to.exist;
-        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
-        const formData = await request!.formData();
-
+        const formData = await verifyRequest();
         const uploadedFile = formData.get('/fooParam') as File | null;
         expect(uploadedFile).to.be.instanceOf(File);
         expect(uploadedFile!.name).to.equal('foo.txt');
         expect(await uploadedFile!.text()).to.equal('foo');
 
-        const body = formData.get(bodyPartName);
+        const body = formData.get(BODY_PART_NAME);
         expect(body).to.equal('{}');
       });
 
@@ -517,17 +520,13 @@ describe('@vaadin/hilla-frontend', () => {
         const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
         await client.call('FooEndpoint', 'fooMethod', { fooParam: { a: 'abc', b: file } });
 
-        const request = fetchMock.callHistory.lastCall()?.request;
-        expect(request).to.exist;
-        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
-        const formData = await request!.formData();
-
+        const formData = await verifyRequest();
         const uploadedFile = formData.get('/fooParam/b') as File | null;
         expect(uploadedFile).to.be.instanceOf(File);
         expect(uploadedFile!.name).to.equal('foo.txt');
         expect(await uploadedFile!.text()).to.equal('foo');
 
-        const body = formData.get(bodyPartName);
+        const body = formData.get(BODY_PART_NAME);
         expect(body).to.equal('{"fooParam":{"a":"abc"}}');
       });
 
@@ -535,17 +534,13 @@ describe('@vaadin/hilla-frontend', () => {
         const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
         await client.call('FooEndpoint', 'fooMethod', { fooParam: ['a', file, 'c'], other: 'abc' });
 
-        const request = fetchMock.callHistory.lastCall()?.request;
-        expect(request).to.exist;
-        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
-        const formData = await request!.formData();
-
+        const formData = await verifyRequest();
         const uploadedFile = formData.get('/fooParam/1') as File | null;
         expect(uploadedFile).to.be.instanceOf(File);
         expect(uploadedFile!.name).to.equal('foo.txt');
         expect(await uploadedFile!.text()).to.equal('foo');
 
-        const body = formData.get(bodyPartName);
+        const body = formData.get(BODY_PART_NAME);
         expect(body).to.equal('{"fooParam":["a",null,"c"],"other":"abc"}');
       });
 
