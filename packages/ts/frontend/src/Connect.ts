@@ -359,8 +359,9 @@ export class ConnectClient {
       }
     } else {
       headers['Content-Type'] = 'application/json';
-      body =
-        params !== undefined ? JSON.stringify(params, (_, value) => (value === undefined ? null : value)) : undefined;
+      if (params) {
+        body = JSON.stringify(params, (_, value) => (value === undefined ? null : value));
+      }
     }
 
     const request = new Request(`${this.prefix}/${endpoint}/${method}`, {
