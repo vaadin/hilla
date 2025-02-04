@@ -24,7 +24,7 @@ $wnd.Vaadin.registrations.push({
   is: 'endpoint',
 });
 
-export const bodyPartName = 'hilla_body_part';
+export const BODY_PART_NAME = 'hilla_body_part';
 
 export type MaybePromise<T> = Promise<T> | T;
 
@@ -350,7 +350,7 @@ export class ConnectClient {
       // in this case params is not undefined, otherwise there would be no files
       body = new FormData();
       body.append(
-        bodyPartName,
+        BODY_PART_NAME,
         JSON.stringify(paramsWithoutFiles, (_, value) => (value === undefined ? null : value)),
       );
 
