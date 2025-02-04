@@ -7,13 +7,13 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "24.7.0-alpha7",
-    "@vaadin/icons": "24.7.0-alpha7",
-    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha7",
+    "@vaadin/icon": "24.7.0-alpha8",
+    "@vaadin/icons": "24.7.0-alpha8",
+    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha8",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "24.7.0-alpha7",
-    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha7",
-    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha7",
+    "@vaadin/tooltip": "24.7.0-alpha8",
+    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha8",
+    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha8",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.2.1"
   },
@@ -52,13 +52,13 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.7.0-alpha10",
       "@vaadin/hilla-lit-form": "24.7.0-alpha10",
-      "@vaadin/icon": "24.7.0-alpha7",
-      "@vaadin/icons": "24.7.0-alpha7",
-      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha7",
+      "@vaadin/icon": "24.7.0-alpha8",
+      "@vaadin/icons": "24.7.0-alpha8",
+      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha8",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "24.7.0-alpha7",
-      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha7",
-      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha7",
+      "@vaadin/tooltip": "24.7.0-alpha8",
+      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha8",
+      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha8",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1"
     },
@@ -91,7 +91,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "aacc3cfc0a320d89312be90fb79a7915ecb15f4ce86bbd17c5eb03e6ca1b8ee3"
+    "hash": "a221ab1d23024c4643ed5fb2201f6af353537b042feb1f6d8ce103a55fe0c579"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
