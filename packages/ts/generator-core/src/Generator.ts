@@ -6,7 +6,7 @@ import ts from 'typescript';
 import type { PluginConstructor } from './Plugin.js';
 import PluginManager from './PluginManager.js';
 import ReferenceResolver from './ReferenceResolver.js';
-import type { SharedStorage } from './SharedStorage.t.js';
+import type { SharedStorage } from './SharedStorage.js';
 
 export type GeneratorContext = Readonly<{
   logger: LoggerFactory;

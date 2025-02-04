@@ -1,6 +1,6 @@
 /* eslint-disable max-params */
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
+import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';

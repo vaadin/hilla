@@ -1,6 +1,6 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import { convertFullyQualifiedNameToRelativePath } from '@vaadin/hilla-generator-core/Schema.js';
-import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
+import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import { ModelFixProcessor } from './ModelFixProcessor.js';
 import { SubTypesProcessor } from './SubTypesProcessor.js';

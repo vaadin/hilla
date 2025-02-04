@@ -5,7 +5,7 @@ import {
   type NonEmptyObjectSchema,
   type Schema,
 } from '@vaadin/hilla-generator-core/Schema.js';
-import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
+import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';

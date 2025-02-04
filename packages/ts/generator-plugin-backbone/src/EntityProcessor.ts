@@ -17,7 +17,7 @@ import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
 } from '@vaadin/hilla-generator-core/Schema.js';
-import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
+import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';

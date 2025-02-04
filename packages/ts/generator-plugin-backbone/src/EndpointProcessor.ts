@@ -1,5 +1,5 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
+import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
