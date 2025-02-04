@@ -1,5 +1,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import { convertFullyQualifiedNameToRelativePath, simplifyFullyQualifiedName, type Nullified } from './utils.js';
+
+export type Nullified<T, K extends keyof T> = T & Record<K, undefined>;
 
 export type ReferenceSchema = OpenAPIV3.ReferenceObject;
 export type ArraySchema = OpenAPIV3.ArraySchemaObject;
@@ -127,14 +128,26 @@ export function isMapSchema(schema: Schema): schema is MapSchema {
   return isEmptyObject(schema) && !!schema.additionalProperties;
 }
 
+export function simplifyFullyQualifiedName(name: string): string {
+  return name.substring(name.lastIndexOf(name.includes('$') ? '$' : '.') + 1, name.length);
+}
+
 export function convertReferenceSchemaToSpecifier({ $ref }: ReferenceSchema): string {
   return simplifyFullyQualifiedName($ref);
 }
 
 const COMPONENTS_SCHEMAS_REF_LENGTH = '#/components/schemas/'.length;
 
-export function convertReferenceSchemaToPath({ $ref }: ReferenceSchema): string {
-  return convertFullyQualifiedNameToRelativePath($ref.substring(COMPONENTS_SCHEMAS_REF_LENGTH));
+export function convertReferenceSchemaToFullyQualifiedName({ $ref }: ReferenceSchema): string {
+  return $ref.substring(COMPONENTS_SCHEMAS_REF_LENGTH);
+}
+
+export function convertFullyQualifiedNameToRelativePath(name: string): string {
+  return name.replace(/[$.]/gu, '/');
+}
+
+export function convertReferenceSchemaToPath(schema: ReferenceSchema): string {
+  return convertFullyQualifiedNameToRelativePath(convertReferenceSchemaToFullyQualifiedName(schema));
 }
 
 export function resolveReference(

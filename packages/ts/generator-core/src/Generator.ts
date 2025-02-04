@@ -2,11 +2,10 @@ import SwaggerParser from '@apidevtools/swagger-parser';
 import type LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import ts from 'typescript';
-import File from './File.js';
 import type { PluginConstructor } from './Plugin.js';
 import PluginManager from './PluginManager.js';
 import ReferenceResolver from './ReferenceResolver.js';
-import type SharedStorage from './SharedStorage.js';
+import type { SharedStorage } from './SharedStorage.js';
 
 export type GeneratorContext = Readonly<{
   logger: LoggerFactory;
@@ -36,6 +35,7 @@ export default class Generator {
       outputDir: this.#outputDir,
       pluginStorage: new Map(),
       sources: [],
+      transferTypes: new Map(),
     };
 
     this.#logger.global.debug('Executing plugins');
