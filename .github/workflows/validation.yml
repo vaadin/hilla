@@ -184,6 +184,7 @@ jobs:
         run: npm run test:coverage
         env:
           CI: true
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
