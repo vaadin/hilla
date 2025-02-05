@@ -27,6 +27,8 @@ permissions:
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
+env:
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
@@ -34,7 +36,6 @@ jobs:
     timeout-minutes: 5
     env:
       NX_SKIP_NX_CACHE: true
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 
     steps:
       - uses: actions-cool/check-user-permission@main
@@ -164,6 +165,7 @@ jobs:
 
     steps:
       - name: Install Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
         uses: actions/checkout@v4
@@ -184,6 +186,7 @@ jobs:
         run: npm run test:coverage
         env:
           CI: true
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
