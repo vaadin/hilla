@@ -165,6 +165,7 @@ jobs:
 
     steps:
       - name: Install Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
         uses: actions/checkout@v4
