@@ -78,7 +78,11 @@ export default class SignalProcessor {
           }
           return template(
             `function ${METHOD_NAME}(): ${RETURN_TYPE} {
-  return new ${SIGNAL}(${isCollectionSignal ? '' : `${INITIAL_VALUE}, `}{ client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${paramNames.length ? `, params: { ${paramNames} }` : ''} });
+  return new ${SIGNAL}(${
+    isCollectionSignal ? '' : `${INITIAL_VALUE}, `
+  }{ client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${
+    paramNames.length ? `, params: { ${paramNames} }` : ''
+  } });
 }`,
             (statements) => statements,
             [
@@ -157,7 +161,7 @@ export default class SignalProcessor {
       return defaultValue;
     }
 
-    defaultValue.genericReturnType = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments![0];
+    [defaultValue.genericReturnType] = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments!;
 
     if (collectionSignals.includes(signalId.text)) {
       return defaultValue;

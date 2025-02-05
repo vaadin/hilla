@@ -1,15 +1,14 @@
-import { appendFile } from 'fs/promises';
-import { mkdir, rm } from 'node:fs/promises';
-import { expect, use } from 'chai';
+import { appendFile, mkdir, rm } from 'node:fs/promises';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 import type { Writable } from 'type-fest';
 import type { Logger } from 'vite';
+import { afterAll, afterEach, beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import collectRoutesFromFS, { type RouteMeta } from '../../src/vite-plugin/collectRoutesFromFS.js';
 import { createLogger, createTestingRouteFiles, createTestingRouteMeta, createTmpDir } from '../utils.js';
 
-use(chaiAsPromised);
-use(sinonChai);
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 const collator = new Intl.Collator('en-US');
 
@@ -33,12 +32,12 @@ describe('@vaadin/hilla-file-router', () => {
     let tmp: URL;
     let logger: Logger;
 
-    before(async () => {
+    beforeAll(async () => {
       tmp = await createTmpDir();
       await createTestingRouteFiles(tmp);
     });
 
-    after(async () => {
+    afterAll(async () => {
       await rm(tmp, { recursive: true, force: true });
     });
 
@@ -56,7 +55,10 @@ describe('@vaadin/hilla-file-router', () => {
       expect(routes).to.deep.equal(expected);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(logger.error).to.be.calledOnceWithExactly(
-        `The file "${new URL('./test/no-default-export.tsx', tmp).toString()}" should contain a default export of a component`,
+        `The file "${new URL(
+          './test/no-default-export.tsx',
+          tmp,
+        ).toString()}" should contain a default export of a component`,
       );
     });
 

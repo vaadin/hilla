@@ -2,16 +2,14 @@ import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
-import snapshotMatcher from '@vaadin/hilla-generator-utils/testing/snapshotMatcher.js';
-import { expect, use } from 'chai';
 import sinonChai from 'sinon-chai';
+import { chai, describe, expect, it } from 'vitest';
 import ModelPlugin from '../../src/index.js';
 
-use(sinonChai);
-use(snapshotMatcher);
+chai.use(sinonChai);
 
 describe('FormPlugin', () => {
-  context('models', () => {
+  describe('models', () => {
     it('correctly generates code', async () => {
       const modelNames = (await readdir(fileURLToPath(new URL('./fixtures', import.meta.url))))
         .filter((fname) => !fname.startsWith('.')) // exclude .DS_Store and such
@@ -34,10 +32,7 @@ describe('FormPlugin', () => {
           const fileName = `com/example/application/endpoints/TsFormEndpoint/${modelName}.ts`;
           const modelFile = filesByName[fileName];
           expect(modelFile, `${fileName} file`).to.not.be.undefined;
-          await expect(await modelFile.text(), `${fileName} file`).toMatchSnapshot(
-            `${modelName}.snap.ts`,
-            import.meta.url,
-          );
+          await expect(await modelFile.text(), `${fileName} file`).toMatchFileSnapshot(`fixtures/${modelName}.snap.ts`);
         }),
       );
     });

@@ -30,7 +30,6 @@ import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.exception.EndpointValidationException.ValidationErrorData;
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import jakarta.servlet.ServletContext;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -46,10 +45,12 @@ import org.springframework.util.ClassUtils;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.security.Principal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -303,13 +304,36 @@ public class EndpointInvoker {
         return endpointData.getMethod(methodName).orElse(null);
     }
 
-    private Map<String, JsonNode> getRequestParameters(ObjectNode body) {
+    private Map<String, JsonNode> getRequestParameters(ObjectNode body,
+            List<String> parameterNames) {
+        // Respect the order of parameters in the request body
         Map<String, JsonNode> parametersData = new LinkedHashMap<>();
         if (body != null) {
             body.fields().forEachRemaining(entry -> parametersData
                     .put(entry.getKey(), entry.getValue()));
         }
-        return parametersData;
+
+        // Try to adapt to the order of parameters in the method
+        var orderedData = new LinkedHashMap<String, JsonNode>();
+        for (String parameterName : parameterNames) {
+            JsonNode parameterData = parametersData.get(parameterName);
+            if (parameterData != null) {
+                parametersData.remove(parameterName);
+                orderedData.put(parameterName, parameterData);
+            }
+        }
+        orderedData.putAll(parametersData);
+
+        if (getLogger().isDebugEnabled()) {
+            var returnedParameterNames = List.copyOf(orderedData.keySet());
+            if (!parameterNames.equals(returnedParameterNames)) {
+                getLogger().debug(
+                        "The parameter names in the request body do not match the method parameters. Expected: {}, but got: {}",
+                        parameterNames, returnedParameterNames);
+            }
+        }
+
+        return orderedData;
     }
 
     private Object[] getVaadinEndpointParameters(
@@ -404,7 +428,10 @@ public class EndpointInvoker {
                     endpointName, methodName, checkError));
         }
 
-        Map<String, JsonNode> requestParameters = getRequestParameters(body);
+        var parameterNames = Arrays.stream(methodToInvoke.getParameters())
+                .map(Parameter::getName).toList();
+        Map<String, JsonNode> requestParameters = getRequestParameters(body,
+                parameterNames);
         Type[] javaParameters = getJavaParameters(methodToInvoke, ClassUtils
                 .getUserClass(vaadinEndpointData.getEndpointObject()));
         if (javaParameters.length != requestParameters.size()) {

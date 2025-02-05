@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { UnauthorizedResponseError } from '@vaadin/hilla-frontend';
-import { expect } from 'chai';
-import { configureAuth } from '../src';
+import { describe, expect, it } from 'vitest';
+import { configureAuth } from '../src/index.js';
 
 describe('@vaadin/react-auth', () => {
   describe('useAuth', () => {

@@ -17,7 +17,7 @@ class RouteFromMetaProcessor {
   readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
 
-  constructor(views: readonly RouteMeta[], { json: jsonFile, code: codeFile }: RuntimeFileUrls) {
+  constructor(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls) {
     this.#views = views;
 
     const codeDir = new URL('./', codeFile);

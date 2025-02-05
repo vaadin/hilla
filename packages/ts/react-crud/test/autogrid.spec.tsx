@@ -1,24 +1,24 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GridColumn } from '@vaadin/react-components/GridColumn.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import chaiDom from 'chai-dom';
 import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { ListService } from '../crud';
-import type { HeaderFilterRendererProps } from '../header-filter';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
-import type { CountService, CrudService } from '../src/crud.js';
+import type { CountService, CrudService, ListService } from '../src/crud.js';
+import type { HeaderFilterRendererProps } from '../src/header-filter.js';
 import { LocaleContext } from '../src/locale.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
 import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
@@ -38,18 +38,12 @@ import {
   PersonWithoutIdPropertyModel,
   PersonWithSimpleIdPropertyModel,
 } from './test-models-and-services.js';
+import { nextFrame } from './test-utils.js';
 import TextFieldController from './TextFieldController.js';
 
-use(sinonChai);
-use(chaiAsPromised);
-
-export async function nextFrame(): Promise<void> {
-  return new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-}
+chai.use(sinonChai);
+chai.use(chaiDom);
+chai.use(chaiAsPromised);
 
 async function assertColumnsOrder(grid: GridController, ...ids: string[]) {
   const columns = await grid.getColumns();
@@ -87,6 +81,7 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     afterEach(() => {
+      cleanup();
       sinon.restore();
     });
 
@@ -918,7 +913,7 @@ describe('@vaadin/hilla-react-crud', () => {
           );
 
           const someNumberFilter = grid.getHeaderCellContent(1, 4);
-          const [someNumberFilterField, someNumberFieldSelect] = await Promise.all([
+          const [someNumberFilterField] = await Promise.all([
             TextFieldController.initByParent(someNumberFilter, user, 'vaadin-number-field'),
             SelectController.init(someNumberFilter, user),
           ]);
@@ -1019,6 +1014,7 @@ describe('@vaadin/hilla-react-crud', () => {
           expect(firstNameFilterField.placeholder).to.deep.equal('Custom filter');
         });
 
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         const CustomFirstNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
           <TextField
             id="firstNameFilter"
@@ -1259,6 +1255,7 @@ describe('@vaadin/hilla-react-crud', () => {
           {item.firstName}-{item.lastName}
         </span>
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       const FullNameFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
         <TextField
           id="full-name-filter"

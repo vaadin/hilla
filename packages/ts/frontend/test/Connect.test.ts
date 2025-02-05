@@ -1,10 +1,12 @@
 /* eslint-disable no-new */
 import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
-import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import chaiLike from 'chai-like';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import type { WritableDeep } from 'type-fest';
+import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import type { MiddlewareContext, MiddlewareNext } from '../src/Connect.js';
 import CookieManager from '../src/CookieManager.js';
 import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
@@ -16,9 +18,9 @@ import {
   ForbiddenResponseError,
   type MiddlewareFunction,
   UnauthorizedResponseError,
-  type FluxConnection,
+  BODY_PART_NAME,
 } from '../src/index.js';
-import type { Vaadin, VaadinGlobal } from '../src/types.js';
+import type { Vaadin } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
 import { fluxConnectionSubscriptionStubs } from './mocks/FluxConnection.js';
 import {
@@ -26,9 +28,11 @@ import {
   setupSpringCsrfMetaTags,
   TEST_SPRING_CSRF_HEADER_NAME,
   TEST_SPRING_CSRF_TOKEN_VALUE,
-} from './SpringCsrfTestUtils.test.js';
+} from './SpringCsrfTestUtils.js';
 
-use(chaiAsPromised);
+chai.use(chaiAsPromised);
+chai.use(chaiLike);
+chai.use(sinonChai);
 
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
@@ -43,6 +47,14 @@ const $wnd = window as TestVaadinWindow;
 describe('@vaadin/hilla-frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
+
+    beforeAll(() => {
+      fetchMock.mockGlobal();
+    });
+
+    afterAll(() => {
+      fetchMock.unmockGlobal();
+    });
 
     beforeEach(() => {
       subscribeStub.resetHistory();
@@ -157,7 +169,7 @@ describe('@vaadin/hilla-frontend', () => {
       });
 
       afterEach(() => {
-        fetchMock.restore();
+        fetchMock.removeRoutes().clearHistory();
         CookieManager.remove(VAADIN_CSRF_COOKIE_NAME);
       });
 
@@ -169,12 +181,12 @@ describe('@vaadin/hilla-frontend', () => {
       });
 
       it('should fetch endpoint and method from default prefix', async () => {
-        expect(fetchMock.calls()).to.have.lengthOf(0); // no premature requests
+        expect(fetchMock.callHistory.calls()).to.have.lengthOf(0); // no premature requests
 
         await client.call('FooEndpoint', 'fooMethod');
 
-        expect(fetchMock.calls()).to.have.lengthOf(1);
-        expect(fetchMock.lastUrl()).to.equal(`${base}/connect/FooEndpoint/fooMethod`);
+        expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
+        expect(fetchMock.callHistory.lastCall()?.url).to.equal(`${base}/connect/FooEndpoint/fooMethod`);
       });
 
       it('should return Promise', () => {
@@ -184,7 +196,7 @@ describe('@vaadin/hilla-frontend', () => {
 
       it('should use POST request', async () => {
         await client.call('FooEndpoint', 'fooMethod');
-        expect(fetchMock.lastOptions()).to.include({ method: 'POST' });
+        expect(fetchMock.callHistory.lastCall()?.options).to.include({ method: 'POST' });
       });
 
       it('should set connection state to LOADING followed by CONNECTED on successful fetch', async () => {
@@ -201,7 +213,7 @@ describe('@vaadin/hilla-frontend', () => {
         fetchMock.post(`${base}/connect/FooEndpoint/reject`, Promise.reject(new TypeError('Network failure')));
         try {
           await client.call('FooEndpoint', 'reject');
-        } catch (error) {
+        } catch {
           // expected
         } finally {
           expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTION_LOST);
@@ -232,7 +244,7 @@ describe('@vaadin/hilla-frontend', () => {
 
         try {
           await client.call('FooEndpoint', 'vaadinConnectResponse');
-        } catch (error) {
+        } catch {
           // expected
         } finally {
           expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
@@ -242,7 +254,7 @@ describe('@vaadin/hilla-frontend', () => {
       it('should use JSON request headers', async () => {
         await client.call('FooEndpoint', 'fooMethod');
 
-        expect(fetchMock.lastOptions()?.headers).to.deep.include({
+        expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
           accept: 'application/json',
           'content-type': 'application/json',
         });
@@ -251,7 +263,7 @@ describe('@vaadin/hilla-frontend', () => {
       it('should set header for preventing CSRF', async () => {
         await client.call('FooEndpoint', 'fooMethod');
 
-        expect(fetchMock.lastOptions()?.headers).to.deep.include({
+        expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
           [VAADIN_CSRF_HEADER.toLowerCase()]: '',
         });
       });
@@ -263,7 +275,7 @@ describe('@vaadin/hilla-frontend', () => {
 
           await client.call('FooEndpoint', 'fooMethod');
 
-          expect(fetchMock.lastOptions()?.headers).to.deep.include({
+          expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
             [TEST_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
           });
         } finally {
@@ -278,7 +290,7 @@ describe('@vaadin/hilla-frontend', () => {
 
           await client.call('FooEndpoint', 'fooMethod');
 
-          expect(fetchMock.lastOptions()?.headers).to.deep.include({
+          expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
             [TEST_SPRING_CSRF_HEADER_NAME]: TEST_SPRING_CSRF_TOKEN_VALUE,
           });
         } finally {
@@ -292,7 +304,7 @@ describe('@vaadin/hilla-frontend', () => {
 
         await client.call('FooEndpoint', 'fooMethod');
 
-        expect(fetchMock.lastOptions()?.headers).to.deep.include({
+        expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
           [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
         });
       });
@@ -308,7 +320,7 @@ describe('@vaadin/hilla-frontend', () => {
 
           await client.call('FooEndpoint', 'fooMethod');
 
-          expect(fetchMock.lastOptions()?.headers).to.deep.include({
+          expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
             [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
           });
         } finally {
@@ -381,7 +393,12 @@ describe('@vaadin/hilla-frontend', () => {
         }
         expect(thrownError).to.be.instanceOf(EndpointResponseError);
         expect(thrownError).to.have.property('message').that.is.string(body);
-        expect(thrownError).to.have.deep.property('response', errorResponse);
+        expect(thrownError)
+          .to.have.deep.property('response')
+          .that.satisfies(
+            (response: Response) =>
+              response.status === errorResponse.status && response.statusText === errorResponse.statusText,
+          );
       });
 
       it('should reject with unauthorized error', async () => {
@@ -466,15 +483,58 @@ describe('@vaadin/hilla-frontend', () => {
         const data = await client.call('BarEndpoint', 'barMethod');
 
         expect(data).to.deep.equal({ barData: 'bar' });
-        expect(fetchMock.lastUrl()).to.equal(`${base}/fooPrefix/BarEndpoint/barMethod`);
+        expect(fetchMock.callHistory.lastCall()?.url).to.equal(`${base}/fooPrefix/BarEndpoint/barMethod`);
       });
 
       it('should pass 3rd argument as JSON request body', async () => {
         await client.call('FooEndpoint', 'fooMethod', { fooParam: 'foo' });
 
-        const request = fetchMock.lastCall()?.request;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- false positive
+        const { request } = fetchMock.callHistory.lastCall() ?? {};
         expect(request).to.exist;
         expect(await request?.json()).to.deep.equal({ fooParam: 'foo' });
+      });
+
+      async function checkMultipartForm(
+        callBody: (file: File) => Record<string, unknown>,
+        filePath: string,
+        jsonBody: string,
+      ) {
+        const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
+        await client.call('FooEndpoint', 'fooMethod', callBody(file));
+
+        const request = fetchMock.callHistory.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        const formData = await request!.formData();
+
+        const uploadedFile = formData.get(filePath) as File | null;
+        expect(uploadedFile).to.be.instanceOf(File);
+        expect(uploadedFile!.name).to.equal('foo.txt');
+        expect(await uploadedFile!.text()).to.equal('foo');
+
+        const body = formData.get(BODY_PART_NAME);
+        expect(body).to.equal(jsonBody);
+      }
+
+      it('should use multipart if a param is of File type', async () => {
+        await checkMultipartForm((file) => ({ fooParam: file }), '/fooParam', '{}');
+      });
+
+      it('should use multipart if a param has a property if File type', async () => {
+        await checkMultipartForm(
+          (file) => ({ fooParam: { a: 'abc', b: file } }),
+          '/fooParam/b',
+          '{"fooParam":{"a":"abc"}}',
+        );
+      });
+
+      it('should use multipart if a File is found in array', async () => {
+        await checkMultipartForm(
+          (file) => ({ fooParam: ['a', file, 'c'], other: 'abc' }),
+          '/fooParam/1',
+          '{"fooParam":["a",null,"c"],"other":"abc"}',
+        );
       });
 
       describe('middleware invocation', () => {
@@ -517,7 +577,8 @@ describe('@vaadin/hilla-frontend', () => {
           client.middlewares = [myMiddleware];
           await client.call('FooEndpoint', 'fooMethod', { fooParam: 'foo' });
 
-          const request = fetchMock.lastCall()?.request;
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- false positive
+          const { request } = fetchMock.callHistory.lastCall() ?? {};
           expect(request?.url).to.equal(myUrl);
           expect(request?.headers.get('X-Foo')).to.equal('Bar');
           expect(await request?.text()).to.equal('{"baz": "qux"}');
@@ -612,11 +673,10 @@ describe('@vaadin/hilla-frontend', () => {
 
     describe('atmosphere configuration', () => {
       let client: ConnectClient;
-      let fluxConnection: FluxConnection;
 
       it('should pass custom configuration to flux connection', () => {
         client = new ConnectClient({ atmosphereOptions: { fallbackMethod: 'fake' } });
-        ({ fluxConnection } = client);
+        const { fluxConnection: _ } = client;
         expect(subscribeStub.lastCall.firstArg).to.have.property('fallbackMethod').which.equals('fake');
       });
     });
