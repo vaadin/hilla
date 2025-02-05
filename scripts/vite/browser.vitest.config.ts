@@ -11,8 +11,6 @@ export { root, cwd, isCI, packageJson };
 function getBrowserProviderOptions(): BrowserProviderOptions {
   const { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD, CHROME_BIN } = process.env;
 
-  console.log({ PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD, CHROME_BIN });
-
   if (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD === '1') {
     if (typeof CHROME_BIN === 'string') {
       return {
