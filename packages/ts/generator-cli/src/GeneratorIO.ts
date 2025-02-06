@@ -10,7 +10,6 @@ type PluginConstructorModule = Readonly<{
 export const GENERATED_LIST_FILENAME = 'generated-file-list.txt';
 
 export default class GeneratorIO {
-  declare ['constructor']: typeof GeneratorIO;
   readonly #logger: LoggerFactory;
   readonly #outputDir: URL;
 

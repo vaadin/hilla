@@ -1,7 +1,8 @@
 import { mkdtemp, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import chaiAsPromised from 'chai-as-promised';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
@@ -41,7 +42,7 @@ describe('GeneratorIO', () => {
     });
   });
 
-  describe('Testing GeneratorIO.cleanOutputDir', () => {
+  describe('cleanOutputDir', () => {
     it('should delete all given files and report them', async () => {
       await createGeneratedFilesList();
       await expect(io.cleanOutputDir([], generatedFilenames)).to.eventually.be.deep.equal(generatedFilenames);
@@ -65,7 +66,7 @@ describe('GeneratorIO', () => {
     });
   });
 
-  describe('Testing GeneratorIO.writeChangedFiles', () => {
+  describe('writeChangedFiles', () => {
     it('should write changed file and sync file index', async () => {
       const f = new File([''], 'file1.ts');
       await expect(io.writeGeneratedFiles([f])).to.eventually.be.deep.equal([f.name]);
@@ -80,6 +81,14 @@ describe('GeneratorIO', () => {
       await expect(io.writeGeneratedFiles([f])).to.eventually.be.deep.equal([f.name]);
       const { mtime: mtime2 } = await stat(url);
       expect(mtime).to.be.deep.equal(mtime2);
+    });
+  });
+
+  describe('loadPlugins', () => {
+    it('loads the required plugin', async () => {
+      const plugin = await io.loadPlugin(fileURLToPath(new URL('./TestPlugin.js', import.meta.url)));
+      expect(plugin).to.be.a('function');
+      expect(plugin.prototype).to.be.an.instanceof(Plugin);
     });
   });
 });
