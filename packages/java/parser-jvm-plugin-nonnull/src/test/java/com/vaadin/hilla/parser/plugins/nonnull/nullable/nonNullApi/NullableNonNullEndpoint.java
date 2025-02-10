@@ -22,5 +22,15 @@ public class NullableNonNullEndpoint {
         @Version
         @Nonnull
         public Long notNullVersion;
+
+        // it's easier to test nullability inside @NonNullApi context
+        @jakarta.annotation.Nullable
+        public String jakartaNullable;
+
+        @org.jspecify.annotations.Nullable
+        public String jspecifyNullable;
+
+        @org.springframework.lang.Nullable
+        public String springNullable;
     }
 }
