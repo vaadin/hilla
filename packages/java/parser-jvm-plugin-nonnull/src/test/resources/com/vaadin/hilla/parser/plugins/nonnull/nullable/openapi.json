@@ -121,6 +121,15 @@
             "type" : "integer",
             "format" : "int64",
             "nullable" : true
+          },
+          "jakartaNonnull" : {
+            "type" : "string"
+          },
+          "jspecifyNonnull" : {
+            "type" : "string"
+          },
+          "springNonnull" : {
+            "type" : "string"
           }
         }
       },
@@ -142,6 +151,18 @@
           "notNullVersion" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "jakartaNullable" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "jspecifyNullable" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "springNullable" : {
+            "type" : "string",
+            "nullable" : true
           }
         }
       }
