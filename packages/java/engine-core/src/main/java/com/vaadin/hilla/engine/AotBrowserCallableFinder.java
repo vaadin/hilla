@@ -65,7 +65,7 @@ class AotBrowserCallableFinder {
             return mainClass;
         } catch (NoClassDefFoundError e) {
             LOGGER.debug(
-                    "Spring Boot org.springframework.boot.loader.toolsMainClassFinder class not found. "
+                    "Spring Boot org.springframework.boot.loader.tools.MainClassFinder class not found. "
                             + "Can happen when a Maven project is configured to use com.vaadin:flow-maven-plugin instead of com.vaadin:vaadin-maven-plugin, "
                             + "for example projects using Vaadin Multiplatform Runtime. "
                             + "If Hilla is not a project requirement exclude it from the dependency tree, "
