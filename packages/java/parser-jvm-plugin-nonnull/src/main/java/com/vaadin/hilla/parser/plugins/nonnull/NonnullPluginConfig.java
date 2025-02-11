@@ -56,25 +56,18 @@ public class NonnullPluginConfig
                 // only matter when they are used in conjunction with
                 // package-level annotations
                 new AnnotationMatcher("jakarta.annotation.Nullable", true, 20),
-                new AnnotationMatcher("org.jetbrains.annotations.Nullable",
-                        true, 20),
-                new AnnotationMatcher("androidx.annotation.Nullable", true, 20),
-                new AnnotationMatcher("org.eclipse.jdt.annotation.Nullable",
-                        true, 20),
                 new AnnotationMatcher("com.vaadin.hilla.Nullable", true, 20),
+                new AnnotationMatcher("org.springframework.lang.Nullable", true,
+                        20),
                 new AnnotationMatcher("org.jspecify.annotations.Nullable", true,
                         20),
                 // Nonnull-like annotations have the highest score for
                 // compatibility with the old generator
                 new AnnotationMatcher("jakarta.annotation.Nonnull", false, 30),
                 new AnnotationMatcher("javax.annotation.Nonnull", false, 30),
-                new AnnotationMatcher("org.jetbrains.annotations.NotNull",
-                        false, 30),
-                new AnnotationMatcher("lombok.NonNull", false, 30),
-                new AnnotationMatcher("androidx.annotation.NonNull", false, 30),
-                new AnnotationMatcher("org.eclipse.jdt.annotation.NonNull",
-                        false, 30),
                 new AnnotationMatcher("com.vaadin.hilla.Nonnull", false, 30),
+                new AnnotationMatcher("org.springframework.lang.NonNull", false,
+                        30),
                 new AnnotationMatcher("org.jspecify.annotations.NonNull", false,
                         30));
 
