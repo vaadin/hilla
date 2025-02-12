@@ -103,10 +103,8 @@ public final class EndpointExposedPlugin
     }
 
     private boolean alwaysExpose(ClassInfoModel classInfo) {
-        return classInfo
-                .is("com.vaadin.flow.spring.data.jpa.CrudRepositoryService")
-                || classInfo.is(
-                        "com.vaadin.flow.spring.data.jpa.ListRepositoryService");
+        return classInfo.is("com.vaadin.hilla.crud.CrudRepositoryService")
+                || classInfo.is("com.vaadin.hilla.crud.ListRepositoryService");
     }
 
     /**
