@@ -47,15 +47,22 @@ class AotBrowserCallableFinder {
     }
 
     private static String determineApplicationClass(
-            EngineConfiguration engineConfiguration) throws IOException {
+            EngineConfiguration engineConfiguration) {
         var mainClass = engineConfiguration.getMainClass();
         if (mainClass != null) {
             return mainClass;
         }
         try {
-            mainClass = MainClassFinder.findSingleMainClass(
-                    engineConfiguration.getClassesDir().toFile(),
-                    SPRING_BOOT_APPLICATION_CLASS_NAME);
+            mainClass = engineConfiguration.getClassesDirs().stream()
+                    .map(path -> {
+                        try {
+                            return MainClassFinder.findSingleMainClass(
+                                    path.toFile(),
+                                    SPRING_BOOT_APPLICATION_CLASS_NAME);
+                        } catch (IOException e) {
+                            return null;
+                        }
+                    }).filter(Objects::nonNull).findFirst().orElse(null);
             if (mainClass == null) {
                 LOGGER.warn(
                         "This project has not been recognized as a Spring Boot"
