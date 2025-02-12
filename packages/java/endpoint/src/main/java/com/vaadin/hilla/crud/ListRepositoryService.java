@@ -11,6 +11,7 @@ import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.crud.filter.Filter;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,10 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    // will store the max page size as configured in
+    // `spring.data.rest.pageable.max-page-size` if available
+    private static Integer maxPageSize;
 
     private R repository;
     private final Class<T> entityClass;
@@ -52,10 +57,13 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
     }
 
     @PostConstruct
-    private void init() {
+    void init() {
         if (repository == null) {
             repository = resolveRepository();
         }
+        var env = applicationContext.getEnvironment();
+        maxPageSize = env.getProperty("spring.data.rest.pageable.max-page-size",
+                Integer.class);
     }
 
     /**
@@ -69,6 +77,11 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
+        if (maxPageSize != null && pageable.getPageSize() > maxPageSize) {
+            pageable = PageRequest.of(pageable.getPageNumber(), maxPageSize,
+                    pageable.getSort());
+        }
+
         Specification<T> spec = toSpec(filter);
         return getRepository().findAll(spec, pageable).getContent();
     }

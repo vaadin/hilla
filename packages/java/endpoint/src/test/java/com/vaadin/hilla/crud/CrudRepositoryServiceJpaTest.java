@@ -12,7 +12,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -27,6 +30,8 @@ public class CrudRepositoryServiceJpaTest {
     private TestEntityManager entityManager;
     @Autowired
     TestCrudRepositoryService testCrudRepositoryService;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private List<TestObject> testObjects;
 
@@ -92,5 +97,21 @@ public class CrudRepositoryServiceJpaTest {
         Assert.assertEquals(List.of("John", "Jeff", "Michael", "Lady"),
                 testCrudRepositoryService.list(Pageable.unpaged(), null)
                         .stream().map(o -> o.getName()).toList());
+    }
+
+    @Test
+    public void listWithMaxPagination() {
+        TestPropertyValues.of("spring.data.rest.pageable.max-page-size=2")
+                .applyTo((ConfigurableEnvironment) applicationContext
+                        .getEnvironment());
+        // force init again, as it already happened
+        testCrudRepositoryService.init();
+
+        List<TestObject> result = testCrudRepositoryService
+                .list(Pageable.ofSize(5), null);
+
+        Assert.assertEquals(2, result.size());
+        Assert.assertEquals("John", result.get(0).getName());
+        Assert.assertEquals("Jeff", result.get(1).getName());
     }
 }
