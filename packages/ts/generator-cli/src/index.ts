@@ -62,7 +62,10 @@ Options:
 
   const logger = new LoggerFactory({ verbose });
 
-  const io = new GeneratorIO(new URL(outputDir, pathToFileURL(`${process.cwd()}/`)), logger);
+  const io = new GeneratorIO(
+    new URL(outputDir.endsWith('/') ? outputDir : `${outputDir}/`, pathToFileURL(`${process.cwd()}/`)),
+    logger,
+  );
 
   const resolvedPlugins = await Promise.all(
     Array.from(new Set(plugins), async (pluginPath) => io.loadPlugin(pluginPath)),
