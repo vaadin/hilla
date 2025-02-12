@@ -85,7 +85,7 @@ public class HillaPlugin : Plugin<Project> {
             return EngineConfiguration.Builder()
                 .baseDir(baseDir)
                 .buildDir(buildDir)
-                .classesDir(sourceSet.output.classesDirs.singleFile.toPath())
+                .classesDirs(sourceSet.output.classesDirs.map { it.toPath() }.toList())
                 .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
                 .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
                 .artifactId(project.name)
