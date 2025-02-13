@@ -15,7 +15,6 @@
     "sourceMap": true,
     "inlineSources": true,
     "isolatedModules": true,
-    "isolatedDeclarations": true,
     "verbatimModuleSyntax": true,
     "noImplicitOverride": true,
     "noImplicitAny": true,
