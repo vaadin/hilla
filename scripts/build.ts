@@ -24,6 +24,12 @@ type Files = ReadonlyArray<readonly [fileName: URL, data: string]>;
 
 const cwd = pathToFileURL(`${process.cwd()}/`);
 
+const dtsFiles = await glob('src/**/*.d.ts', { cwd });
+
+if (dtsFiles.length > 0) {
+  throw new Error('Declaration files are not allowed in the source directory.');
+}
+
 /**
  * Loads the TypeScript compiler options from a tsconfig file.
  *
