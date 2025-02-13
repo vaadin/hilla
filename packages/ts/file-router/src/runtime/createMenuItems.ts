@@ -1,6 +1,6 @@
 import { signal } from '@vaadin/hilla-react-signals';
-import type { VaadinWindow } from '../shared/internal.t.js';
-import type { MenuItem } from '../types.t.js';
+import type { VaadinWindow } from '../shared/internal.js';
+import type { MenuItem } from '../types.js';
 
 export const viewsSignal = signal((window as VaadinWindow).Vaadin?.views);
 

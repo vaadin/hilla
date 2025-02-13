@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
-import type { RouteModule } from '../src/types.t.js';
+import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
 declare global {

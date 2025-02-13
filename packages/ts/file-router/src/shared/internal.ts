@@ -1,4 +1,4 @@
-import type { ViewConfig } from '../types.t.js';
+import type { ViewConfig } from '../types.js';
 import type { RouteParamType } from './routeParamType.js';
 
 /**

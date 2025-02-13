@@ -2,9 +2,9 @@ import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 import ts, { type Node } from 'typescript';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
-import type { ServerViewConfig } from '../shared/internal.t.js';
+import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
-import type { ViewConfig } from '../types.t.js';
+import type { ViewConfig } from '../types.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import { convertFSRouteSegmentToURLPatternFormat, extractParameterFromRouteSegment } from './utils.js';
 
