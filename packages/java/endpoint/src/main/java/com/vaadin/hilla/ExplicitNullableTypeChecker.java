@@ -123,14 +123,14 @@ public class ExplicitNullableTypeChecker {
             return null;
         }
         if (annotatedElement instanceof Method) {
-            return checkRequiredValueForType(value,
+            return checkValueForType(value,
                     ((Method) annotatedElement).getGenericReturnType());
         }
         return null;
     }
 
-    String checkRequiredValueForType(Object value, Type expectedType) {
-        return new ExplicitNullableTypeCheckerHelper()
-                .checkRequiredValueForType(value, expectedType);
+    String checkValueForType(Object value, Type expectedType) {
+        return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
+                expectedType);
     }
 }

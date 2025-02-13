@@ -1126,7 +1126,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         ExplicitNullableTypeChecker explicitNullableTypeChecker = mock(
                 ExplicitNullableTypeChecker.class);
 
-        when(explicitNullableTypeChecker.checkRequiredValueForType(
+        when(explicitNullableTypeChecker.checkValueForType(
                 eq(NullCheckerTestClass.OK_RESPONSE), eq(String.class)))
                 .thenReturn(null);
 
@@ -1444,8 +1444,8 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         if (explicitNullableTypeChecker == null) {
             explicitNullableTypeChecker = mock(
                     ExplicitNullableTypeChecker.class);
-            when(explicitNullableTypeChecker.checkRequiredValueForType(any(),
-                    any())).thenReturn(null);
+            when(explicitNullableTypeChecker.checkValueForType(any(), any()))
+                    .thenReturn(null);
         }
 
         ApplicationContext mockApplicationContext = mockApplicationContext(
