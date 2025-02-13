@@ -124,14 +124,12 @@ public class ExplicitNullableTypeChecker {
         }
         if (annotatedElement instanceof Method) {
             return checkValueForType(value,
-                    ((Method) annotatedElement).getGenericReturnType(),
-                    requiredByContext);
+                    ((Method) annotatedElement).getGenericReturnType());
         }
         return null;
     }
 
-    String checkValueForType(Object value, Type expectedType,
-            boolean requiredByContext) {
+    String checkValueForType(Object value, Type expectedType) {
         return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
                 expectedType);
     }

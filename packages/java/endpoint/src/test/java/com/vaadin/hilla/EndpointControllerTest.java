@@ -1128,8 +1128,8 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
                 ExplicitNullableTypeChecker.class);
 
         when(explicitNullableTypeChecker.checkValueForType(
-                eq(NullCheckerTestClass.OK_RESPONSE), eq(String.class),
-                eq(false))).thenReturn(null);
+                eq(NullCheckerTestClass.OK_RESPONSE), eq(String.class)))
+                .thenReturn(null);
 
         String testOkMethod = "testOkMethod";
         ResponseEntity<String> response = createVaadinController(
@@ -1445,8 +1445,8 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         if (explicitNullableTypeChecker == null) {
             explicitNullableTypeChecker = mock(
                     ExplicitNullableTypeChecker.class);
-            when(explicitNullableTypeChecker.checkValueForType(any(), any(),
-                    ArgumentMatchers.anyBoolean())).thenReturn(null);
+            when(explicitNullableTypeChecker.checkValueForType(any(), any()))
+                    .thenReturn(null);
         }
 
         ApplicationContext mockApplicationContext = mockApplicationContext(
