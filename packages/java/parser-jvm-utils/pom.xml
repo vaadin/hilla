@@ -20,8 +20,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jspecify</groupId>
-            <artifactId>jspecify</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-server</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>

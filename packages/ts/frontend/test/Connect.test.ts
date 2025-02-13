@@ -18,6 +18,7 @@ import {
   ForbiddenResponseError,
   type MiddlewareFunction,
   UnauthorizedResponseError,
+  BODY_PART_NAME,
 } from '../src/index.js';
 import type { Vaadin } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
@@ -204,6 +205,14 @@ describe('@vaadin/hilla-frontend', () => {
 
         await client.call('FooEndpoint', 'fooMethod');
         expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTED);
+      });
+
+      it('should not set connection state for muted requests', async () => {
+        const stateChangeListener = sinon.fake();
+        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
+
+        await client.call('FooEndpoint', 'fooMethod', {}, { mute: true });
+        expect(stateChangeListener).to.not.be.called;
       });
 
       it('should set connection state to CONNECTION_LOST on network failure', async () => {
@@ -492,6 +501,48 @@ describe('@vaadin/hilla-frontend', () => {
         const { request } = fetchMock.callHistory.lastCall() ?? {};
         expect(request).to.exist;
         expect(await request?.json()).to.deep.equal({ fooParam: 'foo' });
+      });
+
+      async function checkMultipartForm(
+        callBody: (file: File) => Record<string, unknown>,
+        filePath: string,
+        jsonBody: string,
+      ) {
+        const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
+        await client.call('FooEndpoint', 'fooMethod', callBody(file));
+
+        const request = fetchMock.callHistory.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        const formData = await request!.formData();
+
+        const uploadedFile = formData.get(filePath) as File | null;
+        expect(uploadedFile).to.be.instanceOf(File);
+        expect(uploadedFile!.name).to.equal('foo.txt');
+        expect(await uploadedFile!.text()).to.equal('foo');
+
+        const body = formData.get(BODY_PART_NAME);
+        expect(body).to.equal(jsonBody);
+      }
+
+      it('should use multipart if a param is of File type', async () => {
+        await checkMultipartForm((file) => ({ fooParam: file }), '/fooParam', '{}');
+      });
+
+      it('should use multipart if a param has a property if File type', async () => {
+        await checkMultipartForm(
+          (file) => ({ fooParam: { a: 'abc', b: file } }),
+          '/fooParam/b',
+          '{"fooParam":{"a":"abc"}}',
+        );
+      });
+
+      it('should use multipart if a File is found in array', async () => {
+        await checkMultipartForm(
+          (file) => ({ fooParam: ['a', file, 'c'], other: 'abc' }),
+          '/fooParam/1',
+          '{"fooParam":["a",null,"c"],"other":"abc"}',
+        );
       });
 
       describe('middleware invocation', () => {

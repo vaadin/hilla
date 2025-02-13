@@ -49,10 +49,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jspecify</groupId>
-      <artifactId>jspecify</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>hilla-engine-core</artifactId>
       <version>${project.version}</version>

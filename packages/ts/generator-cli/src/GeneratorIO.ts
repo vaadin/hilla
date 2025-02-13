@@ -3,7 +3,6 @@ import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type File from '@vaadin/hilla-generator-core/File.js';
 import Plugin, { type PluginConstructor } from '@vaadin/hilla-generator-core/Plugin.js';
 import type LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import GeneratorIOException from './GeneratorIOException.js';
