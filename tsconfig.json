@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "declarationMap": true,
+    "removeComments": true,
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
