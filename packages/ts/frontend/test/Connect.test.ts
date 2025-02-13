@@ -207,6 +207,14 @@ describe('@vaadin/hilla-frontend', () => {
         expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTED);
       });
 
+      it('should not set connection state for muted requests', async () => {
+        const stateChangeListener = sinon.fake();
+        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
+
+        await client.call('FooEndpoint', 'fooMethod', {}, { mute: true });
+        expect(stateChangeListener).to.not.be.called;
+      });
+
       it('should set connection state to CONNECTION_LOST on network failure', async () => {
         const stateChangeListener = sinon.fake();
         $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);

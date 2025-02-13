@@ -231,6 +231,10 @@ export interface EndpointRequestInit {
    * An AbortSignal to set request's signal.
    */
   signal?: AbortSignal | null;
+  /**
+   * If set to true, the connection state will not be updated during the request.
+   */
+  mute?: boolean;
 }
 
 /**
@@ -394,17 +398,19 @@ export class ConnectClient {
     // chain item for our convenience. Always having an ending of the chain
     // this way makes the folding down below more concise.
     async function fetchNext(context: MiddlewareContext) {
-      $wnd.Vaadin?.connectionState?.loadingStarted();
+      // if the request is not "muted", notify the connection state about changes
+      const connectionState = init?.mute ? undefined : $wnd.Vaadin?.connectionState;
+      connectionState?.loadingStarted();
       try {
         const response = await fetch(context.request, { signal: init?.signal });
-        $wnd.Vaadin?.connectionState?.loadingFinished();
+        connectionState?.loadingFinished();
         return response;
       } catch (error: unknown) {
         // don't bother about connections aborted by purpose
         if (error instanceof Error && error.name === 'AbortError') {
-          $wnd.Vaadin?.connectionState?.loadingFinished();
+          connectionState?.loadingFinished();
         } else {
-          $wnd.Vaadin?.connectionState?.loadingFailed();
+          connectionState?.loadingFailed();
         }
         throw error;
       }
