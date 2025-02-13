@@ -29,7 +29,7 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
         implements ListService<T>, GetService<T, ID>, CountService {
 
     // https://github.com/spring-projects/spring-boot/blob/1d35deaaf02cca9af84fdaceddf5335149db0aec/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/data/web/SpringDataWebProperties.java#L84
-    public static final int DEFAULT_PAGE_SIZE_LIMIT = 2000;
+    static final int DEFAULT_PAGE_SIZE_LIMIT = 2000;
 
     @Autowired
     private ApplicationContext applicationContext;
