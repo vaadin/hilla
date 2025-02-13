@@ -16,5 +16,14 @@ public class NullableEndpoint {
         public String id;
         @Version
         public Long version;
+
+        @jakarta.annotation.Nonnull
+        public String jakartaNonnull;
+
+        @org.jspecify.annotations.NonNull
+        public String jspecifyNonnull;
+
+        @org.springframework.lang.NonNull
+        public String springNonnull;
     }
 }
