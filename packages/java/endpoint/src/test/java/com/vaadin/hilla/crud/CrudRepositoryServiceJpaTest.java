@@ -5,17 +5,16 @@ import java.util.List;
 
 import com.vaadin.hilla.crud.filter.PropertyStringFilter;
 import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -30,8 +29,6 @@ public class CrudRepositoryServiceJpaTest {
     private TestEntityManager entityManager;
     @Autowired
     TestCrudRepositoryService testCrudRepositoryService;
-    @Autowired
-    private ApplicationContext applicationContext;
 
     private List<TestObject> testObjects;
 
@@ -101,12 +98,10 @@ public class CrudRepositoryServiceJpaTest {
 
     @Test
     public void listWithMaxPagination() {
-        TestPropertyValues
-                .of(ListRepositoryService.MAX_PAGE_SIZE_PROPERTY_NAME + "=2")
-                .applyTo((ConfigurableEnvironment) applicationContext
-                        .getEnvironment());
-        // force init again, as it already happened
-        testCrudRepositoryService.init();
+        // too late to autowire, so set manually
+        var springDataWebProperties = new SpringDataWebProperties();
+        springDataWebProperties.getPageable().setMaxPageSize(2);
+        testCrudRepositoryService.springDataWebProperties = springDataWebProperties;
 
         List<TestObject> result = testCrudRepositoryService
                 .list(Pageable.ofSize(5), null);

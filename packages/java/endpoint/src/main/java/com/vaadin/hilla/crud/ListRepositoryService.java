@@ -13,6 +13,7 @@ import com.vaadin.hilla.crud.filter.Filter;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,14 +28,11 @@ import org.springframework.data.repository.CrudRepository;
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {
 
-    static final String MAX_PAGE_SIZE_PROPERTY_NAME = "spring.data.web.pageable.max-page-size";
-
     @Autowired
     private ApplicationContext applicationContext;
 
-    // will store the max page size as configured in MAX_PAGE_SIZE_PROPERTY_NAME
-    // if available
-    private static Integer maxPageSize;
+    @Autowired(required = false)
+    SpringDataWebProperties springDataWebProperties;
 
     private R repository;
     private final Class<T> entityClass;
@@ -59,13 +57,10 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
     }
 
     @PostConstruct
-    void init() {
+    private void init() {
         if (repository == null) {
             repository = resolveRepository();
         }
-        var env = applicationContext.getEnvironment();
-        maxPageSize = env.getProperty(MAX_PAGE_SIZE_PROPERTY_NAME,
-                Integer.class);
     }
 
     /**
@@ -79,8 +74,13 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
-        if (maxPageSize != null && pageable.getPageSize() > maxPageSize) {
-            pageable = PageRequest.of(pageable.getPageNumber(), maxPageSize,
+        var pageSize = Optional.ofNullable(springDataWebProperties)
+                .map(SpringDataWebProperties::getPageable)
+                .map(SpringDataWebProperties.Pageable::getMaxPageSize)
+                .orElse(pageable.getPageSize());
+
+        if (pageable.getPageSize() > pageSize) {
+            pageable = PageRequest.of(pageable.getPageNumber(), pageSize,
                     pageable.getSort());
         }
 
