@@ -11,4 +11,4 @@ type SharedStorage = Readonly<{
   outputDir?: string;
 }>;
 
-export default SharedStorage;
+export { type SharedStorage as default };
