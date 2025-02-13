@@ -27,11 +27,13 @@ import org.springframework.data.repository.CrudRepository;
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {
 
+    static final String MAX_PAGE_SIZE_PROPERTY_NAME = "spring.data.web.pageable.max-page-size";
+
     @Autowired
     private ApplicationContext applicationContext;
 
-    // will store the max page size as configured in
-    // `spring.data.rest.pageable.max-page-size` if available
+    // will store the max page size as configured in MAX_PAGE_SIZE_PROPERTY_NAME
+    // if available
     private static Integer maxPageSize;
 
     private R repository;
@@ -62,7 +64,7 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
             repository = resolveRepository();
         }
         var env = applicationContext.getEnvironment();
-        maxPageSize = env.getProperty("spring.data.rest.pageable.max-page-size",
+        maxPageSize = env.getProperty(MAX_PAGE_SIZE_PROPERTY_NAME,
                 Integer.class);
     }
 

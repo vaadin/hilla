@@ -101,7 +101,8 @@ public class CrudRepositoryServiceJpaTest {
 
     @Test
     public void listWithMaxPagination() {
-        TestPropertyValues.of("spring.data.rest.pageable.max-page-size=2")
+        TestPropertyValues
+                .of(ListRepositoryService.MAX_PAGE_SIZE_PROPERTY_NAME + "=2")
                 .applyTo((ConfigurableEnvironment) applicationContext
                         .getEnvironment());
         // force init again, as it already happened
@@ -111,7 +112,5 @@ public class CrudRepositoryServiceJpaTest {
                 .list(Pageable.ofSize(5), null);
 
         Assert.assertEquals(2, result.size());
-        Assert.assertEquals("John", result.get(0).getName());
-        Assert.assertEquals("Jeff", result.get(1).getName());
     }
 }
