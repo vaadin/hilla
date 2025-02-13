@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.vaadin.hilla.crud.filter.PropertyStringFilter;
 import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
