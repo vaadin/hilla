@@ -49,7 +49,7 @@ async function compileCssFile(fileName: string, inputDir: URL): Promise<readonly
 
   return [
     fileName.replace('.css', '.js'),
-    `const css = new CSSStyleSheet();css.replaceSync(\`${compiled}\`);export { css as default };`,
+    `const css = new CSSStyleSheet();css.replaceSync(\`${compiled}\`);export default css;`,
   ];
 }
 
