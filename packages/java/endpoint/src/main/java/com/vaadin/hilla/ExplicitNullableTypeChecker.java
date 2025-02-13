@@ -132,7 +132,7 @@ public class ExplicitNullableTypeChecker {
 
     String checkValueForType(Object value, Type expectedType,
             boolean requiredByContext) {
-        return new ExplicitNullableTypeCheckerHelper(requiredByContext)
-                .checkValueForType(value, expectedType);
+        return new ExplicitNullableTypeCheckerHelper().checkValueForType(value,
+                expectedType);
     }
 }

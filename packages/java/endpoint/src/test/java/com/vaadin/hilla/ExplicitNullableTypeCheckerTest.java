@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 import org.jspecify.annotations.NonNull;
 
 import org.junit.Assert;
@@ -52,7 +53,7 @@ public class ExplicitNullableTypeCheckerTest {
     @Before
     public void setup() throws NoSuchMethodException {
         explicitNullableTypeChecker = new ExplicitNullableTypeChecker();
-        helper = new ExplicitNullableTypeCheckerHelper(false);
+        helper = new ExplicitNullableTypeCheckerHelper();
 
         stringListType = getClass()
                 .getMethod("parametrizedListMethod", String[].class)
@@ -453,12 +454,19 @@ public class ExplicitNullableTypeCheckerTest {
     }
 
     @Test
-    public void should_ReturnError_When_GivenNestedNullAndRequiredByContext() {
+    public void should_NotReturnError_When_GivenNestedNullAndRequiredByTopContext() {
         Employee employee = new Employee();
         employee.setId(12);
         employee.setCompany(null);
-        Assert.assertNotNull(explicitNullableTypeChecker
+        Assert.assertNull(explicitNullableTypeChecker
                 .checkValueForType(employee, Employee.class, true));
+    }
+
+    public void should_ReturnError_When_GivenNestedNullAndRequiredByItsOwnContext() {
+        NonNullableEntity nonNullableEntity = new NonNullableEntity();
+        nonNullableEntity.setValue(null);
+        Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(
+                nonNullableEntity, NonNullableEntity.class, false));
     }
 
     public List<String> parametrizedListMethod(String... args) {
