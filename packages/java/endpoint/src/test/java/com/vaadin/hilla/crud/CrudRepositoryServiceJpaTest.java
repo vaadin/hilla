@@ -104,16 +104,9 @@ public class CrudRepositoryServiceJpaTest {
 
         var result = testCrudRepositoryService.list(Pageable.ofSize(5), null);
         Assert.assertEquals(2, result.size());
-    }
 
-    @Test
-    public void listWithMaxPaginationEvenWithUnpaged() {
-        // too late to autowire, so set manually
-        var springDataWebProperties = new SpringDataWebProperties();
-        springDataWebProperties.getPageable().setMaxPageSize(2);
-        testCrudRepositoryService.springDataWebProperties = springDataWebProperties;
-
-        var result = testCrudRepositoryService.list(Pageable.unpaged(), null);
+        // in the unlikely event that an `unpaged` is received
+        result = testCrudRepositoryService.list(Pageable.unpaged(), null);
         Assert.assertEquals(2, result.size());
     }
 }
