@@ -90,7 +90,7 @@ class ExplicitNullableTypeCheckerHelper {
      * @return error message when the value is null while the expected type does
      *         not explicitly allow null, or null meaning the value is OK.
      */
-    String checkValueForType(Object value, Type expectedType) {
+    String checkRequiredValueForType(Object value, Type expectedType) {
         Class<?> clazz;
         if (expectedType instanceof TypeVariable) {
             return null;
@@ -160,7 +160,7 @@ class ExplicitNullableTypeCheckerHelper {
         }
 
         for (Object item : value) {
-            String error = checkValueForType(item, itemType);
+            String error = checkRequiredValueForType(item, itemType);
             if (error != null) {
                 return String.format("Unexpected null item in %s type '%s'. %s",
                         iterableDescription, expectedType, error);
@@ -179,7 +179,7 @@ class ExplicitNullableTypeCheckerHelper {
         }
 
         for (Map.Entry<?, ?> e : value.entrySet()) {
-            String error = checkValueForType(e.getValue(), valueType);
+            String error = checkRequiredValueForType(e.getValue(), valueType);
             if (error != null) {
                 return String.format(
                         "Unexpected null value for key '%s' of "
@@ -212,7 +212,8 @@ class ExplicitNullableTypeCheckerHelper {
                 Type propertyType = readMethod.getGenericReturnType();
                 Object propertyValue = readMethod.invoke(value);
 
-                String error = checkValueForType(propertyValue, propertyType);
+                String error = checkRequiredValueForType(propertyValue,
+                        propertyType);
                 if (error != null) {
                     return String.format(
                             "Unexpected null value in Java "

@@ -36,7 +36,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.cglib.proxy.Enhancer;
@@ -1127,7 +1126,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         ExplicitNullableTypeChecker explicitNullableTypeChecker = mock(
                 ExplicitNullableTypeChecker.class);
 
-        when(explicitNullableTypeChecker.checkValueForType(
+        when(explicitNullableTypeChecker.checkRequiredValueForType(
                 eq(NullCheckerTestClass.OK_RESPONSE), eq(String.class)))
                 .thenReturn(null);
 
@@ -1445,8 +1444,8 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         if (explicitNullableTypeChecker == null) {
             explicitNullableTypeChecker = mock(
                     ExplicitNullableTypeChecker.class);
-            when(explicitNullableTypeChecker.checkValueForType(any(), any()))
-                    .thenReturn(null);
+            when(explicitNullableTypeChecker.checkRequiredValueForType(any(),
+                    any())).thenReturn(null);
         }
 
         ApplicationContext mockApplicationContext = mockApplicationContext(
