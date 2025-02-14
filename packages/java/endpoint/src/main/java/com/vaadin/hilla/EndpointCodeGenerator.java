@@ -17,12 +17,15 @@ package com.vaadin.hilla;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.FrontendTools;
@@ -79,8 +82,12 @@ public class EndpointCodeGenerator {
     /**
      * Re-generates the endpoint TypeScript and re-registers the endpoints in
      * Java.
+     *
+     * @param proposedNewBrowserCallables
+     *            Some classes that might be new browser callables, for example
+     *            coming from a hotswap event.
      */
-    public void update() {
+    public void update(String... proposedNewBrowserCallables) {
         initIfNeeded();
         if (configuration.isProductionMode()) {
             throw new IllegalStateException(
@@ -90,6 +97,13 @@ public class EndpointCodeGenerator {
         ApplicationContextProvider.runOnContext(applicationContext -> {
             List<Class<?>> browserCallables = findBrowserCallables(
                     engineConfiguration, applicationContext);
+
+            browserCallables = Stream
+                    .concat(browserCallables.stream(),
+                            Arrays.stream(proposedNewBrowserCallables)
+                                    .map(Hotswapper::asEndpointClass))
+                    .filter(Objects::nonNull).distinct().toList();
+
             ParserProcessor parser = new ParserProcessor(engineConfiguration);
             parser.process(browserCallables);
 

@@ -53,7 +53,7 @@ public class Hotswapper implements VaadinHotswapper {
                     getLogger().debug("Regenerating endpoints because "
                             + changed + " were " + operation);
                 }
-                EndpointCodeGenerator.getInstance().update();
+                EndpointCodeGenerator.getInstance().update(changedClasses);
             }
         } catch (IOException e) {
             getLogger().error("Failed to re-generated TypeScript code");
@@ -123,22 +123,28 @@ public class Hotswapper implements VaadinHotswapper {
         }
 
         for (String changedClass : changedClasses) {
-            try {
-                Class<?> cls = Class.forName(changedClass);
-                if (cls.getAnnotation(Endpoint.class) != null
-                        || cls.getAnnotation(BrowserCallable.class) != null
-                        || cls.getAnnotation(EndpointExposed.class) != null) {
-                    getLogger().debug(
-                            "An endpoint annotation has been added to the class "
-                                    + classesUsedInEndpoints);
-                    return true;
-                }
-
-            } catch (ClassNotFoundException e) {
-                getLogger().error("Unable to find class " + changedClass, e);
+            if (asEndpointClass(changedClass) != null) {
+                getLogger().debug(
+                        "An endpoint annotation has been added to the class "
+                                + changedClass);
+                return true;
             }
         }
         return false;
+    }
+
+    public static Class<?> asEndpointClass(String changedClass) {
+        try {
+            Class<?> cls = Class.forName(changedClass);
+            if (cls.getAnnotation(Endpoint.class) != null
+                    || cls.getAnnotation(BrowserCallable.class) != null
+                    || cls.getAnnotation(EndpointExposed.class) != null) {
+                return cls;
+            }
+        } catch (ClassNotFoundException e) {
+            getLogger().error("Unable to find class " + changedClass, e);
+        }
+        return null;
     }
 
     public static void markInUse() {
