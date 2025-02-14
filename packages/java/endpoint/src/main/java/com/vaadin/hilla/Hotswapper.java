@@ -53,7 +53,7 @@ public class Hotswapper implements VaadinHotswapper {
                     getLogger().debug("Regenerating endpoints because "
                             + changed + " were " + operation);
                 }
-                EndpointCodeGenerator.getInstance().update();
+                EndpointCodeGenerator.getInstance().update(changedClasses);
             }
         } catch (IOException e) {
             getLogger().error("Failed to re-generated TypeScript code");
@@ -130,7 +130,7 @@ public class Hotswapper implements VaadinHotswapper {
                         || cls.getAnnotation(EndpointExposed.class) != null) {
                     getLogger().debug(
                             "An endpoint annotation has been added to the class "
-                                    + classesUsedInEndpoints);
+                                    + changedClass);
                     return true;
                 }
 
