@@ -98,12 +98,22 @@ public class EndpointCodeGenerator {
             List<Class<?>> browserCallables = findBrowserCallables(
                     engineConfiguration, applicationContext);
 
-            browserCallables = Stream
-                    .concat(browserCallables.stream(),
-                            Arrays.stream(proposedNewBrowserCallables)
-                                    .map(className -> Hotswapper
-                                            .asEndpointClass(className, false)))
-                    .filter(Objects::nonNull).distinct().toList();
+            browserCallables = Stream.concat(browserCallables.stream(), Arrays
+                    .stream(proposedNewBrowserCallables).map(className -> {
+                        try {
+                            Class<?> cls = Class.forName(className);
+                            if (cls.getAnnotation(Endpoint.class) != null
+                                    || cls.getAnnotation(
+                                            BrowserCallable.class) != null) {
+                                return cls;
+                            }
+
+                        } catch (ClassNotFoundException e) {
+                            LOGGER.error("Unable to find class " + className,
+                                    e);
+                        }
+                        return null;
+                    })).filter(Objects::nonNull).distinct().toList();
 
             ParserProcessor parser = new ParserProcessor(engineConfiguration);
             parser.process(browserCallables);

@@ -123,30 +123,22 @@ public class Hotswapper implements VaadinHotswapper {
         }
 
         for (String changedClass : changedClasses) {
-            if (asEndpointClass(changedClass, true) != null) {
-                getLogger().debug(
-                        "An endpoint annotation has been added to the class "
-                                + changedClass);
-                return true;
+            try {
+                Class<?> cls = Class.forName(changedClass);
+                if (cls.getAnnotation(Endpoint.class) != null
+                        || cls.getAnnotation(BrowserCallable.class) != null
+                        || cls.getAnnotation(EndpointExposed.class) != null) {
+                    getLogger().debug(
+                            "An endpoint annotation has been added to the class "
+                                    + changedClass);
+                    return true;
+                }
+
+            } catch (ClassNotFoundException e) {
+                getLogger().error("Unable to find class " + changedClass, e);
             }
         }
         return false;
-    }
-
-    public static Class<?> asEndpointClass(String changedClass,
-            boolean includeExposed) {
-        try {
-            Class<?> cls = Class.forName(changedClass);
-            if (cls.getAnnotation(Endpoint.class) != null
-                    || cls.getAnnotation(BrowserCallable.class) != null
-                    || (includeExposed && cls
-                            .getAnnotation(EndpointExposed.class) != null)) {
-                return cls;
-            }
-        } catch (ClassNotFoundException e) {
-            getLogger().error("Unable to find class " + changedClass, e);
-        }
-        return null;
     }
 
     public static void markInUse() {
