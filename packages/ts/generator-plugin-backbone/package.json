@@ -9,7 +9,7 @@
   },
   "scripts": {
     "clean:build": "git clean -fx . -e .vite -e node_modules",
-    "build": "tsx ../../../scripts/build.ts",
+    "build": "tsx ../../../scripts/fast-build.ts",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",

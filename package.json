@@ -83,6 +83,7 @@
     "meow": "13.2.0",
     "micromatch": "4.0.8",
     "nx": "20.4.0",
+    "oxc-transform": "0.50.0",
     "pino": "9.6.0",
     "playwright": "1.50.0",
     "postcss": "8.5.1",
