@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import type { PackageJson } from 'type-fest';
 import type { Plugin } from 'vite';
 import { compileCSS } from '../utils/compileCSS.js';
@@ -44,7 +45,7 @@ export function constructCss(): Plugin {
     async transform(_, id) {
       if (id.endsWith('.obj.css')) {
         return {
-          code: await compileCSS(css.get(id), id),
+          code: await compileCSS(css.get(id), pathToFileURL(id)),
         };
       }
 

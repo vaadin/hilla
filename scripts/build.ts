@@ -19,23 +19,23 @@ const [config, packageJson] = await Promise.all([
 const outDir = new URL(dir(config.options.outDir ?? 'dist'), cwd);
 
 async function* loadFiles() {
-  for await (const file of glob('**/*.{ts,obj.css}', { cwd: fileURLToPath(sourceDir) })) {
+  for await (const file of glob('**/*.{ts,tsx,obj.css}', { cwd: fileURLToPath(sourceDir) })) {
     const fileURL = new URL(file, sourceDir);
 
     if (file.endsWith('.d.ts')) {
-      throw new Error(`Declaration files are not allowed in source directory: ${fileURL}`);
+      throw new Error(`Declaration files are not allowed in source directory: ${fileURL.toString()}`);
     }
 
     const contents = await readFile(fileURL, 'utf8');
 
-    if (file.endsWith('.ts')) {
+    if (file.endsWith('.ts') || file.endsWith('.tsx')) {
       let result = injectRegister(contents, packageJson);
       result = replaceCSSImports(result);
       yield [fileURLToPath(fileURL), result] as const;
     } else if (file.endsWith('.obj.css')) {
       yield [fileURLToPath(fileURL), contents] as const;
     } else {
-      throw new Error(`Unexpected file type: ${fileURL}`);
+      throw new Error(`Unexpected file type: ${fileURL.toString()}`);
     }
   }
 }

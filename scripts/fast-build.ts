@@ -50,11 +50,15 @@ const oxcConfig = {
   target: getScriptTarget(config.options.target),
 } satisfies TransformOptions;
 
-for await (const file of glob('**/*.{ts,obj.css}', { cwd: fileURLToPath(sourceDir) })) {
+for await (const file of glob('**/*.{ts,tsx,obj.css}', { cwd: fileURLToPath(sourceDir) })) {
   const fileURL = new URL(file, sourceDir);
   let contents = await readFile(fileURL, 'utf8');
 
-  if (file.endsWith('.ts')) {
+  if (file.endsWith('.d.ts')) {
+    throw new Error(`Declaration files are not allowed in source directory: ${fileURL.toString()}`);
+  }
+
+  if (file.endsWith('.ts') || file.endsWith('.tsx')) {
     contents = injectRegister(contents, packageJson);
     contents = replaceCSSImports(contents);
 
@@ -67,7 +71,7 @@ for await (const file of glob('**/*.{ts,obj.css}', { cwd: fileURLToPath(sourceDi
       process.exit(1);
     }
 
-    const fileBase = file.replace(/\.ts$/u, '');
+    const fileBase = file.replace(/\.tsx?$/u, '');
 
     const js = new URL(`${fileBase}.js`, outDir);
     const jsMap = new URL(`${fileBase}.js.map`, outDir);
