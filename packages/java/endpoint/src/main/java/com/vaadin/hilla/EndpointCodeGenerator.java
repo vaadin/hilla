@@ -101,7 +101,8 @@ public class EndpointCodeGenerator {
             browserCallables = Stream
                     .concat(browserCallables.stream(),
                             Arrays.stream(proposedNewBrowserCallables)
-                                    .map(Hotswapper::asEndpointClass))
+                                    .map(className -> Hotswapper
+                                            .asEndpointClass(className, false)))
                     .filter(Objects::nonNull).distinct().toList();
 
             ParserProcessor parser = new ParserProcessor(engineConfiguration);

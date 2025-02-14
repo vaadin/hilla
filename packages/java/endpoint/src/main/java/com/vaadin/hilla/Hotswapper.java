@@ -123,7 +123,7 @@ public class Hotswapper implements VaadinHotswapper {
         }
 
         for (String changedClass : changedClasses) {
-            if (asEndpointClass(changedClass) != null) {
+            if (asEndpointClass(changedClass, true) != null) {
                 getLogger().debug(
                         "An endpoint annotation has been added to the class "
                                 + changedClass);
@@ -133,12 +133,14 @@ public class Hotswapper implements VaadinHotswapper {
         return false;
     }
 
-    public static Class<?> asEndpointClass(String changedClass) {
+    public static Class<?> asEndpointClass(String changedClass,
+            boolean includeExposed) {
         try {
             Class<?> cls = Class.forName(changedClass);
             if (cls.getAnnotation(Endpoint.class) != null
                     || cls.getAnnotation(BrowserCallable.class) != null
-                    || cls.getAnnotation(EndpointExposed.class) != null) {
+                    || (includeExposed && cls
+                            .getAnnotation(EndpointExposed.class) != null)) {
                 return cls;
             }
         } catch (ClassNotFoundException e) {
