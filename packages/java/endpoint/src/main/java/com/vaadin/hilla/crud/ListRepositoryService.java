@@ -11,7 +11,9 @@ import com.vaadin.hilla.EndpointExposed;
 import com.vaadin.hilla.crud.filter.Filter;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,8 +28,14 @@ import org.springframework.data.repository.CrudRepository;
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {
 
+    // https://github.com/spring-projects/spring-boot/blob/1d35deaaf02cca9af84fdaceddf5335149db0aec/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/data/web/SpringDataWebProperties.java#L84
+    static final int DEFAULT_PAGE_SIZE_LIMIT = 2000;
+
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired(required = false)
+    SpringDataWebProperties springDataWebProperties;
 
     private R repository;
     private final Class<T> entityClass;
@@ -69,8 +77,23 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
 
     @Override
     public List<T> list(Pageable pageable, @Nullable Filter filter) {
+        var limitedPageable = limitSize(pageable);
         Specification<T> spec = toSpec(filter);
-        return getRepository().findAll(spec, pageable).getContent();
+        return getRepository().findAll(spec, limitedPageable).getContent();
+    }
+
+    private PageRequest limitSize(Pageable pageable) {
+        int maxPageSize = Optional.ofNullable(springDataWebProperties)
+                .map(SpringDataWebProperties::getPageable)
+                .map(SpringDataWebProperties.Pageable::getMaxPageSize)
+                .orElse(DEFAULT_PAGE_SIZE_LIMIT);
+
+        var effectivePageSize = pageable.isPaged()
+                ? Math.min(pageable.getPageSize(), maxPageSize)
+                : maxPageSize;
+
+        return PageRequest.of(pageable.isPaged() ? pageable.getPageNumber() : 0,
+                effectivePageSize, pageable.getSort());
     }
 
     @Override
