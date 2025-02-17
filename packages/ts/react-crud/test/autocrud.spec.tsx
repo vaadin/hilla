@@ -1,4 +1,4 @@
-import { render, screen, waitForElementToBeRemoved, within, cleanup } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, within, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import { page } from '@vitest/browser/context';
@@ -104,6 +104,15 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.typeInField('Last name', '2');
       await form.submit();
       expect(grid.getBodyCellContent(1, 1)).to.have.text('2');
+    });
+
+    it('can hide new button', async () => {
+      const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonHidden={false} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonHidden={true} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
     });
 
     it('can add a new item', async () => {

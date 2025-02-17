@@ -77,6 +77,15 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     itemIdProperty?: string;
     /**
+     * Whether to show the new button in the form. This is `false` by default,
+     * so that the button is shown.
+     *
+     * NOTE: This only hides the button, it does not prevent from sending a new
+     * item to the service. Make sure that your backend Java service is
+     * properly secured to prevent unauthorized new items.
+     */
+    newButtonHidden?: boolean;
+    /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
     formProps?: AutoCrudFormProps<TModel>;
@@ -110,6 +119,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   service,
   model,
   itemIdProperty,
+  newButtonHidden,
   formProps,
   gridProps,
   style,
@@ -151,9 +161,11 @@ export function AutoCrud<TModel extends AbstractModel>({
         aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
       <div className="auto-crud-toolbar">
-        <Button theme="primary" onClick={() => setItem(emptyItem)}>
-          + New
-        </Button>
+        {!newButtonHidden && (
+          <Button theme="primary" onClick={() => setItem(emptyItem)}>
+            + New
+          </Button>
+        )}
       </div>
     </div>
   );
