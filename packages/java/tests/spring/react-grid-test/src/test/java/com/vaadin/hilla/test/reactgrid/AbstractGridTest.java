@@ -16,9 +16,11 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
 
     @Override
     protected String getTestPath() {
-         return getRootURL() + "/"+getClass().getSimpleName().replace("IT", "");
+        return getRootURL() + "/"
+                + getClass().getSimpleName().replace("IT", "");
 
     }
+
     @Override
     @Before
     public void setup() throws Exception {
