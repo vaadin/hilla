@@ -11,10 +11,6 @@ public class ReadOnlyGridIT extends AbstractGridTest {
 
     private static final int LUCKY_NUMBER_COLUMN = 4;
 
-    protected String getTestPath() {
-        return getRootURL() + "/readonly-grid";
-    }
-
     protected int getFirstNameColumn() {
         return super.getFirstNameColumn() + 1;
     }

@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
-import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
@@ -15,6 +14,11 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
 
     protected GridElement grid;
 
+    @Override
+    protected String getTestPath() {
+         return getRootURL() + "/"+getClass().getSimpleName().replace("IT", "");
+
+    }
     @Override
     @Before
     public void setup() throws Exception {
