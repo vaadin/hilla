@@ -85,6 +85,7 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      * properly secured to prevent unauthorized new items.
      */
     newButtonHidden?: boolean;
+    toolbarHidden?: boolean;
     /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
@@ -120,6 +121,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   model,
   itemIdProperty,
   newButtonHidden,
+  toolbarHidden,
   formProps,
   gridProps,
   style,
@@ -160,13 +162,15 @@ export function AutoCrud<TModel extends AbstractModel>({
         ref={autoGridRef}
         aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
-      <div className="auto-crud-toolbar">
-        {!newButtonHidden && (
-          <Button theme="primary" onClick={() => setItem(emptyItem)}>
-            + New
-          </Button>
-        )}
-      </div>
+      {!toolbarHidden && (
+        <div className="auto-crud-toolbar">
+          {!newButtonHidden && (
+            <Button theme="primary" onClick={() => setItem(emptyItem)}>
+              + New
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 

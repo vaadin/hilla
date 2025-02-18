@@ -115,6 +115,18 @@ describe('@vaadin/hilla-react-crud', () => {
       await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
     });
 
+    it('can hide toolbar', async () => {
+      const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      rerender(<AutoCrud service={personService()} model={PersonModel} toolbarHidden={false} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      rerender(<AutoCrud service={personService()} model={PersonModel} toolbarHidden={true} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
+      // make sure the button would be there
+      rerender(<AutoCrud service={personService()} model={PersonModel} toolbarHidden={true} newButtonHidden={false} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
+    });
+
     it('can add a new item', async () => {
       const { grid, form, newButton } = await CrudController.init(
         render(<AutoCrud service={personService()} model={PersonModel} />),
