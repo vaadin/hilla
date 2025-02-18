@@ -92,9 +92,11 @@ public final class EndpointExposedPlugin
     private Node<?, ?> createEndpointHierarchyClassNode(
             ClassInfoModel classInfo) {
         var endpointExposedAnnotations = getStorage().getParserConfig()
-                .getEndpointExposedAnnotations();
+                .getEndpointExposedAnnotations().stream().map(Class::getName)
+                .toList();
         var exposed = classInfo.getAnnotations().stream()
                 .map(annInfo -> ((Annotation) annInfo.get()).annotationType())
+                .map(Class::getName)
                 .anyMatch(endpointExposedAnnotations::contains);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
                 : EndpointNonExposedNode.of(classInfo);
