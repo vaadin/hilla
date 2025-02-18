@@ -77,7 +77,7 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     itemIdProperty?: string;
     /**
-     * Whether to show the new button in the form. This is `false` by default,
+     * Whether to show the new button in the toolbar. This is `false` by default,
      * so that the button is shown.
      *
      * NOTE: This only hides the button, it does not prevent from sending a new
@@ -85,6 +85,14 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      * properly secured to prevent unauthorized new items.
      */
     newButtonHidden?: boolean;
+    /**
+     * Whether to show the toolbar with the new button in the grid. This is
+     * `false` by default, so that the toolbar is shown.
+     *
+     * NOTE: While this also hides the new item button, it does not prevent from
+     * sending a new item to the service. Make sure that your backend Java service
+     * is properly secured to prevent unauthorized new items.
+     */
     toolbarHidden?: boolean;
     /**
      * Props to pass to the form. See the `AutoForm` component for details.
