@@ -1,5 +1,5 @@
-import { cleanup, render, renderHook } from '@testing-library/react';
-import { Grid, type GridDataProvider, type GridSorterDefinition } from '@vaadin/react-components/Grid.js';
+import { cleanup, renderHook } from '@testing-library/react';
+import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
@@ -246,12 +246,12 @@ describe('@hilla/react-crud', () => {
       name: string;
     };
     let called = 0;
-    async function TestProductService(pageable: Pageable): Promise<TestProduct[]> {
-      called++;
-      return [
+    async function TestProductService(_pageable: Pageable): Promise<TestProduct[]> {
+      called += 1;
+      return await Promise.resolve([
         { id: 1, name: 'Product 1' },
         { id: 2, name: 'Product 2' },
-      ];
+      ]);
     }
     beforeEach(() => {
       called = 0;
