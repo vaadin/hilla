@@ -19,7 +19,7 @@ function LuckyNumberRenderer({ item }: GridBodyReactRendererProps<Person>): Reac
   return <span style={{ fontWeight: 'bold', color: value % 2 === 0 ? 'green' : 'red' }}>{value}</span>;
 }
 
-export function GridUseDataProviderHook(): React.JSX.Element {
+export default function GridUseDataProviderHook(): React.JSX.Element {
   const [filter, setFilter] = useState<PropertyStringFilter>();
   const { dataProvider, refresh } = useDataProvider(PersonService, filter);
   const [savedPerson, setSavedPerson] = useState<Person | undefined>(undefined);

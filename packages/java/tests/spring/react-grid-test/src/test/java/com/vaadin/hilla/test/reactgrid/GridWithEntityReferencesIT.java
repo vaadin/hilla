@@ -4,10 +4,6 @@ import org.junit.Test;
 
 public class GridWithEntityReferencesIT extends AbstractGridTest {
 
-    protected String getTestPath() {
-        return getRootURL() + "/grid-entityrefs";
-    }
-
     @Test
     public void expectedColumnsShown() {
         assertColumns("Name", "Street address", "City", "Country",
