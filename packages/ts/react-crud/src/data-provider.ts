@@ -6,6 +6,7 @@ import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
 import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling';
+import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
 
 type MaybeCountService<TItem> = Partial<CountService<TItem>>;
 type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
@@ -210,4 +211,19 @@ export function useDataProvider<TItem>(
       setRefreshCounter(refreshCounter + 1);
     },
   };
+}
+
+export type UseGridDataProviderResult<TItem> = GridDataProvider<TItem> & {
+  refresh: () => void;
+};
+
+export type GridFetchCallback<TItem> = {
+  (pageable: Pageable): Promise<TItem[]>;
+};
+
+export function useGridDataProvider<TItem>(list: GridFetchCallback<TItem>): UseGridDataProviderResult<TItem> {
+  const result = useDataProvider({ list: (pageable) => list(pageable) });
+  const dataProvider: UseGridDataProviderResult<TItem> = result.dataProvider as UseGridDataProviderResult<TItem>;
+  dataProvider.refresh = result.refresh;
+  return dataProvider;
 }
