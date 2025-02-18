@@ -3,10 +3,10 @@ import type { GridDataProvider } from '@vaadin/react-components/Grid';
 import { useMemo, useState } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
 import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling';
-import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
 
 type MaybeCountService<TItem> = Partial<CountService<TItem>>;
 type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
@@ -214,15 +214,13 @@ export function useDataProvider<TItem>(
 }
 
 export type UseGridDataProviderResult<TItem> = GridDataProvider<TItem> & {
-  refresh: () => void;
+  refresh(): void;
 };
 
-export type GridFetchCallback<TItem> = {
-  (pageable: Pageable): Promise<TItem[]>;
-};
+export type GridFetchCallback<TItem> = (pageable: Pageable) => Promise<TItem[]>;
 
 export function useGridDataProvider<TItem>(list: GridFetchCallback<TItem>): UseGridDataProviderResult<TItem> {
-  const result = useDataProvider({ list: (pageable) => list(pageable) });
+  const result = useDataProvider({ list: async (pageable) => list(pageable) });
   const dataProvider: UseGridDataProviderResult<TItem> = result.dataProvider as UseGridDataProviderResult<TItem>;
   dataProvider.refresh = result.refresh;
   return dataProvider;
