@@ -33,7 +33,7 @@ public class MultipartFileCheckerPlugin
                     && ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
                             classRefSignatureModel.getClassInfo())) {
                 throw new IllegalArgumentException(
-                        "MultipartFile is not allowed in entity classes");
+                        "MultipartFile is not allowed as return type");
             }
         }
     }
