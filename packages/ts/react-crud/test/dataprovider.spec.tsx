@@ -9,6 +9,7 @@ import {
   DataProvider,
   FixedSizeDataProvider,
   InfiniteDataProvider,
+  useComboBoxDataProvider,
   useDataProvider,
   useGridDataProvider,
   type ItemCounts,
@@ -19,6 +20,7 @@ import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFil
 import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
+import type { ComboBoxDataProvider } from '@vaadin/react-components';
 
 chai.use(sinonChai);
 
@@ -48,7 +50,29 @@ class MockGrid {
     });
   }
 }
+class MockComboBox {
+  pageSize = 10;
+  loadSpy = sinon.spy();
 
+  readonly dataProvider: ComboBoxDataProvider<any>;
+
+  constructor(dataProvider: ComboBoxDataProvider<any>) {
+    this.dataProvider = (params, callback) => {
+      dataProvider(params, (items, size) => {
+        this.loadSpy(items, size);
+        callback(items, size);
+      });
+    };
+  }
+
+  async requestPage(page: number, filter: string): Promise<void> {
+    return new Promise((resolve) => {
+      this.dataProvider({ page, pageSize: this.pageSize, filter }, () => {
+        resolve();
+      });
+    });
+  }
+}
 const data = Array.from({ length: 25 }, (_, i) => i);
 
 const listService: ListService<number> = {
@@ -240,28 +264,35 @@ describe('@hilla/react-crud', () => {
     });
   });
 
-  describe('useGridDataProvider', () => {
+  describe('useComboBoxDataProvider', () => {
     type TestProduct = {
       id: number;
       name: string;
     };
-    let called = 0;
-    async function TestProductService(_pageable: Pageable): Promise<TestProduct[]> {
-      called += 1;
+    let called: Array<{ pageable: Pageable; filterString: string }> = [];
+    async function TestProductService(pageable: Pageable, filterString: string): Promise<TestProduct[]> {
+      called.push({ pageable, filterString });
       return await Promise.resolve([
         { id: 1, name: 'Product 1' },
         { id: 2, name: 'Product 2' },
       ]);
     }
     beforeEach(() => {
-      called = 0;
+      called = [];
     });
     it('loads pages', async () => {
-      const { result } = renderHook(() => useGridDataProvider(TestProductService));
+      const { result } = renderHook(() => useComboBoxDataProvider(TestProductService));
 
-      const grid = new MockGrid(result.current);
-      await grid.requestPage(0);
-      expect(called).to.be.equal(1);
+      const combobox = new MockComboBox(result.current);
+      await combobox.requestPage(0, '');
+      expect(called.length).to.be.equal(1);
+      expect(called[0].filterString).to.be.equal('');
+      await combobox.requestPage(0, 'foo');
+      expect(called.length).to.be.equal(2);
+      expect(called[1].filterString).to.be.equal('foo');
+      await combobox.requestPage(1, 'foo');
+      expect(called.length).to.be.equal(3);
+      expect(called[2].filterString).to.be.equal('foo');
     });
   });
 

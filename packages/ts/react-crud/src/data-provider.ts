@@ -1,5 +1,9 @@
-import type { GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
-import type { GridDataProvider } from '@vaadin/react-components/Grid';
+import type {
+  ComboBoxDataProvider,
+  ComboBoxDataProviderCallback,
+  ComboBoxDataProviderParams,
+} from '@vaadin/react-components';
+import type { GridDataProvider, GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
 import { useMemo, useState } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
@@ -121,6 +125,74 @@ export abstract class DataProvider<TItem> {
   protected abstract fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
 }
 
+export abstract class AbstractComboBoxDataProvider<TItem> {
+  protected readonly list: ComboBoxFetchCallback<TItem>;
+  protected readonly loadTotalCount?: boolean;
+
+  protected sort: Sort | undefined;
+  protected totalCount: number | undefined;
+  protected filteredCount: number | undefined;
+
+  constructor(list: ComboBoxFetchCallback<TItem>, sort: Sort | undefined) {
+    this.list = list;
+    this.load = this.load.bind(this);
+    this.sort = sort;
+  }
+
+  reset(): void {
+    this.totalCount = undefined;
+    this.filteredCount = undefined;
+  }
+
+  async load(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<TItem>): Promise<void> {
+    // Fetch page and filtered count
+    const page = await this.fetchPage(params);
+    this.filteredCount = await this.fetchFilteredCount(page);
+    // Only fetch total count if it's specific in options
+    if (this.loadTotalCount) {
+      this.totalCount = await this.fetchTotalCount(page);
+    }
+
+    // Pass results to the combobox
+    callback(page.items, this.filteredCount);
+  }
+
+  protected async fetchPage(params: ComboBoxDataProviderParams): Promise<DataPage<TItem>> {
+    const pageNumber = params.page;
+    const { pageSize } = params;
+    const pageRequest: Pageable = {
+      pageNumber,
+      pageSize,
+      sort: this.sort ?? { orders: [] },
+    };
+    const items = await this.list(pageRequest, params.filter);
+
+    return { items, pageRequest };
+  }
+
+  protected abstract fetchTotalCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
+
+  protected abstract fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
+}
+
+function determineInfiniteScrollingSize(page: DataPage<unknown>, lastKnownSize?: number): number {
+  const { items, pageRequest } = page;
+  const { pageNumber, pageSize } = pageRequest;
+  let infiniteScrollingSize;
+
+  if (items.length === pageSize) {
+    infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
+    if (lastKnownSize !== undefined && infiniteScrollingSize < lastKnownSize) {
+      // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
+      infiniteScrollingSize = lastKnownSize;
+    }
+  } else {
+    infiniteScrollingSize = pageNumber * pageSize + items.length;
+  }
+
+  return infiniteScrollingSize;
+}
+
 export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
   // cannot be static, otherwise it does not implement superclass
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -129,21 +201,18 @@ export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
   }
 
   protected fetchFilteredCount(page: DataPage<TItem>): number | undefined {
-    const { items, pageRequest } = page;
-    const { pageNumber, pageSize } = pageRequest;
-    let infiniteScrollingSize;
+    return determineInfiniteScrollingSize(page, this.filteredCount);
+  }
+}
+export class InfiniteComboBoxDataProvider<TItem> extends AbstractComboBoxDataProvider<TItem> {
+  // cannot be static, otherwise it does not implement superclass
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected fetchTotalCount(): undefined {
+    return undefined;
+  }
 
-    if (items.length === pageSize) {
-      infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
-      if (this.filteredCount !== undefined && infiniteScrollingSize < this.filteredCount) {
-        // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-        infiniteScrollingSize = this.filteredCount;
-      }
-    } else {
-      infiniteScrollingSize = pageNumber * pageSize + items.length;
-    }
-
-    return infiniteScrollingSize;
+  protected fetchFilteredCount(page: DataPage<TItem>): number | undefined {
+    return determineInfiniteScrollingSize(page, this.filteredCount);
   }
 }
 
@@ -224,4 +293,40 @@ export function useGridDataProvider<TItem>(list: GridFetchCallback<TItem>): UseG
   const dataProvider: UseGridDataProviderResult<TItem> = result.dataProvider as UseGridDataProviderResult<TItem>;
   dataProvider.refresh = result.refresh;
   return dataProvider;
+}
+
+export type UseComboBoxDataProviderResult<TItem> = ComboBoxDataProvider<TItem> & {
+  refresh(): void;
+};
+
+export type ComboBoxFetchCallback<TItem> = (pageable: Pageable, filterString: string) => Promise<TItem[]>;
+
+function createComboBoxDataProvider<TItem>(
+  list: ComboBoxFetchCallback<TItem>,
+  sort: Sort | undefined,
+): AbstractComboBoxDataProvider<TItem> {
+  return new InfiniteComboBoxDataProvider(list, sort);
+}
+
+type ComboboxDataProviderOptions = {
+  sort?: Sort;
+};
+export function useComboBoxDataProvider<TItem>(
+  list: ComboBoxFetchCallback<TItem>,
+  options?: ComboboxDataProviderOptions,
+): UseComboBoxDataProviderResult<TItem> {
+  const [refreshCounter, setRefreshCounter] = useState(0);
+  const dataProvider = useMemo(() => createComboBoxDataProvider(list, options?.sort), [list, options?.sort]);
+
+  // Create a new data provider function reference when the filter changes or the refresh counter is incremented.
+  // This effectively forces the combo box to reload
+  const dataProviderFn = useMemo(() => dataProvider.load.bind(dataProvider), [dataProvider, refreshCounter]);
+  const refresh = () => {
+    dataProvider.reset();
+    setRefreshCounter(refreshCounter + 1);
+  };
+  const dataProviderWithRefresh = dataProviderFn as unknown as UseComboBoxDataProviderResult<TItem>;
+  dataProviderWithRefresh.refresh = refresh;
+
+  return dataProviderWithRefresh;
 }
