@@ -1,7 +1,7 @@
+import { useGridDataProvider } from '@vaadin/hilla-react-crud';
 import { Button } from '@vaadin/react-components';
 import { Grid } from '@vaadin/react-components/Grid';
 import { GridSortColumn } from '@vaadin/react-components/GridSortColumn';
-import { useGridDataProvider } from '../../../../../../ts/react-crud/data-provider';
 import { PersonCustomService } from 'Frontend/generated/endpoints';
 
 export default function GridUseGridDataProviderHook(): React.JSX.Element {
@@ -14,7 +14,7 @@ export default function GridUseGridDataProviderHook(): React.JSX.Element {
         <GridSortColumn path="lastName" />
         <GridSortColumn path="gender" />
       </Grid>
-      <Button onClick={dataProvider.refresh}>Refresh</Button>
+      <Button onClick={() => dataProvider.refresh()}>Refresh</Button>
     </div>
   );
 }
