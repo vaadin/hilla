@@ -14,6 +14,7 @@ import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
 import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
+import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
 
@@ -159,6 +160,7 @@ public final class ParserConfiguration {
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
         private static final List<Plugin> DEFAULTS = List.of(
                 new Plugin(BackbonePlugin.class.getName()),
+                new Plugin(MultipartFileCheckerPlugin.class.getName()),
                 new Plugin(TransferTypesPlugin.class.getName()),
                 new Plugin(NonnullPlugin.class.getName()),
                 new Plugin(SubTypesPlugin.class.getName()),
