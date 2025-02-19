@@ -29,12 +29,11 @@ public class MultipartFileCheckerPlugin
 
         if (nodePath.getNode() instanceof MethodNode methodNode) {
             var nodeType = methodNode.getSource().getResultType();
-            if (nodeType instanceof ClassRefSignatureModel classRefSignatureModel) {
-                if (ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
-                        classRefSignatureModel.getClassInfo())) {
-                    throw new IllegalArgumentException(
-                            "MultipartFile is not allowed in entity classes");
-                }
+            if (nodeType instanceof ClassRefSignatureModel classRefSignatureModel
+                    && ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
+                            classRefSignatureModel.getClassInfo())) {
+                throw new IllegalArgumentException(
+                        "MultipartFile is not allowed in entity classes");
             }
         }
     }
