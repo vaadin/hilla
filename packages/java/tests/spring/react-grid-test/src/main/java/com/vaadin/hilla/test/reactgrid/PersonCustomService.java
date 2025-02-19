@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 
-@Service
 @BrowserCallable
 @AnonymousAllowed
 public class PersonCustomService {
