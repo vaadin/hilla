@@ -109,21 +109,9 @@ describe('@vaadin/hilla-react-crud', () => {
     it('can hide new button', async () => {
       const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonHidden={false} />);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonVisible={true} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonHidden={true} />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
-    });
-
-    it('can hide toolbar', async () => {
-      const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} toolbarHidden={false} />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} toolbarHidden={true} />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
-      // make sure the button would be there
-      rerender(<AutoCrud service={personService()} model={PersonModel} toolbarHidden={true} newButtonHidden={false} />);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonVisible={false} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
     });
 
