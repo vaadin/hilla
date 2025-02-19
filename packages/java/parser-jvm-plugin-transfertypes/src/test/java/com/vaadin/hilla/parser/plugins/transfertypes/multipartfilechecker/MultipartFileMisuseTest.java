@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
+import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileUsageException;
 import com.vaadin.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
 
 public class MultipartFileMisuseTest {
@@ -16,7 +17,7 @@ public class MultipartFileMisuseTest {
 
     @Test
     public void should_ThrowWhenMultipartFileIsUsedInEntity() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(MultipartFileUsageException.class,
                 () -> new Parser()
                         .classPath(Set.of(helper.getTargetDir().toString()))
                         .endpointAnnotations(List.of(Endpoint.class))
@@ -27,7 +28,7 @@ public class MultipartFileMisuseTest {
 
     @Test
     public void should_ThrowWhenMultipartFileIsUsedAsReturnType() {
-        assertThrows(IllegalArgumentException.class, () -> new Parser()
+        assertThrows(MultipartFileUsageException.class, () -> new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))
                 .addPlugin(new BackbonePlugin())
