@@ -10,6 +10,7 @@ import {
   FixedSizeDataProvider,
   InfiniteDataProvider,
   useDataProvider,
+  useGridDataProvider,
   type ItemCounts,
 } from '../src/data-provider.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
@@ -236,6 +237,31 @@ describe('@hilla/react-crud', () => {
       const { result } = renderHook(() => useDataProvider(listService));
 
       await testDataProviderReset(result.current.dataProvider, result.current.refresh);
+    });
+  });
+
+  describe('useGridDataProvider', () => {
+    type TestProduct = {
+      id: number;
+      name: string;
+    };
+    let called = 0;
+    async function TestProductService(_pageable: Pageable): Promise<TestProduct[]> {
+      called += 1;
+      return await Promise.resolve([
+        { id: 1, name: 'Product 1' },
+        { id: 2, name: 'Product 2' },
+      ]);
+    }
+    beforeEach(() => {
+      called = 0;
+    });
+    it('loads pages', async () => {
+      const { result } = renderHook(() => useGridDataProvider(TestProductService));
+
+      const grid = new MockGrid(result.current);
+      await grid.requestPage(0);
+      expect(called).to.be.equal(1);
     });
   });
 
