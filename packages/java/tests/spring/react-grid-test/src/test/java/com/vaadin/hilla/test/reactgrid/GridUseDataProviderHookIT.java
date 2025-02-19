@@ -1,16 +1,12 @@
 package com.vaadin.hilla.test.reactgrid;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class GridUseDataProviderHookIT extends AbstractGridTest {
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 
-    protected String getTestPath() {
-        return getRootURL() + "/grid-use-data-provider-hook";
-    }
+public class GridUseDataProviderHookIT extends AbstractGridTest {
 
     @Test
     public void filteringWorks_and_refreshingDataProvider_keepsTheAppliedFilter() {
