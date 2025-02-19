@@ -20,12 +20,10 @@ public class MultipartFileCheckerPlugin
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof PropertyNode propertyNode) {
             var nodeType = propertyNode.getSource().get().getRawPrimaryType();
-            while (nodeType != null) {
-                if (MULTIPART_CLASS_NAME.equals(nodeType.getTypeName())) {
-                    throw new IllegalArgumentException(
-                            "MultipartFile is not allowed in entity classes");
-                }
-                nodeType = nodeType.getSuperclass();
+            if (ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
+                    nodeType)) {
+                throw new IllegalArgumentException(
+                        "MultipartFile is not allowed in entity classes");
             }
         }
 
