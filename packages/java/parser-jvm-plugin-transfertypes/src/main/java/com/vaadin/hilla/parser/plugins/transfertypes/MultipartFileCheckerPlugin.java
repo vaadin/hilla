@@ -1,16 +1,14 @@
 package com.vaadin.hilla.parser.plugins.transfertypes;
 
-import java.util.Objects;
-
-import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
 
 public class MultipartFileCheckerPlugin
@@ -21,20 +19,24 @@ public class MultipartFileCheckerPlugin
     @Override
     public void enter(NodePath<?> nodePath) {
         if (nodePath.getNode() instanceof PropertyNode propertyNode) {
-            if (propertyNode.getSource().getAssociatedTypes().stream()
-                    .map(SignatureModel::get).map(Objects::toString)
-                    .anyMatch(MULTIPART_CLASS_NAME::equals)) {
-                throw new IllegalArgumentException(
-                        "MultipartFile is not allowed in entity classes");
+            var nodeType = propertyNode.getSource().get().getRawPrimaryType();
+            while (nodeType != null) {
+                if (MULTIPART_CLASS_NAME.equals(nodeType.getTypeName())) {
+                    throw new IllegalArgumentException(
+                            "MultipartFile is not allowed in entity classes");
+                }
+                nodeType = nodeType.getSuperclass();
             }
         }
 
-        if (nodePath.getParentPath().getNode() instanceof MethodNode && nodePath
-                .getNode() instanceof TypeSignatureNode typeSignatureNode) {
-            if (MULTIPART_CLASS_NAME
-                    .equals(typeSignatureNode.getType().get().toString())) {
-                throw new IllegalArgumentException(
-                        "MultipartFile is not allowed as return type");
+        if (nodePath.getNode() instanceof MethodNode methodNode) {
+            var nodeType = methodNode.getSource().getResultType();
+            if (nodeType instanceof ClassRefSignatureModel classRefSignatureModel) {
+                if (ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
+                        classRefSignatureModel.getClassInfo())) {
+                    throw new IllegalArgumentException(
+                            "MultipartFile is not allowed in entity classes");
+                }
             }
         }
     }
