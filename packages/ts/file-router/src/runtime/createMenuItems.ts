@@ -1,8 +1,17 @@
+/// <reference types="vite/client" />
 import { signal } from '@vaadin/hilla-react-signals';
 import type { VaadinWindow } from '../shared/internal.js';
-import type { MenuItem } from '../types.js';
+import type { MenuItem, ViewConfig } from '../types.js';
 
 export const viewsSignal = signal((window as VaadinWindow).Vaadin?.views);
+
+function isExcluded(value: ViewConfig): boolean {
+  return !!value.menu?.exclude;
+}
+
+function hasVariablePathSegment(path: string): boolean {
+  return path.split('/').some((segment) => segment.startsWith(':'));
+}
 
 /**
  * Creates menu items from the views provided by the server. The views are sorted according to the
@@ -21,10 +30,15 @@ export function createMenuItems(): readonly MenuItem[] {
     return [];
   }
 
+  const views = Object.entries(viewsSignal.value);
+  const excluded = [
+    ...new Set(views.map(([path, value]) => (isExcluded(value) ? path : null)).filter((path) => path != null)).values(),
+  ];
+
   return (
-    Object.entries(viewsSignal.value)
+    views
       // Filter out the views that are explicitly excluded from the menu.
-      .filter(([_, value]) => !value.menu?.exclude)
+      .filter(([path]) => !excluded.some((p) => path.startsWith(p)) && !hasVariablePathSegment(path))
       // Map the views to menu items.
       .map(([path, config]) => ({
         to: path,
@@ -40,10 +54,7 @@ export function createMenuItems(): readonly MenuItem[] {
   );
 }
 
-// @ts-expect-error Vite hotswapping
 if (import.meta.hot) {
-  // @ts-expect-error Vite hotswapping
-  // eslint-disable-next-line
   import.meta.hot.on('fs-route-update', () => {
     fetch('?v-r=routeinfo')
       .then(async (resp) => resp.json())
