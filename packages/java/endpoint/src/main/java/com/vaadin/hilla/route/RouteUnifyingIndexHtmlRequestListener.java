@@ -16,42 +16,13 @@
 package com.vaadin.hilla.route;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.auth.MenuAccessControl;
-import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
-import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.internal.menu.MenuRegistry;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.Nullable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
-import com.vaadin.flow.server.menu.RouteParamType;
 
 /**
  * Index HTML request listener for collecting the client side and the server

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference,spaced-comment
 /// <reference types="vitest/node" />
 import react from '@vitejs/plugin-react';
 import { mergeConfig, type ViteUserConfig } from 'vitest/config';
