@@ -22,8 +22,9 @@ public class MultipartFileCheckerPlugin
             var nodeType = propertyNode.getSource().get().getRawPrimaryType();
             if (ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
                     nodeType)) {
-                throw new IllegalArgumentException(
-                        "MultipartFile is not allowed in entity classes");
+                throw new MultipartFileUsageException(
+                        "MultipartFile is not allowed in entity classes: "
+                                + nodeType.getName());
             }
         }
 
@@ -32,8 +33,9 @@ public class MultipartFileCheckerPlugin
             if (nodeType instanceof ClassRefSignatureModel classRefSignatureModel
                     && ClassInfoModel.isAssignableFrom(MULTIPART_CLASS_NAME,
                             classRefSignatureModel.getClassInfo())) {
-                throw new IllegalArgumentException(
-                        "MultipartFile is not allowed as return type");
+                throw new MultipartFileUsageException(
+                        "MultipartFile is not allowed as return type: "
+                                + methodNode.getSource());
             }
         }
     }
