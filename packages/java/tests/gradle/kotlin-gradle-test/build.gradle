@@ -78,10 +78,14 @@ tasks.register('bootStart') {
 	dependsOn productionBuild
 	doLast {
 		logger.info("Running the application in production for integration tests...")
-		def executor = Executors.newSingleThreadExecutor()
-		def processBuilder = new ProcessBuilder('java', '-jar', 'build/libs/kotlin-gradle-test.jar')
+        def jarPath = new File(projectDir, 'build/libs/kotlin-gradle-test.jar')
+        if (!jarPath.exists()) {
+            throw new GradleException("JAR file not found: ${jarPath.absolutePath}")
+        }
+		def processBuilder = new ProcessBuilder('java', '-jar', jarPath.absolutePath)
 		processBuilder.redirectErrorStream(true)
 		def process = processBuilder.start()
+        def executor = Executors.newSingleThreadExecutor()
 		executor.submit {
 			process.inputStream.eachLine { println it }
 		}

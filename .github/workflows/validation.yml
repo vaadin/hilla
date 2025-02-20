@@ -299,12 +299,54 @@ jobs:
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
       - name: Test gradle-plugin's functional tests
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
-      - name: Gradle ITs
+      - name: Old Gradle ITs
         run: ./packages/java/tests/gradle/single-module-tests/gradlew --info -p packages/java/tests/gradle/single-module-tests test
       - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:
-          name: saved-outputs-gradle-${{ matrix.os }}
+          name: saved-outputs-gradle-${{ matrix.os }}-old
+          path: |
+            packages/java/tests/**/target/*-reports/*
+            packages/java/tests/**/error-screenshots/*.png
+            packages/java/gradle-plugin/build/test-results/*
+            packages/java/gradle-plugin/build/reports/*
+
+  new-test-gradle:
+    needs:
+      - init
+    name: New Gradle tests
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Project Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: saved-workspace
+      - name: Restore Workspace
+        run: |
+          set -x
+          tar xf workspace.tar
+          tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Set TB License
+        run: |
+          TB_LICENSE=${{secrets.TB_LICENSE}}
+          mkdir -p ~/.vaadin/
+          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
+      - name: publish plugin to Maven Local
+        run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin build publishToMavenLocal -x functionalTest
+      - name: New Gradle ITs
+        run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() || success() }}
+        with:
+          name: saved-outputs-gradle-ubuntu-latest-new
           path: |
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
@@ -321,6 +363,7 @@ jobs:
       - test-typescript
       - test-it
       - test-gradle
+      - new-test-gradle
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
@@ -328,5 +371,5 @@ jobs:
           name: saved-outputs
           pattern: saved-outputs-*
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' }}
+        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' || needs.new-test-gradle.result != 'success' }}
         run: exit 1
