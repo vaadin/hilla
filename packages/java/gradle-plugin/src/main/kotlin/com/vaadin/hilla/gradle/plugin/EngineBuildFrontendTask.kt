@@ -18,5 +18,5 @@ package com.vaadin.hilla.gradle.plugin
 /**
  * Extend the VaadinBuildFrontendTask so that frontend files are not cleaned after build.
  */
-public open class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
+public abstract class EngineBuildFrontendTask : com.vaadin.gradle.VaadinBuildFrontendTask() {
 }
