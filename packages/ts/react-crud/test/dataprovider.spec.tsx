@@ -268,30 +268,45 @@ describe('@hilla/react-crud', () => {
       id: number;
       name: string;
     };
-    let called: Array<{ pageable: Pageable; filterString: string }> = [];
-    async function TestProductService(pageable: Pageable, filterString: string): Promise<TestProduct[]> {
-      called.push({ pageable, filterString });
-      return await Promise.resolve([
-        { id: 1, name: 'Product 1' },
-        { id: 2, name: 'Product 2' },
-      ]);
+    const allData = [
+      { id: 1, name: 'Product 1' },
+      { id: 2, name: 'Product 2' },
+    ];
+    async function TestProductService(_pageable: Pageable, filterString: string): Promise<TestProduct[]> {
+      return await Promise.resolve(allData.filter((product) => product.name.includes(filterString)));
     }
-    beforeEach(() => {
-      called = [];
-    });
     it('loads pages', async () => {
       const { result } = renderHook(() => useComboBoxDataProvider(TestProductService));
 
       const combobox = new MockComboBox(result.current);
       await combobox.requestPage(0, '');
-      expect(called.length).to.be.equal(1);
-      expect(called[0].filterString).to.be.equal('');
-      await combobox.requestPage(0, 'foo');
-      expect(called.length).to.be.equal(2);
-      expect(called[1].filterString).to.be.equal('foo');
-      await combobox.requestPage(1, 'foo');
-      expect(called.length).to.be.equal(3);
-      expect(called[2].filterString).to.be.equal('foo');
+      expect(
+        combobox.loadSpy.calledOnceWith(
+          [
+            {
+              id: 1,
+              name: 'Product 1',
+            },
+            {
+              id: 2,
+              name: 'Product 2',
+            },
+          ],
+          2,
+        ),
+      ).to.be.true;
+
+      await combobox.requestPage(0, '1');
+      expect(combobox.loadSpy.calledTwice).to.be.true;
+      expect(combobox.loadSpy.lastCall.args).to.eql([
+        [
+          {
+            id: 1,
+            name: 'Product 1',
+          },
+        ],
+        1,
+      ]);
     });
   });
 
