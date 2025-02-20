@@ -308,6 +308,19 @@ describe('@hilla/react-crud', () => {
         1,
       ]);
     });
+    it('refreshes when refresh is called', () => {
+      const hook = renderHook(() => useComboBoxDataProvider(TestProductService));
+      const result1 = hook.result.current;
+      hook.rerender();
+      const result2 = hook.result.current;
+      result2.refresh();
+      hook.rerender();
+      const result3 = hook.result.current;
+
+      // Re-render without a reset should return the same instance, but after a refresh we should get a new instance
+      expect(result1).to.equal(result2);
+      expect(result2).not.to.equal(result3);
+    });
   });
 
   describe('createDataProvider', () => {
