@@ -135,7 +135,6 @@ export abstract class AbstractComboBoxDataProvider<TItem> {
 
   constructor(list: ComboBoxFetchCallback<TItem>, sort: Sort | undefined) {
     this.list = list;
-    this.load = this.load.bind(this);
     this.sort = sort;
   }
 
@@ -144,17 +143,21 @@ export abstract class AbstractComboBoxDataProvider<TItem> {
     this.filteredCount = undefined;
   }
 
-  async load(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<TItem>): Promise<void> {
-    // Fetch page and filtered count
-    const page = await this.fetchPage(params);
-    this.filteredCount = await this.fetchFilteredCount(page);
-    // Only fetch total count if it's specific in options
-    if (this.loadTotalCount) {
-      this.totalCount = await this.fetchTotalCount(page);
-    }
+  load(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<TItem>): void {
+    this.fetchPage(params)
+      .then(async (page) => {
+        this.filteredCount = await this.fetchFilteredCount(page);
+        // Only fetch total count if it's specific in options
+        if (this.loadTotalCount) {
+          this.totalCount = await this.fetchTotalCount(page);
+        }
 
-    // Pass results to the combobox
-    callback(page.items, this.filteredCount);
+        // Pass results to the combobox
+        callback(page.items, this.filteredCount);
+      })
+      .catch((error: unknown) => {
+        throw error;
+      });
   }
 
   protected async fetchPage(params: ComboBoxDataProviderParams): Promise<DataPage<TItem>> {
@@ -311,6 +314,7 @@ function createComboBoxDataProvider<TItem>(
 type ComboboxDataProviderOptions = {
   sort?: Sort;
 };
+
 export function useComboBoxDataProvider<TItem>(
   list: ComboBoxFetchCallback<TItem>,
   options?: ComboboxDataProviderOptions,
@@ -318,15 +322,14 @@ export function useComboBoxDataProvider<TItem>(
   const [refreshCounter, setRefreshCounter] = useState(0);
   const dataProvider = useMemo(() => createComboBoxDataProvider(list, options?.sort), [list, options?.sort]);
 
-  // Create a new data provider function reference when the filter changes or the refresh counter is incremented.
+  // Create a new data provider function reference when the refresh counter is incremented.
   // This effectively forces the combo box to reload
-  const dataProviderFn = useMemo(() => dataProvider.load.bind(dataProvider), [dataProvider, refreshCounter]);
-  const refresh = () => {
-    dataProvider.reset();
-    setRefreshCounter(refreshCounter + 1);
-  };
-  const dataProviderWithRefresh = dataProviderFn as unknown as UseComboBoxDataProviderResult<TItem>;
-  dataProviderWithRefresh.refresh = refresh;
-
-  return dataProviderWithRefresh;
+  return useMemo(() => {
+    const dataProviderWithRefresh = (...args: Parameters<typeof dataProvider.load>) => dataProvider.load(...args);
+    dataProviderWithRefresh.refresh = () => {
+      dataProvider.reset();
+      setRefreshCounter(refreshCounter + 1);
+    };
+    return dataProviderWithRefresh;
+  }, [dataProvider, refreshCounter]);
 }
