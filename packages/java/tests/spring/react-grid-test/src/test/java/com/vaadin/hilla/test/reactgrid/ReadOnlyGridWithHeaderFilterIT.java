@@ -27,10 +27,6 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
     private static final int SHIFT_START_COLUMN = 7;
     private static final int APPOINTMENT_TIME_COLUMN = 8;
 
-    protected String getTestPath() {
-        return getRootURL() + "/readonly-grid-with-headerfilters";
-    }
-
     @Test
     public void stringMatchesContains() {
         setHeaderFilter(FIRST_NAME_COLUMN, "al");

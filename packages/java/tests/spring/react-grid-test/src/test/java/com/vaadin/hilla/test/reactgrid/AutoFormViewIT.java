@@ -20,7 +20,7 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     }
 
     protected String getTestPath() {
-        return getRootURL() + "/auto-form";
+        return getRootURL() + "/AutoFormView";
     }
 
     @Test
