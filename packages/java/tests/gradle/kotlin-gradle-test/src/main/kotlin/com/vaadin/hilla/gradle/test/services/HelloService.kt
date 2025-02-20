@@ -14,5 +14,4 @@ class HelloService {
         } else {
             "Hello $name"
         }
-
 }
