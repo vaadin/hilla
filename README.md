@@ -5,10 +5,10 @@
 The modern web framework
 for Java
 
-![Latest Stable Version](https://img.shields.io/npm/v/@hilla/frontend.svg)
-[![Releases](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fdev%2Fhilla%2Fhilla%2Fmaven-metadata.xml)](https://github.com/vaadin/hilla/releases)
+![Latest Stable Version](https://img.shields.io/npm/v/@vaadin/hilla-frontend.svg)
+[![Releases](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fcom%2Fvaadin%2Fhilla%2Fmaven-metadata.xml)](https://github.com/vaadin/hilla/releases)
   
-[hilla.dev](https://hilla.dev) · [Docs](https://hilla.dev/docs) · [Forum](https://vaadin.com/forum/c/hilla/18)
+[Website](https://vaadin.com/hilla) · [Docs](https://vaadin.com/docs/latest/hilla) · [Forum](https://vaadin.com/forum/c/hilla/18)
 
 </div>
 
@@ -25,10 +25,10 @@ Hilla helps you access the backend easily with type-safe endpoints.
 ```ts
 // Type info is automatically generated based on Java
 import Person from 'Frontend/generated/com/vaadin/hilla/demo/entity/Person';
-import { PersonEndpoint } from 'Frontend/generated/endpoints';
+import { PersonService } from 'Frontend/generated/endpoints';
 
 async function getPeopleWithPhoneNumber() {
-  const people: Person[] = await PersonEndpoint.findAll();
+  const people: Person[] = await PersonService.findAll();
 
   // Compile error: The property is 'phone', not 'phoneNumber'
   return people.filter((person) => !!person.phoneNumber);
@@ -37,16 +37,16 @@ async function getPeopleWithPhoneNumber() {
 console.log('People with phone numbers: ', getPeopleWithPhoneNumber());
 ```
 
-`PersonEndpoint.java`
+`PersonService.java`
 
 ```java
-@Endpoint
+@BrowserCallable
 @AnonymousAllowed
-public class PersonEndpoint {
+public class PersonService {
 
     private PersonRepository repository;
 
-    public PersonEndpoint(PersonRepository repository) {
+    public PersonService(PersonRepository repository) {
         this.repository = repository;
     }
 
@@ -75,11 +75,11 @@ public class Person {
 }
 ```
 
-Learn more at [hilla.dev](https://hilla.dev)
+Learn more at [vaadin.com/hilla](https://vaadin.com/hilla)
 
 ## Get started
 
-Follow the tutorials at https://hilla.dev/docs
+Follow the tutorials at https://vaadin.com/docs/latest/getting-started
 
 ## Contributing
 
@@ -93,16 +93,19 @@ If you want to develop Hilla, you can clone the repo and run tests using the fol
 git clone https://github.com/vaadin/hilla.git
 npm install
 npm run build
+mvn install -DskipTests
 npm test
+mvn verify
 ```
 
-You need the following versions of Node.js and npm:
+You need the following versions of SDKs and tools:
 
-- **Node.js**: `>= 18 LTS` (native support for ES Modules and NodeJS execution of the newest hooks),
-- **npm**: `^9` (`package-lock.json` is of version 3)
+- **Node.js**: `>= 22 LTS`,
+- **npm**: `>=10` (`package-lock.json` is of version 3)
+- **JDK**: `>=17`
+- **Maven**: `>=3`
 
 ---
 
-![Frontend CI](https://github.com/vaadin/hilla/actions/workflows/ts.yml/badge.svg)
-![Java CI](https://github.com/vaadin/hilla/actions/workflows/java.yml/badge.svg)
+[![Validation](https://github.com/vaadin/hilla/actions/workflows/validation.yml/badge.svg)](https://github.com/vaadin/hilla/actions/workflows/validation.yml)
 [![codecov](https://codecov.io/gh/vaadin/hilla/branch/main/graph/badge.svg?token=PQMTMS8ECC)](https://codecov.io/gh/vaadin/hilla)

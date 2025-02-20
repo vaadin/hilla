@@ -44,10 +44,6 @@
             <artifactId>hilla-engine-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jspecify</groupId>
-            <artifactId>jspecify</artifactId>
-        </dependency>
 
         <!-- API DEPENDENCIES -->
 

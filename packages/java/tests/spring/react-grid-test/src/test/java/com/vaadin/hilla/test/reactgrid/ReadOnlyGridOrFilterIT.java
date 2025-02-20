@@ -6,10 +6,6 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 
 public class ReadOnlyGridOrFilterIT extends AbstractGridTest {
 
-    protected String getTestPath() {
-        return getRootURL() + "/readonly-grid-or-filter";
-    }
-
     @Test
     public void findsMatches() {
         setFilter("car");
