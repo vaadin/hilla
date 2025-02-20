@@ -1,4 +1,5 @@
 import { cleanup, renderHook } from '@testing-library/react';
+import type { ComboBoxDataProvider } from '@vaadin/react-components';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -11,7 +12,6 @@ import {
   InfiniteDataProvider,
   useComboBoxDataProvider,
   useDataProvider,
-  useGridDataProvider,
   type ItemCounts,
 } from '../src/data-provider.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
@@ -20,7 +20,6 @@ import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFil
 import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
-import type { ComboBoxDataProvider } from '@vaadin/react-components';
 
 chai.use(sinonChai);
 
