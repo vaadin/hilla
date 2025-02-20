@@ -29,7 +29,8 @@ public class PersonCustomService {
         return repository.findAll(pageable).getContent();
     }
 
-    public List<Person> listPersonsLazyWithFilter(Pageable pageable, String filterString) {
+    public List<Person> listPersonsLazyWithFilter(Pageable pageable,
+            String filterString) {
         OrFilter filter = new OrFilter();
         PropertyStringFilter firstName = new PropertyStringFilter();
         firstName.setFilterValue(filterString);
@@ -40,6 +41,9 @@ public class PersonCustomService {
         lastName.setPropertyId("lastName");
         lastName.setMatcher(Matcher.CONTAINS);
         filter.setChildren(List.of(firstName, lastName));
-        return repository.findAll(JpaFilterConverter.toSpec(filter, Person.class), pageable).getContent();
+        return repository
+                .findAll(JpaFilterConverter.toSpec(filter, Person.class),
+                        pageable)
+                .getContent();
     }
 }
