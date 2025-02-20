@@ -104,18 +104,22 @@ describe('@vaadin/hilla-file-router', () => {
       ]);
     });
 
-    it('should exclude items with { "menu": { "exclude": true } } and their children', () => {
+    it('should exclude items with { "menu": { "exclude": true } } but leave children in place', () => {
       viewsSignal.value = {
         '/foo': { title: 'Foo' },
         '/bar': { title: 'Bar', menu: { exclude: true } }, // should be excluded
-        '/bar/foo': { title: 'Bar Foo' }, // should be excluded
+        '/bar/foo': { title: 'Bar Foo' },
         '/baz': { title: 'Baz' },
         '/baz/bar': { title: 'Baz Bar' },
         '/baz/bar/foo': { title: 'Baz Bar Foo', menu: { exclude: true } }, // should be excluded
-        '/baz/bar/foo/buzz': { title: 'Baz Bar Foo Buzz' }, // should be excluded
+        '/baz/bar/foo/buzz': { title: 'Baz Bar Foo Buzz' },
       };
 
       expect(deepRemoveNullProps(createMenuItems())).to.be.deep.equal([
+        {
+          title: 'Bar Foo',
+          to: '/bar/foo',
+        },
         {
           title: 'Baz',
           to: '/baz',
@@ -123,6 +127,10 @@ describe('@vaadin/hilla-file-router', () => {
         {
           title: 'Baz Bar',
           to: '/baz/bar',
+        },
+        {
+          title: 'Baz Bar Foo Buzz',
+          to: '/baz/bar/foo/buzz',
         },
         {
           title: 'Foo',
@@ -134,12 +142,12 @@ describe('@vaadin/hilla-file-router', () => {
     it('should exclude items with variable path segments and their children', () => {
       viewsSignal.value = {
         '/foo': { title: 'Foo' },
-        '/bar/:id': { title: 'Bar' },
-        '/bar/:id/foo': { title: 'Bar Foo' },
+        '/bar/:id': { title: 'Bar' }, // should be excluded
+        '/bar/:id/foo': { title: 'Bar Foo' }, // should be excluded
         '/baz': { title: 'Baz' },
         '/baz/foo': { title: 'Baz Foo' },
-        '/baz/bar/:id': { title: 'Baz Bar' },
-        '/baz/bar/:id/foo': { title: 'Baz Bar Foo' },
+        '/baz/bar/:id': { title: 'Baz Bar' }, // should be excluded
+        '/baz/bar/:id/foo': { title: 'Baz Bar Foo' }, // should be excluded
       };
 
       expect(deepRemoveNullProps(createMenuItems())).to.be.deep.equal([

@@ -31,14 +31,11 @@ export function createMenuItems(): readonly MenuItem[] {
   }
 
   const views = Object.entries(viewsSignal.value);
-  const excluded = [
-    ...new Set(views.map(([path, value]) => (isExcluded(value) ? path : null)).filter((path) => path != null)).values(),
-  ];
 
   return (
     views
       // Filter out the views that are explicitly excluded from the menu.
-      .filter(([path]) => !excluded.some((p) => path.startsWith(p)) && !hasVariablePathSegment(path))
+      .filter(([path, value]) => !isExcluded(value) && !hasVariablePathSegment(path))
       // Map the views to menu items.
       .map(([path, config]) => ({
         to: path,
