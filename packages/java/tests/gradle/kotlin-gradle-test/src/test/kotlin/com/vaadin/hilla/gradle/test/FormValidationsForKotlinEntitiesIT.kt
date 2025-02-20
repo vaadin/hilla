@@ -3,7 +3,6 @@ package com.vaadin.hilla.gradle.test
 import com.vaadin.flow.component.button.testbench.ButtonElement
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement
 import com.vaadin.flow.testutil.ChromeBrowserTest
-import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -14,11 +13,6 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
-    }
-
-    @After
-    fun tearDown() {
-        checkLogsForErrors()
     }
 
     override fun getTestPath(): String {

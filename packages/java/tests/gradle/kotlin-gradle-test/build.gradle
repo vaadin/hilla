@@ -4,7 +4,6 @@ plugins {
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
 	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
-	// id 'com.vaadin' version "${vaadinVersion}"
 }
 
 apply plugin: 'com.vaadin.hilla'
@@ -32,6 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.parttio:line-awesome:1.1.0'
     implementation 'com.vaadin:vaadin-dev-server'
+    runtimeOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
@@ -44,7 +44,7 @@ dependencies {
     testImplementation "com.vaadin:flow-test-util:$flowVersion"
 	testImplementation "com.vaadin:vaadin-button-testbench:$vaadinComponentsVersion"
 	testImplementation "com.vaadin:vaadin-text-field-testbench:$vaadinComponentsVersion"
-
+	testImplementation "com.vaadin:vaadin-grid-testbench:$vaadinComponentsVersion"
 }
 
 sourceSets {
@@ -62,14 +62,6 @@ sourceSets {
 		}
 	}
 }
-/*
-kotlin {
-	compilerOptions {
-		// freeCompilerArgs.addAll '-Xjsr305=strict'
-		freeCompilerArgs.add("-Xjsr305=strict")
-		freeCompilerArgs.add("-Xemit-jvm-type-annotations")
-	}
-}*/
 
 import java.util.concurrent.Executors
 

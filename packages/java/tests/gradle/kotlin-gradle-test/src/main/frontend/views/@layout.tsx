@@ -41,7 +41,7 @@ export default function MainLayout() {
 
       <DrawerToggle slot="navbar" aria-label="Menu toggle"></DrawerToggle>
       <h1 slot="navbar" className="text-l m-0">
-        {documentTitleSignal}
+        {documentTitleSignal.value}
       </h1>
 
       <Suspense>
