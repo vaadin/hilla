@@ -84,7 +84,7 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      * from being sent to the service. Ensure your backend Java service is
      * properly secured to prevent unauthorized creation of new items.
      */
-    newButtonVisible?: boolean;
+    newButton?: boolean;
     /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
@@ -119,7 +119,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   service,
   model,
   itemIdProperty,
-  newButtonVisible,
+  newButton,
   formProps,
   gridProps,
   style,
@@ -162,7 +162,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       ></AutoGrid>
       {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
           renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {!(newButtonVisible === false) && (
+      {newButton !== false && (
         <div className="auto-crud-toolbar">
           <Button theme="primary" onClick={() => setItem(emptyItem)}>
             + New

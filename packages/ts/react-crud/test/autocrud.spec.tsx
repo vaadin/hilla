@@ -109,9 +109,9 @@ describe('@vaadin/hilla-react-crud', () => {
     it('can hide new button', async () => {
       const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonVisible={true} />);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButton={true} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} newButtonVisible={false} />);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButton={false} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
     });
 
