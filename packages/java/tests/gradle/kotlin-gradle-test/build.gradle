@@ -1,0 +1,128 @@
+plugins {
+	id 'org.jetbrains.kotlin.jvm' version '1.9.25'
+	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
+	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+	// id 'com.vaadin' version "${vaadinVersion}"
+}
+
+apply plugin: 'com.vaadin.hilla'
+
+group = 'com.vaadin.hilla.gradle.test'
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:hilla-bom:$hillaVersion"
+        mavenBom "com.vaadin:flow-bom:$flowVersion"
+    }
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+	maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+}
+
+dependencies {
+    implementation 'com.vaadin:vaadin-spring'
+    implementation 'com.vaadin:hilla'
+    implementation "com.vaadin:vaadin-lumo-theme:$vaadinComponentsVersion"
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.parttio:line-awesome:1.1.0'
+    implementation 'com.vaadin:vaadin-dev-server'
+
+	implementation 'org.jetbrains.kotlin:kotlin-reflect'
+	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'com.h2database:h2'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    testImplementation "com.vaadin:flow-test-util:$flowVersion"
+	testImplementation "com.vaadin:vaadin-button-testbench:$vaadinComponentsVersion"
+	testImplementation "com.vaadin:vaadin-text-field-testbench:$vaadinComponentsVersion"
+
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs("src/main/kotlin") // Include the directory for package-info.java
+		}
+		kotlin {
+			srcDirs("src/main/kotlin")
+		}
+	}
+	test {
+		kotlin {
+			srcDirs("src/test/kotlin")
+		}
+	}
+}
+/*
+kotlin {
+	compilerOptions {
+		// freeCompilerArgs.addAll '-Xjsr305=strict'
+		freeCompilerArgs.add("-Xjsr305=strict")
+		freeCompilerArgs.add("-Xemit-jvm-type-annotations")
+	}
+}*/
+
+import java.util.concurrent.Executors
+
+tasks.register('productionBuild', Exec) {
+	description = 'Builds the Spring Boot application for production.'
+	commandLine 'sh', '-c', './gradlew clean -Pvaadin.productionMode build -x test &'
+	doLast {
+		logger.info("Production build started...")
+	}
+}
+
+tasks.register('bootStart') {
+	description = 'Starts the Spring Boot application for integration tests.'
+	dependsOn productionBuild
+	doLast {
+		logger.info("Running the application in production for integration tests...")
+		def executor = Executors.newSingleThreadExecutor()
+		def processBuilder = new ProcessBuilder('java', '-jar', 'build/libs/kotlin-gradle-test.jar')
+		processBuilder.redirectErrorStream(true)
+		def process = processBuilder.start()
+		executor.submit {
+			process.inputStream.eachLine { println it }
+		}
+		// Store the process for later termination:
+		project.ext.applicationProcess = process
+		// Wait enough for the application to start:
+		sleep(10000)
+	}
+}
+
+tasks.register('bootStop') {
+	description = 'Stops the Spring Boot application after integration tests.'
+	doLast {
+		if (project.ext.has('applicationProcess')) {
+			def process = project.ext.applicationProcess
+			if (process && process.isAlive()) {
+				logger.lifecycle("Stopping the application after running the integration test ...")
+				process.destroy()
+				process.waitFor()
+				logger.lifecycle("Application stopped successfully.")
+			} else {
+				logger.lifecycle("Application process is not running.")
+			}
+		} else {
+			logger.lifecycle("No application process found.")
+		}
+	}
+}
+
+tasks.register('integrationTest', Test) {
+	description = 'Runs integration tests.'
+	dependsOn bootStart
+	finalizedBy bootStop
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+}
