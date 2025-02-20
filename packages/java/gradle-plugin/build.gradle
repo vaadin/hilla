@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /***********************************************************************************************************************
  *
  * Plugins
@@ -69,6 +71,7 @@ dependencies {
     implementation('org.jetbrains.kotlin:kotlin-stdlib:1.9.25')
     implementation("com.vaadin:hilla-engine-core:$version")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
+    implementation("com.vaadin:flow-plugin-base:$flowVersion")
     implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
 
     testImplementation("junit:junit:4.13.2")
@@ -187,6 +190,11 @@ publishing {
  * Misc.
  *
  **********************************************************************************************************************/
+wrapper {
+    gradleVersion = '8.7'
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 // This will print ongoing tests, taken from https://stackoverflow.com/a/4292739/377320
 // This will come in handy on the CI during long-running tests to prevent the CI killing
 //     the process due to a false indication of inactivity:
@@ -200,14 +208,9 @@ kotlin {
     explicitApi()
 }
 
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "17"
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
     }
-}
-
-compileFunctionalTestKotlin {
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    explicitApi()
 }
