@@ -150,16 +150,19 @@ public interface CommandRunner {
                 }
             }
 
-            try (var reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-                    var errorReader = new BufferedReader(
-                            new InputStreamReader(process.getErrorStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-                while ((line = errorReader.readLine()) != null) {
-                    System.err.println(line);
+            if (stdOut) {
+                try (var reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream()));
+                        var errorReader = new BufferedReader(
+                                new InputStreamReader(
+                                        process.getErrorStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                    while ((line = errorReader.readLine()) != null) {
+                        System.err.println(line);
+                    }
                 }
             }
 
