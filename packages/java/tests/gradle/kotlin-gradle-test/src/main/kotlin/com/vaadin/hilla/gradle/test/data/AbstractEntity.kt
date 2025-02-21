@@ -19,17 +19,11 @@ abstract class AbstractEntity(
     @SequenceGenerator(name = "idgenerator", initialValue = 1000)
     var id: Long? = null,
 ) {
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
 
     override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-        if (other == null || other !is AbstractEntity) {
-            return false
-        }
+        if (this === other) return true
+        if (other == null || other !is AbstractEntity) return false
         return id == other.id
     }
 }

@@ -49,10 +49,8 @@ public class HillaPlugin : Plugin<Project> {
         if (project.plugins.hasPlugin("org.springframework.boot")) {
             project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
 
-            project.tasks.apply {
-                register("hillaConfigure", EngineConfigureTask::class.java)
-                register("hillaGenerate", EngineGenerateTask::class.java)
-            }
+            project.tasks.register("hillaConfigure", EngineConfigureTask::class.java)
+            project.tasks.register("hillaGenerate", EngineGenerateTask::class.java)
 
             project.tasks.named("vaadinBuildFrontend") {
                 it.dependsOn("hillaConfigure")
@@ -66,12 +64,12 @@ public class HillaPlugin : Plugin<Project> {
                 if (compilerOptions != null) {
                     val freeCompilerArgs = compilerOptions.javaClass.methods.find { it.name == "getFreeCompilerArgs" }
                         ?.invoke(compilerOptions) as? DefaultListProperty<String>
-                    freeCompilerArgs?.addAll(listOf(JSR_305_STRICT, EMIT_JVM_TYPE_ANNOTATIONS)) ?:
-                    project.logger.warn("""
-                        Kotlin JVM plugin is applied and 'compilerOption' was not null, but could not acquire the
-                        'freeCompilerArgs' instance from the 'compilerOption' to configure Kotlin compiler options by
-                         adding '$JSR_305_STRICT' and '$EMIT_JVM_TYPE_ANNOTATIONS'. To make sure annotation based form
-                         validations are enabled, add the above compiler args in the build file explicitly.""".trimIndent())
+                    freeCompilerArgs?.addAll(listOf(JSR_305_STRICT, EMIT_JVM_TYPE_ANNOTATIONS))
+                        ?: project.logger.warn("""
+                            Kotlin JVM plugin is applied and 'compilerOption' was not null, but could not acquire the
+                            'freeCompilerArgs' instance from the 'compilerOption' to configure Kotlin compiler options by
+                             adding '$JSR_305_STRICT' and '$EMIT_JVM_TYPE_ANNOTATIONS'. To make sure annotation based form
+                             validations are enabled, add the above compiler args in the build file explicitly.""".trimIndent())
                 } else {
                     project.logger.warn("""
                         Kotlin JVM plugin is applied, but could not acquire the 'compilerOption' instance from the

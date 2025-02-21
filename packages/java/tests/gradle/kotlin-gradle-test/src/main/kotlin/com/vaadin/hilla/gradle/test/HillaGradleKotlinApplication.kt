@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-@Theme(value = "hilla-gradle-test")
+@Theme("hilla-gradle-test")
 class HillaGradleKotlinApplication : AppShellConfigurator
 
 fun main(args: Array<String>) {

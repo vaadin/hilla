@@ -9,7 +9,7 @@ import org.jspecify.annotations.NonNull
 class HelloService {
 
     fun sayHello(name: @NonNull String): @NonNull String =
-        if (name.isEmpty()) {
+        if (name.isBlank()) {
             "Hello stranger"
         } else {
             "Hello $name"

@@ -15,9 +15,7 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
         getDriver().get(testPath)
     }
 
-    override fun getTestPath(): String {
-        return "$rootURL/person-form"
-    }
+    override fun getTestPath(): String = "$rootURL/person-form"
 
     @Test
     fun using_NotBlank_on_firstNameField_should_makeItRequired() {
@@ -49,11 +47,8 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
         Assert.assertEquals("", emailField.getPropertyString("errorMessage"))
     }
 
-    private fun getTextField(id: String): TextFieldElement {
-        return `$`(TextFieldElement::class.java).id(id)
-    }
+    private fun getTextField(id: String): TextFieldElement = `$`(TextFieldElement::class.java).id(id)
 
-    private fun getButton(id: String): ButtonElement {
-        return `$`(ButtonElement::class.java).id(id)
-    }
+
+    private fun getButton(id: String): ButtonElement = `$`(ButtonElement::class.java).id(id)
 }

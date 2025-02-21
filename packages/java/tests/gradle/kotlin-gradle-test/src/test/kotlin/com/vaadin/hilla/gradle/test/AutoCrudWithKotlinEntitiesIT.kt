@@ -5,26 +5,20 @@ import com.vaadin.flow.testutil.ChromeBrowserTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.openqa.selenium.WebDriver
 
 class AutoCrudWithKotlinEntitiesIT : ChromeBrowserTest() {
 
-    private var grid: GridElement? = null
+    private lateinit var grid: GridElement
 
     @Before
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
         grid = `$`(GridElement::class.java).waitForFirst()
-        waitUntil { _: WebDriver? ->
-            val prop = grid!!.getProperty("_lastVisibleIndex")
-            prop != null
-        }
+        waitUntil { val prop = grid.getProperty("_lastVisibleIndex") != null }
     }
 
-    override fun getTestPath(): String {
-        return "$rootURL/persons"
-    }
+    override fun getTestPath(): String = "$rootURL/persons"
 
     // Validating that a service extending CrudRepositoryService/ListService is working with Gradle
     @Test
@@ -36,13 +30,8 @@ class AutoCrudWithKotlinEntitiesIT : ChromeBrowserTest() {
     }
 
     private fun assertFirstName(row: Int, firstName: String) {
-        Assert.assertEquals(
-            firstName,
-            grid!!.getCell(row, getFirstNameColumn()).text
-        )
+        Assert.assertEquals(firstName, grid.getCell(row, getFirstNameColumn()).text)
     }
 
-    private fun getFirstNameColumn(): Int {
-        return 0
-    }
+    private fun getFirstNameColumn(): Int = 0
 }
