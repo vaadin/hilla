@@ -1,0 +1,12 @@
+rootProject.name = 'kotlin-gradle-test'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+    }
+    dependencies {
+        classpath("com.vaadin:hilla-gradle-plugin:$hillaVersion")
+    }
+}
