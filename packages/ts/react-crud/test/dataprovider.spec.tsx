@@ -264,7 +264,7 @@ describe('@hilla/react-crud', () => {
       await grid.requestPage(0);
       expect(called).to.be.equal(1);
     });
-    it('does not reassign data provider for an inline fetch function', async () => {
+    it('does not reassign data provider for an inline fetch function', () => {
       const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
       const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
       type PropsType = { fetchCallback: GridFetchCallback<unknown> };
