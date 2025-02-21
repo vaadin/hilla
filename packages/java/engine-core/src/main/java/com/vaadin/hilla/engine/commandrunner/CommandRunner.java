@@ -3,8 +3,10 @@ package com.vaadin.hilla.engine.commandrunner;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import org.slf4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -148,6 +150,19 @@ public interface CommandRunner {
                 }
             }
 
+            try (var reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+                    var errorReader = new BufferedReader(
+                            new InputStreamReader(process.getErrorStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+                while ((line = errorReader.readLine()) != null) {
+                    System.err.println(line);
+                }
+            }
+
             exitCode = process.waitFor();
         } catch (IOException | InterruptedException e) {
             // Tries to figure out if the command is not found. This is not a
@@ -196,8 +211,8 @@ public interface CommandRunner {
         builder.environment().putAll(environment());
 
         if (stdOut) {
-            builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                    .redirectError(ProcessBuilder.Redirect.INHERIT);
+            builder.redirectOutput(ProcessBuilder.Redirect.PIPE)
+                    .redirectError(ProcessBuilder.Redirect.PIPE);
         }
 
         return builder;
