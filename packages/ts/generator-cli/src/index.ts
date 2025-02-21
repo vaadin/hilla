@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { isAbsolute, join, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
@@ -62,8 +63,10 @@ Options:
 
   const logger = new LoggerFactory({ verbose });
 
+  const outputDirPath = isAbsolute(outputDir) ? outputDir : join(process.cwd(), outputDir);
+
   const io = new GeneratorIO(
-    new URL(outputDir.endsWith('/') ? outputDir : `${outputDir}/`, pathToFileURL(`${process.cwd()}/`)),
+    pathToFileURL(outputDirPath.endsWith(sep) ? outputDirPath : `${outputDirPath}${sep}`),
     logger,
   );
 
