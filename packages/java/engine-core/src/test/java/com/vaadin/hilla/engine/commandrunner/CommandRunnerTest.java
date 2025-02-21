@@ -106,6 +106,8 @@ public class CommandRunnerTest {
             };
 
             assertThrows(CommandRunnerException.class, () -> runner.run(null));
+            // On Windows, the error message does not necessarily contain the
+            // name of the missing directory
             assertFalse(errContent.toString().isEmpty());
         } finally {
             System.setErr(originalErr);
