@@ -9,7 +9,9 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -52,7 +54,6 @@ public class CommandRunnerTest {
 
     @Test
     void shouldBeAbleToListFilesInProjectDir() {
-        List<Boolean> stdOutRequested = new ArrayList<>();
         var runner = new TestRunner() {
 
             @Override
@@ -62,6 +63,53 @@ public class CommandRunnerTest {
         };
 
         assertDoesNotThrow(() -> runner.run(null));
+    }
+
+    @Test
+    void shouldPrintOutputFromCommand() {
+        var originalOut = System.out;
+        var outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        try {
+            var runner = new TestRunner() {
+                @Override
+                public List<String> executables() {
+                    return List.of(DIR_LS);
+                }
+            };
+
+            assertDoesNotThrow(() -> runner.run(null));
+            assertTrue(outContent.toString().contains("pom.xml"));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    @Test
+    void shouldPrintErrorFromCommand() {
+        var originalErr = System.err;
+        var errContent = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errContent));
+
+        try {
+            var runner = new TestRunner() {
+                @Override
+                public List<String> executables() {
+                    return List.of(DIR_LS);
+                }
+
+                @Override
+                public String[] arguments() {
+                    return new String[] { "thisDirectoryShouldNotExist" };
+                }
+            };
+
+            assertThrows(CommandRunnerException.class, () -> runner.run(null));
+            assertFalse(errContent.toString().isEmpty());
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 
     @Test
