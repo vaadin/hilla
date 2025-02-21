@@ -64,10 +64,19 @@ sourceSets {
 }
 
 import java.util.concurrent.Executors
+import org.gradle.internal.os.OperatingSystem
+
+def isWindows = OperatingSystem.current().isWindows()
 
 tasks.register('productionBuild', Exec) {
 	description = 'Builds the Spring Boot application for production.'
-	commandLine 'sh', '-c', './gradlew clean -Pvaadin.productionMode build -x test &'
+    def command
+    if (isWindows) {
+        command = ['cmd', '/c', 'start', '/B', 'gradlew.bat', 'clean', '-Pvaadin.productionMode', 'build', '-x', 'test']
+    } else {
+        command = ['sh', '-c', './gradlew clean -Pvaadin.productionMode build -x test &']
+    }
+	commandLine command
 	doLast {
 		logger.info("Production build started...")
 	}
@@ -78,11 +87,14 @@ tasks.register('bootStart') {
 	dependsOn productionBuild
 	doLast {
 		logger.info("Running the application in production for integration tests...")
-        def jarPath = new File(projectDir, 'build/libs/kotlin-gradle-test.jar')
-        if (!jarPath.exists()) {
-            throw new GradleException("JAR file not found: ${jarPath.absolutePath}")
+        // Retrieve the jar task
+        def bootJarTask = tasks.named('bootJar').get()
+        // Get the path to the generated JAR file
+        def bootJarFile = bootJarTask.archiveFile.get().asFile
+        if (!bootJarFile.exists()) {
+            throw new GradleException("The bootJar output file not found at: ${bootJarFile.absolutePath}")
         }
-		def processBuilder = new ProcessBuilder('java', '-jar', jarPath.absolutePath)
+		def processBuilder = new ProcessBuilder('java', '-jar', bootJarFile.absolutePath)
 		processBuilder.redirectErrorStream(true)
 		def process = processBuilder.start()
         def executor = Executors.newSingleThreadExecutor()
