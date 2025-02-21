@@ -1,5 +1,4 @@
-import type { GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
-import type { GridDataProvider } from '@vaadin/react-components/Grid';
+import type { GridDataProvider, GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
 import { useMemo, useState } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
@@ -220,7 +219,14 @@ export type UseGridDataProviderResult<TItem> = GridDataProvider<TItem> & {
 export type GridFetchCallback<TItem> = (pageable: Pageable) => Promise<TItem[]>;
 
 export function useGridDataProvider<TItem>(list: GridFetchCallback<TItem>): UseGridDataProviderResult<TItem> {
-  const result = useDataProvider({ list: async (pageable) => list(pageable) });
+  const result = useDataProvider(
+    useMemo(
+      () => ({
+        list: async (pageable: Pageable) => list(pageable),
+      }),
+      [],
+    ),
+  );
   const dataProvider: UseGridDataProviderResult<TItem> = result.dataProvider as UseGridDataProviderResult<TItem>;
   dataProvider.refresh = result.refresh;
   return dataProvider;

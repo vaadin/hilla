@@ -11,6 +11,7 @@ import {
   InfiniteDataProvider,
   useDataProvider,
   useGridDataProvider,
+  type GridFetchCallback,
   type ItemCounts,
 } from '../src/data-provider.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
@@ -262,6 +263,20 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(result.current);
       await grid.requestPage(0);
       expect(called).to.be.equal(1);
+    });
+    it('does not reassign data provider for an inline fetch function', async () => {
+      const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = { fetchCallback: GridFetchCallback<unknown> };
+
+      const hook = renderHook((props: PropsType) => useGridDataProvider(props.fetchCallback), {
+        initialProps: { fetchCallback: method1 },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2 });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).to.be.eq(dataprovider2);
     });
   });
 
