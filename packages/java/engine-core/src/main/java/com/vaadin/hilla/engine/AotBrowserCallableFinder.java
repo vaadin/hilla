@@ -35,9 +35,6 @@ class AotBrowserCallableFinder {
         // Determine the main application class
         var applicationClass = determineApplicationClass(engineConfiguration);
         if (applicationClass == null) {
-            LOGGER.warn("This project has not been recognized as a Spring Boot"
-                    + " application because a main class could not be found."
-                    + " Hilla services will not be available.");
             return List.of();
         }
 
@@ -50,15 +47,38 @@ class AotBrowserCallableFinder {
     }
 
     private static String determineApplicationClass(
-            EngineConfiguration engineConfiguration) throws IOException {
+            EngineConfiguration engineConfiguration) {
         var mainClass = engineConfiguration.getMainClass();
         if (mainClass != null) {
             return mainClass;
         }
-
-        return MainClassFinder.findSingleMainClass(
-                engineConfiguration.getClassesDir().toFile(),
-                SPRING_BOOT_APPLICATION_CLASS_NAME);
+        try {
+            mainClass = engineConfiguration.getClassesDirs().stream()
+                    .map(path -> {
+                        try {
+                            return MainClassFinder.findSingleMainClass(
+                                    path.toFile(),
+                                    SPRING_BOOT_APPLICATION_CLASS_NAME);
+                        } catch (IOException e) {
+                            return null;
+                        }
+                    }).filter(Objects::nonNull).findFirst().orElse(null);
+            if (mainClass == null) {
+                LOGGER.warn(
+                        "This project has not been recognized as a Spring Boot"
+                                + " application because a main class could not be found."
+                                + " Hilla services will not be available.");
+            }
+            return mainClass;
+        } catch (NoClassDefFoundError e) {
+            LOGGER.debug(
+                    "Spring Boot org.springframework.boot.loader.tools.MainClassFinder class not found. "
+                            + "Can happen when a Maven project is configured to use com.vaadin:flow-maven-plugin instead of com.vaadin:vaadin-maven-plugin, "
+                            + "for example projects using Vaadin Multiplatform Runtime. "
+                            + "If Hilla is not a project requirement exclude it from the dependency tree, "
+                            + "otherwise consider replacing com.vaadin:flow-maven-plugin with com.vaadin:hilla-maven-plugin.");
+            return null;
+        }
     }
 
     private static Path generateAotArtifacts(

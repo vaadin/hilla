@@ -17,7 +17,7 @@ export function loadRegisterJs({ root }: LoadRegisterOptions): Plugin {
     enforce: 'pre',
     name: 'vite-hilla-register',
     async transform(code) {
-      if (code.includes('__REGISTER__()') && !code.includes('function __REGISTER__')) {
+      if (/__REGISTER__\(.*\)/u.test(code) && !code.includes('function __REGISTER__')) {
         const registerCode = await readFile(new URL('scripts/register.js', root), 'utf8').then((c) =>
           c.replace('export', ''),
         );
@@ -58,7 +58,7 @@ export function constructCss(): Plugin {
     },
     async transform(_, id) {
       if (id.endsWith('.obj.css')) {
-        const { content } = await cssTransformer.process(css.get(id));
+        const { content } = await cssTransformer.process(css.get(id), { from: id });
 
         return {
           code: `const css = new CSSStyleSheet();css.replaceSync(${JSON.stringify(content)});export default css;`,

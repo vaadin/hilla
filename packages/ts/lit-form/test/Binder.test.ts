@@ -1,9 +1,9 @@
 /* eslint-disable sort-keys */
-import { assert, expect, use } from 'chai';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, assert, beforeEach, chai, describe, expect, it } from 'vitest';
 // API to test
 import { Binder, type BinderConfiguration, m } from '../src/index.js';
 import {
@@ -16,7 +16,7 @@ import {
   TestModel,
 } from './TestModels.js';
 
-use(sinonChai);
+chai.use(sinonChai);
 
 @customElement('lit-order-view')
 class LitOrderView extends LitElement {}

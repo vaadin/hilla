@@ -1,12 +1,12 @@
-// eslint-disable-next-line
-/// <reference types="karma-viewport" />
-import { render, screen, waitForElementToBeRemoved, within } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, within, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
-import { expect, use } from 'chai';
+import { page } from '@vitest/browser/context';
+import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import { type AutoCrudProps, AutoCrud } from '../src/autocrud.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import { CrudController } from './CrudController.js';
@@ -21,21 +21,22 @@ import {
   UserDataModel,
 } from './test-models-and-services.js';
 
-use(sinonChai);
-use(chaiDom);
+chai.use(sinonChai);
+chai.use(chaiDom);
+chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('Auto crud', () => {
     let user: ReturnType<(typeof userEvent)['setup']>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Desktop resolution
-      viewport.set(1024, 768);
       user = userEvent.setup();
+      await page.viewport(1024, 768);
     });
 
-    after(() => {
-      viewport.reset();
+    afterEach(() => {
+      cleanup();
     });
 
     function TestAutoCrud(props: Partial<AutoCrudProps<PersonModel>> = {}) {
@@ -103,6 +104,15 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.typeInField('Last name', '2');
       await form.submit();
       expect(grid.getBodyCellContent(1, 1)).to.have.text('2');
+    });
+
+    it('can hide new button', async () => {
+      const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButton={true} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      rerender(<AutoCrud service={personService()} model={PersonModel} newButton={false} />);
+      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
     });
 
     it('can add a new item', async () => {
@@ -294,9 +304,9 @@ describe('@vaadin/hilla-react-crud', () => {
       let saveSpy: sinon.SinonSpy;
       let service: ReturnType<typeof personService>;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         // iPhone 13 Pro resolution
-        viewport.set(390, 844);
+        await page.viewport(390, 844);
 
         service = personService();
         saveSpy = sinon.spy(service, 'save');
@@ -576,10 +586,7 @@ describe('@vaadin/hilla-react-crud', () => {
       });
 
       it('shows aria-control with default id', async () => {
-        const { grid, form } = await CrudController.init(
-          render(<TestAutoCrud formProps={{ id: 'custom-form-id' }} />),
-          user,
-        );
+        const { grid } = await CrudController.init(render(<TestAutoCrud formProps={{ id: 'custom-form-id' }} />), user);
         await grid.toggleRowSelected(0);
         expect(grid.instance.getAttribute('aria-controls')).to.equal(`custom-form-id`);
       });

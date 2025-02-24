@@ -1,4 +1,4 @@
-/* eslint-disable accessor-pairs,sort-keys */
+/* eslint-disable accessor-pairs,no-void,sort-keys */
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
@@ -58,8 +58,12 @@ interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
   strategy: FieldStrategy<T>;
 }
 
+type EventHandler = (event: Event) => void;
+
 export type FieldStrategy<T = any> = Field<T> &
   FieldConstraintValidation & {
+    onChange?: EventHandler;
+    onInput?: EventHandler;
     removeEventListeners(): void;
   };
 
@@ -79,6 +83,8 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
    * Fallback for missing .validity property API in Vaadin components.
    */
   #validityFallback: ValidityState = defaultValidity;
+
+  readonly #eventHandlers = new Map<string, EventHandler>();
 
   constructor(element: E, model?: AbstractModel<T>) {
     this.#element = element;
@@ -115,6 +121,22 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
     return this.#element.validity ?? this.#validityFallback;
   }
 
+  get onChange(): EventHandler | undefined {
+    return this.#eventHandlers.get('change');
+  }
+
+  set onChange(onChange: EventHandler | undefined) {
+    this.#setEventHandler('change', onChange);
+  }
+
+  get onInput(): EventHandler | undefined {
+    return this.#getEventHandler('input');
+  }
+
+  set onInput(onInput: EventHandler | undefined) {
+    this.#setEventHandler('input', onInput);
+  }
+
   checkValidity(): boolean {
     if (!this.#element.checkValidity) {
       return true;
@@ -137,7 +159,29 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
     }
   }
 
-  removeEventListeners(): void {}
+  removeEventListeners(): void {
+    for (const [type, handler] of this.#eventHandlers) {
+      this.element.removeEventListener(type, handler);
+      this.#eventHandlers.delete(type);
+    }
+  }
+
+  #getEventHandler(type: string): EventHandler | undefined {
+    return this.#eventHandlers.get(type);
+  }
+
+  #setEventHandler(type: string, handler?: EventHandler) {
+    if (this.#eventHandlers.has(type)) {
+      this.element.removeEventListener(type, this.#eventHandlers.get(type)!);
+    }
+
+    if (handler) {
+      this.element.addEventListener(type, handler);
+      this.#eventHandlers.set(type, handler);
+    } else {
+      this.#eventHandlers.delete(type);
+    }
+  }
 
   #detectValidityError(): Readonly<Partial<ValidityState>> {
     if (!('inputElement' in this.#element)) {
@@ -166,10 +210,12 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
 > {
   #invalid = false;
   readonly #boundOnValidated = this.#onValidated.bind(this);
+  readonly #boundOnUnparsableChange = this.#onUnparsableChange.bind(this);
 
   constructor(element: E, model?: AbstractModel<T>) {
     super(element, model);
     element.addEventListener('validated', this.#boundOnValidated);
+    element.addEventListener('unparsable-change', this.#boundOnUnparsableChange);
   }
 
   set required(value: boolean) {
@@ -187,6 +233,7 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
 
   override removeEventListeners(): void {
     this.element.removeEventListener('validated', this.#boundOnValidated);
+    this.element.removeEventListener('unparsable-change', this.#boundOnUnparsableChange);
   }
 
   #onValidated(e: Event): void {
@@ -196,10 +243,20 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
 
     // Override built-in changes of the `invalid` flag in Vaadin components
     // to keep the `invalid` property state of the web component in sync.
-    const invalid = !(e.detail satisfies Partial<ValidityState> as Partial<ValidityState>).valid;
+    const invalid = !((e.detail ?? {}) as Partial<ValidityState>).valid;
     if (this.#invalid !== invalid) {
       this.element.invalid = this.#invalid;
     }
+
+    // Some user interactions in Vaadin components do not dispatch `input`
+    // event, such as validation upon closing the overlay, pressing Enter key.
+    // One notable example is <vaadin-date-picker>. Use `validated` event in
+    // addition to standard input events to handle those.
+    this.onInput?.call(this.element, e);
+  }
+
+  #onUnparsableChange(e: Event) {
+    this.onChange?.call(this.element, e);
   }
 
   override checkValidity(): boolean {
@@ -450,7 +507,7 @@ export const field = directive(
 
         this.fieldState = fieldState;
 
-        const updateValueFromElement = () => {
+        const inputHandler = () => {
           fieldState.strategy.checkValidity();
           // When bad input is detected, skip reading new value in binder state
           if (!fieldState.strategy.validity.badInput) {
@@ -464,21 +521,27 @@ export const field = directive(
           }
         };
 
-        element.addEventListener('input', updateValueFromElement);
+        fieldState.strategy.onInput = inputHandler;
+        fieldState.strategy.onChange = () => {
+          inputHandler();
+          void binderNode.validate();
+        };
 
-        const changeBlurHandler = () => {
-          updateValueFromElement();
+        const blurHandler = () => {
+          inputHandler();
+          void binderNode.validate();
           binderNode.visited = true;
         };
 
-        element.addEventListener('blur', changeBlurHandler);
-        element.addEventListener('change', changeBlurHandler);
+        element.addEventListener('blur', blurHandler);
       }
 
       const { fieldState } = this;
 
       if (fieldState.element !== element || fieldState.model !== model) {
+        const { onInput } = fieldState.strategy;
         fieldState.strategy = binderNode.binder.getFieldStrategy(element, model);
+        fieldState.strategy.onInput = onInput;
       }
 
       const { name } = binderNode;

@@ -1,0 +1,7 @@
+{
+  "extends": ["../../../.eslintrc.json"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "ignorePatterns": ["src/types/**", "test/grid-test-utils.js"]
+}

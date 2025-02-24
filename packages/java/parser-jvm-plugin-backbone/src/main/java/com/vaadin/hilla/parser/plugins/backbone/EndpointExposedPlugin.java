@@ -91,22 +91,17 @@ public final class EndpointExposedPlugin
      */
     private Node<?, ?> createEndpointHierarchyClassNode(
             ClassInfoModel classInfo) {
+        // annotations are compared by name as Gradle can proxy them
         var endpointExposedAnnotations = getStorage().getParserConfig()
-                .getEndpointExposedAnnotations();
+                .getEndpointExposedAnnotations().stream().map(Class::getName)
+                .toList();
         var exposed = classInfo.getAnnotations().stream()
                 .map(annInfo -> ((Annotation) annInfo.get()).annotationType())
-                .anyMatch(endpointExposedAnnotations::contains)
-                || alwaysExpose(classInfo);
+                .map(Class::getName)
+                .anyMatch(endpointExposedAnnotations::contains);
         var classInfoNode = exposed ? EndpointExposedNode.of(classInfo)
                 : EndpointNonExposedNode.of(classInfo);
         return classInfoNode;
-    }
-
-    private boolean alwaysExpose(ClassInfoModel classInfo) {
-        return classInfo
-                .is("com.vaadin.flow.spring.data.jpa.CrudRepositoryService")
-                || classInfo.is(
-                        "com.vaadin.flow.spring.data.jpa.ListRepositoryService");
     }
 
     /**

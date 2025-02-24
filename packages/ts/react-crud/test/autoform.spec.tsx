@@ -1,7 +1,4 @@
-// eslint-disable-next-line
-/// <reference types="karma-viewport" />
-
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointError } from '@vaadin/hilla-frontend';
 import { ValidationError } from '@vaadin/hilla-lit-form';
@@ -10,14 +7,15 @@ import type { SelectElement } from '@vaadin/react-components/Select.js';
 import { TextArea, type TextAreaElement } from '@vaadin/react-components/TextArea.js';
 import { TextField, type TextFieldElement } from '@vaadin/react-components/TextField.js';
 import { VerticalLayout } from '@vaadin/react-components/VerticalLayout.js';
-import { expect, use } from 'chai';
+import { page } from '@vitest/browser/context';
 import chaiAsPromised from 'chai-as-promised';
+import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
-import { nextFrame } from './autogrid.spec';
 import ConfirmDialogController from './ConfirmDialogController';
 import FormController from './FormController.js';
 import {
@@ -32,9 +30,16 @@ import {
   PersonWithSimpleIdPropertyModel,
   PersonWithoutIdPropertyModel,
 } from './test-models-and-services.js';
+import { nextFrame } from './test-utils.js';
 
-use(sinonChai);
-use(chaiAsPromised);
+chai.use(sinonChai);
+chai.use(chaiAsPromised);
+chai.use(chaiDom);
+
+type ScreenSize = Readonly<{
+  width: number;
+  height: number;
+}>;
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('Auto form', () => {
@@ -105,15 +110,16 @@ describe('@vaadin/hilla-react-crud', () => {
       return expect(formElement).to.have.attribute('colspan', expectedColSpan);
     }
 
+    // eslint-disable-next-line @typescript-eslint/max-params
     async function populatePersonForm(
       personId: number,
       formProps?: Omit<AutoFormProps<PersonModel>, 'item' | 'model' | 'service'>,
-      screenSize?: string,
+      screenSize?: ScreenSize,
       disabled?: boolean,
       service: CrudService<Person> & HasTestInfo = personService(),
     ): Promise<FormController> {
       if (screenSize) {
-        viewport.set(screenSize);
+        await page.viewport(screenSize.width, screenSize.height);
       }
       const person = await getItem(service, personId);
       const result = render(
@@ -127,7 +133,7 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     afterEach(() => {
-      viewport.reset();
+      cleanup();
     });
 
     it('renders fields for the properties in the form', async () => {
@@ -240,7 +246,7 @@ describe('@vaadin/hilla-react-crud', () => {
       await form.submit();
 
       expect(saveSpy).to.have.been.calledOnce;
-      const newItem = saveSpy.getCall(0).args[0];
+      const [newItem] = saveSpy.getCall(0).args;
       expect(newItem.firstName).to.equal('Joe');
       expect(newItem.lastName).to.equal('Quinby');
       expect(newItem.someInteger).to.equal(12);
@@ -356,6 +362,17 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     it('rethrows unknown errors without calling error handler', async () => {
+      const errorPromise = new Promise((resolve) => {
+        addEventListener(
+          'unhandledrejection',
+          (e) => {
+            e.preventDefault();
+            resolve(e.reason);
+          },
+          { once: true },
+        );
+      });
+
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
       // eslint-disable-next-line @typescript-eslint/require-await
       service.save = async (_item: Person): Promise<Person | undefined> => {
@@ -367,13 +384,10 @@ describe('@vaadin/hilla-react-crud', () => {
       const result = render(<AutoForm service={service} model={PersonModel} item={person} onSubmitError={errorSpy} />);
       const form = await FormController.init(user, result.container);
       await form.typeInField('First name', 'J'); // to enable the submit button
-
-      try {
-        await form.submit();
-      } catch (error) {
-        expect(error).to.be.an.instanceOf(Error);
-        expect((error as Error).message).to.equal('foobar');
-      }
+      await form.submit();
+      const error = await errorPromise;
+      expect(error).to.be.an.instanceOf(Error);
+      expect((error as Error).message).to.equal('foobar');
       expect(errorSpy).to.have.not.been.called;
     });
 
@@ -454,7 +468,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     it('shows a predefined error message when the service returns no entity after saving', async () => {
       const service: CrudService<Person> & HasTestInfo = createService<Person>(personData);
-      service.save = async (item: Person): Promise<Person | undefined> => Promise.resolve(undefined);
+      service.save = async (): Promise<Person | undefined> => Promise.resolve(undefined);
       const person = await getItem(service, 1);
       const errorSpy = sinon.spy();
       const submitSpy = sinon.spy();
@@ -511,6 +525,7 @@ describe('@vaadin/hilla-react-crud', () => {
           model={PersonModel}
           item={person}
           onSubmitSuccess={submitSpy}
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           onSubmitError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
         />,
       );
@@ -691,7 +706,8 @@ describe('@vaadin/hilla-react-crud', () => {
           { minWidth: '20em', columns: 1 },
           { minWidth: '40em', columns: 2 },
         ]);
-        expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version fields
+        expect(form.renderResult.getElementsByTagName('vaadin-number-field')).to.have.length(1); // no Id and Version
+        // fields
         await expectFieldColSpan(form, 'First name', null);
         await expectFieldColSpan(form, 'Last name', null);
         await expectFieldColSpan(form, 'Email', null);
@@ -704,7 +720,7 @@ describe('@vaadin/hilla-react-crud', () => {
           return <VerticalLayout>{children}</VerticalLayout>;
         }
 
-        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, 'screen-1440-900');
+        const form = await populatePersonForm(1, { layoutRenderer: MyLayoutRenderer }, { width: 1440, height: 900 });
         expect(form.formLayout).to.not.exist;
         const layout = await waitFor(() => form.renderResult.querySelector('vaadin-vertical-layout')!);
         expect(layout).to.exist;
@@ -999,6 +1015,7 @@ describe('@vaadin/hilla-react-crud', () => {
           item={person}
           deleteButtonVisible={true}
           onDeleteSuccess={deleteSpy}
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           onDeleteError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}
         />,
       );
@@ -1015,7 +1032,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateField', () => {
       it('formats and parses values using localized date format', async () => {
-        viewport.set(1000, 1000);
+        await page.viewport(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(
@@ -1036,7 +1053,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     describe('AutoFormDateTimeField', () => {
       it('formats and parses values using localized date format', async () => {
-        viewport.set(1000, 1000);
+        await page.viewport(1000, 1000);
         const service = personService();
         const person = await getItem(service, 1);
         const result = render(

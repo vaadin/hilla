@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions, no-shadow, @typescript-eslint/unbound-method */
-import { assert, expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import { LitElement, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -7,6 +6,7 @@ import { html, unsafeStatic } from 'lit/static-html.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import isLength from 'validator/es/lib/isLength.js';
+import { afterEach, assert, beforeEach, chai, describe, expect, it } from 'vitest';
 import type { BinderNode } from '../src/BinderNode.js';
 // API to test
 import {
@@ -14,6 +14,7 @@ import {
   type AbstractModel,
   Binder,
   CheckedFieldStrategy,
+  CheckedGroupFieldStrategy,
   ComboBoxFieldStrategy,
   field,
   type FieldElement,
@@ -24,12 +25,11 @@ import {
   SelectedFieldStrategy,
   VaadinDateTimeFieldStrategy,
   VaadinFieldStrategy,
-  CheckedGroupFieldStrategy,
 } from '../src/index.js';
 import { OrderModel, TestModel } from './TestModels.js';
 
-use(sinonChai);
-use(chaiDom);
+chai.use(sinonChai);
+chai.use(chaiDom);
 
 describe('@vaadin/hilla-lit-form', () => {
   describe('Field', () => {
@@ -39,31 +39,31 @@ describe('@vaadin/hilla-lit-form', () => {
         // pretend it’s a Vaadin component to use VaadinFieldStrategy
         static readonly version = '0.0.0';
 
-        __value = '';
+        #value = '';
 
         valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
-        __required = false;
+        #required = false;
 
         requiredSpy = sinon.spy(this, 'required', ['get', 'set']);
 
         setAttributeSpy = sinon.spy(this, 'setAttribute');
 
         get value() {
-          return this.__value;
+          return this.#value;
         }
 
         set value(value) {
           // Native inputs stringify incoming values
-          this.__value = String(value);
+          this.#value = String(value);
         }
 
         get required() {
-          return this.__required;
+          return this.#required;
         }
 
         set required(value) {
-          this.__required = value;
+          this.#required = value;
         }
       }
 
@@ -76,16 +76,16 @@ describe('@vaadin/hilla-lit-form', () => {
         binder = new Binder(this, OrderModel);
 
         @query('#notesField')
-        notesField?: MockTextFieldElement;
+        accessor notesField: MockTextFieldElement | null = null;
 
         @query('#customerFullNameField')
-        customerFullNameField?: MockTextFieldElement;
+        accessor customerFullNameField: MockTextFieldElement | null = null;
 
         @query('#customerNickNameField')
-        customerNickNameField?: MockTextFieldElement;
+        accessor customerNickNameField: MockTextFieldElement | null = null;
 
         @query('#priorityField')
-        priorityField?: MockTextFieldElement;
+        accessor priorityField: MockTextFieldElement | null = null;
 
         override render() {
           return html`
@@ -230,11 +230,11 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(orderViewWithTextField.requestUpdateSpy).to.be.calledOnce;
       });
 
-      it('should update binder value on blur event', async () => {
+      it('should update binder value on validated event', async () => {
         orderViewWithTextField.requestUpdateSpy.resetHistory();
         orderViewWithTextField.notesField!.value = 'foo';
         orderViewWithTextField.notesField!.dispatchEvent(
-          new CustomEvent('blur', { bubbles: true, cancelable: false, composed: true }),
+          new CustomEvent('validated', { bubbles: true, cancelable: false, composed: true, detail: { valid: true } }),
         );
         await orderViewWithTextField.updateComplete;
 
@@ -262,7 +262,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
         beforeEach(() => {
           view = orderViewWithTextField;
-          // eslint-disable-next-line prefer-destructuring
+          // eslint-disable-next-line @typescript-eslint/prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
@@ -329,19 +329,19 @@ describe('@vaadin/hilla-lit-form', () => {
     describe('field with input', () => {
       @customElement('mock-input')
       class MockInputElement extends HTMLElement {
-        __value = '';
+        #value = '';
 
         valueSpy = sinon.spy(this, 'value', ['get', 'set']);
 
         setAttributeSpy = sinon.spy(this, 'setAttribute');
 
         get value() {
-          return this.__value;
+          return this.#value;
         }
 
         set value(value) {
           // Native inputs stringify incoming values
-          this.__value = String(value);
+          this.#value = String(value);
         }
       }
 
@@ -352,16 +352,16 @@ describe('@vaadin/hilla-lit-form', () => {
         binder = new Binder(this, OrderModel);
 
         @query('#notesField')
-        notesField?: MockInputElement;
+        accessor notesField: MockInputElement | null = null;
 
         @query('#customerFullNameField')
-        customerFullNameField?: MockInputElement;
+        accessor customerFullNameField: MockInputElement | null = null;
 
         @query('#customerNickNameField')
-        customerNickNameField?: MockInputElement;
+        accessor customerNickNameField: MockInputElement | null = null;
 
         @query('#priorityField')
-        priorityField?: MockInputElement;
+        accessor priorityField: MockInputElement | null = null;
 
         override render() {
           return html`
@@ -414,7 +414,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
         beforeEach(() => {
           view = orderViewWithInput;
-          // eslint-disable-next-line prefer-destructuring
+          // eslint-disable-next-line @typescript-eslint/prefer-destructuring
           binder = view.binder;
           priorityField = view.priorityField!;
         });
@@ -498,8 +498,10 @@ describe('@vaadin/hilla-lit-form', () => {
       }
 
       @customElement('validity-vaadin-element-tag')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       class ValidityVaadinElement extends AnyVaadinElement {
         invalid = false;
+
         checkValidity() {
           return !this.invalid;
         }
@@ -614,7 +616,7 @@ describe('@vaadin/hilla-lit-form', () => {
         function renderTag(model: AbstractModel) {
           render(
             html`
-                <${tagName} ${field(model)}></${tagName}>`,
+              <${tagName} ${field(model)}></${tagName}>`,
             div,
           );
           currentStrategy = getFieldStrategySpy.lastCall.returnValue;
@@ -648,7 +650,7 @@ describe('@vaadin/hilla-lit-form', () => {
         const renderElement = () => {
           render(
             html`
-                <validity-vaadin-element-tag ${field(stringModel)}"></validity-vaadin-element-tag>`,
+              <validity-vaadin-element-tag ${field(stringModel)}"></validity-vaadin-element-tag>`,
             div,
           );
           return div.firstElementChild as HTMLInputElement & {
@@ -758,7 +760,7 @@ describe('@vaadin/hilla-lit-form', () => {
           const renderElement = () => {
             render(
               html`
-                  <${tagName} ${field(model)}></${tagName}>`,
+                <${tagName} ${field(model)}></${tagName}>`,
               div,
             );
             return div.firstElementChild as Element & { checked?: boolean };
@@ -837,9 +839,6 @@ describe('@vaadin/hilla-lit-form', () => {
 
           binderNode.value = value;
           await resetBinderNodeValidation(binderNode);
-
-          binderNode.validators = [];
-          await binderNode.validate();
 
           binderNode.validators = [{ message: 'any-err-msg', validate: () => false }, new Required()];
 
@@ -1011,6 +1010,67 @@ describe('@vaadin/hilla-lit-form', () => {
           element.dispatchEvent(new CustomEvent('change', { bubbles: true, cancelable: false, composed: true }));
           expect(currentStrategy.value).to.eql([]);
           expect(binderNode.value).to.eql([]);
+        });
+      });
+
+      describe('Event listeners cleanup', () => {
+        function renderElement(elementName: string) {
+          const tag = unsafeStatic(elementName);
+          render(html` <${tag} />`, div);
+          return div.firstElementChild as HTMLElement;
+        }
+
+        it('should remove event standard listeners for <input>', () => {
+          const inputHandler = () => {};
+          const changeHandler = () => {};
+          const element: HTMLElement = renderElement('input');
+          const addEventListenerSpy = sinon.spy(element, 'addEventListener');
+          const removeEventListenerSpy = sinon.spy(element, 'removeEventListener');
+
+          const strategy = binder.getFieldStrategy(element, binder.model.fieldString);
+          strategy.onInput = inputHandler;
+          strategy.onChange = changeHandler;
+
+          expect(addEventListenerSpy).to.be.calledWith('input', inputHandler);
+          expect(addEventListenerSpy).to.be.calledWith('change', changeHandler);
+
+          strategy.onInput = undefined;
+          strategy.onChange = undefined;
+
+          expect(removeEventListenerSpy).to.be.calledWith('input', inputHandler);
+          expect(removeEventListenerSpy).to.be.calledWith('change', changeHandler);
+        });
+
+        it('should remove event standard listeners for <input> on removeEventListeners()', () => {
+          const inputHandler = () => {};
+          const changeHandler = () => {};
+          const element: HTMLElement = renderElement('input');
+          const removeEventListenerSpy = sinon.spy(element, 'removeEventListener');
+
+          const strategy = binder.getFieldStrategy(element, binder.model.fieldString);
+          strategy.onInput = inputHandler;
+          strategy.onChange = changeHandler;
+
+          strategy.removeEventListeners();
+
+          expect(removeEventListenerSpy).to.be.calledWith('input', inputHandler);
+          expect(removeEventListenerSpy).to.be.calledWith('change', changeHandler);
+        });
+
+        it('should remove custom event listeners for <vaadin-text-field> on removeEventListeners()', () => {
+          const element: HTMLElement = renderElement('mock-text-field');
+          const addEventListenerSpy = sinon.spy(element, 'addEventListener');
+          const removeEventListenerSpy = sinon.spy(element, 'removeEventListener');
+
+          const strategy = binder.getFieldStrategy(element, binder.model.fieldString);
+
+          expect(addEventListenerSpy).to.be.calledWith('validated');
+          expect(addEventListenerSpy).to.be.calledWith('unparsable-change');
+
+          strategy.removeEventListeners();
+
+          expect(removeEventListenerSpy).to.be.calledWith('validated');
+          expect(removeEventListenerSpy).to.be.calledWith('unparsable-change');
         });
       });
 

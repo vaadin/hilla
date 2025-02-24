@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-expressions, no-shadow */
 import { EndpointValidationError, ValidationErrorData } from '@vaadin/hilla-frontend';
-import { assert, expect, use } from 'chai';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, assert, beforeEach, chai, describe, expect, it } from 'vitest';
 // API to test
 import {
   Binder,
@@ -19,7 +19,6 @@ import {
   type Validator,
   type ValueError,
 } from '../src/index.js';
-import { Future } from '../Validators';
 import {
   type Customer,
   IdEntityModel,
@@ -30,8 +29,8 @@ import {
   TestModel,
 } from './TestModels.js';
 
-use(sinonChai);
-use(chaiDom);
+chai.use(sinonChai);
+chai.use(chaiDom);
 
 class NumberOutput extends HTMLElement {
   inputElement = document.createElement('input');
@@ -49,7 +48,15 @@ class NumberOutput extends HTMLElement {
     return !Number.isNaN(numericValue) && numericValue.toString() === this.inputElement.value;
   }
 }
+
 customElements.define('number-output', NumberOutput);
+
+class MockDatePickerElement extends HTMLElement {
+  // pretend it’s a Vaadin component to use VaadinFieldStrategy
+  static readonly version = '0.0.0';
+}
+
+customElements.define('mock-date-picker', MockDatePickerElement);
 
 @customElement('order-view')
 class OrderView extends LitElement {
@@ -62,34 +69,34 @@ class OrderView extends LitElement {
   binder = new Binder(this, OrderModel);
 
   @query('#submitting')
-  submitting!: HTMLInputElement;
+  accessor submitting: HTMLInputElement | null = null;
 
   @query('#notes')
-  notes!: HTMLInputElement;
+  accessor notes: HTMLInputElement | null = null;
 
   @query('#fullName')
-  fullName!: HTMLInputElement;
+  accessor fullName: HTMLInputElement | null = null;
 
   @query('#nickName')
-  nickName!: HTMLInputElement;
+  accessor nickName: HTMLInputElement | null = null;
 
   @query('#add')
-  add!: Element;
+  accessor add: Element | null = null;
 
   @query('#description0')
-  description!: HTMLInputElement;
+  accessor description: HTMLInputElement | null = null;
 
   @query('#price0')
-  price!: HTMLInputElement;
+  accessor price: HTMLInputElement | null = null;
 
   @query('#priceError0')
-  priceError!: HTMLOutputElement;
+  accessor priceError: HTMLOutputElement | null = null;
 
   @query('#total')
-  total!: NumberOutput;
+  accessor total: NumberOutput | null = null;
 
   @query('#dateStart')
-  dateStart!: HTMLInputElement;
+  accessor dateStart: HTMLInputElement | null = null;
 
   override render() {
     const {
@@ -101,17 +108,17 @@ class OrderView extends LitElement {
     } = this.binder.model;
 
     return html`
-      <input id="notes" ...="${field(notes)}" />
-      <input id="fullName" ...="${field(fullName)}" />
-      <input id="nickName" ...="${field(nickName)}" />
-      <vaadin-date-picker id="dateStart" ...="${field(dateStart)}" />
+      <input id="notes" ${field(notes)} />
+      <input id="fullName" ${field(fullName)} />
+      <input id="nickName" ${field(nickName)} />
+      <mock-date-picker id="dateStart" ${field(dateStart)} />
       <button id="add" @click=${() => this.binder.for(products).appendItem()}>+</button>
       ${repeat(
         products,
         ({ model: { description, price } }, index) =>
-          html`<div>
-            <input id="description${index}" ...="${field(description)}" />
-            <input id="price${index}" ...="${field(price)}" />
+          html` <div>
+            <input id="description${index}" ${field(description)} />
+            <input id="price${index}" ${field(price)} />
             <output id="priceError${index}">
               ${this.binder
                 .for(price)
@@ -120,7 +127,10 @@ class OrderView extends LitElement {
             </output>
           </div>`,
       )}
-      <h4>Total: <number-output id="total" ${field(total)}></number-output></h4>
+      <h4>
+        Total:
+        <number-output id="total" ${field(total)}></number-output>
+      </h4>
       <div id="submitting">${this.binder.submitting}</div>
     `;
   }
@@ -137,9 +147,9 @@ const sleep = async (t: number) =>
     setTimeout(() => resolve(), t);
   });
 
-const fireEvent = async (elm: Element, name: string) => {
-  elm.dispatchEvent(new CustomEvent(name));
-  return sleep(0);
+const fireEvent = async (elm: Element | null, name: string) => {
+  elm?.dispatchEvent(new CustomEvent(name));
+  return sleep(10);
 };
 
 describe('@vaadin/hilla-lit-form', () => {
@@ -217,7 +227,7 @@ describe('@vaadin/hilla-lit-form', () => {
     describe('clearing', () => {
       (['reset', 'clear'] as const).forEach((methodName) => {
         it(`should reset validation on ${methodName}`, async () => {
-          const errors = await binder.validate();
+          await binder.validate();
           expect(binder.invalid).to.be.true;
           expect(binder.for(binder.model.customer.fullName).invalid).to.be.true;
 
@@ -557,7 +567,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
       beforeEach(async () => {
         orderView = new OrderView();
-        // eslint-disable-next-line prefer-destructuring
+        // eslint-disable-next-line @typescript-eslint/prefer-destructuring
         binder = orderView.binder;
         document.body.append(orderView);
         await orderView.updateComplete;
@@ -596,14 +606,24 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(orderView.notes).to.not.have.attribute('invalid');
       });
 
-      it(`should validate field on input after first visit`, async () => {
-        orderView.notes.value = 'foo';
+      it(`should not validate field on input after first visit`, async () => {
+        orderView.notes!.value = 'foo';
         await fireEvent(orderView.notes, 'blur');
         expect(orderView.notes).to.not.have.attribute('invalid');
 
-        orderView.notes.value = '';
+        orderView.notes!.value = '';
         await fireEvent(orderView.notes, 'input');
+        expect(orderView.notes).to.not.have.attribute('invalid');
+      });
+
+      it(`should revalidate field on input after invalid change`, async () => {
+        orderView.notes!.value = '';
+        await fireEvent(orderView.notes, 'change');
         expect(orderView.notes).to.have.attribute('invalid');
+
+        orderView.notes!.value = 'foo';
+        await fireEvent(orderView.notes, 'input');
+        expect(orderView.notes).to.not.have.attribute('invalid');
       });
 
       it(`should validate fields on submit`, async () => {
@@ -615,7 +635,7 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
 
@@ -650,7 +670,7 @@ describe('@vaadin/hilla-lit-form', () => {
 
         expect(orderView.description).to.have.attribute('invalid');
         expect(orderView.price).to.have.attribute('invalid');
-        expect(String(orderView.priceError.textContent).trim()).to.equal('must be a number');
+        expect(String(orderView.priceError?.textContent).trim()).to.equal('must be a number');
       });
 
       it(`should validate fields of arrays on submit`, async () => {
@@ -665,7 +685,7 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
 
@@ -677,18 +697,18 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(orderView.description).to.be.null;
         await fireEvent(orderView.add, 'click');
 
-        orderView.notes.value = 'foo';
+        orderView.notes!.value = 'foo';
         await fireEvent(orderView.notes, 'change');
-        orderView.fullName.value = 'manuel';
+        orderView.fullName!.value = 'manuel';
         await fireEvent(orderView.fullName, 'change');
-        orderView.description.value = 'bread';
+        orderView.description!.value = 'bread';
         await fireEvent(orderView.description, 'change');
 
         try {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
       });
@@ -697,15 +717,15 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(orderView.description).to.be.null;
         await fireEvent(orderView.add, 'click');
 
-        orderView.notes.value = 'foo';
+        orderView.notes!.value = 'foo';
         await fireEvent(orderView.notes, 'change');
-        orderView.fullName.value = 'manuel';
+        orderView.fullName!.value = 'manuel';
         await fireEvent(orderView.fullName, 'change');
-        orderView.description.value = 'bread';
+        orderView.description!.value = 'bread';
         await fireEvent(orderView.description, 'change');
-        orderView.price.value = '10';
+        orderView.price!.value = '10';
         await fireEvent(orderView.price, 'change');
-        orderView.total.value = '10';
+        orderView.total!.value = '10';
         await fireEvent(orderView.total, 'change');
 
         // eslint-disable-next-line @typescript-eslint/require-await
@@ -729,12 +749,38 @@ describe('@vaadin/hilla-lit-form', () => {
             ]);
           });
           expect.fail();
-        } catch (error) {
+        } catch {
           sinon.assert.calledOnce(requestUpdateSpy);
           await orderView.updateComplete;
           expect(binder.for(binder.model.notes).invalid).to.be.true;
           expect(binder.for(binder.model.notes).ownErrors[0].message).to.equal('Invalid notes');
           expect(binder.for(binder.model.notes).ownErrors[0].validatorMessage).to.equal('Invalid notes');
+        }
+      });
+
+      it('should display server validation error for product description', async () => {
+        binder.for(binder.model.customer.fullName).value = 'foobar';
+        binder.for(binder.model.notes).value = 'whatever';
+        await fireEvent(orderView.add, 'click');
+        const productModel = [...binder.model.products][0].model;
+        binder.for(productModel.description).value = 'foobar';
+        binder.for(productModel.price).value = 10;
+        const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
+        try {
+          await binder.submitTo(() => {
+            requestUpdateSpy.resetHistory();
+            throw new EndpointValidationError('Validation error in endpoint "MyEndpoint" method "saveMyBean"', [
+              new ValidationErrorData('Invalid description', 'products[0].description', 'Invalid description'),
+            ]);
+          });
+          expect.fail();
+        } catch {
+          sinon.assert.calledOnce(requestUpdateSpy);
+          await orderView.updateComplete;
+          const binderInArray = binder.for([...binder.model.products][0].model.description);
+          expect(binderInArray.invalid).to.be.true;
+          expect(binderInArray.ownErrors[0].message).to.equal('Invalid description');
+          expect(binderInArray.ownErrors[0].validatorMessage).to.equal('Invalid description');
         }
       });
 
@@ -749,7 +795,7 @@ describe('@vaadin/hilla-lit-form', () => {
           sinon.assert.called(requestUpdateSpy);
           expect(binder.submitting).to.be.true;
           await orderView.updateComplete;
-          expect(orderView.submitting.textContent).to.equal('true');
+          expect(orderView.submitting?.textContent).to.equal('true');
           requestUpdateSpy.resetHistory();
         });
         await binder.submitTo(endpoint);
@@ -758,7 +804,7 @@ describe('@vaadin/hilla-lit-form', () => {
         sinon.assert.called(requestUpdateSpy);
         expect(binder.submitting).to.be.false;
         await orderView.updateComplete;
-        expect(orderView.submitting.textContent).to.equal('false');
+        expect(orderView.submitting?.textContent).to.equal('false');
       });
 
       // https://github.com/vaadin/flow/issues/8688
@@ -767,12 +813,12 @@ describe('@vaadin/hilla-lit-form', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           await orderView.binder.submitTo(async (item) => item);
           expect.fail();
-        } catch (error) {
+        } catch {
           // do nothing
         }
         const errorsOnSubmit = binder.errors.length;
 
-        orderView.notes.value = 'foo';
+        orderView.notes!.value = 'foo';
         await fireEvent(orderView.notes, 'change');
         const numberOfValidatorsOnNotesField = binder.for(binder.model.notes).validators.length;
 
@@ -784,10 +830,10 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should display error for NaN in number field', async () => {
         await fireEvent(orderView.add, 'click');
 
-        orderView.price.value = 'not a number';
+        orderView.price!.value = 'not a number';
         await fireEvent(orderView.price, 'change');
 
-        expect(String(orderView.priceError.textContent)).to.contain('must be a number');
+        expect(String(orderView.priceError?.textContent)).to.contain('must be a number');
       });
 
       it('should fail validation when element.checkValidity() is false', async () => {
@@ -805,14 +851,14 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(errors).to.have.length(0);
 
         // Simulate good user input
-        orderView.total.value = '2';
+        orderView.total!.value = '2';
         await fireEvent(orderView.total, 'change');
 
         errors = await binder.validate();
         expect(errors).to.have.length(0);
 
         // Simulate built-in validation error
-        orderView.total.value = 'not a number';
+        orderView.total!.value = 'not a number';
         await fireEvent(orderView.total, 'change');
 
         errors = await binder.validate();
@@ -820,8 +866,8 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(errors[0]).to.have.property('property', 'total');
 
         // Simulate bad user input
-        orderView.total.value = '';
-        orderView.total.inputElement.value = 'not a number';
+        orderView.total!.value = '';
+        orderView.total!.inputElement.value = 'not a number';
         await fireEvent(orderView.total, 'change');
 
         errors = await binder.validate();
@@ -829,14 +875,14 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(errors[0]).to.have.property('property', 'total');
 
         // Correction
-        orderView.total.value = '2';
+        orderView.total!.value = '2';
         await fireEvent(orderView.total, 'change');
 
         errors = await binder.validate();
         expect(errors).to.have.length(0);
 
         // Simulate bad user date input
-        orderView.dateStart.value = 'not a date';
+        orderView.dateStart!.value = 'not a date';
         await fireEvent(orderView.dateStart, 'change');
 
         errors = await binder.validate();
@@ -844,11 +890,30 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(errors[0]).to.have.property('property', 'dateStart');
 
         // Correction
-        orderView.dateStart.value = '02-12-2099';
+        orderView.dateStart!.value = '02-12-2099';
         await fireEvent(orderView.dateStart, 'change');
 
         errors = await binder.validate();
         expect(errors).to.have.length(0);
+      });
+
+      it('should track unparsable-change event and fail validation', async () => {
+        const value = binder.defaultValue;
+        value.customer.fullName = 'Jane Doe';
+        value.notes = '42';
+        value.total = 1;
+        value.priority = 0;
+        value.dateStart = '02-11-2099';
+        binder.value = value;
+        await orderView.updateComplete;
+
+        // Simulate bad user date input with unparsable-change event
+        orderView.dateStart!.value = 'not a date';
+        await fireEvent(orderView.dateStart, 'unparsable-change');
+
+        const errors = await binder.validate();
+        expect(errors).to.have.length(1);
+        expect(errors[0]).to.have.property('property', 'dateStart');
       });
     });
 

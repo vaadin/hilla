@@ -27,6 +27,8 @@ permissions:
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
+env:
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
@@ -163,6 +165,7 @@ jobs:
 
     steps:
       - name: Install Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
         uses: actions/checkout@v4
@@ -183,6 +186,7 @@ jobs:
         run: npm run test:coverage
         env:
           CI: true
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
       - name: Collect Coverage
         run: |
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
@@ -296,7 +300,7 @@ jobs:
       - name: Test gradle-plugin's functional tests
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
-        run: ./packages/java/tests/gradle/single-module-tests/gradlew --info -p packages/java/tests/gradle/single-module-tests test
+        run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:

@@ -160,7 +160,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    */
   get defaultValue(): Value<M> | undefined {
     const key = this.model[_key];
-    const parentDefaultValue = this.parent!.defaultValue as { readonly [key in typeof key]?: Value<M> };
+    const parentDefaultValue = this.parent!.defaultValue as Readonly<Partial<Record<typeof key, Value<M>>>>;
 
     if (this.#isArrayItem() && !(key in parentDefaultValue)) {
       if (defaultArrayItemCache.has(this.parent)) {
@@ -262,13 +262,17 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
     const key = this.model[_key];
 
     // The value of parent in unknown, so we need to cast it.
-    type ParentValue = { readonly [K in typeof key]: Value<M> };
+    type ParentValue = Readonly<Record<typeof key, Value<M>>>;
     return (this.parent.value as ParentValue)[key];
   }
 
   set value(value: Value<M> | undefined) {
     this.initializeValue(true);
-    this.#setValueState(value, undefined);
+    const oldValue = this.value;
+    if (value !== oldValue) {
+      this.#setValueState(value, undefined);
+      this[_updateValidation]().catch(() => {});
+    }
   }
 
   /**
@@ -281,7 +285,6 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   set visited(v: boolean) {
     if (this.#visited !== v) {
       this.#visited = v;
-      this[_updateValidation]().catch(() => {});
       this.dispatchEvent(CHANGED);
     }
   }
@@ -406,12 +409,8 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   }
 
   protected async [_updateValidation](): Promise<void> {
-    if (this.#visited) {
+    if (this.invalid) {
       await this.validate();
-    } else if (this.dirty || this.invalid) {
-      await Promise.all(
-        [...this.#getChildBinderNodes()].map(async (childBinderNode) => childBinderNode[_updateValidation]()),
-      );
     }
   }
 
@@ -496,11 +495,11 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
     const key = this.model[_key];
     let value: Value<M> | undefined = this.parent
-      ? (this.parent.value as { [key in typeof key]: Value<M> })[this.model[_key]]
+      ? (this.parent.value as Record<typeof key, Value<M>>)[this.model[_key]]
       : undefined;
 
     const defaultValue: Value<M> | undefined = this.parent
-      ? (this.parent.defaultValue as { readonly [key in typeof key]: Value<M> })[this.model[_key]]
+      ? (this.parent.defaultValue as Readonly<Record<typeof key, Value<M>>>)[this.model[_key]]
       : undefined;
 
     if (value === undefined) {
@@ -510,7 +509,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
         this.#setValueState(value, defaultValue === undefined ? value : defaultValue);
       } else if (
         this.parent.model instanceof ObjectModel &&
-        !(key in ((this.parent.value || {}) as { [key in typeof key]?: Value<M> }))
+        !(key in ((this.parent.value || {}) as Partial<Record<typeof key, Value<M>>>))
       ) {
         this.#setValueState(undefined, defaultValue === undefined ? value : defaultValue);
       }

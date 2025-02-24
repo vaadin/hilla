@@ -6,10 +6,6 @@ import org.junit.Test;
 
 public class ReadOnlyGridCustomFilterIT extends AbstractGridTest {
 
-    protected String getTestPath() {
-        return getRootURL() + "/readonly-grid-custom-filter";
-    }
-
     @Test
     public void findsMatches() {
         setFilterFullName("car");
