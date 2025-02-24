@@ -14,7 +14,6 @@ import {
   useComboBoxDataProvider,
   useDataProvider,
   useGridDataProvider,
-  type GridFetchCallback,
   type ComboBoxFetchMethod,
   type GridFetchMethod,
   type ItemCounts,
