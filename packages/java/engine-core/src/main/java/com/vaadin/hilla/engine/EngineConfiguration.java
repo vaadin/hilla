@@ -35,7 +35,7 @@ public class EngineConfiguration {
     private String mainClass;
     private Path buildDir;
     private Path baseDir;
-    private Path classesDir;
+    private List<Path> classesDirs;
     private GeneratorConfiguration generator;
     private Path outputDir;
     private ParserConfiguration parser;
@@ -82,8 +82,9 @@ public class EngineConfiguration {
         return baseDir;
     }
 
-    public Path getClassesDir() {
-        return classesDir == null ? buildDir.resolve("classes") : classesDir;
+    public List<Path> getClassesDirs() {
+        return classesDirs == null ? List.of(buildDir.resolve("classes"))
+                : classesDirs;
     }
 
     public GeneratorConfiguration getGenerator() {
@@ -156,7 +157,7 @@ public class EngineConfiguration {
         public Builder(EngineConfiguration configuration) {
             this.configuration.baseDir = configuration.baseDir;
             this.configuration.buildDir = configuration.buildDir;
-            this.configuration.classesDir = configuration.classesDir;
+            this.configuration.classesDirs = configuration.classesDirs;
             this.configuration.classpath = configuration.classpath;
             this.configuration.generator = configuration.generator;
             this.configuration.parser = configuration.parser;
@@ -187,8 +188,9 @@ public class EngineConfiguration {
             return this;
         }
 
-        public Builder classesDir(Path value) {
-            configuration.classesDir = resolve(value);
+        public Builder classesDirs(List<Path> values) {
+            configuration.classesDirs = values.stream().map(this::resolve)
+                    .toList();
             return this;
         }
 

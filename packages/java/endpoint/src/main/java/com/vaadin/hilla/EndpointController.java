@@ -15,15 +15,21 @@
  */
 package com.vaadin.hilla;
 
+import com.vaadin.hilla.signals.handler.SignalsHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -33,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
@@ -70,6 +77,8 @@ public class EndpointController {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EndpointController.class);
 
+    public static final String BODY_PART_NAME = "hilla_body_part";
+
     static final String ENDPOINT_METHODS = "/{endpoint}/{method}";
 
     /**
@@ -77,7 +86,8 @@ public class EndpointController {
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
-    private static final String SIGNALS_HANDLER_BEAN_NAME = "signalsHandler";
+    private static final Set<Class<?>> INTERNAL_BROWSER_CALLABLES = Set
+            .of(SignalsHandler.class);
 
     private final ApplicationContext context;
 
@@ -86,6 +96,8 @@ public class EndpointController {
     private final CsrfChecker csrfChecker;
 
     private final EndpointInvoker endpointInvoker;
+
+    private final ObjectMapper objectMapper;
 
     VaadinService vaadinService;
 
@@ -101,13 +113,16 @@ public class EndpointController {
      * @param csrfChecker
      *            the csrf checker to use
      */
+
     public EndpointController(ApplicationContext context,
             EndpointRegistry endpointRegistry, EndpointInvoker endpointInvoker,
-            CsrfChecker csrfChecker) {
+            CsrfChecker csrfChecker,
+            @Qualifier("hillaEndpointObjectMapper") ObjectMapper objectMapper) {
         this.context = context;
         this.endpointInvoker = endpointInvoker;
         this.csrfChecker = csrfChecker;
         this.endpointRegistry = endpointRegistry;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -123,7 +138,12 @@ public class EndpointController {
         endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
         endpointBeans
                 .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
+        if (!endpointBeans.isEmpty()) {
+            HillaStats.reportHasEndpoint();
+        }
 
+        INTERNAL_BROWSER_CALLABLES.stream().map(context::getBeansOfType)
+                .forEach(endpointBeans::putAll);
         var currentEndpointNames = endpointBeans.values().stream()
                 .map(endpointRegistry::registerEndpoint)
                 .collect(Collectors.toSet());
@@ -131,16 +151,11 @@ public class EndpointController {
         endpointRegistry.getEndpoints().keySet()
                 .retainAll(currentEndpointNames);
 
-        endpointBeans.keySet().stream()
-                .filter(name -> !name.equals(SIGNALS_HANDLER_BEAN_NAME))
-                .findAny().ifPresent(name -> HillaStats.reportHasEndpoint());
-
         // Temporary Hack
         VaadinService vaadinService = VaadinService.getCurrent();
         if (vaadinService != null) {
             this.vaadinService = vaadinService;
         }
-
     }
 
     /**
@@ -169,13 +184,42 @@ public class EndpointController {
      *            the current response
      * @return execution result as a JSON string or an error message string
      */
-    @PostMapping(path = ENDPOINT_METHODS, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> serveEndpoint(
             @PathVariable("endpoint") String endpointName,
             @PathVariable("method") String methodName,
             @RequestBody(required = false) ObjectNode body,
             HttpServletRequest request, HttpServletResponse response) {
         return doServeEndpoint(endpointName, methodName, body, request,
+                response);
+    }
+
+    /**
+     * Captures and processes the Vaadin multipart endpoint requests. They are
+     * used when there are uploaded files.
+     * <p>
+     * This method works as
+     * {@link #serveEndpoint(String, String, ObjectNode, HttpServletRequest, HttpServletResponse)},
+     * but it also captures the files uploaded in the request.
+     *
+     * @param endpointName
+     *            the name of an endpoint to address the calls to, not case
+     *            sensitive
+     * @param methodName
+     *            the method name to execute on an endpoint, not case sensitive
+     * @param request
+     *            the current multipart request which triggers the endpoint call
+     * @param response
+     *            the current response
+     * @return execution result as a JSON string or an error message string
+     */
+    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> serveMultipartEndpoint(
+            @PathVariable("endpoint") String endpointName,
+            @PathVariable("method") String methodName,
+            HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        return doServeEndpoint(endpointName, methodName, null, request,
                 response);
     }
 
@@ -227,6 +271,45 @@ public class EndpointController {
             if (enforcementResult.isEnforcementNeeded()) {
                 return buildEnforcementResponseEntity(enforcementResult);
             }
+
+            if (isMultipartRequest(request)) {
+                var multipartRequest = (MultipartHttpServletRequest) request;
+
+                // retrieve the body from a part having the correct name
+                var bodyPart = multipartRequest.getParameter(BODY_PART_NAME);
+                if (bodyPart == null) {
+                    return ResponseEntity.badRequest()
+                            .body(endpointInvoker.createResponseErrorObject(
+                                    "Missing body part in multipart request"));
+                }
+
+                try {
+                    body = objectMapper.readValue(bodyPart, ObjectNode.class);
+                } catch (IOException e) {
+                    LOGGER.error("Request body does not contain valid JSON", e);
+                    return ResponseEntity
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(endpointInvoker.createResponseErrorObject(
+                                    "Request body does not contain valid JSON"));
+                }
+
+                // parse uploaded files and add them to the body
+                var fileMap = multipartRequest.getFileMap();
+                for (var entry : fileMap.entrySet()) {
+                    var partName = entry.getKey();
+                    var file = entry.getValue();
+
+                    // parse the part name as JSON pointer, e.g.
+                    // "/orders/1/invoice"
+                    var pointer = JsonPointer.valueOf(partName);
+                    // split the path in parent and property name
+                    var parent = pointer.head();
+                    var property = pointer.last().getMatchingProperty();
+                    var parentObject = body.withObject(parent);
+                    parentObject.putPOJO(property, file);
+                }
+            }
+
             Object returnValue = endpointInvoker.invoke(endpointName,
                     methodName, body, request.getUserPrincipal(),
                     request::isUserInRole);
@@ -271,6 +354,12 @@ public class EndpointController {
                 CurrentInstance.set(VaadinRequest.class, null);
             }
         }
+    }
+
+    private boolean isMultipartRequest(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        return contentType != null
+                && contentType.startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
     }
 
     private ResponseEntity<String> buildEnforcementResponseEntity(

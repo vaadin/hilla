@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-
-import { render } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import { ActionOnLostSubscription, ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
-import { expect, use } from 'chai';
+import chaiLike from 'chai-like';
 import { nanoid } from 'nanoid';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import type {
   IncrementStateEvent,
   ReplaceStateEvent,
@@ -17,7 +17,8 @@ import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange } from './utils.js';
 
-use(sinonChai);
+chai.use(sinonChai);
+chai.use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
   describe('DependencyTrackingSignal', () => {
@@ -39,6 +40,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     afterEach(() => {
+      cleanup();
       sinon.resetHistory();
     });
 

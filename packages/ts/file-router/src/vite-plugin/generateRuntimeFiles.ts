@@ -64,6 +64,7 @@ async function generateRuntimeFile(url: URL, data: string, forceWrite?: boolean)
  * @param logger - The Vite logger instance.
  * @param debug - true to debug
  */
+// eslint-disable-next-line @typescript-eslint/max-params
 export async function generateRuntimeFiles(
   viewsDir: URL,
   urls: RuntimeFileUrls,

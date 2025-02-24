@@ -6,10 +6,6 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 
 public class ReadOnlyGridSinglePropertyFilterIT extends AbstractGridTest {
 
-    protected String getTestPath() {
-        return getRootURL() + "/readonly-grid-single-property-filter";
-    }
-
     @Test
     public void findsMatches() {
         setFilter("Ali");

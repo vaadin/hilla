@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { type RenderResult, waitFor } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 import type { GridElement } from '@vaadin/react-components/Grid.js';

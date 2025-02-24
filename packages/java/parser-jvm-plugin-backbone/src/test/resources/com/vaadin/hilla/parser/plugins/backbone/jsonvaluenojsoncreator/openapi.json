@@ -1,0 +1,148 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hilla Application",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/connect",
+      "description": "Hilla Backend"
+    }
+  ],
+  "tags": [
+    {
+      "name": "JsonValueNoJsonCreatorEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonValueNoJsonCreatorEndpoint"
+    },
+    {
+      "name": "JsonCreatorNoJsonValueEndpoint",
+      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint"
+    }
+  ],
+  "paths": {
+    "/JsonValueNoJsonCreatorEndpoint/getEmail": {
+      "post": {
+        "tags": [
+          "JsonValueNoJsonCreatorEndpoint"
+        ],
+        "operationId": "JsonValueNoJsonCreatorEndpoint_getEmail_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/JsonValueNoJsonCreatorEndpoint/setEmail": {
+      "post": {
+        "tags": [
+          "JsonValueNoJsonCreatorEndpoint"
+        ],
+        "operationId": "JsonValueNoJsonCreatorEndpoint_setEmail_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/JsonCreatorNoJsonValueEndpoint/getUser": {
+      "post": {
+        "tags": [
+          "JsonCreatorNoJsonValueEndpoint"
+        ],
+        "operationId": "JsonCreatorNoJsonValueEndpoint_getUser_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint$User"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/JsonCreatorNoJsonValueEndpoint/setUser": {
+      "post": {
+        "tags": [
+          "JsonCreatorNoJsonValueEndpoint"
+        ],
+        "operationId": "JsonCreatorNoJsonValueEndpoint_setUser_POST",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint$User"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator.JsonCreatorNoJsonValueEndpoint$User": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
@@ -92,5 +93,20 @@ public class CrudRepositoryServiceJpaTest {
         Assert.assertEquals(List.of("John", "Jeff", "Michael", "Lady"),
                 testCrudRepositoryService.list(Pageable.unpaged(), null)
                         .stream().map(o -> o.getName()).toList());
+    }
+
+    @Test
+    public void listWithMaxPagination() {
+        // too late to autowire, so set manually
+        var springDataWebProperties = new SpringDataWebProperties();
+        springDataWebProperties.getPageable().setMaxPageSize(2);
+        testCrudRepositoryService.springDataWebProperties = springDataWebProperties;
+
+        var result = testCrudRepositoryService.list(Pageable.ofSize(5), null);
+        Assert.assertEquals(2, result.size());
+
+        // in the unlikely event that an `unpaged` is received
+        result = testCrudRepositoryService.list(Pageable.unpaged(), null);
+        Assert.assertEquals(2, result.size());
     }
 }

@@ -1,25 +1,31 @@
-import { renderHook } from '@testing-library/react';
+import { cleanup, renderHook } from '@testing-library/react';
+import type { ComboBoxDataProvider } from '@vaadin/react-components';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
-import { expect, use } from 'chai';
+import type { DependencyList } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import type { CountService, ListService } from '../crud.js';
+import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
+import type { CountService, ListService } from '../src/crud.js';
 import {
   createDataProvider,
   DataProvider,
   FixedSizeDataProvider,
   InfiniteDataProvider,
+  useComboBoxDataProvider,
   useDataProvider,
+  useGridDataProvider,
+  type ComboBoxFetchMethod,
+  type GridFetchMethod,
   type ItemCounts,
 } from '../src/data-provider.js';
+import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
-import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
-import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable.js';
 
-use(sinonChai);
+chai.use(sinonChai);
 
 class MockGrid {
   pageSize = 10;
@@ -41,24 +47,46 @@ class MockGrid {
 
   async requestPage(page: number, sortOrders: GridSorterDefinition[] = []): Promise<void> {
     return new Promise((resolve) => {
-      this.dataProvider({ page, pageSize: this.pageSize, sortOrders, filters: [] }, (_, size) => {
+      this.dataProvider({ page, pageSize: this.pageSize, sortOrders, filters: [] }, () => {
         resolve();
       });
     });
   }
 }
+class MockComboBox {
+  pageSize = 10;
+  loadSpy = sinon.spy();
 
+  readonly dataProvider: ComboBoxDataProvider<any>;
+
+  constructor(dataProvider: ComboBoxDataProvider<any>) {
+    this.dataProvider = (params, callback) => {
+      dataProvider(params, (items, size) => {
+        this.loadSpy(items, size);
+        callback(items, size);
+      });
+    };
+  }
+
+  async requestPage(page: number, filter: string): Promise<void> {
+    return new Promise((resolve) => {
+      this.dataProvider({ page, pageSize: this.pageSize, filter }, () => {
+        resolve();
+      });
+    });
+  }
+}
 const data = Array.from({ length: 25 }, (_, i) => i);
 
 const listService: ListService<number> = {
-  async list(request: Pageable, filter: FilterUnion | undefined): Promise<number[]> {
+  async list(request: Pageable): Promise<number[]> {
     const offset = request.pageNumber * request.pageSize;
     return Promise.resolve(data.slice(offset, offset + request.pageSize));
   },
 };
 
 const listAndCountService: CountService<number> & ListService<number> = {
-  async list(request: Pageable, filter: FilterUnion | undefined): Promise<number[]> {
+  async list(request: Pageable): Promise<number[]> {
     const offset = request.pageNumber * request.pageSize;
     return Promise.resolve(data.slice(offset, offset + request.pageSize));
   },
@@ -91,6 +119,7 @@ function createTestFilter(): FilterUnion {
   return andFilter;
 }
 
+// eslint-disable-next-line @typescript-eslint/max-params
 async function testPageLoad(
   grid: MockGrid,
   listSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>,
@@ -107,7 +136,7 @@ async function testPageLoad(
   expect(grid.loadSpy).to.have.been.calledWith(expectedItems, expectedSize);
 
   expect(listSpy).to.have.been.calledOnce;
-  const pageable = listSpy.lastCall.args[0];
+  const [pageable] = listSpy.lastCall.args;
   expect(pageable.pageNumber).to.equal(pageNumber);
   expect(pageable.pageSize).to.equal(grid.pageSize);
 }
@@ -116,7 +145,7 @@ async function testPageLoadForUseDataProvider(
   grid: MockGrid,
   serviceSpy: sinon.SinonSpy<[request: Pageable, filter: FilterUnion | undefined], Promise<number[]>>,
   pageNumber: number,
-  filter?: FilterUnion | undefined,
+  filter?: FilterUnion,
 ) {
   serviceSpy.resetHistory();
 
@@ -124,7 +153,7 @@ async function testPageLoadForUseDataProvider(
 
   expect(serviceSpy).to.have.been.calledOnce;
   expect(serviceSpy.lastCall.args[1]).to.equal(filter);
-  const pageable = serviceSpy.lastCall.args[0];
+  const [pageable] = serviceSpy.lastCall.args;
   expect(pageable.pageNumber).to.equal(pageNumber);
   expect(pageable.pageSize).to.equal(grid.pageSize);
 }
@@ -162,6 +191,7 @@ describe('@hilla/react-crud', () => {
     });
 
     afterEach(() => {
+      cleanup();
       listSpy.restore();
       countServiceListSpy.restore();
       countServiceCountSpy.restore();
@@ -203,13 +233,13 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(result.current.dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
@@ -234,6 +264,160 @@ describe('@hilla/react-crud', () => {
       const { result } = renderHook(() => useDataProvider(listService));
 
       await testDataProviderReset(result.current.dataProvider, result.current.refresh);
+    });
+  });
+
+  describe('useGridDataProvider', () => {
+    type TestProduct = {
+      id: number;
+      name: string;
+    };
+    let called = 0;
+    async function TestProductService(_pageable: Pageable): Promise<TestProduct[]> {
+      called += 1;
+      return await Promise.resolve([
+        { id: 1, name: 'Product 1' },
+        { id: 2, name: 'Product 2' },
+      ]);
+    }
+    beforeEach(() => {
+      called = 0;
+    });
+    it('loads pages', async () => {
+      const { result } = renderHook(() => useGridDataProvider(TestProductService));
+
+      const grid = new MockGrid(result.current);
+      await grid.requestPage(0);
+      expect(called).to.be.equal(1);
+    });
+    it('does not reassign data provider for an inline fetch function', () => {
+      const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = { fetchCallback: GridFetchMethod<unknown> };
+
+      const hook = renderHook((props: PropsType) => useGridDataProvider(props.fetchCallback), {
+        initialProps: { fetchCallback: method1 },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2 });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).to.be.eq(dataprovider2);
+    });
+    it('reassigns data provider if dependencies change', () => {
+      const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = {
+        dependencies: DependencyList | undefined;
+        fetchCallback: GridFetchMethod<unknown>;
+      };
+
+      const hook = renderHook((props: PropsType) => useGridDataProvider(props.fetchCallback, props.dependencies), {
+        initialProps: { fetchCallback: method1, dependencies: ['first'] },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2, dependencies: ['second'] });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).not.to.be.eq(dataprovider2);
+    });
+  });
+
+  describe('useComboBoxDataProvider', () => {
+    type TestProduct = {
+      id: number;
+      name: string;
+    };
+    const allData = [
+      { id: 1, name: 'Product 1' },
+      { id: 2, name: 'Product 2' },
+    ];
+    async function TestProductService(_pageable: Pageable, filterString: string): Promise<TestProduct[]> {
+      return await Promise.resolve(allData.filter((product) => product.name.includes(filterString)));
+    }
+    it('loads pages', async () => {
+      const { result } = renderHook(() => useComboBoxDataProvider(TestProductService));
+
+      const combobox = new MockComboBox(result.current);
+      await combobox.requestPage(0, '');
+      expect(
+        combobox.loadSpy.calledOnceWith(
+          [
+            {
+              id: 1,
+              name: 'Product 1',
+            },
+            {
+              id: 2,
+              name: 'Product 2',
+            },
+          ],
+          2,
+        ),
+      ).to.be.true;
+
+      await combobox.requestPage(0, '1');
+      expect(combobox.loadSpy.calledTwice).to.be.true;
+      expect(combobox.loadSpy.lastCall.args).to.eql([
+        [
+          {
+            id: 1,
+            name: 'Product 1',
+          },
+        ],
+        1,
+      ]);
+    });
+    it('refreshes when refresh is called', () => {
+      const hook = renderHook(() => useComboBoxDataProvider(TestProductService));
+      const result1 = hook.result.current;
+      hook.rerender();
+      const result2 = hook.result.current;
+      result2.refresh();
+      hook.rerender();
+      const result3 = hook.result.current;
+
+      // Re-render without a reset should return the same instance, but after a refresh we should get a new instance
+      expect(result1).to.equal(result2);
+      expect(result2).not.to.equal(result3);
+    });
+    it('does not reassign data provider for an inline fetch function', () => {
+      const method1 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = { fetchCallback: ComboBoxFetchMethod<unknown> };
+
+      const hook = renderHook((props: PropsType) => useComboBoxDataProvider(props.fetchCallback), {
+        initialProps: { fetchCallback: method1 },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2 });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).to.be.eq(dataprovider2);
+    });
+    it('reassigns data provider if dependencies change', () => {
+      const method1 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = {
+        dependencies: DependencyList | undefined;
+        fetchCallback: ComboBoxFetchMethod<unknown>;
+      };
+
+      const hook = renderHook(
+        (props: PropsType) => useComboBoxDataProvider(props.fetchCallback, {}, props.dependencies),
+        {
+          initialProps: { fetchCallback: method1, dependencies: ['first'] },
+        },
+      );
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2, dependencies: ['second'] });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).not.to.be.eq(dataprovider2);
     });
   });
 
@@ -312,13 +496,13 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
@@ -332,7 +516,7 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0);
-      const passedFilter = listSpy.lastCall.args[1];
+      const [, passedFilter] = listSpy.lastCall.args;
       expect(passedFilter).to.equal(filter);
     });
 
@@ -375,7 +559,7 @@ describe('@hilla/react-crud', () => {
 
     it('does not work with a ListService', () => {
       expect(() => {
-        const dataProvider = new FixedSizeDataProvider(listService);
+        const _dataProvider = new FixedSizeDataProvider(listService);
       }).to.throw('The provided service does not implement the CountService interface.');
     });
 
@@ -446,13 +630,13 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0, [{ path: 'foo', direction: 'asc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'foo', direction: 'ASC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
 
       await grid.requestPage(0, [{ path: 'bar', direction: 'desc' }]);
-      pageable = listSpy.lastCall.args[0];
+      [pageable] = listSpy.lastCall.args;
       expect(pageable.sort).to.eql({
         orders: [{ property: 'bar', direction: 'DESC', ignoreCase: false, nullHandling: NullHandling.NATIVE }],
       });
@@ -466,7 +650,7 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(dataProvider);
 
       await grid.requestPage(0);
-      const passedFilter = listSpy.lastCall.args[1];
+      const [, passedFilter] = listSpy.lastCall.args;
       expect(passedFilter).to.equal(filter);
       expect(countSpy).to.have.been.calledOnceWithExactly(filter);
     });

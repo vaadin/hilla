@@ -1,7 +1,7 @@
 import { open } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
+import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientProcessor from './ClientProcessor.js';
 
 export default class ClientPlugin extends Plugin {
@@ -19,7 +19,7 @@ export default class ClientPlugin extends Plugin {
 
     try {
       return !!(dir && (await open(`${dir}/${ClientPlugin.CUSTOM_CLIENT_FILE_NAME}.ts`, 'r')));
-    } catch (e) {
+    } catch {
       return false;
     }
   }
