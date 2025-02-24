@@ -7,13 +7,13 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
-    "@vaadin/icon": "24.7.0-alpha9",
-    "@vaadin/icons": "24.7.0-alpha9",
-    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha9",
+    "@vaadin/icon": "24.7.0-alpha10",
+    "@vaadin/icons": "24.7.0-alpha10",
+    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha10",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "24.7.0-alpha9",
-    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha9",
-    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha9",
+    "@vaadin/tooltip": "24.7.0-alpha10",
+    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha10",
+    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha10",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.2.1"
   },
@@ -53,13 +53,13 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.7.0-alpha14",
       "@vaadin/hilla-lit-form": "24.7.0-alpha14",
-      "@vaadin/icon": "24.7.0-alpha9",
-      "@vaadin/icons": "24.7.0-alpha9",
-      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha9",
+      "@vaadin/icon": "24.7.0-alpha10",
+      "@vaadin/icons": "24.7.0-alpha10",
+      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha10",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "24.7.0-alpha9",
-      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha9",
-      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha9",
+      "@vaadin/tooltip": "24.7.0-alpha10",
+      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha10",
+      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha10",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1"
     },
@@ -93,7 +93,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "8c30d6d0fb2f78fd9ef87ba5efa4c4bca63fff30e988beedf03c8ebb7807d460"
+    "hash": "45088bfbbf6896e1d5ccf57dbf8039cbe05ee04264bc8686f5de85b43bc59357"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
