@@ -1,4 +1,5 @@
 import { cleanup, renderHook } from '@testing-library/react';
+import type { ComboBoxDataProvider } from '@vaadin/react-components';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -9,8 +10,10 @@ import {
   DataProvider,
   FixedSizeDataProvider,
   InfiniteDataProvider,
+  useComboBoxDataProvider,
   useDataProvider,
   useGridDataProvider,
+  type GridFetchCallback,
   type ItemCounts,
 } from '../src/data-provider.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
@@ -48,7 +51,29 @@ class MockGrid {
     });
   }
 }
+class MockComboBox {
+  pageSize = 10;
+  loadSpy = sinon.spy();
 
+  readonly dataProvider: ComboBoxDataProvider<any>;
+
+  constructor(dataProvider: ComboBoxDataProvider<any>) {
+    this.dataProvider = (params, callback) => {
+      dataProvider(params, (items, size) => {
+        this.loadSpy(items, size);
+        callback(items, size);
+      });
+    };
+  }
+
+  async requestPage(page: number, filter: string): Promise<void> {
+    return new Promise((resolve) => {
+      this.dataProvider({ page, pageSize: this.pageSize, filter }, () => {
+        resolve();
+      });
+    });
+  }
+}
 const data = Array.from({ length: 25 }, (_, i) => i);
 
 const listService: ListService<number> = {
@@ -262,6 +287,80 @@ describe('@hilla/react-crud', () => {
       const grid = new MockGrid(result.current);
       await grid.requestPage(0);
       expect(called).to.be.equal(1);
+    });
+    it('does not reassign data provider for an inline fetch function', () => {
+      const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = { fetchCallback: GridFetchCallback<unknown> };
+
+      const hook = renderHook((props: PropsType) => useGridDataProvider(props.fetchCallback), {
+        initialProps: { fetchCallback: method1 },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2 });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).to.be.eq(dataprovider2);
+    });
+  });
+
+  describe('useComboBoxDataProvider', () => {
+    type TestProduct = {
+      id: number;
+      name: string;
+    };
+    const allData = [
+      { id: 1, name: 'Product 1' },
+      { id: 2, name: 'Product 2' },
+    ];
+    async function TestProductService(_pageable: Pageable, filterString: string): Promise<TestProduct[]> {
+      return await Promise.resolve(allData.filter((product) => product.name.includes(filterString)));
+    }
+    it('loads pages', async () => {
+      const { result } = renderHook(() => useComboBoxDataProvider(TestProductService));
+
+      const combobox = new MockComboBox(result.current);
+      await combobox.requestPage(0, '');
+      expect(
+        combobox.loadSpy.calledOnceWith(
+          [
+            {
+              id: 1,
+              name: 'Product 1',
+            },
+            {
+              id: 2,
+              name: 'Product 2',
+            },
+          ],
+          2,
+        ),
+      ).to.be.true;
+
+      await combobox.requestPage(0, '1');
+      expect(combobox.loadSpy.calledTwice).to.be.true;
+      expect(combobox.loadSpy.lastCall.args).to.eql([
+        [
+          {
+            id: 1,
+            name: 'Product 1',
+          },
+        ],
+        1,
+      ]);
+    });
+    it('refreshes when refresh is called', () => {
+      const hook = renderHook(() => useComboBoxDataProvider(TestProductService));
+      const result1 = hook.result.current;
+      hook.rerender();
+      const result2 = hook.result.current;
+      result2.refresh();
+      hook.rerender();
+      const result3 = hook.result.current;
+
+      // Re-render without a reset should return the same instance, but after a refresh we should get a new instance
+      expect(result1).to.equal(result2);
+      expect(result2).not.to.equal(result3);
     });
   });
 
