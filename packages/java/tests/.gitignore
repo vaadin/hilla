@@ -4,5 +4,9 @@ vite.config.ts
 vite.generated.ts
 */**/tsconfig.json
 types.d.ts
-**/frontend/generated/*
+**/frontend/generated
 **/error-screenshots/*
+**/node_modules/*
+**/build/
+*/**/src/main/bundles
+

@@ -289,3 +289,17 @@ export function createLogger(): Logger {
     hasWarned: false,
   };
 }
+
+export function deepRemoveNullProps<T>(input: T): T {
+  if (typeof input !== 'object' || input == null) {
+    return input;
+  }
+
+  return Array.isArray(input)
+    ? (input.filter((item) => item != null).map((item) => deepRemoveNullProps(item)) as T)
+    : (Object.fromEntries(
+        Object.entries(input)
+          .filter(([, value]) => value != null)
+          .map(([key, value]) => [key, deepRemoveNullProps(value)]),
+      ) as T);
+}
