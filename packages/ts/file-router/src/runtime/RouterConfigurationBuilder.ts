@@ -18,11 +18,7 @@ interface RouteBase {
   children?: readonly this[];
 }
 
-function isReactRouteModule(module?: Module): module is RouteModule<ComponentType> | undefined {
-  if (!module) {
-    return true;
-  }
-
+function isReactRouteModule(module: Module): module is RouteModule<ComponentType> {
   return (
     ('default' in module && typeof module.default === 'function') ||
     ('config' in module && typeof module.config === 'object')
@@ -89,7 +85,7 @@ export class RouterConfigurationBuilder {
     return this.update(routes, ({ original, overriding: added, children }) => {
       if (added) {
         const { module, path, flowLayout } = added;
-        if (!isReactRouteModule(module)) {
+        if (module && !isReactRouteModule(module)) {
           throw new Error(
             `The module for the "${path}" section doesn't have the React component exported by default or a ViewConfig object exported as "config"`,
           );
@@ -205,14 +201,14 @@ export class RouterConfigurationBuilder {
             if (flag === true) {
               lists.server.push({
                 ...route,
-                children: server.length + ambivalent.length > 0 ? [...server, ...ambivalent] : undefined,
+                children: route.children ? [...server, ...ambivalent] : undefined,
               } as RouteObject);
             } else if (server.length > 0) {
               // Even if the route doesn't have the flag, it goes to the server
               // list if any of the children has the flag enabled.
               lists.server.push({
                 ...route,
-                children: server,
+                children: route.children ? server : undefined,
               } as RouteObject);
             }
 
@@ -222,7 +218,7 @@ export class RouterConfigurationBuilder {
             if (flag === false || client.length > 0) {
               lists.client.push({
                 ...route,
-                children: client.length > 0 ? client : undefined,
+                children: route.children ? client : undefined,
               } as RouteObject);
             }
 
@@ -235,7 +231,7 @@ export class RouterConfigurationBuilder {
             ) {
               lists.ambivalent.push({
                 ...route,
-                children: ambivalent.length > 0 ? ambivalent : undefined,
+                children: route.children ? ambivalent : undefined,
               } as RouteObject);
             }
 
