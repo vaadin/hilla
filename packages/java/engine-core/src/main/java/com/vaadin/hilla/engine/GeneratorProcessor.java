@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import io.swagger.v3.oas.models.OpenAPI;
