@@ -5,12 +5,12 @@ import type {
 } from '@vaadin/react-components';
 import type { GridDataProvider, GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
 import { useMemo, useState, type DependencyList } from 'react';
-import type { CountService, ListService } from './crud';
-import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
-import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
-import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
-import Direction from './types/org/springframework/data/domain/Sort/Direction';
-import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling';
+import type { CountService, ListService } from './crud.js';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable.js';
+import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort.js';
+import Direction from './types/org/springframework/data/domain/Sort/Direction.js';
+import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling.js';
 
 type MaybeCountService<TItem> = Partial<CountService<TItem>>;
 type ListAndMaybeCountService<TItem> = ListService<TItem> & MaybeCountService<TItem>;
