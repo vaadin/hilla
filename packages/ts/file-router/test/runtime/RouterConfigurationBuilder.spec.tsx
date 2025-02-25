@@ -29,6 +29,10 @@ describe('RouterBuilder', () => {
     return <></>;
   }
 
+  function Layout() {
+    return <></>;
+  }
+
   beforeEach(() => {
     builder = new RouterConfigurationBuilder().withReactRoutes([
       {
@@ -913,5 +917,35 @@ describe('RouterBuilder', () => {
         { index: true, element: <Server /> },
       ]);
     });
+  });
+
+  it('should support file routes with only client layout and server fallback', () => {
+    const { routes } = new RouterConfigurationBuilder()
+      .withFileRoutes([
+        {
+          path: '',
+          module: {
+            default: Layout,
+          },
+          children: [],
+        },
+      ])
+      .withFallback(Server)
+      .build();
+
+    expect(routes).to.be.like([
+      {
+        path: '',
+        handle: {
+          title: 'Layout',
+        },
+        children: [
+          { path: '*', element: <Server /> },
+          { index: true, element: <Server /> },
+        ],
+      },
+      { path: '*', element: <Server /> },
+      { index: true, element: <Server /> },
+    ]);
   });
 });

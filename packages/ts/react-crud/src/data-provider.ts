@@ -1,6 +1,10 @@
-import type { GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
-import type { GridDataProvider } from '@vaadin/react-components/Grid';
-import { useMemo, useState } from 'react';
+import type {
+  ComboBoxDataProvider,
+  ComboBoxDataProviderCallback,
+  ComboBoxDataProviderParams,
+} from '@vaadin/react-components';
+import type { GridDataProvider, GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
+import { useMemo, useState, type DependencyList } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
 import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
@@ -121,6 +125,77 @@ export abstract class DataProvider<TItem> {
   protected abstract fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
 }
 
+export abstract class AbstractComboBoxDataProvider<TItem> {
+  protected readonly list: ComboBoxFetchMethod<TItem>;
+  protected readonly loadTotalCount?: boolean;
+
+  protected sort: Sort | undefined;
+  protected totalCount: number | undefined;
+  protected filteredCount: number | undefined;
+
+  constructor(list: ComboBoxFetchMethod<TItem>, sort: Sort | undefined) {
+    this.list = list;
+    this.sort = sort;
+  }
+
+  reset(): void {
+    this.totalCount = undefined;
+    this.filteredCount = undefined;
+  }
+
+  load(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<TItem>): void {
+    this.fetchPage(params)
+      .then(async (page) => {
+        this.filteredCount = await this.fetchFilteredCount(page);
+        // Only fetch total count if it's specific in options
+        if (this.loadTotalCount) {
+          this.totalCount = await this.fetchTotalCount(page);
+        }
+
+        // Pass results to the combobox
+        callback(page.items, this.filteredCount);
+      })
+      .catch((error: unknown) => {
+        throw error;
+      });
+  }
+
+  protected async fetchPage(params: ComboBoxDataProviderParams): Promise<DataPage<TItem>> {
+    const pageNumber = params.page;
+    const { pageSize } = params;
+    const pageRequest: Pageable = {
+      pageNumber,
+      pageSize,
+      sort: this.sort ?? { orders: [] },
+    };
+    const items = await this.list(pageRequest, params.filter);
+
+    return { items, pageRequest };
+  }
+
+  protected abstract fetchTotalCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
+
+  protected abstract fetchFilteredCount(page: DataPage<TItem>): Promise<number | undefined> | number | undefined;
+}
+
+function determineInfiniteScrollingSize(page: DataPage<unknown>, lastKnownSize?: number): number {
+  const { items, pageRequest } = page;
+  const { pageNumber, pageSize } = pageRequest;
+  let infiniteScrollingSize;
+
+  if (items.length === pageSize) {
+    infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
+    if (lastKnownSize !== undefined && infiniteScrollingSize < lastKnownSize) {
+      // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
+      infiniteScrollingSize = lastKnownSize;
+    }
+  } else {
+    infiniteScrollingSize = pageNumber * pageSize + items.length;
+  }
+
+  return infiniteScrollingSize;
+}
+
 export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
   // cannot be static, otherwise it does not implement superclass
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -129,21 +204,18 @@ export class InfiniteDataProvider<TItem> extends DataProvider<TItem> {
   }
 
   protected fetchFilteredCount(page: DataPage<TItem>): number | undefined {
-    const { items, pageRequest } = page;
-    const { pageNumber, pageSize } = pageRequest;
-    let infiniteScrollingSize;
+    return determineInfiniteScrollingSize(page, this.filteredCount);
+  }
+}
+export class InfiniteComboBoxDataProvider<TItem> extends AbstractComboBoxDataProvider<TItem> {
+  // cannot be static, otherwise it does not implement superclass
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected fetchTotalCount(): undefined {
+    return undefined;
+  }
 
-    if (items.length === pageSize) {
-      infiniteScrollingSize = (pageNumber + 1) * pageSize + 1;
-      if (this.filteredCount !== undefined && infiniteScrollingSize < this.filteredCount) {
-        // Only allow size to grow here to avoid shrinking the size when scrolled down and sorting
-        infiniteScrollingSize = this.filteredCount;
-      }
-    } else {
-      infiniteScrollingSize = pageNumber * pageSize + items.length;
-    }
-
-    return infiniteScrollingSize;
+  protected fetchFilteredCount(page: DataPage<TItem>): number | undefined {
+    return determineInfiniteScrollingSize(page, this.filteredCount);
   }
 }
 
@@ -217,11 +289,76 @@ export type UseGridDataProviderResult<TItem> = GridDataProvider<TItem> & {
   refresh(): void;
 };
 
-export type GridFetchCallback<TItem> = (pageable: Pageable) => Promise<TItem[]>;
+export type GridFetchMethod<TItem> = (pageable: Pageable) => Promise<TItem[]>;
 
-export function useGridDataProvider<TItem>(list: GridFetchCallback<TItem>): UseGridDataProviderResult<TItem> {
-  const result = useDataProvider({ list: async (pageable) => list(pageable) });
+/**
+ * Creates a data provider for a grid component that fetches data using the provided fetch callback.
+ *
+ * @param fetch - the callback that fetches the data for the grid. The callback should return a promise that resolves to an array of items.
+ * @param dependencies - A list of all reactive values referenced inside of the fetch callback. A change to any of the listed values will cause the grid to refresh its data.
+ * @returns a data provider that can be assigned to a <Grid> component usings its dataProvider property and additionally contains a refresh method that can be called to force a reload of the grid data.
+ */
+export function useGridDataProvider<TItem>(
+  fetch: GridFetchMethod<TItem>,
+  dependencies?: DependencyList,
+): UseGridDataProviderResult<TItem> {
+  const result = useDataProvider(
+    useMemo(
+      () => ({
+        list: async (pageable: Pageable) => fetch(pageable),
+      }),
+      dependencies ?? [],
+    ),
+  );
   const dataProvider: UseGridDataProviderResult<TItem> = result.dataProvider as UseGridDataProviderResult<TItem>;
   dataProvider.refresh = result.refresh;
   return dataProvider;
+}
+
+export type UseComboBoxDataProviderResult<TItem> = ComboBoxDataProvider<TItem> & {
+  refresh(): void;
+};
+
+export type ComboBoxFetchMethod<TItem> = (pageable: Pageable, filterString: string) => Promise<TItem[]>;
+
+function createComboBoxDataProvider<TItem>(
+  list: ComboBoxFetchMethod<TItem>,
+  sort: Sort | undefined,
+): AbstractComboBoxDataProvider<TItem> {
+  return new InfiniteComboBoxDataProvider(list, sort);
+}
+
+type ComboboxDataProviderOptions = {
+  sort?: Sort;
+};
+
+/**
+ * Creates a data provider for a combo box component that fetches data using the provided fetch callback.
+ *
+ * @param fetch - the method that fetches the data for the grid. The method should return a promise that resolves to an array of items.
+ * @param dependencies - A list of all reactive values referenced inside of the fetch callback. A change to any of the listed values will cause the combo box to refresh its data.
+ * @returns a data provider that can be assigned to a <ComboBox> component usings its dataProvider property and additionally contains a refresh method that can be called to force a reload of the combo box data.
+ */
+export function useComboBoxDataProvider<TItem>(
+  fetch: ComboBoxFetchMethod<TItem>,
+  options?: ComboboxDataProviderOptions,
+  dependencies?: DependencyList,
+): UseComboBoxDataProviderResult<TItem> {
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
+  const dataProvider = useMemo(
+    () => createComboBoxDataProvider(fetch, options?.sort),
+    [options?.sort, ...(dependencies ?? [])],
+  );
+
+  // Create a new data provider function reference when the refresh counter is incremented.
+  // This effectively forces the combo box to reload
+  return useMemo(() => {
+    const dataProviderWithRefresh = (...args: Parameters<typeof dataProvider.load>) => dataProvider.load(...args);
+    dataProviderWithRefresh.refresh = () => {
+      dataProvider.reset();
+      setRefreshCounter(refreshCounter + 1);
+    };
+    return dataProviderWithRefresh;
+  }, [dataProvider, refreshCounter]);
 }
