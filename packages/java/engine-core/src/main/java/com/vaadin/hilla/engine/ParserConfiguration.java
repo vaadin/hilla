@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.hilla.parser.plugin.nonnull.kotlin.KotlinNullabilityPlugin;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
@@ -162,6 +163,7 @@ public final class ParserConfiguration {
                 new Plugin(BackbonePlugin.class.getName()),
                 new Plugin(MultipartFileCheckerPlugin.class.getName()),
                 new Plugin(TransferTypesPlugin.class.getName()),
+                new Plugin(KotlinNullabilityPlugin.class.getName()),
                 new Plugin(NonnullPlugin.class.getName()),
                 new Plugin(SubTypesPlugin.class.getName()),
                 new Plugin(ModelPlugin.class.getName()));
