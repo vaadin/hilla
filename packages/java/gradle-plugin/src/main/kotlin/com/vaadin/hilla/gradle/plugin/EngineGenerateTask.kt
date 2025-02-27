@@ -107,7 +107,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
         logger.info("Running the engineGenerate task with effective Vaadin configuration ${effectiveConfig.get()}")
 
         try {
-            //val conf: EngineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
             val conf = engineConfigurationSettings.get().toEngineConfiguration()
 
             val parserProcessor = ParserProcessor(conf)

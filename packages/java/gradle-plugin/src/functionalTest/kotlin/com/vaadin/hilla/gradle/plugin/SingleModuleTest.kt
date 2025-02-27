@@ -64,7 +64,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
     // configuration cache currently does not support tests running in debug mode
     @Test
-    fun hillaGenerate_configurationCache() {
+    fun `hillaGenerate support Gradle configuration cache`() {
         createProject(withNpmInstall = true)
 
         // Create frontend folder, that will otherwise be created by the first
