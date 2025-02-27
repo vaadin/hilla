@@ -2,59 +2,66 @@ package com.vaadin.hilla.parser.plugins.transfertypes;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.jspecify.annotations.NonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
-import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
+import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
 import com.vaadin.hilla.runtime.transfertypes.File;
 import com.vaadin.hilla.runtime.transfertypes.Flux;
+import com.vaadin.hilla.runtime.transfertypes.ListSignal;
+import com.vaadin.hilla.runtime.transfertypes.NumberSignal;
+import com.vaadin.hilla.runtime.transfertypes.Signal;
+import com.vaadin.hilla.runtime.transfertypes.ValueSignal;
+import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 public final class TransferTypesPlugin
-        extends AbstractPlugin<PluginConfiguration> {
-    static private final Map<String, Class<?>> classMap = new HashMap<>();
+    extends AbstractPlugin<PluginConfiguration> {
+    private static final Map<String, Class<?>> classMap = new HashMap<>();
 
     static {
         classMap.put("org.springframework.data.domain.Page", List.class);
         classMap.put("org.springframework.data.domain.Pageable",
-                Pageable.class);
+            Pageable.class);
         classMap.put("org.springframework.data.domain.Sort$Order", Order.class);
         classMap.put("org.springframework.data.domain.Sort", Sort.class);
         classMap.put(UUID.class.getName(), String.class);
         classMap.put("reactor.core.publisher.Flux", Flux.class);
         classMap.put("com.vaadin.hilla.EndpointSubscription",
-                EndpointSubscription.class);
+            EndpointSubscription.class);
         classMap.put(JsonNode.class.getName(), Object.class);
         classMap.put(ObjectNode.class.getName(), Object.class);
         classMap.put(ArrayNode.class.getName(), List.class);
         classMap.put("org.springframework.web.multipart.MultipartFile",
-                File.class);
+            File.class);
+        classMap.put("com.vaadin.hilla.signals.Signal", Signal.class);
+        classMap.put("com.vaadin.hilla.signals.ValueSignal", ValueSignal.class);
+        classMap.put("com.vaadin.hilla.signals.NumberSignal", NumberSignal.class);
+        classMap.put("com.vaadin.hilla.signals.ListSignal", ListSignal.class);
     }
 
-    public TransferTypesPlugin() {
-        super();
-    }
+    private final Set<String> replacedClasses = new HashSet<>();
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -62,6 +69,40 @@ public final class TransferTypesPlugin
 
     @Override
     public void exit(NodePath<?> nodePath) {
+        if (nodePath.getNode() instanceof EntityNode entityNode && nodePath.getParentPath().getNode() instanceof RootNode rootNode) {
+            var cls = entityNode.getSource();
+            var name = cls.getName();
+            if (replacedClasses.contains(name)) {
+                var component = rootNode.getTarget().getComponents().getSchemas().get(name);
+
+                cls.getAnnotations().stream().filter(
+                    (model) -> model.getName().equals(FromModule.class.getName())).findFirst().ifPresent(
+                    (annotationModel) -> {
+                        var annotation = (FromModule) annotationModel.get();
+                        var namedSpecifiers = annotation.namedSpecifiers();
+                        var defaultSpecifier = annotation.defaultSpecifier();
+
+                        if (namedSpecifiers.length == 0 && defaultSpecifier.isBlank()) {
+                            throw new IllegalArgumentException(String.format(
+                                "@FromImport annotation for class %s must have at least one named specifier or a default specifier",
+                                name));
+                        }
+
+                        var fromModule = new HashMap<String, Object>();
+                        fromModule.put("module", annotation.module());
+
+                        if (namedSpecifiers.length != 0) {
+                            fromModule.put("named", namedSpecifiers);
+                        }
+
+                        if (!defaultSpecifier.isBlank()) {
+                            fromModule.put("default", defaultSpecifier);
+                        }
+
+                        component.addExtension("x-from-module", fromModule);
+                    });
+            }
+        }
     }
 
     @Override
@@ -71,36 +112,28 @@ public final class TransferTypesPlugin
 
     @NonNull
     @Override
-    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
-        return nodeDependencies.processChildNodes(this::processNodes)
-                .processRelatedNodes(this::processNodes);
-    }
-
-    private Node<?, ?> mapClassRefNodes(Node<?, ?> node) {
-        if (!(node instanceof TypedNode)) {
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node, @NonNull NodePath<?> nodePath) {
+        if (!(node instanceof TypedNode typedNode)) {
             return node;
         }
 
-        return (Node<?, ?>) ((TypedNode) node).processType(this::processType);
-    }
+        return (Node<?, ?>) typedNode.processType((signature) -> {
+            if (!(signature instanceof ClassRefSignatureModel classRef)) {
+                return signature;
+            }
 
-    private Stream<Node<?, ?>> processNodes(Stream<Node<?, ?>> nodes) {
-        return nodes.map(this::mapClassRefNodes);
-    }
+            var className = classRef.getClassInfo().getName();
+            if (!classMap.containsKey(className)) {
+                return signature;
+            }
 
-    private SignatureModel processType(SignatureModel signature) {
-        if (!(signature instanceof ClassRefSignatureModel)) {
-            return signature;
-        }
+            var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
 
-        var classRef = (ClassRefSignatureModel) signature;
-        var className = classRef.getClassInfo().getName();
-        if (!classMap.containsKey(className)) {
-            return signature;
-        }
+            // Adding the class name to the shared data set to be able to add the import metadata if present.
+            replacedClasses.add(mappedClassInfo.getName());
 
-        var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
-        return ClassRefSignatureModel.of(mappedClassInfo,
+            return ClassRefSignatureModel.of(mappedClassInfo,
                 classRef.getTypeArguments(), classRef.getAnnotations());
+        });
     }
 }
