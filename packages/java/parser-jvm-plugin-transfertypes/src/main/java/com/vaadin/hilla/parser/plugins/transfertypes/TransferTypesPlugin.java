@@ -79,10 +79,10 @@ public final class TransferTypesPlugin
                     (model) -> model.getName().equals(FromModule.class.getName())).findFirst().ifPresent(
                     (annotationModel) -> {
                         var annotation = (FromModule) annotationModel.get();
-                        var namedSpecifiers = annotation.namedSpecifiers();
+                        var namedSpecifier = annotation.namedSpecifier();
                         var defaultSpecifier = annotation.defaultSpecifier();
 
-                        if (namedSpecifiers.length == 0 && defaultSpecifier.isBlank()) {
+                        if (namedSpecifier.isBlank() && defaultSpecifier.isBlank()) {
                             throw new IllegalArgumentException(String.format(
                                 "@FromImport annotation for class %s must have at least one named specifier or a default specifier",
                                 name));
@@ -91,8 +91,8 @@ public final class TransferTypesPlugin
                         var fromModule = new HashMap<String, Object>();
                         fromModule.put("module", annotation.module());
 
-                        if (namedSpecifiers.length != 0) {
-                            fromModule.put("named", namedSpecifiers);
+                        if (!namedSpecifier.isBlank()) {
+                            fromModule.put("named", namedSpecifier);
                         }
 
                         if (!defaultSpecifier.isBlank()) {

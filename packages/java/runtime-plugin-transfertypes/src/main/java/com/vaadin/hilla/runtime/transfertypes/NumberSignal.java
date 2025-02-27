@@ -4,7 +4,6 @@ import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 @FromModule(
     module = "@vaadin/react-signals",
-    namedSpecifiers = { "NumberSignal" },
-    defaultSpecifier = ""
+    namedSpecifier = "NumberSignal"
 )
 public record NumberSignal() {}

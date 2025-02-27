@@ -147,36 +147,28 @@
       "com.vaadin.hilla.runtime.transfertypes.NumberSignal" : {
         "type" : "object",
         "x-from-module" : {
-          "named" : [
-            "NumberSignal"
-          ],
+          "named" : "NumberSignal",
           "module" : "@vaadin/react-signals"
         }
       },
       "com.vaadin.hilla.runtime.transfertypes.ListSignal" : {
         "type" : "object",
         "x-from-module" : {
-          "named" : [
-            "ListSignal"
-          ],
+          "named" : "ListSignal",
           "module" : "@vaadin/react-signals"
         }
       },
       "com.vaadin.hilla.runtime.transfertypes.Signal" : {
         "type" : "object",
         "x-from-module" : {
-          "named" : [
-            "Signal"
-          ],
+          "named" : "Signal",
           "module" : "@vaadin/react-signals"
         }
       },
       "com.vaadin.hilla.runtime.transfertypes.ValueSignal" : {
         "type" : "object",
         "x-from-module" : {
-          "named" : [
-            "ValueSignal"
-          ],
+          "named" : "ValueSignal",
           "module" : "@vaadin/react-signals"
         }
       }

@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface FromModule {
     String module();
-    String[] namedSpecifiers();
-    String defaultSpecifier();
+    String namedSpecifier() default "";
+    String defaultSpecifier() default "";
 }
