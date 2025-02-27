@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.7.0-alpha14",
+  "version": "24.7.0-beta1",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -20,10 +20,7 @@
   ],
   "scripts": {
     "clean:build": "git clean -fx . -e .vite -e node_modules",
-    "build": "concurrently npm:build:*",
-    "build:esbuild": "tsx ../../../scripts/build.ts",
-    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
-    "build:copy": "cd src && copyfiles *.d.ts **/*.d.ts ..",
+    "build": "tsx ../../../scripts/fast-build.ts",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
@@ -63,9 +60,9 @@
     "react-router": "7"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "24.7.0-alpha14",
-    "@vaadin/hilla-react-auth": "24.7.0-alpha14",
-    "@vaadin/hilla-react-signals": "24.7.0-alpha14",
+    "@vaadin/hilla-generator-utils": "24.7.0-beta1",
+    "@vaadin/hilla-react-auth": "24.7.0-beta1",
+    "@vaadin/hilla-react-signals": "24.7.0-beta1",
     "typescript": "5.7.3"
   }
 }

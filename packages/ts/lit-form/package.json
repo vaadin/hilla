@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-lit-form",
-  "version": "24.7.0-alpha14",
+  "version": "24.7.0-beta1",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -16,9 +16,7 @@
   ],
   "scripts": {
     "clean:build": "git clean -fx . -e .vite -e node_modules",
-    "build": "concurrently npm:build:*",
-    "build:esbuild": "tsx ../../../scripts/build.ts",
-    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "build": "tsx ../../../scripts/build.ts",
     "lint": "eslint src test",
     "lint:fix": "npm run lint -- --fix",
     "test": "vitest --run",
@@ -71,7 +69,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.7.0-alpha14",
+    "@vaadin/hilla-frontend": "24.7.0-beta1",
     "validator": "13.12.0"
   },
   "peerDependencies": {

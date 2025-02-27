@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-i18n",
-  "version": "24.7.0-alpha14",
+  "version": "24.7.0-beta1",
   "description": "Hilla I18n utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -17,10 +17,7 @@
   ],
   "scripts": {
     "clean:build": "git clean -fx . -e .vite -e node_modules",
-    "build": "concurrently npm:build:*",
-    "build:esbuild": "tsx ../../../scripts/build.ts",
-    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
-    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "build": "tsx ../../../scripts/fast-build.ts",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
@@ -46,8 +43,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.7.0-alpha14",
-    "@vaadin/hilla-react-signals": "24.7.0-alpha14",
+    "@vaadin/hilla-frontend": "24.7.0-beta1",
+    "@vaadin/hilla-react-signals": "24.7.0-beta1",
     "intl-messageformat": "10.7.11"
   },
   "peerDependencies": {
