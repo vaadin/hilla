@@ -4,11 +4,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { Writable } from 'type-fest';
 import { factory, type Identifier } from 'typescript';
 
-type ReplacedTypeContext = Readonly<{
-  schema?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject;
-}>;
-
-type ReplacedTypeMaker = (context: ReplacedTypeContext) => TransferTypeMaker;
+type ReplacedTypeMaker = (schema?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => TransferTypeMaker;
 
 type FromModule = Readonly<{
   module: string;
@@ -17,7 +13,7 @@ type FromModule = Readonly<{
 }>;
 
 function createReplacedTypeMaker(name: string): ReplacedTypeMaker {
-  return ({ schema }) =>
+  return (schema) =>
     ({ dependencies: { imports }, typeArguments }) => {
       let id: Identifier | undefined;
 
@@ -41,7 +37,7 @@ function createReplacedTypeMaker(name: string): ReplacedTypeMaker {
     };
 }
 
-type ReplacedTypes = Readonly<Record<string, (context: ReplacedTypeContext) => TransferTypeMaker>>;
+type ReplacedTypes = Readonly<Record<string, ReplacedTypeMaker>>;
 
 const replacedTypes: ReplacedTypes = Object.fromEntries(
   ['File', 'Signal', 'NumberSignal', 'ValueSignal', 'ListSignal'].map((name) => [
@@ -59,7 +55,7 @@ export default class TransferTypesPlugin extends Plugin {
 
   override execute({ api: { components }, transferTypes }: SharedStorage): void {
     for (const [key, value] of Object.entries(replacedTypes)) {
-      transferTypes.set(key, value({ schema: components?.schemas?.[key] }));
+      transferTypes.set(key, value(components?.schemas?.[key]));
     }
 
     if (components?.schemas) {
