@@ -93,7 +93,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "6ed12bb586c2f433f33e9d222e01a26e9775ceba7e0a63b9de36e1aa2a6637aa"
+    "hash": "fe156e7a81e89a1a5c0ee028095b1deab5df6e5a08964424e0aba49e67f2bbb8"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
