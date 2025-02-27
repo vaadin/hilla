@@ -7,13 +7,13 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "24.7.0-alpha10",
-    "@vaadin/icons": "24.7.0-alpha10",
-    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha10",
+    "@vaadin/icon": "24.7.0-beta1",
+    "@vaadin/icons": "24.7.0-beta1",
+    "@vaadin/polymer-legacy-adapter": "24.7.0-beta1",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "24.7.0-alpha10",
-    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha10",
-    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha10",
+    "@vaadin/tooltip": "24.7.0-beta1",
+    "@vaadin/vaadin-lumo-styles": "24.7.0-beta1",
+    "@vaadin/vaadin-themable-mixin": "24.7.0-beta1",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.2.1"
   },
@@ -53,13 +53,13 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.7.0-beta1",
       "@vaadin/hilla-lit-form": "24.7.0-beta1",
-      "@vaadin/icon": "24.7.0-alpha10",
-      "@vaadin/icons": "24.7.0-alpha10",
-      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha10",
+      "@vaadin/icon": "24.7.0-beta1",
+      "@vaadin/icons": "24.7.0-beta1",
+      "@vaadin/polymer-legacy-adapter": "24.7.0-beta1",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "24.7.0-alpha10",
-      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha10",
-      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha10",
+      "@vaadin/tooltip": "24.7.0-beta1",
+      "@vaadin/vaadin-lumo-styles": "24.7.0-beta1",
+      "@vaadin/vaadin-themable-mixin": "24.7.0-beta1",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1"
     },
@@ -93,7 +93,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "1ed172f90e5fec267138d9528991b8ef993c5b09e2583192668e4b14ee329a44"
+    "hash": "6ed12bb586c2f433f33e9d222e01a26e9775ceba7e0a63b9de36e1aa2a6637aa"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

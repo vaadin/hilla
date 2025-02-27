@@ -7,13 +7,13 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
-    "@vaadin/icon": "24.7.0-alpha10",
-    "@vaadin/icons": "24.7.0-alpha10",
-    "@vaadin/polymer-legacy-adapter": "24.7.0-alpha10",
+    "@vaadin/icon": "24.7.0-beta1",
+    "@vaadin/icons": "24.7.0-beta1",
+    "@vaadin/polymer-legacy-adapter": "24.7.0-beta1",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "24.7.0-alpha10",
-    "@vaadin/vaadin-lumo-styles": "24.7.0-alpha10",
-    "@vaadin/vaadin-themable-mixin": "24.7.0-alpha10",
+    "@vaadin/tooltip": "24.7.0-beta1",
+    "@vaadin/vaadin-lumo-styles": "24.7.0-beta1",
+    "@vaadin/vaadin-themable-mixin": "24.7.0-beta1",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.2.1"
   },
@@ -53,13 +53,13 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.7.0-beta1",
       "@vaadin/hilla-lit-form": "24.7.0-beta1",
-      "@vaadin/icon": "24.7.0-alpha10",
-      "@vaadin/icons": "24.7.0-alpha10",
-      "@vaadin/polymer-legacy-adapter": "24.7.0-alpha10",
+      "@vaadin/icon": "24.7.0-beta1",
+      "@vaadin/icons": "24.7.0-beta1",
+      "@vaadin/polymer-legacy-adapter": "24.7.0-beta1",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "24.7.0-alpha10",
-      "@vaadin/vaadin-lumo-styles": "24.7.0-alpha10",
-      "@vaadin/vaadin-themable-mixin": "24.7.0-alpha10",
+      "@vaadin/tooltip": "24.7.0-beta1",
+      "@vaadin/vaadin-lumo-styles": "24.7.0-beta1",
+      "@vaadin/vaadin-themable-mixin": "24.7.0-beta1",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1"
     },
@@ -93,7 +93,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "67ced71f13ea791edd0d610a34d2859e7eb80e04e1e3a10931c1f078d8139121"
+    "hash": "f9ca56f5b7821056fdaf07e4540aea3e85827633dd87a748b0c882f70aee7879"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
