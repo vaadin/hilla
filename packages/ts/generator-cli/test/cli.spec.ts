@@ -22,6 +22,6 @@ describe('cli', () => {
   });
 
   it('should throw an error if input file is not provided', async () => {
-    await expect(execAsync(`npx tsx src/index.ts`)).rejects.and.throws(Error, 'Input file is required');
+    await expect(execAsync(`npx tsx src/index.ts`)).rejects.and.throws(Error, 'OpenAPI file is required');
   });
 });

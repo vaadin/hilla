@@ -136,7 +136,6 @@ public final class GeneratorProcessor {
 
     private void prepareOpenAPI(ArrayList<Object> arguments) {
         logger.debug("Using OpenAPI file: {}", openAPIFile);
-        arguments.add("-i");
         arguments.add(openAPIFile);
     }
 

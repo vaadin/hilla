@@ -8,7 +8,8 @@ import type { PackageJson } from 'type-fest';
 import GeneratorIO from './GeneratorIO.js';
 
 const {
-  values: { inputFile, help, outputDir, plugin: plugins, verbose, version },
+  positionals: [file],
+  values: { help, outputDir, plugin: plugins, verbose, version },
 } = parseArgs({
   options: {
     inputFile: {
@@ -37,15 +38,18 @@ const {
       type: 'boolean',
     },
   },
+  allowPositionals: true,
 });
 
 if (help) {
   // eslint-disable-next-line no-console
   console.log(`Usage:
-tsgen
+tsgen <file> [OPTIONS]
+
+Arguments:
+  file                   OpenAPI JSON schema file (required)
 
 Options:
-  -i, --input-file       OpenAPI schema file (required)
   -h, --help             Show this screen
   -o, --output-dir       Output directory
   -p, --plugin <path>    Use the plugin loadable by <path>.
@@ -57,8 +61,8 @@ Options:
   // eslint-disable-next-line no-console
   console.log(packageJson.version);
 } else {
-  if (!inputFile) {
-    throw new Error('Input file is required');
+  if (!file) {
+    throw new Error('OpenAPI file is required');
   }
 
   const logger = new LoggerFactory({ verbose });
@@ -75,7 +79,7 @@ Options:
   );
   const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
-  const files = await generator.process(await readFile(inputFile, 'utf8'));
+  const files = await generator.process(await readFile(file, 'utf8'));
   const filesToDelete = await io.getExistingGeneratedFiles();
   const generatedFiles = await io.writeGeneratedFiles(files);
 
