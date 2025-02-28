@@ -1,5 +1,6 @@
-import { mkdir, readFile, writeFile, glob } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { globIterate as glob } from 'glob';
 import type { PackageJson } from 'type-fest';
 import { createCompilerHost, createProgram, type ParsedCommandLine, sys } from 'typescript';
 import { compileCSS, replaceCSSImports } from './utils/compileCSS.js';
@@ -7,6 +8,13 @@ import dir from './utils/dir.js';
 import injectRegister from './utils/injectRegister.js';
 import loadTSConfig from './utils/loadTSConfig.js';
 import redirectURLPart from './utils/redirectURLPart.js';
+
+if (!('fromAsync' in Array)) {
+  const { fromAsync } = await import('array-from-async');
+  Object.defineProperty(Array, 'fromAsync', {
+    value: fromAsync,
+  });
+}
 
 const cwd = pathToFileURL(dir(process.cwd()));
 const sourceDir = new URL('src/', cwd);
