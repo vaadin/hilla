@@ -130,6 +130,44 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <vaadin.reuseDevServer>
+                                ${vaadin.reuseDevServer}
+                            </vaadin.reuseDevServer>
+                            <vaadin.devmode.liveReload.enabled>
+                                ${vaadin.devmode.liveReload.enabled}
+                            </vaadin.devmode.liveReload.enabled>
+                            <vaadin.allow.appshell.annotations>
+                                ${vaadin.allow.appshell.annotations}
+                            </vaadin.allow.appshell.annotations>
+                            <!-- Allow test clients not on localhost
+                            to connect to Vite -->
+                            <vaadin.devmode.vite.options>
+                                ${vaadin.devmode.vite.options}
+                            </vaadin.devmode.vite.options>
+                            <vaadin.experimental.react19>
+                                ${vaadin.experimental.react19}
+                            </vaadin.experimental.react19>
+                            <vaadin.reuseDevServer>
+                                ${vaadin.reuseDevServer}
+                            </vaadin.reuseDevServer>
+                            <vaadin.devmode.liveReload.enabled>
+                                ${vaadin.devmode.liveReload.enabled}
+                            </vaadin.devmode.liveReload.enabled>
+                            <vaadin.allow.appshell.annotations>
+                                ${vaadin.allow.appshell.annotations}
+                            </vaadin.allow.appshell.annotations>
+                            <!-- Allow test clients not on localhost
+                            to connect to Vite-->
+                            <vaadin.devmode.vite.options>
+                                ${vaadin.devmode.vite.options}
+                            </vaadin.devmode.vite.options>
+                            <vaadin.experimental.react19>
+                                ${vaadin.experimental.react19}
+                            </vaadin.experimental.react19>
+                        </systemPropertyVariables>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -227,6 +265,16 @@
                 <module>endpoints</module>
                 <module>endpoints discovery</module>
                 <module>react-grid-test</module>
+                <module>react-signals</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>react-18</id>
+            <modules>
+                <module>no-endpoints</module>
+                <module>react-grid-test</module>
+                <module>react-i18n</module>
                 <module>react-signals</module>
             </modules>
         </profile>
