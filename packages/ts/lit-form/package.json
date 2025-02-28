@@ -21,6 +21,7 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
+    "test:react": "echo 'Not using React, skipping...'",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },

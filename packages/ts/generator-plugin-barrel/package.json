@@ -14,6 +14,7 @@
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
+    "test:react": "echo 'Not using React, skipping...'",
     "test:update": "vitest --run --update",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"

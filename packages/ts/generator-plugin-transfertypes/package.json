@@ -13,8 +13,10 @@
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
-    "test:update": "vitest --update",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vitest --run --coverage",
+    "test:react": "echo 'Not using React, skipping...'",
+    "test:update": "vitest --run --update",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
