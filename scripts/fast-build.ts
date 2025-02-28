@@ -1,7 +1,8 @@
 import type { SourceMapPayload } from 'module';
-import { mkdir, readFile, writeFile, glob } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { globIterate as glob } from 'glob';
 import { transform, type TransformOptions } from 'oxc-transform';
 import type { PackageJson } from 'type-fest';
 import { ScriptTarget } from 'typescript';
