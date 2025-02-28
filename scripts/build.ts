@@ -8,6 +8,7 @@ import dir from './utils/dir.js';
 import injectRegister from './utils/injectRegister.js';
 import loadTSConfig from './utils/loadTSConfig.js';
 import redirectURLPart from './utils/redirectURLPart.js';
+import { isAbsolute } from 'node:path';
 
 if (!('fromAsync' in Array)) {
   const { fromAsync } = await import('array-from-async');
@@ -61,7 +62,8 @@ const originalFiles = Object.fromEntries(await Array.fromAsync(loadFiles()));
 function compileTypeScript({ options, fileNames }: ParsedCommandLine): ReadonlyArray<readonly [URL, string]> {
   const createdFiles: Array<readonly [string, string]> = [];
   const host = createCompilerHost(options);
-  host.readFile = (fileName) => originalFiles[fileURLToPath(new URL(fileName, cwd))] ?? sys.readFile(fileName);
+  host.readFile = (fileName) =>
+    originalFiles[isAbsolute(fileName) ? fileName : fileURLToPath(new URL(fileName, cwd))] ?? sys.readFile(fileName);
   host.writeFile = (fileName, data) => {
     createdFiles.push([fileName, data]);
   };
