@@ -1,5 +1,6 @@
-import { mkdir, readFile, writeFile, glob } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { globIterate as glob } from 'glob';
 import type { PackageJson } from 'type-fest';
 import { createCompilerHost, createProgram, type ParsedCommandLine, sys } from 'typescript';
 import { compileCSS, replaceCSSImports } from './utils/compileCSS.js';
