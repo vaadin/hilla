@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import Plugin, { type PluginConstructor } from '@vaadin/hilla-generator-core/Plugin.js';
 import type LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
