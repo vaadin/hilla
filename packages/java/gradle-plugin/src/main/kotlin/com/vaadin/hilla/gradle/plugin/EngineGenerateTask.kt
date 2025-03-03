@@ -15,20 +15,35 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import java.io.IOException
+import com.vaadin.gradle.PluginEffectiveConfiguration
 import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.GeneratorException
+import com.vaadin.hilla.engine.GeneratorProcessor
+import com.vaadin.hilla.engine.ParserException
+import com.vaadin.hilla.engine.ParserProcessor
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CompileClasspath
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
-import java.io.IOException
-
-import com.vaadin.hilla.engine.*
-import org.gradle.api.tasks.*
 
 /**
  * Task that generates the endpoints.ts and model TS classes
  * needed for calling the backend in a typesafe manner.
  */
-public open class EngineGenerateTask : DefaultTask() {
+public abstract class EngineGenerateTask : DefaultTask() {
+
     init {
         group = "Vaadin"
         description = "Hilla Generate Task"
@@ -44,23 +59,55 @@ public open class EngineGenerateTask : DefaultTask() {
         }
     }
 
-    @Input
-    public val groupId: String = project.group.toString()
+    internal fun configure(project: Project) {
+        groupId.set(project.group.toString())
+        artifactId.set(project.name)
+        mainClass.set(project.findProperty("mainClass") as String?)
+        val engineConfig = HillaPlugin.createEngineConfiguration(
+            project,
+            VaadinFlowPluginExtension.get(project)
+        )
+        engineConfigurationSettings.set(engineConfig.toInputs())
+        effectiveConfig.set(PluginEffectiveConfiguration.get(project))
+        classpath.from(engineConfig.classpath.map { it.toFile() })
 
-    @Input
-    public val artifactId: String = project.name
+        openApiFile.set(engineConfig.openAPIFile.toFile())
+        outputDir.set(engineConfig.outputDir.toFile())
+    }
 
-    @Input
-    @Optional
-    public var mainClass: String? = project.findProperty("mainClass") as String?
+    @get:Internal
+    internal abstract val effectiveConfig: Property<PluginEffectiveConfiguration>
+
+    @get:Input
+    internal abstract val groupId: Property<String>
+
+    @get:Input
+    internal abstract val artifactId: Property<String>
+
+    @get:Optional
+    @get:Input
+    internal abstract val mainClass: Property<String?>
+
+    @get:Input
+    internal abstract val engineConfigurationSettings: Property<EngineConfigurationSettings>
+
+    @get:CompileClasspath
+    internal abstract val classpath : ConfigurableFileCollection
+
+    @get:Optional
+    @get:OutputFile
+    internal abstract val openApiFile: RegularFileProperty
+
+    @get:OutputDirectory
+    internal abstract val outputDir: DirectoryProperty
 
     @TaskAction
     public fun engineGenerate() {
-        val vaadinExtension = VaadinFlowPluginExtension.get(project)
-        logger.info("Running the engineGenerate task with effective Vaadin configuration $vaadinExtension")
+
+        logger.info("Running the engineGenerate task with effective Vaadin configuration ${effectiveConfig.get()}")
 
         try {
-            val conf: EngineConfiguration = HillaPlugin.createEngineConfiguration(project, vaadinExtension)
+            val conf = engineConfigurationSettings.get().toEngineConfiguration()
 
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)

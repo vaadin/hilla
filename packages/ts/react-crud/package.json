@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-crud",
-  "version": "24.7.0-beta1",
+  "version": "24.8.0-alpha1",
   "description": "Hilla CRUD utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -22,6 +22,7 @@
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
+    "test:react": "npm run test",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
@@ -53,9 +54,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.7.0-beta1",
-    "@vaadin/hilla-lit-form": "24.7.0-beta1",
-    "@vaadin/hilla-react-form": "24.7.0-beta1",
+    "@vaadin/hilla-frontend": "24.8.0-alpha1",
+    "@vaadin/hilla-lit-form": "24.8.0-alpha1",
+    "@vaadin/hilla-react-form": "24.8.0-alpha1",
     "@vaadin/react-components": "24.7.0-beta1"
   },
   "peerDependencies": {

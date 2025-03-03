@@ -17,18 +17,18 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.flow.server.frontend.FrontendUtils
-import com.vaadin.hilla.engine.EngineConfiguration
 import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
 import org.gradle.testkit.runner.BuildResult
-import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.function.Function
 import java.util.stream.Stream
+import kotlin.test.assertContains
 import kotlin.test.expect
+import org.gradle.testkit.runner.TaskOutcome
 
 class SingleModuleTest : AbstractGradleTest() {
 
@@ -61,6 +61,29 @@ class SingleModuleTest : AbstractGradleTest() {
         verifyOpenApiJsonFileGeneratedProperly(true)
         verifyEndpointsTsFileGeneratedProperly()
     }
+
+    // configuration cache currently does not support tests running in debug mode
+    @Test
+    fun `hillaGenerate support Gradle configuration cache`() {
+        createProject(withNpmInstall = true)
+
+        // Create frontend folder, that will otherwise be created by the first
+        // execution of vaadinPrepareFrontend, invalidating the cache on the
+        // second run
+        testProject.newFolder("src/main/frontend")
+        addHelloReactEndpoint()
+        addMainClass()
+
+        var buildResult: BuildResult = testProject.build("--configuration-cache", "hillaGenerate", checkTasksSuccessful = true, debug = false)
+        buildResult.expectTaskSucceded("hillaGenerate")
+        assertContains(buildResult.output, "Calculating task graph as no cached configuration is available for tasks: hillaGenerate")
+        assertContains(buildResult.output, "Configuration cache entry stored")
+
+        buildResult = testProject.build("--configuration-cache", "hillaGenerate", checkTasksSuccessful = false, debug = false)
+        buildResult.expectTaskOutcome("hillaGenerate", TaskOutcome.UP_TO_DATE)
+        assertContains(buildResult.output, "Reusing configuration cache")
+    }
+
 
 
     private fun verifyOpenApiJsonFileGeneratedProperly(productionMode: Boolean) {
