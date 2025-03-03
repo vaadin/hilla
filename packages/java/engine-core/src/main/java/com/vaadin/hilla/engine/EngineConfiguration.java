@@ -138,7 +138,9 @@ public class EngineConfiguration {
             } catch (Exception e) {
                 if (classFinder != null) {
                     LOGGER.info(
-                            "AOT-based detection of browser-callable classes failed. Falling back to classpath scan.");
+                            "AOT-based detection of browser-callable classes failed."
+                                    + " Falling back to classpath scan."
+                                    + " Enable debug logging for more information.");
                     return LookupBrowserCallableFinder
                             .findEndpointClasses(classFinder, this);
                 } else {

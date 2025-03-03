@@ -101,8 +101,6 @@ class AotBrowserCallableFinder {
         var argsFile = engineConfiguration.getBuildDir()
                 .resolve("hilla-aot-args.txt");
         Files.write(argsFile, settings);
-        var report = engineConfiguration.getBuildDir()
-                .resolve("hilla-aot-report.txt");
 
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
@@ -113,6 +111,8 @@ class AotBrowserCallableFinder {
         var process = new ProcessBuilder().inheritIO()
                 .command(javaExecutable, "@" + argsFile)
                 .redirectErrorStream(true).start();
+        var report = engineConfiguration.getBuildDir()
+                .resolve("hilla-aot-report.txt");
         Files.copy(process.getInputStream(), report);
         int exitCode = process.waitFor();
 
