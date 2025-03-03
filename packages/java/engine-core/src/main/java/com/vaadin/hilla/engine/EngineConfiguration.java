@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ public class EngineConfiguration {
     private BrowserCallableFinder browserCallableFinder;
     private boolean productionMode = false;
     private String nodeCommand = "node";
+    private ClassFinder classFinder;
 
     private EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -107,6 +109,10 @@ public class EngineConfiguration {
         return nodeCommand;
     }
 
+    public ClassFinder getClassFinder() {
+        return classFinder;
+    }
+
     public List<Class<? extends Annotation>> getEndpointAnnotations() {
         return parser.getEndpointAnnotations();
     }
@@ -129,8 +135,17 @@ public class EngineConfiguration {
         return () -> {
             try {
                 return AotBrowserCallableFinder.findEndpointClasses(this);
-            } catch (IOException | InterruptedException e) {
-                throw new ExecutionFailedException(e);
+            } catch (Exception e) {
+                if (classFinder != null) {
+                    LOGGER.info(
+                            "AOT-based detection of browser-callable classes failed."
+                                    + " Falling back to classpath scan."
+                                    + " Enable debug logging for more information.");
+                    return LookupBrowserCallableFinder
+                            .findEndpointClasses(classFinder, this);
+                } else {
+                    throw new ExecutionFailedException(e);
+                }
             }
         };
     }
@@ -168,6 +183,7 @@ public class EngineConfiguration {
             this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
+            this.configuration.classFinder = configuration.classFinder;
             this.configuration.parser.setEndpointAnnotations(
                     configuration.getEndpointAnnotations());
             this.configuration.parser.setEndpointExposedAnnotations(
@@ -250,6 +266,11 @@ public class EngineConfiguration {
 
         public Builder nodeCommand(String value) {
             configuration.nodeCommand = value;
+            return this;
+        }
+
+        public Builder classFinder(ClassFinder value) {
+            configuration.classFinder = value;
             return this;
         }
 
