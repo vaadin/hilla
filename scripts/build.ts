@@ -1,5 +1,8 @@
-import { mkdir, readFile, writeFile, glob } from 'node:fs/promises';
+import './polyfills.js';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { globIterate as glob } from 'glob';
 import type { PackageJson } from 'type-fest';
 import { createCompilerHost, createProgram, type ParsedCommandLine, sys } from 'typescript';
 import { compileCSS, replaceCSSImports } from './utils/compileCSS.js';
@@ -53,7 +56,8 @@ const originalFiles = Object.fromEntries(await Array.fromAsync(loadFiles()));
 function compileTypeScript({ options, fileNames }: ParsedCommandLine): ReadonlyArray<readonly [URL, string]> {
   const createdFiles: Array<readonly [string, string]> = [];
   const host = createCompilerHost(options);
-  host.readFile = (fileName) => originalFiles[fileURLToPath(new URL(fileName, cwd))] ?? sys.readFile(fileName);
+  host.readFile = (fileName) =>
+    originalFiles[isAbsolute(fileName) ? fileName : fileURLToPath(new URL(fileName, cwd))] ?? sys.readFile(fileName);
   host.writeFile = (fileName, data) => {
     createdFiles.push([fileName, data]);
   };
