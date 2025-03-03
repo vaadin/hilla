@@ -25,6 +25,7 @@
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
+    "test:react": "npm run test",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
