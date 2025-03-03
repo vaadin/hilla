@@ -64,10 +64,9 @@ class AotBrowserCallableFinder {
                         }
                     }).filter(Objects::nonNull).findFirst().orElse(null);
             if (mainClass == null) {
-                LOGGER.warn(
+                LOGGER.debug(
                         "This project has not been recognized as a Spring Boot"
-                                + " application because a main class could not be found."
-                                + " Hilla services will not be available.");
+                                + " application because a main class could not be found.");
             }
             return mainClass;
         } catch (NoClassDefFoundError e) {
@@ -102,19 +101,23 @@ class AotBrowserCallableFinder {
         var argsFile = engineConfiguration.getBuildDir()
                 .resolve("hilla-aot-args.txt");
         Files.write(argsFile, settings);
-
+        var report = engineConfiguration.getBuildDir()
+                .resolve("hilla-aot-report.txt");
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
 
         // Runs the SpringApplicationAotProcessor to generate the
         // reflect-config.json file. This comes from the `process-aot` goal.
-        int exitCode = new ProcessBuilder().inheritIO()
-                .command(javaExecutable, "@" + argsFile).start().waitFor();
+        var process = new ProcessBuilder().inheritIO()
+                .command(javaExecutable, "@" + argsFile)
+                .redirectOutput(report.toFile()).redirectErrorStream(true)
+                .start();
+        int exitCode = process.waitFor();
 
         if (exitCode != 0) {
-            LOGGER.error(
-                    SPRING_AOT_PROCESSOR + " exited with code: " + exitCode);
+            LOGGER.debug(SPRING_AOT_PROCESSOR + " exited with code " + exitCode
+                    + ". The output of the process is available in " + report);
         }
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
