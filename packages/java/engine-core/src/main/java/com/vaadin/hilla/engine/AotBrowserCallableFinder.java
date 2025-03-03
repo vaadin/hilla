@@ -101,7 +101,8 @@ class AotBrowserCallableFinder {
         var argsFile = engineConfiguration.getBuildDir()
                 .resolve("hilla-aot-args.txt");
         Files.write(argsFile, settings);
-
+        var report = engineConfiguration.getBuildDir()
+                .resolve("hilla-aot-report.txt");
         var javaExecutable = ProcessHandle.current().info().command()
                 .orElse(Path.of(System.getProperty("java.home"), "bin", "java")
                         .toString());
@@ -110,10 +111,8 @@ class AotBrowserCallableFinder {
         // reflect-config.json file. This comes from the `process-aot` goal.
         var process = new ProcessBuilder().inheritIO()
                 .command(javaExecutable, "@" + argsFile)
-                .redirectErrorStream(true).start();
-        var report = engineConfiguration.getBuildDir()
-                .resolve("hilla-aot-report.txt");
-        Files.copy(process.getInputStream(), report);
+                .redirectOutput(report.toFile()).redirectErrorStream(true)
+                .start();
         int exitCode = process.waitFor();
 
         if (exitCode != 0) {
