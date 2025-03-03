@@ -21,16 +21,13 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
 
     @Override
     public void enter(NodePath<?> nodePath) {
-        for (var plugin : plugins) {
-            plugin.enter(nodePath);
-        }
+        plugins.iterator().forEachRemaining((plugin) -> plugin.enter(nodePath));
     }
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        for (var plugin : plugins) {
-            plugin.exit(nodePath);
-        }
+        plugins.descendingIterator()
+                .forEachRemaining((plugin) -> plugin.exit(nodePath));
     }
 
     @Override
@@ -55,19 +52,15 @@ public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
     @Override
     public void setConfiguration(PluginConfiguration configuration) {
         super.setConfiguration(configuration);
-
-        for (var plugin : plugins) {
-            plugin.setConfiguration(configuration);
-        }
+        plugins.iterator().forEachRemaining(
+                plugin -> plugin.setConfiguration(configuration));
     }
 
     @Override
     public void setStorage(SharedStorage storage) {
         super.setStorage(storage);
-
-        for (var plugin : plugins) {
-            plugin.setStorage(storage);
-        }
+        plugins.iterator()
+                .forEachRemaining(plugin -> plugin.setStorage(storage));
     }
 
     private void verifyPluginsOrder() {

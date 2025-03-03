@@ -73,7 +73,7 @@ public final class TransferTypesPlugin
             var cls = entityNode.getSource();
             var name = cls.getName();
             if (replacedClasses.contains(name)) {
-                var component = rootNode.getTarget().getComponents().getSchemas().get(name);
+                var schema = entityNode.getTarget();
 
                 cls.getAnnotations().stream().filter(
                     (model) -> model.getName().equals(FromModule.class.getName())).findFirst().ifPresent(
@@ -99,7 +99,7 @@ public final class TransferTypesPlugin
                             fromModule.put("default", defaultSpecifier);
                         }
 
-                        component.addExtension("x-from-module", fromModule);
+                        schema.addExtension("x-from-module", fromModule);
                     });
             }
         }
