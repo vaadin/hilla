@@ -11,13 +11,7 @@ class LookupBrowserCallableFinder {
             EngineConfiguration engineConfiguration) {
         return engineConfiguration.getEndpointAnnotations().stream()
                 .map(classFinder::getAnnotatedClasses).flatMap(Set::stream)
-                .distinct().filter(clazz -> {
-                    var location = clazz.getProtectionDomain().getCodeSource()
-                            .getLocation();
-                    return location != null
-                            && location.getProtocol().equals("file")
-                            && location.getPath().endsWith("/");
-                }).toList();
+                .distinct().toList();
     }
 
 }
