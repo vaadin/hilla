@@ -37,27 +37,28 @@ import com.vaadin.hilla.runtime.transfertypes.ValueSignal;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
 
 public final class TransferTypesPlugin
-    extends AbstractPlugin<PluginConfiguration> {
+        extends AbstractPlugin<PluginConfiguration> {
     private static final Map<String, Class<?>> classMap = new HashMap<>();
 
     static {
         classMap.put("org.springframework.data.domain.Page", List.class);
         classMap.put("org.springframework.data.domain.Pageable",
-            Pageable.class);
+                Pageable.class);
         classMap.put("org.springframework.data.domain.Sort$Order", Order.class);
         classMap.put("org.springframework.data.domain.Sort", Sort.class);
         classMap.put(UUID.class.getName(), String.class);
         classMap.put("reactor.core.publisher.Flux", Flux.class);
         classMap.put("com.vaadin.hilla.EndpointSubscription",
-            EndpointSubscription.class);
+                EndpointSubscription.class);
         classMap.put(JsonNode.class.getName(), Object.class);
         classMap.put(ObjectNode.class.getName(), Object.class);
         classMap.put(ArrayNode.class.getName(), List.class);
         classMap.put("org.springframework.web.multipart.MultipartFile",
-            File.class);
+                File.class);
         classMap.put("com.vaadin.hilla.signals.Signal", Signal.class);
         classMap.put("com.vaadin.hilla.signals.ValueSignal", ValueSignal.class);
-        classMap.put("com.vaadin.hilla.signals.NumberSignal", NumberSignal.class);
+        classMap.put("com.vaadin.hilla.signals.NumberSignal",
+                NumberSignal.class);
         classMap.put("com.vaadin.hilla.signals.ListSignal", ListSignal.class);
     }
 
@@ -69,38 +70,42 @@ public final class TransferTypesPlugin
 
     @Override
     public void exit(NodePath<?> nodePath) {
-        if (nodePath.getNode() instanceof EntityNode entityNode && nodePath.getParentPath().getNode() instanceof RootNode rootNode) {
+        if (nodePath.getNode() instanceof EntityNode entityNode && nodePath
+                .getParentPath().getNode() instanceof RootNode rootNode) {
             var cls = entityNode.getSource();
             var name = cls.getName();
             if (replacedClasses.contains(name)) {
                 var schema = entityNode.getTarget();
 
-                cls.getAnnotations().stream().filter(
-                    (model) -> model.getName().equals(FromModule.class.getName())).findFirst().ifPresent(
-                    (annotationModel) -> {
-                        var annotation = (FromModule) annotationModel.get();
-                        var namedSpecifier = annotation.namedSpecifier();
-                        var defaultSpecifier = annotation.defaultSpecifier();
+                cls.getAnnotations().stream()
+                        .filter((model) -> model.getName()
+                                .equals(FromModule.class.getName()))
+                        .findFirst().ifPresent((annotationModel) -> {
+                            var annotation = (FromModule) annotationModel.get();
+                            var namedSpecifier = annotation.namedSpecifier();
+                            var defaultSpecifier = annotation
+                                    .defaultSpecifier();
 
-                        if (namedSpecifier.isBlank() && defaultSpecifier.isBlank()) {
-                            throw new IllegalArgumentException(String.format(
-                                "@FromImport annotation for class %s must have at least one named specifier or a default specifier",
-                                name));
-                        }
+                            if (namedSpecifier.isBlank()
+                                    && defaultSpecifier.isBlank()) {
+                                throw new IllegalArgumentException(String
+                                        .format("@FromImport annotation for class %s must have at least one named specifier or a default specifier",
+                                                name));
+                            }
 
-                        var fromModule = new HashMap<String, Object>();
-                        fromModule.put("module", annotation.module());
+                            var fromModule = new HashMap<String, Object>();
+                            fromModule.put("module", annotation.module());
 
-                        if (!namedSpecifier.isBlank()) {
-                            fromModule.put("named", namedSpecifier);
-                        }
+                            if (!namedSpecifier.isBlank()) {
+                                fromModule.put("named", namedSpecifier);
+                            }
 
-                        if (!defaultSpecifier.isBlank()) {
-                            fromModule.put("default", defaultSpecifier);
-                        }
+                            if (!defaultSpecifier.isBlank()) {
+                                fromModule.put("default", defaultSpecifier);
+                            }
 
-                        schema.addExtension("x-from-module", fromModule);
-                    });
+                            schema.addExtension("x-from-module", fromModule);
+                        });
             }
         }
     }
@@ -112,7 +117,8 @@ public final class TransferTypesPlugin
 
     @NonNull
     @Override
-    public Node<?, ?> resolve(@NonNull Node<?, ?> node, @NonNull NodePath<?> nodePath) {
+    public Node<?, ?> resolve(@NonNull Node<?, ?> node,
+            @NonNull NodePath<?> nodePath) {
         if (!(node instanceof TypedNode typedNode)) {
             return node;
         }
@@ -129,11 +135,12 @@ public final class TransferTypesPlugin
 
             var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
 
-            // Adding the class name to the shared data set to be able to add the import metadata if present.
+            // Adding the class name to the shared data set to be able to add
+            // the import metadata if present.
             replacedClasses.add(mappedClassInfo.getName());
 
             return ClassRefSignatureModel.of(mappedClassInfo,
-                classRef.getTypeArguments(), classRef.getAnnotations());
+                    classRef.getTypeArguments(), classRef.getAnnotations());
         });
     }
 }
