@@ -148,28 +148,28 @@
         "type" : "object",
         "x-from-module" : {
           "named" : "NumberSignal",
-          "module" : "@vaadin/react-signals"
+          "module" : "@vaadin/hilla-react-signals"
         }
       },
       "com.vaadin.hilla.runtime.transfertypes.ListSignal" : {
         "type" : "object",
         "x-from-module" : {
           "named" : "ListSignal",
-          "module" : "@vaadin/react-signals"
+          "module" : "@vaadin/hilla-react-signals"
         }
       },
       "com.vaadin.hilla.runtime.transfertypes.Signal" : {
         "type" : "object",
         "x-from-module" : {
           "named" : "Signal",
-          "module" : "@vaadin/react-signals"
+          "module" : "@vaadin/hilla-react-signals"
         }
       },
       "com.vaadin.hilla.runtime.transfertypes.ValueSignal" : {
         "type" : "object",
         "x-from-module" : {
           "named" : "ValueSignal",
-          "module" : "@vaadin/react-signals"
+          "module" : "@vaadin/hilla-react-signals"
         }
       }
     }
