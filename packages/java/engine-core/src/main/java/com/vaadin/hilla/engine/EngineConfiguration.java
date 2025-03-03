@@ -135,7 +135,7 @@ public class EngineConfiguration {
         return () -> {
             try {
                 return AotBrowserCallableFinder.findEndpointClasses(this);
-            } catch (IOException | InterruptedException e) {
+            } catch (Exception e) {
                 if (classFinder != null) {
                     LOGGER.info(
                             "AOT-based detection of browser-callable classes failed. Falling back to classpath scan.");
