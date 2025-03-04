@@ -67,24 +67,21 @@ public class FilterTransformer {
         }
 
         if (filter instanceof AndFilter andFilter) {
-            var newAndFilter = new AndFilter();
-            newAndFilter.setChildren(
-                    andFilter.getChildren().stream().map(this::apply).toList());
-            return newAndFilter;
+            Filter[] childFilters = andFilter.getChildren().stream()
+                    .map(this::apply).toArray(Filter[]::new);
+            return new AndFilter(childFilters);
         } else if (filter instanceof OrFilter orFilter) {
-            var newOrFilter = new OrFilter();
-            newOrFilter.setChildren(
-                    orFilter.getChildren().stream().map(this::apply).toList());
-            return newOrFilter;
+            Filter[] childFilters = orFilter.getChildren().stream()
+                    .map(this::apply).toArray(Filter[]::new);
+            return new OrFilter(childFilters);
         } else if (filter instanceof PropertyStringFilter propertyStringFilter) {
             var property = propertyStringFilter.getPropertyId();
             var mappedProperty = mappings.get(property);
-
-            var newFilter = new PropertyStringFilter();
-            newFilter.setPropertyId(
-                    mappedProperty == null ? property : mappedProperty);
-            newFilter.setFilterValue(propertyStringFilter.getFilterValue());
-            newFilter.setMatcher(propertyStringFilter.getMatcher());
+            var filterProperty = mappedProperty == null ? property
+                    : mappedProperty;
+            var newFilter = new PropertyStringFilter(filterProperty,
+                    propertyStringFilter.getMatcher(),
+                    propertyStringFilter.getFilterValue());
 
             if (filterTransformation != null) {
                 newFilter = filterTransformation.apply(newFilter);

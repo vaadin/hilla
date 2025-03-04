@@ -52,25 +52,15 @@ public class FilterTransformerTest {
         testObject.setEnumValue(TestEnum.TEST3);
         entityManager.persist(testObject);
 
-        var nameFilter = new PropertyStringFilter();
-        nameFilter.setPropertyId("dtoName");
-        nameFilter.setFilterValue("test");
-        nameFilter.setMatcher(Matcher.CONTAINS);
+        var nameFilter = new PropertyStringFilter("dtoName", Matcher.CONTAINS,
+                "test");
+        var intValueFilter = new PropertyStringFilter("dtoIntValue",
+                Matcher.EQUALS, "1");
+        var enumValueFilter = new PropertyStringFilter("dtoEnumValue",
+                Matcher.EQUALS, null);
 
-        var intValueFilter = new PropertyStringFilter();
-        intValueFilter.setPropertyId("dtoIntValue");
-        intValueFilter.setFilterValue("1");
-        intValueFilter.setMatcher(Matcher.EQUALS);
-
-        var enumValueFilter = new PropertyStringFilter();
-        enumValueFilter.setPropertyId("dtoEnumValue");
-        enumValueFilter.setMatcher(Matcher.EQUALS);
-
-        var orFilter = new OrFilter();
-        orFilter.setChildren(List.of(intValueFilter, enumValueFilter));
-
-        var andFilter = new AndFilter();
-        andFilter.setChildren(List.of(nameFilter, orFilter));
+        var orFilter = new OrFilter(intValueFilter, enumValueFilter);
+        var andFilter = new AndFilter(nameFilter, orFilter);
 
         var transformer = new FilterTransformer().withMapping("dtoName", "name")
                 .withMapping("dtoIntValue", "intValue")

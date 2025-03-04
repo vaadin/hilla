@@ -48,10 +48,8 @@ public class CrudRepositoryServiceJpaTest {
     public void count() {
         Assert.assertEquals(6, testCrudRepositoryService.count(null));
 
-        PropertyStringFilter filter = new PropertyStringFilter();
-        filter.setPropertyId("name");
-        filter.setMatcher(Matcher.CONTAINS);
-        filter.setFilterValue("Mich");
+        PropertyStringFilter filter = new PropertyStringFilter("name",
+                Matcher.CONTAINS, "Mich");
         Assert.assertEquals(2, testCrudRepositoryService.count(filter));
     }
 
