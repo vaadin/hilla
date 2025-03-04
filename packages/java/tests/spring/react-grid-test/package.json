@@ -25,7 +25,7 @@
     "lit": "3.2.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.29.0"
+    "react-router-dom": "6.30.0"
   },
   "devDependencies": {
     "@babel/preset-react": "7.26.3",
@@ -63,14 +63,14 @@
       "@polymer/polymer": "3.5.2",
       "@vaadin/bundles": "24.5.11",
       "@vaadin/common-frontend": "0.0.19",
-      "@vaadin/hilla-file-router": "24.5.12",
-      "@vaadin/hilla-frontend": "24.5.12",
-      "@vaadin/hilla-lit-form": "24.5.12",
-      "@vaadin/hilla-react-auth": "24.5.12",
-      "@vaadin/hilla-react-crud": "24.5.12",
-      "@vaadin/hilla-react-form": "24.5.12",
-      "@vaadin/hilla-react-i18n": "24.5.12",
-      "@vaadin/hilla-react-signals": "24.5.12",
+      "@vaadin/hilla-file-router": "24.5.13",
+      "@vaadin/hilla-frontend": "24.5.13",
+      "@vaadin/hilla-lit-form": "24.5.13",
+      "@vaadin/hilla-react-auth": "24.5.13",
+      "@vaadin/hilla-react-crud": "24.5.13",
+      "@vaadin/hilla-react-form": "24.5.13",
+      "@vaadin/hilla-react-i18n": "24.5.13",
+      "@vaadin/hilla-react-signals": "24.5.13",
       "@vaadin/polymer-legacy-adapter": "24.5.11",
       "@vaadin/react-components": "24.5.11",
       "@vaadin/react-components-pro": "24.5.11",
@@ -82,7 +82,7 @@
       "lit": "3.2.1",
       "react": "18.3.1",
       "react-dom": "18.3.1",
-      "react-router-dom": "6.29.0"
+      "react-router-dom": "6.30.0"
     },
     "devDependencies": {
       "@babel/preset-react": "7.26.3",
@@ -91,16 +91,16 @@
       "@rollup/pluginutils": "5.1.4",
       "@types/react": "18.3.18",
       "@types/react-dom": "18.3.5",
-      "@vaadin/hilla-generator-cli": "24.5.12",
-      "@vaadin/hilla-generator-core": "24.5.12",
-      "@vaadin/hilla-generator-plugin-backbone": "24.5.12",
-      "@vaadin/hilla-generator-plugin-barrel": "24.5.12",
-      "@vaadin/hilla-generator-plugin-client": "24.5.12",
-      "@vaadin/hilla-generator-plugin-model": "24.5.12",
-      "@vaadin/hilla-generator-plugin-push": "24.5.12",
-      "@vaadin/hilla-generator-plugin-signals": "24.5.12",
-      "@vaadin/hilla-generator-plugin-subtypes": "24.5.12",
-      "@vaadin/hilla-generator-utils": "24.5.12",
+      "@vaadin/hilla-generator-cli": "24.5.13",
+      "@vaadin/hilla-generator-core": "24.5.13",
+      "@vaadin/hilla-generator-plugin-backbone": "24.5.13",
+      "@vaadin/hilla-generator-plugin-barrel": "24.5.13",
+      "@vaadin/hilla-generator-plugin-client": "24.5.13",
+      "@vaadin/hilla-generator-plugin-model": "24.5.13",
+      "@vaadin/hilla-generator-plugin-push": "24.5.13",
+      "@vaadin/hilla-generator-plugin-signals": "24.5.13",
+      "@vaadin/hilla-generator-plugin-subtypes": "24.5.13",
+      "@vaadin/hilla-generator-utils": "24.5.13",
       "@vitejs/plugin-react": "4.3.4",
       "async": "3.2.6",
       "glob": "10.4.5",
@@ -115,7 +115,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "ec1693a63c3e9a996b16b12653dc13fa0e7fba1196a499d0cd3f15f1293e9657"
+    "hash": "b2c2059fea5745703ae1be9161a649c2209c9601f45e4706b9608644e2202c33"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
