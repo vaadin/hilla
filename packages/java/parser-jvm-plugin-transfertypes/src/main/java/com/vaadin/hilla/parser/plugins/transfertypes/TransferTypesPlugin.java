@@ -89,7 +89,7 @@ public final class TransferTypesPlugin
                             if (namedSpecifier.isBlank()
                                     && defaultSpecifier.isBlank()) {
                                 throw new IllegalArgumentException(String
-                                        .format("@FromImport annotation for class %s must have at least one named specifier or a default specifier",
+                                        .format("@FromModule annotation for class %s must have at least one named specifier or a default specifier",
                                                 name));
                             }
 
