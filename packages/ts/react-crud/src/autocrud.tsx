@@ -162,7 +162,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       ></AutoGrid>
       {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
           renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {noNewButton !== true && (
+      {!noNewButton && (
         <div className="auto-crud-toolbar">
           <Button theme="primary" onClick={() => setItem(emptyItem)}>
             + New
@@ -197,29 +197,30 @@ export function AutoCrud<TModel extends AbstractModel>({
     />
   );
 
-  const editableGrid = (
-    <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
-      {fullScreen ? (
-        <>
-          {mainSection}
-          <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
-            {autoForm}
-          </AutoCrudDialog>
-        </>
-      ) : (
-        <SplitLayout theme="small">
-          {mainSection}
-          <div className="auto-crud-form">
-            <div className="auto-crud-form-header">{formHeader}</div>
-            {autoForm}
-          </div>
-        </SplitLayout>
-      )}
-    </div>
-  );
-
   // If the "New" button is visible, the form is always shown.
   // Otherwise, the form is only shown when an item is being edited.
-  const formEnabled = noNewButton !== true || (item && item !== emptyItem);
-  return formEnabled ? editableGrid : mainSection;
+  if (!noNewButton || (item && item !== emptyItem)) {
+    return (
+      <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
+        {fullScreen ? (
+          <>
+            {mainSection}
+            <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
+              {autoForm}
+            </AutoCrudDialog>
+          </>
+        ) : (
+          <SplitLayout theme="small">
+            {mainSection}
+            <div className="auto-crud-form">
+              <div className="auto-crud-form-header">{formHeader}</div>
+              {autoForm}
+            </div>
+          </SplitLayout>
+        )}
+      </div>
+    );
+  }
+
+  return mainSection;
 }
