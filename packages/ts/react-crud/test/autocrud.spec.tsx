@@ -109,9 +109,9 @@ describe('@vaadin/hilla-react-crud', () => {
     it('can hide new button', async () => {
       const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} newButton={true} />);
+      rerender(<AutoCrud service={personService()} model={PersonModel} noNewButton={false} />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
-      rerender(<AutoCrud service={personService()} model={PersonModel} newButton={false} />);
+      rerender(<AutoCrud service={personService()} model={PersonModel} noNewButton />);
       await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
     });
 
@@ -298,6 +298,19 @@ describe('@vaadin/hilla-react-crud', () => {
       // Edit existing item
       await grid.toggleRowSelected(0);
       await expect(result.findByRole('heading', { name: 'Edit person' })).to.eventually.exist;
+    });
+
+    it('does not show the form if the New button is hidden', () => {
+      const result = render(<TestAutoCrud noNewButton />);
+      const hiddenForm = result.queryByTestId('auto-form');
+      expect(hiddenForm).to.not.exist;
+    });
+
+    it('shows the form if the New button is hidden, but an item is selected', async () => {
+      const grid = await GridController.init(render(<TestAutoCrud noNewButton />), user);
+      await grid.toggleRowSelected(1);
+      const form = await FormController.init(user);
+      expect(form.instance).to.exist;
     });
 
     describe('mobile layout', () => {

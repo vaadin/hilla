@@ -15,6 +15,10 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import java.io.File
+import java.io.Serializable
+import java.nio.file.Path
+import java.util.stream.Stream
 import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.gradle.VaadinPlugin
 import com.vaadin.hilla.engine.EngineConfiguration
@@ -27,8 +31,6 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
-import java.nio.file.Path
-import java.util.stream.Stream
 
 /**
  * The main class of the Hilla Gradle Plugin
@@ -49,8 +51,14 @@ public class HillaPlugin : Plugin<Project> {
         if (project.plugins.hasPlugin("org.springframework.boot")) {
             project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
 
-            project.tasks.register("hillaConfigure", EngineConfigureTask::class.java)
-            project.tasks.register("hillaGenerate", EngineGenerateTask::class.java)
+            project.tasks.apply {
+                register("hillaConfigure", EngineConfigureTask::class.java) {
+                    it.configure(project)
+                }
+                register("hillaGenerate", EngineGenerateTask::class.java) {
+                    it.configure(project)
+                }
+            }
 
             project.tasks.named("vaadinBuildFrontend") {
                 it.dependsOn("hillaConfigure")
@@ -120,4 +128,50 @@ public class HillaPlugin : Plugin<Project> {
                 .build()
         }
     }
+}
+
+/**
+ * A serializable data container that stores EngineConfiguration settings to
+ * provide an instance at execution time.
+ * It is needed to support gradle configuration cache, because
+ * EngineConfiguration has unserializable private members (e.g. Path references)
+ */
+internal data class EngineConfigurationSettings(
+    val baseDir: File,
+    val buildDir: File,
+    val classesDirs: Set<File>,
+    val outputDir: File,
+    val groupId: String,
+    val artifactId: String,
+    val classpath: List<String>,
+    val mainClass: String?,
+    val productionMode: Boolean
+) : Serializable {
+    fun toEngineConfiguration(): EngineConfiguration {
+        return EngineConfiguration.Builder()
+            .baseDir(baseDir.toPath())
+            .buildDir(buildDir.toPath())
+            .classesDirs(classesDirs.map { it.toPath() })
+            .outputDir(outputDir.toPath())
+            .groupId(groupId)
+            .artifactId(artifactId)
+            .classpath(classpath)
+            .withDefaultAnnotations()
+            .mainClass(mainClass)
+            .productionMode(productionMode)
+            .build()
+    }
+}
+
+internal fun EngineConfiguration.toInputs(): EngineConfigurationSettings {
+    return EngineConfigurationSettings(
+        baseDir = this.baseDir.toFile(), buildDir = this.buildDir.toFile(),
+        classesDirs = this.classesDirs.map { it.toFile() }.toSet(),
+        outputDir = this.outputDir.toFile(),
+        groupId = this.groupId,
+        artifactId = this.artifactId,
+        classpath = this.classpath.map { it.toString() },
+        mainClass = this.mainClass,
+        productionMode = this.isProductionMode
+    )
 }

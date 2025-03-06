@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.7-SNAPSHOT</version>
+        <version>24.8-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -15,7 +15,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <vaadin.components.version>24.7-SNAPSHOT</vaadin.components.version>
+        <vaadin.components.version>24.8-SNAPSHOT</vaadin.components.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
@@ -29,6 +29,9 @@
         <vaadin.devmode.vite.options>--host</vaadin.devmode.vite.options>
         <!-- make sure we do not leave webpack-dev-server running after IT -->
         <vaadin.reuseDevServer>false</vaadin.reuseDevServer>
+
+        <!-- enable React 19 feature flag by default -->
+        <vaadin.experimental.react19>true</vaadin.experimental.react19>
 
         <!-- Used in the tests, should be overridden for each module to support
     concurrent running of test modules. -->
@@ -139,6 +142,18 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>${properties-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -252,16 +267,26 @@
                             </goals>
                             <configuration>
                                 <properties>
-                                    <vaadin.reuseDevServer>${vaadin.reuseDevServer}</vaadin.reuseDevServer>
-                  <vaadin.devmode.liveReload.enabled>
-                                    ${vaadin.devmode.liveReload.enabled}</vaadin.devmode.liveReload.enabled>
-                  <vaadin.allow.appshell.annotations>
-                                    ${vaadin.allow.appshell.annotations}</vaadin.allow.appshell.annotations>
-
-                  <jetty.scantrigger>
-                                    ${jetty.scantrigger}</jetty.scantrigger>-->                   <!-- Allow test clients not on localhost to connect to Vite-->
-                  <vaadin.devmode.vite.options>
-                                    ${vaadin.devmode.vite.options}</vaadin.devmode.vite.options>
+                                    <jetty.scantrigger>
+                                        ${jetty.scantrigger}
+                                    </jetty.scantrigger>
+                                    <vaadin.reuseDevServer>
+                                        ${vaadin.reuseDevServer}
+                                    </vaadin.reuseDevServer>
+                                    <vaadin.devmode.liveReload.enabled>
+                                        ${vaadin.devmode.liveReload.enabled}
+                                    </vaadin.devmode.liveReload.enabled>
+                                    <vaadin.allow.appshell.annotations>
+                                        ${vaadin.allow.appshell.annotations}
+                                    </vaadin.allow.appshell.annotations>
+                                    <!-- Allow test clients not on localhost
+                                    to connect to Vite -->
+                                    <vaadin.devmode.vite.options>
+                                        ${vaadin.devmode.vite.options}
+                                    </vaadin.devmode.vite.options>
+                                    <vaadin.experimental.react19>
+                                        ${vaadin.experimental.react19}
+                                    </vaadin.experimental.react19>
                                 </properties>
                             </configuration>
                         </execution>
@@ -326,6 +351,16 @@
 
         <profile>
             <id>it-modules-some</id>
+            <modules>
+                <module>spring</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>react-18</id>
+            <properties>
+                <vaadin.experimental.react19>false</vaadin.experimental.react19>
+            </properties>
             <modules>
                 <module>spring</module>
             </modules>
