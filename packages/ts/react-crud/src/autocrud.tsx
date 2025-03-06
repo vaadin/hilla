@@ -77,12 +77,13 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     itemIdProperty?: string;
     /**
-     * Determines whether to hide the "New" button in the toolbar. By default,
-     * this is set to `false`, meaning the button will be shown.
+     * Determines whether to hide the "New" button in the toolbar.
      *
      * NOTE: This setting only hides the button; it does not prevent new items
      * from being sent to the service. Ensure your backend Java service is
      * properly secured to prevent unauthorized creation of new items.
+     *
+     * @defaultValue `false` meaning the button will be shown.
      */
     noNewButton?: boolean;
     /**
