@@ -218,6 +218,8 @@ export function AutoCrud<TModel extends AbstractModel>({
     </div>
   );
 
+  // If the "new" button is visible, the form is always shown.
+  // Otherwise, the form is only shown when an item is being edited.
   const formEnabled = noNewButton !== true || (item && item !== emptyItem);
   return formEnabled ? editableGrid : mainSection;
 }
