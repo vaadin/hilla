@@ -306,6 +306,13 @@ describe('@vaadin/hilla-react-crud', () => {
       expect(hiddenForm).to.not.exist;
     });
 
+    it('shows the form if the New button is hidden, but an item is selected', async () => {
+      const grid = await GridController.init(render(<TestAutoCrud noNewButton />), user);
+      await grid.toggleRowSelected(1);
+      const form = await FormController.init(user);
+      expect(form.instance).to.exist;
+    });
+
     describe('mobile layout', () => {
       let saveSpy: sinon.SinonSpy;
       let service: ReturnType<typeof personService>;
