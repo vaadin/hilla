@@ -26,7 +26,9 @@ public interface Plugin {
     }
 
     @NonNull
-    NodeDependencies scan(@NonNull NodeDependencies nodeDependencies);
+    default NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
+        return nodeDependencies;
+    }
 
     void setStorage(SharedStorage storage);
 }
