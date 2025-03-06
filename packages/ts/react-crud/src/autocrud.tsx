@@ -77,14 +77,14 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     itemIdProperty?: string;
     /**
-     * Determines whether to display the "New" button in the toolbar. By default,
-     * this is set to `true`, meaning the button will be shown.
+     * Determines whether to hide the "New" button in the toolbar. By default,
+     * this is set to `false`, meaning the button will be shown.
      *
      * NOTE: This setting only hides the button; it does not prevent new items
      * from being sent to the service. Ensure your backend Java service is
      * properly secured to prevent unauthorized creation of new items.
      */
-    newButton?: boolean;
+    noNewButton?: boolean;
     /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
@@ -119,7 +119,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   service,
   model,
   itemIdProperty,
-  newButton,
+  noNewButton,
   formProps,
   gridProps,
   style,
@@ -162,7 +162,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       ></AutoGrid>
       {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
           renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {newButton !== false && (
+      {noNewButton !== true && (
         <div className="auto-crud-toolbar">
           <Button theme="primary" onClick={() => setItem(emptyItem)}>
             + New
@@ -197,7 +197,7 @@ export function AutoCrud<TModel extends AbstractModel>({
     />
   );
 
-  return (
+  const editableGrid = (
     <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
       {fullScreen ? (
         <>
@@ -217,4 +217,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       )}
     </div>
   );
+
+  const formEnabled = noNewButton !== true || (item && item !== emptyItem);
+  return formEnabled ? editableGrid : mainSection;
 }
