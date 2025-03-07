@@ -19,8 +19,8 @@ import java.io.File
 import java.io.Serializable
 import java.nio.file.Path
 import java.util.stream.Stream
-import com.vaadin.gradle.VaadinFlowPluginExtension
-import com.vaadin.gradle.VaadinPlugin
+import com.vaadin.flow.gradle.VaadinFlowPluginExtension
+import com.vaadin.flow.gradle.FlowPlugin
 import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -45,7 +45,7 @@ public class HillaPlugin : Plugin<Project> {
 
         // we apply Vaadin (flow) plugin so that the users do not need to add it themselves
         // to leverage from vaadinPrepareFrontend and vaadinBuildFrontend:
-        project.pluginManager.apply(VaadinPlugin::class.java)
+        project.pluginManager.apply(FlowPlugin::class.java)
 
         // only register Hilla tasks in projects that use Spring Boot
         if (project.plugins.hasPlugin("org.springframework.boot")) {
