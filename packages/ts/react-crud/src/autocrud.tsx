@@ -161,15 +161,16 @@ export function AutoCrud<TModel extends AbstractModel>({
         ref={autoGridRef}
         aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
-      {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
-          renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {!noNewButton && (
-        <div className="auto-crud-toolbar">
-          <Button theme="primary" onClick={() => setItem(emptyItem)}>
-            + New
-          </Button>
-        </div>
-      )}
+      <div className="auto-crud-toolbar">
+        <Button
+          theme="primary"
+          onClick={() => setItem(emptyItem)}
+          disabled={noNewButton}
+          style={noNewButton ? { visibility: 'hidden', width: 0, minWidth: 0, padding: 0 } : undefined}
+        >
+          + New
+        </Button>
+      </div>
     </div>
   );
 
@@ -200,28 +201,26 @@ export function AutoCrud<TModel extends AbstractModel>({
 
   // If the "New" button is visible, the form is always shown.
   // Otherwise, the form is only shown when an item is being edited.
-  if (!noNewButton || (item && item !== emptyItem)) {
-    return (
-      <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
-        {fullScreen ? (
-          <>
-            {mainSection}
-            <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
-              {autoForm}
-            </AutoCrudDialog>
-          </>
-        ) : (
-          <SplitLayout theme="small">
-            {mainSection}
-            <div className="auto-crud-form">
-              <div className="auto-crud-form-header">{formHeader}</div>
-              {autoForm}
-            </div>
-          </SplitLayout>
-        )}
-      </div>
-    );
-  }
-
-  return mainSection;
+  return (
+    <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
+      {noNewButton && (!item || item === emptyItem) ? (
+        mainSection
+      ) : fullScreen ? (
+        <>
+          {mainSection}
+          <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
+            {autoForm}
+          </AutoCrudDialog>
+        </>
+      ) : (
+        <SplitLayout theme="small">
+          {mainSection}
+          <div className="auto-crud-form">
+            <div className="auto-crud-form-header">{formHeader}</div>
+            {autoForm}
+          </div>
+        </SplitLayout>
+      )}
+    </div>
+  );
 }
