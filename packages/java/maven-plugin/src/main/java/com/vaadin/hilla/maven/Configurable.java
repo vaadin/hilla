@@ -47,7 +47,7 @@ interface Configurable {
                 .withDefaultAnnotations().mainClass(mainClass)
                 .nodeCommand(getNode()).productionMode(isProduction).build();
         EngineConfiguration.setDefault(conf);
-        return conf;
+        return EngineConfiguration.load();
     }
 
     private File generatedOrOldLocation() {

@@ -1,7 +1,6 @@
 package com.vaadin.hilla.engine;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,6 +10,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +45,7 @@ public class EngineConfiguration {
     private String nodeCommand = "node";
     private ClassFinder classFinder;
 
-    private EngineConfiguration() {
+    EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
         buildDir = baseDir.resolve("target");
         generator = new GeneratorConfiguration();
@@ -162,6 +162,21 @@ public class EngineConfiguration {
         INSTANCE = config;
     }
 
+    public static EngineConfiguration load() {
+        var configurations = ServiceLoader.load(EngineConfiguration.class)
+                .stream().map(ServiceLoader.Provider::get).toList();
+
+        if (configurations.size() > 1) {
+            throw new IllegalStateException(configurations.stream()
+                    .map(config -> config.getClass().getName())
+                    .collect(Collectors.joining("\", \"",
+                            "Multiple EngineConfiguration instances found: \"",
+                            "\"")));
+        }
+
+        return configurations.isEmpty() ? getDefault() : configurations.get(0);
+    }
+
     public static final class Builder {
         private final EngineConfiguration configuration = new EngineConfiguration();
 
@@ -218,6 +233,10 @@ public class EngineConfiguration {
 
         public EngineConfiguration build() {
             return configuration;
+        }
+
+        public void setAsDefault() {
+            setDefault(configuration);
         }
 
         public Builder generator(GeneratorConfiguration value) {
@@ -335,5 +354,99 @@ public class EngineConfiguration {
     @FunctionalInterface
     public interface BrowserCallableFinder {
         List<Class<?>> findBrowserCallables() throws ExecutionFailedException;
+    }
+
+    /**
+     * Custom configurations must extend this class.
+     */
+    public static class Service extends EngineConfiguration {
+        protected Service() {
+        }
+
+        @Override
+        public Set<Path> getClasspath() {
+            return EngineConfiguration.getDefault().getClasspath();
+        }
+
+        @Override
+        public String getGroupId() {
+            return EngineConfiguration.getDefault().getGroupId();
+        }
+
+        @Override
+        public String getArtifactId() {
+            return EngineConfiguration.getDefault().getArtifactId();
+        }
+
+        @Override
+        public String getMainClass() {
+            return EngineConfiguration.getDefault().getMainClass();
+        }
+
+        @Override
+        public Path getBuildDir() {
+            return EngineConfiguration.getDefault().getBuildDir();
+        }
+
+        @Override
+        public Path getBaseDir() {
+            return EngineConfiguration.getDefault().getBaseDir();
+        }
+
+        @Override
+        public List<Path> getClassesDirs() {
+            return EngineConfiguration.getDefault().getClassesDirs();
+        }
+
+        @Override
+        public GeneratorConfiguration getGenerator() {
+            return EngineConfiguration.getDefault().getGenerator();
+        }
+
+        @Override
+        public Path getOutputDir() {
+            return EngineConfiguration.getDefault().getOutputDir();
+        }
+
+        @Override
+        public ParserConfiguration getParser() {
+            return EngineConfiguration.getDefault().getParser();
+        }
+
+        @Override
+        public boolean isProductionMode() {
+            return EngineConfiguration.getDefault().isProductionMode();
+        }
+
+        @Override
+        public String getNodeCommand() {
+            return EngineConfiguration.getDefault().getNodeCommand();
+        }
+
+        @Override
+        public ClassFinder getClassFinder() {
+            return EngineConfiguration.getDefault().getClassFinder();
+        }
+
+        @Override
+        public List<Class<? extends Annotation>> getEndpointAnnotations() {
+            return EngineConfiguration.getDefault().getEndpointAnnotations();
+        }
+
+        @Override
+        public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
+            return EngineConfiguration.getDefault()
+                    .getEndpointExposedAnnotations();
+        }
+
+        @Override
+        public Path getOpenAPIFile() {
+            return EngineConfiguration.getDefault().getOpenAPIFile();
+        }
+
+        @Override
+        public BrowserCallableFinder getBrowserCallableFinder() {
+            return EngineConfiguration.getDefault().getBrowserCallableFinder();
+        }
     }
 }

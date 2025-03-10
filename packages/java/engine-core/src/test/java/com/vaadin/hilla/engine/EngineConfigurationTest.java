@@ -7,6 +7,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -58,4 +60,42 @@ public class EngineConfigurationTest {
                     conf.getBrowserCallableFinder().findBrowserCallables());
         }
     }
+
+    /**
+     * Test that the service class overrides all public methods of the
+     * EngineConfiguration class. This is a sort of compile-like test to ensure
+     * that the service class is kept up-to-date with the superclass.
+     */
+    @Test
+    public void serviceShouldOverrideAllPublicMethods() {
+        var engineConfigurationClass = EngineConfiguration.class;
+        var engineConfigurationServiceClass = EngineConfiguration.Service.class;
+
+        var nonOverriddenMethods = Arrays
+                .stream(engineConfigurationClass.getDeclaredMethods())
+                .filter(method -> Modifier.isPublic(method.getModifiers()))
+                .filter(method -> !method.getName().equals("getDefault")
+                        && !method.getName().equals("setDefault"))
+                .filter(method -> {
+                    try {
+                        return engineConfigurationServiceClass
+                                .getDeclaredMethod(method.getName(),
+                                        method.getParameterTypes()) == null;
+                    } catch (NoSuchMethodException e) {
+                        return true;
+                    }
+                }).toList();
+
+        assertTrue(nonOverriddenMethods.isEmpty(),
+                "Service class should override all public methods of the EngineConfiguration class. "
+                        + "The following methods are not overridden: "
+                        + nonOverriddenMethods);
+    }
+
+    @Test
+    public void serviceClassShouldBeInstantiable() {
+        assertNotNull(new EngineConfiguration.Service(),
+                "Service class cannot be instantiated");
+    }
+
 }
