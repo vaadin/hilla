@@ -74,6 +74,8 @@ public class EngineConfigurationTest {
         var nonOverriddenMethods = Arrays
                 .stream(engineConfigurationClass.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
+                .filter(method -> !Modifier.isStatic(method.getModifiers()))
+                .filter(method -> !Modifier.isFinal(method.getModifiers()))
                 .filter(method -> !method.getName().equals("getDefault")
                         && !method.getName().equals("setDefault"))
                 .filter(method -> {
