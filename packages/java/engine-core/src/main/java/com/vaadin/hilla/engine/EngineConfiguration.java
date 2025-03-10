@@ -167,7 +167,7 @@ public class EngineConfiguration {
                 .stream().map(ServiceLoader.Provider::get).toList();
 
         if (configurations.size() > 1) {
-            throw new IllegalStateException(configurations.stream()
+            throw new ConfigurationException(configurations.stream()
                     .map(config -> config.getClass().getName())
                     .collect(Collectors.joining("\", \"",
                             "Multiple EngineConfiguration instances found: \"",
