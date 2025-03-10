@@ -24,7 +24,7 @@ interface Configurable {
 
     String getMainClass();
 
-    default EngineConfiguration configure() {
+    default void configure() {
         var project = (MavenProject) getPluginContext().get("project");
 
         var isProduction = project.getActiveProfiles().stream()
@@ -47,7 +47,6 @@ interface Configurable {
                 .withDefaultAnnotations().mainClass(mainClass)
                 .nodeCommand(getNode()).productionMode(isProduction).build();
         EngineConfiguration.setDefault(conf);
-        return EngineConfiguration.load();
     }
 
     private File generatedOrOldLocation() {
