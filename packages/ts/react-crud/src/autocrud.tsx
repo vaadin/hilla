@@ -161,16 +161,15 @@ export function AutoCrud<TModel extends AbstractModel>({
         ref={autoGridRef}
         aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
-      <div className="auto-crud-toolbar">
-        <Button
-          theme="primary"
-          onClick={() => setItem(emptyItem)}
-          disabled={noNewButton}
-          style={noNewButton ? { visibility: 'hidden', width: 0, minWidth: 0, padding: 0 } : undefined}
-        >
-          + New
-        </Button>
-      </div>
+      {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
+          renders as a half-height bar, let's hide it completely when the button is hidden */}
+      {!noNewButton && (
+        <div className="auto-crud-toolbar">
+          <Button theme="primary" onClick={() => setItem(emptyItem)}>
+            + New
+          </Button>
+        </div>
+      )}
     </div>
   );
 
