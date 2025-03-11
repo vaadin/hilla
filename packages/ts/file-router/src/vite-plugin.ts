@@ -1,7 +1,7 @@
 import { basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { TransformResult } from 'rollup';
-import type { Logger, Plugin } from 'vite';
+import type { EnvironmentModuleNode, HotUpdateOptions, Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
 const INJECTION =
@@ -62,14 +62,18 @@ export default function vitePluginFileSystemRouter({
   let _outDir: URL;
   let _logger: Logger;
   let runtimeUrls: RuntimeFileUrls;
+  let _generateRuntimeFiles: () => Promise<boolean>;
+  let _viewsDirUsingSlashes: string;
 
   return {
     name: 'vite-plugin-file-router',
+    enforce: 'pre',
     configResolved({ logger, root, build: { outDir } }) {
       const _root = pathToFileURL(root);
       const _generatedDir = new URL(generatedDir, _root);
 
       _viewsDir = new URL(viewsDir, _root);
+      _viewsDirUsingSlashes = fileURLToPath(_viewsDir, {}).replaceAll('\\', '/');
       _outDir = pathToFileURL(outDir);
       _logger = logger;
 
@@ -83,40 +87,80 @@ export default function vitePluginFileSystemRouter({
         code: new URL('file-routes.ts', _generatedDir),
         layouts: new URL('layouts.json', _generatedDir),
       };
+      _generateRuntimeFiles = async (): Promise<boolean> => {
+        try {
+          return await generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug);
+        } catch (e: unknown) {
+          _logger.error(String(e));
+          return true;
+        }
+      };
     },
     async buildStart() {
-      try {
-        await generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug);
-      } catch (e: unknown) {
-        _logger.error(String(e));
-      }
+      await _generateRuntimeFiles();
     },
-    configureServer(server) {
-      const dir = fileURLToPath(_viewsDir);
+    async hotUpdate({ file, modules }: HotUpdateOptions): Promise<void | EnvironmentModuleNode[]> {
+      const fileUrlString = String(pathToFileURL(file));
 
-      const changeListener = (file: string): void => {
-        if (!file.startsWith(dir)) {
-          if (file === fileURLToPath(runtimeUrls.json)) {
-            server.hot.send({ type: 'custom', event: 'fs-route-update' });
-          } else if (file !== fileURLToPath(runtimeUrls.layouts)) {
-            // outside views folder, only changes to layouts file should trigger files generation
-            return;
-          }
+      if (fileUrlString === String(runtimeUrls.json)) {
+        // Reload file routes JSON with a custom HMR event.
+        this.environment.hot.send({ type: 'custom', event: 'fs-route-update' });
+        return [];
+      }
+
+      if (fileUrlString === String(runtimeUrls.code)) {
+        // Skip HMR for file routes from Vite builtin file change listener,
+        // as we have our own HMR handling below.
+        return [];
+      }
+
+      if (!file.startsWith(_viewsDirUsingSlashes)) {
+        // Outside views folder, only changes to layouts file should trigger
+        // files generation.
+        if (fileUrlString !== String(runtimeUrls.layouts)) {
+          return;
+        }
+      }
+
+      // Check and update file routes if needed.
+      if (await _generateRuntimeFiles()) {
+        // The "file-routes.ts" file was changed at this point, so it should
+        // be considered within the HMR update that caused the routes update.
+
+        const mg = this.environment.moduleGraph;
+        const fileRoutesModules = mg.getModulesByFile(fileURLToPath(runtimeUrls.code).replaceAll('\\', '/'))!;
+
+        // Make eager update for file routes in Vite module graph
+        // for consistency with the generated file contents.
+        await Promise.all(
+          [...fileRoutesModules].map(async (fileRouteModule) => {
+            mg.invalidateModule(fileRouteModule);
+            await this.environment.fetchModule(fileRouteModule.id!, undefined, { cached: false });
+          }),
+        );
+
+        const neverImported = modules.every((module) => module.importers.size === 0);
+        if (neverImported) {
+          // The current file is a not imported anywhere, however it caused
+          // "file-routes.ts" update: possibly a route for this file
+          // was removed, or we're processing "layouts.json".
+
+          // Default Vite HMR behavior for not imported modules is a full page
+          // reload. However, in this case, we could avoid it and only do HMR
+          // for the file routes instead.
+          return [...fileRoutesModules];
         }
 
-        generateRuntimeFiles(_viewsDir, runtimeUrls, extensions, _logger, debug).catch((e: unknown) =>
-          _logger.error(String(e)),
-        );
-      };
+        // Add "file-routes.ts" to current HMR module update list to reload
+        // both at the same time.
+        return [...fileRoutesModules, ...modules];
+      }
 
-      server.watcher.on('add', changeListener);
-      server.watcher.on('change', changeListener);
-      server.watcher.on('unlink', changeListener);
+      return undefined;
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
       let modifiedCode = code;
-      const viewsDirUsingSlashes = fileURLToPath(_viewsDir).replaceAll('\\', '/');
-      if (id.startsWith(viewsDirUsingSlashes) && !basename(id).startsWith('_')) {
+      if (id.startsWith(_viewsDirUsingSlashes) && !basename(id).startsWith('_')) {
         if (isDevMode) {
           // To enable HMR for route files with exported configurations, we need
           // to address a limitation in `react-refresh`. This library requires
