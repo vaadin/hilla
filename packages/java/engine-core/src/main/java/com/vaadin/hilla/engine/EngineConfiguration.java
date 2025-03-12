@@ -103,7 +103,8 @@ public interface EngineConfiguration {
         return isProductionMode()
                 ? getClassesDirs().stream()
                         .map(dir -> dir.resolve(OPEN_API_PATH))
-                        .filter(Files::isRegularFile).findFirst().orElseThrow()
+                        .filter(Files::isRegularFile).findFirst()
+                        .orElse(getClassesDirs().get(0).resolve(OPEN_API_PATH))
                 : getBuildDir().resolve(OPEN_API_PATH);
     }
 
