@@ -158,26 +158,13 @@ class AotBrowserCallableFinder {
             candidates.add(name);
         }
 
-        // Prepare classloader
-        var classpath = engineConfiguration.getClasspath().stream()
-                .filter(Files::exists).toList();
-
-        var urls = classpath.stream().map(Path::toFile).map(file -> {
-            try {
-                return file.toURI().toURL();
-            } catch (Throwable t) {
-                return null;
-            }
-        }).filter(Objects::nonNull).toArray(URL[]::new);
-
         var annotationNames = engineConfiguration.getParser()
                 .getEndpointAnnotations().stream().map(Class::getName).toList();
 
-        var classLoader = new URLClassLoader(urls,
-                AotBrowserCallableFinder.class.getClassLoader());
         return candidates.stream().map(name -> {
             try {
-                return Class.forName(name, false, classLoader);
+                return Class.forName(name, false,
+                        engineConfiguration.getClassLoader());
             } catch (Throwable t) {
                 return null;
             }

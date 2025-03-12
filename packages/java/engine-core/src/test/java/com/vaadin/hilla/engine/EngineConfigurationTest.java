@@ -38,8 +38,7 @@ public class EngineConfigurationTest {
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenThrow(RuntimeException.class);
-        var conf = new EngineConfiguration.Builder().classFinder(classFinder)
-                .build();
+        var conf = EngineConfiguration.DEFAULT.setClassFinder(classFinder);
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
@@ -54,8 +53,8 @@ public class EngineConfigurationTest {
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
-        var conf = new EngineConfiguration.Builder().classFinder(classFinder)
-                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        var conf = EngineConfiguration.DEFAULT.setClassFinder(classFinder)
+                .setEndpointAnnotations(BrowserCallableEndpoint.class);
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
                     .thenThrow(ParserException.class);
@@ -64,40 +63,42 @@ public class EngineConfigurationTest {
         }
     }
 
-    /**
-     * Test that the service class overrides all public methods of the
-     * EngineConfiguration class. This is a sort of compile-like test to ensure
-     * that the service class is kept up-to-date with the superclass.
-     */
-    @Test
-    public void serviceShouldOverrideAllPublicMethods() {
-        var engineConfigurationClass = EngineConfiguration.class;
-        var engineConfigurationServiceClass = EngineConfiguration.Service.class;
+    // /**
+    // * Test that the service class overrides all public methods of the
+    // * EngineConfiguration class. This is a sort of compile-like test to
+    // ensure
+    // * that the service class is kept up-to-date with the superclass.
+    // */
+    // @Test
+    // public void serviceShouldOverrideAllPublicMethods() {
+    // var engineConfigurationClass = EngineConfiguration.class;
+    // var engineConfigurationServiceClass = EngineConfiguration.Service.class;
 
-        var nonOverriddenMethods = Arrays
-                .stream(engineConfigurationClass.getDeclaredMethods())
-                .filter(method -> Modifier.isPublic(method.getModifiers()))
-                .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .filter(method -> !Modifier.isFinal(method.getModifiers()))
-                .filter(method -> !method.getName().equals("getDefault")
-                        && !method.getName().equals("setDefault"))
-                .filter(method -> {
-                    try {
-                        return engineConfigurationServiceClass
-                                .getDeclaredMethod(method.getName(),
-                                        method.getParameterTypes()) == null;
-                    } catch (NoSuchMethodException e) {
-                        return true;
-                    }
-                }).toList();
+    // var nonOverriddenMethods = Arrays
+    // .stream(engineConfigurationClass.getDeclaredMethods())
+    // .filter(method -> Modifier.isPublic(method.getModifiers()))
+    // .filter(method -> !Modifier.isStatic(method.getModifiers()))
+    // .filter(method -> !Modifier.isFinal(method.getModifiers()))
+    // .filter(method -> !method.getName().equals("getDefault")
+    // && !method.getName().equals("setDefault"))
+    // .filter(method -> {
+    // try {
+    // return engineConfigurationServiceClass
+    // .getDeclaredMethod(method.getName(),
+    // method.getParameterTypes()) == null;
+    // } catch (NoSuchMethodException e) {
+    // return true;
+    // }
+    // }).toList();
 
-        assertTrue(nonOverriddenMethods.isEmpty(),
-                "Service class should override all public methods of the EngineConfiguration class. "
-                        + "The following methods are not overridden: "
-                        + nonOverriddenMethods);
-    }
+    // assertTrue(nonOverriddenMethods.isEmpty(),
+    // "Service class should override all public methods of the
+    // EngineConfiguration class. "
+    // + "The following methods are not overridden: "
+    // + nonOverriddenMethods);
+    // }
 
-    private static class TestService extends EngineConfiguration.Service {
+    private static class TestService implements EngineConfiguration {
         @Override
         public String getGroupId() {
             return "com.example";
@@ -119,7 +120,7 @@ public class EngineConfigurationTest {
         }
     }
 
-    private static class OtherTestService extends EngineConfiguration.Service {
+    private static class OtherTestService implements EngineConfiguration {
         @Override
         public String getGroupId() {
             return "com.other";

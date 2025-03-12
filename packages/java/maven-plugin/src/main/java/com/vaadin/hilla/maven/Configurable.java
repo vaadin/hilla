@@ -37,16 +37,14 @@ interface Configurable {
                     "mainClass");
         }
 
-        var conf = new EngineConfiguration.Builder()
-                .baseDir(project.getBasedir().toPath())
-                .buildDir(project.getBuild().getDirectory())
-                .outputDir(generatedOrOldLocation().toPath())
-                .groupId(project.getGroupId())
-                .artifactId(project.getArtifactId())
-                .classpath(getClasspathElements(project))
-                .withDefaultAnnotations().mainClass(mainClass)
-                .nodeCommand(getNode()).productionMode(isProduction).build();
-        EngineConfiguration.setDefault(conf);
+        EngineConfiguration.DEFAULT.setBaseDir(project.getBasedir().toPath())
+                .setBuildDir(project.getBuild().getDirectory())
+                .setOutputDir(generatedOrOldLocation().toPath())
+                .setGroupId(project.getGroupId())
+                .setArtifactId(project.getArtifactId())
+                .setClasspath(getClasspathElements(project))
+                .withDefaultAnnotations().setMainClass(mainClass)
+                .setNodeCommand(getNode()).setProductionMode(isProduction);
     }
 
     private File generatedOrOldLocation() {

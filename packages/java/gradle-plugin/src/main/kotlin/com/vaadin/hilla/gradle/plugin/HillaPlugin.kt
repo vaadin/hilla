@@ -101,7 +101,7 @@ public class HillaPlugin : Plugin<Project> {
     }
 
     public companion object {
-        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension): EngineConfiguration {
+        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension) {
             val baseDir: Path = project.projectDir.toPath()
             val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
@@ -114,18 +114,17 @@ public class HillaPlugin : Plugin<Project> {
                 .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
             val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
 
-            return EngineConfiguration.Builder()
-                .baseDir(baseDir)
-                .buildDir(buildDir)
-                .classesDirs(sourceSet.output.classesDirs.map { it.toPath() }.toList())
-                .outputDir(vaadinExtension.generatedTsFolder.get().toPath())
-                .groupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
-                .artifactId(project.name)
-                .classpath(classpath)
+            EngineConfiguration.DEFAULT
+                .setBaseDir(baseDir)
+                .setBuildDir(buildDir)
+                .setClassesDirs(sourceSet.output.classesDirs.map { it.toPath() }.toList())
+                .setOutputDir(vaadinExtension.generatedTsFolder.get().toPath())
+                .setGroupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
+                .setArtifactId(project.name)
+                .setClasspath(classpath)
+                .setMainClass(project.findProperty("mainClass") as String?)
+                .setProductionMode(vaadinExtension.productionMode.getOrElse(false))
                 .withDefaultAnnotations()
-                .mainClass(project.findProperty("mainClass") as String?)
-                .productionMode(vaadinExtension.productionMode.getOrElse(false))
-                .build()
         }
     }
 }
@@ -147,19 +146,18 @@ internal data class EngineConfigurationSettings(
     val mainClass: String?,
     val productionMode: Boolean
 ) : Serializable {
-    fun toEngineConfiguration(): EngineConfiguration {
-        return EngineConfiguration.Builder()
-            .baseDir(baseDir.toPath())
-            .buildDir(buildDir.toPath())
-            .classesDirs(classesDirs.map { it.toPath() })
-            .outputDir(outputDir.toPath())
-            .groupId(groupId)
-            .artifactId(artifactId)
-            .classpath(classpath)
+    fun toEngineConfiguration() {
+         EngineConfiguration.DEFAULT
+            .setBaseDir(baseDir.toPath())
+            .setBuildDir(buildDir.toPath())
+            .setClassesDirs(classesDirs.map { it.toPath() })
+            .setOutputDir(outputDir.toPath())
+            .setGroupId(groupId)
+            .setArtifactId(artifactId)
+            .setClasspath(classpath)
+            .setMainClass(mainClass)
+            .setProductionMode(productionMode)
             .withDefaultAnnotations()
-            .mainClass(mainClass)
-            .productionMode(productionMode)
-            .build()
     }
 }
 

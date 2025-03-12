@@ -83,9 +83,8 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
-        var engineConfiguration = new EngineConfiguration.Builder()
-                .browserCallableFinder(() -> List.of(MyEndpoint.class)).build();
-        EngineConfiguration.setDefault(engineConfiguration);
+        var engineConfiguration = EngineConfiguration.DEFAULT
+                .setBrowserCallableFinder(() -> List.of(MyEndpoint.class));
 
         new NodeTasks(options).execute();
         assertEndpointFilesInProductionMode(true);

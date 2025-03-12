@@ -35,11 +35,11 @@ public abstract class EngineConfigureTask : DefaultTask() {
     }
 
     internal fun configure(project: Project) {
-        val engineConfig = HillaPlugin.createEngineConfiguration(
+        HillaPlugin.createEngineConfiguration(
             project,
             VaadinFlowPluginExtension.get(project)
         )
-        engineConfigurationSettings.set(engineConfig.toInputs())
+        engineConfigurationSettings.set(EngineConfiguration.load().toInputs())
     }
 
     @get:Internal
@@ -47,8 +47,6 @@ public abstract class EngineConfigureTask : DefaultTask() {
 
     @TaskAction
     public fun engineConfigure() {
-        EngineConfiguration.setDefault(
-            engineConfigurationSettings.get().toEngineConfiguration()
-        )
+        engineConfigurationSettings.get().toEngineConfiguration()
     }
 }

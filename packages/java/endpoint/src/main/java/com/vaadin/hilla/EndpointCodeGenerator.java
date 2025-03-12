@@ -154,16 +154,16 @@ public class EndpointCodeGenerator {
 
             var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());
-            engineConfiguration = new EngineConfiguration.Builder()
-                    .baseDir(configuration.getProjectFolder().toPath())
-                    .buildDir(configuration.getBuildFolder())
-                    .outputDir(
+            engineConfiguration = EngineConfiguration.DEFAULT
+                    .setBaseDir(configuration.getProjectFolder().toPath())
+                    .setBuildDir(configuration.getBuildFolder())
+                    .setOutputDir(
                             FrontendUtils
                                     .getFrontendGeneratedFolder(
                                             configuration.getFrontendFolder())
                                     .toPath())
-                    .productionMode(false).withDefaultAnnotations()
-                    .nodeCommand(frontendTools.getNodeBinary()).build();
+                    .setProductionMode(false).withDefaultAnnotations()
+                    .setNodeCommand(frontendTools.getNodeBinary());
         }
     }
 

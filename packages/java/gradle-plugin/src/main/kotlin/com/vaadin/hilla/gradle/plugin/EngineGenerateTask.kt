@@ -18,6 +18,7 @@ package com.vaadin.hilla.gradle.plugin
 import java.io.IOException
 import com.vaadin.gradle.PluginEffectiveConfiguration
 import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.EngineConfiguration
 import com.vaadin.hilla.engine.GeneratorException
 import com.vaadin.hilla.engine.GeneratorProcessor
 import com.vaadin.hilla.engine.ParserException
@@ -63,10 +64,11 @@ public abstract class EngineGenerateTask : DefaultTask() {
         groupId.set(project.group.toString())
         artifactId.set(project.name)
         mainClass.set(project.findProperty("mainClass") as String?)
-        val engineConfig = HillaPlugin.createEngineConfiguration(
+        HillaPlugin.createEngineConfiguration(
             project,
             VaadinFlowPluginExtension.get(project)
         )
+        val engineConfig = EngineConfiguration.load()
         engineConfigurationSettings.set(engineConfig.toInputs())
         effectiveConfig.set(PluginEffectiveConfiguration.get(project))
         classpath.from(engineConfig.classpath.map { it.toFile() })
@@ -107,7 +109,8 @@ public abstract class EngineGenerateTask : DefaultTask() {
         logger.info("Running the engineGenerate task with effective Vaadin configuration ${effectiveConfig.get()}")
 
         try {
-            val conf = engineConfigurationSettings.get().toEngineConfiguration()
+            engineConfigurationSettings.get().toEngineConfiguration()
+            val conf = EngineConfiguration.load()
 
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)

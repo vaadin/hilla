@@ -64,10 +64,9 @@ public class TaskTest {
     }
 
     protected EngineConfiguration getEngineConfiguration() {
-        return new EngineConfiguration.Builder()
-                .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
-                .outputDir(getOutputDirectory()).withDefaultAnnotations()
-                .build();
+        return EngineConfiguration.DEFAULT.setBaseDir(getTemporaryDirectory())
+                .setBuildDir(getBuildDirectory())
+                .setOutputDir(getOutputDirectory()).withDefaultAnnotations();
     }
 
     protected OpenAPI getGeneratedOpenAPI() {
