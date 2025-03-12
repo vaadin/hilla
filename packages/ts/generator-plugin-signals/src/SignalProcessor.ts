@@ -1,31 +1,33 @@
+import { dirname, extname } from 'node:path';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import { template, transform, traverse } from '@vaadin/hilla-generator-utils/ast.js';
-import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
+import { simplifyFullyQualifiedName } from '@vaadin/hilla-generator-core/Schema.js';
+import { traverse } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type FunctionDeclaration, type Identifier, type SourceFile } from 'typescript';
+import ast, { createTransformer } from 'tsc-template';
+import {
+  factory,
+  isTypeReferenceNode,
+  isIdentifier,
+  type ReturnStatement,
+  type SourceFile,
+  type TypeNode,
+  type ParameterDeclaration,
+  type BinaryExpression,
+  type Node,
+  SyntaxKind,
+  isTypeNode,
+  transform,
+  isFunctionDeclaration,
+  isImportDeclaration,
+  isUnionTypeNode,
+  type PropertyAccessExpression,
+} from 'typescript';
+import { ARRAY_TYPES, COLLECTION_SIGNALS, GENERIC_SIGNALS } from './utils.js';
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';
-
-const CONNECT_CLIENT = '$CONNECT_CLIENT$';
-const METHOD_NAME = '$METHOD_NAME$';
-const SIGNAL = '$SIGNAL$';
-const RETURN_TYPE = '$RETURN_TYPE$';
-const INITIAL_VALUE = '$INITIAL_VALUE$';
-
-const signals = ['NumberSignal', 'ValueSignal', 'ListSignal'];
-const genericSignals = ['ValueSignal', 'ListSignal'];
-const collectionSignals = ['ListSignal'];
-
-const primitiveModels = Object.freeze(
-  new Map<ts.SyntaxKind, string>([
-    [ts.SyntaxKind.StringKeyword, 'StringModel'],
-    [ts.SyntaxKind.NumberKeyword, 'NumberModel'],
-    [ts.SyntaxKind.BooleanKeyword, 'BooleanModel'],
-    [ts.SyntaxKind.ArrayType, 'ArrayModel'],
-  ]),
-);
+const HILLA_LIT_FORM = '@vaadin/hilla-lit-form';
 
 export default class SignalProcessor {
   readonly #dependencyManager: DependencyManager;
@@ -47,87 +49,69 @@ export default class SignalProcessor {
     this.#owner.logger.debug(`Processing signals: ${this.#service}`);
     const { imports } = this.#dependencyManager;
 
-    const [, connectClientId] = imports.default.iter().find(([path]) => path.includes('connect-client'))!;
+    const [, connectClientId] = Iterator.from(imports.default).find(([path]) => path.includes('connect-client'))!;
 
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
     let initTypeUsageCount = 0;
-    const functionParams: Map<string, ts.ParameterDeclaration[]> = new Map<string, ts.ParameterDeclaration[]>();
 
-    const [file] = ts.transform<SourceFile>(this.#sourceFile, [
-      transform((tsNode) => {
-        if (ts.isFunctionDeclaration(tsNode) && tsNode.name && this.#methods.has(tsNode.name.text)) {
-          const signalId = this.#replaceSignalImport(tsNode);
-          const filteredParams = tsNode.parameters.filter(
-            (p) => !p.type || !ts.isTypeReferenceNode(p.type) || p.type.typeName !== initTypeId,
-          );
-          // `filteredParams` can be altered after, need to store the param names now
-          const paramNames = filteredParams.map((p) => (p.name as ts.Identifier).text).join(', ');
-          const isCollectionSignal = collectionSignals.includes(signalId.text);
+    const [file] = transform<SourceFile>(this.#sourceFile, [
+      createTransformer((node) => {
+        if (isFunctionDeclaration(node)) {
+          if (node.name && this.#methods.has(node.name.text)) {
+            const signalId = imports.named.getIdentifier(
+              HILLA_REACT_SIGNALS,
+              simplifyFullyQualifiedName(this.#methods.get(node.name.text)!),
+            )!;
 
-          const { defaultValueExpression, defaultValueParam, genericReturnType } = this.#createDefaultValue(
-            signalId,
-            tsNode,
-          );
-          if (defaultValueParam) {
-            filteredParams.push(defaultValueParam);
-          }
+            const params = node.parameters.filter(
+              // Remove the `init` parameter
+              (p) => !(p.type && isTypeReferenceNode(p.type) && p.type.typeName === initTypeId),
+            );
 
-          const returnType = genericReturnType ?? signalId;
-          if (filteredParams.length > 0) {
-            functionParams.set(tsNode.name.text, filteredParams);
-          }
-          return template(
-            `function ${METHOD_NAME}(): ${RETURN_TYPE} {
-  return new ${SIGNAL}(${
-    isCollectionSignal ? '' : `${INITIAL_VALUE}, `
-  }{ client: ${CONNECT_CLIENT}, endpoint: '${this.#service}', method: '${tsNode.name.text}'${
-    paramNames.length ? `, params: { ${paramNames} }` : ''
-  } });
-}`,
-            (statements) => statements,
-            [
-              transform((node) => (ts.isIdentifier(node) && node.text === METHOD_NAME ? tsNode.name : node)),
-              transform((node) => (ts.isIdentifier(node) && node.text === SIGNAL ? signalId : node)),
-              transform((node) => (ts.isIdentifier(node) && node.text === RETURN_TYPE ? returnType : node)),
-              transform((node) => (ts.isIdentifier(node) && node.text === CONNECT_CLIENT ? connectClientId : node)),
-              transform((node) =>
-                ts.isIdentifier(node) && node.text === INITIAL_VALUE ? defaultValueExpression : node,
-              ),
-            ],
-          );
-        }
-        return tsNode;
-      }),
-      transform((tsNode) => {
-        if (
-          ts.isFunctionDeclaration(tsNode) &&
-          tsNode.name &&
-          this.#methods.has(tsNode.name.text) &&
-          functionParams.has(tsNode.name.text)
-        ) {
-          return ts.factory.updateFunctionDeclaration(
-            tsNode,
-            tsNode.modifiers,
-            tsNode.asteriskToken,
-            tsNode.name,
-            tsNode.typeParameters,
-            functionParams.get(tsNode.name.text)!,
-            tsNode.type,
-            tsNode.body,
-          );
-        }
-        return tsNode;
-      }),
-      transform((tsNode) => {
-        if (ts.isFunctionDeclaration(tsNode)) {
-          if (
-            !(tsNode.name && this.#methods.has(tsNode.name.text)) &&
-            tsNode.parameters.some((p) => p.type && ts.isTypeReferenceNode(p.type) && p.type.typeName === initTypeId)
+            const { defaultValue, defaultValueParameter } = this.#createDefaultValue(signalId.text, node.type);
+
+            const modifiers = node.modifiers?.filter((m) => m.kind !== SyntaxKind.AsyncKeyword);
+
+            const type =
+              node.type &&
+              isTypeReferenceNode(node.type) &&
+              isIdentifier(node.type.typeName) &&
+              node.type.typeName.text === 'Promise'
+                ? node.type.typeArguments?.[0]
+                : node.type;
+
+            const paramNames = params
+              .map((p) => p.name)
+              .filter((n) => isIdentifier(n))
+              .map((n) => n.text);
+
+            const result = ast`function dummy() { %{
+              return new ${signalId}(${defaultValue}${defaultValue ? ',' : ''}{
+                client: ${connectClientId},
+                endpoint: '${this.#service}',
+                method: '${node.name.text}'
+                ${paramNames.length ? `, params: { ${paramNames.join('\n')} }` : ''} });
+            }% });`;
+
+            return factory.updateFunctionDeclaration(
+              node,
+              modifiers,
+              node.asteriskToken,
+              node.name,
+              node.typeParameters,
+              defaultValueParameter ? [...params, defaultValueParameter] : params,
+              type,
+              factory.createBlock([result.node as ReturnStatement]),
+            );
+          } else if (
+            node.parameters.some((p) => p.type && isTypeReferenceNode(p.type) && p.type.typeName === initTypeId)
           ) {
+            // Count the number of times the `init` parameter is used to remove the import if not used
             initTypeUsageCount += 1;
           }
         }
-        return tsNode;
+
+        return node;
       }),
     ]).transformed;
 
@@ -138,202 +122,100 @@ export default class SignalProcessor {
     return createSourceFile(
       [
         ...this.#dependencyManager.imports.toCode(),
-        ...file.statements.filter((statement) => !ts.isImportDeclaration(statement)),
+        ...file.statements.filter((statement) => !isImportDeclaration(statement)),
       ],
       file.fileName,
     );
   }
 
-  #createDefaultValue(signalId: ts.Identifier, functionDeclaration: FunctionDeclaration) {
-    const defaultValue: {
-      defaultValueExpression: ts.Expression | ts.Identifier;
-      defaultValueParam: ts.ParameterDeclaration | undefined;
-      genericReturnType: ts.TypeNode | undefined;
-    } = {
-      defaultValueExpression: signalId.text.startsWith('NumberSignal')
-        ? ts.factory.createNumericLiteral('0')
-        : ts.factory.createIdentifier('undefined'),
-      defaultValueParam: undefined,
-      genericReturnType: undefined,
+  #createDefaultValue(signalClass: string, returnType?: TypeNode) {
+    const { imports } = this.#dependencyManager;
+
+    if (COLLECTION_SIGNALS.includes(signalClass)) {
+      return {};
+    }
+
+    const defaultValue = signalClass.startsWith('NumberSignal') ? '0' : 'undefined';
+
+    if (!GENERIC_SIGNALS.includes(signalClass)) {
+      return { defaultValue };
+    }
+
+    const type = traverse(returnType!, (node) =>
+      isTypeReferenceNode(node) &&
+      isIdentifier(node.typeName) &&
+      GENERIC_SIGNALS.includes(node.typeName.text) &&
+      node.typeArguments
+        ? node.typeArguments[0]
+        : undefined,
+    )!;
+
+    const modelId = traverse(type, (node) => {
+      // In case the generic argument of a signal class is a union type with
+      // undefined (e.g. `Signal<Person | undefined>`), the default value will
+      // be `undefined`.
+      if (isUnionTypeNode(node) && node.types.length > 1 && node.types[1].kind === SyntaxKind.UndefinedKeyword) {
+        return SyntaxKind.UndefinedKeyword;
+      }
+
+      // Otherwise, we have to import the model class.
+      return this.#getModelId(node);
+    })!;
+
+    // If we have a signal class with a generic argument (but not a collection),
+    // we need to provide a possibility to set the default value.
+    const optionsMethodTypeId =
+      imports.named.getIdentifier(HILLA_REACT_SIGNALS, 'SignalMethodOptions') ??
+      imports.named.add(HILLA_REACT_SIGNALS, 'SignalMethodOptions');
+
+    return {
+      defaultValue:
+        modelId === SyntaxKind.UndefinedKeyword
+          ? (ast`options?.defaultValue`.node as PropertyAccessExpression)
+          : (ast`options?.defaultValue ?? ${modelId}.createEmptyValue()`.node as BinaryExpression),
+      defaultValueParameter: ast`function dummy( %{ options?: ${optionsMethodTypeId}<${type}> }% ) {}`
+        .node as ParameterDeclaration,
     };
-
-    if (!genericSignals.includes(signalId.text)) {
-      return defaultValue;
-    }
-
-    [defaultValue.genericReturnType] = (functionDeclaration.type as ts.TypeReferenceNode).typeArguments!;
-
-    if (collectionSignals.includes(signalId.text)) {
-      return defaultValue;
-    }
-
-    const defaultValueType = SignalProcessor.#getDefaultValueType(defaultValue.genericReturnType);
-    if (!defaultValueType) {
-      return defaultValue;
-    }
-
-    defaultValue.defaultValueParam = SignalProcessor.#createDefaultValueParameter(defaultValueType);
-    const emptyValueExpression = this.#createEmptyValueExpression(defaultValueType);
-
-    defaultValue.defaultValueExpression = ts.factory.createBinaryExpression(
-      ts.factory.createPropertyAccessChain(
-        ts.factory.createIdentifier('options'),
-        ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
-        ts.factory.createIdentifier('defaultValue'),
-      ),
-      ts.factory.createToken(ts.SyntaxKind.QuestionQuestionToken),
-      emptyValueExpression,
-    );
-
-    return defaultValue;
   }
 
-  static #getDefaultValueType(node: ts.Node) {
-    if (
-      ts.isUnionTypeNode(node) &&
-      node.types.length &&
-      ts.isTypeReferenceNode(node.types[0]) &&
-      node.types[0].typeArguments?.length === 1 &&
-      ts.isUnionTypeNode(node.types[0].typeArguments[0])
-    ) {
-      return node.types[0].typeArguments[0];
-    }
-    return undefined;
-  }
-
-  static #createDefaultValueParameter(defaultValueType: ts.TypeNode) {
-    const paramType = ts.factory.createTypeLiteralNode([
-      ts.factory.createPropertySignature(
-        undefined,
-        ts.factory.createIdentifier('defaultValue'),
-        undefined,
-        defaultValueType,
-      ),
-    ]);
-
-    return ts.factory.createParameterDeclaration(
-      undefined,
-      undefined,
-      'options',
-      ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-      paramType,
-    );
-  }
-
-  static #isDefaultValueTypeNullable(defaultValueType: ts.TypeNode) {
-    return (
-      ts.isUnionTypeNode(defaultValueType) &&
-      defaultValueType.types.length &&
-      defaultValueType.types.length > 1 &&
-      defaultValueType.types.map((t) => t.kind).includes(ts.SyntaxKind.UndefinedKeyword)
-    );
-  }
-
-  #createEmptyValueExpression(defaultValueType: ts.UnionTypeNode) {
-    if (SignalProcessor.#isDefaultValueTypeNullable(defaultValueType)) {
-      return ts.factory.createIdentifier('undefined');
-    }
-    const importedModelUniqueId = this.#determineModelImportUniqueIdentifier(defaultValueType);
-    return ts.factory.createCallExpression(
-      ts.factory.createPropertyAccessExpression(importedModelUniqueId, 'createEmptyValue'),
-      undefined,
-      [],
-    );
-  }
-
-  #determineModelImportUniqueIdentifier(returnTypeNode: ts.UnionTypeNode) {
-    let modelName = primitiveModels.get(returnTypeNode.types[0].kind);
-    let entityName;
-    if (modelName === undefined) {
-      const { entityName: e, modelName: m } = SignalProcessor.#extractModelNameFromTypeNode(returnTypeNode);
-      modelName = m;
-      entityName = e;
-    }
-    const modelImportUniqueId =
-      this.#getExistingEntityModelUniqueIdentifier(modelName) ?? createFullyUniqueIdentifier(modelName);
-
-    this.#addModelImport(entityName, modelName, modelImportUniqueId);
-    return modelImportUniqueId;
-  }
-
-  static #extractModelNameFromTypeNode(returnTypeNode: ts.UnionTypeNode) {
-    if (ts.isTypeReferenceNode(returnTypeNode.types[0])) {
-      const typeIdentifier = returnTypeNode.types[0].typeName;
-      if (ts.isIdentifier(typeIdentifier)) {
-        const entityName = typeIdentifier.text;
-        const modelName = `${entityName}Model`;
-        return { entityName, modelName };
-      }
-    }
-    throw new Error('Unsupported type reference node');
-  }
-
-  #getExistingEntityModelUniqueIdentifier(modelName: string) {
+  #getModelId(node: Node) {
     const { imports } = this.#dependencyManager;
-    return (
-      imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName) ??
-      imports.default.iter().find(([path]) => path.endsWith(`/${modelName}.js`))?.[1]
-    );
-  }
 
-  #addModelImport(
-    entityName: string | undefined,
-    modelName: string | undefined,
-    modelNameUniqueId: ts.Identifier | undefined,
-  ) {
-    if (modelName) {
-      if (primitiveModels.values().find((primitiveModel) => primitiveModel === modelName)) {
-        const { imports } = this.#dependencyManager;
-        const importedModel = imports.named.getIdentifier('@vaadin/hilla-lit-form', modelName);
-        if (importedModel === undefined) {
-          imports.named.add('@vaadin/hilla-lit-form', modelName, false, modelNameUniqueId);
-        }
+    if (isIdentifier(node)) {
+      if (ARRAY_TYPES.includes(node.text)) {
+        return (
+          imports.named.getIdentifier(HILLA_LIT_FORM, 'ArrayModel') ?? imports.named.add(HILLA_LIT_FORM, 'ArrayModel')
+        );
+      }
+
+      const [path] = Iterator.from(imports.default).find(([, id]) => id === node) ?? [];
+
+      if (!path) {
+        throw new Error(`Model not found for ${node.text}`);
+      }
+
+      const modelName = `${node.text}Model`;
+      const modelPath = `${dirname(path)}/${modelName}${extname(path)}`;
+
+      return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
+    } else if (isTypeNode(node)) {
+      let modelName: string | undefined;
+
+      if (node.kind === SyntaxKind.ArrayType) {
+        modelName = 'ArrayModel';
+      } else if (node.kind === SyntaxKind.StringKeyword) {
+        modelName = 'StringModel';
+      } else if (node.kind === SyntaxKind.NumberKeyword) {
+        modelName = 'NumberModel';
+      } else if (node.kind === SyntaxKind.BooleanKeyword) {
+        modelName = 'BooleanModel';
       } else {
-        this.#addObjectModelImport(entityName!, modelName, modelNameUniqueId!);
+        return undefined;
       }
-    }
-  }
 
-  #addObjectModelImport(entityName: string, modelName: string, modelNameUniqueId: ts.Identifier) {
-    const { imports } = this.#dependencyManager;
-    const entityImport = imports.default
-      .iter()
-      .map(([path]) => path)
-      .find((path) => path.startsWith('./') && path.endsWith(`/${entityName}.js`));
-    if (entityImport) {
-      const entityModelImportPath = entityImport.replace(`/${entityName}.js`, `/${modelName}.js`);
-      const importedModel = imports.default.paths().find((path) => path === entityModelImportPath);
-      if (importedModel === undefined) {
-        imports.default.add(entityModelImportPath, modelName, false, modelNameUniqueId);
-      }
-    }
-  }
-
-  #replaceSignalImport(method: FunctionDeclaration): Identifier {
-    const { imports } = this.#dependencyManager;
-
-    if (method.type) {
-      const type = traverse(method.type, (node) =>
-        ts.isIdentifier(node) && signals.includes(node.text) ? node : undefined,
-      );
-
-      if (type) {
-        const signalId = imports.named.getIdentifier(HILLA_REACT_SIGNALS, type.text);
-
-        if (signalId) {
-          return signalId;
-        }
-
-        const result = imports.default.iter().find(([_p, id]) => id.text === type.text);
-
-        if (result) {
-          const [path] = result;
-          imports.default.remove(path);
-          return imports.named.add(HILLA_REACT_SIGNALS, type.text, false, type);
-        }
-      }
+      return imports.named.getIdentifier(HILLA_LIT_FORM, modelName) ?? imports.named.add(HILLA_LIT_FORM, modelName);
     }
 
-    throw new Error('Signal type not found');
+    return undefined;
   }
 }
