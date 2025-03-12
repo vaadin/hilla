@@ -57,21 +57,27 @@ export default class SignalProcessor {
     const [file] = transform<SourceFile>(this.#sourceFile, [
       createTransformer((node) => {
         if (isFunctionDeclaration(node)) {
+          // Check if the function is a signal method.
           if (node.name && this.#methods.has(node.name.text)) {
+            // Get the signal class ID that was already imported in
+            // TransferTypes plugin.
             const signalId = imports.named.getIdentifier(
               HILLA_REACT_SIGNALS,
               simplifyFullyQualifiedName(this.#methods.get(node.name.text)!),
             )!;
 
+            // Remove the `init` parameter.
             const params = node.parameters.filter(
-              // Remove the `init` parameter
               (p) => !(p.type && isTypeReferenceNode(p.type) && p.type.typeName === initTypeId),
             );
 
+            // Calculate the default value for the signal class.
             const { defaultValue, defaultValueParameter } = this.#createDefaultValue(signalId.text, node.type);
 
+            // Remove the `async` modifier if present.
             const modifiers = node.modifiers?.filter((m) => m.kind !== SyntaxKind.AsyncKeyword);
 
+            // Remove the `Promise` type if present.
             const type =
               node.type &&
               isTypeReferenceNode(node.type) &&
@@ -80,11 +86,15 @@ export default class SignalProcessor {
                 ? node.type.typeArguments?.[0]
                 : node.type;
 
+            // Get the variable parameter names to be passed to the signal
+            // class.
             const paramNames = params
               .map((p) => p.name)
               .filter((n) => isIdentifier(n))
               .map((n) => n.text);
 
+            // Create the signal class method body applying all the data we've
+            // gathered.
             const result = ast`function dummy() { %{
               return new ${signalId}(${defaultValue}${defaultValue ? ',' : ''}{
                 client: ${connectClientId},
@@ -93,6 +103,7 @@ export default class SignalProcessor {
                 ${paramNames.length ? `, params: { ${paramNames.join('\n')} }` : ''} });
             }% });`;
 
+            // Update the function declaration accordingly.
             return factory.updateFunctionDeclaration(
               node,
               modifiers,
@@ -106,7 +117,8 @@ export default class SignalProcessor {
           } else if (
             node.parameters.some((p) => p.type && isTypeReferenceNode(p.type) && p.type.typeName === initTypeId)
           ) {
-            // Count the number of times the `init` parameter is used to remove the import if not used
+            // Count the number of times the `init` parameter is used to check
+            // if the type import is necessary to be removed.
             initTypeUsageCount += 1;
           }
         }
@@ -115,6 +127,7 @@ export default class SignalProcessor {
       }),
     ]).transformed;
 
+    // Remove the `EndpointRequestInit` import if it is not used anymore.
     if (initTypeUsageCount === 0) {
       imports.named.remove('@vaadin/hilla-frontend', 'EndpointRequestInit');
     }
@@ -131,16 +144,19 @@ export default class SignalProcessor {
   #createDefaultValue(signalClass: string, returnType?: TypeNode) {
     const { imports } = this.#dependencyManager;
 
+    // If the signal class is a collection signal, we have no default value to
+    // generate.
     if (COLLECTION_SIGNALS.includes(signalClass)) {
       return {};
     }
 
-    const defaultValue = signalClass.startsWith('NumberSignal') ? '0' : 'undefined';
-
+    // If we have the NumberSignal class, we can use `0` as the default.
     if (!GENERIC_SIGNALS.includes(signalClass)) {
-      return { defaultValue };
+      return signalClass.startsWith('NumberSignal') ? { defaultValue: '0' } : {};
     }
 
+    // Extract the generic argument of the signal class to get the default
+    // value type.
     const type = traverse(returnType!, (node) =>
       isTypeReferenceNode(node) &&
       isIdentifier(node.typeName) &&
@@ -150,10 +166,11 @@ export default class SignalProcessor {
         : undefined,
     )!;
 
+    // Import the model class for the signal type (or omitting the import if
+    // the type is a nullable one).
     const modelId = traverse(type, (node) => {
-      // In case the generic argument of a signal class is a union type with
-      // undefined (e.g. `Signal<Person | undefined>`), the default value will
-      // be `undefined`.
+      // In case the generic argument of a signal class is nullable (e.g.
+      // `Signal<Person | undefined>`), the default value will be `undefined`.
       if (isUnionTypeNode(node) && node.types.length > 1 && node.types[1].kind === SyntaxKind.UndefinedKeyword) {
         return SyntaxKind.UndefinedKeyword;
       }
@@ -182,12 +199,15 @@ export default class SignalProcessor {
     const { imports } = this.#dependencyManager;
 
     if (isIdentifier(node)) {
+      // In case the node is an array type defined as `Array<T>` or
+      // `ReadonlyArray<T>`, we need to import the `ArrayModel` class.
       if (ARRAY_TYPES.includes(node.text)) {
         return (
           imports.named.getIdentifier(HILLA_LIT_FORM, 'ArrayModel') ?? imports.named.add(HILLA_LIT_FORM, 'ArrayModel')
         );
       }
 
+      // Otherwise, we calculate and import the model class.
       const [path] = Iterator.from(imports.default).find(([, id]) => id === node) ?? [];
 
       if (!path) {
@@ -199,6 +219,8 @@ export default class SignalProcessor {
 
       return imports.default.getIdentifier(modelPath) ?? imports.default.add(modelPath, modelName);
     } else if (isTypeNode(node)) {
+      // If the node is a primitive type, we will import the corresponding
+      // model class from `@vaadin/hilla-lit-form`.
       let modelName: string | undefined;
 
       if (node.kind === SyntaxKind.ArrayType) {
