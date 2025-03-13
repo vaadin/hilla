@@ -54,7 +54,8 @@ public class EngineConfigurationTest {
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
         var conf = EngineConfiguration.DEFAULT.setClassFinder(classFinder)
-                .setEndpointAnnotations(BrowserCallableEndpoint.class);
+                .setEndpointAnnotationNames(
+                        BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
                     .thenThrow(ParserException.class);

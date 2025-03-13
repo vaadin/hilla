@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -94,12 +95,24 @@ public interface EngineConfiguration {
         return State.classFinder;
     }
 
+    default List<String> getEndpointAnnotationNames() {
+        return State.endpointAnnotationNames;
+    }
+
     default List<Class<? extends Annotation>> getEndpointAnnotations() {
-        return State.endpointAnnotations;
+        return getEndpointAnnotationNames().stream()
+                .map(this::toAnnotationClass).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    default List<String> getEndpointExposedAnnotationNames() {
+        return State.endpointExposedAnnotationNames;
     }
 
     default List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
-        return State.endpointExposedAnnotations;
+        return getEndpointExposedAnnotationNames().stream()
+                .map(this::toAnnotationClass).filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     default Path getOpenAPIFile() {
@@ -155,7 +168,7 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setBuildDir(String buildDir) {
-        setBuildDir(Path.of(buildDir));
+        setBuildDir(getBaseDir().resolve(buildDir));
         return this;
     }
 
@@ -186,7 +199,7 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setOutputDir(String outputDir) {
-        setOutputDir(Path.of(outputDir));
+        setOutputDir(getBaseDir().resolve(outputDir));
         return this;
     }
 
@@ -236,16 +249,16 @@ public interface EngineConfiguration {
         return this;
     }
 
-    default EngineConfiguration setEndpointAnnotations(
-            Class<? extends Annotation>... endpointAnnotations) {
-        State.endpointAnnotations = Arrays.asList(endpointAnnotations);
+    default EngineConfiguration setEndpointAnnotationNames(
+            String... endpointAnnotationNames) {
+        State.endpointAnnotationNames = Arrays.asList(endpointAnnotationNames);
         return this;
     }
 
-    default EngineConfiguration setEndpointExposedAnnotations(
-            Class<? extends Annotation>... endpointExposedAnnotations) {
-        State.endpointExposedAnnotations = Arrays
-                .asList(endpointExposedAnnotations);
+    default EngineConfiguration setEndpointExposedAnnotationNames(
+            String... endpointExposedAnnotationNames) {
+        State.endpointExposedAnnotationNames = Arrays
+                .asList(endpointExposedAnnotationNames);
         return this;
     }
 
@@ -270,16 +283,28 @@ public interface EngineConfiguration {
         return State.classLoader;
     }
 
+    default Class<? extends Annotation> toAnnotationClass(String name) {
+        try {
+            var c = Class.forName(name, true, getClassLoader());
+
+            if (c.isAnnotation()) {
+                return (Class<? extends Annotation>) c;
+            }
+
+            LOGGER.debug("Class " + name + " is not an annotation");
+        } catch (Throwable t) { // in some cases an error can be thrown
+            LOGGER.debug("Class not found for annotation" + name);
+        }
+
+        return null;
+    }
+
     default EngineConfiguration withDefaultAnnotations() {
         try {
-            setEndpointAnnotations((Class<? extends Annotation>) Class.forName(
-                    "com.vaadin.hilla.BrowserCallable", true, getClassLoader()),
-                    (Class<? extends Annotation>) Class.forName(
-                            "com.vaadin.hilla.Endpoint", true,
-                            getClassLoader()));
-            setEndpointExposedAnnotations((Class<? extends Annotation>) Class
-                    .forName("com.vaadin.hilla.EndpointExposed", true,
-                            getClassLoader()));
+            setEndpointAnnotationNames("com.vaadin.hilla.BrowserCallable",
+                    "com.vaadin.hilla.Endpoint");
+            setEndpointExposedAnnotationNames(
+                    "com.vaadin.hilla.EndpointExposed");
         } catch (Throwable t) {
             LOGGER.debug(
                     "Default annotations not found. Hilla is probably not in the classpath.");
@@ -294,6 +319,9 @@ public interface EngineConfiguration {
 }
 
 class State {
+    // Inspect this instance in your IDE debugger to see configuration values
+    static State CURRENT = new State();
+
     static Set<Path> classpath = Arrays
             .stream(System.getProperty("java.class.path")
                     .split(File.pathSeparator))
@@ -305,8 +333,8 @@ class State {
     static Path baseDir = Path.of(System.getProperty("user.dir"));
     static Path buildDir;
     static List<Path> classesDirs;
-    static List<Class<? extends Annotation>> endpointAnnotations;
-    static List<Class<? extends Annotation>> endpointExposedAnnotations;
+    static List<String> endpointAnnotationNames;
+    static List<String> endpointExposedAnnotationNames;
     static GeneratorConfiguration generator = new GeneratorConfiguration();
     static Path outputDir;
     static ParserConfiguration parser = new ParserConfiguration();
