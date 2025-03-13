@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -158,8 +156,8 @@ class AotBrowserCallableFinder {
             candidates.add(name);
         }
 
-        var annotationNames = engineConfiguration.getParser()
-                .getEndpointAnnotations().stream().map(Class::getName).toList();
+        var annotationNames = engineConfiguration.getEndpointAnnotations()
+                .stream().map(Class::getName).toList();
 
         return candidates.stream().map(name -> {
             try {

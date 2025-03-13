@@ -60,7 +60,8 @@ public interface EngineConfiguration {
     }
 
     default Path getBuildDir() {
-        return State.buildDir;
+        return State.buildDir == null ? getBaseDir().resolve("target")
+                : State.buildDir;
     }
 
     default Path getBaseDir() {
@@ -68,7 +69,9 @@ public interface EngineConfiguration {
     }
 
     default List<Path> getClassesDirs() {
-        return State.classesDirs;
+        return State.classesDirs == null
+                ? List.of(getBuildDir().resolve("classes"))
+                : State.classesDirs;
     }
 
     default GeneratorConfiguration getGenerator() {
@@ -92,11 +95,11 @@ public interface EngineConfiguration {
     }
 
     default List<Class<? extends Annotation>> getEndpointAnnotations() {
-        return State.parser.getEndpointAnnotations();
+        return State.endpointAnnotations;
     }
 
     default List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
-        return State.parser.getEndpointExposedAnnotations();
+        return State.endpointExposedAnnotations;
     }
 
     default Path getOpenAPIFile() {
@@ -235,18 +238,22 @@ public interface EngineConfiguration {
 
     default EngineConfiguration setEndpointAnnotations(
             Class<? extends Annotation>... endpointAnnotations) {
-        State.parser.setEndpointAnnotations(Arrays.asList(endpointAnnotations));
+        State.endpointAnnotations = Arrays.asList(endpointAnnotations);
         return this;
     }
 
     default EngineConfiguration setEndpointExposedAnnotations(
             Class<? extends Annotation>... endpointExposedAnnotations) {
-        State.parser.setEndpointExposedAnnotations(
-                Arrays.asList(endpointExposedAnnotations));
+        State.endpointExposedAnnotations = Arrays
+                .asList(endpointExposedAnnotations);
         return this;
     }
 
     default ClassLoader getClassLoader() {
+        if (State.classLoader == null && getClassFinder() != null) {
+            State.classLoader = getClassFinder().getClassLoader();
+        }
+
         if (State.classLoader == null) {
             var urls = getClasspath().stream().map(path -> {
                 try {
@@ -259,6 +266,7 @@ public interface EngineConfiguration {
             State.classLoader = new URLClassLoader(urls,
                     getClass().getClassLoader());
         }
+
         return State.classLoader;
     }
 
@@ -295,8 +303,10 @@ class State {
     static String artifactId;
     static String mainClass;
     static Path baseDir = Path.of(System.getProperty("user.dir"));
-    static Path buildDir = baseDir.resolve("target");
-    static List<Path> classesDirs = List.of(buildDir.resolve("classes"));
+    static Path buildDir;
+    static List<Path> classesDirs;
+    static List<Class<? extends Annotation>> endpointAnnotations;
+    static List<Class<? extends Annotation>> endpointExposedAnnotations;
     static GeneratorConfiguration generator = new GeneratorConfiguration();
     static Path outputDir;
     static ParserConfiguration parser = new ParserConfiguration();
