@@ -117,14 +117,13 @@ public class HillaPlugin : Plugin<Project> {
             EngineConfiguration.DEFAULT
                 .setBaseDir(baseDir)
                 .setBuildDir(buildDir)
-                .setClassesDirs(sourceSet.output.classesDirs.map { it.toPath() }.toList())
+                .setClassesDirs(*sourceSet.output.classesDirs.map { it.toPath() }.toTypedArray())
                 .setOutputDir(vaadinExtension.generatedTsFolder.get().toPath())
                 .setGroupId(project.group.toString().takeIf { it.isNotEmpty() } ?: "unspecified")
                 .setArtifactId(project.name)
                 .setClasspath(classpath)
                 .setMainClass(project.findProperty("mainClass") as String?)
                 .setProductionMode(vaadinExtension.productionMode.getOrElse(false))
-                .withDefaultAnnotations()
         }
     }
 }
@@ -150,14 +149,13 @@ internal data class EngineConfigurationSettings(
          EngineConfiguration.DEFAULT
             .setBaseDir(baseDir.toPath())
             .setBuildDir(buildDir.toPath())
-            .setClassesDirs(classesDirs.map { it.toPath() })
+            .setClassesDirs(*classesDirs.map { it.toPath() }.toTypedArray())
             .setOutputDir(outputDir.toPath())
             .setGroupId(groupId)
             .setArtifactId(artifactId)
             .setClasspath(classpath)
             .setMainClass(mainClass)
             .setProductionMode(productionMode)
-            .withDefaultAnnotations()
     }
 }
 
