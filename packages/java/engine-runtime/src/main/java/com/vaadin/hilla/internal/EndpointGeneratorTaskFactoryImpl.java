@@ -92,13 +92,12 @@ public class EndpointGeneratorTaskFactoryImpl
     }
 
     private static EngineConfiguration configureFromOptions(Options options) {
-        return new EngineConfiguration.Builder()
-                .baseDir(options.getNpmFolder().toPath())
-                .buildDir(options.getBuildDirectoryName())
-                .outputDir(options.getFrontendGeneratedFolder().toPath())
-                .nodeCommand(buildTools(options).getNodeExecutable())
-                .classFinder(options.getClassFinder())
-                .productionMode(options.isProductionMode())
-                .withDefaultAnnotations().build();
+        EngineConfiguration.DEFAULT.setBaseDir(options.getNpmFolder().toPath())
+                .setBuildDir(options.getBuildDirectoryName())
+                .setOutputDir(options.getFrontendGeneratedFolder().toPath())
+                .setNodeCommand(buildTools(options).getNodeExecutable())
+                .setClassFinder(options.getClassFinder())
+                .setProductionMode(options.isProductionMode());
+        return EngineConfiguration.load();
     }
 }

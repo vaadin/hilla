@@ -91,23 +91,9 @@ public final class ParserProcessor {
             return;
         }
 
-        applyEndpointAnnotations(parserConfiguration.getEndpointAnnotations());
-        applyEndpointExposedAnnotations(
-                parserConfiguration.getEndpointExposedAnnotations());
         parserConfiguration.getOpenAPIBasePath()
                 .ifPresent(this::applyOpenAPIBase);
         parserConfiguration.getPlugins().ifPresent(this::applyPlugins);
-    }
-
-    private void applyEndpointAnnotations(
-            @NonNull List<Class<? extends Annotation>> endpointAnnotations) {
-        this.endpointAnnotations = Objects.requireNonNull(endpointAnnotations);
-    }
-
-    private void applyEndpointExposedAnnotations(
-            @NonNull List<Class<? extends Annotation>> endpointExposedAnnotations) {
-        this.endpointExposedAnnotations = Objects
-                .requireNonNull(endpointExposedAnnotations);
     }
 
     private void applyOpenAPIBase(@NonNull String openAPIBasePath) {

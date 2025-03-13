@@ -24,7 +24,7 @@ interface Configurable {
 
     String getMainClass();
 
-    default EngineConfiguration configure() {
+    default void configure() {
         var project = (MavenProject) getPluginContext().get("project");
 
         var isProduction = project.getActiveProfiles().stream()
@@ -37,17 +37,14 @@ interface Configurable {
                     "mainClass");
         }
 
-        var conf = new EngineConfiguration.Builder()
-                .baseDir(project.getBasedir().toPath())
-                .buildDir(project.getBuild().getDirectory())
-                .outputDir(generatedOrOldLocation().toPath())
-                .groupId(project.getGroupId())
-                .artifactId(project.getArtifactId())
-                .classpath(getClasspathElements(project))
-                .withDefaultAnnotations().mainClass(mainClass)
-                .nodeCommand(getNode()).productionMode(isProduction).build();
-        EngineConfiguration.setDefault(conf);
-        return conf;
+        EngineConfiguration.DEFAULT.setBaseDir(project.getBasedir().toPath())
+                .setBuildDir(project.getBuild().getDirectory())
+                .setOutputDir(generatedOrOldLocation().toPath())
+                .setGroupId(project.getGroupId())
+                .setArtifactId(project.getArtifactId())
+                .setClasspath(getClasspathElements(project))
+                .setMainClass(mainClass).setNodeCommand(getNode())
+                .setProductionMode(isProduction);
     }
 
     private File generatedOrOldLocation() {
