@@ -32,6 +32,8 @@ public class TaskTest {
         var frontendDir = getTemporaryDirectory()
                 .resolve(getFrontendDirectory());
         Files.createDirectories(frontendDir);
+
+        EngineConfiguration.reset();
     }
 
     @AfterEach
@@ -87,6 +89,10 @@ public class TaskTest {
                 return getBaseDir().resolve(getOutputDirectory());
             }
 
+            @Override
+            public Path getOpenAPIFile() {
+                return TaskTest.this.getOpenAPIFile();
+            }
         };
     }
 

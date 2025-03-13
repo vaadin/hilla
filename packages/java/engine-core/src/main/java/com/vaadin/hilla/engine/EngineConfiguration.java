@@ -30,8 +30,8 @@ public interface EngineConfiguration {
     String OPEN_API_PATH = "hilla-openapi.json";
 
     default Path getOutputDir() {
-        if (State.outputDir != null) {
-            return State.outputDir;
+        if (State.INSTANCE.outputDir != null) {
+            return State.INSTANCE.outputDir;
         }
 
         var legacyFrontendDir = getBaseDir().resolve("frontend");
@@ -45,58 +45,58 @@ public interface EngineConfiguration {
     }
 
     default Set<Path> getClasspath() {
-        return State.classpath;
+        return State.INSTANCE.classpath;
     }
 
     default String getGroupId() {
-        return State.groupId;
+        return State.INSTANCE.groupId;
     }
 
     default String getArtifactId() {
-        return State.artifactId;
+        return State.INSTANCE.artifactId;
     }
 
     default String getMainClass() {
-        return State.mainClass;
+        return State.INSTANCE.mainClass;
     }
 
     default Path getBuildDir() {
-        return State.buildDir == null ? getBaseDir().resolve("target")
-                : State.buildDir;
+        return State.INSTANCE.buildDir == null ? getBaseDir().resolve("target")
+                : State.INSTANCE.buildDir;
     }
 
     default Path getBaseDir() {
-        return State.baseDir;
+        return State.INSTANCE.baseDir;
     }
 
     default List<Path> getClassesDirs() {
-        return State.classesDirs == null
+        return State.INSTANCE.classesDirs == null
                 ? List.of(getBuildDir().resolve("classes"))
-                : State.classesDirs;
+                : State.INSTANCE.classesDirs;
     }
 
     default GeneratorConfiguration getGenerator() {
-        return State.generator;
+        return State.INSTANCE.generator;
     }
 
     default ParserConfiguration getParser() {
-        return State.parser;
+        return State.INSTANCE.parser;
     }
 
     default boolean isProductionMode() {
-        return State.productionMode;
+        return State.INSTANCE.productionMode;
     }
 
     default String getNodeCommand() {
-        return State.nodeCommand;
+        return State.INSTANCE.nodeCommand;
     }
 
     default ClassFinder getClassFinder() {
-        return State.classFinder;
+        return State.INSTANCE.classFinder;
     }
 
     default List<String> getEndpointAnnotationNames() {
-        return State.endpointAnnotationNames;
+        return State.INSTANCE.endpointAnnotationNames;
     }
 
     default List<Class<? extends Annotation>> getEndpointAnnotations() {
@@ -106,7 +106,7 @@ public interface EngineConfiguration {
     }
 
     default List<String> getEndpointExposedAnnotationNames() {
-        return State.endpointExposedAnnotationNames;
+        return State.INSTANCE.endpointExposedAnnotationNames;
     }
 
     default List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
@@ -116,8 +116,8 @@ public interface EngineConfiguration {
     }
 
     default Path getOpenAPIFile() {
-        if (State.openAPIFile != null) {
-            return State.openAPIFile;
+        if (State.INSTANCE.openAPIFile != null) {
+            return State.INSTANCE.openAPIFile;
         }
 
         return isProductionMode()
@@ -126,9 +126,9 @@ public interface EngineConfiguration {
     }
 
     default List<BrowserCallableFinder> getBrowserCallableFinders() {
-        if (State.browserCallableFinders != null
-                && !State.browserCallableFinders.isEmpty()) {
-            return State.browserCallableFinders;
+        if (State.INSTANCE.browserCallableFinders != null
+                && !State.INSTANCE.browserCallableFinders.isEmpty()) {
+            return State.INSTANCE.browserCallableFinders;
         }
 
         return getClassFinder() == null
@@ -153,7 +153,7 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setBaseDir(Path baseDir) {
-        State.baseDir = baseDir;
+        State.INSTANCE.baseDir = baseDir;
         return this;
     }
 
@@ -163,17 +163,17 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setBuildDir(Path buildDir) {
-        State.buildDir = buildDir;
+        State.INSTANCE.buildDir = buildDir;
         return this;
     }
 
     default EngineConfiguration setClassesDirs(Path... classesDirs) {
-        State.classesDirs = Arrays.asList(classesDirs);
+        State.INSTANCE.classesDirs = Arrays.asList(classesDirs);
         return this;
     }
 
     default EngineConfiguration setClasspath(Set<Path> classpath) {
-        State.classpath = classpath;
+        State.INSTANCE.classpath = classpath;
         return this;
     }
 
@@ -184,7 +184,7 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setGenerator(GeneratorConfiguration generator) {
-        State.generator = generator;
+        State.INSTANCE.generator = generator;
         return this;
     }
 
@@ -194,33 +194,34 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setOutputDir(Path outputDir) {
-        State.outputDir = outputDir;
+        State.INSTANCE.outputDir = outputDir;
         return this;
     }
 
     default EngineConfiguration setParser(ParserConfiguration parser) {
-        State.parser = parser;
+        State.INSTANCE.parser = parser;
         return this;
     }
 
     default EngineConfiguration setGroupId(String groupId) {
-        State.groupId = groupId;
+        State.INSTANCE.groupId = groupId;
         return this;
     }
 
     default EngineConfiguration setArtifactId(String artifactId) {
-        State.artifactId = artifactId;
+        State.INSTANCE.artifactId = artifactId;
         return this;
     }
 
     default EngineConfiguration setMainClass(String mainClass) {
-        State.mainClass = mainClass;
+        State.INSTANCE.mainClass = mainClass;
         return this;
     }
 
     default EngineConfiguration setBrowserCallableFinders(
             BrowserCallableFinder... browserCallableFinders) {
-        State.browserCallableFinders = Arrays.asList(browserCallableFinders);
+        State.INSTANCE.browserCallableFinders = Arrays
+                .asList(browserCallableFinders);
         return this;
     }
 
@@ -248,44 +249,45 @@ public interface EngineConfiguration {
     }
 
     default EngineConfiguration setProductionMode(boolean productionMode) {
-        State.productionMode = productionMode;
+        State.INSTANCE.productionMode = productionMode;
         return this;
     }
 
     default EngineConfiguration setNodeCommand(String nodeCommand) {
-        State.nodeCommand = nodeCommand;
+        State.INSTANCE.nodeCommand = nodeCommand;
         return this;
     }
 
     default EngineConfiguration setClassFinder(ClassFinder classFinder) {
-        State.classFinder = classFinder;
+        State.INSTANCE.classFinder = classFinder;
         return this;
     }
 
     default EngineConfiguration setEndpointAnnotationNames(
             String... endpointAnnotationNames) {
-        State.endpointAnnotationNames = Arrays.asList(endpointAnnotationNames);
+        State.INSTANCE.endpointAnnotationNames = Arrays
+                .asList(endpointAnnotationNames);
         return this;
     }
 
     default EngineConfiguration setEndpointExposedAnnotationNames(
             String... endpointExposedAnnotationNames) {
-        State.endpointExposedAnnotationNames = Arrays
+        State.INSTANCE.endpointExposedAnnotationNames = Arrays
                 .asList(endpointExposedAnnotationNames);
         return this;
     }
 
     default EngineConfiguration setOpenAPIFile(Path openAPIFile) {
-        State.openAPIFile = openAPIFile;
+        State.INSTANCE.openAPIFile = openAPIFile;
         return this;
     }
 
     default ClassLoader getClassLoader() {
-        if (State.classLoader == null && getClassFinder() != null) {
-            State.classLoader = getClassFinder().getClassLoader();
+        if (State.INSTANCE.classLoader == null && getClassFinder() != null) {
+            State.INSTANCE.classLoader = getClassFinder().getClassLoader();
         }
 
-        if (State.classLoader == null) {
+        if (State.INSTANCE.classLoader == null) {
             var urls = getClasspath().stream().map(path -> {
                 try {
                     return path.toUri().toURL();
@@ -294,11 +296,11 @@ public interface EngineConfiguration {
                             "Classpath contains invalid elements", e);
                 }
             }).toArray(URL[]::new);
-            State.classLoader = new URLClassLoader(urls,
+            State.INSTANCE.classLoader = new URLClassLoader(urls,
                     getClass().getClassLoader());
         }
 
-        return State.classLoader;
+        return State.INSTANCE.classLoader;
     }
 
     @SuppressWarnings("unchecked")
@@ -322,33 +324,46 @@ public interface EngineConfiguration {
         return path.isAbsolute() ? path.normalize()
                 : getBaseDir().resolve(path).normalize();
     }
+
+    static void reset() {
+        State.INSTANCE = new State();
+    }
 }
 
 class State {
-    // Inspect this instance in your IDE debugger to see configuration values
-    static State CURRENT = new State();
+    static State INSTANCE = new State();
 
-    static Set<Path> classpath = Arrays
-            .stream(System.getProperty("java.class.path")
-                    .split(File.pathSeparator))
-            .map(Path::of).collect(Collectors.toSet());
-    static ClassLoader classLoader;
-    static String groupId;
-    static String artifactId;
-    static String mainClass;
-    static Path baseDir = Path.of(System.getProperty("user.dir"));
-    static Path buildDir;
-    static Path openAPIFile;
-    static List<Path> classesDirs;
-    static List<String> endpointAnnotationNames = List.of(
-            "com.vaadin.hilla.BrowserCallable", "com.vaadin.hilla.Endpoint");
-    static List<String> endpointExposedAnnotationNames = List
-            .of("com.vaadin.hilla.EndpointExposed");
-    static GeneratorConfiguration generator = new GeneratorConfiguration();
-    static Path outputDir;
-    static ParserConfiguration parser = new ParserConfiguration();
-    static List<BrowserCallableFinder> browserCallableFinders;
-    static boolean productionMode = false;
-    static String nodeCommand = "node";
-    static ClassFinder classFinder;
+    Set<Path> classpath;
+    ClassLoader classLoader;
+    String groupId;
+    String artifactId;
+    String mainClass;
+    Path baseDir;
+    Path buildDir;
+    Path openAPIFile;
+    List<Path> classesDirs;
+    List<String> endpointAnnotationNames;
+    List<String> endpointExposedAnnotationNames;
+    GeneratorConfiguration generator;
+    Path outputDir;
+    ParserConfiguration parser;
+    List<BrowserCallableFinder> browserCallableFinders;
+    boolean productionMode = false;
+    String nodeCommand;
+    ClassFinder classFinder;
+
+    State() {
+        classpath = Arrays
+                .stream(System.getProperty("java.class.path")
+                        .split(File.pathSeparator))
+                .map(Path::of).collect(Collectors.toSet());
+        baseDir = Path.of(System.getProperty("user.dir"));
+        endpointAnnotationNames = List.of("com.vaadin.hilla.BrowserCallable",
+                "com.vaadin.hilla.Endpoint");
+        endpointExposedAnnotationNames = List
+                .of("com.vaadin.hilla.EndpointExposed");
+        generator = new GeneratorConfiguration();
+        parser = new ParserConfiguration();
+        nodeCommand = "node";
+    }
 }
