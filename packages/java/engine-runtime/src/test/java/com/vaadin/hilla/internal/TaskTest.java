@@ -47,7 +47,7 @@ public class TaskTest {
     }
 
     protected Path getOpenAPIFile() {
-        return getTemporaryDirectory().resolve(getBuildDirectory())
+        return getTemporaryDirectory().resolve(getClassesDirectory())
                 .resolve(EngineConfiguration.OPEN_API_PATH);
     }
 

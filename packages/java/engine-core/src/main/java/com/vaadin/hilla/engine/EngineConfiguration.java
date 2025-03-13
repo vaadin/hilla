@@ -30,18 +30,18 @@ public interface EngineConfiguration {
     String OPEN_API_PATH = "hilla-openapi.json";
 
     default Path getOutputDir() {
-        if (State.outputDir == null) {
-            var legacyFrontendDir = getBaseDir().resolve("frontend");
-
-            if (Files.exists(legacyFrontendDir)) {
-                State.outputDir = legacyFrontendDir.resolve("generated");
-            } else {
-                State.outputDir = getBaseDir().resolve(
-                        FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR);
-            }
+        if (State.outputDir != null) {
+            return State.outputDir;
         }
 
-        return State.outputDir;
+        var legacyFrontendDir = getBaseDir().resolve("frontend");
+
+        if (Files.exists(legacyFrontendDir)) {
+            return legacyFrontendDir.resolve("generated");
+        } else {
+            return getBaseDir().resolve(
+                    FrontendUtils.DEFAULT_PROJECT_FRONTEND_GENERATED_DIR);
+        }
     }
 
     default Set<Path> getClasspath() {
@@ -117,10 +117,7 @@ public interface EngineConfiguration {
 
     default Path getOpenAPIFile() {
         return isProductionMode()
-                ? getClassesDirs().stream()
-                        .map(dir -> dir.resolve(OPEN_API_PATH))
-                        .filter(Files::isRegularFile).findFirst()
-                        .orElse(getClassesDirs().get(0).resolve(OPEN_API_PATH))
+                ? getClassesDirs().get(0).resolve(OPEN_API_PATH)
                 : getBuildDir().resolve(OPEN_API_PATH);
     }
 
