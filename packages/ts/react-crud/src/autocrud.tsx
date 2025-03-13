@@ -77,14 +77,15 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     itemIdProperty?: string;
     /**
-     * Determines whether to display the "New" button in the toolbar. By default,
-     * this is set to `true`, meaning the button will be shown.
+     * Determines whether to hide the "New" button in the toolbar.
      *
      * NOTE: This setting only hides the button; it does not prevent new items
      * from being sent to the service. Ensure your backend Java service is
      * properly secured to prevent unauthorized creation of new items.
+     *
+     * @defaultValue `false` meaning the button will be shown.
      */
-    newButton?: boolean;
+    noNewButton?: boolean;
     /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
@@ -119,7 +120,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   service,
   model,
   itemIdProperty,
-  newButton,
+  noNewButton,
   formProps,
   gridProps,
   style,
@@ -162,7 +163,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       ></AutoGrid>
       {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
           renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {newButton !== false && (
+      {!noNewButton && (
         <div className="auto-crud-toolbar">
           <Button theme="primary" onClick={() => setItem(emptyItem)}>
             + New
@@ -197,9 +198,13 @@ export function AutoCrud<TModel extends AbstractModel>({
     />
   );
 
+  // If the "New" button is visible, the form is always shown.
+  // Otherwise, the form is only shown when an item is being edited.
   return (
     <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
-      {fullScreen ? (
+      {noNewButton && (!item || item === emptyItem) ? (
+        mainSection
+      ) : fullScreen ? (
         <>
           {mainSection}
           <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
