@@ -72,9 +72,9 @@ public class NoEndpointsTaskTest extends TaskTest {
             Files.createFile(arbitraryGeneratedFile);
 
             taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                    EngineConfiguration.DEFAULT);
+                    getEngineConfiguration());
             taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                    EngineConfiguration.DEFAULT);
+                    getEngineConfiguration());
 
             taskGenerateOpenApi.execute();
 

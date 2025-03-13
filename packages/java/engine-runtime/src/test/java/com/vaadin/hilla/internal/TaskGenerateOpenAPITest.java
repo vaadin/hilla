@@ -37,7 +37,7 @@ public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
     public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                EngineConfiguration.DEFAULT);
+                getEngineConfiguration());
 
         taskGenerateOpenApi.execute();
 
@@ -57,7 +57,7 @@ public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
     public void should_UseCustomEndpointName_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                EngineConfiguration.DEFAULT);
+                getEngineConfiguration());
 
         taskGenerateOpenApi.execute();
 
@@ -77,7 +77,7 @@ public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                EngineConfiguration.DEFAULT);
+                getEngineConfiguration());
 
         taskGenerateOpenApi.execute();
 

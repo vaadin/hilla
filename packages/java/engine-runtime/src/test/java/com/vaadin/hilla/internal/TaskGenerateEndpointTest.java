@@ -48,7 +48,7 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
         assertFalse(client.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                EngineConfiguration.DEFAULT);
+                getEngineConfiguration());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -81,7 +81,7 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
         assertTrue(customConnectClient.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                EngineConfiguration.DEFAULT);
+                getEngineConfiguration());
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
