@@ -5,6 +5,7 @@ import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -64,9 +65,29 @@ public class TaskTest {
     }
 
     protected EngineConfiguration getEngineConfiguration() {
-        return EngineConfiguration.DEFAULT.setBaseDir(getTemporaryDirectory())
-                .setBuildDir(getBuildDirectory())
-                .setOutputDir(getOutputDirectory()).withDefaultAnnotations();
+        return new EngineConfiguration() {
+
+            @Override
+            public Path getBaseDir() {
+                return getTemporaryDirectory();
+            }
+
+            @Override
+            public Path getBuildDir() {
+                return getBaseDir().resolve(getBuildDirectory());
+            }
+
+            @Override
+            public List<Path> getClassesDirs() {
+                return List.of(getBaseDir().resolve(getClassesDirectory()));
+            }
+
+            @Override
+            public Path getOutputDir() {
+                return getBaseDir().resolve(getOutputDirectory());
+            }
+
+        };
     }
 
     protected OpenAPI getGeneratedOpenAPI() {

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
@@ -47,7 +48,7 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
         assertFalse(client.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                getEngineConfiguration());
+                EngineConfiguration.DEFAULT);
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());
@@ -80,7 +81,7 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
         assertTrue(customConnectClient.exists());
 
         taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                getEngineConfiguration());
+                EngineConfiguration.DEFAULT);
         taskGenerateEndpoint.execute();
 
         assertTrue(ts1.exists());

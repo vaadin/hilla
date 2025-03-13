@@ -162,7 +162,7 @@ public class EndpointCodeGenerator {
                                     .getFrontendGeneratedFolder(
                                             configuration.getFrontendFolder())
                                     .toPath())
-                    .setProductionMode(false).withDefaultAnnotations()
+                    .setProductionMode(false)
                     .setNodeCommand(frontendTools.getNodeBinary());
         }
     }

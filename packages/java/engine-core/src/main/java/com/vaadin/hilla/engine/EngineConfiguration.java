@@ -116,6 +116,10 @@ public interface EngineConfiguration {
     }
 
     default Path getOpenAPIFile() {
+        if (State.openAPIFile != null) {
+            return State.openAPIFile;
+        }
+
         return isProductionMode()
                 ? getClassesDirs().get(0).resolve(OPEN_API_PATH)
                 : getBuildDir().resolve(OPEN_API_PATH);
@@ -163,8 +167,8 @@ public interface EngineConfiguration {
         return this;
     }
 
-    default EngineConfiguration setClassesDirs(List<Path> classesDirs) {
-        State.classesDirs = classesDirs;
+    default EngineConfiguration setClassesDirs(Path... classesDirs) {
+        State.classesDirs = Arrays.asList(classesDirs);
         return this;
     }
 
@@ -231,8 +235,7 @@ public interface EngineConfiguration {
                 return finder.findEndpointClasses(this);
             } catch (ExecutionFailedException e) {
                 if (iterator.hasNext()) {
-                    LOGGER.debug("Failed to find browser-callables with {}",
-                            finder.getClass().getName(), e);
+                    LOGGER.debug("Failed to find browser-callables", e);
                 } else {
                     throw e;
                 }
@@ -269,6 +272,11 @@ public interface EngineConfiguration {
             String... endpointExposedAnnotationNames) {
         State.endpointExposedAnnotationNames = Arrays
                 .asList(endpointExposedAnnotationNames);
+        return this;
+    }
+
+    default EngineConfiguration setOpenAPIFile(Path openAPIFile) {
+        State.openAPIFile = openAPIFile;
         return this;
     }
 
@@ -310,19 +318,6 @@ public interface EngineConfiguration {
         return null;
     }
 
-    default EngineConfiguration withDefaultAnnotations() {
-        try {
-            setEndpointAnnotationNames("com.vaadin.hilla.BrowserCallable",
-                    "com.vaadin.hilla.Endpoint");
-            setEndpointExposedAnnotationNames(
-                    "com.vaadin.hilla.EndpointExposed");
-        } catch (Throwable t) {
-            LOGGER.debug(
-                    "Default annotations not found. Hilla is probably not in the classpath.");
-        }
-        return this;
-    }
-
     default Path resolve(Path path) {
         return path.isAbsolute() ? path.normalize()
                 : getBaseDir().resolve(path).normalize();
@@ -343,9 +338,12 @@ class State {
     static String mainClass;
     static Path baseDir = Path.of(System.getProperty("user.dir"));
     static Path buildDir;
+    static Path openAPIFile;
     static List<Path> classesDirs;
-    static List<String> endpointAnnotationNames;
-    static List<String> endpointExposedAnnotationNames;
+    static List<String> endpointAnnotationNames = List.of(
+            "com.vaadin.hilla.BrowserCallable", "com.vaadin.hilla.Endpoint");
+    static List<String> endpointExposedAnnotationNames = List
+            .of("com.vaadin.hilla.EndpointExposed");
     static GeneratorConfiguration generator = new GeneratorConfiguration();
     static Path outputDir;
     static ParserConfiguration parser = new ParserConfiguration();

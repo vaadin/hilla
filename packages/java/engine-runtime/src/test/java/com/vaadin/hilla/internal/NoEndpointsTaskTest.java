@@ -4,6 +4,7 @@ import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -71,9 +72,9 @@ public class NoEndpointsTaskTest extends TaskTest {
             Files.createFile(arbitraryGeneratedFile);
 
             taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                    getEngineConfiguration());
+                    EngineConfiguration.DEFAULT);
             taskGenerateEndpoint = new TaskGenerateEndpointImpl(
-                    getEngineConfiguration());
+                    EngineConfiguration.DEFAULT);
 
             taskGenerateOpenApi.execute();
 

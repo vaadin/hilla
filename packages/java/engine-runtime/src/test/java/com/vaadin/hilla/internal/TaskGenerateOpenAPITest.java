@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
@@ -36,7 +37,7 @@ public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
     public void should_UseCustomEndpointNameWithoutValueEqual_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getEngineConfiguration());
+                EngineConfiguration.DEFAULT);
 
         taskGenerateOpenApi.execute();
 
@@ -56,7 +57,7 @@ public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
     public void should_UseCustomEndpointName_InsteadOf_UsingClassName()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getEngineConfiguration());
+                EngineConfiguration.DEFAULT);
 
         taskGenerateOpenApi.execute();
 
@@ -76,7 +77,7 @@ public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
     public void should_UseDefaultProperties_when_applicationPropertiesIsEmpty()
             throws Exception {
         taskGenerateOpenApi = new TaskGenerateOpenAPIImpl(
-                getEngineConfiguration());
+                EngineConfiguration.DEFAULT);
 
         taskGenerateOpenApi.execute();
 

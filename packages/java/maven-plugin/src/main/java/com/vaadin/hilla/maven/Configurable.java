@@ -43,8 +43,8 @@ interface Configurable {
                 .setGroupId(project.getGroupId())
                 .setArtifactId(project.getArtifactId())
                 .setClasspath(getClasspathElements(project))
-                .withDefaultAnnotations().setMainClass(mainClass)
-                .setNodeCommand(getNode()).setProductionMode(isProduction);
+                .setMainClass(mainClass).setNodeCommand(getNode())
+                .setProductionMode(isProduction);
     }
 
     private File generatedOrOldLocation() {

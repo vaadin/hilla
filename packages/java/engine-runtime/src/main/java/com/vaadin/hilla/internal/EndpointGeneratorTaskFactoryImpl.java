@@ -97,8 +97,7 @@ public class EndpointGeneratorTaskFactoryImpl
                 .setOutputDir(options.getFrontendGeneratedFolder().toPath())
                 .setNodeCommand(buildTools(options).getNodeExecutable())
                 .setClassFinder(options.getClassFinder())
-                .setProductionMode(options.isProductionMode())
-                .withDefaultAnnotations();
+                .setProductionMode(options.isProductionMode());
         return EngineConfiguration.load();
     }
 }
