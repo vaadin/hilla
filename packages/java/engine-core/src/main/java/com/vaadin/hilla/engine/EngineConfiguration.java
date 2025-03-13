@@ -121,27 +121,16 @@ public interface EngineConfiguration {
                 : getBuildDir().resolve(OPEN_API_PATH);
     }
 
-    default BrowserCallableFinder getBrowserCallableFinder() {
-        if (State.browserCallableFinder != null) {
-            return State.browserCallableFinder;
+    default List<BrowserCallableFinder> getBrowserCallableFinders() {
+        if (State.browserCallableFinders != null
+                && !State.browserCallableFinders.isEmpty()) {
+            return State.browserCallableFinders;
         }
 
-        return () -> {
-            try {
-                return AotBrowserCallableFinder.findEndpointClasses(this);
-            } catch (Exception e) {
-                if (this.getClassFinder() != null) {
-                    LOGGER.info(
-                            "AOT-based detection of browser-callable classes failed."
-                                    + " Falling back to classpath scan."
-                                    + " Enable debug logging for more information.");
-                    return LookupBrowserCallableFinder
-                            .findEndpointClasses(this);
-                } else {
-                    throw new ExecutionFailedException(e);
-                }
-            }
-        };
+        return getClassFinder() == null
+                ? List.of(AotBrowserCallableFinder::findEndpointClasses)
+                : List.of(AotBrowserCallableFinder::findEndpointClasses,
+                        LookupBrowserCallableFinder::findEndpointClasses);
     }
 
     static EngineConfiguration load() {
@@ -225,10 +214,34 @@ public interface EngineConfiguration {
         return this;
     }
 
-    default EngineConfiguration setBrowserCallableFinder(
-            BrowserCallableFinder browserCallableFinder) {
-        State.browserCallableFinder = browserCallableFinder;
+    default EngineConfiguration setBrowserCallableFinders(
+            BrowserCallableFinder... browserCallableFinders) {
+        State.browserCallableFinders = Arrays.asList(browserCallableFinders);
         return this;
+    }
+
+    default List<Class<?>> findBrowserCallables()
+            throws ExecutionFailedException {
+        var iterator = getBrowserCallableFinders().iterator();
+
+        while (iterator.hasNext()) {
+            var finder = iterator.next();
+
+            try {
+                return finder.findEndpointClasses(this);
+            } catch (ExecutionFailedException e) {
+                if (iterator.hasNext()) {
+                    LOGGER.debug("Failed to find browser-callables with {}",
+                            finder.getClass().getName(), e);
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        // should never happen, as the last one throws
+        throw new IllegalStateException(
+                "No other browser-callable finders available");
     }
 
     default EngineConfiguration setProductionMode(boolean productionMode) {
@@ -280,6 +293,7 @@ public interface EngineConfiguration {
         return State.classLoader;
     }
 
+    @SuppressWarnings("unchecked")
     default Class<? extends Annotation> toAnnotationClass(String name) {
         try {
             var c = Class.forName(name, true, getClassLoader());
@@ -288,9 +302,9 @@ public interface EngineConfiguration {
                 return (Class<? extends Annotation>) c;
             }
 
-            LOGGER.debug("Class " + name + " is not an annotation");
+            LOGGER.debug("Class {} is not an annotation", name);
         } catch (Throwable t) { // in some cases an error can be thrown
-            LOGGER.debug("Class not found for annotation" + name);
+            LOGGER.debug("Class not found for annotation {}", name);
         }
 
         return null;
@@ -335,7 +349,7 @@ class State {
     static GeneratorConfiguration generator = new GeneratorConfiguration();
     static Path outputDir;
     static ParserConfiguration parser = new ParserConfiguration();
-    static BrowserCallableFinder browserCallableFinder;
+    static List<BrowserCallableFinder> browserCallableFinders;
     static boolean productionMode = false;
     static String nodeCommand = "node";
     static ClassFinder classFinder;

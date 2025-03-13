@@ -62,8 +62,7 @@ public final class EngineGenerateMojo extends AbstractMojo
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 
-            var browserCallables = conf.getBrowserCallableFinder()
-                    .findBrowserCallables();
+            var browserCallables = conf.findBrowserCallables();
             parserProcessor.process(browserCallables);
             generatorProcessor.process();
         } catch (ExecutionFailedException e) {

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.engine.BrowserCallableFinder;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
 import com.vaadin.hilla.internal.fixtures.MyEndpoint;
@@ -83,11 +84,14 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
-        var engineConfiguration = EngineConfiguration.DEFAULT
-                .setBrowserCallableFinder(() -> List.of(MyEndpoint.class));
+        var finders = EngineConfiguration.DEFAULT.getBrowserCallableFinders();
+        EngineConfiguration.DEFAULT
+                .setBrowserCallableFinders((conf) -> List.of(MyEndpoint.class));
 
         new NodeTasks(options).execute();
         assertEndpointFilesInProductionMode(true);
+        EngineConfiguration.DEFAULT.setBrowserCallableFinders(
+                finders.toArray(BrowserCallableFinder[]::new));
     }
 
     @Test

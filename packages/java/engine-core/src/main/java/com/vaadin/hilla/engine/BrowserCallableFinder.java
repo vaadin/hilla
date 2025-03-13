@@ -11,5 +11,16 @@ import com.vaadin.flow.server.ExecutionFailedException;
  */
 @FunctionalInterface
 public interface BrowserCallableFinder {
-    List<Class<?>> findBrowserCallables() throws ExecutionFailedException;
+    /**
+     * Finds and returns a list of browser-callable endpoint classes based on
+     * the provided configuration.
+     *
+     * @param engineConfiguration
+     *            The configuration to use for finding endpoint classes.
+     * @return A list of endpoint classes that are browser-callable.
+     * @throws ExecutionFailedException
+     *             If something goes wrong during the lookup.
+     */
+    List<Class<?>> findEndpointClasses(EngineConfiguration engineConfiguration)
+            throws ExecutionFailedException;
 }

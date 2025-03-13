@@ -7,8 +7,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -18,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 
 public class EngineConfigurationTest {
@@ -43,7 +42,7 @@ public class EngineConfigurationTest {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
             assertEquals(List.of(EndpointFromAot.class),
-                    conf.getBrowserCallableFinder().findBrowserCallables());
+                    conf.findBrowserCallables());
         }
     }
 
@@ -58,9 +57,9 @@ public class EngineConfigurationTest {
                         BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
-                    .thenThrow(ParserException.class);
+                    .thenThrow(ExecutionFailedException.class);
             assertEquals(List.of(EndpointFromClassFinder.class),
-                    conf.getBrowserCallableFinder().findBrowserCallables());
+                    conf.findBrowserCallables());
         }
     }
 

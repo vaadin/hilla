@@ -49,8 +49,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         var engineConfiguration = getEngineConfiguration();
         if (engineConfiguration.isProductionMode()) {
-            var browserCallables = engineConfiguration
-                    .getBrowserCallableFinder().findBrowserCallables();
+            var browserCallables = engineConfiguration.findBrowserCallables();
             var processor = new ParserProcessor(engineConfiguration);
             processor.process(browserCallables);
         } else {

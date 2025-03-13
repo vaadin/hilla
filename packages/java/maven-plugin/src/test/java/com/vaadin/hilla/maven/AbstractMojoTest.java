@@ -53,7 +53,7 @@ public class AbstractMojoTest {
 
         engineConfiguration = EngineConfiguration.DEFAULT
                 .setBaseDir(temporaryDirectory)
-                .setBrowserCallableFinder(() -> List.of());
+                .setBrowserCallableFinders((conf) -> List.of());
     }
 
     @AfterEach

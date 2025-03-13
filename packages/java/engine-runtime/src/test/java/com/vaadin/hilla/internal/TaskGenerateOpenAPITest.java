@@ -26,7 +26,7 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
  * content of the generator, they are tested in other package
- * {@link com.vaadin.hilla.generator}
+ * {@link com.vaadin.hilla.engine}
  */
 public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
 
