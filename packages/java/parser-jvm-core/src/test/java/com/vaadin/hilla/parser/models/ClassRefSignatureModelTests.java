@@ -456,8 +456,15 @@ public class ClassRefSignatureModelTests {
             case SOURCE: {
                 var fooAnnotation = AnnotationInfoModel
                         .of(matches.getAnnotation("fooAnnotation"));
+                var barAnnotation = AnnotationInfoModel
+                        .of(matches.getAnnotation("barAnnotation"));
 
                 assertEquals(List.of(fooAnnotation), model.getAnnotations());
+
+                assertEquals(List.of(barAnnotation),
+                        model.getOwner()
+                                .map(ClassRefSignatureModel::getAnnotations)
+                                .orElseGet(List::of));
             }
                 break;
             case REFLECTION_BARE:
@@ -615,14 +622,14 @@ public class ClassRefSignatureModelTests {
     }
 
     static class Sample {
-        private DynamicDependency.@Foo Sub dynamicDependency;
-        private DynamicParametrizedDependency<String>.@Foo Sub<Integer> dynamicParametrizedDependency;
+        private @Bar DynamicDependency.@Foo Sub dynamicDependency;
+        private @Bar DynamicParametrizedDependency<String>.@Foo Sub<Integer> dynamicParametrizedDependency;
         private StaticDependency.@Foo Sub staticDependency;
         private StaticParametrizedDependency.@Foo Sub<Integer> staticParametrizedDependency;
         private @Foo List<String> topLevelParametrizedDependency;
 
         @Retention(RetentionPolicy.RUNTIME)
-        @Target(ElementType.TYPE_USE)
+        @Target({ ElementType.TYPE_USE, ElementType.FIELD })
         @interface Bar {
         }
 

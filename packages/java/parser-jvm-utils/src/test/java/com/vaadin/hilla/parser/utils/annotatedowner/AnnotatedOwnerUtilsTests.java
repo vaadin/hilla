@@ -56,7 +56,7 @@ public class AnnotatedOwnerUtilsTests {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
+    @Target({ ElementType.TYPE_USE, ElementType.FIELD })
     @interface Bar {
     }
 
@@ -84,8 +84,9 @@ public class AnnotatedOwnerUtilsTests {
     static class Provider implements ArgumentsProvider {
         public static final String testNamePattern = "{1}";
 
-        private static final List<String> fieldsWithTwoAnnotations = List
-                .of("gs_ds", "gs_dp", "gp_ds", "gp_dp");
+        private static final List<String> fieldsWithTwoAnnotations = List.of(
+                "ss_ds", "ss_dp", "sp_ds", "sp_dp", "gs_ds", "gs_dp", "gp_ds",
+                "gp_dp");
 
         @Override
         public Stream<? extends Arguments> provideArguments(
@@ -155,11 +156,15 @@ public class AnnotatedOwnerUtilsTests {
         GLOB_Simple.@Foo DYN_CSimple gs_ds; // me me
         GLOB_Simple.@Foo ST_CParam<Integer> gs_sp; // parent
         GLOB_Simple.@Foo ST_CSimple gs_ss; // both
+        @Bar
         ST_Param<Integer>.@Foo DYN_CParam<Integer> sp_dp; // parent
+        @Bar
         ST_Param<Integer>.@Foo DYN_CSimple sp_ds; // parent
         ST_Param.@Foo ST_CParam<Integer> sp_sp; // parent
         ST_Param.@Foo ST_CSimple sp_ss; // both
+        @Bar
         ST_Simple.@Foo DYN_CParam<Integer> ss_dp; // me
+        @Bar
         ST_Simple.@Foo DYN_CSimple ss_ds; // me
         ST_Simple.@Foo ST_CParam<Integer> ss_sp; // parent
         ST_Simple.@Foo ST_CSimple ss_ss; // both
