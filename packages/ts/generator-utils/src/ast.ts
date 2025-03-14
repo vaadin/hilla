@@ -61,7 +61,7 @@ export function transform<T extends Node>(
   };
 }
 
-export function traverse<T extends Node>(node: Node, visitor: (node: Node) => T | undefined): T | undefined {
+export function traverse<T>(node: Node, visitor: (node: Node) => T | undefined): T | undefined {
   function _visitor(n: Node): T | undefined {
     return visitor(n) ?? ts.forEachChild(n, _visitor);
   }

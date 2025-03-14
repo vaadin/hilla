@@ -6,4 +6,5 @@ module com.vaadin.hilla.runtime.transfertypes {
 
     exports com.vaadin.hilla.runtime.transfertypes;
     exports com.vaadin.hilla.mappedtypes;
+    exports com.vaadin.hilla.transfertypes.annotations;
 }
