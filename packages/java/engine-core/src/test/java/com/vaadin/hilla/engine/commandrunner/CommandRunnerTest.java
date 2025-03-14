@@ -195,7 +195,7 @@ public class CommandRunnerTest {
                 return new MockProcessInfo();
             }
 
-            private class MockProcessInfo implements ProcessHandle.Info {
+            class MockProcessInfo implements ProcessHandle.Info {
 
                 @Override
                 public Optional<String> command() {

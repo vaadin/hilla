@@ -56,7 +56,7 @@ public class AnnotatedOwnerUtilsTests {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE_USE)
+    @Target({ ElementType.TYPE_USE, ElementType.FIELD })
     @interface Bar {
     }
 
