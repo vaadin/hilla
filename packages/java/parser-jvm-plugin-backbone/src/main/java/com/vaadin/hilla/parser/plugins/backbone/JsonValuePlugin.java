@@ -10,11 +10,17 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import org.jspecify.annotations.NonNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * Adds support for Jackson's {@code JsonValue} annotation.
  */
 public class JsonValuePlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
+    private final Map<Class<?>, Optional<Class<?>>> jsonValues = new HashMap<>();
+
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -41,22 +47,27 @@ public class JsonValuePlugin
                 // Check if the class has the annotations which qualify for a
                 // value type. If so, replace the type with the corresponding
                 // value type.
-                var valueType = getValueType(cls);
-                return valueType == null ? node
-                        : TypeSignatureNode.of(SignatureModel.of(valueType));
+                Optional<Node<?, ?>> valueNode = getValueType(cls)
+                        .map(SignatureModel::of).map(TypeSignatureNode::of);
+                return valueNode.orElse(node);
             }
         }
 
         return node;
     }
 
-    private Class<?> getValueType(Class<?> cls) {
+    private Optional<Class<?>> getValueType(Class<?> cls) {
+        // Use cached results to avoid recomputing the value type.
+        return jsonValues.computeIfAbsent(cls, this::findValueType);
+    }
+
+    private Optional<Class<?>> findValueType(Class<?> cls) {
         for (var method : cls.getMethods()) {
             if (method.isAnnotationPresent(JsonValue.class)) {
-                return method.getReturnType();
+                return Optional.of(method.getReturnType());
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 }
