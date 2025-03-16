@@ -81,8 +81,8 @@ describe('@vaadin/hilla-react-crud', () => {
 
     function I18nTestComponent() {
       const i18n = useDatePickerI18n();
-      const formatted = i18n.formatDate(dateAsObject);
-      const parsed = i18n.parseDate(dateAsString);
+      const formatted = i18n.formatDate?.(dateAsObject);
+      const parsed = i18n.parseDate?.(dateAsString);
 
       return (
         <>
