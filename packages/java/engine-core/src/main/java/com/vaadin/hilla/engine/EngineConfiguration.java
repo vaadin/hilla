@@ -348,7 +348,7 @@ class State {
     Path outputDir;
     ParserConfiguration parser;
     List<BrowserCallableFinder> browserCallableFinders;
-    boolean productionMode = false;
+    boolean productionMode;
     String nodeCommand;
     ClassFinder classFinder;
 
