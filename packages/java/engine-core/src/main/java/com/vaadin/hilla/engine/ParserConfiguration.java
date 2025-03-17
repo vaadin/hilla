@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.hilla.parser.plugin.nonnull.kotlin.KotlinNullabilityPlugin;
+import com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
