@@ -314,7 +314,7 @@ public interface EngineConfiguration {
 
             LOGGER.debug("Class {} is not an annotation", name);
         } catch (Throwable t) { // in some cases an error can be thrown
-            LOGGER.debug("Class not found for annotation {}", name);
+            LOGGER.debug("Class not found for annotation " + name, t);
         }
 
         return null;

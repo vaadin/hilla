@@ -15,10 +15,6 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import java.io.File
-import java.io.Serializable
-import java.nio.file.Path
-import java.util.stream.Stream
 import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.gradle.VaadinPlugin
 import com.vaadin.hilla.engine.EngineConfiguration
@@ -31,6 +27,8 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
+import java.nio.file.Path
+import java.util.stream.Stream
 
 /**
  * The main class of the Hilla Gradle Plugin
@@ -53,11 +51,9 @@ public class HillaPlugin : Plugin<Project> {
 
             project.tasks.apply {
                 register("hillaConfigure", EngineConfigureTask::class.java) {
-                    it.configure(project)
+                    createEngineConfiguration(it.project)
                 }
-                register("hillaGenerate", EngineGenerateTask::class.java) {
-                    it.configure(project)
-                }
+                register("hillaGenerate", EngineGenerateTask::class.java)
             }
 
             project.tasks.named("vaadinBuildFrontend") {
@@ -101,7 +97,8 @@ public class HillaPlugin : Plugin<Project> {
     }
 
     public companion object {
-        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension) {
+        public fun createEngineConfiguration(project: Project) {
+            val vaadinExtension = VaadinFlowPluginExtension.get(project)
             val baseDir: Path = project.projectDir.toPath()
             val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
@@ -126,48 +123,4 @@ public class HillaPlugin : Plugin<Project> {
                 .setProductionMode(vaadinExtension.productionMode.getOrElse(false))
         }
     }
-}
-
-/**
- * A serializable data container that stores EngineConfiguration settings to
- * provide an instance at execution time.
- * It is needed to support gradle configuration cache, because
- * EngineConfiguration has unserializable private members (e.g. Path references)
- */
-internal data class EngineConfigurationSettings(
-    val baseDir: File,
-    val buildDir: File,
-    val classesDirs: Set<File>,
-    val outputDir: File,
-    val groupId: String,
-    val artifactId: String,
-    val classpath: List<String>,
-    val mainClass: String?,
-    val productionMode: Boolean
-) : Serializable {
-    fun toEngineConfiguration() {
-         EngineConfiguration.DEFAULT
-            .setBaseDir(baseDir.toPath())
-            .setBuildDir(buildDir.toPath())
-            .setClassesDirs(*classesDirs.map { it.toPath() }.toTypedArray())
-            .setOutputDir(outputDir.toPath())
-            .setGroupId(groupId)
-            .setArtifactId(artifactId)
-            .setClasspath(classpath)
-            .setMainClass(mainClass)
-            .setProductionMode(productionMode)
-    }
-}
-
-internal fun EngineConfiguration.toInputs(): EngineConfigurationSettings {
-    return EngineConfigurationSettings(
-        baseDir = this.baseDir.toFile(), buildDir = this.buildDir.toFile(),
-        classesDirs = this.classesDirs.map { it.toFile() }.toSet(),
-        outputDir = this.outputDir.toFile(),
-        groupId = this.groupId,
-        artifactId = this.artifactId,
-        classpath = this.classpath.map { it.toString() },
-        mainClass = this.mainClass,
-        productionMode = this.isProductionMode
-    )
 }

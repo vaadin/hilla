@@ -18,10 +18,11 @@ package com.vaadin.hilla.gradle.plugin
 import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
+import java.nio.file.Path
+import java.util.stream.Stream
 
 /**
  * Task that generates the configuration json which is needed
@@ -34,19 +35,7 @@ public abstract class EngineConfigureTask : DefaultTask() {
         description = "Hilla Configure Task"
     }
 
-    internal fun configure(project: Project) {
-        HillaPlugin.createEngineConfiguration(
-            project,
-            VaadinFlowPluginExtension.get(project)
-        )
-        engineConfigurationSettings.set(EngineConfiguration.load().toInputs())
-    }
-
-    @get:Internal
-    internal abstract val engineConfigurationSettings: Property<EngineConfigurationSettings>
-
     @TaskAction
     public fun engineConfigure() {
-        engineConfigurationSettings.get().toEngineConfiguration()
     }
 }
