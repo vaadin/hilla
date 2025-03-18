@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project

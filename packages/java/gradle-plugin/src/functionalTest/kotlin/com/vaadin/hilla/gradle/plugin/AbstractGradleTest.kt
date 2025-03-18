@@ -42,7 +42,7 @@ abstract class AbstractGradleTest {
     @After
     fun deleteTestProjectFolder() {
         // comment out if a test is failing and you need to investigate the project files.
-        // testProject.delete()
+        testProject.delete()
     }
 
     @Before
