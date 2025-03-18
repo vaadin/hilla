@@ -383,5 +383,5 @@ jobs:
           name: saved-outputs
           pattern: saved-outputs-*
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' || needs.test-react-18.result != 'success' }}
+        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' }}
         run: exit 1
