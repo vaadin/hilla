@@ -92,7 +92,7 @@ public class EndpointGeneratorTaskFactoryImpl
     }
 
     private static EngineConfiguration configureFromOptions(Options options) {
-        EngineConfiguration.DEFAULT.setBaseDir(options.getNpmFolder().toPath())
+        EngineConfiguration.load().setBaseDir(options.getNpmFolder().toPath())
                 .setBuildDir(options.getBuildDirectoryName())
                 .setOutputDir(options.getFrontendGeneratedFolder().toPath())
                 .setNodeCommand(buildTools(options).getNodeExecutable())

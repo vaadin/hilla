@@ -154,7 +154,7 @@ public class EndpointCodeGenerator {
 
             var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());
-            engineConfiguration = EngineConfiguration.DEFAULT
+            engineConfiguration = EngineConfiguration.load()
                     .setBaseDir(configuration.getProjectFolder().toPath())
                     .setBuildDir(configuration.getBuildFolder())
                     .setOutputDir(

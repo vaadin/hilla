@@ -51,7 +51,7 @@ public class AbstractMojoTest {
         // Maven project is not initialized on the mojo, setup a mock manually
         project = createMavenProject();
 
-        engineConfiguration = EngineConfiguration.DEFAULT
+        engineConfiguration = EngineConfiguration.STATE
                 .setBaseDir(temporaryDirectory)
                 .setBrowserCallableFinders((conf) -> List.of());
     }

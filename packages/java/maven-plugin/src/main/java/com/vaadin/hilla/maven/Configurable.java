@@ -37,7 +37,7 @@ interface Configurable {
                     "mainClass");
         }
 
-        EngineConfiguration.DEFAULT.setBaseDir(project.getBasedir().toPath())
+        EngineConfiguration.load().setBaseDir(project.getBasedir().toPath())
                 .setBuildDir(project.getBuild().getDirectory())
                 .setOutputDir(generatedOrOldLocation().toPath())
                 .setGroupId(project.getGroupId())

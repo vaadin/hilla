@@ -84,13 +84,13 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
-        var finders = EngineConfiguration.DEFAULT.getBrowserCallableFinders();
-        EngineConfiguration.DEFAULT
+        var finders = EngineConfiguration.STATE.getBrowserCallableFinders();
+        EngineConfiguration.STATE
                 .setBrowserCallableFinders((conf) -> List.of(MyEndpoint.class));
 
         new NodeTasks(options).execute();
         assertEndpointFilesInProductionMode(true);
-        EngineConfiguration.DEFAULT.setBrowserCallableFinders(
+        EngineConfiguration.STATE.setBrowserCallableFinders(
                 finders.toArray(BrowserCallableFinder[]::new));
     }
 

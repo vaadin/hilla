@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface EngineConfiguration {
-    EngineConfiguration DEFAULT = new EngineConfiguration() {
+    EngineConfiguration STATE = new EngineConfiguration() {
     };
     Logger LOGGER = LoggerFactory.getLogger(EngineConfiguration.class);
 
@@ -149,7 +149,7 @@ public interface EngineConfiguration {
                             "\"")));
         }
 
-        return configurations.isEmpty() ? DEFAULT : configurations.get(0);
+        return configurations.isEmpty() ? STATE : configurations.get(0);
     }
 
     default EngineConfiguration setBaseDir(Path baseDir) {

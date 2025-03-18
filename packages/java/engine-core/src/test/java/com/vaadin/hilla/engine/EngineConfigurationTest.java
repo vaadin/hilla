@@ -37,7 +37,7 @@ public class EngineConfigurationTest {
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenThrow(RuntimeException.class);
-        var conf = EngineConfiguration.DEFAULT.setClassFinder(classFinder);
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder);
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
@@ -52,7 +52,7 @@ public class EngineConfigurationTest {
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
-        var conf = EngineConfiguration.DEFAULT.setClassFinder(classFinder)
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
                 .setEndpointAnnotationNames(
                         BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
