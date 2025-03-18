@@ -26,19 +26,23 @@ class NativeHelloService {
         return listOf()
     }
 
-    fun saveAllPersons(persons: List<NativePerson>?): List<NativePerson> {
+    fun saveAllPersons(persons: List<NativePerson>): List<NativePerson?>? {
         return listOf()
     }
 
-    // fun saveCompaniesPerCities(data: Map<String, Map<String, List<Map<String, List<Team<Employee, Manager>>>>>>): Map<String, Map<String, List<Map<String, List<Team<Employee, Manager>>>>>> {
-    //    return data
-    //}
+    /*fun saveCompaniesPerCities(data: Map<String, Map<String, List<Map<String, List<Team<Employee, Manager?>>?>>>>): Map<String, Map<String, List<Map<String, List<Team<Employee?, Manager>?>>>>?> {
+        return mapOf()
+    }*/
 
-    //fun saveTeams(teams: List<Team<Employee, Manager>>): List<Team<Employee, Manager>> {
-    //    return teams
-    //}
+    fun saveDepartmentManager(data: Map<String, Manager?>): Boolean? {
+        return false
+    }
 
-    fun saveTeam(team: Team<Employee, Manager>): Team<Employee, Manager> {
+    fun saveTeams(teams: List<Team<Employee?, Manager>?>?): List<Team<Employee?, Manager>?> {
+        return listOf()
+    }
+
+    fun saveTeam(team: Team<Employee, Manager?>?): Team<Employee, Manager?>? {
         return team
     }
 }
