@@ -12,4 +12,4 @@ class KMethodNode(
 ): MethodNode(
     source,
     target
-)
+), KNode

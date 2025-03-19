@@ -1,15 +1,15 @@
 package com.vaadin.hilla.parser.plugins.backbone.knodes
 
 import com.vaadin.hilla.parser.models.ClassInfoModel
-import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode
-import io.swagger.v3.oas.models.tags.Tag
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode
+import io.swagger.v3.oas.models.media.ObjectSchema
 import kotlin.reflect.KClass
 
-class KEndpointNode(
+class KEntityNode(
     source: ClassInfoModel,
-    target: Tag,
+    target: ObjectSchema,
     val kClass: KClass<*>
-): EndpointNode(
+): EntityNode(
     source,
     target
 ), KNode

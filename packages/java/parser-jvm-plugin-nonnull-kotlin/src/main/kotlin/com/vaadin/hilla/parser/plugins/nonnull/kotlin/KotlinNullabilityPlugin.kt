@@ -2,15 +2,16 @@ package com.vaadin.hilla.parser.plugins.nonnull.kotlin
 
 import com.vaadin.hilla.parser.core.*
 import com.vaadin.hilla.parser.models.*
+import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin
-import com.vaadin.hilla.parser.plugins.backbone.knodes.KEndpointNode
-import com.vaadin.hilla.parser.plugins.backbone.knodes.KMethodNode
-import com.vaadin.hilla.parser.plugins.backbone.knodes.KMethodParameterNode
-import com.vaadin.hilla.parser.plugins.backbone.knodes.KTypeSignatureNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.*
 import com.vaadin.hilla.parser.plugins.backbone.nodes.*
+import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.memberProperties
 
 class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
@@ -42,12 +43,16 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             else {
                 if (node.source is TypeArgumentModel) { // it depends on the parent node
                     if (parentPath.node is KTypeSignatureNode) {
+                        val parentType = (parentPath.node as KTypeSignatureNode).kType
+                        // if parent is a map, then the key is always ignored and the index to read the generic type is 1
+                        val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
+                                       else node.position
                         return KTypeSignatureNode(
                             node.source,
                             node.target,
                             node.annotations,
                             node.position,
-                            (parentPath.node as KTypeSignatureNode).kType.arguments[node.position].type!!
+                            parentType.arguments[position].type!!
                         )
                     } else if (parentPath.node is KMethodParameterNode) {
                         return KTypeSignatureNode(
@@ -58,7 +63,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                             (parentPath.node as KMethodParameterNode).kParameter.type.arguments[node.position].type!!
                         )
                     }
-                } else if (node.source is ClassRefSignatureModel) {
+                } else if (node.source is ClassRefSignatureModel || node.source is BaseSignatureModel) {
                     if (parentPath.node is KMethodNode) { // method return type node
                         return KTypeSignatureNode(
                             node.source,
@@ -86,6 +91,14 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                     }
                 }
             }
+        } else if (node is EntityNode && node.source is ClassInfoModel && isKotlinClass(node.source.get() as Class<*>)) {
+            return if (node is KEntityNode) node
+                else KEntityNode(node.source, node.target as ObjectSchema, (node.source.get() as Class<*>).kotlin)
+        } else if (node is PropertyNode && node.source is JacksonPropertyModel && isKotlinClass((parentPath.node.source as ClassInfoModel).get() as Class<*>)) {
+            return if (node is KPropertyNode) node
+                else KPropertyNode(node.source, node.target, (parentPath.node as KEntityNode).kClass.memberProperties.first {
+                    it.name == node.source.name
+                })
         }
 
         return super.resolve(node, parentPath)
@@ -101,27 +114,10 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             schema.nullable = if (node.kType.isMarkedNullable) true else null
         } else if (node is KMethodParameterNode) {
             schema.nullable = if (node.kParameter.type.isMarkedNullable) true else null
-        }
-        /*val clazz = findClosestClass(nodePath)
-        if (!isKotlinClass(clazz)){
-            return
-        }
-        val schema = node.target as Schema<*>
+        } else if (node is KEntityNode) {
 
-        if (isMethodParameterNode(nodePath)) {
-            val methodInfo = nodePath.parentPath.parentPath.node.source as MethodInfoModel
-            schema.nullable = if (isMethodParameterNullable(nodePath, clazz, methodInfo.name)) true else null
-        } else if (isMethodReturnTypeNode(nodePath)) {
-            val methodInfo = nodePath.parentPath.node.source as MethodInfoModel
-            schema.nullable = if (isMethodReturnTypeNullable(clazz, methodInfo.name)) true else null
-        } else if (isMethodReturnTypeTypeVariableNode(nodePath)) {
-            val methodInfo = nodePath.parentPath.parentPath.node.source as MethodInfoModel
-            // val typeVariable = nodePath.node.source as TypeVariableModel
-            // val typeParameter = clazz.kotlin.typeParameters.first {
-            //    it.name == typeVariable.name
-            // }
-            // schema.nullable = if (typeParameter.upperBounds.first().isMarkedNullable) true else null
-        }*/
+            node.kClass.declaredMemberProperties
+        }
     }
 
     private fun isKotlinClass(clazz: Class<*>): Boolean {
@@ -135,36 +131,5 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             .filter{ node -> node.getSource() is ClassInfoModel }
             .map{ node -> node.getSource() as ClassInfoModel }
             .findFirst().get().get() as Class<*>
-    }
-
-    private fun isMethodParameterNode(nodePath: NodePath<*>): Boolean {
-        return nodePath.node.source is ClassRefSignatureModel && nodePath.parentPath.node is MethodParameterNode
-    }
-
-    private fun isMethodReturnTypeNode(nodePath: NodePath<*>): Boolean {
-        return nodePath.node is TypeSignatureNode && nodePath.parentPath.node is MethodNode
-    }
-
-    private fun isMethodReturnTypeTypeVariableNode(nodePath: NodePath<*>): Boolean {
-        return nodePath.node.source is TypeArgumentModel
-            && nodePath.parentPath.node is TypeSignatureNode
-            && nodePath.parentPath.parentPath.node is MethodNode
-    }
-
-    private fun isMethodParameterNullable(nodePath: NodePath<*>, clazz: Class<*>, methodName: String): Boolean {
-        return clazz.kotlin
-            .memberFunctions.first {
-                it.name == methodName
-            }.parameters.first {
-                it.name == nodePath.parentPath.node.target &&
-                    it.kind == KParameter.Kind.VALUE
-            }.type.isMarkedNullable
-    }
-
-    private fun isMethodReturnTypeNullable(clazz: Class<*>, methodName: String): Boolean {
-        return clazz.kotlin
-            .memberFunctions.first {
-                it.name == methodName
-            }.returnType.isMarkedNullable
     }
 }

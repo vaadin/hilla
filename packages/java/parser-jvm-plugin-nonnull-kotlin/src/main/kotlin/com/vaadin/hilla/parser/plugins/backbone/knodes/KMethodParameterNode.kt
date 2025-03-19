@@ -11,4 +11,4 @@ class KMethodParameterNode(
 ): MethodParameterNode(
     source,
     target
-)
+), KNode

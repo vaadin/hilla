@@ -18,7 +18,7 @@ class NativeHelloService {
             "Hello $name"
         }
 
-    fun isValidPerson(person: NativePerson): Boolean {
+    fun isValidPerson(person: NativePerson): Boolean? {
         return person.firstName?.isNotBlank() == true && person.dateOfBirth != null
     }
 
@@ -30,12 +30,12 @@ class NativeHelloService {
         return listOf()
     }
 
-    /*fun saveCompaniesPerCities(data: Map<String, Map<String, List<Map<String, List<Team<Employee, Manager?>>?>>>>): Map<String, Map<String, List<Map<String, List<Team<Employee?, Manager>?>>>>?> {
+    fun saveCompaniesPerCities(data: Map<String, Map<String, List<Map<String, List<Team<Employee, Manager?>>?>>>>): Map<String, Map<String, List<Map<String, List<Team<Employee?, Manager>?>>>>?> {
         return mapOf()
-    }*/
+    }
 
-    fun saveDepartmentManager(data: Map<String, Manager?>): Boolean? {
-        return false
+    fun saveDepartmentManager(data: Map<String, Manager?>): Map<String?, Manager>? {
+        return mapOf()
     }
 
     fun saveTeams(teams: List<Team<Employee?, Manager>?>?): List<Team<Employee?, Manager>?> {

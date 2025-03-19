@@ -5,9 +5,9 @@ import org.jspecify.annotations.NonNull;
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 
-public final class PropertyNode
+public class PropertyNode
         extends AbstractNode<JacksonPropertyModel, String> {
-    private PropertyNode(@NonNull JacksonPropertyModel source,
+    protected PropertyNode(@NonNull JacksonPropertyModel source,
             @NonNull String target) {
         super(source, target);
     }

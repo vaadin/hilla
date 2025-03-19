@@ -17,4 +17,4 @@ class KTypeSignatureNode(
     target,
     annotations,
     position
-)
+), KNode
