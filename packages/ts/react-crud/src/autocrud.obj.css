@@ -2,13 +2,15 @@
   display: flex;
   overflow: hidden;
   border: solid 1px var(--lumo-contrast-20pct);
+  height: 462px; /* vaadin-grid intrinsic 400px + 62px for the button toolbar */
 }
 
-.auto-crud vaadin-split-layout {
+.auto-crud > vaadin-split-layout {
   flex: 1 1 100%;
+  align-items: stretch;
 }
 
-.auto-crud vaadin-split-layout::part(splitter) {
+.auto-crud > vaadin-split-layout::part(splitter) {
   border-top: solid 1px var(--lumo-contrast-20pct);
   border-left: solid 1px var(--lumo-contrast-20pct);
 }
@@ -20,8 +22,9 @@
   flex-direction: column;
 }
 
-.auto-crud-main vaadin-grid {
+.auto-crud-main > vaadin-grid {
   border: none;
+  height: auto;
 }
 
 .auto-crud-toolbar {
