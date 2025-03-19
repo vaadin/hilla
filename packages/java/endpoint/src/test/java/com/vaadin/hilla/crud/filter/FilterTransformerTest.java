@@ -1,6 +1,7 @@
 package com.vaadin.hilla.crud.filter;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.vaadin.hilla.crud.JpaFilterConverter;
 import com.vaadin.hilla.crud.TestEnum;
@@ -88,5 +89,26 @@ public class FilterTransformerTest {
         assertEquals("test3", result2.getName());
         assertEquals(4, result2.getIntValue());
         assertEquals(TestEnum.TEST3, result2.getEnumValue());
+    }
+
+    @Test
+    public void testUUIDFilter() {
+        var uuidString = "a012d576-4e96-40a0-9de0-67adb8f47023";
+
+        var testObject = new TestObject();
+        testObject.setName("test1");
+        testObject.setUuidValue(UUID.fromString(uuidString));
+        entityManager.persist(testObject);
+
+        var filter = new PropertyStringFilter("uuidValue", Matcher.EQUALS,
+                uuidString);
+
+        var spec = JpaFilterConverter.toSpec(filter, TestObject.class);
+        var result = repository.findAll(spec);
+        assertEquals(1, result.size());
+
+        var result1 = result.get(0);
+        assertEquals("test1", result1.getName());
+        assertEquals(UUID.fromString(uuidString), result1.getUuidValue());
     }
 }

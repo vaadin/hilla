@@ -9,6 +9,7 @@ import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Entity
 public class TestObject {
@@ -30,6 +31,7 @@ public class TestObject {
     private double doubleValue;
     private Double nullableDoubleValue;
     private TestEnum enumValue;
+    private UUID uuidValue;
 
     @OneToOne
     private NestedObject nestedObject;
@@ -153,6 +155,10 @@ public class TestObject {
     public void setEnumValue(TestEnum testEnum) {
         this.enumValue = testEnum;
     }
+
+    public UUID getUuidValue() {return uuidValue;}
+
+    public void setUuidValue(UUID uuidValue) {this.uuidValue = uuidValue;}
 
     public NestedObject getNestedObject() {
         return nestedObject;
