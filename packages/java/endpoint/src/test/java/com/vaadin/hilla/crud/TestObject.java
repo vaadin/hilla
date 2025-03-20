@@ -156,9 +156,13 @@ public class TestObject {
         this.enumValue = testEnum;
     }
 
-    public UUID getUuidValue() {return uuidValue;}
+    public UUID getUuidValue() {
+        return uuidValue;
+    }
 
-    public void setUuidValue(UUID uuidValue) {this.uuidValue = uuidValue;}
+    public void setUuidValue(UUID uuidValue) {
+        this.uuidValue = uuidValue;
+    }
 
     public NestedObject getNestedObject() {
         return nestedObject;
