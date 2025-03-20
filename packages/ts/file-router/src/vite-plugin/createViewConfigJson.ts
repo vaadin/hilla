@@ -26,9 +26,10 @@ function* walkAST(node: Node): Generator<Node> {
  * routes along with managing the client-side routes.
  *
  * @param views - The route metadata tree.
+ * @returns A view configuration tree.
  */
-export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<string> {
-  const res = await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
+export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<readonly ServerViewConfig[]> {
+  return await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
     views,
     null,
     async (routes, next) =>
@@ -103,6 +104,4 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
         }),
       ),
   );
-
-  return JSON.stringify(res, undefined, 2);
 }

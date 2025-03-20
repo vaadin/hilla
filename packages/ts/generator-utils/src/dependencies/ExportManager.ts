@@ -5,7 +5,7 @@ import StatementRecordManager, { type StatementRecord } from './StatementRecordM
 import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedExportManager implements CodeConvertable<ExportDeclaration | undefined> {
-  readonly #collator: Intl.Collator;
+  readonly collator: Intl.Collator;
   readonly #map = new Map<string, DependencyRecord>();
 
   get size(): number {
@@ -13,7 +13,7 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
   }
 
   constructor(collator: Intl.Collator) {
-    this.#collator = collator;
+    this.collator = collator;
   }
 
   add(name: string, isType?: boolean, uniqueId?: Identifier): Identifier {
@@ -47,7 +47,7 @@ export class NamedExportManager implements CodeConvertable<ExportDeclaration | u
 
     const names = [...this.#map.keys()];
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    names.sort(this.#collator.compare);
+    names.sort(this.collator.compare);
 
     return ts.factory.createExportDeclaration(
       undefined,

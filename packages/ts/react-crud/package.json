@@ -57,7 +57,7 @@
     "@vaadin/hilla-frontend": "24.8.0-alpha1",
     "@vaadin/hilla-lit-form": "24.8.0-alpha1",
     "@vaadin/hilla-react-form": "24.8.0-alpha1",
-    "@vaadin/react-components": "24.7.0-beta1"
+    "@vaadin/react-components": "24.8.0-alpha2"
   },
   "peerDependencies": {
     "react": "18 || 19",

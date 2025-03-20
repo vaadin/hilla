@@ -1,17 +1,11 @@
 import ts, { type Identifier, type ImportDeclaration, type Statement } from 'typescript';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
-import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
+import StatementRecordManager, { createComparator, type StatementRecord } from './StatementRecordManager.js';
 import { createDependencyRecord, type DependencyRecord } from './utils.js';
 
 export class NamedImportManager extends StatementRecordManager<ImportDeclaration> {
-  readonly #collator: Intl.Collator;
   readonly #map = new Map<string, Map<string, DependencyRecord>>();
-
-  constructor(collator: Intl.Collator) {
-    super(collator);
-    this.#collator = collator;
-  }
 
   get size(): number {
     return this.#map.size;
@@ -73,7 +67,7 @@ export class NamedImportManager extends StatementRecordManager<ImportDeclaration
     for (const [path, specifiers] of this.#map) {
       const names = [...specifiers.keys()];
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      names.sort(this.#collator.compare);
+      names.sort(this.collator.compare);
 
       const isTypeOnly = names.every((name) => specifiers.get(name)!.isType);
 
@@ -223,17 +217,16 @@ export class DefaultImportManager extends StatementRecordManager<ImportDeclarati
 }
 
 export default class ImportManager implements CodeConvertable<readonly Statement[]> {
+  readonly collator: Intl.Collator;
   readonly default: DefaultImportManager;
   readonly named: NamedImportManager;
   readonly namespace: NamespaceImportManager;
-
-  readonly #collator: Intl.Collator;
 
   constructor(collator: Intl.Collator) {
     this.default = new DefaultImportManager(collator);
     this.named = new NamedImportManager(collator);
     this.namespace = new NamespaceImportManager(collator);
-    this.#collator = collator;
+    this.collator = collator;
   }
 
   get size(): number {
@@ -246,7 +239,7 @@ export default class ImportManager implements CodeConvertable<readonly Statement
       ...this.named.statementRecords(),
       ...this.namespace.statementRecords(),
     ];
-    records.sort(StatementRecordManager.createComparator(this.#collator));
+    records.sort(createComparator(this.collator));
 
     return records.map(([, statement]) => statement);
   }
