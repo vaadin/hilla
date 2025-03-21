@@ -12,7 +12,7 @@ open class NativePerson(
     var email: @Email String? = null,
     var phone: String = "",
     @OneToMany
-    var address: List<Address>? = null,
+    var address: List<Address> = listOf(),
     var dateOfBirth: LocalDate? = null,
     var occupation: String? = null,
     var role: String? = null,

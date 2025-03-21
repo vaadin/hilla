@@ -30,19 +30,19 @@ class NativeHelloService {
         return listOf()
     }
 
-    fun saveCompaniesPerCities(data: Map<String, Map<String, List<Map<String, List<Team<Employee, Manager?>>?>>>>): Map<String, Map<String, List<Map<String, List<Team<Employee?, Manager>?>>>>?> {
+    fun saveDepartmentManager(data: Map<String, Manager?>): Map<String?, Manager>? {
         return mapOf()
     }
 
-    fun saveDepartmentManager(data: Map<String, Manager?>): Map<String?, Manager>? {
-        return mapOf()
+    fun saveTeam(team: Team<Employee, Manager?>?): Team<Employee, Manager?>? {
+        return team
     }
 
     fun saveTeams(teams: List<Team<Employee?, Manager>?>?): List<Team<Employee?, Manager>?> {
         return listOf()
     }
 
-    fun saveTeam(team: Team<Employee, Manager?>?): Team<Employee, Manager?>? {
-        return team
+    fun saveCompaniesPerCities(data: Map<String, Map<String, List<Map<String, List<Team<Employee, Manager?>>?>>>>): Map<String, Map<String, List<Map<String, List<Team<Employee?, Manager>?>>>>?> {
+        return mapOf()
     }
 }
