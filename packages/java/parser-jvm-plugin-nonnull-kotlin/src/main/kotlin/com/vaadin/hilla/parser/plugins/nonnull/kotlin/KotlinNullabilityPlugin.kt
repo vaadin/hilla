@@ -51,53 +51,63 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                    .parameters.first {
                        it.name == node.source.name && it.kind == KParameter.Kind.VALUE
                    })
-        } else if (node is TypeSignatureNode) {
-            if (node.source is TypeArgumentModel) { // it depends on the parent node
+        } else if (node is TypedNode) {
+            if (node.type is TypeArgumentModel) { // it depends on the parent node
                 if (parentPath.node is KTypeSignatureNode) {
+                    val typeSignatureNode = node as TypeSignatureNode
                     val parentType = (parentPath.node as KTypeSignatureNode).kType
                     // if parent is a map, then the key is always ignored and the index to read the generic type is 1
                     val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
-                                   else node.position
+                                   else typeSignatureNode.position
                     return KTypeSignatureNode(
-                        node.source,
+                        node.type,
                         node.target,
                         node.annotations,
-                        node.position,
+                        typeSignatureNode.position,
                         parentType.arguments[position].type!!
                     )
                 } else if (parentPath.node is KMethodParameterNode) {
+                    val typeSignatureNode = node as TypeSignatureNode
                     return KTypeSignatureNode(
-                        node.source,
+                        node.type,
                         node.target,
                         node.annotations,
-                        node.position,
-                        (parentPath.node as KMethodParameterNode).kParameter.type.arguments[node.position].type!!
+                        typeSignatureNode.position,
+                        (parentPath.node as KMethodParameterNode).kParameter.type.arguments[typeSignatureNode.position].type!!
                     )
                 }
-            } else if (node.source is ClassRefSignatureModel || node.source is BaseSignatureModel) {
+            } else if (node.type is ClassRefSignatureModel || node.type is BaseSignatureModel) {
                 if (parentPath.node is KMethodNode) { // method return type node
                     return KTypeSignatureNode(
-                        node.source,
+                        node.type,
                         node.target,
                         node.annotations,
-                        node.position,
+                        null,
                         (parentPath.node as KMethodNode).kFunction.returnType
                     )
                 } else if (parentPath.node is KMethodParameterNode) { // method parameter node
                     return KTypeSignatureNode(
-                        node.source,
+                        node.type,
                         node.target,
                         node.annotations,
-                        node.position,
+                        null,
                         (parentPath.node as KMethodParameterNode).kParameter.type
                     )
                 } else if (parentPath.node is KTypeSignatureNode) { // type argument node
                     return KTypeSignatureNode(
-                        node.source,
+                        node.type,
                         node.target,
                         node.annotations,
-                        node.position,
+                        null,
                         (parentPath.node as KTypeSignatureNode).kType
+                    )
+                } else if (parentPath.node is KPropertyNode) { // property node
+                    return KTypeSignatureNode(
+                        node.type,
+                        node.target,
+                        node.annotations,
+                        null,
+                        (parentPath.node as KPropertyNode).kProperty.returnType
                     )
                 }
             }
