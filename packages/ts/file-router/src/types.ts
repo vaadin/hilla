@@ -36,6 +36,14 @@ export type ViewConfig = Readonly<{
    */
   skipLayouts?: boolean;
 
+  /**
+   * Set false to indicate that the view should not be lazy loaded. `/` and
+   * `/login` are always loaded eagerly.
+   *
+   * @defaultValue `true`
+   */
+  lazy?: boolean;
+
   menu?: Readonly<{
     /**
      * Title to use in the menu. Falls back the title property of the view
