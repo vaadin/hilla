@@ -2,6 +2,7 @@ package com.vaadin.hilla.crud;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.vaadin.hilla.crud.filter.AndFilter;
 import com.vaadin.hilla.crud.filter.Filter;
@@ -60,6 +61,43 @@ public class FilterTest {
         setupNames("Jack", "John", "Johnny", "Polly", "Josh");
         PropertyStringFilter filter = new PropertyStringFilter("name",
                 Matcher.GREATER_THAN, "John");
+        executeFilter(filter);
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterUUIDPropertyUsingContains() {
+        setupUUIDs();
+        String filterValue = UUID.randomUUID().toString();
+        PropertyStringFilter filter = new PropertyStringFilter("uuidValue",
+                Matcher.CONTAINS, filterValue);
+        executeFilter(filter);
+    }
+
+    @Test
+    public void filterUUIDPropertyUsingEquals() {
+        List<TestObject> created = setupUUIDs();
+        TestObject to = created.get(0);
+        String filterValue = to.getUuidValue().toString();
+        PropertyStringFilter filter = new PropertyStringFilter("uuidValue",
+                Matcher.EQUALS, filterValue);
+        assertFilterResult(filter, List.of(to));
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterUUIDPropertyUsingLessThan() {
+        setupUUIDs();
+        String filterValue = UUID.randomUUID().toString();
+        PropertyStringFilter filter = new PropertyStringFilter("uuidValue",
+                Matcher.LESS_THAN, filterValue);
+        executeFilter(filter);
+    }
+
+    @Test(expected = InvalidDataAccessApiUsageException.class)
+    public void filterUUIDPropertyUsingGreaterThan() {
+        setupUUIDs();
+        String filterValue = UUID.randomUUID().toString();
+        PropertyStringFilter filter = new PropertyStringFilter("uuidValue",
+                Matcher.GREATER_THAN, filterValue);
         executeFilter(filter);
     }
 
@@ -438,6 +476,18 @@ public class FilterTest {
             TestObject testObject = new TestObject();
             testObject.setName(name);
             created.add(entityManager.persist(testObject));
+        }
+        entityManager.flush();
+        return created;
+    }
+
+    private List<TestObject> setupUUIDs() {
+        List<TestObject> created = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            TestObject testObject = new TestObject();
+            testObject.setUuidValue(UUID.randomUUID());
+            entityManager.persist(testObject);
+            created.add(testObject);
         }
         entityManager.flush();
         return created;
