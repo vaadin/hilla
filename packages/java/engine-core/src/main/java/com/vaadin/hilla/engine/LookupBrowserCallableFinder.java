@@ -7,8 +7,7 @@ import com.vaadin.flow.server.ExecutionFailedException;
 
 public class LookupBrowserCallableFinder {
 
-    public static List<Class<?>> findEndpointClasses(
-            EngineConfiguration engineConfiguration)
+    public static List<Class<?>> find(EngineConfiguration engineConfiguration)
             throws ExecutionFailedException {
         return engineConfiguration.getEndpointAnnotations().stream()
                 .map(engineConfiguration.getClassFinder()::getAnnotatedClasses)

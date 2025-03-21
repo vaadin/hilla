@@ -39,7 +39,7 @@ public class EngineConfigurationTest {
                 .thenThrow(RuntimeException.class);
         var conf = EngineConfiguration.STATE.setClassFinder(classFinder);
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
-            when(AotBrowserCallableFinder.findEndpointClasses(conf))
+            when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
             assertEquals(List.of(EndpointFromAot.class),
                     conf.findBrowserCallables());
@@ -56,7 +56,7 @@ public class EngineConfigurationTest {
                 .setEndpointAnnotationNames(
                         BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
-            when(AotBrowserCallableFinder.findEndpointClasses(conf))
+            when(AotBrowserCallableFinder.find(conf))
                     .thenThrow(ExecutionFailedException.class);
             assertEquals(List.of(EndpointFromClassFinder.class),
                     conf.findBrowserCallables());

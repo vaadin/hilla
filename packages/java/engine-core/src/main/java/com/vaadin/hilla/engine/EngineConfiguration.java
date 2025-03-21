@@ -22,13 +22,28 @@ import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Configuration for the generator engine. It exposes all properties that can be
+ * overridden by an alternative implementation, while providing defaults for all
+ * of them.
+ *
+ * @see #load() for details on how to override the default configuration
+ */
 public interface EngineConfiguration {
+    /**
+     * The internal configuration state. It is recommended to use
+     * {@link #load()} to get the current configuration.
+     */
     EngineConfiguration STATE = new EngineConfiguration() {
     };
+
     Logger LOGGER = LoggerFactory.getLogger(EngineConfiguration.class);
 
     String OPEN_API_PATH = "hilla-openapi.json";
 
+    /**
+     * Gets the output directory for the generated files.
+     */
     default Path getOutputDir() {
         if (State.INSTANCE.outputDir != null) {
             return State.INSTANCE.outputDir;
@@ -44,61 +59,104 @@ public interface EngineConfiguration {
         }
     }
 
+    /**
+     * Gets the classpath to be used by the engine.
+     */
     default Set<Path> getClasspath() {
         return State.INSTANCE.classpath;
     }
 
+    /**
+     * Gets the Maven group ID of the project.
+     */
     default String getGroupId() {
         return State.INSTANCE.groupId;
     }
 
+    /**
+     * Gets the Maven artifact ID of the project.
+     */
     default String getArtifactId() {
         return State.INSTANCE.artifactId;
     }
 
+    /**
+     * Gets the main class of the project. This is only useful in some
+     * applications where the main class cannot be determined automatically.
+     */
     default String getMainClass() {
         return State.INSTANCE.mainClass;
     }
 
+    /**
+     * Gets the build directory of the project.
+     */
     default Path getBuildDir() {
         return State.INSTANCE.buildDir == null ? getBaseDir().resolve("target")
                 : State.INSTANCE.buildDir;
     }
 
+    /**
+     * Gets the root directory of the project.
+     */
     default Path getBaseDir() {
         return State.INSTANCE.baseDir;
     }
 
+    /**
+     * Gets the directories where the compiled classes are located.
+     */
     default List<Path> getClassesDirs() {
         return State.INSTANCE.classesDirs == null
                 ? List.of(getBuildDir().resolve("classes"))
                 : State.INSTANCE.classesDirs;
     }
 
+    /**
+     * Gets the configuration specific to the generator.
+     */
     default GeneratorConfiguration getGenerator() {
         return State.INSTANCE.generator;
     }
 
+    /**
+     * Gets the configuration specific to the parser.
+     */
     default ParserConfiguration getParser() {
         return State.INSTANCE.parser;
     }
 
+    /**
+     * Checks if the application is running in production mode.
+     */
     default boolean isProductionMode() {
         return State.INSTANCE.productionMode;
     }
 
+    /**
+     * Gets the command to run Node.js.
+     */
     default String getNodeCommand() {
         return State.INSTANCE.nodeCommand;
     }
 
+    /**
+     * Gets the class finder to be used by the engine.
+     */
     default ClassFinder getClassFinder() {
         return State.INSTANCE.classFinder;
     }
 
+    /**
+     * Gets the names of the annotations that mark the browser callables.
+     */
     default List<String> getEndpointAnnotationNames() {
         return State.INSTANCE.endpointAnnotationNames;
     }
 
+    /**
+     * Gets the names of the annotations that mark the browser callables.
+     */
     default List<Class<? extends Annotation>> getEndpointAnnotations() {
         return getEndpointAnnotationNames().stream()
                 .map(this::toAnnotationClass).filter(Objects::nonNull)
@@ -132,9 +190,9 @@ public interface EngineConfiguration {
         }
 
         return getClassFinder() == null
-                ? List.of(AotBrowserCallableFinder::findEndpointClasses)
-                : List.of(AotBrowserCallableFinder::findEndpointClasses,
-                        LookupBrowserCallableFinder::findEndpointClasses);
+                ? List.of(AotBrowserCallableFinder::find)
+                : List.of(AotBrowserCallableFinder::find,
+                        LookupBrowserCallableFinder::find);
     }
 
     static EngineConfiguration load() {
@@ -233,7 +291,7 @@ public interface EngineConfiguration {
             var finder = iterator.next();
 
             try {
-                return finder.findEndpointClasses(this);
+                return finder.find(this);
             } catch (ExecutionFailedException e) {
                 if (iterator.hasNext()) {
                     LOGGER.debug("Failed to find browser-callables", e);

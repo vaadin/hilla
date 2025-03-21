@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Utility class to find browser callables (endpoints) in a non-running Hilla
- * application.
+ * Finds browser callables (endpoints) in a non-running Hilla application, using
+ * Spring AOT to detect available beans and select those who are annotated.
  */
 public class AotBrowserCallableFinder {
     private static final Logger LOGGER = LoggerFactory
@@ -29,8 +29,16 @@ public class AotBrowserCallableFinder {
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
-    public static List<Class<?>> findEndpointClasses(
-            EngineConfiguration engineConfiguration)
+    /**
+     * Finds the classes annotated with the endpoint annotations.
+     *
+     * @param engineConfiguration
+     *            the engine configuration
+     * @return the list of classes annotated with the endpoint annotations
+     * @throws ExecutionFailedException
+     *             if the process fails
+     */
+    public static List<Class<?>> find(EngineConfiguration engineConfiguration)
             throws ExecutionFailedException {
         // Determine the main application class
         var applicationClass = determineApplicationClass(engineConfiguration);
