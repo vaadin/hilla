@@ -223,16 +223,21 @@ export default class SignalProcessor {
       // model class from `@vaadin/hilla-lit-form`.
       let modelName: string | undefined;
 
-      if (node.kind === SyntaxKind.ArrayType) {
-        modelName = 'ArrayModel';
-      } else if (node.kind === SyntaxKind.StringKeyword) {
-        modelName = 'StringModel';
-      } else if (node.kind === SyntaxKind.NumberKeyword) {
-        modelName = 'NumberModel';
-      } else if (node.kind === SyntaxKind.BooleanKeyword) {
-        modelName = 'BooleanModel';
-      } else {
-        return undefined;
+      switch (node.kind) {
+        case SyntaxKind.StringKeyword:
+          modelName = 'StringModel';
+          break;
+        case SyntaxKind.NumberKeyword:
+          modelName = 'NumberModel';
+          break;
+        case SyntaxKind.BooleanKeyword:
+          modelName = 'BooleanModel';
+          break;
+        case SyntaxKind.ArrayType:
+          modelName = 'ArrayModel';
+          break;
+        default:
+          return undefined;
       }
 
       return imports.named.getIdentifier(HILLA_LIT_FORM, modelName) ?? imports.named.add(HILLA_LIT_FORM, modelName);
