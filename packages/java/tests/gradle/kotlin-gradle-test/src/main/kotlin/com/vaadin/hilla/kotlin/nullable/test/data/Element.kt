@@ -1,7 +1,7 @@
 package com.vaadin.hilla.kotlin.nullable.test.data
 
-open class Employee: NativePerson()
+class Employee : NativePerson()
 
-open class Manager: Employee()
+class Manager : Employee()
 
-class Team<E, M>(var employees: List<E>, var manager: M)
+class Team<E, M>(var employees: List<Employee>?, var manager: Manager?): AbstractEntity()

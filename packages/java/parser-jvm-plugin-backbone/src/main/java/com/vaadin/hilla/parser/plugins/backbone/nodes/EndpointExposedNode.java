@@ -5,9 +5,9 @@ import org.jspecify.annotations.NonNull;
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 
-public final class EndpointExposedNode
+public class EndpointExposedNode
         extends AbstractNode<ClassInfoModel, Void> {
-    private EndpointExposedNode(@NonNull ClassInfoModel classInfo) {
+    protected EndpointExposedNode(@NonNull ClassInfoModel classInfo) {
         super(classInfo, null);
     }
 

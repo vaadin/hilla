@@ -9,7 +9,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.*
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
 
@@ -42,10 +41,24 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
         if (node is EndpointNode && node.source is ClassInfoModel) {
             return KEndpointNode(node.source, node.target, (node.source.get() as Class<*>).kotlin)
+        } else if (node is EndpointExposedNode && node.source is ClassInfoModel) {
+            return KEndpointExposedNode(node.source, (node.source.get() as Class<*>).kotlin)
         } else if (node is MethodNode && node.source is MethodInfoModel) {
-            return KMethodNode(node.source, node.target, (parentPath.node as KEndpointNode).kClass.memberFunctions.first {
-                       it.name == node.source.name
-                   })
+            if (parentPath.node is KEndpointNode) {
+                return KMethodNode(
+                    node.source,
+                    node.target,
+                    (parentPath.node as KEndpointNode).kClass.memberFunctions.first {
+                        it.name == node.source.name
+                    })
+            } else if (parentPath.node is EndpointExposedNode) {
+                return KMethodNode(
+                    node.source,
+                    node.target,
+                    (parentPath.node as KEndpointExposedNode).kClass.memberFunctions.first {
+                        it.name == node.source.name
+                    })
+            }
         } else if (node is MethodParameterNode && node.source is MethodParameterInfoModel) {
             return KMethodParameterNode(node.source, node.target, (parentPath.node as KMethodNode).kFunction
                    .parameters.first {
@@ -53,12 +66,13 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                    })
         } else if (node is TypedNode) {
             if (node.type is TypeArgumentModel) { // it depends on the parent node
+                val typeSignatureNode = node as TypeSignatureNode
                 if (parentPath.node is KTypeSignatureNode) {
-                    val typeSignatureNode = node as TypeSignatureNode
+                    // val typeSignatureNode = node as TypeSignatureNode
                     val parentType = (parentPath.node as KTypeSignatureNode).kType
                     // if parent is a map, then the key is always ignored and the index to read the generic type is 1
                     val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
-                                   else typeSignatureNode.position
+                    else typeSignatureNode.position
                     return KTypeSignatureNode(
                         node.type,
                         node.target,
@@ -67,7 +81,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                         parentType.arguments[position].type!!
                     )
                 } else if (parentPath.node is KMethodParameterNode) {
-                    val typeSignatureNode = node as TypeSignatureNode
+                    // val typeSignatureNode = node as TypeSignatureNode
                     return KTypeSignatureNode(
                         node.type,
                         node.target,
@@ -101,6 +115,16 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                         null,
                         (parentPath.node as KTypeSignatureNode).kType
                     )
+                } else if (parentPath.node is TypeSignatureNode &&
+                            (parentPath.node as TypeSignatureNode).type is TypeVariableModel &&
+                            parentPath.parentPath.node is KMethodParameterNode) { // realized type variable
+                    return KTypeSignatureNode(
+                        node.type,
+                        node.target,
+                        node.annotations,
+                        null,
+                        (parentPath.parentPath.node as KMethodParameterNode).kParameter.type
+                    )
                 } else if (parentPath.node is KPropertyNode) { // property node
                     return KTypeSignatureNode(
                         node.type,
@@ -125,16 +149,18 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
     override fun exit(nodePath: NodePath<*>?) {
         val node = nodePath!!.node
-        if (node.target !is Schema<*> && node !is KPropertyNode) {
-            return
-        }
-        if (node is KTypeSignatureNode) {
+        if (node is KTypeSignatureNode && node.target is Schema<*>) {
             val schema = node.target as Schema<*>
             schema.nullable = if (node.kType.isMarkedNullable) true else null
-        } else if (node is KMethodParameterNode) {
-            val schema = node.target as Schema<*>
-            schema.nullable = if (node.kParameter.type.isMarkedNullable) true else null
-        } else if (node is KPropertyNode) {
+        } /*else if (node is KMethodParameterNode) {
+            val methodNode = nodePath.parentPath.node as KMethodNode
+            val paramSchema = methodNode.target.parameters?.first{
+                it.name == node.target
+            }?.schema
+            paramSchema?.nullable = if (node.kParameter.type.isMarkedNullable) true else null
+            //val schema = node.target as Schema<*>
+            //schema.nullable = if (node.kParameter.type.isMarkedNullable) true else null
+        }*/ else if (node is KPropertyNode) {
             val entityNode = nodePath.parentPath.node as KEntityNode
             val propertySchema = entityNode.target.properties[node.target]
             propertySchema?.nullable = if (node.kProperty.returnType.isMarkedNullable) true else null
