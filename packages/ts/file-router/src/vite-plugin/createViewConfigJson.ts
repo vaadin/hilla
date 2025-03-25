@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 import ts, { type Node } from 'typescript';
 import { convertComponentNameToTitle } from '../shared/convertComponentNameToTitle.js';
-import type { ServerViewConfig } from '../shared/internal.js';
+import { brandServerViewConfig, type ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { ViewConfig } from '../types.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
@@ -38,11 +38,11 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
           const newChildren = children ? await next(children) : undefined;
 
           if (!file && !layout) {
-            return {
+            return brandServerViewConfig({
               route: convertFSRouteSegmentToURLPatternFormat(path),
               params: extractParameterFromRouteSegment(path),
               children: newChildren,
-            } satisfies ServerViewConfig;
+            });
           }
 
           const sourceFile = ts.createSourceFile(
@@ -94,13 +94,13 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             title = convertComponentNameToTitle(componentName);
           }
 
-          return {
+          return brandServerViewConfig({
             route: convertFSRouteSegmentToURLPatternFormat(path),
             ...config,
             params: extractParameterFromRouteSegment(config.route ?? path),
             title,
             children: newChildren ?? (layout ? [] : undefined),
-          } satisfies ServerViewConfig;
+          });
         }),
       ),
   );

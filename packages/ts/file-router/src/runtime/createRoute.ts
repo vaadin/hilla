@@ -1,4 +1,15 @@
-import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
+import { type ComponentType, lazy, type LazyExoticComponent } from 'react';
+import type { AgnosticRoute, Module, RouteModule, ViewConfig } from '../types.js';
+
+export function createLazyModule(
+  load: () => Promise<{ default: ComponentType }>,
+  config?: ViewConfig,
+): RouteModule<LazyExoticComponent<ComponentType>> {
+  return {
+    default: lazy(load),
+    config,
+  };
+}
 
 /**
  * Extends a router module's config with additional properties. The original

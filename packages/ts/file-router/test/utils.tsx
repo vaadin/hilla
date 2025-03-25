@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
-import type { ServerViewConfig } from '../src/shared/internal.js';
+import { brandServerViewConfig, type ServerViewConfig } from '../src/shared/internal.js';
 import { transformTree } from '../src/shared/transformTree.js';
 import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
@@ -125,8 +125,8 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(new URL('test/_ignored.tsx', dir), 'export default function Ignored() {};'),
     appendFile(new URL('test/no-default-export.tsx', dir), 'export const config = { title: "No Default Export" };'),
     appendFile(
-      new URL('test/lazy.tsx', dir),
-      'export const config = { lazy: false };\nexport default function Lazy() {};',
+      new URL('test/non-lazy.tsx', dir),
+      'export const config = { lazy: false };\nexport default function NonLazy() {};',
     ),
   ]);
 }
@@ -214,8 +214,8 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
           file: new URL('test/issue-002879-config-below.tsx', dir),
         },
         {
-          path: 'lazy',
-          file: new URL('test/lazy.tsx', dir),
+          path: 'non-lazy',
+          file: new URL('test/non-lazy.tsx', dir),
         },
       ],
     },
@@ -227,11 +227,11 @@ export function createTestingServerViewConfigs(metas: readonly RouteMeta[]): rea
     _metas.map(({ path, children }) => {
       const _children = children ? next(children) : [];
 
-      if (path === 'lazy') {
-        return { lazy: false, children: _children };
+      if (path === 'non-lazy') {
+        return brandServerViewConfig({ title: path, lazy: false, children: _children });
       }
 
-      return { children: _children };
+      return brandServerViewConfig({ ...(path.length > 0 ? { title: path } : {}), children: _children });
     }),
   );
 }

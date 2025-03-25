@@ -1,20 +1,9 @@
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import { DefaultImportManager } from '@vaadin/hilla-generator-utils/dependencies/ImportManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import StatementRecordManager, {
-  type StatementRecord,
-} from '@vaadin/hilla-generator-utils/dependencies/StatementRecordManager.js';
 import ast from 'tsc-template';
-import {
-  type CallExpression,
-  createPrinter,
-  factory,
-  type Identifier,
-  NewLineKind,
-  type VariableStatement,
-} from 'typescript';
-import type { ServerViewConfig } from '../shared/internal.js';
+import { type CallExpression, createPrinter, factory, type Identifier, NewLineKind } from 'typescript';
+import { isServerViewConfig, type ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
@@ -24,51 +13,13 @@ const printer = createPrinter({ newLine: NewLineKind.LineFeed });
 
 const fileExtensions = ['.ts', '.tsx', '.js', '.jsx'];
 
-class LazyImportManager extends StatementRecordManager<VariableStatement> {
-  readonly #lazyId: Identifier;
+const HILLA_FILE_ROUTER = '@vaadin/hilla-file-router';
+const HILLA_FILE_ROUTER_RUNTIME = `${HILLA_FILE_ROUTER}/runtime.js`;
+const HILLA_FILE_ROUTER_TYPES = `${HILLA_FILE_ROUTER}/types.js`;
 
-  readonly #manager: DefaultImportManager;
-
-  get size(): number {
-    return this.#manager.size;
-  }
-
-  constructor(collator: Intl.Collator, lazyId: Identifier) {
-    super(collator);
-    this.#manager = new DefaultImportManager(collator);
-    this.#lazyId = lazyId;
-  }
-
-  add(path: string, name: string, uniqueId?: Identifier): Identifier {
-    return this.#manager.add(path, name, false, uniqueId);
-  }
-
-  override clear(): void {
-    this.#manager.clear();
-  }
-
-  override *statementRecords(): IterableIterator<StatementRecord<VariableStatement>> {
-    for (const [path, id] of this.#manager) {
-      yield [
-        path,
-        ast`const ${id} = ${this.#lazyId}(() => import('${path}'));`.source.statements[0] as VariableStatement,
-      ];
-    }
-  }
-}
-
-function isLazy(path: string, config: ServerViewConfig, rootConfig: readonly ServerViewConfig[]): boolean {
-  const strippedPath = strip(path);
-
-  if (rootConfig.includes(config) && (strippedPath === '' || strippedPath === 'login')) {
-    return false;
-  }
-
-  return config.lazy ?? true;
-}
+type ModuleExtension = Readonly<Record<string, unknown>>;
 
 class RouteFromMetaProcessor {
-  readonly #lazyImportManager: LazyImportManager;
   readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
   readonly #configs: readonly ServerViewConfig[];
@@ -83,10 +34,6 @@ class RouteFromMetaProcessor {
 
     const codeDir = new URL('./', codeFile);
     this.#manager = new DependencyManager(new PathManager({ extension: '.js', relativeTo: codeDir }));
-    this.#lazyImportManager = new LazyImportManager(
-      this.#manager.imports.collator,
-      this.#manager.imports.named.add('react', 'lazy'),
-    );
   }
 
   /**
@@ -120,37 +67,30 @@ class RouteFromMetaProcessor {
           _children = next([children, config.children!]);
         }
 
-        let mod: Identifier | undefined;
+        let mod: Identifier | string | undefined;
+        const isLazy = this.#isLazy(path, config);
         if (file) {
           const fileExt = fileExtensions.find((ext) => file.pathname.endsWith(ext));
           const relativePath = paths.createRelativePath(file, fileExt);
-          mod = isLazy(path, config, this.#configs)
-            ? this.#lazyImportManager.add(relativePath, `Page`)
-            : namespace.add(relativePath, `Page`);
+          mod = isLazy ? relativePath : namespace.add(relativePath, `Page`);
         } else if (layout) {
           const fileExt = fileExtensions.find((ext) => layout.pathname.endsWith(ext));
           const relativePath = paths.createRelativePath(layout, fileExt);
-          mod = isLazy(path, config, this.#configs)
-            ? this.#lazyImportManager.add(relativePath, `Layout`)
-            : namespace.add(paths.createRelativePath(layout, fileExt), `Layout`);
+          mod = isLazy ? relativePath : namespace.add(paths.createRelativePath(layout, fileExt), `Layout`);
         }
 
-        const moduleExtension = flowLayout ? { flowLayout } : undefined;
+        // If the route is lazy, flowLayout is already included in the config.
+        const configOrExtension = isLazy ? config : flowLayout ? { flowLayout } : undefined;
 
-        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, moduleExtension, _children);
+        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children, configOrExtension);
       });
     });
 
-    if (this.#lazyImportManager.size === 0) {
-      named.remove('react', 'lazy');
-    }
-
     const agnosticRouteId =
-      named.getIdentifier('@vaadin/hilla-file-router/types.js', 'AgnosticRoute') ??
-      named.add('@vaadin/hilla-file-router/types.js', 'AgnosticRoute', true);
+      named.getIdentifier(HILLA_FILE_ROUTER_TYPES, 'AgnosticRoute') ??
+      named.add(HILLA_FILE_ROUTER_TYPES, 'AgnosticRoute', true);
     const routeDeclaration = [
       ...this.#manager.imports.toCode(),
-      ...this.#lazyImportManager.toCode(),
       ...ast`${errors.join('\n')}
 const routes: readonly ${agnosticRouteId}[] = ${factory.createArrayLiteralExpression(routes, true)};
 export default routes;`.source.statements,
@@ -172,34 +112,82 @@ export default routes;`.source.statements,
    */
   #createRouteData(
     path: string,
-    mod: Identifier | undefined,
-    extension?: Readonly<Record<string, unknown>>,
-    children?: readonly CallExpression[],
+    mod: Identifier | string | undefined,
+    children: readonly CallExpression[] | undefined,
+    extension: ModuleExtension | undefined,
+  ): CallExpression;
+  /**
+   * Create an abstract route creation function call. The nested function calls
+   * create a route tree.
+   *
+   * @param path - The path of the route.
+   * @param mod - The name of the route module imported as a namespace.
+   * @param config - The ViewConfig object for the route.
+   * @param children - The list of child route call expressions.
+   */
+  #createRouteData(
+    path: string,
+    mod: string | undefined,
+    children: readonly CallExpression[] | undefined,
+    config: ServerViewConfig,
+  ): CallExpression;
+  #createRouteData(
+    path: string,
+    mod: Identifier | string | undefined,
+    children: readonly CallExpression[] | undefined,
+    configOrExtension: ModuleExtension | ServerViewConfig | undefined,
   ): CallExpression {
     const { named } = this.#manager.imports;
 
-    let modNode: Identifier | CallExpression | undefined = mod;
+    let modNode: Identifier | string | CallExpression | undefined = mod;
 
-    if (extension) {
-      const extendModuleId =
-        named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'extendModule') ??
-        named.add('@vaadin/hilla-file-router/runtime.js', 'extendModule');
+    if (mod) {
+      if (isServerViewConfig(configOrExtension)) {
+        const createLazyModuleId =
+          named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'createLazyModule') ??
+          named.add(HILLA_FILE_ROUTER_RUNTIME, 'createLazyModule');
 
-      // `extendModule(Page, { flowLayout: true }),`
-      modNode = ast`${extendModuleId}(${mod ?? 'null'}, ${JSON.stringify(extension)})`.node as CallExpression;
+        const { children: _c, params: _p, brand: _b, ...viewConfig } = configOrExtension;
+
+        // ```ts
+        // createLazyModule(() => import('../LazyPage.js'), { title: 'Lazy Page' }));
+        // ```
+        modNode =
+          ast`${createLazyModuleId}(() => import('${mod as string}'), ${Object.keys(viewConfig).length > 0 ? JSON.stringify(viewConfig) : ''})`
+            .node as CallExpression;
+      } else if (configOrExtension) {
+        const extendModuleId =
+          named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'extendModule') ??
+          named.add(HILLA_FILE_ROUTER_RUNTIME, 'extendModule');
+
+        // `extendModule(Page, { flowLayout: true }),`
+        modNode = ast`${extendModuleId}(${mod}, ${JSON.stringify(configOrExtension)})`.node as CallExpression;
+      }
     }
 
     const createRouteId =
-      named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'createRoute') ??
-      named.add('@vaadin/hilla-file-router/runtime.js', 'createRoute');
+      named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'createRoute') ??
+      named.add(HILLA_FILE_ROUTER_RUNTIME, 'createRoute');
 
     // ```ts
-    // createRoute("parent", extendModule(Layout, {flowLayout: true}), [
-    //   createRoute("child", Page),
+    // createRoute("grandparent", extendModule(Layout, {flowLayout: true}), [
+    //   createRoute("parent", ParentPage, [
+    //     createRoute("child", createLazyModule(() => import('../ChildPage.js'), { title: 'Child Page' }))
+    //   ]),
     // ]),
     // ```
-    return ast`${createRouteId}("${path}", ${modNode ?? ''} ${children ? factory.createArrayLiteralExpression(children, true) : ''})`
+    return ast`${createRouteId}("${path}", ${modNode ?? ''}, ${children && children.length > 0 ? factory.createArrayLiteralExpression(children, true) : ''})`
       .node as CallExpression;
+  }
+
+  #isLazy(path: string, config: ServerViewConfig): boolean {
+    const strippedPath = strip(path);
+
+    if (this.#configs.includes(config) && (strippedPath === '' || strippedPath === 'login')) {
+      return false;
+    }
+
+    return config.lazy ?? true;
   }
 }
 

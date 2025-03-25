@@ -119,11 +119,11 @@
         "params": {}
       },
       {
-        "route": "lazy",
+        "route": "non-lazy",
         "lazy": false,
         "flowLayout": false,
         "params": {},
-        "title": "Lazy"
+        "title": "Non Lazy"
       }
     ]
   },
