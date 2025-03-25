@@ -23,4 +23,8 @@ class MyListRepositoryService<T, ID, R: CrudRepository<T, ID>> {
     fun exists(id: ID): Boolean {
         return false
     }
+
+    fun getRepository(): R? {
+        return null
+    }
 }

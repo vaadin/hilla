@@ -7,7 +7,7 @@ import com.vaadin.hilla.kotlin.nullable.test.data.NativePersonRepository
 
 @BrowserCallable
 @AnonymousAllowed
-class NativePersonRepositoryService: MyListRepositoryService<NativePerson, Long, NativePersonRepository>() {
+class NativePersonRepositoryService: MyListRepositoryService<NativePerson?, Long?, NativePersonRepository>() {
 
     fun findByFirstName(firstName: String): List<NativePerson> {
         return listOf()

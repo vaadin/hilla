@@ -19,7 +19,7 @@ class NativeHelloService {
         }
 
     fun isValidPerson(person: NativePerson): Boolean? {
-        return person.firstName?.isNotBlank() == true && person.dateOfBirth != null
+        return person.firstName.isNotBlank() && person.dateOfBirth != null
     }
 
     fun getPersonsByFirstname(firstname: String): List<NativePerson> {

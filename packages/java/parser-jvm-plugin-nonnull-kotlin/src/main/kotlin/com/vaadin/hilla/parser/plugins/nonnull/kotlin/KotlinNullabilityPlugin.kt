@@ -68,7 +68,6 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             if (node.type is TypeArgumentModel) { // it depends on the parent node
                 val typeSignatureNode = node as TypeSignatureNode
                 if (parentPath.node is KTypeSignatureNode) {
-                    // val typeSignatureNode = node as TypeSignatureNode
                     val parentType = (parentPath.node as KTypeSignatureNode).kType
                     // if parent is a map, then the key is always ignored and the index to read the generic type is 1
                     val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
@@ -81,7 +80,6 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                         parentType.arguments[position].type!!
                     )
                 } else if (parentPath.node is KMethodParameterNode) {
-                    // val typeSignatureNode = node as TypeSignatureNode
                     return KTypeSignatureNode(
                         node.type,
                         node.target,
@@ -117,7 +115,8 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                     )
                 } else if (parentPath.node is TypeSignatureNode &&
                             (parentPath.node as TypeSignatureNode).type is TypeVariableModel &&
-                            parentPath.parentPath.node is KMethodParameterNode) { // realized type variable
+                            parentPath.parentPath.node is KMethodParameterNode) {
+                    // method parameter type variable node
                     return KTypeSignatureNode(
                         node.type,
                         node.target,
@@ -152,15 +151,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         if (node is KTypeSignatureNode && node.target is Schema<*>) {
             val schema = node.target as Schema<*>
             schema.nullable = if (node.kType.isMarkedNullable) true else null
-        } /*else if (node is KMethodParameterNode) {
-            val methodNode = nodePath.parentPath.node as KMethodNode
-            val paramSchema = methodNode.target.parameters?.first{
-                it.name == node.target
-            }?.schema
-            paramSchema?.nullable = if (node.kParameter.type.isMarkedNullable) true else null
-            //val schema = node.target as Schema<*>
-            //schema.nullable = if (node.kParameter.type.isMarkedNullable) true else null
-        }*/ else if (node is KPropertyNode) {
+        } else if (node is KPropertyNode) {
             val entityNode = nodePath.parentPath.node as KEntityNode
             val propertySchema = entityNode.target.properties[node.target]
             propertySchema?.nullable = if (node.kProperty.returnType.isMarkedNullable) true else null
