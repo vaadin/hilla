@@ -73,7 +73,7 @@ export default function vitePluginFileSystemRouter({
       const _generatedDir = new URL(generatedDir, _root);
 
       _viewsDir = new URL(viewsDir, _root);
-      _viewsDirUsingSlashes = fileURLToPath(_viewsDir, {}).replaceAll('\\', '/');
+      _viewsDirPosix = fileURLToPath(_viewsDir, { windows: false });
       _outDir = pathToFileURL(outDir);
       _logger = logger;
 
@@ -133,7 +133,7 @@ export default function vitePluginFileSystemRouter({
         // Make eager update for file routes in Vite module graph
         // for consistency with the generated file contents.
         await Promise.all(
-          [...fileRoutesModules].map(async (fileRouteModule) => {
+          Array.from(fileRoutesModules, async (fileRouteModule) => {
             mg.invalidateModule(fileRouteModule);
             await this.environment.fetchModule(fileRouteModule.id!, undefined, { cached: false });
           }),
