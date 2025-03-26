@@ -63,7 +63,7 @@ export default function vitePluginFileSystemRouter({
   let _logger: Logger;
   let runtimeUrls: RuntimeFileUrls;
   let _generateRuntimeFiles: () => Promise<boolean>;
-  let _viewsDirUsingSlashes: string;
+  let _viewsDirPosix: string;
 
   return {
     name: 'vite-plugin-file-router',
