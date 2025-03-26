@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { createBrowserRouter, RouteObject } from 'react-router';
 
 export type ViewConfig = Readonly<{
@@ -77,9 +78,9 @@ export type Module = Readonly<Record<string, unknown>>;
 /**
  * A module that exports a component and an optional view configuration.
  */
-export type RouteModule<C = unknown> = Module &
+export type RouteModule<C extends ComponentType = ComponentType> = Module &
   Readonly<{
-    default: C;
+    default?: C;
     config?: ViewConfig;
   }>;
 
@@ -88,7 +89,12 @@ export type RouteModule<C = unknown> = Module &
  */
 export type AgnosticRoute = Readonly<{
   path: string;
-  module?: Module;
+  /**
+   * @deprecated Use `component` and `config` separately instead.
+   */
+  module?: RouteModule;
+  component?: ComponentType;
+  config?: ViewConfig;
   children?: readonly AgnosticRoute[];
   flowLayout?: boolean;
 }>;

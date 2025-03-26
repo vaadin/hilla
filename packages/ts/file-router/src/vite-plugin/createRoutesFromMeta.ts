@@ -2,8 +2,16 @@ import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js'
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import ast from 'tsc-template';
-import { type CallExpression, createPrinter, factory, type Identifier, NewLineKind } from 'typescript';
-import { isServerViewConfig, type ServerViewConfig } from '../shared/internal.js';
+import {
+  type CallExpression,
+  createPrinter,
+  factory,
+  type Identifier,
+  NewLineKind,
+  type ObjectLiteralExpression,
+  type PropertyAccessExpression,
+} from 'typescript';
+import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
@@ -17,7 +25,21 @@ const HILLA_FILE_ROUTER = '@vaadin/hilla-file-router';
 const HILLA_FILE_ROUTER_RUNTIME = `${HILLA_FILE_ROUTER}/runtime.js`;
 const HILLA_FILE_ROUTER_TYPES = `${HILLA_FILE_ROUTER}/types.js`;
 
-type ModuleExtension = Readonly<Record<string, unknown>>;
+type LazyModule = Readonly<{
+  path: string;
+  config: ServerViewConfig;
+  lazyId: Identifier;
+}>;
+
+type RegularModule = Readonly<{
+  componentId: PropertyAccessExpression;
+  configId: PropertyAccessExpression;
+  flowLayout?: boolean;
+}>;
+
+function isLazyModule(mod: LazyModule | RegularModule | undefined): mod is LazyModule {
+  return !!mod && 'path' in mod;
+}
 
 class RouteFromMetaProcessor {
   readonly #manager: DependencyManager;
@@ -42,7 +64,7 @@ class RouteFromMetaProcessor {
   process(): string {
     const {
       paths,
-      imports: { named, namespace },
+      imports: { namespace, named },
     } = this.#manager;
     const errors: string[] = [];
 
@@ -67,22 +89,40 @@ class RouteFromMetaProcessor {
           _children = next([children, config.children!]);
         }
 
-        let mod: Identifier | string | undefined;
-        const isLazy = this.#isLazy(path, config);
+        let module: LazyModule | RegularModule | undefined;
+
+        let relativePath: string | undefined;
+        let fileName: string | undefined;
+
         if (file) {
           const fileExt = fileExtensions.find((ext) => file.pathname.endsWith(ext));
-          const relativePath = paths.createRelativePath(file, fileExt);
-          mod = isLazy ? relativePath : namespace.add(relativePath, `Page`);
+          relativePath = paths.createRelativePath(file, fileExt);
+          fileName = 'Page';
         } else if (layout) {
           const fileExt = fileExtensions.find((ext) => layout.pathname.endsWith(ext));
-          const relativePath = paths.createRelativePath(layout, fileExt);
-          mod = isLazy ? relativePath : namespace.add(paths.createRelativePath(layout, fileExt), `Layout`);
+          relativePath = paths.createRelativePath(layout, fileExt);
+          fileName = 'Layout';
         }
 
-        // If the route is lazy, flowLayout is already included in the config.
-        const configOrExtension = isLazy ? config : flowLayout ? { flowLayout } : undefined;
+        if (relativePath && fileName) {
+          if (this.#isLazy(path, config)) {
+            module = {
+              path: relativePath,
+              config,
+              lazyId: named.getIdentifier('react', 'lazy') ?? named.add('react', 'lazy'),
+            };
+          } else {
+            const mod = namespace.add(relativePath, fileName);
 
-        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, _children, configOrExtension);
+            module = {
+              componentId: ast`${mod}.default`.node as PropertyAccessExpression,
+              configId: ast`${mod}.config`.node as PropertyAccessExpression,
+              flowLayout,
+            };
+          }
+        }
+
+        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), module, _children);
       });
     });
 
@@ -105,79 +145,46 @@ export default routes;`.source.statements,
    * create a route tree.
    *
    * @param path - The path of the route.
-   * @param mod - The name of the route module imported as a namespace.
-   * @param extension - The object that contains specific features of the
-   *                    module.
+   * @param module - The module to build route from.
    * @param children - The list of child route call expressions.
    */
   #createRouteData(
     path: string,
-    mod: Identifier | string | undefined,
+    module: LazyModule | RegularModule | undefined,
     children: readonly CallExpression[] | undefined,
-    extension: ModuleExtension | undefined,
-  ): CallExpression;
-  /**
-   * Create an abstract route creation function call. The nested function calls
-   * create a route tree.
-   *
-   * @param path - The path of the route.
-   * @param mod - The name of the route module imported as a namespace.
-   * @param config - The ViewConfig object for the route.
-   * @param children - The list of child route call expressions.
-   */
-  #createRouteData(
-    path: string,
-    mod: string | undefined,
-    children: readonly CallExpression[] | undefined,
-    config: ServerViewConfig,
-  ): CallExpression;
-  #createRouteData(
-    path: string,
-    mod: Identifier | string | undefined,
-    children: readonly CallExpression[] | undefined,
-    configOrExtension: ModuleExtension | ServerViewConfig | undefined,
   ): CallExpression {
     const { named } = this.#manager.imports;
-
-    let modNode: Identifier | string | CallExpression | undefined = mod;
-
-    if (mod) {
-      if (isServerViewConfig(configOrExtension)) {
-        const createLazyModuleId =
-          named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'createLazyModule') ??
-          named.add(HILLA_FILE_ROUTER_RUNTIME, 'createLazyModule');
-
-        const { children: _c, params: _p, brand: _b, ...viewConfig } = configOrExtension;
-
-        // ```ts
-        // createLazyModule(() => import('../LazyPage.js'), { title: 'Lazy Page' }));
-        // ```
-        modNode =
-          ast`${createLazyModuleId}(() => import('${mod as string}'), ${Object.keys(viewConfig).length > 0 ? JSON.stringify(viewConfig) : ''})`
-            .node as CallExpression;
-      } else if (configOrExtension) {
-        const extendModuleId =
-          named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'extendModule') ??
-          named.add(HILLA_FILE_ROUTER_RUNTIME, 'extendModule');
-
-        // `extendModule(Page, { flowLayout: true }),`
-        modNode = ast`${extendModuleId}(${mod}, ${JSON.stringify(configOrExtension)})`.node as CallExpression;
-      }
-    }
 
     const createRouteId =
       named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'createRoute') ??
       named.add(HILLA_FILE_ROUTER_RUNTIME, 'createRoute');
 
+    let component: PropertyAccessExpression | CallExpression | undefined;
+    let config: PropertyAccessExpression | ObjectLiteralExpression | string | undefined;
+
+    if (isLazyModule(module)) {
+      const { children: _c, params: _p, ...viewConfig } = module.config;
+
+      component = ast`${module.lazyId}(() => import('${module.path}')`.node as CallExpression;
+      config = Object.keys(viewConfig).length > 0 ? JSON.stringify(viewConfig) : '';
+    } else if (module) {
+      component = module.componentId;
+      config = module.flowLayout
+        ? (ast`const a = %{ { ...${module.configId}, flowLayout: ${module.flowLayout.toString()} } }%`
+            .node as ObjectLiteralExpression)
+        : module.configId;
+    }
+
+    const _children = children && children.length > 0 ? factory.createArrayLiteralExpression(children, true) : '';
+
     // ```ts
-    // createRoute("grandparent", extendModule(Layout, {flowLayout: true}), [
-    //   createRoute("parent", ParentPage, [
-    //     createRoute("child", createLazyModule(() => import('../ChildPage.js'), { title: 'Child Page' }))
+    // createRoute("grandparent", {...grandparentConfig, flowLayout: true}, [
+    //   createRoute("parent", ParentPage, parentConfig, [
+    //     createRoute("child", lazy(() => import('../ChildPage.js')), { title: 'Child Page' }),
     //   ]),
     // ]),
     // ```
-    return ast`${createRouteId}("${path}", ${modNode ?? ''}, ${children && children.length > 0 ? factory.createArrayLiteralExpression(children, true) : ''})`
-      .node as CallExpression;
+    return ast`${createRouteId}("${path}", ${component ?? ''}, ${config ?? ''}, ${_children})`.node as CallExpression;
   }
 
   #isLazy(path: string, config: ServerViewConfig): boolean {

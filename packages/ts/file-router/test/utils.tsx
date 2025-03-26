@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
-import { brandServerViewConfig, type ServerViewConfig } from '../src/shared/internal.js';
+import type { ServerViewConfig } from '../src/shared/internal.js';
 import { transformTree } from '../src/shared/transformTree.js';
 import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
@@ -228,10 +228,10 @@ export function createTestingServerViewConfigs(metas: readonly RouteMeta[]): rea
       const _children = children ? next(children) : [];
 
       if (path === 'non-lazy') {
-        return brandServerViewConfig({ title: path, lazy: false, children: _children });
+        return { title: path, lazy: false, children: _children };
       }
 
-      return brandServerViewConfig({ ...(path.length > 0 ? { title: path } : {}), children: _children });
+      return { ...(path.length > 0 ? { title: path } : {}), children: _children };
     }),
   );
 }
