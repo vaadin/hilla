@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, LazyExoticComponent } from 'react';
 import type { AgnosticRoute, Module, RouteModule, ViewConfig } from '../types.js';
 
 /**
@@ -19,6 +19,14 @@ export function extendModule(module: Module | null, config?: ViewConfig): Module
       ...(module?.config as ViewConfig),
     },
   };
+}
+
+function isReactLazyComponent(value: unknown): value is LazyExoticComponent<ComponentType> {
+  return !!value && typeof value === 'object' && '$$typeof' in value && value.$$typeof === Symbol.for('react.lazy');
+}
+
+function isReactComponent(value: unknown): value is ComponentType {
+  return !!value && typeof value === 'function';
 }
 
 /**
@@ -63,21 +71,27 @@ export function createRoute(
   childrenOrConfig?: readonly AgnosticRoute[] | ViewConfig,
   children?: readonly AgnosticRoute[],
 ): AgnosticRoute {
+  let isDeprecatedModuleUsed = false;
   let component: ComponentType | undefined;
   let config: ViewConfig | undefined;
   if (Array.isArray(moduleOrChildrenOrComponent)) {
     // eslint-disable-next-line no-param-reassign
     children = moduleOrChildrenOrComponent;
-  } else if (typeof moduleOrChildrenOrComponent === 'function') {
+  } else if (
+    isReactLazyComponent(moduleOrChildrenOrComponent) ||
+    isReactComponent(moduleOrChildrenOrComponent) ||
+    (!moduleOrChildrenOrComponent && !!childrenOrConfig && typeof childrenOrConfig === 'object')
+  ) {
     component = moduleOrChildrenOrComponent;
     config = childrenOrConfig as ViewConfig;
   } else if (moduleOrChildrenOrComponent) {
     ({ default: component, config } = moduleOrChildrenOrComponent as RouteModule);
+    isDeprecatedModuleUsed = true;
   }
 
   return {
     path,
-    module: { default: component, config },
+    module: isDeprecatedModuleUsed ? { default: component, config } : undefined,
     component,
     config,
     children,
