@@ -134,20 +134,31 @@ public class EngineConfiguration {
 
         return () -> {
             try {
-                return AotBrowserCallableFinder.findEndpointClasses(this);
+                var endpointClasses = AotBrowserCallableFinder
+                        .findEndpointClasses(this);
+                if (!endpointClasses.isEmpty()) {
+                    return endpointClasses;
+                }
+                return runFallbackBrowserCallableFinder(
+                        "AOT-based detection of browser-callable classes didn't find any candidates."
+                                + " Falling back to classpath scan.");
             } catch (Exception e) {
                 if (classFinder != null) {
-                    LOGGER.info(
+                    return runFallbackBrowserCallableFinder(
                             "AOT-based detection of browser-callable classes failed."
                                     + " Falling back to classpath scan."
                                     + " Enable debug logging for more information.");
-                    return LookupBrowserCallableFinder
-                            .findEndpointClasses(classFinder, this);
                 } else {
                     throw new ExecutionFailedException(e);
                 }
             }
         };
+    }
+
+    private List<Class<?>> runFallbackBrowserCallableFinder(String logMessage) {
+        LOGGER.debug(logMessage);
+        return LookupBrowserCallableFinder.findEndpointClasses(classFinder,
+                this);
     }
 
     public static EngineConfiguration getDefault() {
