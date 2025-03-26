@@ -134,7 +134,8 @@ public class EngineConfiguration {
 
         return () -> {
             try {
-                var endpointClasses = AotBrowserCallableFinder.findEndpointClasses(this);
+                var endpointClasses = AotBrowserCallableFinder
+                        .findEndpointClasses(this);
                 if (!endpointClasses.isEmpty()) {
                     return endpointClasses;
                 }
@@ -144,9 +145,9 @@ public class EngineConfiguration {
             } catch (Exception e) {
                 if (classFinder != null) {
                     return runFallbackBrowserCallableFinder(
-                        "AOT-based detection of browser-callable classes failed."
-                            + " Falling back to classpath scan."
-                            + " Enable debug logging for more information.");
+                            "AOT-based detection of browser-callable classes failed."
+                                    + " Falling back to classpath scan."
+                                    + " Enable debug logging for more information.");
                 } else {
                     throw new ExecutionFailedException(e);
                 }
