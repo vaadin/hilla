@@ -71,7 +71,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.NumberSignal"
                     }
                   ]
                 }
@@ -95,7 +95,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.NumberSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.NumberSignal"
                     }
                   ]
                 }
@@ -108,19 +108,11 @@
   },
   "components" : {
     "schemas" : {
-      "com.vaadin.hilla.signals.NumberSignal" : {
+      "com.vaadin.hilla.runtime.transfertypes.NumberSignal" : {
         "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "x-java-type" : "java.lang.String"
-          },
-          "value" : {
-            "type" : "number",
-            "format" : "double",
-            "nullable" : true,
-            "x-java-type" : "java.lang.Double"
-          }
+        "x-from-module" : {
+          "named" : "NumberSignal",
+          "module" : "@vaadin/hilla-react-signals"
         }
       }
     }
