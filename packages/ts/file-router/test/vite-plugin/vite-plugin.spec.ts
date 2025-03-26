@@ -157,7 +157,7 @@ describe('@vaadin/hilla-file-router', () => {
       // Updates to file-routes.ts are not processed separately, instead they
       // are combined with the update of the triggering file.
       expect(mockEnvironment.hot.send).to.not.be.called;
-      expect(modulesToUpdate).to.be.deep.equal([]);
+      expect(modulesToUpdate).to.be.an('array').that.is.empty;
     });
 
     it('should send hot reload including file routes when a view file imported in file routes changes', async () => {
@@ -197,9 +197,7 @@ describe('@vaadin/hilla-file-router', () => {
       const modulesToUpdate = await hotUpdate({ type: 'update', file: viewFilePath, modules: [viewFileModule] });
       expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
       // HMR for only file routes.
-      expect(modulesToUpdate).to.not.equal(undefined);
-      expect(modulesToUpdate!.length).to.equal(1);
-      expect(modulesToUpdate![0]).to.eq(fileRoutesModule);
+      expect(modulesToUpdate).to.be.deep.equal([fileRoutesModule]);
       expect(mockEnvironment.hot.send).to.not.be.called;
     });
 
@@ -210,7 +208,7 @@ describe('@vaadin/hilla-file-router', () => {
       const modulesToUpdate = await hotUpdate({ type: 'delete', file: viewFilePath, modules: [viewFileModule] });
       expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
       // HMR for only file routes.
-      expect(modulesToUpdate).to.not.equal(undefined);
+      expect(modulesToUpdate).to.not.be.undefined;
       expect(modulesToUpdate!.length).to.equal(1);
       expect(modulesToUpdate![0]).to.eq(fileRoutesModule);
       expect(mockEnvironment.hot.send).to.not.be.called;
