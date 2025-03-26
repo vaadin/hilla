@@ -2,10 +2,8 @@ package com.vaadin.hilla.parser.plugins.transfertypes;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -62,8 +60,6 @@ public final class TransferTypesPlugin
         classMap.put("com.vaadin.hilla.signals.ListSignal", ListSignal.class);
     }
 
-    private final Set<String> replacedClasses = new HashSet<>();
-
     @Override
     public void enter(NodePath<?> nodePath) {
     }
@@ -73,8 +69,7 @@ public final class TransferTypesPlugin
         if (nodePath.getNode() instanceof EntityNode entityNode && nodePath
                 .getParentPath().getNode() instanceof RootNode rootNode) {
             var cls = entityNode.getSource();
-            var name = cls.getName();
-            if (replacedClasses.contains(name)) {
+            if (classMap.containsValue((Class<?>) cls.get())) {
                 var schema = entityNode.getTarget();
 
                 cls.getAnnotations().stream()
@@ -90,7 +85,7 @@ public final class TransferTypesPlugin
                                     && defaultSpecifier.isBlank()) {
                                 throw new IllegalArgumentException(String
                                         .format("@FromModule annotation for class %s must have at least one named specifier or a default specifier",
-                                                name));
+                                                cls.getName()));
                             }
 
                             var fromModule = new HashMap<String, Object>();
@@ -134,10 +129,6 @@ public final class TransferTypesPlugin
             }
 
             var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
-
-            // Adding the class name to the shared data set to be able to add
-            // the import metadata if present.
-            replacedClasses.add(mappedClassInfo.getName());
 
             return ClassRefSignatureModel.of(mappedClassInfo,
                     classRef.getTypeArguments(), classRef.getAnnotations());
