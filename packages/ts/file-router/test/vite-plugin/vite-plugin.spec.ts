@@ -5,7 +5,7 @@ import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import type { EnvironmentModuleNode, FetchModuleOptions, FetchResult, HotPayload, HotUpdateOptions } from 'vite';
-import { beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import vitePluginFileSystemRouter from '../../src/vite-plugin';
 import { createTestingRouteFiles, createTmpDir } from '../utils';
 
@@ -28,11 +28,12 @@ describe('@vaadin/hilla-file-router', () => {
     let generatedDir: URL;
     let viewsDir: URL;
     let plugin: ReturnType<typeof vitePluginFileSystemRouter>;
-    let fileRoutesTsPath: string;
-    let fileRoutesJsonPath: string;
-    let fileRoutesModule: EnvironmentModuleNode;
+    let viewModule: EnvironmentModuleNode;
+    let fileRoutesTsModule: EnvironmentModuleNode;
+    let fileRoutesJsonModule: EnvironmentModuleNode;
 
-    function createMockEnvironmentModuleNode(file: string): EnvironmentModuleNode {
+    function createMockEnvironmentModuleNode(fileName: string, dir: URL): EnvironmentModuleNode {
+      const file = fileURLToPath(new URL(fileName, dir)).replaceAll('\\', '/');
       return {
         id: file,
         file,
@@ -61,48 +62,20 @@ describe('@vaadin/hilla-file-router', () => {
       );
     }
 
-    async function expectRuntimeFileGeneratedWithHotUpdate(
-      changedFileName: string,
-      expectGeneration: boolean,
-      importer?: string,
-    ): Promise<void> {
-      const file = fileURLToPath(new URL(changedFileName, generatedDir));
-      await createTestingRouteFiles(viewsDir);
-      const fileModule = createMockEnvironmentModuleNode(file);
-      if (importer) {
-        fileModule.importers.add(createMockEnvironmentModuleNode(importer));
-      }
-      const modules = [fileModule];
-      const modulesToUpdate = await hotUpdate({ type: 'update', file, modules });
-      if (expectGeneration) {
-        expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
-        if (importer) {
-          expect(modulesToUpdate).to.be.deep.equal([fileRoutesModule, fileModule]);
-        } else {
-          // No importer — only file routes HMR should happen to avoid full
-          // page reload
-          expect(modulesToUpdate).to.be.deep.equal([fileRoutesModule]);
-        }
-      } else {
-        expect(mockEnvironment.fetchModule).to.not.be.called;
-        expect(modulesToUpdate).to.equal(undefined);
-      }
-      expect(existsSync(fileRoutesJsonPath)).to.equal(expectGeneration);
-    }
-
     beforeAll(async () => {
       // const rootDir = pathToFileURL('/path/to/project/');
       const rootDir = await createTmpDir();
       const outDir = new URL('dist/', rootDir);
       viewsDir = new URL('frontend/views/', rootDir);
+      await createTestingRouteFiles(viewsDir);
       generatedDir = new URL('frontend/generated/', rootDir);
-      fileRoutesTsPath = fileURLToPath(new URL('file-routes.ts', generatedDir));
-      fileRoutesJsonPath = fileURLToPath(new URL('file-routes.json', generatedDir));
-      fileRoutesModule = createMockEnvironmentModuleNode(fileRoutesTsPath);
+      viewModule = createMockEnvironmentModuleNode('file.tsx', viewsDir);
+      fileRoutesTsModule = createMockEnvironmentModuleNode('file-routes.ts', generatedDir);
+      fileRoutesJsonModule = createMockEnvironmentModuleNode('file-routes.json', generatedDir);
       mockModuleGraph = {
         getModulesByFile(file: string) {
-          if (file === fileRoutesTsPath) {
-            return new Set([fileRoutesModule]);
+          if (file === fileRoutesTsModule.file) {
+            return new Set([fileRoutesTsModule]);
           }
           return new Set();
         },
@@ -131,110 +104,137 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     beforeEach(() => {
-      if (existsSync(fileRoutesJsonPath)) {
-        rmSync(fileRoutesJsonPath);
+      if (existsSync(fileRoutesJsonModule.file!)) {
+        rmSync(fileRoutesJsonModule.file!);
       }
       sinon.resetHistory();
     });
 
+    it('should generate fs routes during build', async () => {
+      await (plugin.buildStart as () => Promise<void>)();
+      expect(existsSync(fileRoutesJsonModule.file!)).to.be.true;
+    });
+
     it('should send fs-route-update when file-routes.json is added', async () => {
       expect(mockEnvironment.hot.send).to.not.be.called;
-      const modulesToUpdate = await hotUpdate({ type: 'create', file: fileRoutesJsonPath });
+      const modulesToUpdate = await hotUpdate({ type: 'create', file: fileRoutesJsonModule.file! });
+      expect(modulesToUpdate).to.be.an('array').that.is.empty;
       expect(mockEnvironment.hot.send).to.be.calledWith({ type: 'custom', event: 'fs-route-update' });
-      expect(modulesToUpdate).to.be.deep.equal([]);
     });
 
     it('should send fs-route-update when file-routes.json changes', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const modulesToUpdate = await hotUpdate({ type: 'update', file: fileRoutesJsonPath });
+      const modulesToUpdate = await hotUpdate({ type: 'update', file: fileRoutesJsonModule.file! });
+      expect(modulesToUpdate).to.be.an('array').that.is.empty;
       expect(mockEnvironment.hot.send).to.be.calledWith({ type: 'custom', event: 'fs-route-update' });
-      expect(modulesToUpdate).to.be.deep.equal([]);
     });
 
     it('should not send updates for file-routes.ts separately', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const modulesToUpdate = await hotUpdate({ type: 'update', file: fileRoutesTsPath });
+      const modulesToUpdate = await hotUpdate({ type: 'update', file: fileRoutesTsModule.file! });
       // Updates to file-routes.ts are not processed separately, instead they
       // are combined with the update of the triggering file.
-      expect(mockEnvironment.hot.send).to.not.be.called;
       expect(modulesToUpdate).to.be.an('array').that.is.empty;
-    });
-
-    it('should send hot reload including file routes when a view file imported in file routes changes', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const viewFilePath = fileURLToPath(new URL('file.tsx', viewsDir));
-      const viewFileModule = createMockEnvironmentModuleNode(viewFilePath);
-      viewFileModule.importers.add(fileRoutesModule);
-      const modulesToUpdate = await hotUpdate({ type: 'update', file: viewFilePath, modules: [viewFileModule] });
-      expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
-      // HMR for routes and view file together.
-      expect(modulesToUpdate).to.not.equal(undefined);
-      expect(modulesToUpdate!.length).to.equal(2);
-      expect(modulesToUpdate![0]).to.eq(fileRoutesModule);
-      expect(modulesToUpdate![1]).to.eq(viewFileModule);
       expect(mockEnvironment.hot.send).to.not.be.called;
     });
 
-    it('should send hot reload including file routes when a view file imported in file routes is added', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const viewFilePath = fileURLToPath(new URL('file.tsx', viewsDir));
-      const viewFileModule = createMockEnvironmentModuleNode(viewFilePath);
-      viewFileModule.importers.add(fileRoutesModule);
-      const modulesToUpdate = await hotUpdate({ type: 'create', file: viewFilePath, modules: [viewFileModule] });
-      expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
-      // HMR for routes and view file together.
-      expect(modulesToUpdate).to.not.equal(undefined);
-      expect(modulesToUpdate!.length).to.equal(2);
-      expect(modulesToUpdate![0]).to.eq(fileRoutesModule);
-      expect(modulesToUpdate![1]).to.eq(viewFileModule);
-      expect(mockEnvironment.hot.send).to.not.be.called;
+    describe('view module imported in file routes', () => {
+      beforeAll(() => {
+        viewModule.importers.add(viewModule);
+      });
+
+      afterAll(() => {
+        viewModule.importers.clear();
+      });
+
+      it('should send hot reload including file routes when a view file changes', async () => {
+        const modulesToUpdate = await hotUpdate({
+          type: 'update',
+          file: viewModule.file!,
+          modules: [viewModule],
+        });
+        expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsModule.id!);
+        // HMR for routes and view file together.
+        expect(modulesToUpdate).to.deep.equal([fileRoutesTsModule, viewModule]);
+        expect(mockEnvironment.hot.send).to.not.be.called;
+      });
+
+      it('should send hot reload including file routes when a view file is added', async () => {
+        const modulesToUpdate = await hotUpdate({
+          type: 'create',
+          file: viewModule.file!,
+          modules: [viewModule],
+        });
+        expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsModule.id!);
+        // HMR for routes and view file together.
+        expect(modulesToUpdate).to.deep.equal([fileRoutesTsModule, viewModule]);
+        expect(mockEnvironment.hot.send).to.not.be.called;
+      });
+
+      it('should send regular updates when a view file but not routes change', async () => {
+        // Trigger update for "file-routes.ts".
+        await hotUpdate({ type: 'update', file: viewModule.file!, modules: [viewModule] });
+        sinon.resetHistory();
+        // Next update is expected to skip file routes as they did not change.
+        const modulesToUpdate = await hotUpdate({
+          type: 'update',
+          file: viewModule.file!,
+          modules: [viewModule],
+        });
+        expect(mockEnvironment.fetchModule).to.not.be.called;
+        // undefined result makes Vite proceed with regular HMR.
+        expect(modulesToUpdate).to.equal(undefined);
+      });
     });
 
-    it('should send hot reload for only file routes when a view file not imported anywhere changes', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const viewFilePath = fileURLToPath(new URL('file.tsx', viewsDir));
-      const viewFileModule = createMockEnvironmentModuleNode(viewFilePath);
-      const modulesToUpdate = await hotUpdate({ type: 'update', file: viewFilePath, modules: [viewFileModule] });
-      expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
-      // HMR for only file routes.
-      expect(modulesToUpdate).to.be.deep.equal([fileRoutesModule]);
-      expect(mockEnvironment.hot.send).to.not.be.called;
-    });
+    describe('view module not imported anywhere', () => {
+      it('should send hot reload for only file routes when a view file changes', async () => {
+        const modulesToUpdate = await hotUpdate({
+          type: 'update',
+          file: viewModule.file!,
+          modules: [viewModule],
+        });
+        expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsModule.id!);
+        // HMR for only file routes.
+        expect(modulesToUpdate).to.be.deep.equal([fileRoutesTsModule]);
+        expect(mockEnvironment.hot.send).to.not.be.called;
+      });
 
-    it('should send hot reload for only file routes when a view file not imported anywhere is removed', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const viewFilePath = fileURLToPath(new URL('file.tsx', viewsDir));
-      const viewFileModule = createMockEnvironmentModuleNode(viewFilePath);
-      const modulesToUpdate = await hotUpdate({ type: 'delete', file: viewFilePath, modules: [viewFileModule] });
-      expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsPath);
-      // HMR for only file routes.
-      expect(modulesToUpdate).to.not.be.undefined;
-      expect(modulesToUpdate!.length).to.equal(1);
-      expect(modulesToUpdate![0]).to.eq(fileRoutesModule);
-      expect(mockEnvironment.hot.send).to.not.be.called;
-    });
-
-    it('should send regular updates when a view file but not routes change', async () => {
-      expect(mockEnvironment.hot.send).to.not.be.called;
-      const viewFilePath = fileURLToPath(new URL('file.tsx', viewsDir));
-      const viewFileModule = createMockEnvironmentModuleNode(viewFilePath);
-      viewFileModule.importers.add(fileRoutesModule);
-      // Trigger update for "file-routes.ts".
-      await hotUpdate({ type: 'update', file: viewFilePath, modules: [viewFileModule] });
-      sinon.resetHistory();
-      // Next update is expected to skip file routes as they did not change.
-      const modulesToUpdate = await hotUpdate({ type: 'update', file: viewFilePath, modules: [viewFileModule] });
-      expect(mockEnvironment.fetchModule).to.not.be.called;
-      // undefined result makes Vite proceed with regular HMR.
-      expect(modulesToUpdate).to.equal(undefined);
+      it('should send hot reload for only file routes when a view file is removed', async () => {
+        const modulesToUpdate = await hotUpdate({
+          type: 'delete',
+          file: viewModule.file!,
+          modules: [viewModule],
+        });
+        expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsModule.id!);
+        // HMR for only file routes.
+        expect(modulesToUpdate).to.deep.equal([fileRoutesTsModule]);
+        expect(mockEnvironment.hot.send).to.not.be.called;
+      });
     });
 
     it('should regenerate files when layouts.json is updated', async () => {
-      await expectRuntimeFileGeneratedWithHotUpdate('layouts.json', true);
+      const layoutJsonModule = createMockEnvironmentModuleNode('layouts.json', generatedDir);
+      layoutJsonModule.importers.add(fileRoutesTsModule);
+      const modulesToUpdate = await hotUpdate({
+        type: 'update',
+        file: layoutJsonModule.file!,
+        modules: [layoutJsonModule],
+      });
+      expect(mockEnvironment.fetchModule).to.be.calledWith(fileRoutesTsModule.id!);
+      expect(modulesToUpdate).to.be.deep.equal([fileRoutesTsModule, layoutJsonModule]);
+      expect(existsSync(fileRoutesJsonModule.file!)).to.be.true;
     });
 
     it('should not regenerate files when another file is updated', async () => {
-      await expectRuntimeFileGeneratedWithHotUpdate('something.json', false);
+      const someJsonModule = createMockEnvironmentModuleNode('something.json', generatedDir);
+      someJsonModule.importers.add(fileRoutesTsModule);
+      const modulesToUpdate = await hotUpdate({
+        type: 'update',
+        file: someJsonModule.file!,
+        modules: [someJsonModule],
+      });
+      expect(mockEnvironment.fetchModule).to.not.be.called;
+      expect(modulesToUpdate).to.equal(undefined);
+      expect(existsSync(fileRoutesJsonModule.file!)).to.be.false;
     });
   });
 });

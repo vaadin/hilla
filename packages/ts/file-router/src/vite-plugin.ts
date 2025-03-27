@@ -73,7 +73,7 @@ export default function vitePluginFileSystemRouter({
       const _generatedDir = new URL(generatedDir, _root);
 
       _viewsDir = new URL(viewsDir, _root);
-      _viewsDirPosix = fileURLToPath(_viewsDir, { windows: false });
+      _viewsDirPosix = fileURLToPath(_viewsDir).replaceAll('\\', '/');
       _outDir = pathToFileURL(outDir);
       _logger = logger;
 
