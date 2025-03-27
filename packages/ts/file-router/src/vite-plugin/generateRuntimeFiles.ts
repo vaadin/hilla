@@ -71,7 +71,7 @@ export async function generateRuntimeFiles(
   extensions: readonly string[],
   logger: Logger,
   debug: boolean,
-): Promise<void> {
+): Promise<boolean> {
   let routeMeta: readonly RouteMeta[];
   try {
     routeMeta = await collectRoutesFromFS(viewsDir, { extensions, logger });
@@ -97,8 +97,9 @@ export async function generateRuntimeFiles(
   // If the metadata has changed, we need to write the TS file also to make Vite HMR updates work properly.
   // Even though the contents of the TS file does not change, the contents of the files imported in the TS
   // files changes and the routes must be re-applied to the React router
-  await generateRuntimeFile(urls.code, runtimeRoutesCode, jsonWritten);
+  const codeWritten = await generateRuntimeFile(urls.code, runtimeRoutesCode, jsonWritten);
   if (debug) {
     logger.info(`File Route module is generated: ${String(urls.code)}`);
   }
+  return codeWritten;
 }
