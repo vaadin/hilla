@@ -51,7 +51,8 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                             .filter { it.kind == KParameter.Kind.VALUE }
                               .first { it.name == node.source.name })
         } else if (node is TypedNode) {
-            if (node.type is TypeArgumentModel) { // it depends on the parent node
+            // it depends on the parent node
+            if (node.type is TypeArgumentModel) { // generic types
                 val typeSignatureNode = node as TypeSignatureNode
                 if (parentPath.node is KTypeSignatureNode) {
                     val parentType = (parentPath.node as KTypeSignatureNode).kType
@@ -69,10 +70,10 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                     )
                 }
             } else if (node.type is ClassRefSignatureModel || node.type is BaseSignatureModel || node.type is TypeVariableModel) {
-                if (parentPath.node is KMethodNode) { // method return type node
+                if (parentPath.node is KMethodNode) { // method return type
                     return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
                         (parentPath.node as KMethodNode).kFunction.returnType)
-                } else if (parentPath.node is KMethodParameterNode) { // method parameter node
+                } else if (parentPath.node is KMethodParameterNode) { // method parameter
                     return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
                         (parentPath.node as KMethodParameterNode).kParameter.type)
                 } else if (parentPath.node is KTypeSignatureNode) { // type argument node
