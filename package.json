@@ -34,7 +34,7 @@
   "overrides": {
     "esbuild": "$esbuild",
     "prettier": "$prettier",
-    "vite": "$vite"
+    "vite": "6.1.1"
   },
   "devDependencies": {
     "@nx/js": "20.4.5",
