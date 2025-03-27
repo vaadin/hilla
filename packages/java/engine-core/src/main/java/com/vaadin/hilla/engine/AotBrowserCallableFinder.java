@@ -1,6 +1,8 @@
 package com.vaadin.hilla.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.server.ExecutionFailedException;
+
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,27 +23,31 @@ import java.util.stream.Stream;
  * Utility class to find browser callables (endpoints) in a non-running Hilla
  * application.
  */
-class AotBrowserCallableFinder {
+public class AotBrowserCallableFinder {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AotBrowserCallableFinder.class);
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
-    static List<Class<?>> findEndpointClasses(
+    public static List<Class<?>> findEndpointClasses(
             EngineConfiguration engineConfiguration)
-            throws IOException, InterruptedException {
+            throws ExecutionFailedException {
         // Determine the main application class
         var applicationClass = determineApplicationClass(engineConfiguration);
         if (applicationClass == null) {
-            return List.of();
+            throw new ExecutionFailedException("Application has no main class");
         }
 
-        // Generate the AOT artifacts, including reflect-config.json
-        var reflectConfigPath = generateAotArtifacts(engineConfiguration,
-                applicationClass);
+        try {
+            // Generate the AOT artifacts, including reflect-config.json
+            var reflectConfigPath = generateAotArtifacts(engineConfiguration,
+                    applicationClass);
 
-        // Load annotated classes from reflect-config.json
-        return loadAnnotatedClasses(engineConfiguration, reflectConfigPath);
+            // Load annotated classes from reflect-config.json
+            return loadAnnotatedClasses(engineConfiguration, reflectConfigPath);
+        } catch (IOException | InterruptedException e) {
+            throw new ExecutionFailedException(e);
+        }
     }
 
     private static String determineApplicationClass(
@@ -82,7 +86,7 @@ class AotBrowserCallableFinder {
 
     private static Path generateAotArtifacts(
             EngineConfiguration engineConfiguration, String applicationClass)
-            throws IOException, InterruptedException {
+            throws IOException, InterruptedException, ExecutionFailedException {
         var aotOutput = engineConfiguration.getBuildDir()
                 .resolve("spring-aot/main");
         var classesDirectory = aotOutput.resolve("classes");
@@ -125,7 +129,7 @@ class AotBrowserCallableFinder {
                 engineConfiguration.getArtifactId(), "reflect-config.json"));
 
         if (!Files.isRegularFile(json)) {
-            throw new ParserException(String.format(
+            throw new ExecutionFailedException(String.format(
                     "The `%s` tool has not produced the expected"
                             + " `reflect-config.json` file, which is used to"
                             + " identify available endpoints.",
@@ -137,7 +141,7 @@ class AotBrowserCallableFinder {
 
     private static List<Class<?>> loadAnnotatedClasses(
             EngineConfiguration engineConfiguration, Path reflectConfigPath)
-            throws IOException {
+            throws IOException, ExecutionFailedException {
         // The file simply contains a list of beans, we just need their names,
         // which are class names.
         var jsonContent = Files.readString(reflectConfigPath);
@@ -145,7 +149,7 @@ class AotBrowserCallableFinder {
         var rootNode = objectMapper.readTree(jsonContent);
 
         if (!rootNode.isArray()) {
-            throw new ParserException(
+            throw new ExecutionFailedException(
                     "Aot output file reflect-config.json does not contain"
                             + " information about beans, so endpoint detection"
                             + " cannot be performed");
@@ -158,23 +162,10 @@ class AotBrowserCallableFinder {
             candidates.add(name);
         }
 
-        // Prepare classloader
-        var classpath = engineConfiguration.getClasspath().stream()
-                .filter(Files::exists).toList();
+        var annotationNames = engineConfiguration.getEndpointAnnotations()
+                .stream().map(Class::getName).toList();
+        var classLoader = engineConfiguration.getClassLoader();
 
-        var urls = classpath.stream().map(Path::toFile).map(file -> {
-            try {
-                return file.toURI().toURL();
-            } catch (Throwable t) {
-                return null;
-            }
-        }).filter(Objects::nonNull).toArray(URL[]::new);
-
-        var annotationNames = engineConfiguration.getParser()
-                .getEndpointAnnotations().stream().map(Class::getName).toList();
-
-        var classLoader = new URLClassLoader(urls,
-                AotBrowserCallableFinder.class.getClassLoader());
         return candidates.stream().map(name -> {
             try {
                 return Class.forName(name, false, classLoader);

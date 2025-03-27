@@ -3,15 +3,16 @@ package com.vaadin.hilla.engine;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.server.frontend.scanner.ClassFinder;
+import com.vaadin.flow.server.ExecutionFailedException;
 
-class LookupBrowserCallableFinder {
+public class LookupBrowserCallableFinder {
 
-    static List<Class<?>> findEndpointClasses(ClassFinder classFinder,
-            EngineConfiguration engineConfiguration) {
+    public static List<Class<?>> findEndpointClasses(
+            EngineConfiguration engineConfiguration)
+            throws ExecutionFailedException {
         return engineConfiguration.getEndpointAnnotations().stream()
-                .map(classFinder::getAnnotatedClasses).flatMap(Set::stream)
-                .distinct().toList();
+                .map(engineConfiguration.getClassFinder()::getAnnotatedClasses)
+                .flatMap(Set::stream).distinct().toList();
     }
 
 }
