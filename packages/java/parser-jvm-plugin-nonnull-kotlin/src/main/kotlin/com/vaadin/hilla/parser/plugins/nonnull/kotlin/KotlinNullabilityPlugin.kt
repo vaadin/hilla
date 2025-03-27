@@ -44,26 +44,12 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         } else if (node is EndpointExposedNode && node.source is ClassInfoModel) {
             return KEndpointExposedNode(node.source, (node.source.get() as Class<*>).kotlin)
         } else if (node is MethodNode && node.source is MethodInfoModel) {
-            if (parentPath.node is KEndpointNode) {
-                return KMethodNode(
-                    node.source,
-                    node.target,
-                    (parentPath.node as KEndpointNode).kClass.memberFunctions.first {
-                        it.name == node.source.name
-                    })
-            } else if (parentPath.node is EndpointExposedNode) {
-                return KMethodNode(
-                    node.source,
-                    node.target,
-                    (parentPath.node as KEndpointExposedNode).kClass.memberFunctions.first {
-                        it.name == node.source.name
-                    })
-            }
+            return createKMethodNode(node, parentPath)
         } else if (node is MethodParameterNode && node.source is MethodParameterInfoModel) {
-            return KMethodParameterNode(node.source, node.target, (parentPath.node as KMethodNode).kFunction
-                   .parameters.first {
-                       it.name == node.source.name && it.kind == KParameter.Kind.VALUE
-                   })
+            return KMethodParameterNode(node.source, node.target,
+                    (parentPath.node as KMethodNode).kFunction.parameters
+                            .filter { it.kind == KParameter.Kind.VALUE }
+                              .first { it.name == node.source.name })
         } else if (node is TypedNode) {
             if (node.type is TypeArgumentModel) { // it depends on the parent node
                 val typeSignatureNode = node as TypeSignatureNode
@@ -73,74 +59,41 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                     val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
                     else typeSignatureNode.position
                     return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        typeSignatureNode.position,
+                        node.type, node.target, node.annotations, typeSignatureNode.position,
                         parentType.arguments[position].type!!
                     )
                 } else if (parentPath.node is KMethodParameterNode) {
                     return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        typeSignatureNode.position,
+                        node.type, node.target, node.annotations, typeSignatureNode.position,
                         (parentPath.node as KMethodParameterNode).kParameter.type.arguments[typeSignatureNode.position].type!!
                     )
                 }
-            } else if (node.type is ClassRefSignatureModel || node.type is BaseSignatureModel) {
+            } else if (node.type is ClassRefSignatureModel || node.type is BaseSignatureModel || node.type is TypeVariableModel) {
                 if (parentPath.node is KMethodNode) { // method return type node
-                    return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        null,
-                        (parentPath.node as KMethodNode).kFunction.returnType
-                    )
+                    return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
+                        (parentPath.node as KMethodNode).kFunction.returnType)
                 } else if (parentPath.node is KMethodParameterNode) { // method parameter node
-                    return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        null,
-                        (parentPath.node as KMethodParameterNode).kParameter.type
-                    )
+                    return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
+                        (parentPath.node as KMethodParameterNode).kParameter.type)
                 } else if (parentPath.node is KTypeSignatureNode) { // type argument node
-                    return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        null,
-                        (parentPath.node as KTypeSignatureNode).kType
-                    )
+                    return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
+                        (parentPath.node as KTypeSignatureNode).kType)
                 } else if (parentPath.node is TypeSignatureNode &&
                             (parentPath.node as TypeSignatureNode).type is TypeVariableModel &&
                             parentPath.parentPath.node is KMethodParameterNode) {
                     // method parameter type variable node
-                    return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        null,
-                        (parentPath.parentPath.node as KMethodParameterNode).kParameter.type
-                    )
+                    return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
+                        (parentPath.parentPath.node as KMethodParameterNode).kParameter.type)
                 } else if (parentPath.node is KPropertyNode) { // property node
-                    return KTypeSignatureNode(
-                        node.type,
-                        node.target,
-                        node.annotations,
-                        null,
-                        (parentPath.node as KPropertyNode).kProperty.returnType
-                    )
+                    return KTypeSignatureNode(node.type, node.target, node.annotations, position = null,
+                        (parentPath.node as KPropertyNode).kProperty.returnType)
                 }
             }
-
         } else if (node is EntityNode && node.source is ClassInfoModel) {
             return KEntityNode(node.source, node.target as ObjectSchema, (node.source.get() as Class<*>).kotlin)
         } else if (node is PropertyNode && node.source is JacksonPropertyModel) {
-            return KPropertyNode(node.source, node.target, (parentPath.node as KEntityNode).kClass.memberProperties.first {
-                       it.name == node.source.name
-                   })
+            return KPropertyNode(node.source, node.target,
+                (parentPath.node as KEntityNode).kClass.memberProperties.first { it.name == node.source.name })
         }
 
         return super.resolve(node, parentPath)
@@ -156,6 +109,28 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             val propertySchema = entityNode.target.properties[node.target]
             propertySchema?.nullable = if (node.kProperty.returnType.isMarkedNullable) true else null
         }
+    }
+
+    private fun createKMethodNode(node: MethodNode, parentPath: NodePath<*>): KMethodNode {
+        if (parentPath.node is KEndpointNode) {
+            return KMethodNode(node.source, node.target,
+                (parentPath.node as KEndpointNode).kClass.memberFunctions.first {
+                    it.name == node.source.name
+                })
+        } else if (parentPath.node is EndpointExposedNode) {
+            if ((parentPath.node as KEndpointExposedNode).kClass.memberFunctions.none { it.name == node.source.name }) {
+                throw IllegalArgumentException(
+                    "Defining public class properties in BrowserCallable class body is not supported. " +
+                    "Consider marking '${(parentPath.node as KEndpointExposedNode).kClass.qualifiedName} -> " +
+                    "${node.source.name.substring(3).lowercase()}' as either private or protected")
+            }
+            return KMethodNode(node.source, node.target,
+                (parentPath.node as KEndpointExposedNode).kClass.memberFunctions.first {
+                    it.name == node.source.name
+                })
+        }
+        throw IllegalStateException(("Cannot create KMethodNode as 'parentPath.node' is neither KEndpointNode nor " +
+            "KEndpointExposedNode. Parent Node: ${parentPath.node}").trim())
     }
 
     private fun isKotlinClass(clazz: Class<*>): Boolean {

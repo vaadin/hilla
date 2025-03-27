@@ -17,8 +17,15 @@ class NativePerson(
     var address: MutableList<Address> = mutableListOf(),
     @Transient
     var team: Map<String, List<Employee?>> = mapOf(),
-    var dateOfBirth: LocalDate? = null,
+    private var dateOfBirth: LocalDate? = null,
     var occupation: String? = null,
     var role: String? = null,
     var important: Boolean = false,
-): AbstractEntity()
+): AbstractEntity<Long?>() {
+    var age: Int?
+        get() = dateOfBirth?.let { LocalDate.now().year - it.year } ?: 0
+        set(value) {
+            dateOfBirth = LocalDate.now().minusYears(value!!.toLong())
+        }
+    lateinit var data: String
+}

@@ -8,6 +8,8 @@ import org.springframework.data.repository.CrudRepository
 @EndpointExposed
 class MyListRepositoryService<T, ID, R: CrudRepository<T, ID>> {
 
+    private lateinit var repo: R
+
     fun list(pageable: Pageable, filter: Filter?): List<T> {
         return listOf()
     }
@@ -16,15 +18,15 @@ class MyListRepositoryService<T, ID, R: CrudRepository<T, ID>> {
         return 0
     }
 
-    fun get(id: ID?): T? {
-        return null
+    fun get(id: ID): T {
+        return repo.findAll().iterator().next()
     }
 
     fun exists(id: ID): Boolean {
         return false
     }
 
-    fun getRepository(): R? {
-        return null
+    fun getRepository(): R {
+        return repo
     }
 }

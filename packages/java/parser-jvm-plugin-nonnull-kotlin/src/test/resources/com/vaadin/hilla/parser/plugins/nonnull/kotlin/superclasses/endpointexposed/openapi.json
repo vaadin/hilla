@@ -87,6 +87,50 @@
         }
       }
     },
+    "/PersonEndpoint/save" : {
+      "post" : {
+        "tags" : [
+          "PersonEndpoint"
+        ],
+        "operationId" : "PersonEndpoint_save_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "entity" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.endpointexposed.PersonEndpoint$Person"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.endpointexposed.PersonEndpoint$Person"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PersonEndpoint/update" : {
       "post" : {
         "tags" : [

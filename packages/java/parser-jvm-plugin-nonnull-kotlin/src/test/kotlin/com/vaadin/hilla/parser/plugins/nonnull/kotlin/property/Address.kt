@@ -1,9 +1,7 @@
-package com.vaadin.hilla.kotlin.nullable.test.data
+package com.vaadin.hilla.parser.plugins.nonnull.kotlin.property
 
-import jakarta.persistence.Entity
-
-@Entity
 class Address(
+    override var id: Long?,
     var street: String,
     var zipCode: String,
     var city: String?,
