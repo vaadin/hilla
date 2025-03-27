@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 @Entity
 class Person(
-    var firstName: @NotBlank String? = null,
+    var firstName: @NotBlank String,
     var lastName: String = "",
     var email: @Email String? = null,
     var phone: String = "",
