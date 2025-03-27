@@ -1,4 +1,4 @@
-import type { ComponentType, LazyExoticComponent } from 'react';
+import type { ComponentType } from 'react';
 import type { AgnosticRoute, Module, RouteModule, ViewConfig } from '../types.js';
 
 /**
@@ -21,12 +21,12 @@ export function extendModule(module: Module | null, config?: ViewConfig): Module
   };
 }
 
-function isReactLazyComponent(value: unknown): value is LazyExoticComponent<ComponentType> {
-  return !!value && typeof value === 'object' && '$$typeof' in value && value.$$typeof === Symbol.for('react.lazy');
-}
-
 function isReactComponent(value: unknown): value is ComponentType {
-  return !!value && typeof value === 'function';
+  return (
+    !!value &&
+    (typeof value === 'function' ||
+      (typeof value === 'object' && '$$typeof' in value && value.$$typeof === Symbol.for('react.lazy')))
+  );
 }
 
 /**
@@ -62,7 +62,7 @@ export function createRoute(path: string, module: Module, children?: readonly Ag
 export function createRoute(
   path: string,
   component: ComponentType,
-  config: ViewConfig,
+  config: ViewConfig | undefined,
   children?: readonly AgnosticRoute[],
 ): AgnosticRoute;
 export function createRoute(
@@ -78,7 +78,6 @@ export function createRoute(
     // eslint-disable-next-line no-param-reassign
     children = moduleOrChildrenOrComponent;
   } else if (
-    isReactLazyComponent(moduleOrChildrenOrComponent) ||
     isReactComponent(moduleOrChildrenOrComponent) ||
     (!moduleOrChildrenOrComponent && !!childrenOrConfig && typeof childrenOrConfig === 'object')
   ) {

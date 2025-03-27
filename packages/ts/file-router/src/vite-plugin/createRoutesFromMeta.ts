@@ -113,10 +113,13 @@ class RouteFromMetaProcessor {
             };
           } else {
             const mod = namespace.add(relativePath, fileName);
+            const reactModuleType =
+              named.getIdentifier(HILLA_FILE_ROUTER_TYPES, 'RouteModule') ??
+              named.add(HILLA_FILE_ROUTER_TYPES, 'RouteModule', true);
 
             module = {
               componentId: ast`${mod}.default`.node as PropertyAccessExpression,
-              configId: ast`${mod}.config`.node as PropertyAccessExpression,
+              configId: ast`(${mod} as ${reactModuleType}).config`.node as PropertyAccessExpression,
               flowLayout,
             };
           }

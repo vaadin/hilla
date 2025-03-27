@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
-import type { ServerViewConfig } from '../src/shared/internal.js';
+import type { ServerViewConfigTreeNode } from '../src/shared/internal.js';
 import { transformTree } from '../src/shared/transformTree.js';
 import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
@@ -222,7 +222,7 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
   ];
 }
 
-export function createTestingServerViewConfigs(metas: readonly RouteMeta[]): readonly ServerViewConfig[] {
+export function createTestingServerViewConfigs(metas: readonly RouteMeta[]): readonly ServerViewConfigTreeNode[] {
   return transformTree(metas, null, (_metas, next) =>
     _metas.map(({ path, children }) => {
       const _children = children ? next(children) : [];
