@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
@@ -159,15 +158,36 @@ public final class ParserConfiguration {
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
-        private static final List<Plugin> DEFAULTS = List.of(
-                new Plugin(BackbonePlugin.class.getName()),
-                new Plugin(MultipartFileCheckerPlugin.class.getName()),
-                new Plugin(TransferTypesPlugin.class.getName()),
-                new Plugin(KotlinNullabilityPlugin.class.getName()),
-                new Plugin(NonnullPlugin.class.getName()),
-                new Plugin(SubTypesPlugin.class.getName()),
-                new Plugin(ModelPlugin.class.getName()));
-
+        private static final List<Plugin> DEFAULTS;
+        static {
+            @SuppressWarnings("Intentionally, to avoid loading the class")
+            Class kotlinNullabilityClass = null;
+            Class kClass = null; // Just a class from kotlin-reflect library to check if the lib is available
+            try {
+                kotlinNullabilityClass = Class.forName("com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
+                kClass = Class.forName("kotlin.reflect.KClass");
+            } catch (Throwable e) {
+                // Ignore
+            }
+            if (kotlinNullabilityClass != null && kClass != null) {
+                DEFAULTS = List.of(
+                    new Plugin(BackbonePlugin.class.getName()),
+                    new Plugin(MultipartFileCheckerPlugin.class.getName()),
+                    new Plugin(TransferTypesPlugin.class.getName()),
+                    new Plugin(kotlinNullabilityClass.getName()),
+                    new Plugin(NonnullPlugin.class.getName()),
+                    new Plugin(SubTypesPlugin.class.getName()),
+                    new Plugin(ModelPlugin.class.getName()));
+            } else {
+                DEFAULTS = List.of(
+                    new Plugin(BackbonePlugin.class.getName()),
+                    new Plugin(MultipartFileCheckerPlugin.class.getName()),
+                    new Plugin(TransferTypesPlugin.class.getName()),
+                    new Plugin(NonnullPlugin.class.getName()),
+                    new Plugin(SubTypesPlugin.class.getName()),
+                    new Plugin(ModelPlugin.class.getName()));
+            }
+        }
         PluginsProcessor() {
             super(DEFAULTS);
         }
