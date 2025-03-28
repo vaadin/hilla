@@ -17,8 +17,12 @@ import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ParserConfiguration {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ParserConfiguration.class);
     private List<Class<? extends Annotation>> endpointAnnotations = List.of();
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
             .of();
@@ -162,32 +166,36 @@ public final class ParserConfiguration {
         static {
             @SuppressWarnings("Intentionally, to avoid loading the class")
             Class kotlinNullabilityClass = null;
-            Class kClass = null; // Just a class from kotlin-reflect library to check if the lib is available
+            Class kClass = null; // Just a class from kotlin-reflect library to
+                                 // check if the library is available
             try {
-                kotlinNullabilityClass = Class.forName("com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
+                kotlinNullabilityClass = Class.forName(
+                        "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
                 kClass = Class.forName("kotlin.reflect.KClass");
             } catch (Throwable e) {
-                // Ignore
+                LOGGER.debug(
+                        "Kotlin nullability plugin is not going to be loaded. "
+                                + "If you with to have it enabled, please make sure the 'kotlin-reflect' "
+                                + "and 'hilla-parser-jvm-plugin-nonnull-kotlin' libraries are included in your classpath.");
             }
             if (kotlinNullabilityClass != null && kClass != null) {
-                DEFAULTS = List.of(
-                    new Plugin(BackbonePlugin.class.getName()),
-                    new Plugin(MultipartFileCheckerPlugin.class.getName()),
-                    new Plugin(TransferTypesPlugin.class.getName()),
-                    new Plugin(kotlinNullabilityClass.getName()),
-                    new Plugin(NonnullPlugin.class.getName()),
-                    new Plugin(SubTypesPlugin.class.getName()),
-                    new Plugin(ModelPlugin.class.getName()));
+                DEFAULTS = List.of(new Plugin(BackbonePlugin.class.getName()),
+                        new Plugin(MultipartFileCheckerPlugin.class.getName()),
+                        new Plugin(TransferTypesPlugin.class.getName()),
+                        new Plugin(kotlinNullabilityClass.getName()),
+                        new Plugin(NonnullPlugin.class.getName()),
+                        new Plugin(SubTypesPlugin.class.getName()),
+                        new Plugin(ModelPlugin.class.getName()));
             } else {
-                DEFAULTS = List.of(
-                    new Plugin(BackbonePlugin.class.getName()),
-                    new Plugin(MultipartFileCheckerPlugin.class.getName()),
-                    new Plugin(TransferTypesPlugin.class.getName()),
-                    new Plugin(NonnullPlugin.class.getName()),
-                    new Plugin(SubTypesPlugin.class.getName()),
-                    new Plugin(ModelPlugin.class.getName()));
+                DEFAULTS = List.of(new Plugin(BackbonePlugin.class.getName()),
+                        new Plugin(MultipartFileCheckerPlugin.class.getName()),
+                        new Plugin(TransferTypesPlugin.class.getName()),
+                        new Plugin(NonnullPlugin.class.getName()),
+                        new Plugin(SubTypesPlugin.class.getName()),
+                        new Plugin(ModelPlugin.class.getName()));
             }
         }
+
         PluginsProcessor() {
             super(DEFAULTS);
         }
