@@ -1,5 +1,5 @@
 import { createRoute as createRoute_1 } from "@vaadin/hilla-file-router/runtime.js";
-import type { AgnosticRoute as AgnosticRoute_1 } from "@vaadin/hilla-file-router/types.js";
+import type { AgnosticRoute as AgnosticRoute_1, RouteModule as RouteModule_1 } from "@vaadin/hilla-file-router/types.js";
 import { lazy as lazy_1 } from "react";
 import * as Page_1 from "../views/test/non-lazy.js";
 console.error("Two views share the same path: profile");
@@ -28,7 +28,7 @@ const routes: readonly AgnosticRoute_1[] = [
         ]),
         createRoute_1("issue-002571-empty-layout", lazy_1(() => import("../views/test/issue-002571-empty-layout/@layout.js")), { "title": "issue-002571-empty-layout" }),
         createRoute_1("issue-002879-config-below", lazy_1(() => import("../views/test/issue-002879-config-below.js")), { "title": "issue-002879-config-below" }),
-        createRoute_1("non-lazy", Page_1.default, Page_1.config)
+        createRoute_1("non-lazy", Page_1.default, (Page_1 as RouteModule_1).config)
     ]),
     createRoute_1("profile", lazy_1(() => import("../profile/@index.js")), { "title": "profile" })
 ];
