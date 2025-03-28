@@ -106,6 +106,11 @@
                 "type" : "boolean",
                 "x-java-type" : "boolean"
               },
+              "luckyNumber" : {
+                "type" : "integer",
+                "format" : "int32",
+                "x-java-type" : "int"
+              },
               "addresses" : {
                 "type" : "object",
                 "additionalProperties" : {
@@ -122,16 +127,16 @@
                 "nullable" : true,
                 "x-java-type" : "java.lang.String"
               },
+              "fullName" : {
+                "type" : "string",
+                "nullable" : true,
+                "x-java-type" : "java.lang.String"
+              },
               "age" : {
                 "type" : "integer",
                 "format" : "int32",
                 "nullable" : true,
                 "x-java-type" : "java.lang.Integer"
-              },
-              "luckyNumber" : {
-                "type" : "integer",
-                "format" : "int32",
-                "x-java-type" : "int"
               }
             }
           }

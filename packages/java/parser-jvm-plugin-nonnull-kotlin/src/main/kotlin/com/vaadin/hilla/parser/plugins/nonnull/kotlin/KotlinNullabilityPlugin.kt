@@ -8,16 +8,51 @@ import com.vaadin.hilla.parser.plugins.backbone.knodes.*
 import com.vaadin.hilla.parser.plugins.backbone.nodes.*
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
+import java.lang.reflect.Method
+import java.util.*
+import kotlin.Comparator
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaMethod
 
 class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
     override fun getRequiredPlugins(): Collection<Class<out Plugin?>> =
         listOf<Class<out Plugin?>>(BackbonePlugin::class.java)
 
-    override fun scan(nodeDependencies: NodeDependencies): NodeDependencies = nodeDependencies
+    /*
+     * This method is overridden to sort the child nodes of the EntityNode,
+     * first by the order of the properties in the class constructor, and then for the
+     * computed properties, the order is determined by the order of the getter/setter methods.
+     * The computed properties are listed after other properties and fields, and the order
+     * of the setter/getter methods is determined by what Java reflection 'declaredMethods'
+     * is returning, which is not guaranteed be in the same order of appearance in the class.
+     */
+    override fun scan(nodeDependencies: NodeDependencies): NodeDependencies {
+        if (nodeDependencies.node !is EntityNode) {
+            return nodeDependencies
+        }
+        val entityNode = nodeDependencies.node as EntityNode
+        val clazz = entityNode.source.get() as Class<*>
+        if (!isKotlinClass(clazz)) {
+            return nodeDependencies
+        }
+        val fields = clazz.declaredFields.map { it.name.substringBefore("\$delegate") }
+        val getters = clazz.declaredMethods.filter { it.name.startsWith("get") && it.parameterCount == 0 }
+            .map { it.name.substring(3)
+            .replaceFirstChar { it.lowercase(Locale.getDefault()) } }
+        val setters = clazz.declaredMethods.filter { it.name.startsWith("set") && it.parameterCount == 1 }
+            .map { it.name.substring(3)
+            .replaceFirstChar { it.lowercase(Locale.getDefault()) } }
+
+        val propertyNames = (fields + getters + setters).distinct()
+        val namesComparator = Comparator.comparing<String, Int>({ propertyNames.indexOf(it) })
+        val propertyComparator = Comparator.nullsLast(Comparator.comparing<PropertyNode, String>({ it.source.name }, namesComparator))
+        val childNodesComparator = Comparator.comparing<Node<*, *>, PropertyNode>({ if (it is PropertyNode) it else null }, propertyComparator)
+        return nodeDependencies.processChildNodes { it.sorted(childNodesComparator) }
+    }
 
     override fun enter(nodePath: NodePath<*>?) {}
 
@@ -93,8 +128,14 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         } else if (node is EntityNode && node.source is ClassInfoModel) {
             return KEntityNode(node.source, node.target as ObjectSchema, (node.source.get() as Class<*>).kotlin)
         } else if (node is PropertyNode && node.source is JacksonPropertyModel) {
-            return KPropertyNode(node.source, node.target,
-                (parentPath.node as KEntityNode).kClass.memberProperties.first { it.name == node.source.name })
+            // a property node in jackson model can be a field or an accessor method
+            val kProperty = (parentPath.node as KEntityNode).kClass.memberProperties
+                .firstOrNull { it.name == node.source.name }
+            if (kProperty != null) {
+                return KPropertyNode(node.source, node.target, kProperty)
+            }
+            return node // if the property is not found, return the original node
+                        // and then handle it in the exit method
         }
 
         return super.resolve(node, parentPath)
@@ -109,6 +150,20 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             val entityNode = nodePath.parentPath.node as KEntityNode
             val propertySchema = entityNode.target.properties[node.target]
             propertySchema?.nullable = if (node.kProperty.returnType.isMarkedNullable) true else null
+        } else if (node is PropertyNode && nodePath.parentPath.node is KEntityNode) {
+            val entityNode = nodePath.parentPath.node as KEntityNode
+            val propertySchema = entityNode.target.properties[node.target]
+            val member = node.source.primaryMember.get()
+            if (member is Method) {
+                val kMember = entityNode.kClass.functions.firstOrNull { it.javaMethod == member }
+                if (kMember != null) {
+                    if (member == node.source.getter) {
+                        propertySchema?.nullable = if (kMember.returnType.isMarkedNullable) true else null
+                    } else if (member == node.source.setter) {
+                        propertySchema?.nullable = if (kMember.parameters.first().type.isMarkedNullable) true else null
+                    }
+                }
+            }
         }
     }
 

@@ -15,10 +15,18 @@ open class Person(
     var important: Boolean,
 ): AbstractEntity<Long?>() {
     var age: Int?
-        get() = dateOfBirth?.let { LocalDate.now().year - it.year } ?: 0
+        get() = dateOfBirth?.let { LocalDate.now().year - it.year }
         set(value) {
-            dateOfBirth = LocalDate.now().minusYears(value!!.toLong())
+            if (value != null) {
+                dateOfBirth = LocalDate.now().minusYears(value.toLong())
+            }
         }
+    fun getFullName() = "$firstName $lastName"
+    fun setFullName(fullName: String) {
+        val parts = fullName.split(" ")
+        firstName = parts[0]
+        lastName = parts[1]
+    }
     var luckyNumber by Delegates.notNull<Int>()
     lateinit var addresses: Map<String, Address>
     val profilePicture: String? by lazy {
