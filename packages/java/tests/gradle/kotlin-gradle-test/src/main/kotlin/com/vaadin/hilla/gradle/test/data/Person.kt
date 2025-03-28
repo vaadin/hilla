@@ -7,10 +7,10 @@ import java.time.LocalDate
 
 @Entity
 class Person(
-    var firstName: @NotBlank String? = null,
-    var lastName: String? = null,
+    var firstName: @NotBlank String,
+    var lastName: String = "",
     var email: @Email String? = null,
-    var phone: String? = null,
+    var phone: String = "",
     var dateOfBirth: LocalDate? = null,
     var occupation: String? = null,
     var role: String? = null,
