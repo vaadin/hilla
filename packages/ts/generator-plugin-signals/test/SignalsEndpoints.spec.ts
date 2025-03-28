@@ -1,24 +1,30 @@
 import { readFile } from 'node:fs/promises';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone';
+import TransferTypesPlugin from '@vaadin/hilla-generator-plugin-transfertypes';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import sinonChai from 'sinon-chai';
-import { chai, describe, expect, it } from 'vitest';
+import { beforeEach, chai, describe, expect, it } from 'vitest';
 import SignalsPlugin from '../src/index.js';
 
 chai.use(sinonChai);
 
 describe('SignalsPlugin', () => {
   describe('Endpoint methods with Signals as return type', () => {
-    it('correctly generates service with mixture of normal and signal returning methods', async () => {
-      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
+    let generator: Generator;
+
+    beforeEach(() => {
+      generator = new Generator([TransferTypesPlugin, BackbonePlugin, SignalsPlugin], {
         logger: new LoggerFactory({ name: 'signals-plugin-test', verbose: true }),
       });
+    });
+
+    it('correctly generates service with mixture of normal and signal returning methods', async () => {
       const input = await readFile(new URL('./hilla-openapi-mix.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
 
       const generatedNumberSignalService = files.find((f) => f.name === 'NumberSignalService.ts')!;
-      await expect(await generatedNumberSignalService.text()).toMatchFileSnapshot(
+      await expect(generatedNumberSignalService.text()).resolves.toMatchFileSnapshot(
         `fixtures/NumberSignalServiceMix.snap.ts`,
       );
 
@@ -28,9 +34,6 @@ describe('SignalsPlugin', () => {
     });
 
     it('removes unused request init import', async () => {
-      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
-        logger: new LoggerFactory({ name: 'signals-plugin-test', verbose: true }),
-      });
       const input = await readFile(new URL('./hilla-openapi.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
 
@@ -46,9 +49,6 @@ describe('SignalsPlugin', () => {
     });
 
     it('correctly generates service with ListSignal returning methods, with and without parameters', async () => {
-      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
-        logger: new LoggerFactory({ name: 'signals-plugin-test', verbose: true }),
-      });
       const input = await readFile(new URL('./hilla-openapi-mix.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
 
@@ -57,9 +57,6 @@ describe('SignalsPlugin', () => {
     });
 
     it('correctly generates service with mixture of all Signal returning methods', async () => {
-      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
-        logger: new LoggerFactory({ name: 'signals-plugin-test', verbose: true }),
-      });
       const input = await readFile(new URL('./hilla-openapi-mix.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
 
@@ -72,9 +69,6 @@ describe('SignalsPlugin', () => {
     });
 
     it('correctly generates service with automatic default values for value signals of primitive types', async () => {
-      const generator = new Generator([BackbonePlugin, SignalsPlugin], {
-        logger: new LoggerFactory({ name: 'signals-plugin-test', verbose: true }),
-      });
       const input = await readFile(new URL('./hilla-openapi-default-value.json', import.meta.url), 'utf8');
       const files = await generator.process(input);
 

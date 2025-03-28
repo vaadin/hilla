@@ -3,6 +3,7 @@ package com.vaadin.hilla.crud;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -44,6 +45,19 @@ public class PropertyStringFilterSpecification<T> implements Specification<T> {
                         "A string cannot be filtered using less than");
             default:
                 break;
+            }
+        } else if (javaType == UUID.class) {
+            switch (this.filter.getMatcher()) {
+            case EQUALS -> {
+                return criteriaBuilder.equal(propertyPath,
+                        UUID.fromString(value));
+            }
+            case CONTAINS -> throw new IllegalArgumentException(
+                    "A UUID cannot be filtered using contains");
+            case GREATER_THAN -> throw new IllegalArgumentException(
+                    "A UUID cannot be filtered using greater than");
+            case LESS_THAN -> throw new IllegalArgumentException(
+                    "A UUID cannot be filtered using less than");
             }
 
         } else if (isNumber(javaType)) {

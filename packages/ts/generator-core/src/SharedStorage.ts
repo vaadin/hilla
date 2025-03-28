@@ -1,8 +1,14 @@
 import type { $Refs } from '@apidevtools/swagger-parser';
+import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { SourceFile, TypeNode } from 'typescript';
 
-export type TransferTypeMaker = (typeArguments: readonly TypeNode[] | undefined) => TypeNode;
+export type TransferTypeMakerContext = Readonly<{
+  dependencies: DependencyManager;
+  typeArguments?: readonly TypeNode[];
+}>;
+
+export type TransferTypeMaker = (context: TransferTypeMakerContext) => TypeNode;
 
 export type TransferTypes = Map<string, TransferTypeMaker>;
 
