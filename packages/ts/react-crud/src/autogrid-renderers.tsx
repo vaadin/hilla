@@ -38,7 +38,7 @@ export function AutoGridDecimalRenderer<TItem>({ item }: RendererOptions<TItem>)
 
 export function AutoGridEnumRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;
-  const value = getColumnValue(context, item) || '';
+  const value = getColumnValue(context, item) ?? '';
   return <span>{convertToTitleCase(value)}</span>;
 }
 
