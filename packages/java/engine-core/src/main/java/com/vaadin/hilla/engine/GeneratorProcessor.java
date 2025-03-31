@@ -182,15 +182,16 @@ public final class GeneratorProcessor {
     }
 
     private Path getTsgenPath() {
-        var arguments = List.<String>of(
-            "--input-type", "commonjs",
-            "--eval", "console.log(require.resolve('" + TSGEN_PACKAGE_NAME + "'))"
-        ).toArray(String[]::new);
+        var arguments = List.<String> of("--input-type", "commonjs", "--eval",
+                "console.log(require.resolve('" + TSGEN_PACKAGE_NAME + "'))")
+                .toArray(String[]::new);
         AtomicReference<String> pathLine = new AtomicReference<>();
         try {
-            var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand, arguments);
+            var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
+                    arguments);
             runner.run(null, (stdOutStream) -> {
-                new BufferedReader(new InputStreamReader(stdOutStream)).lines().limit(1).forEach(pathLine::set);
+                new BufferedReader(new InputStreamReader(stdOutStream)).lines()
+                        .limit(1).forEach(pathLine::set);
             }, null);
             if (pathLine.get() == null) {
                 throw new CommandRunnerException("No output from Node");
@@ -201,7 +202,8 @@ public final class GeneratorProcessor {
         } catch (CommandNotFoundException e) {
             throw new GeneratorException("Node command not found", e);
         } catch (CommandRunnerException e) {
-            throw new GeneratorException("Unable to resolve npm package \"" + TSGEN_PACKAGE_NAME + "\"", e);
+            throw new GeneratorException("Unable to resolve npm package \""
+                    + TSGEN_PACKAGE_NAME + "\"", e);
         }
     }
 }

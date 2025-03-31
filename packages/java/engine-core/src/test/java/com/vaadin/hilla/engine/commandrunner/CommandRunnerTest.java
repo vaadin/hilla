@@ -230,9 +230,8 @@ public class CommandRunnerTest {
 
         assertEquals(expectedJavaHome, runner.environment().get("JAVA_HOME"));
 
-        assertEquals(expectedJavaHome,
-                runner.createProcessBuilder(List.of()).environment()
-                        .get("JAVA_HOME"));
+        assertEquals(expectedJavaHome, runner.createProcessBuilder(List.of())
+                .environment().get("JAVA_HOME"));
 
         var ProcessBuilder = runner.createProcessBuilder(List.of());
         assertEquals(expectedJavaHome,
@@ -250,7 +249,9 @@ public class CommandRunnerTest {
             }
 
             @Override
-            public void run(Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut, Consumer<InputStream> stdErr) throws CommandRunnerException {
+            public void run(Consumer<OutputStream> stdIn,
+                    Consumer<InputStream> stdOut, Consumer<InputStream> stdErr)
+                    throws CommandRunnerException {
                 stdOutRequested.add(stdOut != null && stdErr != null);
                 super.run(stdIn, stdOut, stdErr);
             }
@@ -272,7 +273,9 @@ public class CommandRunnerTest {
             }
 
             @Override
-            public void run(Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut, Consumer<InputStream> stdErr) throws CommandRunnerException {
+            public void run(Consumer<OutputStream> stdIn,
+                    Consumer<InputStream> stdOut, Consumer<InputStream> stdErr)
+                    throws CommandRunnerException {
                 stdOutRequested.add(stdOut != null && stdErr != null);
                 super.run(stdIn, stdOut, stdErr);
             }

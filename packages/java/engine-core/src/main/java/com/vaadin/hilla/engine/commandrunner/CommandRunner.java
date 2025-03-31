@@ -89,9 +89,11 @@ public interface CommandRunner {
             throws CommandRunnerException {
         if (stdOut) {
             run(stdIn, (stdOutStream) -> {
-                new BufferedReader(new InputStreamReader(stdOutStream)).lines().forEach(System.out::println);
+                new BufferedReader(new InputStreamReader(stdOutStream)).lines()
+                        .forEach(System.out::println);
             }, (stdErrStream) -> {
-                new BufferedReader(new InputStreamReader(stdErrStream)).lines().forEach(System.err::println);
+                new BufferedReader(new InputStreamReader(stdErrStream)).lines()
+                        .forEach(System.err::println);
             });
         } else {
             run(stdIn, null, null);
@@ -119,12 +121,12 @@ public interface CommandRunner {
      *             if the command fails
      */
     default void run(Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut,
-                     Consumer<InputStream> stdErr) throws CommandRunnerException {
+            Consumer<InputStream> stdErr) throws CommandRunnerException {
         var execs = executables();
         // Find the first executable that works
         var executable = execs.stream().filter(this::executeWithTestArguments)
-            .findFirst().orElseThrow(() -> new CommandNotFoundException(
-                "No valid executable found between " + execs));
+                .findFirst().orElseThrow(() -> new CommandNotFoundException(
+                        "No valid executable found between " + execs));
         getLogger().debug("Running command {}", executable);
         // Execute the command with the given arguments
         executeCommand(executable, arguments(), stdIn, stdOut, stdErr);
@@ -147,8 +149,8 @@ public interface CommandRunner {
     }
 
     private void executeCommand(String executable, String[] arguments,
-            Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut, Consumer<InputStream> stdErr)
-            throws CommandRunnerException {
+            Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut,
+            Consumer<InputStream> stdErr) throws CommandRunnerException {
         Stream<String> cmdStream = Stream.concat(Stream.of(executable),
                 Arrays.stream(arguments));
 
