@@ -129,7 +129,6 @@
               },
               "fullName" : {
                 "type" : "string",
-                "nullable" : true,
                 "x-java-type" : "java.lang.String"
               },
               "age" : {
