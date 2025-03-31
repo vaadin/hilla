@@ -11,6 +11,7 @@
   "workspaces": [
     "packages/ts/*",
     "packages/java/tests/*",
+    "packages/java/tests/gradle/*",
     "packages/java/tests/spring/*"
   ],
   "scripts": {
