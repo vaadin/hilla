@@ -1,4 +1,5 @@
 {
+  "name": "@vaadin/hilla-endpoints-discovery",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",

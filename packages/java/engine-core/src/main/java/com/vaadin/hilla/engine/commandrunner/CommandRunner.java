@@ -1,13 +1,10 @@
 package com.vaadin.hilla.engine.commandrunner;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -90,14 +87,47 @@ public interface CommandRunner {
      */
     default void run(Consumer<OutputStream> stdIn, boolean stdOut)
             throws CommandRunnerException {
+        if (stdOut) {
+            run(stdIn, (stdOutStream) -> {
+                new BufferedReader(new InputStreamReader(stdOutStream)).lines().forEach(System.out::println);
+            }, (stdErrStream) -> {
+                new BufferedReader(new InputStreamReader(stdErrStream)).lines().forEach(System.err::println);
+            });
+        } else {
+            run(stdIn, null, null);
+        }
+    }
+
+    /**
+     * Run the command.
+     * <p>
+     * </p>
+     * Output and errors destination for the sub-process are the same as the
+     * parent process.
+     *
+     * @param stdIn
+     *            a Consumer that can be used to write to the command's standard
+     *            input, can be {@code null} if there's no need to write to it.
+     * @param stdOut
+     *            a Consumer that can be used to read the command's standard
+     *            output, can be {@code null} if there's no need to read it.
+     * @param stdErr
+     *            a Consumer that can be used to read the command's error
+     *            output, can be {@code null} if there's no need to read it.
+     *
+     * @throws CommandRunnerException
+     *             if the command fails
+     */
+    default void run(Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut,
+                     Consumer<InputStream> stdErr) throws CommandRunnerException {
         var execs = executables();
         // Find the first executable that works
         var executable = execs.stream().filter(this::executeWithTestArguments)
-                .findFirst().orElseThrow(() -> new CommandNotFoundException(
-                        "No valid executable found between " + execs));
+            .findFirst().orElseThrow(() -> new CommandNotFoundException(
+                "No valid executable found between " + execs));
         getLogger().debug("Running command {}", executable);
         // Execute the command with the given arguments
-        executeCommand(executable, arguments(), stdIn, stdOut);
+        executeCommand(executable, arguments(), stdIn, stdOut, stdErr);
     }
 
     private boolean executeWithTestArguments(String command) {
@@ -106,7 +136,7 @@ public interface CommandRunner {
             getLogger().debug("Testing command {} with arguments {}", command,
                     args);
             // Execute the command with the test arguments
-            executeCommand(command, args, null, false);
+            executeCommand(command, args, null, null, null);
 
             return true;
         } catch (CommandRunnerException e) {
@@ -117,7 +147,7 @@ public interface CommandRunner {
     }
 
     private void executeCommand(String executable, String[] arguments,
-            Consumer<OutputStream> stdIn, boolean stdOut)
+            Consumer<OutputStream> stdIn, Consumer<InputStream> stdOut, Consumer<InputStream> stdErr)
             throws CommandRunnerException {
         Stream<String> cmdStream = Stream.concat(Stream.of(executable),
                 Arrays.stream(arguments));
@@ -139,7 +169,7 @@ public interface CommandRunner {
         var exitCode = 0;
 
         try {
-            var processBuilder = createProcessBuilder(commandWithArgs, stdOut);
+            var processBuilder = createProcessBuilder(commandWithArgs);
 
             var process = processBuilder.start();
 
@@ -150,19 +180,15 @@ public interface CommandRunner {
                 }
             }
 
-            if (stdOut) {
-                try (var reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()));
-                        var errorReader = new BufferedReader(
-                                new InputStreamReader(
-                                        process.getErrorStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                    while ((line = errorReader.readLine()) != null) {
-                        System.err.println(line);
-                    }
+            if (stdOut != null) {
+                try (var inputStream = process.getInputStream()) {
+                    stdOut.accept(inputStream);
+                }
+            }
+
+            if (stdErr != null) {
+                try (var inputStream = process.getErrorStream()) {
+                    stdErr.accept(inputStream);
                 }
             }
 
@@ -197,26 +223,17 @@ public interface CommandRunner {
      *
      * @param commandWithArgs
      *            the command to be executed and its arguments
-     * @param stdOut
-     *            whether output and errors destination for the sub-process be
-     *            the same as the parent process or not
      *
      * @see CommandRunner#environment()
      *
      * @return a ProcessBuilder instance to be used for executing the passed in
      *         commands and arguments.
      */
-    default ProcessBuilder createProcessBuilder(List<String> commandWithArgs,
-            boolean stdOut) {
+    default ProcessBuilder createProcessBuilder(List<String> commandWithArgs) {
         var builder = new ProcessBuilder(commandWithArgs)
                 .directory(currentDirectory());
 
         builder.environment().putAll(environment());
-
-        if (stdOut) {
-            builder.redirectOutput(ProcessBuilder.Redirect.PIPE)
-                    .redirectError(ProcessBuilder.Redirect.PIPE);
-        }
 
         return builder;
     }
