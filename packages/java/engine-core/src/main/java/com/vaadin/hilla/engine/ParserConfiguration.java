@@ -162,38 +162,37 @@ public final class ParserConfiguration {
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
-        private static final List<Plugin> DEFAULTS;
-        static {
-            @SuppressWarnings("Intentionally, to avoid loading the class")
-            Class kotlinNullabilityClass = null;
-            Class kClass = null; // Just a class from kotlin-reflect library to
-                                 // check if the library is available
+        private static final List<Plugin> DEFAULTS = createDefaults();
+
+        private static List<Plugin> createDefaults() {
+            List<Plugin> plugins = new ArrayList<>();
+            // Always include these plugins.
+            plugins.add(new Plugin(BackbonePlugin.class.getName()));
+            plugins.add(new Plugin(MultipartFileCheckerPlugin.class.getName()));
+            plugins.add(new Plugin(TransferTypesPlugin.class.getName()));
+
+            // Conditionally add the Kotlin nullability plugin if available.
             try {
-                kotlinNullabilityClass = Class.forName(
+                // Check that the kotlin-reflect library is available:
+                Class<?> kotlinNullabilityClass = Class.forName(
                         "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
-                kClass = Class.forName("kotlin.reflect.KClass");
+
+                // Check that a class from kotlin-reflect is available:
+                Class.forName("kotlin.reflect.KClass");
+
+                plugins.add(new Plugin(kotlinNullabilityClass.getName()));
             } catch (Throwable e) {
                 LOGGER.debug(
                         "Kotlin nullability plugin is not going to be loaded. "
-                                + "If you with to have it enabled, please make sure the 'kotlin-reflect' "
-                                + "and 'hilla-parser-jvm-plugin-nonnull-kotlin' libraries are included in your classpath.");
+                                + "If you wish to enable it, please ensure that both 'kotlin-reflect' "
+                                + "and 'hilla-parser-jvm-plugin-nonnull-kotlin' are in your classpath.");
             }
-            if (kotlinNullabilityClass != null && kClass != null) {
-                DEFAULTS = List.of(new Plugin(BackbonePlugin.class.getName()),
-                        new Plugin(MultipartFileCheckerPlugin.class.getName()),
-                        new Plugin(TransferTypesPlugin.class.getName()),
-                        new Plugin(kotlinNullabilityClass.getName()),
-                        new Plugin(NonnullPlugin.class.getName()),
-                        new Plugin(SubTypesPlugin.class.getName()),
-                        new Plugin(ModelPlugin.class.getName()));
-            } else {
-                DEFAULTS = List.of(new Plugin(BackbonePlugin.class.getName()),
-                        new Plugin(MultipartFileCheckerPlugin.class.getName()),
-                        new Plugin(TransferTypesPlugin.class.getName()),
-                        new Plugin(NonnullPlugin.class.getName()),
-                        new Plugin(SubTypesPlugin.class.getName()),
-                        new Plugin(ModelPlugin.class.getName()));
-            }
+
+            // Add the remaining plugins.
+            plugins.add(new Plugin(NonnullPlugin.class.getName()));
+            plugins.add(new Plugin(SubTypesPlugin.class.getName()));
+            plugins.add(new Plugin(ModelPlugin.class.getName()));
+            return List.copyOf(plugins);
         }
 
         PluginsProcessor() {
