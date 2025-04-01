@@ -43,6 +43,12 @@ describe('@vaadin/hilla-react-crud', () => {
       return <AutoCrud service={personService()} model={PersonModel} {...props} />;
     }
 
+    async function waitForClosingDialog(): Promise<void> {
+      if (screen.queryByRole('dialog') !== null) {
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+      }
+    }
+
     it('shows a grid and a form', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.instance).not.to.be.undefined;
@@ -393,9 +399,6 @@ describe('@vaadin/hilla-react-crud', () => {
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
 
-        // dialog is closed
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
-
         // grid selection is cleared
         expect(grid.isSelected(0)).to.be.false;
 
@@ -412,8 +415,7 @@ describe('@vaadin/hilla-react-crud', () => {
         await form.typeInField('First name', 'J'); // to enable the submit button
         await form.submit();
 
-        // dialog is closed
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+        await waitForClosingDialog();
 
         // grid selection is cleared
         expect(grid.isSelected(0)).to.be.false;
@@ -439,7 +441,8 @@ describe('@vaadin/hilla-react-crud', () => {
         // Close dialog
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        await waitForClosingDialog();
 
         // Edit existing item
         const grid = await GridController.init(result, user);
@@ -471,7 +474,8 @@ describe('@vaadin/hilla-react-crud', () => {
         // Close dialog
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        await waitForClosingDialog();
 
         // Edit existing item
         const grid = await GridController.init(result, user);
