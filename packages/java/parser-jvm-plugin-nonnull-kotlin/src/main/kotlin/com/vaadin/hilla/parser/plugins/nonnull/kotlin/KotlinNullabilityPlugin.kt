@@ -10,7 +10,6 @@ import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import java.lang.reflect.Method
 import java.util.*
-import kotlin.Comparator
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
@@ -54,7 +53,9 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         return (fields + getters + setters).distinct()
     }
 
-    override fun enter(nodePath: NodePath<*>?) {}
+    override fun enter(nodePath: NodePath<*>?) {
+        // No action needed on enter
+    }
 
     override fun resolve(node: Node<*, *>, parentPath: NodePath<*>): Node<*, *> {
         // If node is already a Kotlin node, nothing to do.
@@ -227,11 +228,12 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                     it.name == node.source.name
                 })
         } else if (parentPath.node is EndpointExposedNode) {
-            if ((parentPath.node as KEndpointExposedNode).kClass.memberFunctions.none { it.name == node.source.name }) {
-                throw IllegalArgumentException(
-                    "Defining public class properties in BrowserCallable class body is not supported. " +
+            require(
+                !((parentPath.node as KEndpointExposedNode).kClass.memberFunctions.none { it.name == node.source.name })
+            ) {
+                "Defining public class properties in BrowserCallable class body is not supported. " +
                     "Consider marking '${(parentPath.node as KEndpointExposedNode).kClass.qualifiedName} -> " +
-                    "${node.source.name.substring(3).lowercase()}' as either private or protected")
+                    "${node.source.name.substring(3).lowercase()}' as either private or protected"
             }
             return KMethodNode(node.source, node.target,
                 (parentPath.node as KEndpointExposedNode).kClass.memberFunctions.first {
