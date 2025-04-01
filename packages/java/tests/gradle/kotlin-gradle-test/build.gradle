@@ -68,7 +68,22 @@ import org.gradle.internal.os.OperatingSystem
 
 def isWindows = OperatingSystem.current().isWindows()
 
+tasks.register('mvnInstallFixLumo', Exec) {
+    description = 'Installs fix-lumo artifact to local Maven repository'
+    def command
+    if (isWindows) {
+        command = ['cmd', '/c', 'cd ..\\..\\fix-lumo && mvn install -DskipTests']
+    } else {
+        command = ['sh', '-c', 'cd ../../fix-lumo && mvn install -DskipTests']
+    }
+    commandLine command
+    doLast {
+        logger.info("Started Maven fix-lumo install...")
+    }
+}
+
 tasks.register('productionBuild', Exec) {
+    dependsOn mvnInstallFixLumo
 	description = 'Builds the Spring Boot application for production.'
     def command
     if (isWindows) {
