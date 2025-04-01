@@ -1,4 +1,5 @@
 {
+  "name": "@vaadin/hilla-endpoints-discovery",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -31,7 +32,7 @@
     "@vaadin/hilla-generator-plugin-push": "file:../../../../ts/generator-plugin-push",
     "@vaadin/hilla-generator-plugin-signals": "file:../../../../ts/generator-plugin-signals",
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
-    "@vaadin/hilla-generator-plugin-transfertypes": "24.7.2",
+    "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
     "@vitejs/plugin-react": "4.3.4",
     "async": "3.2.6",
