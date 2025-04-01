@@ -34,9 +34,12 @@ public class FusionFormIT extends ChromeBrowserTest {
     public void tearDown() {
         if (getDriver() != null) {
             checkLogsForErrors(msg -> {
-                // form validation errors
-                return msg.contains(
-                        "the server responded with a status of 400 ()");
+                // TODO: Remove when
+                // https://github.com/vaadin/web-components/issues/8889 is fixed
+                return msg.contains(".slotStyles is not iterable")
+                        // form validation errors
+                        || msg.contains(
+                                "the server responded with a status of 400 ()");
             });
         }
     }
