@@ -201,7 +201,11 @@ describe('@vaadin/hilla-react-crud', () => {
       const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
-      expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      try {
+        expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      } finally {
+        await dialog.cancel();
+      }
     });
 
     it('refreshes grid after confirming delete', async () => {
@@ -325,12 +329,20 @@ describe('@vaadin/hilla-react-crud', () => {
         saveSpy = sinon.spy(service, 'save');
       });
 
-      afterEach(() => {
-        // cleanup dangling overlay
-        const overlay = document.querySelector('vaadin-dialog-overlay');
-        if (overlay) {
-          overlay.remove();
-        }
+      afterEach(async () => {
+        // cleanup dangling overlays
+        await Promise.all(
+          Array.from(document.querySelectorAll('vaadin-dialog-overlay')).map(async (overlay) => {
+            await new Promise<void>((resolve) => {
+              overlay.addEventListener('vaadin-overlay-closed', () => resolve());
+              (overlay as unknown as { opened: boolean }).opened = false;
+            });
+            overlay.remove();
+          }),
+        );
+        await waitFor(() => {
+          expect(document.body.style.pointerEvents).to.not.equal('none');
+        });
       });
 
       it('opens the form in a dialog when selecting an item', async () => {
