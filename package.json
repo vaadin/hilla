@@ -36,8 +36,7 @@
   "license": "Apache-2.0",
   "overrides": {
     "esbuild": "$esbuild",
-    "prettier": "$prettier",
-    "vite": "$vite"
+    "prettier": "$prettier"
   },
   "devDependencies": {
     "@nx/js": "20.4.5",
