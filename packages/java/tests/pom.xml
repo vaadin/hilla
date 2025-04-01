@@ -12,6 +12,9 @@
 
     <artifactId>tests</artifactId>
     <name>Hilla Tests</name>
+    <modules>
+        <module>fix-lumo</module>
+    </modules>
     <packaging>pom</packaging>
 
     <properties>
@@ -91,11 +94,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-react</artifactId>
             <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
-            <version>${vaadin.components.version}</version>
         </dependency>
 
         <dependency>
