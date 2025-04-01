@@ -58,6 +58,7 @@ export const destination = {
     new URL('packages/java/tests/spring/react-grid-test/src/main/resources/vaadin-core-versions.json', root),
     new URL('packages/java/tests/spring/react-i18n/src/main/resources/vaadin-core-versions.json', root),
     new URL('packages/java/tests/spring/react-signals/src/main/resources/vaadin-core-versions.json', root),
+    new URL('packages/java/tests/gradle/kotlin-gradle-test/src/main/resources/vaadin-core-versions.json', root),
   ],
   components: new URL(
     'packages/java/hilla/src/main/resources/com/vaadin/flow/server/frontend/dependencies/hilla/components/',

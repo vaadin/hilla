@@ -1,12 +1,14 @@
 package com.vaadin.hilla.engine;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -23,8 +25,7 @@ public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
 
-    private static final Path TSGEN_PATH = Paths.get("node_modules", "@vaadin",
-            "hilla-generator-cli", "bin", "index.js");
+    private static String TSGEN_PACKAGE_NAME = "@vaadin/hilla-generator-cli";
     private final Path baseDir;
     private final String nodeCommand;
     private final Path openAPIFile;
@@ -46,7 +47,7 @@ public final class GeneratorProcessor {
         }
 
         var arguments = new ArrayList<>();
-        arguments.add(TSGEN_PATH);
+        arguments.add(getTsgenPath());
         prepareOpenAPI(arguments);
         prepareOutputDir(arguments);
         preparePlugins(arguments);
@@ -177,6 +178,32 @@ public final class GeneratorProcessor {
                             || openApi.getComponents().getSchemas().isEmpty());
         } catch (IOException e) {
             throw new GeneratorException("Unable to read OpenAPI json file", e);
+        }
+    }
+
+    private Path getTsgenPath() {
+        var arguments = List.<String> of("--input-type", "commonjs", "--eval",
+                "console.log(require.resolve('" + TSGEN_PACKAGE_NAME + "'))")
+                .toArray(String[]::new);
+        AtomicReference<String> pathLine = new AtomicReference<>();
+        try {
+            var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
+                    arguments);
+            runner.run(null, (stdOutStream) -> {
+                new BufferedReader(new InputStreamReader(stdOutStream)).lines()
+                        .limit(1).forEach(pathLine::set);
+            }, null);
+            if (pathLine.get() == null) {
+                throw new CommandRunnerException("No output from Node");
+            }
+            return Path.of(pathLine.get());
+        } catch (LambdaException e) {
+            throw new GeneratorException("Node execution failed", e.getCause());
+        } catch (CommandNotFoundException e) {
+            throw new GeneratorException("Node command not found", e);
+        } catch (CommandRunnerException e) {
+            throw new GeneratorException("Unable to resolve npm package \""
+                    + TSGEN_PACKAGE_NAME + "\"", e);
         }
     }
 }
