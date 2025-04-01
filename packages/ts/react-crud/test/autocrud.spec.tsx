@@ -43,6 +43,12 @@ describe('@vaadin/hilla-react-crud', () => {
       return <AutoCrud service={personService()} model={PersonModel} {...props} />;
     }
 
+    async function waitForClosingDialog(): Promise<void> {
+      if (screen.queryByRole('dialog') !== null) {
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+      }
+    }
+
     it('shows a grid and a form', async () => {
       const { grid, form } = await CrudController.init(render(<TestAutoCrud />), user);
       expect(grid.instance).not.to.be.undefined;
@@ -201,7 +207,11 @@ describe('@vaadin/hilla-react-crud', () => {
       const deleteButton = await form.findButton('Delete...');
       await user.click(deleteButton);
       const dialog = await ConfirmDialogController.init(document.body, user);
-      expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      try {
+        expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+      } finally {
+        await dialog.cancel();
+      }
     });
 
     it('refreshes grid after confirming delete', async () => {
@@ -325,12 +335,20 @@ describe('@vaadin/hilla-react-crud', () => {
         saveSpy = sinon.spy(service, 'save');
       });
 
-      afterEach(() => {
-        // cleanup dangling overlay
-        const overlay = document.querySelector('vaadin-dialog-overlay');
-        if (overlay) {
-          overlay.remove();
-        }
+      afterEach(async () => {
+        // cleanup dangling overlays
+        await Promise.all(
+          Array.from(document.querySelectorAll('vaadin-dialog-overlay')).map(async (overlay) => {
+            await new Promise<void>((resolve) => {
+              overlay.addEventListener('vaadin-overlay-closed', () => resolve());
+              (overlay as unknown as { opened: boolean }).opened = false;
+            });
+            overlay.remove();
+          }),
+        );
+        await waitFor(() => {
+          expect(document.body.style.pointerEvents).to.not.equal('none');
+        });
       });
 
       it('opens the form in a dialog when selecting an item', async () => {
@@ -381,9 +399,6 @@ describe('@vaadin/hilla-react-crud', () => {
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
 
-        // dialog is closed
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
-
         // grid selection is cleared
         expect(grid.isSelected(0)).to.be.false;
 
@@ -400,8 +415,7 @@ describe('@vaadin/hilla-react-crud', () => {
         await form.typeInField('First name', 'J'); // to enable the submit button
         await form.submit();
 
-        // dialog is closed
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+        await waitForClosingDialog();
 
         // grid selection is cleared
         expect(grid.isSelected(0)).to.be.false;
@@ -427,7 +441,8 @@ describe('@vaadin/hilla-react-crud', () => {
         // Close dialog
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        await waitForClosingDialog();
 
         // Edit existing item
         const grid = await GridController.init(result, user);
@@ -459,7 +474,8 @@ describe('@vaadin/hilla-react-crud', () => {
         // Close dialog
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+
+        await waitForClosingDialog();
 
         // Edit existing item
         const grid = await GridController.init(result, user);

@@ -126,9 +126,7 @@ export class ModelInfo {
     // Check for @Id annotation
     let idProperty = rootProperties.find((propertyInfo) => hasAnnotation(propertyInfo.meta, 'jakarta.persistence.Id'));
     // Check for id name as fallback
-    if (!idProperty) {
-      idProperty = rootProperties.find((propertyInfo) => propertyInfo.name === 'id');
-    }
+    idProperty ??= rootProperties.find((propertyInfo) => propertyInfo.name === 'id');
 
     return idProperty;
   }

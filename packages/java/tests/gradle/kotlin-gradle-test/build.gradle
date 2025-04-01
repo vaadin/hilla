@@ -28,7 +28,7 @@ repositories {
 dependencies {
     implementation 'com.vaadin:vaadin-spring'
     implementation 'com.vaadin:hilla'
-    implementation "com.vaadin:vaadin-lumo-theme:$vaadinComponentsVersion"
+    implementation "com.vaadin:fix-lumo:$hillaVersion"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.parttio:line-awesome:1.1.0'
     implementation 'com.vaadin:vaadin-dev-server'
@@ -141,4 +141,10 @@ tasks.register('integrationTest', Test) {
 	finalizedBy bootStop
 	testClassesDirs = sourceSets.test.output.classesDirs
 	classpath = sourceSets.test.runtimeClasspath
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
