@@ -1,6 +1,7 @@
 package com.vaadin.hilla.crud.filter;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.vaadin.hilla.crud.JpaFilterConverter;
 import com.vaadin.hilla.crud.TestEnum;

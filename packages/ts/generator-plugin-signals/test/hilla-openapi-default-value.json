@@ -31,7 +31,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -63,7 +63,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -95,7 +95,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -128,7 +128,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -161,7 +161,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -195,7 +195,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -231,7 +231,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -267,7 +267,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -299,7 +299,7 @@
                 "schema" : {
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.signals.ValueSignal"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
                     }
                   ],
                   "x-type-arguments" : {
@@ -321,56 +321,11 @@
   },
   "components" : {
     "schemas" : {
-      "com.vaadin.hilla.signals.Signal" : {
+      "com.vaadin.hilla.runtime.transfertypes.ValueSignal" : {
         "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "x-java-type" : "java.lang.String"
-          },
-          "valueType" : {
-            "type" : "object",
-            "x-type-arguments" : {
-              "allOf" : [
-                {
-                  "type" : "object",
-                  "x-type-variable" : "T"
-                }
-              ]
-            },
-            "x-java-type" : "java.lang.Class"
-          }
-        },
-        "x-type-parameters" : [
-          "T"
-        ]
-      },
-      "com.vaadin.hilla.signals.ValueSignal" : {
-        "anyOf" : [
-          {
-            "$ref" : "#/components/schemas/com.vaadin.hilla.signals.Signal"
-          },
-          {
-            "type" : "object",
-            "properties" : {
-              "value" : {
-                "type" : "object",
-                "nullable" : true,
-                "x-type-variable" : "T"
-              }
-            },
-            "x-type-parameters" : [
-              "T"
-            ]
-          }
-        ],
-        "x-type-arguments" : {
-          "allOf" : [
-            {
-              "type" : "object",
-              "x-type-variable" : "T"
-            }
-          ]
+        "x-from-module" : {
+          "named" : "ValueSignal",
+          "module" : "@vaadin/hilla-react-signals"
         }
       }
     }
