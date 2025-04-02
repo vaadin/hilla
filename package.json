@@ -9,21 +9,24 @@
     "npm": ">=10.5"
   },
   "workspaces": [
-    "packages/ts/*"
+    "packages/ts/*",
+    "packages/java/tests/*",
+    "packages/java/tests/gradle/*",
+    "packages/java/tests/spring/*"
   ],
   "scripts": {
-    "clean:build": "nx run-many -t clean:build --all --output-style stream",
-    "check": "nx run-many -t lint,typecheck --all --output-style stream",
+    "clean:build": "nx run-many -p packages/ts/* -t clean:build --all --output-style stream",
+    "check": "nx run-many -p packages/ts/* -t lint,typecheck --all --output-style stream",
     "build": "npm run build:prepare && npm run build:run",
     "build:prepare": "tsx scripts/prepare/index.ts",
-    "build:run": "nx run-many -t build --all --output-style stream",
+    "build:run": "nx run-many -p packages/ts/* -t build --all --output-style stream",
     "build:nocache": "npm run build",
-    "lint": "nx run-many -t lint --all --output-style stream",
-    "lint:fix": "nx run-many -t lint:fix --all --output-style stream",
-    "test": "nx run-many -t test --all --output-style stream",
-    "test:coverage": "nx run-many -t test:coverage --all --output-style stream",
-    "test:react": "nx run-many -t test:react --all --output-style stream",
-    "typecheck": "nx run-many -t typecheck --all --output-style stream"
+    "lint": "nx run-many -p packages/ts/* -t lint --all --output-style stream",
+    "lint:fix": "nx run-many -p packages/ts/* -t lint:fix --all --output-style stream",
+    "test": "nx run-many -p packages/ts/* -t test --all --output-style stream",
+    "test:coverage": "nx run-many -p packages/ts/* -t test:coverage --all --output-style stream",
+    "test:react": "nx run-many -p packages/ts/* -t test:react --all --output-style stream",
+    "typecheck": "nx run-many -p packages/ts/* -t typecheck --all --output-style stream"
   },
   "repository": {
     "type": "git",
@@ -33,8 +36,7 @@
   "license": "Apache-2.0",
   "overrides": {
     "esbuild": "$esbuild",
-    "prettier": "$prettier",
-    "vite": "$vite"
+    "prettier": "$prettier"
   },
   "devDependencies": {
     "@nx/js": "20.4.5",
@@ -51,8 +53,8 @@
     "@types/deep-equal-in-any-order": "1.0.4",
     "@types/js-cookie": "3.0.6",
     "@types/node": "22.13.4",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19",
+    "@types/react": "19.0.12",
+    "@types/react-dom": "19.0.4",
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "4.0.0",
     "@types/validator": "13.12.2",
@@ -89,9 +91,9 @@
     "playwright": "1.50.1",
     "postcss": "8.5.2",
     "prettier": "3.5.1",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "react-router": "7.2.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-router": "7.4.1",
     "rollup": "4.34.8",
     "simple-git-hooks": "2.11.1",
     "sinon": "19.0.2",

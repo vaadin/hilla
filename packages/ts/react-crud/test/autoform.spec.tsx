@@ -16,7 +16,7 @@ import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
 import type { CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
-import ConfirmDialogController from './ConfirmDialogController';
+import ConfirmDialogController from './ConfirmDialogController.js';
 import FormController from './FormController.js';
 import {
   createService,
@@ -671,16 +671,21 @@ describe('@vaadin/hilla-react-crud', () => {
         await form.typeInField('First name', 'J');
         expect(submitButton.disabled).to.be.false;
 
-        fireEvent.keyDown(deleteButton, { key: 'Enter', code: 'Enter', charCode: 13 });
-        await nextFrame();
-        expect(submitSpy).to.have.not.been.called;
+        try {
+          fireEvent.keyDown(deleteButton, { key: 'Enter', code: 'Enter', charCode: 13 });
+          await nextFrame();
+          expect(submitSpy).to.have.not.been.called;
 
-        const discardButton = await form.findButton('Discard');
-        expect(discardButton.disabled).to.be.false;
+          const discardButton = await form.findButton('Discard');
+          expect(discardButton.disabled).to.be.false;
 
-        fireEvent.keyDown(discardButton, { key: 'Enter', code: 'Enter', charCode: 13 });
-        await nextFrame();
-        expect(submitSpy).to.have.not.been.called;
+          fireEvent.keyDown(discardButton, { key: 'Enter', code: 'Enter', charCode: 13 });
+          await nextFrame();
+          expect(submitSpy).to.have.not.been.called;
+        } finally {
+          const dialog = await ConfirmDialogController.init(document.body, user);
+          await dialog.cancel();
+        }
       });
 
       it('submits the form when enter key is pressed with custom layout renderer', async () => {
@@ -805,14 +810,6 @@ describe('@vaadin/hilla-react-crud', () => {
         onDeleteErrorSpy = sinon.spy();
       });
 
-      afterEach(() => {
-        // cleanup dangling overlay
-        const overlay = document.querySelector('vaadin-confirm-dialog-overlay');
-        if (overlay) {
-          overlay.remove();
-        }
-      });
-
       async function renderForm(item: Person | typeof emptyItem | null, enableDelete: boolean) {
         return FormController.init(
           user,
@@ -890,13 +887,17 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(form.queryButton('Delete...')).not.to.exist;
       });
 
-      it('does shows confirmation dialog before deleting', async () => {
+      it('shows confirmation dialog before deleting', async () => {
         const form = await renderForm(person, true);
         const deleteButton = await form.findButton('Delete...');
         await userEvent.click(deleteButton);
 
         const dialog = await ConfirmDialogController.init(document.body, user);
-        expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+        try {
+          expect(dialog.text).to.equal('Are you sure you want to delete the selected item?');
+        } finally {
+          await dialog.cancel();
+        }
       });
 
       it('deletes item and calls success callback after confirming', async () => {
