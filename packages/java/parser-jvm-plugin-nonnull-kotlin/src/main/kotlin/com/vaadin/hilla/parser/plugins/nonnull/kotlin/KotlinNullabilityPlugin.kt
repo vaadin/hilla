@@ -1,11 +1,33 @@
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin
 
-import com.vaadin.hilla.parser.core.*
-import com.vaadin.hilla.parser.models.*
-import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel
+import com.vaadin.hilla.parser.core.AbstractPlugin
+import com.vaadin.hilla.parser.core.Node
+import com.vaadin.hilla.parser.core.NodeDependencies
+import com.vaadin.hilla.parser.core.NodePath
+import com.vaadin.hilla.parser.core.Plugin
+import com.vaadin.hilla.parser.core.PluginConfiguration
+import com.vaadin.hilla.parser.models.BaseSignatureModel
+import com.vaadin.hilla.parser.models.ClassInfoModel
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel
+import com.vaadin.hilla.parser.models.TypeArgumentModel
+import com.vaadin.hilla.parser.models.TypeVariableModel
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin
-import com.vaadin.hilla.parser.plugins.backbone.knodes.*
-import com.vaadin.hilla.parser.plugins.backbone.nodes.*
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KEndpointExposedNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KEndpointNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KEntityNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KMethodNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KMethodParameterNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KPropertyNode
+import com.vaadin.hilla.parser.plugins.backbone.knodes.KTypeSignatureNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointExposedNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import java.lang.reflect.Method
@@ -76,117 +98,92 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         if (parentPath != parentPath.rootPath && !isKotlinClass(findClosestClass(parentPath))) return node
 
         return when (node) {
-            is EndpointNode -> {
-                if (node.source is ClassInfoModel)
-                    KEndpointNode(node.source, node.target, (node.source.get() as Class<*>).kotlin)
-                else node
-            }
-            is EndpointExposedNode -> {
-                if (node.source is ClassInfoModel)
-                    KEndpointExposedNode(node.source, (node.source.get() as Class<*>).kotlin)
-                else node
-            }
-            is MethodNode -> {
-                if (node.source is MethodInfoModel) createKMethodNode(node, parentPath) else node
-            }
-            is MethodParameterNode -> {
-                if (node.source is MethodParameterInfoModel) {
-                    val kMethodNode = parentPath.node as? KMethodNode
-                        ?: throw IllegalStateException("Expected parent node to be KMethodNode")
-                    KMethodParameterNode(
-                        node.source,
-                        node.target,
-                        kMethodNode.kFunction.parameters
-                            .filter { it.kind == KParameter.Kind.VALUE }
-                            .first { it.name == node.source.name }
-                    )
-                } else node
-            }
-            is TypedNode -> {
-                when (node.type) {
-                    is TypeArgumentModel -> {
-                        val typeSignatureNode = node as TypeSignatureNode
-                        when (parentPath.node) {
-                            is KTypeSignatureNode -> {
-                                val parentType = (parentPath.node as KTypeSignatureNode).kType
-                                // For maps, always use index 1 (ignore key type); otherwise, use the node’s position.
-                                val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
-                                else typeSignatureNode.position
-                                KTypeSignatureNode(
-                                    node.type, node.target, node.annotations, typeSignatureNode.position,
-                                    parentType.arguments[position].type!!
-                                )
-                            }
-
-                            is KMethodParameterNode -> {
-                                KTypeSignatureNode(
-                                    node.type, node.target, node.annotations, typeSignatureNode.position,
-                                    (parentPath.node as KMethodParameterNode).kParameter.type
-                                        .arguments[typeSignatureNode.position].type!!
-                                )
-                            }
-
-                            else -> node
-                        }
-                    }
-
-                    is ClassRefSignatureModel, is BaseSignatureModel, is TypeVariableModel -> {
-                        when (parentPath.node) {
-                            is KMethodNode -> KTypeSignatureNode(
-                                node.type, node.target, node.annotations, position = null,
-                                (parentPath.node as KMethodNode).kFunction.returnType
-                            )
-
-                            is KMethodParameterNode -> KTypeSignatureNode(
-                                node.type, node.target, node.annotations, position = null,
-                                (parentPath.node as KMethodParameterNode).kParameter.type
-                            )
-
-                            is KTypeSignatureNode -> KTypeSignatureNode(
-                                node.type, node.target, node.annotations, position = null,
-                                (parentPath.node as KTypeSignatureNode).kType
-                            )
-
-                            is TypeSignatureNode -> {
-                                if ((parentPath.node as TypeSignatureNode).type is TypeVariableModel &&
-                                    parentPath.parentPath.node is KMethodParameterNode
-                                ) {
-                                    KTypeSignatureNode(
-                                        node.type, node.target, node.annotations, position = null,
-                                        (parentPath.parentPath.node as KMethodParameterNode).kParameter.type
-                                    )
-                                } else node
-                            }
-
-                            is KPropertyNode -> KTypeSignatureNode(
-                                node.type, node.target, node.annotations, position = null,
-                                (parentPath.node as KPropertyNode).kProperty.returnType
-                            )
-
-                            else -> node
-                        }
-                    }
-
-                    else -> node
+            is EndpointNode -> KEndpointNode(node.source, node.target, (node.source.get() as Class<*>).kotlin)
+            is EndpointExposedNode -> KEndpointExposedNode(node.source, (node.source.get() as Class<*>).kotlin)
+            is MethodNode -> createKMethodNode(node, parentPath)
+            is MethodParameterNode -> KMethodParameterNode(node.source, node.target,
+                    (parentPath.node as KMethodNode).kFunction.parameters
+                        .first { it.kind == KParameter.Kind.VALUE && it.name == node.source.name })
+            is TypedNode -> resolveTypedNode(node, parentPath)
+            is EntityNode ->
+                KEntityNode(node.source, node.target as ObjectSchema, (node.source.get() as Class<*>).kotlin)
+            is PropertyNode -> {
+                val kProperty = (parentPath.node as? KEntityNode)?.kClass?.memberProperties
+                    ?.firstOrNull { it.name == node.source.name }
+                if (kProperty != null) {
+                    KPropertyNode(node.source, node.target, kProperty)
+                } else {
+                    // If the property is not found, it might property define using getter/setter methods
+                    // then leave it unchanged (will be handled in exit)
+                    node
                 }
             }
-            is EntityNode -> {
-                if (node.source is ClassInfoModel)
-                    KEntityNode(node.source, node.target as ObjectSchema, (node.source.get() as Class<*>).kotlin)
-                else node
-            }
-            is PropertyNode -> {
-                if (node.source is JacksonPropertyModel) {
-                    val kProperty = (parentPath.node as? KEntityNode)?.kClass?.memberProperties
-                        ?.firstOrNull { it.name == node.source.name }
-                    if (kProperty != null) {
-                        KPropertyNode(node.source, node.target, kProperty)
-                    } else {
-                        node // if not found, leave it unchanged (will be handled in exit)
-                    }
-                } else node
-            }
             else -> super.resolve(node, parentPath)
+        }
+    }
+
+    private fun resolveTypedNode(node: TypedNode, parentPath: NodePath<*>): Node<*, *> {
+        return when (node.type) {
+            is TypeArgumentModel -> resolveTypeArgumentModel(node as TypeSignatureNode, parentPath)
+            is ClassRefSignatureModel, is BaseSignatureModel, is TypeVariableModel -> resolveTypeSignature(node, parentPath)
+            else -> node as Node<*, *>
+        }
+    }
+
+    /**
+     * This handles these cases:
+     * - generic argument of method return type (and their nested generic arguments)
+     * - generic argument of method parameter type (and their nested generic arguments)
+     *
+     * This does not handle cases:
+     * - generic arguments in class definition, e.g. as 'Long' in:
+     *      class Person: AbstractEntity<Long>()
+     */
+    private fun resolveTypeArgumentModel(node: TypeSignatureNode, parentPath: NodePath<*>): Node<*, *> {
+        return when (parentPath.node) {
+            is KTypeSignatureNode -> {
+                val parentType = (parentPath.node as KTypeSignatureNode).kType
+                // For maps, always use index 1 (ignore key type); otherwise, use the node's position.
+                val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
+                else node.position
+                KTypeSignatureNode(
+                    node.type, node.target, node.annotations, node.position,
+                    parentType.arguments[position].type!!
+                )
+            }
+            else -> node
+        }
+    }
+
+    /**
+     * This handles these cases:
+     * - Method Return type
+     * - Method Parameter type
+     * - Generic Type Argument
+     * - Property type
+     */
+    private fun resolveTypeSignature(node: TypedNode, parentPath: NodePath<*>): Node<*, *> {
+        return when (parentPath.node) {
+            is KMethodNode -> KTypeSignatureNode(
+                node.type, node.target, node.annotations, position = null,
+                (parentPath.node as KMethodNode).kFunction.returnType
+            )
+            is KMethodParameterNode -> KTypeSignatureNode(
+                node.type, node.target, node.annotations, position = null,
+                (parentPath.node as KMethodParameterNode).kParameter.type
+            )
+            is KTypeSignatureNode -> KTypeSignatureNode(
+                node.type, node.target, node.annotations, position = null,
+                (parentPath.node as KTypeSignatureNode).kType
+            )
+            is KPropertyNode -> KTypeSignatureNode(
+                node.type, node.target, node.annotations, position = null,
+                (parentPath.node as KPropertyNode).kProperty.returnType
+            )
+            // Other cases: return unchanged as it doesn't make any change in the nullability
+            // TypeSignature with ClassRefSignatureModel, e.g. an Entity parent class, or
+            // CompositeTypeSignature for properties defined using getter/setter methods
+            else -> node as Node<*, *>
         }
     }
 
@@ -262,8 +259,8 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
     private fun findClosestClass(nodePath: NodePath<*>): Class<*> {
         return nodePath.stream().map{ it.node }
-            .filter{ node -> node.getSource() is ClassInfoModel }
-            .map{ node -> node.getSource() as ClassInfoModel }
+            .filter{ it.source is ClassInfoModel }
+            .map{ it.source as ClassInfoModel }
             .findFirst().get().get() as Class<*>
     }
 }
