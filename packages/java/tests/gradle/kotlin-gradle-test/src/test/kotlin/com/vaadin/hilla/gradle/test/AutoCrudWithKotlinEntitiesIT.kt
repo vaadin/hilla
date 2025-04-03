@@ -15,7 +15,7 @@ class AutoCrudWithKotlinEntitiesIT : ChromeBrowserTest() {
         super.setup()
         getDriver().get(testPath)
         grid = `$`(GridElement::class.java).waitForFirst()
-        waitUntil { val prop = grid.getProperty("_lastVisibleIndex") != null }
+        waitUntil { grid.getProperty("_lastVisibleIndex") != null }
     }
 
     override fun getTestPath(): String = "$rootURL/persons"

@@ -5,9 +5,9 @@ import org.jspecify.annotations.NonNull;
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.MethodParameterInfoModel;
 
-public final class MethodParameterNode
+public class MethodParameterNode
         extends AbstractNode<MethodParameterInfoModel, String> {
-    private MethodParameterNode(@NonNull MethodParameterInfoModel source,
+    protected MethodParameterNode(@NonNull MethodParameterInfoModel source,
             String target) {
         super(source, target);
     }
