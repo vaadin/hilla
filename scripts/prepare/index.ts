@@ -62,6 +62,7 @@ await Promise.all(
 );
 
 const reactComponentsPackageName = '@vaadin/react-components';
+const reactComponentsProPackageName = '@vaadin/react-components-pro';
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
 const rootPackageJsonFile = new URL('package.json', root);
@@ -70,6 +71,8 @@ if ((packageJson.devDependencies ??= {})[reactComponentsPackageName] !== reactCo
   console.log(`Updating "${reactComponentsSpec}".`);
   // Update hoisted version in root package.json
   packageJson.devDependencies[reactComponentsPackageName] = reactComponentsVersion;
+  // Also update hoisted pro version
+  packageJson.devDependencies[reactComponentsProPackageName] = reactComponentsVersion;
   await writeFile(rootPackageJsonFile, JSON.stringify(packageJson, undefined, 2), 'utf-8');
 
   // Keep @vaadin/hilla-react-crud in sync
