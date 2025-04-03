@@ -188,8 +188,6 @@ public final class GeneratorProcessor {
                 throw new CommandRunnerException("No output from Node");
             }
             return Path.of(pathLine.get());
-        } catch (LambdaException e) {
-            throw new GeneratorException("Node execution failed", e.getCause());
         } catch (CommandNotFoundException e) {
             throw new GeneratorException("Node command not found", e);
         } catch (CommandRunnerException e) {
