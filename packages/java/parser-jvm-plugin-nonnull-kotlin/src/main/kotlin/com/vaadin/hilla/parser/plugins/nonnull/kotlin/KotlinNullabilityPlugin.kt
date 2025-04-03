@@ -154,13 +154,6 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         }
     }
 
-    /**
-     * This handles these cases:
-     * - Method Return type
-     * - Method Parameter type
-     * - Generic Type Argument
-     * - Property type
-     */
     private fun resolveTypeSignature(node: TypedNode, parentPath: NodePath<*>): Node<*, *> {
         return when (parentPath.node) {
             is KMethodNode -> KTypeSignatureNode(
