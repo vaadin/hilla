@@ -112,7 +112,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
                 if (kProperty != null) {
                     KPropertyNode(node.source, node.target, kProperty)
                 } else {
-                    // If the property is not found, it might property define using getter/setter methods
+                    // If the property is not found, it possibly can be a property defined using getter/setter methods
                     // then leave it unchanged (will be handled in exit)
                     node
                 }
