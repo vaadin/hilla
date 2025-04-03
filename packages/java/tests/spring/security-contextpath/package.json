@@ -43,8 +43,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "24.8.0-alpha4",
-    "@vaadin/icon": "24.8.0-alpha6",
-    "@vaadin/icons": "24.8.0-alpha6",
+    "@vaadin/icon": "24.8.0-alpha8",
+    "@vaadin/icons": "24.8.0-alpha8",
     "@vaadin/input-container": "24.8.0-alpha4",
     "@vaadin/integer-field": "24.8.0-alpha4",
     "@vaadin/item": "24.8.0-alpha4",
@@ -75,7 +75,7 @@
     "@vaadin/text-area": "24.8.0-alpha4",
     "@vaadin/text-field": "24.8.0-alpha4",
     "@vaadin/time-picker": "24.8.0-alpha4",
-    "@vaadin/tooltip": "24.8.0-alpha6",
+    "@vaadin/tooltip": "24.8.0-alpha8",
     "@vaadin/upload": "24.8.0-alpha4",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "24.8.0-alpha4",
@@ -155,8 +155,8 @@
       "@vaadin/hilla-frontend": "24.8.0-alpha2",
       "@vaadin/hilla-lit-form": "24.8.0-alpha2",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "24.8.0-alpha6",
-      "@vaadin/icons": "24.8.0-alpha6",
+      "@vaadin/icon": "24.8.0-alpha8",
+      "@vaadin/icons": "24.8.0-alpha8",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -187,7 +187,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "24.8.0-alpha6",
+      "@vaadin/tooltip": "24.8.0-alpha8",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "24.8.0-alpha4",
@@ -230,7 +230,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "18f2fbd71dd6eda9b4da3243c78db47ae71b867e558c58e3bcda5d0e1e907585"
+    "hash": "b62e8b35762d318551bf4eea2eedea15339f3e63f15ca3c8d265619d66057ee3"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
