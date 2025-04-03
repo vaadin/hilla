@@ -31,7 +31,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import java.lang.reflect.Method
-import java.util.*
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
