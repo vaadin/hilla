@@ -222,26 +222,31 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
     }
 
     private fun createKMethodNode(node: MethodNode, parentPath: NodePath<*>): KMethodNode {
-        if (parentPath.node is KEndpointNode) {
-            return KMethodNode(node.source, node.target,
-                (parentPath.node as KEndpointNode).kClass.memberFunctions.first {
-                    it.name == node.source.name
-                })
-        } else if (parentPath.node is EndpointExposedNode) {
-            require(
-                !((parentPath.node as KEndpointExposedNode).kClass.memberFunctions.none { it.name == node.source.name })
-            ) {
-                "Defining public class properties in BrowserCallable class body is not supported. " +
-                    "Consider marking '${(parentPath.node as KEndpointExposedNode).kClass.qualifiedName} -> " +
-                    "${node.source.name.substring(3).lowercase()}' as either private or protected"
+        return when (val parentNode = parentPath.node) {
+            is KEndpointNode -> {
+                KMethodNode(
+                    node.source,
+                    node.target,
+                    parentNode.kClass.memberFunctions.first { it.name == node.source.name }
+                )
             }
-            return KMethodNode(node.source, node.target,
-                (parentPath.node as KEndpointExposedNode).kClass.memberFunctions.first {
-                    it.name == node.source.name
-                })
+
+            is KEndpointExposedNode -> {
+                val methodName = node.source.name
+                val kClass = parentNode.kClass
+
+                kClass.memberFunctions
+                    .find { it.name == methodName }
+                    ?.let { kFunction ->
+                        KMethodNode(node.source, node.target, kFunction)
+                    } ?: error("Defining public class properties in BrowserCallable class body is not supported. " +
+                        "Consider marking '${kClass.qualifiedName} -> " +
+                        "${methodName.substring(3).lowercase()}' as either private or protected")
+            }
+
+            else -> error("Cannot create KMethodNode as parent node is neither KEndpointNode nor KEndpointExposedNode. " +
+                    "Parent node: $parentNode")
         }
-        throw IllegalStateException(("Cannot create KMethodNode as 'parentPath.node' is neither KEndpointNode nor " +
-            "KEndpointExposedNode. Parent Node: ${parentPath.node}").trim())
     }
 
     private fun isKotlinClass(clazz: Class<*>): Boolean {
