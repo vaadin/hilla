@@ -16,6 +16,9 @@
 package com.vaadin.hilla.scripts;
 
 import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.core.util.Separators;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -119,8 +122,12 @@ public class FlowPackageJsonUpdater {
     }
 
     private void saveChanges() throws IOException {
-        FileIOUtils.writeIfChanged(packageJsonFile.toFile(),
-                JacksonUtils.toFileJson(tree));
+        var objectMapper = JacksonUtils.getMapper();
+        var filePrinter = new DefaultPrettyPrinter()
+            .withSeparators(Separators.createDefaultInstance().withObjectFieldValueSpacing(Separators.Spacing.AFTER))
+            .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+        var contents = objectMapper.writer().with(filePrinter).writeValueAsString(tree);
+        FileIOUtils.writeIfChanged(packageJsonFile.toFile(), contents);
     }
 
     public static void main(String[] args)
