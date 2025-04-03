@@ -36,7 +36,8 @@
   "license": "Apache-2.0",
   "overrides": {
     "esbuild": "$esbuild",
-    "prettier": "$prettier"
+    "prettier": "$prettier",
+    "vite": "6.2.4"
   },
   "devDependencies": {
     "@nx/js": "20.4.5",
@@ -102,7 +103,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.35.0",
     "typescript": "5.7.3",
-    "vite": "6.1.1",
+    "vite": "6.2.4",
     "vitest": "3.0.6"
   }
 }

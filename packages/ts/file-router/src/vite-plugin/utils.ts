@@ -77,3 +77,7 @@ export function cleanUp(path: string): string {
 
   return res;
 }
+
+export function strip(path: string): string {
+  return path.replace(/^\/*(.+)\/*$/u, '$1');
+}

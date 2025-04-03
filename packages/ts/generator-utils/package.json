@@ -22,6 +22,7 @@
     "./dependencies/ExportManager.js": "./dependencies/ExportManager.js",
     "./dependencies/ImportManager.js": "./dependencies/ImportManager.js",
     "./dependencies/PathManager.js": "./dependencies/PathManager.js",
+    "./dependencies/StatementRecordManager.js": "./dependencies/StatementRecordManager.js",
     "./testing/snapshotMatcher.js": "./testing/snapshotMatcher.js",
     "./ast.js": "./ast.js",
     "./createFullyUniqueIdentifier.js": "./createFullyUniqueIdentifier.js",

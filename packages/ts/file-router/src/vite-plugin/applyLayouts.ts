@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path/posix';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
+import { strip } from './utils.js';
 
 /**
  * The information about a particular server-side layout.
@@ -9,10 +10,6 @@ import type { RouteMeta } from './collectRoutesFromFS.js';
 export type LayoutMeta = Readonly<{
   path: string;
 }>;
-
-function strip(path: string) {
-  return path.replace(/^\/*(.+)\/*$/u, '$1');
-}
 
 /**
  * Enables Flow layout flag on the matching routes based on the information from the layouts JSON file.
