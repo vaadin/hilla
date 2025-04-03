@@ -80,6 +80,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>hilla-engine-runtime</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>fix-lumo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
