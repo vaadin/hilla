@@ -46,10 +46,15 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
 
     private fun getKotlinPropertyNames(clazz: Class<*>): List<String> {
         val fields = clazz.declaredFields.map { it.name.substringBefore("\$delegate") }
-        val getters = clazz.declaredMethods.filter { it.name.startsWith("get") && it.parameterCount == 0 }
-            .map { it.name.substring(3).replaceFirstChar { char -> char.lowercase(Locale.getDefault()) } }
-        val setters = clazz.declaredMethods.filter { it.name.startsWith("set") && it.parameterCount == 1 }
-            .map { it.name.substring(3).replaceFirstChar { char -> char.lowercase(Locale.getDefault()) } }
+
+        val getters = clazz.declaredMethods
+            .filter { it.name.startsWith("get") && it.parameterCount == 0 }
+            .map { it.name.removePrefix("get").replaceFirstChar(Char::lowercase) }
+
+        val setters = clazz.declaredMethods
+            .filter { it.name.startsWith("set") && it.parameterCount == 1 }
+            .map { it.name.removePrefix("set").replaceFirstChar(Char::lowercase) }
+
         return (fields + getters + setters).distinct()
     }
 
