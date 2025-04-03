@@ -2,7 +2,7 @@
 import { spawn, type SpawnOptions } from 'node:child_process';
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { PackageJson } from 'type-fest';
-import { componentOptions, destination, local, remote, type Versions } from './config.js';
+import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
 
 async function run(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<void> {
@@ -64,10 +64,19 @@ await Promise.all(
 const reactComponentsPackageName = '@vaadin/react-components';
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
-console.log(`Installing "${reactComponentsSpec}".`);
-// The root hoisted version should be updated first, before the workspaces
-await run('npm', ['install', reactComponentsSpec, '--save-dev', '--save-exact']);
-const workspaceArg = `--workspace=@vaadin/hilla-react-crud`;
-// Workaround: doing "npm uninstall" first, the package.json in the workspace is not updated otherwise
-await run('npm', ['uninstall', reactComponentsPackageName, workspaceArg, '--save']);
-await run('npm', ['install', reactComponentsSpec, workspaceArg, '--save', '--save-exact']);
+const rootPackageJsonFile = new URL('package.json', root);
+const packageJson = JSON.parse(await readFile(rootPackageJsonFile, 'utf-8')) as PackageJson;
+if ((packageJson.devDependencies ??= {})[reactComponentsPackageName] !== reactComponentsVersion) {
+  console.log(`Updating "${reactComponentsSpec}".`);
+  // Update hoisted version in root package.json
+  packageJson.devDependencies[reactComponentsPackageName] = reactComponentsVersion;
+  await writeFile(rootPackageJsonFile, JSON.stringify(packageJson, undefined, 2), 'utf-8');
+
+  // Keep @vaadin/hilla-react-crud in sync
+  const reactCrudPackageJsonFile = new URL('packages/ts/react-crud/package.json', root);
+  const reactCrudPackageJson = JSON.parse(await readFile(reactCrudPackageJsonFile, 'utf-8')) as PackageJson;
+  (reactCrudPackageJson.dependencies ??= {})[reactComponentsPackageName] = reactComponentsVersion;
+  await writeFile(reactCrudPackageJsonFile, JSON.stringify(reactCrudPackageJson, undefined, 2), 'utf-8');
+} else {
+  console.log(`Skipping install for "${reactComponentsSpec}", same version installed.`);
+}
