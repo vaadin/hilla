@@ -2,6 +2,9 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
+  "scripts": {
+    "postinstall": "npm run --include-workspace-root --workspace=@vaadin/hilla install:vite-copy"
+  },
   "dependencies": {
     "@polymer/polymer": "3.5.2",
     "@vaadin/bundles": "24.8.0-alpha8",
@@ -72,12 +75,12 @@
       "@vaadin/hilla-react-form": "24.8.0-alpha2",
       "@vaadin/hilla-react-i18n": "24.8.0-alpha2",
       "@vaadin/hilla-react-signals": "24.8.0-alpha2",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha4",
+      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha8",
       "@vaadin/react-components": "24.8.0-alpha4",
       "@vaadin/react-components-pro": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "24.8.0-alpha4",
-      "@vaadin/vaadin-themable-mixin": "24.8.0-alpha4",
+      "@vaadin/vaadin-lumo-styles": "24.8.0-alpha8",
+      "@vaadin/vaadin-themable-mixin": "24.8.0-alpha8",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.2.1",
@@ -117,7 +120,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "9efe62d6a45c210873dc0699b73f68124cdd6b0561f4d24d119f7cf094460aee"
+    "hash": "6b7514e10703a879af1f702d68c20cd3fc3bb869d915a2b1834d3e3eb5c965c7"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

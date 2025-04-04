@@ -3,6 +3,9 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
+  "scripts": {
+    "postinstall": "npm run --include-workspace-root --workspace=@vaadin/hilla install:vite-copy"
+  },
   "dependencies": {
     "@polymer/polymer": "3.5.2",
     "@vaadin/common-frontend": "0.0.19",
