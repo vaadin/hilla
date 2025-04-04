@@ -280,7 +280,10 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
         <profile>
             <id>react-18</id>
             <modules>
+<!--
+TODO: Re-enable when postinstall script to copy Vite isn't needed
                 <module>no-endpoints</module>
+-->
                 <module>react-grid-test</module>
                 <module>react-i18n</module>
                 <module>react-signals</module>
