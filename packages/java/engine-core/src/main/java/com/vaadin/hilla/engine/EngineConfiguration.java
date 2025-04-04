@@ -191,8 +191,8 @@ public interface EngineConfiguration {
 
         return getClassFinder() == null
                 ? List.of(AotBrowserCallableFinder::find)
-                : List.of(AotBrowserCallableFinder::find,
-                        LookupBrowserCallableFinder::find);
+                : List.of(LookupBrowserCallableFinder::find,
+                        AotBrowserCallableFinder::find);
     }
 
     static EngineConfiguration load() {

@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 
 public class EngineConfigurationTest {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface BrowserCallableEndpoint {
+        String value() default "";
     }
 
     @BrowserCallableEndpoint
@@ -33,13 +33,27 @@ public class EngineConfigurationTest {
     private static class EndpointFromClassFinder {
     }
 
+    @BrowserCallableEndpoint("EndpointFromClassFinder")
+    private static class EndpointFromClassFinderWithCustomName {
+    }
+
     @Test
-    public void shouldUseAot() throws Exception {
+    public void shouldUseLookupByDefault() throws Exception {
         var classFinder = mock(ClassFinder.class);
         when(classFinder
-                .getAnnotatedClasses((Class<? extends Annotation>) any()))
-                .thenThrow(RuntimeException.class);
-        var conf = EngineConfiguration.STATE.setClassFinder(classFinder);
+        .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class));
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
+                .setEndpointAnnotationNames(
+                        BrowserCallableEndpoint.class.getName());
+        assertEquals(List.of(EndpointFromClassFinder.class),
+                conf.findBrowserCallables());
+    }
+
+    @Test
+    public void shouldUseAotWhenNoClassFinder() throws Exception {
+        // classFinder is null by default in configuration
+        var conf = EngineConfiguration.STATE;
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
@@ -49,56 +63,19 @@ public class EngineConfigurationTest {
     }
 
     @Test
-    public void shouldFallbackToClassFinder() throws Exception {
+    public void shouldUseAotWhenClassFinderThrowsException() throws Exception {
         var classFinder = mock(ClassFinder.class);
-        when(classFinder
-                .getAnnotatedClasses((Class<? extends Annotation>) any()))
-                .thenReturn(Set.of(EndpointFromClassFinder.class));
-        var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
-                .setEndpointAnnotationNames(
-                        BrowserCallableEndpoint.class.getName());
+        when(classFinder.getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class, EndpointFromClassFinderWithCustomName.class));
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder).setEndpointAnnotationNames(
+                BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
-                    .thenThrow(ExecutionFailedException.class);
-            assertEquals(List.of(EndpointFromClassFinder.class),
+                    .thenReturn(List.of(EndpointFromAot.class));
+            assertEquals(List.of(EndpointFromAot.class),
                     conf.findBrowserCallables());
         }
     }
-
-    // /**
-    // * Test that the service class overrides all public methods of the
-    // * EngineConfiguration class. This is a sort of compile-like test to
-    // ensure
-    // * that the service class is kept up-to-date with the superclass.
-    // */
-    // @Test
-    // public void serviceShouldOverrideAllPublicMethods() {
-    // var engineConfigurationClass = EngineConfiguration.class;
-    // var engineConfigurationServiceClass = EngineConfiguration.Service.class;
-
-    // var nonOverriddenMethods = Arrays
-    // .stream(engineConfigurationClass.getDeclaredMethods())
-    // .filter(method -> Modifier.isPublic(method.getModifiers()))
-    // .filter(method -> !Modifier.isStatic(method.getModifiers()))
-    // .filter(method -> !Modifier.isFinal(method.getModifiers()))
-    // .filter(method -> !method.getName().equals("getDefault")
-    // && !method.getName().equals("setDefault"))
-    // .filter(method -> {
-    // try {
-    // return engineConfigurationServiceClass
-    // .getDeclaredMethod(method.getName(),
-    // method.getParameterTypes()) == null;
-    // } catch (NoSuchMethodException e) {
-    // return true;
-    // }
-    // }).toList();
-
-    // assertTrue(nonOverriddenMethods.isEmpty(),
-    // "Service class should override all public methods of the
-    // EngineConfiguration class. "
-    // + "The following methods are not overridden: "
-    // + nonOverriddenMethods);
-    // }
 
     private static class TestService implements EngineConfiguration {
         @Override
