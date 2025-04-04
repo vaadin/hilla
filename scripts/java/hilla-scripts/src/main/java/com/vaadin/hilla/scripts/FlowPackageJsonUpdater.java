@@ -124,9 +124,11 @@ public class FlowPackageJsonUpdater {
     private void saveChanges() throws IOException {
         var objectMapper = JacksonUtils.getMapper();
         var filePrinter = new DefaultPrettyPrinter()
-            .withSeparators(Separators.createDefaultInstance().withObjectFieldValueSpacing(Separators.Spacing.AFTER))
-            .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-        var contents = objectMapper.writer().with(filePrinter).writeValueAsString(tree) + DefaultIndenter.SYS_LF;
+                .withSeparators(Separators.createDefaultInstance()
+                        .withObjectFieldValueSpacing(Separators.Spacing.AFTER))
+                .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+        var contents = objectMapper.writer().with(filePrinter)
+                .writeValueAsString(tree) + DefaultIndenter.SYS_LF;
         FileIOUtils.writeIfChanged(packageJsonFile.toFile(), contents);
     }
 
