@@ -25,9 +25,11 @@ public class EngineConfigurationTest {
     public @interface BrowserCallableEndpoint {
     }
 
+    @BrowserCallableEndpoint
     private static class EndpointFromAot {
     }
 
+    @BrowserCallableEndpoint
     private static class EndpointFromClassFinder {
     }
 
