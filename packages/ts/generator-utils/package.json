@@ -57,6 +57,6 @@
   "dependencies": {
     "pino": "9.6.0",
     "pino-pretty": "10.3.1",
-    "typescript": "5.7.3"
+    "typescript": "5"
   }
 }

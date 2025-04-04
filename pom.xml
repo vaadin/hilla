@@ -56,6 +56,17 @@
         <module>packages/java/gradle-plugin/pom-portal.xml</module>
       </modules>
     </profile>
+    <profile>
+      <id>scripts</id>
+      <activation>
+        <property>
+          <name>!release</name>
+        </property>
+      </activation>
+      <modules>
+        <module>scripts/java/hilla-scripts</module>
+      </modules>
+    </profile>
   </profiles>
 
   <properties>
