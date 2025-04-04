@@ -58,8 +58,6 @@ public final class GeneratorProcessor {
                     arguments.stream().map(Objects::toString)
                             .toArray(String[]::new));
             runner.run(null);
-        } catch (LambdaException e) {
-            throw new GeneratorException("Node execution failed", e.getCause());
         } catch (CommandNotFoundException e) {
             throw new GeneratorException("Node command not found", e);
         } catch (CommandRunnerException e) {
@@ -111,13 +109,6 @@ public final class GeneratorProcessor {
         } catch (IOException e) {
             throw new GeneratorException(
                     "Unable to remove the generated file list file", e);
-        }
-    }
-
-    // Used to catch a checked exception in a lambda and handle it after
-    private static class LambdaException extends RuntimeException {
-        public LambdaException(Throwable cause) {
-            super(cause);
         }
     }
 
@@ -197,8 +188,6 @@ public final class GeneratorProcessor {
                 throw new CommandRunnerException("No output from Node");
             }
             return Path.of(pathLine.get());
-        } catch (LambdaException e) {
-            throw new GeneratorException("Node execution failed", e.getCause());
         } catch (CommandNotFoundException e) {
             throw new GeneratorException("Node command not found", e);
         } catch (CommandRunnerException e) {

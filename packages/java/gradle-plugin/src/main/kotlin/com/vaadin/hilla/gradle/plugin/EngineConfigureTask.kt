@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
-import com.vaadin.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -35,11 +34,8 @@ public abstract class EngineConfigureTask : DefaultTask() {
     }
 
     internal fun configure(project: Project) {
-        val engineConfig = HillaPlugin.createEngineConfiguration(
-            project,
-            VaadinFlowPluginExtension.get(project)
-        )
-        engineConfigurationSettings.set(engineConfig.toInputs())
+        HillaPlugin.createEngineConfiguration(project)
+        engineConfigurationSettings.set(EngineConfiguration.load().toInputs())
     }
 
     @get:Internal
@@ -47,8 +43,6 @@ public abstract class EngineConfigureTask : DefaultTask() {
 
     @TaskAction
     public fun engineConfigure() {
-        EngineConfiguration.setDefault(
-            engineConfigurationSettings.get().toEngineConfiguration()
-        )
+        engineConfigurationSettings.get().toEngineConfiguration()
     }
 }
