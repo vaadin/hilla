@@ -1,13 +1,8 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import CookieManager from './CookieManager.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
+import { getSpringCsrfTokenParametersForAuthRequest, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
 
 const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
-
-function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
-  const doc = new DOMParser().parseFromString(body, 'text/html');
-  return getSpringCsrfInfo(doc);
-}
 
 function clearSpringCsrfMetaTags() {
   Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
@@ -27,29 +22,30 @@ function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
   document.head.appendChild(tokenMeta);
 }
 
-const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined => {
-  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"\}\};/iu.exec(body);
-  return match ? match[1] : undefined;
-};
+function formLogout(url: URL | string, parameters: Record<string, string>) {
+  const logoutUrl = typeof url === 'string' ? url : url.toString();
 
-async function updateCsrfTokensBasedOnResponse(response: Response): Promise<string | undefined> {
-  const responseText = await response.text();
-  const token = getVaadinCsrfTokenFromResponseBody(responseText);
-  const springCsrfTokenInfo = getSpringCsrfTokenFromResponseBody(responseText);
-  updateSpringCsrfMetaTags(springCsrfTokenInfo);
+  // Create form to send POST request
+  const form = document.createElement('form');
 
-  return token;
-}
+  form.setAttribute('method', 'POST');
+  form.setAttribute('action', logoutUrl);
+  form.style.display = 'none';
 
-async function doLogout(logoutUrl: URL | string, headers: Record<string, string>) {
-  const response = await fetch(logoutUrl, { headers, method: 'POST' });
-  if (!response.ok) {
-    throw new Error(`failed to logout with response ${response.status}`);
+  // Add data to form as hidden input fields
+  for (const [name, value] of Object.entries(parameters)) {
+    const input = document.createElement('input');
+
+    input.setAttribute('type', 'hidden');
+    input.setAttribute('name', name);
+    input.setAttribute('value', value);
+
+    form.appendChild(input);
   }
 
-  await updateCsrfTokensBasedOnResponse(response);
-
-  return response;
+  // Append form to page and submit it to perform logout and redirect
+  document.body.appendChild(form);
+  form.submit();
 }
 
 export interface LoginResult {
@@ -213,17 +209,16 @@ export async function login(username: string, password: string, options?: LoginO
 export async function logout(options?: LogoutOptions): Promise<void> {
   // this assumes the default Spring Security logout configuration (handler URL)
   const logoutUrl = options?.logoutUrl ?? 'logout';
-  let response: Response | undefined;
   try {
-    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    response = await doLogout(logoutUrl, headers);
+    const parameters = getSpringCsrfTokenParametersForAuthRequest(document);
+    return formLogout(logoutUrl, parameters);
   } catch {
     try {
       const noCacheResponse = await fetch('?nocache');
       const responseText = await noCacheResponse.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
-      const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
-      response = await doLogout(logoutUrl, headers);
+      const parameters = getSpringCsrfTokenParametersForAuthRequest(doc);
+      return formLogout(logoutUrl, parameters);
     } catch (error) {
       // clear the token if the call fails
       clearSpringCsrfMetaTags();
@@ -231,14 +226,6 @@ export async function logout(options?: LogoutOptions): Promise<void> {
     }
   } finally {
     CookieManager.remove(JWT_COOKIE_NAME);
-    if (response && response.ok && response.redirected) {
-      if (options?.onSuccess) {
-        await options.onSuccess();
-      }
-      const toPath = normalizePath(response.url);
-      const navigate = options?.navigate ?? navigateWithPageReload;
-      navigate(toPath);
-    }
   }
 }
 
