@@ -33,7 +33,8 @@
                     "nullable" : true,
                     "anyOf" : [
                       {
-                        "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.File"
+                        "type" : "object",
+                        "x-std-type" : "File"
                       }
                     ]
                   }
@@ -47,13 +48,6 @@
             "description" : ""
           }
         }
-      }
-    }
-  },
-  "components" : {
-    "schemas" : {
-      "com.vaadin.hilla.runtime.transfertypes.File" : {
-        "type" : "object"
       }
     }
   }

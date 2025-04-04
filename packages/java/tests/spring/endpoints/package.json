@@ -1,5 +1,5 @@
 {
-  "_private": true,
+  "private": true,
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {

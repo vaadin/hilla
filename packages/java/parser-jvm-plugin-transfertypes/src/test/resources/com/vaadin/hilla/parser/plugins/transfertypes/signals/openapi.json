@@ -32,7 +32,11 @@
                   "nullable" : true,
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.NumberSignal"
+                      "type" : "object",
+                      "x-from-module" : {
+                        "named" : "NumberSignal",
+                        "module" : "@vaadin/hilla-react-signals"
+                      }
                     }
                   ]
                 }
@@ -57,7 +61,11 @@
                   "nullable" : true,
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ListSignal"
+                      "type" : "object",
+                      "x-from-module" : {
+                        "named" : "ListSignal",
+                        "module" : "@vaadin/hilla-react-signals"
+                      }
                     }
                   ],
                   "x-type-arguments" : {
@@ -90,7 +98,11 @@
                   "nullable" : true,
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.Signal"
+                      "type" : "object",
+                      "x-from-module" : {
+                        "named" : "Signal",
+                        "module" : "@vaadin/hilla-react-signals"
+                      }
                     }
                   ],
                   "x-type-arguments" : {
@@ -123,7 +135,11 @@
                   "nullable" : true,
                   "anyOf" : [
                     {
-                      "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.ValueSignal"
+                      "type" : "object",
+                      "x-from-module" : {
+                        "named" : "ValueSignal",
+                        "module" : "@vaadin/hilla-react-signals"
+                      }
                     }
                   ],
                   "x-type-arguments" : {
@@ -138,38 +154,6 @@
               }
             }
           }
-        }
-      }
-    }
-  },
-  "components" : {
-    "schemas" : {
-      "com.vaadin.hilla.runtime.transfertypes.NumberSignal" : {
-        "type" : "object",
-        "x-from-module" : {
-          "named" : "NumberSignal",
-          "module" : "@vaadin/hilla-react-signals"
-        }
-      },
-      "com.vaadin.hilla.runtime.transfertypes.ListSignal" : {
-        "type" : "object",
-        "x-from-module" : {
-          "named" : "ListSignal",
-          "module" : "@vaadin/hilla-react-signals"
-        }
-      },
-      "com.vaadin.hilla.runtime.transfertypes.Signal" : {
-        "type" : "object",
-        "x-from-module" : {
-          "named" : "Signal",
-          "module" : "@vaadin/hilla-react-signals"
-        }
-      },
-      "com.vaadin.hilla.runtime.transfertypes.ValueSignal" : {
-        "type" : "object",
-        "x-from-module" : {
-          "named" : "ValueSignal",
-          "module" : "@vaadin/hilla-react-signals"
         }
       }
     }
