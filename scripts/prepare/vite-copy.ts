@@ -7,11 +7,11 @@ import { root, workspaceFiles } from './config';
 const hoistedVitePackageDir = new URL('node_modules/vite/', root);
 
 const cwd = pathToFileURL(process.env['INIT_CWD'] ?? process.cwd()).toString();
-const cwdFilter = cwd.startsWith(root.toString()) ? cwd.substring(root.toString().length) : '';
+const cwdPathPrefix = cwd.startsWith(root.toString()) ? decodeURIComponent(cwd.substring(root.toString().length)) : '';
 
 await Promise.all(
   workspaceFiles
-    .filter((file) => file.startsWith(cwdFilter))
+    .filter((file) => file.startsWith(cwdPathPrefix))
     .map(async (file) => {
       const workspaceFile = new URL(file, root);
 
