@@ -1,6 +1,7 @@
 {
   "workspaceLayout": {
-    "libsDir": "packages/ts"
+    "libsDir": "packages/ts",
+    "appsDir": "packages/java/tests"
   },
   "affected": {
     "defaultBase": "main"
@@ -9,5 +10,10 @@
     "build": {
       "dependsOn": ["^build"]
     }
+  },
+  "release": {
+    "projects": [
+      "packages/ts/*"
+    ]
   }
 }
