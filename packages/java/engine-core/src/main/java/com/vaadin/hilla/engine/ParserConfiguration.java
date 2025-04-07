@@ -173,7 +173,6 @@ public final class ParserConfiguration {
 
             // Conditionally add the Kotlin nullability plugin if available.
             try {
-                // Check that the kotlin-reflect library is available:
                 Class<?> kotlinNullabilityClass = Class.forName(
                         "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
 
