@@ -22,11 +22,10 @@ await Promise.all(
       try {
         await cp(hoistedVitePackageDir, viteCopyDir, { recursive: true });
       } catch (err) {
-        if (typeof err === 'object') {
-          const errorObject = err ?? {};
-          if ('code' in errorObject && errorObject.code === 'EEXIST') {
-            // ignore existing installation
-          }
+        if (typeof err === 'object' && (err as { readonly code: string }).code === 'EEXIST') {
+          // ignore errors caused by existing installation
+        } else {
+          throw err;
         }
       }
     }),
