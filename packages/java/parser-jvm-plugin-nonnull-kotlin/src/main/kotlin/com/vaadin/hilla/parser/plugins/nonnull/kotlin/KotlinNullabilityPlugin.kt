@@ -61,7 +61,7 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         val propertyComparator = Comparator.nullsLast(Comparator.comparing<PropertyNode, String>(
             { it.source.name }, namesComparator))
         val childNodesComparator = Comparator.comparing<Node<*, *>, PropertyNode>(
-            { if (it is PropertyNode) it else null }, propertyComparator)
+            { it as? PropertyNode }, propertyComparator)
         return nodeDependencies.processChildNodes { it.sorted(childNodesComparator) }
     }
 
@@ -79,16 +79,14 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         return (fields + getters + setters).distinct()
     }
 
-    override fun enter(nodePath: NodePath<*>?) {
-        // No action needed on enter
-    }
+    override fun enter(nodePath: NodePath<*>?) = Unit
 
     override fun resolve(node: Node<*, *>, parentPath: NodePath<*>): Node<*, *> {
         // If node is already a Kotlin node, nothing to do.
         if (node is KNode) return node
 
         // Check that the parent class is Kotlin. If not, return unchanged.
-        val parentClass: Class<*>? = when (node) {
+        val parentClass = when (node) {
             is EndpointNode, is EntityNode -> (node.source as? ClassInfoModel)?.get() as? Class<*>
             is MethodNode, is PropertyNode -> (parentPath.node.source as? ClassInfoModel)?.get() as? Class<*>
             else -> null
@@ -109,25 +107,20 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             is PropertyNode -> {
                 val kProperty = (parentPath.node as? KEntityNode)?.kClass?.memberProperties
                     ?.firstOrNull { it.name == node.source.name }
-                if (kProperty != null) {
-                    KPropertyNode(node.source, node.target, kProperty)
-                } else {
-                    // If the property is not found, it possibly can be a property defined using getter/setter methods
-                    // then leave it unchanged (will be handled in exit)
-                    node
-                }
+                // If the property is not found, it possibly can be a property defined using getter/setter methods
+                // then leave it unchanged (will be handled in exit)
+                kProperty?.let { KPropertyNode(node.source, node.target, it) } ?: node
             }
             else -> super.resolve(node, parentPath)
         }
     }
 
-    private fun resolveTypedNode(node: TypedNode, parentPath: NodePath<*>): Node<*, *> {
-        return when (node.type) {
+    private fun resolveTypedNode(node: TypedNode, parentPath: NodePath<*>): Node<*, *> =
+        when (node.type) {
             is TypeArgumentModel -> resolveTypeArgumentModel(node as TypeSignatureNode, parentPath)
             is ClassRefSignatureModel, is BaseSignatureModel, is TypeVariableModel -> resolveTypeSignature(node, parentPath)
             else -> node as Node<*, *>
         }
-    }
 
     /**
      * This handles these cases:
@@ -138,10 +131,10 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
      * - generic arguments in class definition, e.g. as 'Long' in:
      *      class Person: AbstractEntity<Long>()
      */
-    private fun resolveTypeArgumentModel(node: TypeSignatureNode, parentPath: NodePath<*>): Node<*, *> {
-        return when (parentPath.node) {
+    private fun resolveTypeArgumentModel(node: TypeSignatureNode, parentPath: NodePath<*>): Node<*, *> =
+        when (val parentNode = parentPath.node) {
             is KTypeSignatureNode -> {
-                val parentType = (parentPath.node as KTypeSignatureNode).kType
+                val parentType = parentNode.kType
                 // For maps, always use index 1 (ignore key type); otherwise, use the node's position.
                 val position = if (parentType.toString().startsWith("kotlin.collections.Map<")) 1
                 else node.position
@@ -152,32 +145,30 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             }
             else -> node
         }
-    }
 
-    private fun resolveTypeSignature(node: TypedNode, parentPath: NodePath<*>): Node<*, *> {
-        return when (parentPath.node) {
+    private fun resolveTypeSignature(node: TypedNode, parentPath: NodePath<*>): Node<*, *> =
+        when (val parentNode = parentPath.node) {
             is KMethodNode -> KTypeSignatureNode(
                 node.type, node.target, node.annotations, position = null,
-                (parentPath.node as KMethodNode).kFunction.returnType
+                parentNode.kFunction.returnType
             )
             is KMethodParameterNode -> KTypeSignatureNode(
                 node.type, node.target, node.annotations, position = null,
-                (parentPath.node as KMethodParameterNode).kParameter.type
+                parentNode.kParameter.type
             )
             is KTypeSignatureNode -> KTypeSignatureNode(
                 node.type, node.target, node.annotations, position = null,
-                (parentPath.node as KTypeSignatureNode).kType
+                parentNode.kType
             )
             is KPropertyNode -> KTypeSignatureNode(
                 node.type, node.target, node.annotations, position = null,
-                (parentPath.node as KPropertyNode).kProperty.returnType
+                parentNode.kProperty.returnType
             )
             // Other cases: return unchanged as it doesn't make any change in the nullability
             // TypeSignature with ClassRefSignatureModel, e.g. an Entity parent class, or
             // CompositeTypeSignature for properties defined using getter/setter methods
             else -> node as Node<*, *>
         }
-    }
 
     override fun exit(nodePath: NodePath<*>?) {
         when (val node = nodePath!!.node) {
@@ -215,8 +206,8 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
         }
     }
 
-    private fun createKMethodNode(node: MethodNode, parentPath: NodePath<*>): KMethodNode {
-        return when (val parentNode = parentPath.node) {
+    private fun createKMethodNode(node: MethodNode, parentPath: NodePath<*>): KMethodNode =
+        when (val parentNode = parentPath.node) {
             is KEndpointNode -> {
                 KMethodNode(
                     node.source,
@@ -241,13 +232,9 @@ class KotlinNullabilityPlugin : AbstractPlugin<PluginConfiguration>() {
             else -> error("Cannot create KMethodNode as parent node is neither KEndpointNode nor KEndpointExposedNode. " +
                     "Parent node: $parentNode")
         }
-    }
 
-    private fun isKotlinClass(clazz: Class<*>): Boolean {
-        return clazz.declaredAnnotations.any {
-            it.annotationClass.qualifiedName == "kotlin.Metadata"
-        }
-    }
+    private fun isKotlinClass(clazz: Class<*>): Boolean =
+        clazz.isAnnotationPresent(Metadata::class.java)
 
     private fun findClosestClass(nodePath: NodePath<*>): Class<*> {
         return nodePath.stream().map{ it.node }
