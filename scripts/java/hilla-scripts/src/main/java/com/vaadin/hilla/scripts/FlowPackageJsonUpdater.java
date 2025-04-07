@@ -133,7 +133,7 @@ public class FlowPackageJsonUpdater {
     }
 
     public static void main(String[] args)
-            throws URISyntaxException, IOException {
+            throws IOException {
         var packageJsonFile = getHillaProjectDir().resolve("package.json");
         var instance = new FlowPackageJsonUpdater(packageJsonFile);
         for (String arg : args) {
