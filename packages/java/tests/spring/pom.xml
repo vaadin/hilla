@@ -233,7 +233,10 @@
                 <module>react-signals</module>
                 <module>react-i18n</module>
 
+<!--
+TODO: Re-enable when postinstall script to copy Vite isn't needed
                 <module>no-endpoints</module>
+-->
             </modules>
         </profile>
 
