@@ -1,6 +1,4 @@
-import {glob} from "glob";
-import {readFile} from "node:fs/promises";
-import type {PackageJson} from "type-fest";
+import { glob } from 'glob';
 
 export type Version = {
   javaVersion?: string;
@@ -76,13 +74,9 @@ export const destination = {
   ],
 };
 
-const workspacesToMaintain = [
-  'packages/java/tests/*',
-  'packages/java/tests/gradle/*',
-  'packages/java/tests/spring/*',
-];
+const workspacesToMaintain = ['packages/java/tests/*', 'packages/java/tests/gradle/*', 'packages/java/tests/spring/*'];
 
-const [patterns, ignore] = workspacesToMaintain.reduce<[string[], string[]]>(
+const [patterns, ignore] = workspacesToMaintain.reduce<readonly [string[], string[]]>(
   ([_patterns, _ignore], pattern) => {
     if (pattern.startsWith('!')) {
       _ignore.push(`${pattern.substring(1)}/package.json`);

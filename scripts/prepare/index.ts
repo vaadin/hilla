@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { copyFile, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import type { PackageJson } from 'type-fest';
 import { componentOptions, destination, local, remote, root, type Versions, workspaceFiles } from './config.js';
 import generate from './generate.js';
@@ -79,9 +79,9 @@ await Promise.all(
     const workspaceJsonContents = (await readFile(workspaceFile, 'utf-8')).trim();
     const workspaceJson = JSON.parse(workspaceJsonContents) as PackageJson;
     // Update versions in workspace package.json from versions.json
-    for (const [_group, packages] of Object.entries(versions)) {
-      for (const [_name, { npmName, jsVersion }] of Object.entries(
-        packages as Record<string, { npmName?: string; jsVersion?: string }>,
+    for (const packages of Object.values(versions)) {
+      for (const { npmName, jsVersion } of Object.values(
+        packages as Record<string, Readonly<{ npmName?: string; jsVersion?: string }>>,
       )) {
         if (!npmName || !jsVersion) {
           continue;
