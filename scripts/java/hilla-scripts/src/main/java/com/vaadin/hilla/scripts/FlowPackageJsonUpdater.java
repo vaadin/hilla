@@ -131,8 +131,7 @@ public class FlowPackageJsonUpdater {
         FileIOUtils.writeIfChanged(packageJsonFile.toFile(), contents);
     }
 
-    public static void main(String[] args)
-            throws IOException {
+    public static void main(String[] args) throws IOException {
         var packageJsonFile = getHillaProjectDir().resolve("package.json");
         var instance = new FlowPackageJsonUpdater(packageJsonFile);
         for (String arg : args) {
