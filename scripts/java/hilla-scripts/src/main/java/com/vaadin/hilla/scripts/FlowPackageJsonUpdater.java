@@ -52,8 +52,8 @@ public class FlowPackageJsonUpdater {
     private static final JsonPointer DEV_DEPENDENCIES = JsonPointer
             .compile("/devDependencies");
 
-    private Path packageJsonFile;
-    private ObjectNode tree;
+    private final Path packageJsonFile;
+    private final ObjectNode tree;
 
     private FlowPackageJsonUpdater(Path packageJsonFile) throws IOException {
         this.packageJsonFile = packageJsonFile;
