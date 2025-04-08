@@ -301,7 +301,7 @@ jobs:
       - name: Test gradle-plugin's functional tests
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
-        run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
+        run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --debug --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v4
         if: ${{ failure() || success() }}
         with:
