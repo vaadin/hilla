@@ -72,9 +72,9 @@ tasks.register('productionBuild', Exec) {
 	description = 'Builds the Spring Boot application for production.'
     def command
     if (isWindows) {
-        command = ['cmd', '/c', 'gradlew.bat', 'clean', '-Pvaadin.productionMode', 'build', '-x', 'test']
+        command = ['cmd', '/c', 'gradlew.bat', '--debug', 'clean', '-Pvaadin.productionMode', 'build', '-x', 'test']
     } else {
-        command = ['sh', '-c', './gradlew clean -Pvaadin.productionMode build -x test']
+        command = ['sh', '-c', './gradlew --debug clean -Pvaadin.productionMode build -x test']
     }
 	commandLine command
 	doLast {
