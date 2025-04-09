@@ -16,6 +16,7 @@
     "@vaadin/board": "24.8.0-alpha8",
     "@vaadin/bundles": "24.8.0-alpha8",
     "@vaadin/button": "24.8.0-alpha8",
+    "@vaadin/card": "24.8.0-alpha8",
     "@vaadin/charts": "24.8.0-alpha8",
     "@vaadin/checkbox": "24.8.0-alpha8",
     "@vaadin/checkbox-group": "24.8.0-alpha8",
@@ -110,7 +111,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.8.2",
-    "vite": "6.2.4",
+    "vite": "6.2.5",
     "vite-plugin-checker": "0.9.1",
     "workbox-build": "7.3.0",
     "workbox-core": "7.3.0",
@@ -128,6 +129,7 @@
       "@vaadin/board": "24.8.0-alpha4",
       "@vaadin/bundles": "24.8.0-alpha4",
       "@vaadin/button": "24.8.0-alpha4",
+      "@vaadin/card": "24.8.0-alpha8",
       "@vaadin/charts": "24.8.0-alpha4",
       "@vaadin/checkbox": "24.8.0-alpha4",
       "@vaadin/checkbox-group": "24.8.0-alpha4",
@@ -170,7 +172,7 @@
       "@vaadin/number-field": "24.8.0-alpha4",
       "@vaadin/overlay": "24.8.0-alpha4",
       "@vaadin/password-field": "24.8.0-alpha4",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha4",
+      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha8",
       "@vaadin/popover": "24.8.0-alpha4",
       "@vaadin/progress-bar": "24.8.0-alpha4",
       "@vaadin/radio-group": "24.8.0-alpha4",
@@ -188,9 +190,9 @@
       "@vaadin/tooltip": "24.8.0-alpha8",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "24.8.0-alpha4",
+      "@vaadin/vaadin-lumo-styles": "24.8.0-alpha8",
       "@vaadin/vaadin-material-styles": "24.8.0-alpha4",
-      "@vaadin/vaadin-themable-mixin": "24.8.0-alpha4",
+      "@vaadin/vaadin-themable-mixin": "24.8.0-alpha8",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "@vaadin/vertical-layout": "24.8.0-alpha4",
       "@vaadin/virtual-list": "24.8.0-alpha4",
@@ -222,13 +224,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.8.2",
-      "vite": "6.2.4",
+      "vite": "6.2.5",
       "vite-plugin-checker": "0.9.1",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "a32504600da785ad9d25ae5bd2539c43722fcc9103567ac7e3d18fd08303f319"
+    "hash": "34e7a43ed141e4cd66a6a300b9cc5f7aca2834ed7496e24eeb4ebe675868733c"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -318,6 +320,7 @@
     "@vaadin/map": "$@vaadin/map",
     "@vaadin/rich-text-editor": "$@vaadin/rich-text-editor",
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
-    "mobx": "$mobx"
+    "mobx": "$mobx",
+    "@vaadin/card": "$@vaadin/card"
   }
 }
