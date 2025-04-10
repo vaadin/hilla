@@ -30,7 +30,8 @@
     "test": "nx run-many -p packages/ts/* -t test --all --output-style stream",
     "test:coverage": "nx run-many -p packages/ts/* -t test:coverage --all --output-style stream",
     "test:react": "nx run-many -p packages/ts/* -t test:react --all --output-style stream",
-    "typecheck": "nx run-many -p packages/ts/* -t typecheck --all --output-style stream"
+    "typecheck": "nx run-many -p packages/ts/* -t typecheck --all --output-style stream",
+    "react-version": "tsx scripts/enforce-react-version.ts"
   },
   "repository": {
     "type": "git",
@@ -58,8 +59,8 @@
     "@types/deep-equal-in-any-order": "1.0.4",
     "@types/js-cookie": "3.0.6",
     "@types/node": "22.13.4",
-    "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.1",
+    "@types/react": "18.3.20",
+    "@types/react-dom": "18.3.6",
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "4.0.0",
     "@types/validator": "13.12.2",
@@ -90,6 +91,7 @@
     "eslint-plugin-tsdoc": "0.4.0",
     "fetch-mock": "12.3.0",
     "glob": "11.0.1",
+    "itertools-ts": "2.2.0",
     "lint-staged": "15.4.3",
     "magic-string": "0.30.17",
     "micromatch": "4.0.8",
