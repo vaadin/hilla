@@ -1,4 +1,3 @@
-import { glob } from 'glob';
 
 export type Version = {
   javaVersion?: string;
@@ -73,19 +72,3 @@ export const destination = {
     },
   ],
 };
-
-const workspacesToMaintain = ['packages/java/tests/*', 'packages/java/tests/gradle/*', 'packages/java/tests/spring/*'];
-
-const [patterns, ignore] = workspacesToMaintain.reduce<readonly [string[], string[]]>(
-  ([_patterns, _ignore], pattern) => {
-    if (pattern.startsWith('!')) {
-      _ignore.push(`${pattern.substring(1)}/package.json`);
-    } else {
-      _patterns.push(`${pattern}/package.json`);
-    }
-    return [_patterns, _ignore];
-  },
-  [[], []],
-);
-
-export const workspaceFiles = await glob(patterns, { ignore });
