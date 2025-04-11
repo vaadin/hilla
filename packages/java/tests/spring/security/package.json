@@ -2,9 +2,6 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "scripts": {
-    "postinstall": "npm run --include-workspace-root --workspace=@vaadin/hilla install:vite-copy"
-  },
   "dependencies": {
     "@adobe/lit-mobx": "2.0.0-rc.4",
     "@polymer/polymer": "3.5.2",
