@@ -75,6 +75,20 @@ public abstract class EndpointInvocationException extends Exception {
 
     }
 
+    public static class EndpointHttpException
+            extends EndpointInvocationException {
+        private final int httpStatusCode;
+
+        public EndpointHttpException(int httpStatusCode, String message) {
+            super(message);
+            this.httpStatusCode = httpStatusCode;
+        }
+
+        public int getHttpStatusCode() {
+            return httpStatusCode;
+        }
+    }
+
     /**
      * Creates a new instance..
      *
