@@ -75,15 +75,33 @@ public abstract class EndpointInvocationException extends Exception {
 
     }
 
+    /**
+     * Allows to specify the HTTP status code and message to return as error.
+     * Although the HTTP code is arbitrary, this exception still indicates an
+     * error condition.
+     */
     public static class EndpointHttpException
             extends EndpointInvocationException {
         private final int httpStatusCode;
 
+        /**
+         * Creates a new instance.
+         *
+         * @param httpStatusCode
+         *            the HTTP status code to return
+         * @param message
+         *            the message to pass to the client
+         */
         public EndpointHttpException(int httpStatusCode, String message) {
             super(message);
             this.httpStatusCode = httpStatusCode;
         }
 
+        /**
+         * Returns the HTTP status code.
+         *
+         * @return the HTTP status code
+         */
         public int getHttpStatusCode() {
             return httpStatusCode;
         }
