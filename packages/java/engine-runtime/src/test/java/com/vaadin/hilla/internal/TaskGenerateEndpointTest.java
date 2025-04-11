@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.hilla.engine.EngineConfiguration;
 
 public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
