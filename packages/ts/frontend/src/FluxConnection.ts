@@ -76,7 +76,7 @@ let atmosphere: Atmosphere.Atmosphere | undefined;
 if (globalThis.document) {
   // In case we are in the browser environment, we have to load atmosphere.js
   try {
-    atmosphere = await import('atmosphere.js').then((module) => module.default);
+    atmosphere = (await import('atmosphere.js')).default;
   } catch (e: unknown) {
     console.error('Failed to load atmosphere.js', e);
   }
@@ -323,10 +323,10 @@ export class FluxConnection extends EventTarget {
   }
 
   #send(message: ServerMessage) {
-    if (this.state === State.INACTIVE) {
+    if (this.state === State.INACTIVE || !this.#socket) {
       this.#pendingMessages.push(message);
     } else {
-      this.#socket?.push?.(JSON.stringify(message));
+      this.#socket.push?.(JSON.stringify(message));
     }
   }
 
