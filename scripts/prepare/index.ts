@@ -47,7 +47,7 @@ await Promise.all(
 const KNOWN_COMPONENT_PACKAGES = ['@vaadin/vaadin-themable-mixin'];
 const componentsVersion = versions.core['component-base'].jsVersion ?? '';
 
-// Known packages to synchronise with Vaadin Rect components version
+// Known packages to synchronise with Vaadin React components version
 const KNOWN_REACT_COMPONENT_PACKAGES = ['@vaadin/react-components', '@vaadin/react-components-pro'];
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 
