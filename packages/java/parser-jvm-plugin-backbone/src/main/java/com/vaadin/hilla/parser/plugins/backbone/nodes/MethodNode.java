@@ -6,8 +6,8 @@ import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.MethodInfoModel;
 import io.swagger.v3.oas.models.PathItem;
 
-public final class MethodNode extends AbstractNode<MethodInfoModel, PathItem> {
-    private MethodNode(@NonNull MethodInfoModel source,
+public class MethodNode extends AbstractNode<MethodInfoModel, PathItem> {
+    protected MethodNode(@NonNull MethodInfoModel source,
             @NonNull PathItem target) {
         super(source, target);
     }
