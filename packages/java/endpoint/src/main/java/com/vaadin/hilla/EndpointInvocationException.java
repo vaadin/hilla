@@ -29,7 +29,7 @@ public abstract class EndpointInvocationException extends Exception {
      */
     @Deprecated(forRemoval = true)
     public static class EndpointAccessDeniedException
-            extends EndpointUnauthorizedException {
+            extends EndpointInvocationException {
 
         /**
          * Creates a new instance.
@@ -66,7 +66,7 @@ public abstract class EndpointInvocationException extends Exception {
      * of the endpoint invocation.
      */
     public static class EndpointInternalException
-            extends EndpointInvocationException {
+            extends EndpointHttpException {
 
         /**
          * Creates a new instance.
@@ -75,7 +75,7 @@ public abstract class EndpointInvocationException extends Exception {
          *            the message to pass to the client
          */
         public EndpointInternalException(String message) {
-            super(message);
+            super(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
         }
 
     }

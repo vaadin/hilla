@@ -16,7 +16,6 @@ import com.vaadin.hilla.EndpointControllerConfiguration;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.EndpointInvoker;
@@ -83,8 +82,7 @@ public class PushMessageHandlerTest {
     private String connectionId;
 
     @Before
-    public void setup()
-            throws EndpointInternalException, EndpointHttpException {
+    public void setup() throws EndpointHttpException {
         Mockito.when(endpointInvoker.getReturnType(Mockito.anyString(),
                 Mockito.anyString())).thenAnswer(request -> {
                     if (!request.getArgument(0).equals(ENDPOINT_NAME)) {

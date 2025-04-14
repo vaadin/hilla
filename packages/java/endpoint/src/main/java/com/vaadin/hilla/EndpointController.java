@@ -332,9 +332,6 @@ public class EndpointController {
                 LOGGER.error(errorMessage, e);
                 return ResponseEntity.internalServerError().body(errorMessage);
             }
-        } catch (EndpointInternalException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    endpointInvoker.createResponseErrorObject(e.getMessage()));
         } catch (EndpointHttpException e) {
             var resp = ResponseEntity.status(e.getHttpStatusCode());
             var message = e.getMessage();

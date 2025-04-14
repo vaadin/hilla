@@ -51,8 +51,7 @@ public class SecureSignalsRegistry {
 
     public synchronized void register(String clientSignalId,
             String endpointName, String methodName, ObjectNode body)
-            throws EndpointInvocationException.EndpointInternalException,
-            EndpointInvocationException.EndpointHttpException {
+            throws EndpointInvocationException.EndpointHttpException {
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil

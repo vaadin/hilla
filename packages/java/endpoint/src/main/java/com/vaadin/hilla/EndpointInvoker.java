@@ -161,25 +161,13 @@ public class EndpointInvoker {
      *            a function for checking if a user is in a given role
      * @return the return value of the invoked endpoint method, wrapped in a
      *         response entity
-     * @throws EndpointNotFoundException
-     *             if the endpoint was not found
-     * @throws EndpointUnauthorizedException
-     *             if access to the endpoint was denied and the user is not
-     *             authenticated
-     * @throws EndpointForbiddenException
-     *             if access to the endpoint was denied and the user is
-     *             authenticated
-     * @throws EndpointBadRequestException
-     *             if there was a problem with the request data
      * @throws EndpointHttpException
      *             if thrown by the endpoint
-     * @throws EndpointInternalException
-     *             if there was an internal error executing the endpoint method
      */
     public Object invoke(String endpointName, String methodName,
             ObjectNode body, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointInternalException, EndpointHttpException {
+            throws EndpointHttpException {
         VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
                 endpointName);
 
@@ -385,7 +373,7 @@ public class EndpointInvoker {
 
     private ResponseEntity<String> handleMethodExecutionError(
             String endpointName, String methodName, InvocationTargetException e)
-            throws EndpointInternalException, EndpointHttpException {
+            throws EndpointHttpException {
         var wrappedException = e.getCause();
         if (wrappedException instanceof EndpointHttpException ex) {
             throw ex;
@@ -426,7 +414,7 @@ public class EndpointInvoker {
             String methodName, Method methodToInvoke, ObjectNode body,
             VaadinEndpointData vaadinEndpointData, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointInternalException, EndpointHttpException {
+            throws EndpointHttpException {
         HillaStats.reportEndpointActive();
 
         var checkError = checkAccess(vaadinEndpointData, methodToInvoke,

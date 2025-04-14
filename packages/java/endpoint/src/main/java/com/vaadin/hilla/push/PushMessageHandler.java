@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointSubscription;
@@ -192,7 +191,7 @@ public class PushMessageHandler {
         } catch (EndpointNotFoundException e) {
             sender.accept(new ClientMessageError(fluxId, "No such endpoint"));
             return;
-        } catch (EndpointInternalException | EndpointHttpException e) {
+        } catch (EndpointHttpException e) {
             sender.accept(new ClientMessageError(fluxId, e.getMessage()));
             return;
         }
