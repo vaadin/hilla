@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { glob } from 'glob';
+import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
 import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
@@ -122,12 +122,9 @@ const [patterns, ignore] = workspaces.reduce<readonly [string[], string[]]>(
   [[], []],
 );
 
-const workspaceJsonFiles = await glob(patterns, { cwd: root, ignore });
-await Promise.all(
-  workspaceJsonFiles.map(async (file) => {
-    await getPackageJsonWithUpdates(file);
-    // Clean old IT node_modules installation
-    const nodeModulesDir = new URL('node_modules/', new URL(file, root));
-    await rm(nodeModulesDir, { recursive: true, force: true });
-  }),
-);
+for await (const file of globIterate(patterns, { cwd: root, ignore })) {
+  await getPackageJsonWithUpdates(file);
+  // Clean old IT node_modules installation
+  const nodeModulesDir = new URL('node_modules/', new URL(file, root));
+  await rm(nodeModulesDir, { recursive: true, force: true });
+}
