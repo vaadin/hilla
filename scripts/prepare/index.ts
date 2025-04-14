@@ -51,6 +51,8 @@ const componentsVersion = versions.core['component-base'].jsVersion ?? '';
 const KNOWN_REACT_COMPONENT_PACKAGES = ['@vaadin/react-components', '@vaadin/react-components-pro'];
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 
+let rootPackageJson: PackageJson | undefined;
+
 function updateDependencyVersion(json: PackageJson, npmName: string, versionSpec: string) {
   if (json.devDependencies?.[npmName] !== undefined) {
     json.devDependencies[npmName] = versionSpec;
@@ -81,6 +83,18 @@ async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
     updateDependencyVersion(json, packageName, reactComponentsVersion);
   }
 
+  if (rootPackageJson && file !== 'package.json') {
+    for (const [packageName, versionSpec] of [
+      ...Object.entries(rootPackageJson.dependencies ?? {}),
+      ...Object.entries(rootPackageJson.devDependencies ?? {}),
+    ]) {
+      if (!versionSpec) {
+        continue;
+      }
+      updateDependencyVersion(json, packageName, versionSpec);
+    }
+  }
+
   const contents = JSON.stringify(json, undefined, 2).trim();
   if (contents !== originalContents) {
     console.log(`Updating ${file}.`);
@@ -92,7 +106,7 @@ async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
   return json;
 }
 
-const rootPackageJson = await getPackageJsonWithUpdates('package.json');
+rootPackageJson = await getPackageJsonWithUpdates('package.json');
 
 const workspaces = Array.isArray(rootPackageJson.workspaces) ? rootPackageJson.workspaces : [];
 
