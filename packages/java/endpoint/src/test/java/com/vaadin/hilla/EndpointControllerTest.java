@@ -349,7 +349,7 @@ public class EndpointControllerTest {
                 .serveEndpoint(TEST_ENDPOINT_NAME, TEST_METHOD.getName(), null,
                         requestMock);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         String responseBody = response.getBody();
         assertEndpointInfoPresent(responseBody);
         assertTrue(String.format("Invalid response body: '%s'", responseBody),
@@ -465,7 +465,7 @@ public class EndpointControllerTest {
                 TEST_ENDPOINT_NAME, "testRoleAllowed",
                 createRequestParameters("{}"), requestMock);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertTrue(response.getBody()
                 .contains(EndpointAccessChecker.ACCESS_DENIED_MSG));
     }

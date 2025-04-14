@@ -1,5 +1,6 @@
 package com.vaadin.hilla.signals.core.registry;
 
+import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
@@ -7,6 +8,7 @@ import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.ValueSignal;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -69,7 +71,7 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsRejected_register_throws()
             throws Exception {
-        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess(false);
+        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
         SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                 invoker);
 
@@ -105,22 +107,27 @@ public class SecureSignalsRegistryTest {
 
     @Test
     public void when_accessToEndpointIsRejected_get_throws() throws Exception {
-        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess(true);
-        SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
-                invoker);
-        // fake an existing endpoint method registration in
-        // secureSignalsRegistry:
-        var endpointMethodsField = secureSignalsRegistry.getClass()
-                .getDeclaredField("endpointMethods");
-        endpointMethodsField.setAccessible(true);
-        var endpointMethods = (Map<String, SecureSignalsRegistry.EndpointMethod>) endpointMethodsField
-                .get(secureSignalsRegistry);
-        endpointMethods.put("clientSignalId",
-                new SecureSignalsRegistry.EndpointMethod("endpoint", "method"));
+        try (var authUtilMock = Mockito.mockStatic(AuthenticationUtil.class)) {
+            when(AuthenticationUtil.getSecurityHolderAuthentication())
+                    .thenReturn(Mockito.mock(Authentication.class));
+            EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
+            SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
+                    invoker);
+            // fake an existing endpoint method registration in
+            // secureSignalsRegistry:
+            var endpointMethodsField = secureSignalsRegistry.getClass()
+                    .getDeclaredField("endpointMethods");
+            endpointMethodsField.setAccessible(true);
+            var endpointMethods = (Map<String, SecureSignalsRegistry.EndpointMethod>) endpointMethodsField
+                    .get(secureSignalsRegistry);
+            endpointMethods.put("clientSignalId",
+                    new SecureSignalsRegistry.EndpointMethod("endpoint",
+                            "method"));
 
-        assertThrows(
-                EndpointInvocationException.EndpointForbiddenException.class,
-                () -> secureSignalsRegistry.get("clientSignalId"));
+            assertThrows(
+                    EndpointInvocationException.EndpointForbiddenException.class,
+                    () -> secureSignalsRegistry.get("clientSignalId"));
+        }
     }
 
     private EndpointInvoker mockEndpointInvokerThatGrantsAccess(
@@ -133,12 +140,11 @@ public class SecureSignalsRegistryTest {
         return invoker;
     }
 
-    private EndpointInvoker mockEndpointInvokerThatDeniesAccess(
-            boolean isAuthenticated) throws Exception {
+    private EndpointInvoker mockEndpointInvokerThatDeniesAccess()
+            throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
-        when(invoker.checkAccess(Mockito.any(), Mockito.any(),
-                isAuthenticated ? Mockito.any() : null, Mockito.any()))
-                .thenReturn("Access denied");
+        when(invoker.checkAccess(Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any())).thenReturn("Access denied");
         fakeMethodExistenceOn(invoker);
         return invoker;
     }
