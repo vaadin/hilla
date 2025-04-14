@@ -13,6 +13,7 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
+        `$`(ButtonElement::class.java).withId("save").waitForFirst()
     }
 
     override fun getTestPath(): String = "$rootURL/person-form"
