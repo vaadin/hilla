@@ -22,9 +22,12 @@ public abstract class EndpointInvocationException extends Exception {
 
     /**
      * Exception indicating access to the endpoint was denied.
+     *
+     * @deprecated use {@link EndpointUnauthorizedException} instead.
      */
+    @Deprecated(forRemoval = true)
     public static class EndpointAccessDeniedException
-            extends EndpointInvocationException {
+            extends EndpointUnauthorizedException {
 
         /**
          * Creates a new instance.
@@ -73,6 +76,28 @@ public abstract class EndpointInvocationException extends Exception {
             super(message);
         }
 
+    }
+
+    /**
+     * Exception indicating access to the endpoint was denied as the user is not
+     * authenticated.
+     */
+    public static class EndpointUnauthorizedException
+            extends EndpointInvocationException {
+        public EndpointUnauthorizedException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Exception indicating access to the endpoint was denied as the user is not
+     * authorized.
+     */
+    public static class EndpointForbiddenException
+            extends EndpointInvocationException {
+        public EndpointForbiddenException(String message) {
+            super(message);
+        }
     }
 
     /**

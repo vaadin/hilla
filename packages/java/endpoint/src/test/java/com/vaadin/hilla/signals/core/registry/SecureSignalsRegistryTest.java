@@ -69,12 +69,12 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsRejected_register_throws()
             throws Exception {
-        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
+        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess(false);
         SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                 invoker);
 
         assertThrows(
-                EndpointInvocationException.EndpointAccessDeniedException.class,
+                EndpointInvocationException.EndpointUnauthorizedException.class,
                 () -> secureSignalsRegistry.register("clientSignalId",
                         "endpoint", "method", null));
     }
@@ -105,7 +105,7 @@ public class SecureSignalsRegistryTest {
 
     @Test
     public void when_accessToEndpointIsRejected_get_throws() throws Exception {
-        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
+        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess(true);
         SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                 invoker);
         // fake an existing endpoint method registration in
@@ -119,7 +119,7 @@ public class SecureSignalsRegistryTest {
                 new SecureSignalsRegistry.EndpointMethod("endpoint", "method"));
 
         assertThrows(
-                EndpointInvocationException.EndpointAccessDeniedException.class,
+                EndpointInvocationException.EndpointForbiddenException.class,
                 () -> secureSignalsRegistry.get("clientSignalId"));
     }
 
@@ -133,11 +133,12 @@ public class SecureSignalsRegistryTest {
         return invoker;
     }
 
-    private EndpointInvoker mockEndpointInvokerThatDeniesAccess()
-            throws Exception {
+    private EndpointInvoker mockEndpointInvokerThatDeniesAccess(
+            boolean isAuthenticated) throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
-        when(invoker.checkAccess(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any())).thenReturn("Access denied");
+        when(invoker.checkAccess(Mockito.any(), Mockito.any(),
+                isAuthenticated ? Mockito.any() : null, Mockito.any()))
+                .thenReturn("Access denied");
         fakeMethodExistenceOn(invoker);
         return invoker;
     }

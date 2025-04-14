@@ -21,11 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.EndpointRegistry.VaadinEndpointData;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
@@ -162,19 +163,25 @@ public class EndpointInvoker {
      *         response entity
      * @throws EndpointNotFoundException
      *             if the endpoint was not found
-     * @throws EndpointAccessDeniedException
-     *             if access to the endpoint was denied
+     * @throws EndpointUnauthorizedException
+     *             if access to the endpoint was denied and the user is not
+     *             authenticated
+     * @throws EndpointForbiddenException
+     *             if access to the endpoint was denied and the user is
+     *             authenticated
      * @throws EndpointBadRequestException
      *             if there was a problem with the request data
+     * @throws EndpointHttpException
+     *             if thrown by the endpoint
      * @throws EndpointInternalException
      *             if there was an internal error executing the endpoint method
      */
     public Object invoke(String endpointName, String methodName,
             ObjectNode body, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointNotFoundException, EndpointAccessDeniedException,
-            EndpointBadRequestException, EndpointInternalException,
-            EndpointHttpException {
+            throws EndpointNotFoundException, EndpointUnauthorizedException,
+            EndpointForbiddenException, EndpointBadRequestException,
+            EndpointInternalException, EndpointHttpException {
         VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
                 endpointName);
 
@@ -421,16 +428,22 @@ public class EndpointInvoker {
             String methodName, Method methodToInvoke, ObjectNode body,
             VaadinEndpointData vaadinEndpointData, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointAccessDeniedException, EndpointBadRequestException,
-            EndpointInternalException, EndpointHttpException {
+            throws EndpointUnauthorizedException, EndpointForbiddenException,
+            EndpointBadRequestException, EndpointInternalException,
+            EndpointHttpException {
         HillaStats.reportEndpointActive();
 
         var checkError = checkAccess(vaadinEndpointData, methodToInvoke,
                 principal, rolesChecker);
         if (checkError != null) {
-            throw new EndpointAccessDeniedException(String.format(
+            var message = String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
-                    endpointName, methodName, checkError));
+                    endpointName, methodName, checkError);
+            if (principal == null) {
+                throw new EndpointUnauthorizedException(message);
+            } else {
+                throw new EndpointForbiddenException(message);
+            }
         }
 
         var parameterNames = Arrays.stream(methodToInvoke.getParameters())

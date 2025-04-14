@@ -46,11 +46,12 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.dau.DAUUtils;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
-import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
@@ -337,8 +338,11 @@ public class EndpointController {
             }
         } catch (EndpointNotFoundException e) {
             return ResponseEntity.notFound().build();
-        } catch (EndpointAccessDeniedException e) {
+        } catch (EndpointUnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    endpointInvoker.createResponseErrorObject(e.getMessage()));
+        } catch (EndpointForbiddenException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     endpointInvoker.createResponseErrorObject(e.getMessage()));
         } catch (EndpointBadRequestException e) {
             return ResponseEntity.badRequest().body(
