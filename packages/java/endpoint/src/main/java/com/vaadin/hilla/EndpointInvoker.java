@@ -23,6 +23,7 @@ import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
@@ -170,6 +171,8 @@ public class EndpointInvoker {
      *             authenticated
      * @throws EndpointBadRequestException
      *             if there was a problem with the request data
+     * @throws EndpointHttpException
+     *             if thrown by the endpoint
      * @throws EndpointInternalException
      *             if there was an internal error executing the endpoint method
      */
@@ -178,7 +181,7 @@ public class EndpointInvoker {
             Function<String, Boolean> rolesChecker)
             throws EndpointNotFoundException, EndpointUnauthorizedException,
             EndpointForbiddenException, EndpointBadRequestException,
-            EndpointInternalException {
+            EndpointInternalException, EndpointHttpException {
         VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
                 endpointName);
 
@@ -384,10 +387,13 @@ public class EndpointInvoker {
 
     private ResponseEntity<String> handleMethodExecutionError(
             String endpointName, String methodName, InvocationTargetException e)
-            throws EndpointInternalException {
-        if (EndpointException.class.isAssignableFrom(e.getCause().getClass())) {
-            EndpointException endpointException = ((EndpointException) e
-                    .getCause());
+            throws EndpointInternalException, EndpointHttpException {
+        var wrappedException = e.getCause();
+        if (wrappedException instanceof EndpointHttpException ex) {
+            throw ex;
+        } else if (EndpointException.class
+                .isAssignableFrom(wrappedException.getClass())) {
+            EndpointException endpointException = ((EndpointException) wrappedException);
             getLogger().debug("Endpoint '{}' method '{}' aborted the execution",
                     endpointName, methodName, endpointException);
             throw endpointException;
@@ -423,7 +429,8 @@ public class EndpointInvoker {
             VaadinEndpointData vaadinEndpointData, Principal principal,
             Function<String, Boolean> rolesChecker)
             throws EndpointUnauthorizedException, EndpointForbiddenException,
-            EndpointBadRequestException, EndpointInternalException {
+            EndpointBadRequestException, EndpointInternalException,
+            EndpointHttpException {
         HillaStats.reportEndpointActive();
 
         var checkError = checkAccess(vaadinEndpointData, methodToInvoke,

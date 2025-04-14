@@ -22,6 +22,7 @@ import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
@@ -195,7 +196,8 @@ public class PushMessageHandler {
             sender.accept(new ClientMessageError(fluxId, "No such endpoint"));
             return;
         } catch (EndpointUnauthorizedException | EndpointForbiddenException
-                | EndpointBadRequestException | EndpointInternalException e) {
+                | EndpointBadRequestException | EndpointInternalException
+                | EndpointHttpException e) {
             sender.accept(new ClientMessageError(fluxId, e.getMessage()));
             return;
         }

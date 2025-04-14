@@ -60,6 +60,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.shared.ApplicationConstants;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.endpoints.IterableEndpoint;
@@ -200,6 +201,11 @@ public class EndpointControllerTest {
             return file1.getSize() + file2.getSize() == expectedLength
                     ? "Check multiple files OK"
                     : "Check multiple files FAILED";
+        }
+
+        @AnonymousAllowed
+        public void throwCustomHttpException() throws EndpointHttpException {
+            throw new EndpointHttpException(410, "Gone to hell");
         }
     }
 
@@ -505,6 +511,20 @@ public class EndpointControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertTrue(response.getBody()
                 .contains(EndpointAccessChecker.ACCESS_DENIED_MSG));
+    }
+
+    @Test
+    public void should_GetResponseStatusAndMessageFromCustomException() {
+        EndpointController vaadinController = createVaadinController(
+                TEST_ENDPOINT,
+                new EndpointAccessChecker(new AccessAnnotationChecker()));
+
+        ResponseEntity<String> response = vaadinController.serveEndpoint(
+                TEST_ENDPOINT_NAME, "throwCustomHttpException",
+                createRequestParameters("{}"), requestMock);
+
+        assertEquals(HttpStatus.GONE, response.getStatusCode());
+        assertTrue(response.getBody().contains("Gone to hell"));
     }
 
     @Test

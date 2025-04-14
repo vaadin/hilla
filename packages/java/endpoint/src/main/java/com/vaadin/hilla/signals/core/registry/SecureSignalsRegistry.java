@@ -55,7 +55,8 @@ public class SecureSignalsRegistry {
             EndpointInvocationException.EndpointForbiddenException,
             EndpointInvocationException.EndpointNotFoundException,
             EndpointInvocationException.EndpointBadRequestException,
-            EndpointInvocationException.EndpointInternalException {
+            EndpointInvocationException.EndpointInternalException,
+            EndpointInvocationException.EndpointHttpException {
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil
