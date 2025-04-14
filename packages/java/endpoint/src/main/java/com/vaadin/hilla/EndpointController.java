@@ -48,7 +48,6 @@ import com.vaadin.flow.server.dau.DAUUtils;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
@@ -349,9 +348,6 @@ public class EndpointController {
                     endpointInvoker.createResponseErrorObject(e.getMessage()));
         } catch (EndpointInternalException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    endpointInvoker.createResponseErrorObject(e.getMessage()));
-        } catch (EndpointHttpException e) {
-            return ResponseEntity.status(e.getHttpStatusCode()).body(
                     endpointInvoker.createResponseErrorObject(e.getMessage()));
         } finally {
 

@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.security.Principal;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import org.junit.Before;
 import org.junit.Test;
@@ -176,27 +175,6 @@ public class EndpointInvokerTest {
                 any(), any());
         Mockito.verify(endpointAccessChecker, Mockito.times(0))
                 .check(any(Class.class), any(), any());
-    }
-
-    @Test
-    public void httpExceptionIsRethrown() {
-        @Endpoint
-        class TestEndpoint {
-
-            public String sayHello() throws EndpointHttpException {
-                throw new EndpointHttpException(123, "Everything is broken");
-            }
-        }
-
-        TestEndpoint test = new TestEndpoint();
-
-        endpointRegistry.registerEndpoint(test);
-
-        var ex = assertThrows(EndpointHttpException.class,
-                () -> endpointInvoker.invoke("TestEndpoint", "sayhello", body,
-                        principal, requestMock::isUserInRole));
-        assertEquals("Everything is broken", ex.getMessage());
-        assertEquals(123, ex.getHttpStatusCode());
     }
 
 }
