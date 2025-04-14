@@ -230,14 +230,14 @@
       "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.8.2",
-      "vite": "6.2.5",
+      "typescript": "5.8.3",
+      "vite": "6.2.6",
       "vite-plugin-checker": "0.9.1",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "5506157139e2cea28b009dc13cde5acf8cb1d46ead06055cb01c23ad6ff05a3a"
+    "hash": "62749c41d559a02cd51408b26b6dda38d593700f375a34bb95958b1819ede456"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",

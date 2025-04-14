@@ -7,8 +7,8 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-public final class EntityNode extends AbstractNode<ClassInfoModel, Schema<?>> {
-    private EntityNode(@NonNull ClassInfoModel source,
+public class EntityNode extends AbstractNode<ClassInfoModel, Schema<?>> {
+    protected EntityNode(@NonNull ClassInfoModel source,
             @NonNull ObjectSchema target) {
         super(source, target);
     }

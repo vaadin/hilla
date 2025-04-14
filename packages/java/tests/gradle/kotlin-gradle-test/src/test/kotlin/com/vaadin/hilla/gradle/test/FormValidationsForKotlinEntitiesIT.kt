@@ -39,11 +39,13 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
 
         emailField.sendKeys("invalid")
         saveButton.focus()
+        waitUntil { emailField.getPropertyString("errorMessage") != null }
         Assert.assertEquals("must be a well-formed email address",
             emailField.getPropertyString("errorMessage"))
 
         emailField.sendKeys("valid@foofle.co")
         saveButton.focus()
+        waitUntil { emailField.getPropertyString("errorMessage").isEmpty() }
         Assert.assertEquals("", emailField.getPropertyString("errorMessage"))
     }
 
