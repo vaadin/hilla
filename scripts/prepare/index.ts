@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { glob } from 'glob';
+import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
 import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
@@ -51,6 +51,8 @@ const componentsVersion = versions.core['component-base'].jsVersion ?? '';
 const KNOWN_REACT_COMPONENT_PACKAGES = ['@vaadin/react-components', '@vaadin/react-components-pro'];
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 
+let rootPackageJson: PackageJson | undefined;
+
 function updateDependencyVersion(json: PackageJson, npmName: string, versionSpec: string) {
   if (json.devDependencies?.[npmName] !== undefined) {
     json.devDependencies[npmName] = versionSpec;
@@ -81,6 +83,18 @@ async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
     updateDependencyVersion(json, packageName, reactComponentsVersion);
   }
 
+  if (rootPackageJson && file !== 'package.json') {
+    for (const [packageName, versionSpec] of [
+      ...Object.entries(rootPackageJson.dependencies ?? {}),
+      ...Object.entries(rootPackageJson.devDependencies ?? {}),
+    ]) {
+      if (!versionSpec) {
+        continue;
+      }
+      updateDependencyVersion(json, packageName, versionSpec);
+    }
+  }
+
   const contents = JSON.stringify(json, undefined, 2).trim();
   if (contents !== originalContents) {
     console.log(`Updating ${file}.`);
@@ -92,7 +106,7 @@ async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
   return json;
 }
 
-const rootPackageJson = await getPackageJsonWithUpdates('package.json');
+rootPackageJson = await getPackageJsonWithUpdates('package.json');
 
 const workspaces = Array.isArray(rootPackageJson.workspaces) ? rootPackageJson.workspaces : [];
 
@@ -108,12 +122,9 @@ const [patterns, ignore] = workspaces.reduce<readonly [string[], string[]]>(
   [[], []],
 );
 
-const workspaceJsonFiles = await glob(patterns, { cwd: root, ignore });
-await Promise.all(
-  workspaceJsonFiles.map(async (file) => {
-    await getPackageJsonWithUpdates(file);
-    // Clean old IT node_modules installation
-    const nodeModulesDir = new URL('node_modules/', new URL(file, root));
-    await rm(nodeModulesDir, { recursive: true, force: true });
-  }),
-);
+for await (const file of globIterate(patterns, { cwd: root, ignore })) {
+  await getPackageJsonWithUpdates(file);
+  // Clean old IT node_modules installation
+  const nodeModulesDir = new URL('node_modules/', new URL(file, root));
+  await rm(nodeModulesDir, { recursive: true, force: true });
+}
