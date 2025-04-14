@@ -84,9 +84,7 @@ public class PushMessageHandlerTest {
 
     @Before
     public void setup()
-            throws EndpointNotFoundException, EndpointUnauthorizedException,
-            EndpointForbiddenException, EndpointBadRequestException,
-            EndpointInternalException, EndpointHttpException {
+            throws EndpointInternalException, EndpointHttpException {
         Mockito.when(endpointInvoker.getReturnType(Mockito.anyString(),
                 Mockito.anyString())).thenAnswer(request -> {
                     if (!request.getArgument(0).equals(ENDPOINT_NAME)) {

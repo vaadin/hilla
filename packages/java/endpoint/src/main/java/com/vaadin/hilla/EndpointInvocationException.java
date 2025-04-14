@@ -1,5 +1,7 @@
 package com.vaadin.hilla;
 
+import org.springframework.http.HttpStatus;
+
 /**
  * Exception thrown by EndpointInvoker when invocation fails.
  */
@@ -9,13 +11,13 @@ public abstract class EndpointInvocationException extends Exception {
      * Exception indicating the endpoint was not found.
      */
     public static class EndpointNotFoundException
-            extends EndpointInvocationException {
+            extends EndpointHttpException {
 
         /**
          * Creates a new instance..
          */
         public EndpointNotFoundException() {
-            super(null);
+            super(HttpStatus.NOT_FOUND.value(), null);
         }
 
     }
@@ -45,7 +47,7 @@ public abstract class EndpointInvocationException extends Exception {
      * Exception indicating a problem with the request data.
      */
     public static class EndpointBadRequestException
-            extends EndpointInvocationException {
+            extends EndpointHttpException {
 
         /**
          * Creates a new instance.
@@ -54,7 +56,7 @@ public abstract class EndpointInvocationException extends Exception {
          *            the message to pass to the client
          */
         public EndpointBadRequestException(String message) {
-            super(message);
+            super(HttpStatus.BAD_REQUEST.value(), message);
         }
 
     }
@@ -83,9 +85,9 @@ public abstract class EndpointInvocationException extends Exception {
      * authenticated.
      */
     public static class EndpointUnauthorizedException
-            extends EndpointInvocationException {
+            extends EndpointHttpException {
         public EndpointUnauthorizedException(String message) {
-            super(message);
+            super(HttpStatus.UNAUTHORIZED.value(), message);
         }
     }
 
@@ -94,9 +96,9 @@ public abstract class EndpointInvocationException extends Exception {
      * authorized.
      */
     public static class EndpointForbiddenException
-            extends EndpointInvocationException {
+            extends EndpointHttpException {
         public EndpointForbiddenException(String message) {
-            super(message);
+            super(HttpStatus.FORBIDDEN.value(), message);
         }
     }
 

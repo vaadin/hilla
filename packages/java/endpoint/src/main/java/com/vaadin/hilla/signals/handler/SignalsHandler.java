@@ -87,9 +87,7 @@ public class SignalsHandler {
 
     private Flux<ObjectNode> subscribe(String parentClientSignalId,
             String clientSignalId)
-            throws EndpointInvocationException.EndpointUnauthorizedException,
-            EndpointInvocationException.EndpointForbiddenException,
-            EndpointInvocationException.EndpointNotFoundException {
+            throws EndpointInvocationException.EndpointHttpException {
         var parentSignal = registry.get(parentClientSignalId);
         if (parentSignal == null) {
             throw new IllegalStateException(String.format(
@@ -109,9 +107,7 @@ public class SignalsHandler {
      *            the event to update with
      */
     public void update(String clientSignalId, ObjectNode event)
-            throws EndpointInvocationException.EndpointUnauthorizedException,
-            EndpointInvocationException.EndpointForbiddenException,
-            EndpointInvocationException.EndpointNotFoundException {
+            throws EndpointInvocationException.EndpointHttpException {
         if (registry == null) {
             throw new IllegalStateException(
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));

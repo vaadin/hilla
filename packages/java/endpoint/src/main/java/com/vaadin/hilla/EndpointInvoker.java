@@ -179,9 +179,7 @@ public class EndpointInvoker {
     public Object invoke(String endpointName, String methodName,
             ObjectNode body, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointNotFoundException, EndpointUnauthorizedException,
-            EndpointForbiddenException, EndpointBadRequestException,
-            EndpointInternalException, EndpointHttpException {
+            throws EndpointInternalException, EndpointHttpException {
         VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
                 endpointName);
 
@@ -428,9 +426,7 @@ public class EndpointInvoker {
             String methodName, Method methodToInvoke, ObjectNode body,
             VaadinEndpointData vaadinEndpointData, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointUnauthorizedException, EndpointForbiddenException,
-            EndpointBadRequestException, EndpointInternalException,
-            EndpointHttpException {
+            throws EndpointInternalException, EndpointHttpException {
         HillaStats.reportEndpointActive();
 
         var checkError = checkAccess(vaadinEndpointData, methodToInvoke,

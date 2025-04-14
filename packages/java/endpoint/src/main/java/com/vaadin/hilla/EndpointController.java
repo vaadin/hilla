@@ -46,12 +46,8 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.dau.DAUUtils;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
-import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
@@ -336,23 +332,16 @@ public class EndpointController {
                 LOGGER.error(errorMessage, e);
                 return ResponseEntity.internalServerError().body(errorMessage);
             }
-        } catch (EndpointNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (EndpointUnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    endpointInvoker.createResponseErrorObject(e.getMessage()));
-        } catch (EndpointForbiddenException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                    endpointInvoker.createResponseErrorObject(e.getMessage()));
-        } catch (EndpointBadRequestException e) {
-            return ResponseEntity.badRequest().body(
-                    endpointInvoker.createResponseErrorObject(e.getMessage()));
         } catch (EndpointInternalException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     endpointInvoker.createResponseErrorObject(e.getMessage()));
         } catch (EndpointHttpException e) {
-            return ResponseEntity.status(e.getHttpStatusCode()).body(
-                    endpointInvoker.createResponseErrorObject(e.getMessage()));
+            var resp = ResponseEntity.status(e.getHttpStatusCode());
+            var message = e.getMessage();
+
+            return message == null ? resp.build()
+                    : resp.body(
+                            endpointInvoker.createResponseErrorObject(message));
         } finally {
 
             if (enforcementResult != null

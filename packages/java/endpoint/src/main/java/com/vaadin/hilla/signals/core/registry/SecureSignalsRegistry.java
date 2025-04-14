@@ -51,11 +51,7 @@ public class SecureSignalsRegistry {
 
     public synchronized void register(String clientSignalId,
             String endpointName, String methodName, ObjectNode body)
-            throws EndpointInvocationException.EndpointUnauthorizedException,
-            EndpointInvocationException.EndpointForbiddenException,
-            EndpointInvocationException.EndpointNotFoundException,
-            EndpointInvocationException.EndpointBadRequestException,
-            EndpointInvocationException.EndpointInternalException,
+            throws EndpointInvocationException.EndpointInternalException,
             EndpointInvocationException.EndpointHttpException {
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
@@ -80,9 +76,7 @@ public class SecureSignalsRegistry {
     }
 
     public synchronized Signal<?> get(String clientSignalId)
-            throws EndpointInvocationException.EndpointUnauthorizedException,
-            EndpointInvocationException.EndpointForbiddenException,
-            EndpointInvocationException.EndpointNotFoundException {
+            throws EndpointInvocationException.EndpointHttpException {
         var endpointMethodInfo = endpointMethods.get(clientSignalId);
         if (endpointMethodInfo == null) {
             return null;
@@ -92,9 +86,7 @@ public class SecureSignalsRegistry {
     }
 
     private void checkAccess(String endpointName, String methodName)
-            throws EndpointInvocationException.EndpointNotFoundException,
-            EndpointInvocationException.EndpointUnauthorizedException,
-            EndpointInvocationException.EndpointForbiddenException {
+            throws EndpointInvocationException.EndpointHttpException {
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil
@@ -104,9 +96,7 @@ public class SecureSignalsRegistry {
 
     private void checkAccess(String endpointName, String methodName,
             Principal principal, Function<String, Boolean> isInRole)
-            throws EndpointInvocationException.EndpointNotFoundException,
-            EndpointInvocationException.EndpointUnauthorizedException,
-            EndpointInvocationException.EndpointForbiddenException {
+            throws EndpointInvocationException.EndpointHttpException {
         EndpointRegistry.VaadinEndpointData endpointData = invoker
                 .getVaadinEndpointData(endpointName);
         Method method = getMethod(endpointData, methodName);

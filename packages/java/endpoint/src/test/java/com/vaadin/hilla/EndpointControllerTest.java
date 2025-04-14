@@ -205,7 +205,7 @@ public class EndpointControllerTest {
 
         @AnonymousAllowed
         public void throwCustomHttpException() throws EndpointHttpException {
-            throw new EndpointHttpException(410, "Gone to hell");
+            throw new EndpointHttpException(418, "I'm a teapot!");
         }
     }
 
@@ -523,8 +523,8 @@ public class EndpointControllerTest {
                 TEST_ENDPOINT_NAME, "throwCustomHttpException",
                 createRequestParameters("{}"), requestMock);
 
-        assertEquals(HttpStatus.GONE, response.getStatusCode());
-        assertTrue(response.getBody().contains("Gone to hell"));
+        assertEquals(HttpStatus.I_AM_A_TEAPOT, response.getStatusCode());
+        assertTrue(response.getBody().contains("I'm a teapot!"));
     }
 
     @Test
