@@ -107,26 +107,37 @@ public class SecureSignalsRegistryTest {
 
     @Test
     public void when_accessToEndpointIsRejected_get_throws() throws Exception {
+        EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
+        SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
+                invoker);
+        // fake an existing endpoint method registration in
+        // secureSignalsRegistry:
+        var endpointMethodsField = secureSignalsRegistry.getClass()
+                .getDeclaredField("endpointMethods");
+        endpointMethodsField.setAccessible(true);
+        var endpointMethods = (Map<String, SecureSignalsRegistry.EndpointMethod>) endpointMethodsField
+                .get(secureSignalsRegistry);
+        endpointMethods.put("clientSignalId",
+                new SecureSignalsRegistry.EndpointMethod("endpoint", "method"));
+
+        assertThrows(
+                EndpointInvocationException.EndpointUnauthorizedException.class,
+                () -> secureSignalsRegistry.get("clientSignalId"));
+    }
+
+    @Test
+    public void when_userAuthenticated_throws_forbidden() throws Exception {
         try (var authUtilMock = Mockito.mockStatic(AuthenticationUtil.class)) {
             when(AuthenticationUtil.getSecurityHolderAuthentication())
                     .thenReturn(Mockito.mock(Authentication.class));
             EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
-            // fake an existing endpoint method registration in
-            // secureSignalsRegistry:
-            var endpointMethodsField = secureSignalsRegistry.getClass()
-                    .getDeclaredField("endpointMethods");
-            endpointMethodsField.setAccessible(true);
-            var endpointMethods = (Map<String, SecureSignalsRegistry.EndpointMethod>) endpointMethodsField
-                    .get(secureSignalsRegistry);
-            endpointMethods.put("clientSignalId",
-                    new SecureSignalsRegistry.EndpointMethod("endpoint",
-                            "method"));
 
             assertThrows(
                     EndpointInvocationException.EndpointForbiddenException.class,
-                    () -> secureSignalsRegistry.get("clientSignalId"));
+                    () -> secureSignalsRegistry.register("clientSignalId",
+                            "endpoint", "method", null));
         }
     }
 
