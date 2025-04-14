@@ -7,7 +7,7 @@ import type { ItemCounts } from './data-provider';
 import { useLocaleFormatter } from './locale.js';
 import { convertToTitleCase } from './util';
 
-// eslint-disable-next-line
+// eslint-disable-next-line import/no-unassigned-import
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
 export type RendererOptions<TItem> = {
