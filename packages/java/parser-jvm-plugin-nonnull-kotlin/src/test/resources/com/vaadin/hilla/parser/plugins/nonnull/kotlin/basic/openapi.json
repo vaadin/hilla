@@ -1,0 +1,869 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "SimpleEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.SimpleEndpoint"
+    }
+  ],
+  "paths" : {
+    "/SimpleEndpoint/getPersonsByFirstname" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_getPersonsByFirstname_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "firstname" : {
+                    "type" : "string",
+                    "x-java-type" : "java.lang.String"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Person"
+                      }
+                    ]
+                  },
+                  "x-java-type" : "java.util.List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/isValidPerson" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_isValidPerson_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "person" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Person"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean",
+                  "nullable" : true,
+                  "x-java-type" : "java.lang.Boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/saveAllPersons" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_saveAllPersons_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "persons" : {
+                    "type" : "array",
+                    "items" : {
+                      "anyOf" : [
+                        {
+                          "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Person"
+                        }
+                      ]
+                    },
+                    "x-java-type" : "java.util.List"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "nullable" : true,
+                  "items" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Person"
+                      }
+                    ]
+                  },
+                  "x-java-type" : "java.util.List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/saveCompaniesPerCities" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_saveCompaniesPerCities_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "data" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "object",
+                      "additionalProperties" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "object",
+                          "additionalProperties" : {
+                            "type" : "array",
+                            "nullable" : true,
+                            "items" : {
+                              "anyOf" : [
+                                {
+                                  "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team"
+                                }
+                              ],
+                              "x-type-arguments" : {
+                                "allOf" : [
+                                  {
+                                    "anyOf" : [
+                                      {
+                                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "nullable" : true,
+                                    "anyOf" : [
+                                      {
+                                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            "x-java-type" : "java.util.List"
+                          },
+                          "x-java-type" : "java.util.Map"
+                        },
+                        "x-java-type" : "java.util.List"
+                      },
+                      "x-java-type" : "java.util.Map"
+                    },
+                    "x-java-type" : "java.util.Map"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "object",
+                        "additionalProperties" : {
+                          "type" : "array",
+                          "items" : {
+                            "nullable" : true,
+                            "anyOf" : [
+                              {
+                                "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team"
+                              }
+                            ],
+                            "x-type-arguments" : {
+                              "allOf" : [
+                                {
+                                  "nullable" : true,
+                                  "anyOf" : [
+                                    {
+                                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "anyOf" : [
+                                    {
+                                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "x-java-type" : "java.util.List"
+                        },
+                        "x-java-type" : "java.util.Map"
+                      },
+                      "x-java-type" : "java.util.List"
+                    },
+                    "nullable" : true,
+                    "x-java-type" : "java.util.Map"
+                  },
+                  "x-java-type" : "java.util.Map"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/saveDepartmentManager" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_saveDepartmentManager_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "data" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "nullable" : true,
+                      "anyOf" : [
+                        {
+                          "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                        }
+                      ]
+                    },
+                    "x-java-type" : "java.util.Map"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                      }
+                    ]
+                  },
+                  "nullable" : true,
+                  "x-java-type" : "java.util.Map"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/saveNestedPerson" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_saveNestedPerson_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "person" : {
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.SimpleEndpoint$NestedPerson"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.SimpleEndpoint$NestedPerson"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/saveTeam" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_saveTeam_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "team" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team"
+                      }
+                    ],
+                    "x-type-arguments" : {
+                      "allOf" : [
+                        {
+                          "anyOf" : [
+                            {
+                              "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                            }
+                          ]
+                        },
+                        {
+                          "nullable" : true,
+                          "anyOf" : [
+                            {
+                              "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team"
+                    }
+                  ],
+                  "x-type-arguments" : {
+                    "allOf" : [
+                      {
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                          }
+                        ]
+                      },
+                      {
+                        "nullable" : true,
+                        "anyOf" : [
+                          {
+                            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/saveTeams" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_saveTeams_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "teams" : {
+                    "type" : "array",
+                    "nullable" : true,
+                    "items" : {
+                      "nullable" : true,
+                      "anyOf" : [
+                        {
+                          "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team"
+                        }
+                      ],
+                      "x-type-arguments" : {
+                        "allOf" : [
+                          {
+                            "nullable" : true,
+                            "anyOf" : [
+                              {
+                                "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf" : [
+                              {
+                                "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "x-java-type" : "java.util.List"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team"
+                      }
+                    ],
+                    "x-type-arguments" : {
+                      "allOf" : [
+                        {
+                          "nullable" : true,
+                          "anyOf" : [
+                            {
+                              "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                            }
+                          ]
+                        },
+                        {
+                          "anyOf" : [
+                            {
+                              "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "x-java-type" : "java.util.List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SimpleEndpoint/sayHello" : {
+      "post" : {
+        "tags" : [
+          "SimpleEndpoint"
+        ],
+        "operationId" : "SimpleEndpoint_sayHello_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "nullable" : true,
+                    "x-java-type" : "java.lang.String"
+                  },
+                  "age" : {
+                    "type" : "integer",
+                    "format" : "int32",
+                    "x-java-type" : "int"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "x-java-type" : "java.lang.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Person" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.AbstractEntity"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "firstName" : {
+                "type" : "string",
+                "x-validation-constraints" : [
+                  {
+                    "simpleName" : "NotBlank"
+                  }
+                ],
+                "x-java-type" : "java.lang.String"
+              },
+              "lastName" : {
+                "type" : "string",
+                "x-java-type" : "java.lang.String"
+              },
+              "email" : {
+                "type" : "string",
+                "nullable" : true,
+                "x-validation-constraints" : [
+                  {
+                    "simpleName" : "Email"
+                  }
+                ],
+                "x-java-type" : "java.lang.String"
+              },
+              "phone" : {
+                "type" : "string",
+                "x-java-type" : "java.lang.String"
+              },
+              "address" : {
+                "type" : "array",
+                "items" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Address"
+                    }
+                  ]
+                },
+                "x-java-type" : "java.util.List",
+                "x-annotations" : [
+                  {
+                    "name" : "jakarta.persistence.OneToMany"
+                  }
+                ]
+              },
+              "team" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "array",
+                  "items" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                      }
+                    ]
+                  },
+                  "x-java-type" : "java.util.List"
+                },
+                "x-java-type" : "java.util.Map"
+              },
+              "dateOfBirth" : {
+                "type" : "string",
+                "format" : "date",
+                "nullable" : true,
+                "x-java-type" : "java.time.LocalDate"
+              },
+              "occupation" : {
+                "type" : "string",
+                "nullable" : true,
+                "x-java-type" : "java.lang.String"
+              },
+              "role" : {
+                "type" : "string",
+                "nullable" : true,
+                "x-java-type" : "java.lang.String"
+              },
+              "important" : {
+                "type" : "boolean",
+                "x-java-type" : "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Team" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.AbstractEntity"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "employees" : {
+                "type" : "array",
+                "nullable" : true,
+                "items" : {
+                  "anyOf" : [
+                    {
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                    }
+                  ]
+                },
+                "x-java-type" : "java.util.List"
+              },
+              "manager" : {
+                "nullable" : true,
+                "anyOf" : [
+                  {
+                    "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager"
+                  }
+                ]
+              }
+            },
+            "x-type-parameters" : [
+              "E",
+              "M"
+            ]
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Person"
+          },
+          {
+            "type" : "object"
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Manager" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+          },
+          {
+            "type" : "object"
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.SimpleEndpoint$NestedPerson" : {
+        "type" : "object",
+        "properties" : {
+          "firstName" : {
+            "type" : "string",
+            "x-validation-constraints" : [
+              {
+                "simpleName" : "NotBlank"
+              }
+            ],
+            "x-java-type" : "java.lang.String"
+          },
+          "lastName" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
+          },
+          "email" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-validation-constraints" : [
+              {
+                "simpleName" : "Email"
+              }
+            ],
+            "x-java-type" : "java.lang.String"
+          },
+          "phone" : {
+            "type" : "string",
+            "x-java-type" : "java.lang.String"
+          },
+          "address" : {
+            "type" : "array",
+            "items" : {
+              "anyOf" : [
+                {
+                  "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Address"
+                }
+              ]
+            },
+            "x-java-type" : "java.util.List"
+          },
+          "team" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "nullable" : true,
+                "anyOf" : [
+                  {
+                    "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Employee"
+                  }
+                ]
+              },
+              "x-java-type" : "java.util.List"
+            },
+            "x-java-type" : "java.util.Map"
+          },
+          "dateOfBirth" : {
+            "type" : "string",
+            "format" : "date",
+            "nullable" : true,
+            "x-java-type" : "java.time.LocalDate"
+          },
+          "occupation" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          },
+          "role" : {
+            "type" : "string",
+            "nullable" : true,
+            "x-java-type" : "java.lang.String"
+          },
+          "important" : {
+            "type" : "boolean",
+            "x-java-type" : "boolean"
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.Address" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.AbstractEntity"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "street" : {
+                "type" : "string",
+                "x-java-type" : "java.lang.String"
+              },
+              "zipCode" : {
+                "type" : "string",
+                "x-java-type" : "java.lang.String"
+              },
+              "city" : {
+                "type" : "string",
+                "nullable" : true,
+                "x-java-type" : "java.lang.String"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.AbstractEntity" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int32",
+            "x-java-type" : "int",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.Version"
+              }
+            ]
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "nullable" : true,
+            "x-java-type" : "java.lang.Long",
+            "x-annotations" : [
+              {
+                "name" : "jakarta.persistence.Id"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
