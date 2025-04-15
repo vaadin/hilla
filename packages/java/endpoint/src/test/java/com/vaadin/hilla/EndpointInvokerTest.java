@@ -184,7 +184,7 @@ public class EndpointInvokerTest {
         class TestEndpoint {
 
             public String sayHello() throws EndpointHttpException {
-                throw new EndpointHttpException(123, "Everything is broken");
+                throw new EndpointHttpException(418, "I'm a teapot");
             }
         }
 
@@ -195,8 +195,8 @@ public class EndpointInvokerTest {
         var ex = assertThrows(EndpointHttpException.class,
                 () -> endpointInvoker.invoke("TestEndpoint", "sayhello", body,
                         principal, requestMock::isUserInRole));
-        assertEquals("Everything is broken", ex.getMessage());
-        assertEquals(123, ex.getHttpStatusCode());
+        assertEquals(418, ex.getHttpStatusCode());
+        assertEquals("I'm a teapot", ex.getMessage());
     }
 
 }
