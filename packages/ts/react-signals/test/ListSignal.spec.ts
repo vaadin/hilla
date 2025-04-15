@@ -94,7 +94,7 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: listSignal.id,
         // @ts-expect-error params.event type has id property
         event: { id: params?.event.id, type: 'insert', position: 'last', value: 'Alice', accepted: false },
-      });
+      }, { mute: true });
     });
 
     it('should validate that entryId is defined when insertLast event is accepted', () => {
@@ -166,7 +166,7 @@ describe('@vaadin/hilla-react-signals', () => {
         clientSignalId: listSignal.id,
         // @ts-expect-error params.event type has id property
         event: { id: params?.event.id, type: 'remove', entryId: firstElement.id, accepted: false },
-      });
+      }, { mute: true });
     });
 
     it('should do nothing when the update for removing a non-existing entry is received', () => {

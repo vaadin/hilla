@@ -91,7 +91,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent1,
-      });
+      }, { mute: true });
 
       simulateReceivingAcceptedEvent(expectedEvent1);
       expect(numberSignal.value).to.equal(43);
@@ -103,7 +103,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent2,
-      });
+      }, { mute: true });
 
       simulateReceivingAcceptedEvent(expectedEvent2);
       expect(numberSignal.value).to.equal(45);
@@ -120,7 +120,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: numberSignal.id,
         event: expectedEvent3,
-      });
+      }, { mute: true });
 
       simulateReceivingAcceptedEvent(expectedEvent3);
       expect(numberSignal.value).to.equal(40);

@@ -16,6 +16,7 @@ import type {
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange } from './utils.js';
+import {$update} from "../FullStackSignal";
 
 chai.use(sinonChai);
 chai.use(chaiLike);
@@ -172,7 +173,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         clientSignalId: signal.id,
         event: { type: 'set', value: 42 },
-      });
+      }, { mute: true });
     });
 
     it('should not subscribe on the fly when updating if already subscribed', () => {
@@ -232,7 +233,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         event: { type: 'set', value: 42 },
-      });
+      }, { mute: true });
 
       signal.value = 0;
 
@@ -242,7 +243,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
         event: { type: 'set', value: 1 },
-      });
+      }, { mute: true });
 
       const [, , params] = client.call.firstCall.args;
 
@@ -366,7 +367,7 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledWith('SignalsHandler', 'update', {
         clientSignalId: '1234',
         event: { id: '1234', type: 'set', value: 42, accepted: false, parentSignalId: 'a1b2c3d4' },
-      });
+      }, { mute: true });
     });
   });
 });
