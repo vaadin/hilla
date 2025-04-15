@@ -60,7 +60,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.shared.ApplicationConstants;
-
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.endpoints.IterableEndpoint;
@@ -201,6 +201,16 @@ public class EndpointControllerTest {
             return file1.getSize() + file2.getSize() == expectedLength
                     ? "Check multiple files OK"
                     : "Check multiple files FAILED";
+        }
+
+        @AnonymousAllowed
+        public void throwCustomHttpException() throws EndpointHttpException {
+            throw new EndpointHttpException(418, "I'm a teapot");
+        }
+
+        @AnonymousAllowed
+        public void throwInvalidHttpException() throws EndpointHttpException {
+            throw new EndpointHttpException(200, "All right!");
         }
     }
 
@@ -344,7 +354,7 @@ public class EndpointControllerTest {
                 .serveEndpoint(TEST_ENDPOINT_NAME, TEST_METHOD.getName(), null,
                         requestMock);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         String responseBody = response.getBody();
         assertEndpointInfoPresent(responseBody);
         assertTrue(String.format("Invalid response body: '%s'", responseBody),
@@ -460,7 +470,7 @@ public class EndpointControllerTest {
                 TEST_ENDPOINT_NAME, "testRoleAllowed",
                 createRequestParameters("{}"), requestMock);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertTrue(response.getBody()
                 .contains(EndpointAccessChecker.ACCESS_DENIED_MSG));
     }
@@ -506,6 +516,33 @@ public class EndpointControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertTrue(response.getBody()
                 .contains(EndpointAccessChecker.ACCESS_DENIED_MSG));
+    }
+
+    @Test
+    public void should_GetResponseStatusAndMessageFromCustomException() {
+        var vaadinController = createVaadinController(TEST_ENDPOINT,
+                new EndpointAccessChecker(new AccessAnnotationChecker()));
+
+        var response = vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
+                "throwCustomHttpException", createRequestParameters("{}"),
+                requestMock);
+
+        assertEquals(HttpStatus.I_AM_A_TEAPOT, response.getStatusCode());
+        assertTrue(response.getBody().contains("I'm a teapot"));
+    }
+
+    @Test
+    public void should_FailWhenTryingToReturnInvalidHttpCodeThroughException() {
+        var vaadinController = createVaadinController(TEST_ENDPOINT,
+                new EndpointAccessChecker(new AccessAnnotationChecker()));
+
+        var response = vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
+                "throwInvalidHttpException", createRequestParameters("{}"),
+                requestMock);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+        assertTrue(response.getBody().contains("throwInvalidHttpException"));
     }
 
     @Test
