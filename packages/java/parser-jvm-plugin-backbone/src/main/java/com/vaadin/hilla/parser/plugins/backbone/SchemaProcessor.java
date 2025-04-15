@@ -59,7 +59,14 @@ final class SchemaProcessor {
         } else if (type.isArray()) {
             result = arraySchema();
         } else if (type.isIterable()) {
-            result = iterableSchema();
+            if (type instanceof ClassRefSignatureModel classType
+                    && PropertyPlugin
+                            .collectProperties(classType.getClassInfo())
+                            .count() > 0) {
+                result = refSchema();
+            } else {
+                result = iterableSchema();
+            }
         } else if (type.isMap()) {
             result = mapSchema();
         } else if (type.isDate()) {

@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -8,19 +9,24 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
+import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.RootNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.FieldInfoModel;
+import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.SpecializedModel;
 import com.vaadin.hilla.parser.models.TypeParameterModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
-
+import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
+import com.vaadin.hilla.parser.utils.Generics;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -32,8 +38,16 @@ public final class EntityPlugin
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = entityNode.getSource();
-            Schema<?> schema = cls.isEnum() ? enumSchema(cls)
-                    : new ObjectSchema();
+            Schema<?> schema;
+
+            if (cls.isEnum()) {
+                schema = enumSchema(cls);
+            } else if (cls.isIterable()) {
+                schema = new ArraySchema();
+            } else {
+                schema = new ObjectSchema();
+            }
+
             entityNode.setTarget(schema);
 
             // Create an array of schemas for the type parameters
@@ -76,9 +90,42 @@ public final class EntityPlugin
         }
 
         var ref = (ClassRefSignatureModel) typedNode.getType();
-        if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
+        if (ref.isJDKClass() || ref.isDate()) {
             return nodeDependencies;
         }
+
+        if (ref.isIterable()) {
+            var classInfo = ref.getClassInfo();
+            var properties = PropertyPlugin.collectProperties(classInfo)
+                    .toList();
+
+            if (properties.isEmpty()) {
+                return nodeDependencies;
+            } else {
+                var iterableType = Generics
+                        .getExactIterableType((Class<?>) classInfo.get())
+                        .map(type -> SignatureModel
+                                .of((AnnotatedElement) type));
+
+                return nodeDependencies
+                        .appendChildNodes(iterableType.stream()
+                                .<Node<?, ?>> map(TypeSignatureNode::of))
+                        .appendChildNodes(properties.stream()
+                                .<Node<?, ?>> map(PropertyNode::of))
+                        .appendRelatedNodes(
+                                Stream.of(EntityNode.of(classInfo)));
+            }
+        }
+
+        // if (ref.isIterable()) {
+        // System.out.println("Iterable: " + ref.getName());
+        // nodeDependencies = nodeDependencies.appendChildNodes(Generics
+        // .getExactIterableType((Class<?>) ref.getClassInfo().get())
+        // .filter(AnnotatedElement.class::isInstance)
+        // .<Node<?, ?>> map(type -> TypeSignatureNode
+        // .of(SignatureModel.of((AnnotatedElement) type)))
+        // .stream().peek(System.out::println));
+        // }
 
         return nodeDependencies.appendRelatedNodes(
                 Stream.of(EntityNode.of(ref.getClassInfo())));

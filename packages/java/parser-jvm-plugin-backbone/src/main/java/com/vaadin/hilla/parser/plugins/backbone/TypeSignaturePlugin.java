@@ -103,6 +103,9 @@ public final class TypeSignaturePlugin
                 && schema instanceof ComposedSchema) {
             attachSchemaToEntitySubclass((ComposedSchema) schema,
                     (EntityNode) parentNode);
+        } else if (parentNode instanceof EntityNode
+                && parentNode.getTarget() instanceof ArraySchema) {
+            ((ArraySchema) parentNode.getTarget()).setItems(schema);
         } else if (parentNode instanceof PropertyNode
                 && grandParentNode instanceof EntityNode) {
             attachSchemaToPropertyOfEntity(schema, (PropertyNode) parentNode,

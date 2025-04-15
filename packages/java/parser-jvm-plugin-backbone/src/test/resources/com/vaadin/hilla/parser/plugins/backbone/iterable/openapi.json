@@ -181,6 +181,41 @@
         }
       }
     },
+    "/IterableEndpoint/getIterableWithProperties": {
+      "post": {
+        "tags": ["IterableEndpoint"],
+        "operationId": "IterableEndpoint_getIterableWithProperties_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$IterableWithProperties"
+                    }
+                  ],
+                  "x-type-arguments": {
+                    "allOf": [
+                      {
+                        "nullable": true,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Bar"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/IterableEndpoint/getSpecializedIterable": {
       "post": {
         "tags": ["IterableEndpoint"],
@@ -240,6 +275,32 @@
         "type": "object",
         "properties": {
           "bar": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$IterableWithProperties": {
+        "type": "array",
+        "items": {
+          "nullable": true,
+          "x-type-variable" : "T"
+        },
+        "properties": {
+          "defaultItem": {
+            "type": "object",
+            "nullable": true,
+            "x-type-variable": "T"
+          }
+        },
+        "x-type-parameters": [
+          "T"
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.backbone.iterable.IterableEndpoint$Bar": {
+        "type": "object",
+        "properties": {
+          "foo": {
             "type": "string",
             "nullable": true
           }

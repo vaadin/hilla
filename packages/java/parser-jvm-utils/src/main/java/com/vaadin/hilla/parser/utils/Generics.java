@@ -30,6 +30,9 @@ public class Generics {
             if (exactReturnType instanceof ParameterizedType) {
                 return Optional.of(((ParameterizedType) exactReturnType)
                         .getActualTypeArguments()[0]);
+            } else if (exactReturnType instanceof Class<?>) {
+                return Optional.of(
+                        ((Class<?>) exactReturnType).getTypeParameters()[0]);
             }
 
             return Optional.empty();

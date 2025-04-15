@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Objects;
@@ -20,15 +21,19 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
+import com.vaadin.hilla.parser.utils.Generics;
 
 import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
+    private static SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
             .build()
             .setVisibility(PropertyAccessor.SETTER,
                     JsonAutoDetect.Visibility.PUBLIC_ONLY)
@@ -51,20 +56,21 @@ public final class PropertyPlugin
     @NonNull
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
-        if (!(nodeDependencies.getNode() instanceof EntityNode)) {
-            return nodeDependencies;
+        if (nodeDependencies.getNode() instanceof EntityNode) {
+
+            var node = nodeDependencies.getNode();
+            var model = (ClassInfoModel) node.getSource();
+            if (model.isEnum()) {
+                return nodeDependencies;
+            }
+
+            var properties = collectProperties(model)
+                    .<Node<?, ?>> map(PropertyNode::of);
+
+            return nodeDependencies.appendChildNodes(properties);
         }
 
-        var node = nodeDependencies.getNode();
-        var model = (ClassInfoModel) node.getSource();
-        if (model.isEnum()) {
-            return nodeDependencies;
-        }
-
-        var properties = collectProperties(model)
-                .<Node<?, ?>> map(PropertyNode::of);
-
-        return nodeDependencies.appendChildNodes(properties);
+        return nodeDependencies;
     }
 
     @Override
@@ -74,11 +80,11 @@ public final class PropertyPlugin
         var factory = loadJacksonObjectMapperFactory();
 
         if (factory != null) {
-            this.serializationConfig = factory.build().getSerializationConfig();
+            serializationConfig = factory.build().getSerializationConfig();
         }
     }
 
-    private Stream<JacksonPropertyModel> collectProperties(
+    public static Stream<JacksonPropertyModel> collectProperties(
             @NonNull ClassInfoModel model) {
         var cls = Objects.requireNonNull(model).get();
 
@@ -131,7 +137,7 @@ public final class PropertyPlugin
      * The class for processing each BeanDescription. The class' algorithm is
      * adopted from the Jackson's BeanSerializerFactory class (v2.15).
      */
-    private class PropertyProcessor {
+    private static class PropertyProcessor {
         private final BeanDescription description;
 
         PropertyProcessor(BeanDescription description) {
