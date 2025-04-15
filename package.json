@@ -30,7 +30,8 @@
     "test": "nx run-many -p packages/ts/* -t test --all --output-style stream",
     "test:coverage": "nx run-many -p packages/ts/* -t test:coverage --all --output-style stream",
     "test:react": "nx run-many -p packages/ts/* -t test:react --all --output-style stream",
-    "typecheck": "nx run-many -p packages/ts/* -t typecheck --all --output-style stream"
+    "typecheck": "nx run-many -p packages/ts/* -t typecheck --all --output-style stream",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
