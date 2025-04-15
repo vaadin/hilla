@@ -51,10 +51,7 @@ public class SecureSignalsRegistry {
 
     public synchronized void register(String clientSignalId,
             String endpointName, String methodName, ObjectNode body)
-            throws EndpointInvocationException.EndpointAccessDeniedException,
-            EndpointInvocationException.EndpointNotFoundException,
-            EndpointInvocationException.EndpointBadRequestException,
-            EndpointInvocationException.EndpointInternalException {
+            throws EndpointInvocationException.EndpointHttpException {
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil
@@ -78,8 +75,7 @@ public class SecureSignalsRegistry {
     }
 
     public synchronized Signal<?> get(String clientSignalId)
-            throws EndpointInvocationException.EndpointAccessDeniedException,
-            EndpointInvocationException.EndpointNotFoundException {
+            throws EndpointInvocationException.EndpointHttpException {
         var endpointMethodInfo = endpointMethods.get(clientSignalId);
         if (endpointMethodInfo == null) {
             return null;
@@ -89,8 +85,7 @@ public class SecureSignalsRegistry {
     }
 
     private void checkAccess(String endpointName, String methodName)
-            throws EndpointInvocationException.EndpointNotFoundException,
-            EndpointInvocationException.EndpointAccessDeniedException {
+            throws EndpointInvocationException.EndpointHttpException {
         Principal principal = AuthenticationUtil
                 .getSecurityHolderAuthentication();
         Function<String, Boolean> isInRole = AuthenticationUtil
@@ -100,18 +95,23 @@ public class SecureSignalsRegistry {
 
     private void checkAccess(String endpointName, String methodName,
             Principal principal, Function<String, Boolean> isInRole)
-            throws EndpointInvocationException.EndpointNotFoundException,
-            EndpointInvocationException.EndpointAccessDeniedException {
+            throws EndpointInvocationException.EndpointHttpException {
         EndpointRegistry.VaadinEndpointData endpointData = invoker
                 .getVaadinEndpointData(endpointName);
         Method method = getMethod(endpointData, methodName);
         var checkError = invoker.checkAccess(endpointData, method, principal,
                 isInRole);
         if (checkError != null) {
-            throw new EndpointInvocationException.EndpointAccessDeniedException(
-                    String.format(
-                            "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
-                            endpointName, methodName, checkError));
+            var message = String.format(
+                    "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
+                    endpointName, methodName, checkError);
+            if (principal == null) {
+                throw new EndpointInvocationException.EndpointUnauthorizedException(
+                        message);
+            } else {
+                throw new EndpointInvocationException.EndpointForbiddenException(
+                        message);
+            }
         }
     }
 

@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
-import { componentOptions, destination, local, remote, root, type Versions, workspaceFiles } from './config.js';
+import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
 
 const [{ version }, versions] = await Promise.all([
@@ -42,71 +43,88 @@ await Promise.all(
   }),
 );
 
-const reactComponentsPackageName = '@vaadin/react-components';
-const reactComponentsProPackageName = '@vaadin/react-components-pro';
+// Known packages to synchronise with Vaadin web components version
+const KNOWN_COMPONENT_PACKAGES = ['@vaadin/vaadin-themable-mixin'];
+const componentsVersion = versions.core['component-base'].jsVersion ?? '';
+
+// Known packages to synchronise with Vaadin React components version
+const KNOWN_REACT_COMPONENT_PACKAGES = ['@vaadin/react-components', '@vaadin/react-components-pro'];
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
-const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
-const rootPackageJsonFile = new URL('package.json', root);
-const rootPackageJson = JSON.parse(await readFile(rootPackageJsonFile, 'utf-8')) as PackageJson;
-if ((rootPackageJson.devDependencies ??= {})[reactComponentsPackageName] !== reactComponentsVersion) {
-  console.log(`Updating "${reactComponentsSpec}".`);
-  // Update hoisted version in root package.json
-  rootPackageJson.devDependencies[reactComponentsPackageName] = reactComponentsVersion;
-  // Also update hoisted pro version
-  rootPackageJson.devDependencies[reactComponentsProPackageName] = reactComponentsVersion;
-  await writeFile(rootPackageJsonFile, JSON.stringify(rootPackageJson, undefined, 2), 'utf-8');
 
-  // Keep @vaadin/hilla-react-crud in sync
-  const reactCrudPackageJsonFile = new URL('packages/ts/react-crud/package.json', root);
-  const reactCrudPackageJson = JSON.parse(await readFile(reactCrudPackageJsonFile, 'utf-8')) as PackageJson;
-  (reactCrudPackageJson.dependencies ??= {})[reactComponentsPackageName] = reactComponentsVersion;
-  await writeFile(reactCrudPackageJsonFile, JSON.stringify(reactCrudPackageJson, undefined, 2), 'utf-8');
-} else {
-  console.log(`Skipping install for "${reactComponentsSpec}", same version installed.`);
-}
+let rootPackageJson: PackageJson | undefined;
 
-function updateDependencyVersion(packageJson: PackageJson, npmName: string, versionSpec: string) {
-  if (packageJson.devDependencies?.[npmName] !== undefined) {
-    packageJson.devDependencies[npmName] = versionSpec;
+function updateDependencyVersion(json: PackageJson, npmName: string, versionSpec: string) {
+  if (json.devDependencies?.[npmName] !== undefined) {
+    json.devDependencies[npmName] = versionSpec;
   }
-  if (packageJson.dependencies?.[npmName] !== undefined) {
-    packageJson.dependencies[npmName] = versionSpec;
+  if (json.dependencies?.[npmName] !== undefined) {
+    json.dependencies[npmName] = versionSpec;
   }
 }
-await Promise.all(
-  workspaceFiles.map(async (file) => {
-    const workspaceFile = new URL(file, root);
-    const workspaceJsonContents = (await readFile(workspaceFile, 'utf-8')).trim();
-    const workspaceJson = JSON.parse(workspaceJsonContents) as PackageJson;
-    // Update versions in workspace package.json from versions.json
-    for (const packages of Object.values(versions)) {
-      for (const { npmName, jsVersion } of Object.values(
-        packages as Record<string, Readonly<{ npmName?: string; jsVersion?: string }>>,
-      )) {
-        if (!npmName || !jsVersion) {
-          continue;
-        }
-        updateDependencyVersion(workspaceJson, npmName, jsVersion);
-      }
-    }
-    // FIXME: replace with correct source for themable mixin version
-    updateDependencyVersion(workspaceJson, '@vaadin/vaadin-themable-mixin', reactComponentsVersion);
-    // Update versions in workspace package.json from root
-    for (const [npmName, jsVersion] of Object.entries(rootPackageJson.devDependencies ?? {})) {
-      if (!jsVersion) {
+
+async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
+  const fileUrl = new URL(file, root);
+  const originalContents = (await readFile(fileUrl, 'utf-8')).trim();
+  const json = JSON.parse(originalContents) as PackageJson;
+  for (const packages of Object.values(versions)) {
+    for (const { npmName, jsVersion } of Object.values(
+      packages as Record<string, Readonly<{ npmName?: string; jsVersion?: string }>>,
+    )) {
+      if (!npmName || !jsVersion) {
         continue;
       }
-      updateDependencyVersion(workspaceJson, npmName, jsVersion);
+      updateDependencyVersion(json, npmName, jsVersion);
     }
-    const contents = JSON.stringify(workspaceJson, undefined, 2).trim();
-    if (contents !== workspaceJsonContents) {
-      console.log(`Updating ${file}.`);
-      await writeFile(workspaceFile, contents, 'utf-8');
+  }
+  for (const packageName of KNOWN_COMPONENT_PACKAGES) {
+    updateDependencyVersion(json, packageName, componentsVersion);
+  }
+  for (const packageName of KNOWN_REACT_COMPONENT_PACKAGES) {
+    updateDependencyVersion(json, packageName, reactComponentsVersion);
+  }
+
+  if (rootPackageJson && file !== 'package.json') {
+    for (const [packageName, versionSpec] of [
+      ...Object.entries(rootPackageJson.dependencies ?? {}),
+      ...Object.entries(rootPackageJson.devDependencies ?? {}),
+    ]) {
+      if (!versionSpec) {
+        continue;
+      }
+      updateDependencyVersion(json, packageName, versionSpec);
+    }
+  }
+
+  const contents = JSON.stringify(json, undefined, 2).trim();
+  if (contents !== originalContents) {
+    console.log(`Updating ${file}.`);
+    await writeFile(fileUrl, contents, 'utf-8');
+  } else {
+    console.log(`Nothing to update in ${file}, skipping.`);
+  }
+
+  return json;
+}
+
+rootPackageJson = await getPackageJsonWithUpdates('package.json');
+
+const workspaces = Array.isArray(rootPackageJson.workspaces) ? rootPackageJson.workspaces : [];
+
+const [patterns, ignore] = workspaces.reduce<readonly [string[], string[]]>(
+  ([_patterns, _ignore], pattern) => {
+    if (pattern.startsWith('!')) {
+      _ignore.push(`${pattern.substring(1)}/package.json`);
     } else {
-      console.log(`Nothing to update in ${file}, skipping.`);
+      _patterns.push(`${pattern}/package.json`);
     }
-    // Clean old IT node_modules installation
-    const nodeModulesDir = new URL('node_modules/', workspaceFile);
-    await rm(nodeModulesDir, { recursive: true, force: true });
-  }),
+    return [_patterns, _ignore];
+  },
+  [[], []],
 );
+
+for await (const file of globIterate(patterns, { cwd: root, ignore })) {
+  await getPackageJsonWithUpdates(file);
+  // Clean old IT node_modules installation
+  const nodeModulesDir = new URL('node_modules/', new URL(file, root));
+  await rm(nodeModulesDir, { recursive: true, force: true });
+}
