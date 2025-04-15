@@ -13,10 +13,7 @@ import java.util.function.Consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerConfiguration;
-import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
-import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointProperties;
 import com.vaadin.hilla.EndpointSubscription;
@@ -81,9 +78,7 @@ public class PushMessageHandlerTest {
     private String connectionId;
 
     @Before
-    public void setup()
-            throws EndpointNotFoundException, EndpointAccessDeniedException,
-            EndpointBadRequestException, EndpointInternalException {
+    public void setup() throws EndpointHttpException {
         Mockito.when(endpointInvoker.getReturnType(Mockito.anyString(),
                 Mockito.anyString())).thenAnswer(request -> {
                     if (!request.getArgument(0).equals(ENDPOINT_NAME)) {

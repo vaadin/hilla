@@ -2,13 +2,16 @@
 import { cpSync, mkdirSync, statSync } from 'fs';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
-import { root, workspaceFiles } from './config';
+import { glob } from 'glob';
+import { root } from './config';
 
 const hoistedVitePackageDir = new URL('node_modules/vite/', root);
 
 const cwd = pathToFileURL(process.env['INIT_CWD'] ?? process.cwd()).toString();
 const cwdPathPrefix = cwd.startsWith(root.toString()) ? decodeURIComponent(cwd.substring(root.toString().length)) : '';
 
+const workspacesToMaintain = ['packages/java/tests/*', 'packages/java/tests/gradle/*', 'packages/java/tests/spring/*'];
+const workspaceFiles = await glob(workspacesToMaintain, { cwd: root });
 const targetWorkspaceFiles = workspaceFiles.filter((file) => file.startsWith(cwdPathPrefix));
 for (const file of targetWorkspaceFiles) {
   const workspaceFile = new URL(file, root);

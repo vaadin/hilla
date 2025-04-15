@@ -21,10 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.hilla.EndpointInvocationException.EndpointAccessDeniedException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointForbiddenException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.EndpointRegistry.VaadinEndpointData;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
@@ -159,20 +161,13 @@ public class EndpointInvoker {
      *            a function for checking if a user is in a given role
      * @return the return value of the invoked endpoint method, wrapped in a
      *         response entity
-     * @throws EndpointNotFoundException
-     *             if the endpoint was not found
-     * @throws EndpointAccessDeniedException
-     *             if access to the endpoint was denied
-     * @throws EndpointBadRequestException
-     *             if there was a problem with the request data
-     * @throws EndpointInternalException
-     *             if there was an internal error executing the endpoint method
+     * @throws EndpointHttpException
+     *             if thrown by the endpoint
      */
     public Object invoke(String endpointName, String methodName,
             ObjectNode body, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointNotFoundException, EndpointAccessDeniedException,
-            EndpointBadRequestException, EndpointInternalException {
+            throws EndpointHttpException {
         VaadinEndpointData vaadinEndpointData = getVaadinEndpointData(
                 endpointName);
 
@@ -378,10 +373,13 @@ public class EndpointInvoker {
 
     private ResponseEntity<String> handleMethodExecutionError(
             String endpointName, String methodName, InvocationTargetException e)
-            throws EndpointInternalException {
-        if (EndpointException.class.isAssignableFrom(e.getCause().getClass())) {
-            EndpointException endpointException = ((EndpointException) e
-                    .getCause());
+            throws EndpointHttpException {
+        var wrappedException = e.getCause();
+        if (wrappedException instanceof EndpointHttpException ex) {
+            throw ex;
+        } else if (EndpointException.class
+                .isAssignableFrom(wrappedException.getClass())) {
+            EndpointException endpointException = ((EndpointException) wrappedException);
             getLogger().debug("Endpoint '{}' method '{}' aborted the execution",
                     endpointName, methodName, endpointException);
             throw endpointException;
@@ -416,16 +414,20 @@ public class EndpointInvoker {
             String methodName, Method methodToInvoke, ObjectNode body,
             VaadinEndpointData vaadinEndpointData, Principal principal,
             Function<String, Boolean> rolesChecker)
-            throws EndpointAccessDeniedException, EndpointBadRequestException,
-            EndpointInternalException {
+            throws EndpointHttpException {
         HillaStats.reportEndpointActive();
 
         var checkError = checkAccess(vaadinEndpointData, methodToInvoke,
                 principal, rolesChecker);
         if (checkError != null) {
-            throw new EndpointAccessDeniedException(String.format(
+            var message = String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
-                    endpointName, methodName, checkError));
+                    endpointName, methodName, checkError);
+            if (principal == null) {
+                throw new EndpointUnauthorizedException(message);
+            } else {
+                throw new EndpointForbiddenException(message);
+            }
         }
 
         var parameterNames = Arrays.stream(methodToInvoke.getParameters())
