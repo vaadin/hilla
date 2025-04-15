@@ -124,9 +124,8 @@ describe('@vaadin/hilla-react-signals', () => {
         { mute: true },
       );
 
-      const [onNextCallback] = subscription.onNext.firstCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'snapshot', value: 'bar' });
+      simulateReceivedChange(subscription, { id: params?.event.id, type: 'snapshot', value: 'bar' });
       // verify receiving the snapshot event updates the value correctly:
       expect(valueSignal.value).to.equal('bar');
     });
@@ -138,9 +137,8 @@ describe('@vaadin/hilla-react-signals', () => {
       valueSignal.replace('bar', 'barfoo');
 
       const [, , params] = client.call.firstCall.args;
-      const [onNextCallback] = subscription.onNext.firstCall.args;
       // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params?.event.id, type: 'reject', value: 'dont care' });
+      simulateReceivedChange(subscription, { id: params?.event.id, type: 'reject', value: 'dont care' });
       // verify receiving the reject event doesn't change the value:
       expect(valueSignal.value).to.equal('baz');
     });
@@ -236,8 +234,7 @@ describe('@vaadin/hilla-react-signals', () => {
         { mute: true },
       );
 
-      const [onNextCallback] = subscription.onNext.firstCall.args;
-      onNextCallback({ ...expectedEvent, accepted: true });
+      simulateReceivedChange(subscription, { ...expectedEvent, accepted: true });
       expect(valueSignal.value).to.equal('bar');
     });
 
@@ -261,10 +258,8 @@ describe('@vaadin/hilla-react-signals', () => {
         { mute: true },
       );
 
-      const [onNextCallback] = subscription.onNext.firstCall.args;
-
       // Simulate an accepted event representing a concurrent value change before the reject is received:
-      onNextCallback({
+      simulateReceivedChange(subscription, {
         id: 'another-event-id',
         type: 'replace',
         value: 'b',
@@ -273,8 +268,14 @@ describe('@vaadin/hilla-react-signals', () => {
       } as ReplaceStateEvent<string>);
       expect(valueSignal.value).to.equal('b');
 
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params1?.event.id, type: 'replace', value: 'aa', expected: 'a', accepted: false });
+      simulateReceivedChange(subscription, {
+        // @ts-expect-error params.event type has id property
+        id: params1?.event.id,
+        type: 'replace',
+        value: 'aa',
+        expected: 'a',
+        accepted: false,
+      } as ReplaceStateEvent<string>);
       // verify that the value is not updated after receiving a reject event:
       expect(valueSignal.value).to.equal('b');
       // verify that receiving reject event triggers another update call:
@@ -292,7 +293,7 @@ describe('@vaadin/hilla-react-signals', () => {
       );
 
       // Simulate another concurrent value change before the reject is received:
-      onNextCallback({
+      simulateReceivedChange(subscription, {
         id: 'another-event-id',
         type: 'replace',
         value: 'c',
@@ -301,8 +302,14 @@ describe('@vaadin/hilla-react-signals', () => {
       } as ReplaceStateEvent<string>);
       expect(valueSignal.value).to.equal('c');
 
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b', accepted: false });
+      simulateReceivedChange(subscription, {
+        // @ts-expect-error params.event type has id property
+        id: params2?.event.id,
+        type: 'replace',
+        value: 'ba',
+        expected: 'b',
+        accepted: false,
+      } as ReplaceStateEvent<string>);
       expect(client.call).to.have.been.calledThrice;
       const [, , params3] = client.call.thirdCall.args;
       expect(client.call).to.have.been.calledWithMatch(
@@ -316,8 +323,14 @@ describe('@vaadin/hilla-react-signals', () => {
         { mute: true },
       );
 
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c', accepted: false });
+      simulateReceivedChange(subscription, {
+        // @ts-expect-error params.event type has id property
+        id: params3?.event.id,
+        type: 'replace',
+        value: 'ca',
+        expected: 'c',
+        accepted: false,
+      } as ReplaceStateEvent<string>);
       expect(client.call).to.have.been.callCount(4);
 
       setTimeout(() => updateOperation.cancel(), 500);
@@ -329,22 +342,37 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(valueSignal.value).to.equal('foo');
       render(<div>{valueSignal}</div>);
       await nextFrame();
-      const [onNextCallback] = subscription.onNext.firstCall.args;
       valueSignal.update((currValue) => `${currValue}bar`);
       const [, , params1] = client.call.firstCall.args;
 
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params1?.event.id, type: 'replace', value: 'dont care', accepted: false });
+      simulateReceivedChange(subscription, {
+        // @ts-expect-error params.event type has id property
+        id: params1?.event.id,
+        type: 'replace',
+        value: 'dont care',
+        accepted: false,
+      });
       expect(valueSignal.value).to.equal('foo');
 
       const [, , params2] = client.call.secondCall.args;
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params2?.event.id, type: 'replace', value: 'dont care', accepted: false });
+      simulateReceivedChange(subscription, {
+        // @ts-expect-error params.event type has id property
+        id: params2?.event.id,
+        type: 'replace',
+        value: 'dont care',
+        accepted: false,
+      });
       expect(valueSignal.value).to.equal('foo');
 
       const [, , params3] = client.call.thirdCall.args;
-      // @ts-expect-error params.event type has id property
-      onNextCallback({ id: params3?.event.id, type: 'replace', value: 'foobar', expected: 'foo', accepted: true });
+      simulateReceivedChange(subscription, {
+        // @ts-expect-error params.event type has id property
+        id: params3?.event.id,
+        type: 'replace',
+        value: 'foobar',
+        expected: 'foo',
+        accepted: true,
+      } as ReplaceStateEvent<string>);
       expect(valueSignal.value).to.equal('foobar');
     });
   });
