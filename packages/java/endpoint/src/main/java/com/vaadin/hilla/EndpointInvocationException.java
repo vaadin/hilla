@@ -104,8 +104,6 @@ public abstract class EndpointInvocationException extends Exception {
 
     /**
      * Allows to specify the HTTP status code and message to return as error.
-     * Although the HTTP code is arbitrary, this exception still indicates an
-     * error condition.
      */
     public static class EndpointHttpException
             extends EndpointInvocationException {
@@ -115,12 +113,19 @@ public abstract class EndpointInvocationException extends Exception {
          * Creates a new instance.
          *
          * @param httpStatusCode
-         *            the HTTP status code to return
+         *            the HTTP status code to return. Only 4xx and 5xx status
+         *            codes are allowed.
          * @param message
          *            the message to pass to the client
          */
         public EndpointHttpException(int httpStatusCode, String message) {
             super(message);
+
+            if (httpStatusCode < 400 || httpStatusCode > 599) {
+                throw new IllegalArgumentException(
+                        "Only 4xx and 5xx status codes are allowed");
+            }
+
             this.httpStatusCode = httpStatusCode;
         }
 

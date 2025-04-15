@@ -207,6 +207,11 @@ public class EndpointControllerTest {
         public void throwCustomHttpException() throws EndpointHttpException {
             throw new EndpointHttpException(418, "I'm a teapot!");
         }
+
+        @AnonymousAllowed
+        public void throwInvalidHttpException() throws EndpointHttpException {
+            throw new EndpointHttpException(200, "All right!");
+        }
     }
 
     @Endpoint("CustomEndpoint")
@@ -515,16 +520,29 @@ public class EndpointControllerTest {
 
     @Test
     public void should_GetResponseStatusAndMessageFromCustomException() {
-        EndpointController vaadinController = createVaadinController(
-                TEST_ENDPOINT,
+        var vaadinController = createVaadinController(TEST_ENDPOINT,
                 new EndpointAccessChecker(new AccessAnnotationChecker()));
 
-        ResponseEntity<String> response = vaadinController.serveEndpoint(
-                TEST_ENDPOINT_NAME, "throwCustomHttpException",
-                createRequestParameters("{}"), requestMock);
+        var response = vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
+                "throwCustomHttpException", createRequestParameters("{}"),
+                requestMock);
 
         assertEquals(HttpStatus.I_AM_A_TEAPOT, response.getStatusCode());
         assertTrue(response.getBody().contains("I'm a teapot!"));
+    }
+
+    @Test
+    public void should_FailWhenTryingToReturnInvalidHttpCodeThroughException() {
+        var vaadinController = createVaadinController(TEST_ENDPOINT,
+                new EndpointAccessChecker(new AccessAnnotationChecker()));
+
+        var response = vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
+                "throwInvalidHttpException", createRequestParameters("{}"),
+                requestMock);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                response.getStatusCode());
+        assertTrue(response.getBody().contains("throwInvalidHttpException"));
     }
 
     @Test
