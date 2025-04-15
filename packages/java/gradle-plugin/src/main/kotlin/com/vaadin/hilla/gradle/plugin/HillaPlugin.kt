@@ -1,5 +1,5 @@
 /**
- *    Copyright 2000-2024 Vaadin Ltd
+ *    Copyright 2000-2025 Vaadin Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class HillaPlugin : Plugin<Project> {
         project.pluginManager.apply(VaadinPlugin::class.java)
 
         // only register Hilla tasks in projects that use Spring Boot
-        if (project.plugins.hasPlugin("org.springframework.boot")) {
+        project.plugins.withId("org.springframework.boot") {
             project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
 
             project.tasks.apply {

@@ -1,6 +1,5 @@
 package com.vaadin.hilla.engine;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,8 +16,12 @@ import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ParserConfiguration {
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(ParserConfiguration.class);
     private String openAPIBasePath;
     private Plugins plugins;
 
@@ -137,13 +140,37 @@ public final class ParserConfiguration {
     }
 
     static class PluginsProcessor extends ConfigList.Processor<Plugin> {
-        private static final List<Plugin> DEFAULTS = List.of(
-                new Plugin(BackbonePlugin.class.getName()),
-                new Plugin(MultipartFileCheckerPlugin.class.getName()),
-                new Plugin(TransferTypesPlugin.class.getName()),
-                new Plugin(NonnullPlugin.class.getName()),
-                new Plugin(SubTypesPlugin.class.getName()),
-                new Plugin(ModelPlugin.class.getName()));
+        private static final List<Plugin> DEFAULTS = createDefaults();
+
+        private static List<Plugin> createDefaults() {
+            List<Plugin> plugins = new ArrayList<>();
+            // Always include these plugins.
+            plugins.add(new Plugin(BackbonePlugin.class.getName()));
+            plugins.add(new Plugin(MultipartFileCheckerPlugin.class.getName()));
+            plugins.add(new Plugin(TransferTypesPlugin.class.getName()));
+
+            // Conditionally add the Kotlin nullability plugin if available.
+            try {
+                Class<?> kotlinNullabilityClass = Class.forName(
+                        "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
+
+                // Check that a class from kotlin-reflect is available:
+                Class.forName("kotlin.reflect.KClass");
+
+                plugins.add(new Plugin(kotlinNullabilityClass.getName()));
+            } catch (Throwable e) {
+                LOGGER.debug(
+                        "Kotlin nullability plugin is not going to be loaded. "
+                                + "If you wish to enable it, please ensure that both 'kotlin-reflect' "
+                                + "and 'hilla-parser-jvm-plugin-nonnull-kotlin' are in your classpath.");
+            }
+
+            // Add the remaining plugins.
+            plugins.add(new Plugin(NonnullPlugin.class.getName()));
+            plugins.add(new Plugin(SubTypesPlugin.class.getName()));
+            plugins.add(new Plugin(ModelPlugin.class.getName()));
+            return List.copyOf(plugins);
+        }
 
         PluginsProcessor() {
             super(DEFAULTS);
