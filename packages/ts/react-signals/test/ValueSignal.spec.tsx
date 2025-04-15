@@ -113,11 +113,16 @@ describe('@vaadin/hilla-react-signals', () => {
       const [, , params] = client.call.firstCall.args;
 
       expect(client.call).to.have.been.calledOnce;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: valueSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params?.event.id, type: 'replace', value: 'foo', expected: 'bar' },
-      }, { mute: true });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: valueSignal.id,
+          // @ts-expect-error params.event type has id property
+          event: { id: params?.event.id, type: 'replace', value: 'foo', expected: 'bar' },
+        },
+        { mute: true },
+      );
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
       // @ts-expect-error params.event type has id property
@@ -221,10 +226,15 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.call).to.have.been.calledOnce;
       // @ts-expect-error params.event type has id property
       const expectedEvent = { id: params?.event.id, type: 'replace', value: 'bar', expected: 'ba' };
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: valueSignal.id,
-        event: expectedEvent,
-      }, { mute: true });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: valueSignal.id,
+          event: expectedEvent,
+        },
+        { mute: true },
+      );
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
       onNextCallback({ ...expectedEvent, accepted: true });
@@ -240,11 +250,16 @@ describe('@vaadin/hilla-react-signals', () => {
       const updateOperation = valueSignal.update((currValue) => `${currValue}a`);
       expect(client.call).to.have.been.calledOnce;
       const [, , params1] = client.call.firstCall.args;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: valueSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params1?.event.id, type: 'replace', value: 'aa', expected: 'a' },
-      }, { mute: true });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: valueSignal.id,
+          // @ts-expect-error params.event type has id property
+          event: { id: params1?.event.id, type: 'replace', value: 'aa', expected: 'a' },
+        },
+        { mute: true },
+      );
 
       const [onNextCallback] = subscription.onNext.firstCall.args;
 
@@ -265,11 +280,16 @@ describe('@vaadin/hilla-react-signals', () => {
       // verify that receiving reject event triggers another update call:
       expect(client.call).to.have.been.calledTwice;
       const [, , params2] = client.call.secondCall.args;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: valueSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b', accepted: false },
-      }, { mute: true });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: valueSignal.id,
+          // @ts-expect-error params.event type has id property
+          event: { id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b', accepted: false },
+        },
+        { mute: true },
+      );
 
       // Simulate another concurrent value change before the reject is received:
       onNextCallback({
@@ -285,11 +305,16 @@ describe('@vaadin/hilla-react-signals', () => {
       onNextCallback({ id: params2?.event.id, type: 'replace', value: 'ba', expected: 'b', accepted: false });
       expect(client.call).to.have.been.calledThrice;
       const [, , params3] = client.call.thirdCall.args;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: valueSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c', accepted: false },
-      }, { mute: true });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: valueSignal.id,
+          // @ts-expect-error params.event type has id property
+          event: { id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c', accepted: false },
+        },
+        { mute: true },
+      );
 
       // @ts-expect-error params.event type has id property
       onNextCallback({ id: params3?.event.id, type: 'replace', value: 'ca', expected: 'c', accepted: false });
