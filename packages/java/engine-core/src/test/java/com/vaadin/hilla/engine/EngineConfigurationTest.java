@@ -41,7 +41,7 @@ public class EngineConfigurationTest {
     public void shouldUseLookupByDefault() throws Exception {
         var classFinder = mock(ClassFinder.class);
         when(classFinder
-        .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
         var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
                 .setEndpointAnnotationNames(
@@ -65,10 +65,13 @@ public class EngineConfigurationTest {
     @Test
     public void shouldUseAotWhenClassFinderThrowsException() throws Exception {
         var classFinder = mock(ClassFinder.class);
-        when(classFinder.getAnnotatedClasses((Class<? extends Annotation>) any()))
-                .thenReturn(Set.of(EndpointFromClassFinder.class, EndpointFromClassFinderWithCustomName.class));
-        var conf = EngineConfiguration.STATE.setClassFinder(classFinder).setEndpointAnnotationNames(
-                BrowserCallableEndpoint.class.getName());
+        when(classFinder
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class,
+                        EndpointFromClassFinderWithCustomName.class));
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
+                .setEndpointAnnotationNames(
+                        BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
