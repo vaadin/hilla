@@ -88,10 +88,15 @@ describe('@vaadin/hilla-react-signals', () => {
         value: 1,
         accepted: false,
       };
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: numberSignal.id,
-        event: expectedEvent1,
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: numberSignal.id,
+          event: expectedEvent1,
+        },
+        { mute: true },
+      );
 
       simulateReceivingAcceptedEvent(expectedEvent1);
       expect(numberSignal.value).to.equal(43);
@@ -100,10 +105,15 @@ describe('@vaadin/hilla-react-signals', () => {
       const [, , params2] = client.call.secondCall.args;
       // @ts-expect-error params.event type has id property
       const expectedEvent2: IncrementStateEvent = { id: params2?.event.id, type: 'increment', value: 2 };
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: numberSignal.id,
-        event: expectedEvent2,
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: numberSignal.id,
+          event: expectedEvent2,
+        },
+        { mute: true },
+      );
 
       simulateReceivingAcceptedEvent(expectedEvent2);
       expect(numberSignal.value).to.equal(45);
@@ -117,10 +127,15 @@ describe('@vaadin/hilla-react-signals', () => {
         value: -5,
         accepted: false,
       };
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: numberSignal.id,
-        event: expectedEvent3,
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: numberSignal.id,
+          event: expectedEvent3,
+        },
+        { mute: true },
+      );
 
       simulateReceivingAcceptedEvent(expectedEvent3);
       expect(numberSignal.value).to.equal(40);

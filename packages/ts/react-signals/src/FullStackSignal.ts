@@ -1,4 +1,9 @@
-import type { ActionOnLostSubscription, ConnectClient, Subscription } from '@vaadin/hilla-frontend';
+import type {
+  ActionOnLostSubscription,
+  ConnectClient,
+  EndpointRequestInit,
+  Subscription,
+} from '@vaadin/hilla-frontend';
 import { nanoid } from 'nanoid';
 import { computed, signal, Signal } from './core.js';
 import { createSetStateEvent, type StateEvent } from './events.js';
@@ -123,17 +128,22 @@ class ServerConnection {
     return this.#subscription;
   }
 
-  async update(event: StateEvent): Promise<void> {
+  async update(event: StateEvent, init?: EndpointRequestInit): Promise<void> {
     const onTheFly = !this.#subscription;
 
     if (onTheFly) {
       this.connect();
     }
 
-    await this.config.client.call(ENDPOINT, 'update', {
-      clientSignalId: this.#id,
-      event,
-    });
+    await this.config.client.call(
+      ENDPOINT,
+      'update',
+      {
+        clientSignalId: this.#id,
+        event,
+      },
+      init ?? { mute: true },
+    );
 
     if (onTheFly) {
       this.disconnect();
