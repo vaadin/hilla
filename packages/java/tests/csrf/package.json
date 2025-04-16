@@ -15,7 +15,7 @@
     "@vaadin/vaadin-lumo-styles": "24.8.0-alpha11",
     "@vaadin/vaadin-themable-mixin": "24.8.0-alpha11",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.2.1"
+    "lit": "3.3.0"
   },
   "devDependencies": {
     "@babel/preset-react": "7.26.3",
@@ -61,7 +61,7 @@
       "@vaadin/vaadin-lumo-styles": "24.8.0-alpha11",
       "@vaadin/vaadin-themable-mixin": "24.8.0-alpha11",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.2.1"
+      "lit": "3.3.0"
     },
     "devDependencies": {
       "@babel/preset-react": "7.26.3",
@@ -93,7 +93,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "a3479ae2ffee8a018984b859854c19ea593cbe9e32702db84992af51fe4a420d"
+    "hash": "0a5dbb7230209dc533d64848363428316e21774863049e10a4f3cd53939583bb"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
