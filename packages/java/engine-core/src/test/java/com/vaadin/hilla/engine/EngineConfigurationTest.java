@@ -8,9 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,7 +78,7 @@ public class EngineConfigurationTest {
         }
     }
 
-    private static class TestService implements EngineConfiguration {
+    public static class TestService implements EngineConfiguration {
         @Override
         public String getGroupId() {
             return "com.example";
@@ -89,20 +87,11 @@ public class EngineConfigurationTest {
 
     @Test
     public void shouldLoadCustomConfiguration() {
-        try (var staticServiceLoaderMock = mockStatic(ServiceLoader.class)) {
-            var serviceLoaderMock = mock(ServiceLoader.class);
-            when(ServiceLoader.load(EngineConfiguration.class))
-                    .thenReturn(serviceLoaderMock);
-            var providerMock = mock(ServiceLoader.Provider.class);
-            when(serviceLoaderMock.stream())
-                    .thenReturn(Stream.of(providerMock));
-            when(providerMock.get()).thenReturn(new TestService());
-            var conf = EngineConfiguration.load();
-            assertEquals("com.example", conf.getGroupId());
-        }
+        var conf = EngineConfiguration.load(new TestService());
+        assertEquals("com.example", conf.getGroupId());
     }
 
-    private static class OtherTestService implements EngineConfiguration {
+    public static class OtherTestService implements EngineConfiguration {
         @Override
         public String getGroupId() {
             return "com.other";
@@ -111,18 +100,19 @@ public class EngineConfigurationTest {
 
     @Test
     public void shouldThrowWhenMultipleCustomConfigurations() {
-        try (var staticServiceLoaderMock = mockStatic(ServiceLoader.class)) {
-            var serviceLoaderMock = mock(ServiceLoader.class);
-            when(ServiceLoader.load(EngineConfiguration.class))
-                    .thenReturn(serviceLoaderMock);
-            var providerMock = mock(ServiceLoader.Provider.class);
-            var otherProviderMock = mock(ServiceLoader.Provider.class);
-            when(serviceLoaderMock.stream())
-                    .thenReturn(Stream.of(providerMock, otherProviderMock));
-            when(providerMock.get()).thenReturn(new TestService());
-            when(otherProviderMock.get()).thenReturn(new OtherTestService());
-            assertThrows(ConfigurationException.class,
-                    EngineConfiguration::load);
-        }
+        var ex = assertThrows(ConfigurationException.class,
+                () -> EngineConfiguration.load(new TestService(),
+                        new OtherTestService()));
+        assertTrue(ex.getMessage().contains(
+                "Multiple EngineConfiguration implementations found:"));
+        assertTrue(ex.getMessage().contains("TestService"));
+        assertTrue(ex.getMessage().contains("OtherTestService"));
+    }
+
+    @Test
+    public void shouldUseServiceLoader() {
+        // loads TestService from META-INF/services
+        var conf = EngineConfiguration.load();
+        assertEquals("com.example", conf.getGroupId());
     }
 }

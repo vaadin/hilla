@@ -196,18 +196,24 @@ public interface EngineConfiguration {
     }
 
     static EngineConfiguration load() {
-        var configurations = ServiceLoader.load(EngineConfiguration.class)
-                .stream().map(ServiceLoader.Provider::get).toList();
+        return load(ServiceLoader.load(EngineConfiguration.class).stream()
+                .map(ServiceLoader.Provider::get)
+                .toArray(EngineConfiguration[]::new));
+    }
 
-        if (configurations.size() > 1) {
-            throw new ConfigurationException(configurations.stream()
+    static EngineConfiguration load(EngineConfiguration... configurations) {
+        switch (configurations.length) {
+        case 0:
+            return STATE;
+        case 1:
+            return configurations[0];
+        default:
+            throw new ConfigurationException(Arrays.stream(configurations)
                     .map(config -> config.getClass().getName())
                     .collect(Collectors.joining("\", \"",
-                            "Multiple EngineConfiguration instances found: \"",
+                            "Multiple EngineConfiguration implementations found: \"",
                             "\"")));
         }
-
-        return configurations.isEmpty() ? STATE : configurations.get(0);
     }
 
     default EngineConfiguration setBaseDir(Path baseDir) {
