@@ -26,6 +26,7 @@ import {
   columnRendererTestService,
   CompanyModel,
   companyService,
+  createListService,
   createService,
   Gender,
   getItem,
@@ -1086,6 +1087,46 @@ describe('@vaadin/hilla-react-crud', () => {
           };
 
           expect(service.lastFilter).to.deep.equal({ '@type': 'and', children: [expectedOrFilter] });
+        });
+      });
+
+      describe('empty state', () => {
+        it('should render and display empty-state slot when set and grid contains no items', async () => {
+          const result = render(
+            <AutoGrid service={createListService([])} model={PersonModel} emptyState={'No items found'} />,
+          );
+          const grid = await GridController.init(result, user);
+          expect(grid.getRowCount()).to.equal(0);
+          expect(grid.getEmptyStateSlot()).not.to.be.null;
+          expect(grid.getEmptyStateSlot()).to.have.rendered.text('No items found');
+          expect(grid.getEmptyStateRow()).toBeVisible();
+        });
+
+        it('should render but not display empty-state slot when set and grid contains items', async () => {
+          const result = render(
+            <AutoGrid service={personService()} model={PersonModel} emptyState={'No items found'} />,
+          );
+          const grid = await GridController.init(result, user);
+          expect(grid.getRowCount()).to.equal(2);
+          expect(grid.getEmptyStateSlot()).not.to.be.null;
+          expect(grid.getEmptyStateSlot()).to.have.rendered.text('No items found');
+          expect(grid.getEmptyStateRow()).not.toBeVisible();
+        });
+
+        it('should not render empty-state slot when not set and grid contains no items', async () => {
+          const result = render(<AutoGrid service={createListService([])} model={PersonModel} />);
+          const grid = await GridController.init(result, user);
+          expect(grid.getRowCount()).to.equal(0);
+          expect(grid.getEmptyStateSlot()).to.be.null;
+          expect(grid.getEmptyStateRow()).not.toBeVisible();
+        });
+
+        it('should not render empty-state slot when not set and grid contains items', async () => {
+          const result = render(<AutoGrid service={personService()} model={PersonModel} />);
+          const grid = await GridController.init(result, user);
+          expect(grid.getRowCount()).to.equal(2);
+          expect(grid.getEmptyStateSlot()).to.be.null;
+          expect(grid.getEmptyStateRow()).not.toBeVisible();
         });
       });
     });
