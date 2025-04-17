@@ -232,11 +232,7 @@
                 <module>react-grid-test</module>
                 <module>react-signals</module>
                 <module>react-i18n</module>
-
-<!--
-TODO: Re-enable when postinstall script to copy Vite isn't needed
                 <module>no-endpoints</module>
--->
             </modules>
         </profile>
 
@@ -259,14 +255,13 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
         <profile>
             <id>it-modules-group-2</id>
             <modules>
+                <module>no-endpoints</module>
+                <module>react-grid-test</module>
+                <module>react-signals</module>
                 <module>security</module>
                 <module>security-contextpath</module>
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
-<!--
-TODO: Re-enable when postinstall script to copy Vite isn't needed
-                <module>no-endpoints</module>
--->
             </modules>
         </profile>
 
@@ -283,10 +278,7 @@ TODO: Re-enable when postinstall script to copy Vite isn't needed
         <profile>
             <id>react-18</id>
             <modules>
-<!--
-TODO: Re-enable when postinstall script to copy Vite isn't needed
                 <module>no-endpoints</module>
--->
                 <module>react-grid-test</module>
                 <module>react-i18n</module>
                 <module>react-signals</module>
