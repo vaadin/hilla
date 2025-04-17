@@ -52,6 +52,7 @@
                 <version>3.5.0</version>
                 <executions>
                     <execution>
+                        <id>updatePackageJson</id>
                         <goals>
                             <goal>java</goal>
                         </goals>
@@ -70,4 +71,35 @@
         </plugins>
         <defaultGoal>compile exec:java</defaultGoal>
     </build>
+
+    <profiles>
+        <profile>
+            <id>react-18</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>updatePackageJson</id>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>com.vaadin.hilla.scripts.FlowPackageJsonUpdater</mainClass>
+                            <arguments>
+                                <argument>default</argument>
+                                <argument>react-router</argument>
+                                <argument>vite</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
