@@ -1,4 +1,5 @@
 .auto-crud {
+  flex: 1;
   display: flex;
   overflow: hidden;
   border: solid 1px var(--lumo-contrast-20pct);
