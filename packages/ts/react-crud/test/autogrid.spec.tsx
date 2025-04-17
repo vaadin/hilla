@@ -1702,6 +1702,7 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.style('text-align', 'end');
         expect(grid.getBodyCellContent(0, columnIndex)).to.have.rendered.text('123,456');
         expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('-12');
+        expect(grid.getBodyCellContent(4, columnIndex)).to.have.rendered.text('0');
       });
 
       it('renders decimals as right aligned numbers', async () => {
@@ -1711,15 +1712,6 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(grid.getBodyCellContent(1, columnIndex)).to.have.rendered.text('-0.12');
         expect(grid.getBodyCellContent(2, columnIndex)).to.have.rendered.text('123.40');
         expect(grid.getBodyCellContent(3, columnIndex)).to.have.rendered.text('-12.00');
-      });
-
-      it('renders integer zero value as 0', async () => {
-        const columnIndex = await grid.findColumnIndexByHeaderText('Integer');
-        expect(grid.getBodyCellContent(4, columnIndex)).to.have.rendered.text('0');
-      });
-
-      it('renders decimal zero value as 0.00', async () => {
-        const columnIndex = await grid.findColumnIndexByHeaderText('Decimal');
         expect(grid.getBodyCellContent(4, columnIndex)).to.have.rendered.text('0.00');
       });
 
