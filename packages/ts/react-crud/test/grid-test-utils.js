@@ -63,6 +63,8 @@ export const getPhysicalAverage = (grid) => {
   return physicalItems.map((el) => el.offsetHeight).reduce((sum, value) => sum + value, 0) / physicalItems.length;
 };
 
+export const getEmptyStateItems = (grid) => Array.from(grid.shadowRoot.querySelector('tbody#emptystatebody').children);
+
 export const scrollGrid = (grid, left, top) => {
   grid.shadowRoot.querySelector('table').scroll(left, top);
 };
