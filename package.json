@@ -22,6 +22,7 @@
     "build": "npm run build:align && npm run build:prepare && npm install && npm run build:run",
     "build:align": "mvn -pl com.vaadin:hilla-scripts -q",
     "build:prepare": "tsx scripts/prepare/index.ts",
+    "build:react-18": "npm run build:align -- -Preact-18 && npm run build:prepare && npm install && npm run build:run",
     "build:run": "nx run-many -p packages/ts/* -t build --all --output-style stream",
     "build:nocache": "npm run build",
     "lint": "nx run-many -p packages/ts/* -t lint --all --output-style stream",
