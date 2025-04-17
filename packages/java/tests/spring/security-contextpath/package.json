@@ -90,7 +90,7 @@
     "@vaadin/vertical-layout": "24.8.0-alpha11",
     "@vaadin/virtual-list": "24.8.0-alpha11",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.2.1",
+    "lit": "3.3.0",
     "mobx": "6.3.3"
   },
   "devDependencies": {
@@ -204,7 +204,7 @@
       "@vaadin/vertical-layout": "24.8.0-alpha4",
       "@vaadin/virtual-list": "24.8.0-alpha4",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.2.1",
+      "lit": "3.3.0",
       "mobx": "6.3.3"
     },
     "devDependencies": {
@@ -237,7 +237,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "62749c41d559a02cd51408b26b6dda38d593700f375a34bb95958b1819ede456"
+    "hash": "47b40a5a0105c6a5ea9176a8147e9006fe9ce982f02ae753f07176c35c136b99"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",

@@ -25,7 +25,7 @@
     "@vaadin/vaadin-themable-mixin": "24.8.0-alpha11",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.2.1",
+    "lit": "3.3.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-router": "7.5.0"
@@ -83,7 +83,7 @@
       "@vaadin/vaadin-themable-mixin": "24.8.0-alpha11",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.2.1",
+      "lit": "3.3.0",
       "react": "19.1.0",
       "react-dom": "19.1.0",
       "react-router": "7.5.0"
@@ -120,7 +120,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "0b37cd37daec50cc5ede43d0a6ebb43dc9c67711579bc98f9acf8d47f143c30e"
+    "hash": "92c43cee3db07ad1d4c55d1f1126d8e243a84cc04ec186751128468ab040c5ef"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
