@@ -89,6 +89,7 @@
     "fetch-mock": "12.3.0",
     "glob": "11.0.1",
     "lint-staged": "15.4.3",
+    "lit": "3.2.1",
     "magic-string": "0.30.17",
     "meow": "13.2.0",
     "micromatch": "4.0.8",
