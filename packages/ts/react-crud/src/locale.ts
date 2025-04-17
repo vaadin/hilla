@@ -84,11 +84,11 @@ export class LocaleFormatter {
   }
 
   formatInteger(value?: number): string {
-    return value && Number.isFinite(value) ? this.#integer.format(value) : '';
+    return value !== undefined && Number.isFinite(value) ? this.#integer.format(value) : '';
   }
 
   formatDecimal(value?: number): string {
-    return value && Number.isFinite(value) ? this.#decimal.format(value) : '';
+    return value !== undefined && Number.isFinite(value) ? this.#decimal.format(value) : '';
   }
 
   parse(dateString: string): DatePickerDate | undefined {
