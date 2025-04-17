@@ -208,7 +208,7 @@ jobs:
             it-modules: group-1
           - os: ubuntu-latest
             it-modules: group-2
-          - os: ubuntu-latest
+          - os: windows-latest
             it-modules: some
     runs-on: ${{ matrix.os }}
 
@@ -228,9 +228,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -288,9 +285,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -337,9 +331,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Install React 18
         run: npm run build:react-18
       - name: Test
