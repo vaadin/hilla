@@ -27,7 +27,6 @@
     "build:nocache": "npm run build",
     "lint": "nx run-many -p packages/ts/* -t lint --all --output-style stream",
     "lint:fix": "nx run-many -p packages/ts/* -t lint:fix --all --output-style stream",
-    "install:vite-copy": "tsx scripts/prepare/vite-copy.ts",
     "test": "nx run-many -p packages/ts/* -t test --all --output-style stream",
     "test:coverage": "nx run-many -p packages/ts/* -t test:coverage --all --output-style stream",
     "test:react": "nx run-many -p packages/ts/* -t test:react --all --output-style stream",
