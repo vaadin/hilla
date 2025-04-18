@@ -1,39 +1,39 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Hilla Application",
-    "version": "1.0.0"
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
   },
-  "servers": [
+  "servers" : [
     {
-      "url": "http://localhost:8080/connect",
-      "description": "Hilla Backend"
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
     }
   ],
-  "tags": [
+  "tags" : [
     {
-      "name": "SubTypesEndpoint",
-      "x-class-name": "com.vaadin.hilla.parser.plugins.subtypes.SubTypesEndpoint"
+      "name" : "SubTypesEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.subtypes.SubTypesEndpoint"
     }
   ],
-  "paths": {
-    "/SubTypesEndpoint/receiveEvent": {
-      "post": {
-        "tags": [
+  "paths" : {
+    "/SubTypesEndpoint/receiveEvent" : {
+      "post" : {
+        "tags" : [
           "SubTypesEndpoint"
         ],
-        "operationId": "SubTypesEndpoint_receiveEvent_POST",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "event": {
-                    "nullable": true,
-                    "anyOf": [
+        "operationId" : "SubTypesEndpoint_receiveEvent_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "event" : {
+                    "nullable" : true,
+                    "anyOf" : [
                       {
-                        "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
                       }
                     ]
                   }
@@ -42,29 +42,29 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": ""
+        "responses" : {
+          "200" : {
+            "description" : ""
           }
         }
       }
     },
-    "/SubTypesEndpoint/sendEvent": {
-      "post": {
-        "tags": [
+    "/SubTypesEndpoint/sendEvent" : {
+      "post" : {
+        "tags" : [
           "SubTypesEndpoint"
         ],
-        "operationId": "SubTypesEndpoint_sendEvent_POST",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "nullable": true,
-                  "anyOf": [
+        "operationId" : "SubTypesEndpoint_sendEvent_POST",
+        "responses" : {
+          "200" : {
+            "description" : "",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "nullable" : true,
+                  "anyOf" : [
                     {
-                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
+                      "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
                     }
                   ]
                 }
@@ -75,93 +75,119 @@
       }
     }
   },
-  "components": {
-    "schemas": {
-      "com.vaadin.hilla.parser.plugins.subtypes.BaseEvent": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.parser.plugins.subtypes.BaseEvent" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "eventType" : {
+            "type" : "string",
+            "example" : "base"
           }
         }
       },
-      "com.vaadin.hilla.parser.plugins.subtypes.BaseEventUnion": {
-        "type": "object",
-        "oneOf": [
+      "com.vaadin.hilla.parser.plugins.subtypes.BaseEventUnion" : {
+        "type" : "object",
+        "oneOf" : [
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.AddEvent"
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
           },
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.UpdateEvent"
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.AddEvent"
           },
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.DeleteEvent"
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.UpdateEvent"
+          },
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.DeleteEvent"
+          },
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.AdvancedAddEvent"
           }
         ]
       },
-      "com.vaadin.hilla.parser.plugins.subtypes.AddEvent": {
-        "anyOf": [
+      "com.vaadin.hilla.parser.plugins.subtypes.AddEvent" : {
+        "anyOf" : [
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
           },
           {
-            "type": "object",
-            "properties": {
-              "item": {
-                "type": "string",
-                "nullable": true
+            "type" : "object",
+            "properties" : {
+              "item" : {
+                "type" : "string",
+                "nullable" : true
               },
-              "@type": {
-                "type": "string",
-                "example": "add"
+              "eventType" : {
+                "type" : "string",
+                "example" : "add"
               }
             }
           }
         ]
       },
-      "com.vaadin.hilla.parser.plugins.subtypes.UpdateEvent": {
-        "anyOf": [
+      "com.vaadin.hilla.parser.plugins.subtypes.UpdateEvent" : {
+        "anyOf" : [
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
           },
           {
-            "type": "object",
-            "properties": {
-              "oldItem": {
-                "type": "string",
-                "nullable": true
+            "type" : "object",
+            "properties" : {
+              "oldItem" : {
+                "type" : "string",
+                "nullable" : true
               },
-              "newItem": {
-                "type": "string",
-                "nullable": true
+              "newItem" : {
+                "type" : "string",
+                "nullable" : true
               },
-              "@type": {
-                "type": "string",
-                "example": "update"
+              "eventType" : {
+                "type" : "string",
+                "example" : "update"
               }
             }
           }
         ]
       },
-      "com.vaadin.hilla.parser.plugins.subtypes.DeleteEvent": {
-        "anyOf": [
+      "com.vaadin.hilla.parser.plugins.subtypes.DeleteEvent" : {
+        "anyOf" : [
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.BaseEvent"
           },
           {
-            "type": "object",
-            "properties": {
-              "item": {
-                "type": "string",
-                "nullable": true
+            "type" : "object",
+            "properties" : {
+              "item" : {
+                "type" : "string",
+                "nullable" : true
               },
-              "force": {
-                "type": "boolean"
+              "force" : {
+                "type" : "boolean"
               },
-              "@type": {
-                "type": "string",
-                "example": "delete"
+              "eventType" : {
+                "type" : "string",
+                "example" : "delete"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.AdvancedAddEvent" : {
+        "anyOf" : [
+          {
+            "$ref" : "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.AddEvent"
+          },
+          {
+            "type" : "object",
+            "properties" : {
+              "eventType" : {
+                "type" : "string",
+                "example" : "advanced-add"
               }
             }
           }
