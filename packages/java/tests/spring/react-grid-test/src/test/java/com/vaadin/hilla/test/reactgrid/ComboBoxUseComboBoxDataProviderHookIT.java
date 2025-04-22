@@ -36,7 +36,8 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @Test
     public void defaultSort_dataShown() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).withId("defaultSort").waitForFirst();
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .withId("defaultSort").waitForFirst();
         List<String> options = getOptions(comboBox);
         Assert.assertEquals("Johnson", options.get(0));
         Assert.assertEquals("Lewis", options.get(9));
@@ -45,7 +46,8 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @Test
     public void sortUsingLastname_dataShown() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).withId("sortLastName").waitForFirst();
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .withId("sortLastName").waitForFirst();
         List<String> options = getOptions(comboBox);
         Assert.assertEquals("Adams", options.get(0));
         Assert.assertEquals("Evans", options.get(9));
@@ -53,13 +55,15 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @Test
     public void filteringUsingSignalWorks() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).withId("prependFilter").waitForFirst();
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .withId("prependFilter").waitForFirst();
         List<String> options = getOptions(comboBox);
         Assert.assertEquals("Adams", options.get(0));
         Assert.assertEquals("Evans", options.get(9));
         comboBox.closePopup();
 
-        TestBenchElement filterInput = $("input").withId("filter").waitForFirst();
+        TestBenchElement filterInput = $("input").withId("filter")
+                .waitForFirst();
         filterInput.sendKeys("c");
         options = getOptions(comboBox);
         Assert.assertEquals("Baker", options.get(0)); // Zack

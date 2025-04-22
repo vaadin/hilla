@@ -62,14 +62,17 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     }
 
     private TextFieldElement getTextField(String name) {
-        return $(TextFieldElement.class).withAttribute("name", name).waitForFirst();
+        return $(TextFieldElement.class).withAttribute("name", name)
+                .waitForFirst();
     }
 
     private IntegerFieldElement getIntegerField(String name) {
-        return $(IntegerFieldElement.class).withAttribute("name", name).waitForFirst();
+        return $(IntegerFieldElement.class).withAttribute("name", name)
+                .waitForFirst();
     }
 
     private NumberFieldElement getNumberField(String name) {
-        return $(NumberFieldElement.class).withAttribute("name", name).waitForFirst();
+        return $(NumberFieldElement.class).withAttribute("name", name)
+                .waitForFirst();
     }
 }
