@@ -1,7 +1,13 @@
 import type { ComponentType } from 'react';
 import type { createBrowserRouter, RouteObject } from 'react-router';
 
-export type ViewConfig = Readonly<{
+/**
+ * A configuration object for a view. This is used to define the view's
+ * metadata, such as the title, roles allowed, and other properties.
+ *
+ * @typeParam T - The type of the detail object.
+ */
+export type ViewConfig<T = unknown> = Readonly<{
   /**
    * View title used in the main layout header, as <title> and as the default
    * for the menu entry. If not defined, the component name will be taken,
@@ -68,6 +74,14 @@ export type ViewConfig = Readonly<{
      */
     icon?: string;
   }>;
+
+  /**
+   * Used to add additional properties to the view. This object will be
+   * available when building the menu.
+   *
+   * @see {@link ./runtime/createMenuItems.ts#createMenuItems}
+   */
+  detail?: T;
 }>;
 
 /**
@@ -101,11 +115,14 @@ export type AgnosticRoute = Readonly<{
 
 /**
  * A menu item used in for building the navigation menu.
+ *
+ * @typeParam T - The type of the detail object, same as in the view configuration.
  */
-export type MenuItem = Readonly<{
+export type MenuItem<T = unknown> = Readonly<{
   to: string;
   icon?: string;
   title?: string;
+  detail?: T;
 }>;
 
 export type RouterConfiguration = Readonly<{

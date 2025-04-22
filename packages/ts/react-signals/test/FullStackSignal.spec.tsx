@@ -169,10 +169,15 @@ describe('@vaadin/hilla-react-signals', () => {
 
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.call).to.be.have.been.calledOnce;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: signal.id,
-        event: { type: 'set', value: 42 },
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: signal.id,
+          event: { type: 'set', value: 42 },
+        },
+        { mute: true },
+      );
     });
 
     it('should not subscribe on the fly when updating if already subscribed', () => {
@@ -230,9 +235,14 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should publish the new value to the server when set', () => {
       signal.value = 42;
       expect(client.call).to.have.been.calledOnce;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        event: { type: 'set', value: 42 },
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          event: { type: 'set', value: 42 },
+        },
+        { mute: true },
+      );
 
       signal.value = 0;
 
@@ -240,9 +250,14 @@ describe('@vaadin/hilla-react-signals', () => {
 
       signal.value += 1;
       expect(client.call).to.have.been.calledOnce;
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        event: { type: 'set', value: 1 },
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          event: { type: 'set', value: 1 },
+        },
+        { mute: true },
+      );
 
       const [, , params] = client.call.firstCall.args;
 
@@ -363,10 +378,15 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
 
       signal.value = 42;
-      expect(client.call).to.have.been.calledWith('SignalsHandler', 'update', {
-        clientSignalId: '1234',
-        event: { id: '1234', type: 'set', value: 42, accepted: false, parentSignalId: 'a1b2c3d4' },
-      });
+      expect(client.call).to.have.been.calledWith(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: '1234',
+          event: { id: '1234', type: 'set', value: 42, accepted: false, parentSignalId: 'a1b2c3d4' },
+        },
+        { mute: true },
+      );
     });
   });
 });

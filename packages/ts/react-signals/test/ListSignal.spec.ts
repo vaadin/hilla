@@ -90,11 +90,16 @@ describe('@vaadin/hilla-react-signals', () => {
 
       const [, , params] = client.call.firstCall.args;
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: listSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params?.event.id, type: 'insert', position: 'last', value: 'Alice', accepted: false },
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: listSignal.id,
+          // @ts-expect-error params.event type has id property
+          event: { id: params?.event.id, type: 'insert', position: 'last', value: 'Alice', accepted: false },
+        },
+        { mute: true },
+      );
     });
 
     it('should validate that entryId is defined when insertLast event is accepted', () => {
@@ -162,11 +167,16 @@ describe('@vaadin/hilla-react-signals', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(client.call).to.have.been.calledOnce;
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(client.call).to.have.been.calledWithMatch('SignalsHandler', 'update', {
-        clientSignalId: listSignal.id,
-        // @ts-expect-error params.event type has id property
-        event: { id: params?.event.id, type: 'remove', entryId: firstElement.id, accepted: false },
-      });
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: listSignal.id,
+          // @ts-expect-error params.event type has id property
+          event: { id: params?.event.id, type: 'remove', entryId: firstElement.id, accepted: false },
+        },
+        { mute: true },
+      );
     });
 
     it('should do nothing when the update for removing a non-existing entry is received', () => {
