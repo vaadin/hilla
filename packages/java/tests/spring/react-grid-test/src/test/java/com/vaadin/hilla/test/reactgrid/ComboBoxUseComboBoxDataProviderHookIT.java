@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
@@ -23,7 +23,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
     }
 
     @Override
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         super.setup();
         getDriver().get(getTestPath());
@@ -36,7 +36,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @Test
     public void defaultSort_dataShown() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("defaultSort");
+        ComboBoxElement comboBox = $(ComboBoxElement.class).withId("defaultSort").waitForFirst();
         List<String> options = getOptions(comboBox);
         Assert.assertEquals("Johnson", options.get(0));
         Assert.assertEquals("Lewis", options.get(9));
@@ -45,7 +45,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @Test
     public void sortUsingLastname_dataShown() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("sortLastName");
+        ComboBoxElement comboBox = $(ComboBoxElement.class).withId("sortLastName").waitForFirst();
         List<String> options = getOptions(comboBox);
         Assert.assertEquals("Adams", options.get(0));
         Assert.assertEquals("Evans", options.get(9));
@@ -53,13 +53,13 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
 
     @Test
     public void filteringUsingSignalWorks() {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("prependFilter");
+        ComboBoxElement comboBox = $(ComboBoxElement.class).withId("prependFilter").waitForFirst();
         List<String> options = getOptions(comboBox);
         Assert.assertEquals("Adams", options.get(0));
         Assert.assertEquals("Evans", options.get(9));
         comboBox.closePopup();
 
-        TestBenchElement filterInput = $("input").id("filter");
+        TestBenchElement filterInput = $("input").withId("filter").waitForFirst();
         filterInput.sendKeys("c");
         options = getOptions(comboBox);
         Assert.assertEquals("Baker", options.get(0)); // Zack
