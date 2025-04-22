@@ -6,8 +6,15 @@ import type { GridColumnElement } from '@vaadin/react-components/GridColumn.js';
 import type { GridSorterDirection, GridSorterElement } from '@vaadin/react-components/GridSorter.js';
 import type { SinonFakeTimers } from 'sinon';
 import type Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
-// @ts-expect-error no types for the utils
-import { getCellContent, getContainerCell, getPhysicalItems, getRowCells, getRows } from './grid-test-utils.js';
+import {
+  getCellContent,
+  getContainerCell,
+  getEmptyStateItems,
+  getPhysicalItems,
+  getRowCells,
+  getRows,
+  // @ts-expect-error no types for the utils
+} from './grid-test-utils.js';
 import type { Person } from './test-models-and-services.js';
 
 export type IndexedHTMLTableRowElement = HTMLTableRowElement & { index: number };
@@ -164,5 +171,14 @@ export default class GridController {
     if (clock) {
       await clock.tickAsync(500);
     }
+  }
+
+  getEmptyStateRow(): HTMLTableRowElement | undefined {
+    const emptyStateItems = getEmptyStateItems(this.instance) as readonly IndexedHTMLTableRowElement[];
+    return emptyStateItems[0];
+  }
+
+  getEmptyStateSlot(): Element | null {
+    return this.instance.querySelector('span[slot="empty-state"]');
   }
 }
