@@ -1,5 +1,6 @@
 package com.vaadin.hilla.signals.core.registry;
 
+import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
@@ -7,6 +8,7 @@ import com.vaadin.hilla.signals.NumberSignal;
 import com.vaadin.hilla.signals.ValueSignal;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class SecureSignalsRegistryTest {
                 invoker);
 
         assertThrows(
-                EndpointInvocationException.EndpointAccessDeniedException.class,
+                EndpointInvocationException.EndpointUnauthorizedException.class,
                 () -> secureSignalsRegistry.register("clientSignalId",
                         "endpoint", "method", null));
     }
@@ -119,8 +121,24 @@ public class SecureSignalsRegistryTest {
                 new SecureSignalsRegistry.EndpointMethod("endpoint", "method"));
 
         assertThrows(
-                EndpointInvocationException.EndpointAccessDeniedException.class,
+                EndpointInvocationException.EndpointUnauthorizedException.class,
                 () -> secureSignalsRegistry.get("clientSignalId"));
+    }
+
+    @Test
+    public void when_userAuthenticated_throws_forbidden() throws Exception {
+        try (var authUtilMock = Mockito.mockStatic(AuthenticationUtil.class)) {
+            when(AuthenticationUtil.getSecurityHolderAuthentication())
+                    .thenReturn(Mockito.mock(Authentication.class));
+            EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
+            SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
+                    invoker);
+
+            assertThrows(
+                    EndpointInvocationException.EndpointForbiddenException.class,
+                    () -> secureSignalsRegistry.register("clientSignalId",
+                            "endpoint", "method", null));
+        }
     }
 
     private EndpointInvoker mockEndpointInvokerThatGrantsAccess(

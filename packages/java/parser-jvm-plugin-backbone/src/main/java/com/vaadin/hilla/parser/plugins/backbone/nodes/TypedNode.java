@@ -1,6 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
-import java.util.List;
 import java.util.function.UnaryOperator;
 
 import com.vaadin.hilla.parser.models.SignatureModel;

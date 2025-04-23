@@ -1,6 +1,7 @@
 import './vaadinGlobals.js'; // eslint-disable-line import/no-unassigned-import
 import { expect, describe, it } from 'vitest';
 import { createMenuItems, viewsSignal } from '../../src/runtime/createMenuItems.js';
+import type { ViewConfig } from '../../src/types.js';
 import { deepRemoveNullProps } from '../utils.js';
 
 const collator = new Intl.Collator('en-US');
@@ -162,6 +163,35 @@ describe('@vaadin/hilla-file-router', () => {
         {
           title: 'Foo',
           to: '/foo',
+        },
+      ]);
+    });
+
+    it('should include detail objects in menu items', () => {
+      // used to check that the type of the detail object is correct
+      // this is a compile-time check, does nothing at runtime
+      type Detail = {
+        foo: string;
+        bar?: number;
+      };
+
+      const views: Record<string, ViewConfig<Detail>> = {
+        '/bar': { title: 'Bar', detail: { foo: '1', bar: 2 } },
+        '/foo': { title: 'Foo', detail: { foo: '3' } },
+      };
+      viewsSignal.value = views;
+
+      const items = createMenuItems<Detail>();
+      expect(deepRemoveNullProps(items)).to.be.deep.equal([
+        {
+          title: 'Bar',
+          to: '/bar',
+          detail: { foo: '1', bar: 2 },
+        },
+        {
+          title: 'Foo',
+          to: '/foo',
+          detail: { foo: '3' },
         },
       ]);
     });

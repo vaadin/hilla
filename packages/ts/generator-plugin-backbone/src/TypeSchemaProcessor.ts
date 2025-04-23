@@ -131,7 +131,10 @@ export default class TypeSchemaProcessor {
     const fullyQualifiedName = convertReferenceSchemaToFullyQualifiedName(schema);
 
     if (this.#transferTypes.has(fullyQualifiedName)) {
-      return this.#transferTypes.get(fullyQualifiedName)!(typeArguments);
+      return this.#transferTypes.get(fullyQualifiedName)!({
+        dependencies: this.#dependencies,
+        typeArguments,
+      });
     }
 
     const specifier = convertReferenceSchemaToSpecifier(schema);

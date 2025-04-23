@@ -7,7 +7,7 @@ import type { ItemCounts } from './data-provider';
 import { useLocaleFormatter } from './locale.js';
 import { convertToTitleCase } from './util';
 
-// eslint-disable-next-line
+// eslint-disable-next-line import/no-unassigned-import
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
 export type RendererOptions<TItem> = {
@@ -38,7 +38,7 @@ export function AutoGridDecimalRenderer<TItem>({ item }: RendererOptions<TItem>)
 
 export function AutoGridEnumRenderer<TItem>({ item }: RendererOptions<TItem>): JSX.Element {
   const context = useContext(ColumnContext)!;
-  const value = getColumnValue(context, item) || '';
+  const value = getColumnValue(context, item) ?? '';
   return <span>{convertToTitleCase(value)}</span>;
 }
 

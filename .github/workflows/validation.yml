@@ -78,6 +78,7 @@ jobs:
           )
           find packages/java -type d -name target -print0 | xargs -0 tar rf workspace.tar
           find packages/java/tests -path */src/main/resources/vaadin-core-versions.json -print0 | xargs -0 tar rf workspace.tar
+          find scripts/prepare/results -print0 | xargs -0 tar rf workspace.tar
           tar rf workspace.tar $(find packages/ts -name node_modules -prune -o -print | git check-ignore --stdin)
       - uses: actions/upload-artifact@v4
         with:
@@ -227,6 +228,9 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Install Maven local artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -284,6 +288,9 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Install Maven local artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -330,8 +337,11 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
+      - name: Install Maven local artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Install React 18
-        run: npm install --save-dev react@18 react-dom@18 @types/react@18 @types/react-dom@18
+        run: npm run build:react-18
       - name: Test
         run: npm run test:react
         env:
