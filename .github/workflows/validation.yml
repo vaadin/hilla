@@ -338,7 +338,6 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
         run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Install React 18
         run: npm run build:react-18
