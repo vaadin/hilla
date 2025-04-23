@@ -136,6 +136,10 @@ interface AutoGridOwnProps<TItem> {
    * See {@link AutoGrid#totalCount} and {@link AutoGrid#filteredCount}.
    */
   footerCountRenderer?: ComponentType<ItemCounts>;
+  /**
+   * Allows to set a text or component to be displayed when the underlying grid is empty.
+   */
+  emptyState?: string | JSX.Element;
 }
 
 export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<TItem>>;
@@ -312,6 +316,7 @@ function AutoGridInner<TItem>(
     totalCount,
     filteredCount,
     footerCountRenderer,
+    emptyState,
     ...gridProps
   }: AutoGridProps<TItem>,
   ref: ForwardedRef<AutoGridRef<TItem>>,
@@ -428,6 +433,8 @@ function AutoGridInner<TItem>(
   return (
     <Grid itemIdPath={modelInfo.idProperty?.name} {...gridProps} ref={gridRef}>
       {children}
+
+      {emptyState && <span slot="empty-state">{emptyState}</span>}
     </Grid>
   );
 }

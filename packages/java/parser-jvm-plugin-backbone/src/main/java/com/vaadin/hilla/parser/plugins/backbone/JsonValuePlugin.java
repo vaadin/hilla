@@ -10,8 +10,6 @@ import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import org.jspecify.annotations.NonNull;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -64,8 +62,12 @@ public class JsonValuePlugin
     }
 
     private Optional<Class<?>> findValueType(Class<?> cls) {
-        return Arrays.stream(cls.getMethods())
-                .filter(method -> method.isAnnotationPresent(JsonValue.class))
-                .map(Method::getReturnType).findAny();
+        for (var method : cls.getMethods()) {
+            if (method.isAnnotationPresent(JsonValue.class)) {
+                return Optional.of(method.getReturnType());
+            }
+        }
+
+        return Optional.empty();
     }
 }

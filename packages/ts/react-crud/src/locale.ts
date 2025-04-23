@@ -1,6 +1,7 @@
 import { DatePickerElement, type DatePickerDate, type DatePickerI18n } from '@vaadin/react-components/DatePicker.js';
 import { DateTimePickerElement, type DateTimePickerI18n } from '@vaadin/react-components/DateTimePicker.js';
 import { createContext, useContext, useMemo } from 'react';
+import type { SetRequired } from 'type-fest';
 
 export const LocaleContext = createContext(navigator.language);
 
@@ -83,11 +84,11 @@ export class LocaleFormatter {
   }
 
   formatInteger(value?: number): string {
-    return value && Number.isFinite(value) ? this.#integer.format(value) : '';
+    return Number.isFinite(value) ? this.#integer.format(value!) : '';
   }
 
   formatDecimal(value?: number): string {
-    return value && Number.isFinite(value) ? this.#decimal.format(value) : '';
+    return Number.isFinite(value) ? this.#decimal.format(value!) : '';
   }
 
   parse(dateString: string): DatePickerDate | undefined {
@@ -115,7 +116,7 @@ export function useLocaleFormatter(): LocaleFormatter {
 
 const defaultDatePickerI18n = new DatePickerElement().i18n;
 
-export function useDatePickerI18n(): DatePickerI18n {
+export function useDatePickerI18n(): SetRequired<DatePickerI18n, 'formatDate' | 'parseDate'> {
   const formatter = useLocaleFormatter();
 
   return useMemo(

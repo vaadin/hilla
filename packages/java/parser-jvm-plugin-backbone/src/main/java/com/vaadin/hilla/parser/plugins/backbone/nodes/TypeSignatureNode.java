@@ -11,25 +11,29 @@ import com.vaadin.hilla.parser.models.SignatureModel;
 import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
-public final class TypeSignatureNode
-        extends AbstractNode<SignatureModel, Schema<?>> implements TypedNode {
+public class TypeSignatureNode extends AbstractNode<SignatureModel, Schema<?>>
+        implements TypedNode {
     private final List<AnnotationInfoModel> annotations;
     private final Integer position;
 
-    private TypeSignatureNode(SignatureModel source, Schema<?> target,
+    protected TypeSignatureNode(SignatureModel source, Schema<?> target,
             List<AnnotationInfoModel> annotations, Integer position) {
         super(source, target);
         this.annotations = annotations;
         this.position = position;
     }
 
-    private TypeSignatureNode(SignatureModel source, Schema<?> target,
+    protected TypeSignatureNode(SignatureModel source, Schema<?> target,
             Integer position) {
         this(source, target, source.getAnnotations(), position);
     }
 
     public List<AnnotationInfoModel> getAnnotations() {
         return annotations;
+    }
+
+    public Integer getPosition() {
+        return position;
     }
 
     public SignatureModel getType() {

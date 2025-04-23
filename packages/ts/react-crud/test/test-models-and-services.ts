@@ -581,6 +581,14 @@ export const columnRendererTestData: ColumnRendererTestValues[] = [
     localTime: 'foo',
     localDateTime: 'foo',
   },
+  {
+    id: 5,
+    version: 1,
+    string: 'Hello World 5',
+    integer: 0,
+    decimal: 0,
+    boolean: false,
+  },
 ];
 
 export type HasTestInfo = {

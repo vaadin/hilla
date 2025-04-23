@@ -2,6 +2,7 @@ plugins {
 	id 'org.jetbrains.kotlin.jvm' version '1.9.25'
 	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
 	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
+	id 'org.jetbrains.kotlin.plugin.allopen' version '1.9.25'
 	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -27,7 +28,7 @@ repositories {
 dependencies {
     implementation 'com.vaadin:vaadin-spring'
     implementation 'com.vaadin:hilla'
-    implementation "com.vaadin:vaadin-lumo-theme:$vaadinComponentsVersion"
+    implementation "com.vaadin:fix-lumo:$hillaVersion"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.parttio:line-awesome:1.1.0'
     implementation 'com.vaadin:vaadin-dev-server'
@@ -61,6 +62,13 @@ sourceSets {
 			srcDirs("src/test/kotlin")
 		}
 	}
+}
+
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
+    annotation("com.vaadin.hilla.EndpointExposed")
 }
 
 import java.util.concurrent.Executors
@@ -133,4 +141,10 @@ tasks.register('integrationTest', Test) {
 	finalizedBy bootStop
 	testClassesDirs = sourceSets.test.output.classesDirs
 	classpath = sourceSets.test.runtimeClasspath
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
