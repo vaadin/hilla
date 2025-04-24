@@ -16,7 +16,7 @@
 package com.vaadin.hilla.gradle.plugin
 
 import java.io.IOException
-import com.vaadin.gradle.PluginEffectiveConfiguration
+import com.vaadin.flow.gradle.PluginEffectiveConfiguration
 import com.vaadin.hilla.engine.EngineConfiguration
 import com.vaadin.hilla.engine.GeneratorException
 import com.vaadin.hilla.engine.GeneratorProcessor
