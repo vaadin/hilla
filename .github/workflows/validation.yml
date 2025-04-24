@@ -339,8 +339,10 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: $HEAD_SHA
           fetch-depth: 0
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
