@@ -59,7 +59,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -100,7 +100,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -127,7 +127,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -168,7 +168,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -219,7 +219,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -279,7 +279,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -328,7 +328,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: $HEAD_SHA
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
