@@ -31,6 +31,7 @@ env:
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
   HEAD_REF: ${{ github.head_ref }}
   REF_NAME: ${{ github.ref_name }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
@@ -60,8 +61,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - name: Build TypeScript
@@ -103,8 +102,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
@@ -132,8 +129,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
@@ -175,8 +170,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
@@ -228,8 +221,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
@@ -290,8 +281,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
@@ -341,8 +330,6 @@ jobs:
         with:
           ref: $HEAD_SHA
           fetch-depth: 0
-        env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Setup
         uses: ./.github/actions/setup
       - uses: actions/download-artifact@v4
