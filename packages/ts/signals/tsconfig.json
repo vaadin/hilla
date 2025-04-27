@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "target": "es2022",
+    "lib": ["es2022"]
+  },
+  "include": ["_src", "test"],
+  "exclude": ["test/**/*.snap.ts"]
+}

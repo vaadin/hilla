@@ -89,6 +89,7 @@
     "eslint-plugin-tsdoc": "0.4.0",
     "fetch-mock": "12.3.0",
     "glob": "11.0.1",
+    "itertools-ts": "2.2.0",
     "lint-staged": "15.4.3",
     "lit": "3.3.0",
     "magic-string": "0.30.17",
