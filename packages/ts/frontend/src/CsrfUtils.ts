@@ -7,7 +7,8 @@ export const VAADIN_CSRF_COOKIE_NAME = 'csrfToken';
 /** @internal */
 export const SPRING_CSRF_COOKIE_NAME = 'XSRF-TOKEN';
 
-function extractContentFromMetaTag(element: HTMLMetaElement | null): string | undefined {
+function extractContentFromMetaTag(doc: Document, metaTag: string): string | undefined {
+  const element = doc.head.querySelector<HTMLMetaElement>(`meta[name="${metaTag}"]`);
   if (element) {
     const value = element.content;
     if (value && value.toLowerCase() !== 'undefined') {
@@ -18,23 +19,11 @@ function extractContentFromMetaTag(element: HTMLMetaElement | null): string | un
 }
 
 /** @internal */
-function getSpringCsrfHeaderFromMetaTag(doc: Document): string | undefined {
-  const csrfHeader = doc.head.querySelector<HTMLMetaElement>('meta[name="_csrf_header"]');
-  return extractContentFromMetaTag(csrfHeader);
-}
-
-/** @internal */
-function getSpringCsrfTokenFromMetaTag(doc: Document): string | undefined {
-  const csrfToken = doc.head.querySelector<HTMLMetaElement>('meta[name="_csrf"]');
-  return extractContentFromMetaTag(csrfToken);
-}
-
-/** @internal */
 export function getSpringCsrfInfo(doc: Document): Record<string, string> {
-  const csrfHeader = getSpringCsrfHeaderFromMetaTag(doc);
+  const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
   let csrf = CookieManager.get(SPRING_CSRF_COOKIE_NAME);
   if (!csrf || csrf.length === 0) {
-    csrf = getSpringCsrfTokenFromMetaTag(doc);
+    csrf = extractContentFromMetaTag(doc, '_csrf');
   }
   const headers: Record<string, string> = {};
   if (csrf && csrfHeader) {
@@ -67,4 +56,36 @@ export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<str
   }
 
   return headers;
+}
+
+function getSpringCsrfInfoForForm(doc: Document): Record<string, string> {
+  let csrf = CookieManager.get(SPRING_CSRF_COOKIE_NAME);
+  if (!csrf || csrf.length === 0) {
+    csrf = extractContentFromMetaTag(doc, '_csrf');
+  }
+  const headers: Record<string, string> = {};
+  if (csrf) {
+    headers._csrf = csrf;
+    const csrfParameter = extractContentFromMetaTag(doc, '_csrf_parameter');
+    if (csrfParameter) {
+      // eslint-disable-next-line camelcase
+      headers._csrf_parameter = csrfParameter;
+    }
+    const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
+    if (csrfHeader) {
+      // eslint-disable-next-line camelcase
+      headers._csrf_header = csrfHeader;
+    }
+  }
+  return headers;
+}
+
+/** @internal */
+export function getSpringCsrfTokenParametersForAuthRequest(doc: Document): Record<string, string> {
+  const csrfInfo = getSpringCsrfInfoForForm(doc);
+  const parameters: Record<string, string> = {};
+  if (csrfInfo._csrf && csrfInfo._csrf_parameter) {
+    parameters[csrfInfo._csrf_parameter] = csrfInfo._csrf;
+  }
+  return parameters;
 }

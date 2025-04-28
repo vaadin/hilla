@@ -1,6 +1,11 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import CookieManager from './CookieManager.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
+import {
+  getSpringCsrfInfo,
+  getSpringCsrfTokenParametersForAuthRequest,
+  getSpringCsrfTokenHeadersForAuthRequest,
+  VAADIN_CSRF_HEADER,
+} from './CsrfUtils.js';
 
 const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
 
@@ -41,7 +46,7 @@ async function updateCsrfTokensBasedOnResponse(response: Response): Promise<stri
   return token;
 }
 
-async function doLogout(logoutUrl: URL | string, headers: Record<string, string>) {
+async function doFetchLogout(logoutUrl: URL | string, headers: Record<string, string>) {
   const response = await fetch(logoutUrl, { headers, method: 'POST' });
   if (!response.ok) {
     throw new Error(`failed to logout with response ${response.status}`);
@@ -50,6 +55,46 @@ async function doLogout(logoutUrl: URL | string, headers: Record<string, string>
   await updateCsrfTokensBasedOnResponse(response);
 
   return response;
+}
+
+function doFormLogout(url: URL | string, parameters: Record<string, string>) {
+  const logoutUrl = typeof url === 'string' ? url : url.toString();
+
+  // Create form to send POST request
+  const form = document.createElement('form');
+
+  form.setAttribute('method', 'POST');
+  form.setAttribute('action', logoutUrl);
+  form.style.display = 'none';
+
+  // Add data to form as hidden input fields
+  for (const [name, value] of Object.entries(parameters)) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'hidden');
+    input.setAttribute('name', name);
+    input.setAttribute('value', value);
+
+    form.appendChild(input);
+  }
+
+  // Append form to page and submit it to perform logout and redirect
+  document.body.appendChild(form);
+  form.submit();
+}
+
+async function doLogout(doc: Document, options?: LogoutOptions): Promise<Response> {
+  // performing fetch logout only makes sense if at least one of the 'navigate'
+  // or 'onSuccess' is defined, otherwise we can just do a form logout:
+  const shouldSubmitFormLogout = !options?.navigate && !options?.onSuccess;
+  // this assumes the default Spring Security logout configuration (handler URL)
+  const logoutUrl = options?.logoutUrl ?? 'logout';
+  if (shouldSubmitFormLogout) {
+    const parameters = getSpringCsrfTokenParametersForAuthRequest(doc);
+    doFormLogout(logoutUrl, parameters);
+    return new Response(undefined, { status: 200, statusText: 'OK' } as ResponseInit);
+  }
+  const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
+  return await doFetchLogout(logoutUrl, headers);
 }
 
 export interface LoginResult {
@@ -211,19 +256,15 @@ export async function login(username: string, password: string, options?: LoginO
  * @param options - defines additional options, e.g, the logoutUrl.
  */
 export async function logout(options?: LogoutOptions): Promise<void> {
-  // this assumes the default Spring Security logout configuration (handler URL)
-  const logoutUrl = options?.logoutUrl ?? 'logout';
   let response: Response | undefined;
   try {
-    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    response = await doLogout(logoutUrl, headers);
+    response = await doLogout(document, options);
   } catch {
     try {
       const noCacheResponse = await fetch('?nocache');
       const responseText = await noCacheResponse.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
-      const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
-      response = await doLogout(logoutUrl, headers);
+      response = await doLogout(doc, options);
     } catch (error) {
       // clear the token if the call fails
       clearSpringCsrfMetaTags();
