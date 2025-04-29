@@ -202,18 +202,16 @@ public interface EngineConfiguration {
     }
 
     static EngineConfiguration load(EngineConfiguration... configurations) {
-        switch (configurations.length) {
-        case 0:
-            return STATE;
-        case 1:
-            return configurations[0];
-        default:
-            throw new ConfigurationException(Arrays.stream(configurations)
-                    .map(config -> config.getClass().getName())
-                    .collect(Collectors.joining("\", \"",
-                            "Multiple EngineConfiguration implementations found: \"",
-                            "\"")));
-        }
+        return switch (configurations.length) {
+        case 0 -> STATE;
+        case 1 -> configurations[0];
+        default -> throw new ConfigurationException(Arrays
+                .stream(configurations)
+                .map(config -> config.getClass().getName())
+                .collect(Collectors.joining("\", \"",
+                        "Multiple EngineConfiguration implementations found: \"",
+                        "\"")));
+        };
     }
 
     default EngineConfiguration setBaseDir(Path baseDir) {
