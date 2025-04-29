@@ -19,22 +19,37 @@ public class EngineConfigurationTest {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface BrowserCallableEndpoint {
+        String value() default "";
     }
 
+    @BrowserCallableEndpoint
     private static class EndpointFromAot {
     }
 
+    @BrowserCallableEndpoint
     private static class EndpointFromClassFinder {
     }
 
+    @BrowserCallableEndpoint("EndpointFromClassFinder")
+    private static class EndpointFromClassFinderWithCustomName {
+    }
+
     @Test
-    public void shouldUseAot() throws Exception {
+    public void shouldUseLookupByDefault() throws Exception {
         var classFinder = mock(ClassFinder.class);
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
-                .thenThrow(RuntimeException.class);
+                .thenReturn(Set.of(EndpointFromClassFinder.class));
         var conf = new EngineConfiguration.Builder().classFinder(classFinder)
-                .build();
+                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        assertEquals(List.of(EndpointFromClassFinder.class),
+                conf.getBrowserCallableFinder().findBrowserCallables());
+    }
+
+    @Test
+    public void shouldUseAotWhenNoClassFinder() throws Exception {
+        // classFinder is null by default in configuration
+        var conf = EngineConfiguration.getDefault();
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
@@ -44,17 +59,18 @@ public class EngineConfigurationTest {
     }
 
     @Test
-    public void shouldFallbackToClassFinder() throws Exception {
+    public void shouldUseAotWhenClassFinderThrowsException() throws Exception {
         var classFinder = mock(ClassFinder.class);
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
-                .thenReturn(Set.of(EndpointFromClassFinder.class));
+                .thenReturn(Set.of(EndpointFromClassFinder.class,
+                        EndpointFromClassFinderWithCustomName.class));
         var conf = new EngineConfiguration.Builder().classFinder(classFinder)
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.findEndpointClasses(conf))
-                    .thenThrow(ParserException.class);
-            assertEquals(List.of(EndpointFromClassFinder.class),
+                    .thenReturn(List.of(EndpointFromAot.class));
+            assertEquals(List.of(EndpointFromAot.class),
                     conf.getBrowserCallableFinder().findBrowserCallables());
         }
     }
