@@ -140,7 +140,7 @@ internal data class EngineConfigurationSettings(
     val buildDir: File,
     val classesDirs: Set<File>,
     val outputDir: File,
-    val groupId: String ,
+    val groupId: String,
     val artifactId: String,
     val classpath: List<String>,
     val mainClass: String?,
