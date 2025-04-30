@@ -90,7 +90,7 @@
       "@preact/signals-react-transform": "0.5.1",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.1.4",
-      "@types/react": "19.1.0",
+      "@types/react": "19.1.2",
       "@types/react-dom": "19.1.2",
       "@vaadin/hilla-generator-cli": "24.7.2",
       "@vaadin/hilla-generator-core": "24.7.2",
