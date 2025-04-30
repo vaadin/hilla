@@ -5,6 +5,6 @@
     "outDir": "."
   },
   "include": [
-    "_src"
+    "src"
   ]
 }
