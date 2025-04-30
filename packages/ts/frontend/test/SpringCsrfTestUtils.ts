@@ -5,7 +5,7 @@ export const TEST_SPRING_CSRF_HEADER_NAME = 'x-xsrf-token';
 export const TEST_SPRING_CSRF_TOKEN_VALUE = 'spring-csrf-token';
 export const TEST_VAADIN_CSRF_TOKEN_VALUE = 'vaadin-csrf-token';
 
-export const TEST_SPRING_CSRF_META_TAG_NAME = '_csrf';
+const TEST_SPRING_CSRF_META_TAG_NAME = '_csrf';
 
 export function setupSpringCsrfMetaTags(
   csrfToken: string = TEST_SPRING_CSRF_TOKEN_VALUE,
