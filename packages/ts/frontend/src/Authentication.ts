@@ -2,8 +2,8 @@ import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Conne
 import CookieManager from './CookieManager.js';
 import {
   getSpringCsrfInfo,
-  getSpringCsrfTokenParametersForAuthRequest,
   getSpringCsrfTokenHeadersForAuthRequest,
+  getSpringCsrfTokenParametersForAuthRequest,
   VAADIN_CSRF_HEADER,
 } from './CsrfUtils.js';
 
@@ -15,9 +15,9 @@ function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string
 }
 
 function clearSpringCsrfMetaTags() {
-  Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
-    el.remove(),
-  );
+  Array.from(
+    document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"], meta[name="_csrf_parameter"]'),
+  ).forEach((el) => el.remove());
 }
 
 function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
@@ -62,7 +62,6 @@ function doFormLogout(url: URL | string, parameters: Record<string, string>) {
 
   // Create form to send POST request
   const form = document.createElement('form');
-
   form.setAttribute('method', 'POST');
   form.setAttribute('action', logoutUrl);
   form.style.display = 'none';

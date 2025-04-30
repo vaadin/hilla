@@ -18,18 +18,24 @@ function extractContentFromMetaTag(doc: Document, metaTag: string): string | und
   return undefined;
 }
 
-/** @internal */
 export function getSpringCsrfInfo(doc: Document): Record<string, string> {
-  const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
   let csrf = CookieManager.get(SPRING_CSRF_COOKIE_NAME);
   if (!csrf || csrf.length === 0) {
     csrf = extractContentFromMetaTag(doc, '_csrf');
   }
+  const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
+
   const headers: Record<string, string> = {};
   if (csrf && csrfHeader) {
     headers._csrf = csrf;
     // eslint-disable-next-line camelcase
     headers._csrf_header = csrfHeader;
+
+    const csrfParameter = extractContentFromMetaTag(doc, '_csrf_parameter');
+    if (csrfParameter) {
+      // eslint-disable-next-line camelcase
+      headers._csrf_parameter = csrfParameter;
+    }
   }
   return headers;
 }
@@ -58,31 +64,9 @@ export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<str
   return headers;
 }
 
-function getSpringCsrfInfoForForm(doc: Document): Record<string, string> {
-  let csrf = CookieManager.get(SPRING_CSRF_COOKIE_NAME);
-  if (!csrf || csrf.length === 0) {
-    csrf = extractContentFromMetaTag(doc, '_csrf');
-  }
-  const headers: Record<string, string> = {};
-  if (csrf) {
-    headers._csrf = csrf;
-    const csrfParameter = extractContentFromMetaTag(doc, '_csrf_parameter');
-    if (csrfParameter) {
-      // eslint-disable-next-line camelcase
-      headers._csrf_parameter = csrfParameter;
-    }
-    const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
-    if (csrfHeader) {
-      // eslint-disable-next-line camelcase
-      headers._csrf_header = csrfHeader;
-    }
-  }
-  return headers;
-}
-
 /** @internal */
 export function getSpringCsrfTokenParametersForAuthRequest(doc: Document): Record<string, string> {
-  const csrfInfo = getSpringCsrfInfoForForm(doc);
+  const csrfInfo = getSpringCsrfInfo(doc);
   const parameters: Record<string, string> = {};
   if (csrfInfo._csrf && csrfInfo._csrf_parameter) {
     parameters[csrfInfo._csrf_parameter] = csrfInfo._csrf;
