@@ -23,7 +23,7 @@ function hasVariablePathSegment(path: string): boolean {
  *
  * @returns A list of menu items.
  */
-export function createMenuItems(): readonly MenuItem[] {
+export function createMenuItems<T = unknown>(): ReadonlyArray<MenuItem<T>> {
   // @ts-expect-error: esbuild injection
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   __REGISTER__('createMenuItems', (window as VaadinWindow).Vaadin);
@@ -44,6 +44,7 @@ export function createMenuItems(): readonly MenuItem[] {
         icon: config.menu?.icon,
         title: config.menu?.title ?? config.title,
         order: config.menu?.order,
+        detail: config.detail as T | undefined,
       }))
       // Sort views according to the order specified in the view configuration.
       .sort((menuA, menuB) => {
