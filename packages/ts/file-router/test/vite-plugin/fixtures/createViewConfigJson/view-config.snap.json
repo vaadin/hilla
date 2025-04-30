@@ -1,0 +1,137 @@
+[
+  {
+    "route": "about",
+    "title": "About",
+    "flowLayout": false,
+    "params": {}
+  },
+  {
+    "route": "profile",
+    "params": {},
+    "children": [
+      {
+        "route": "",
+        "title": "Profile",
+        "flowLayout": false,
+        "params": {}
+      },
+      {
+        "route": "account",
+        "title": "Account",
+        "flowLayout": false,
+        "params": {},
+        "children": [
+          {
+            "route": "security",
+            "params": {},
+            "children": [
+              {
+                "route": "password",
+                "flowLayout": false,
+                "params": {},
+                "title": "Password"
+              },
+              {
+                "route": "two-factor-auth",
+                "flowLayout": false,
+                "params": {},
+                "title": "Two Factor Auth"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "route": "friends",
+        "flowLayout": false,
+        "params": {},
+        "title": "Friends Layout",
+        "children": [
+          {
+            "route": "list",
+            "flowLayout": false,
+            "params": {},
+            "title": "List"
+          },
+          {
+            "route": ":user",
+            "flowLayout": false,
+            "params": {
+              ":user": "req"
+            },
+            "title": "User"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "test",
+    "params": {},
+    "children": [
+      {
+        "route": ":optional?",
+        "title": "Optional",
+        "flowLayout": false,
+        "params": {
+          ":optional?": "opt"
+        }
+      },
+      {
+        "route": "*",
+        "title": "Wildcard",
+        "flowLayout": false,
+        "params": {
+          "*": "*"
+        }
+      },
+      {
+        "route": "issue-002378",
+        "params": {},
+        "children": [
+          {
+            "route": ":requiredParam",
+            "params": {
+              ":requiredParam": "req"
+            },
+            "children": [
+              {
+                "route": "edit",
+                "flowLayout": false,
+                "params": {},
+                "title": "Issue002378 Required Param"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "route": "issue-002571-empty-layout",
+        "flowLayout": false,
+        "params": {},
+        "title": "Issue002571 Empty Layout",
+        "children": []
+      },
+      {
+        "route": "issue-002879-config-below",
+        "title": "Config Below",
+        "flowLayout": false,
+        "params": {}
+      },
+      {
+        "route": "non-lazy",
+        "lazy": false,
+        "flowLayout": false,
+        "params": {},
+        "title": "Non Lazy"
+      }
+    ]
+  },
+  {
+    "route": "layout-only",
+    "flowLayout": false,
+    "params": {},
+    "title": "Layout Only",
+    "children": []
+  }
+]
