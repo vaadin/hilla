@@ -51,7 +51,7 @@
     "@types/deep-equal-in-any-order": "1.0.4",
     "@types/js-cookie": "3.0.6",
     "@types/node": "22.13.4",
-    "@types/react": "19.0.10",
+    "@types/react": "19.1.2",
     "@types/react-dom": "19",
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "4.0.0",
@@ -101,7 +101,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.35.0",
     "typescript": "5.7.3",
-    "vite": "6.1.1",
+    "vite": "6.3.3",
     "vitest": "3.0.6"
   }
 }

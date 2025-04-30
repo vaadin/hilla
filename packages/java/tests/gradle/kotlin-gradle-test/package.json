@@ -22,9 +22,9 @@
     "@vaadin/vaadin-lumo-styles": "24.7.0-alpha9",
     "@vaadin/vaadin-themable-mixin": "24.7.0-alpha9",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.2.1",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "lit": "3.3.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-router": "7.5.2"
   },
   "devDependencies": {
@@ -53,7 +53,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.7.3",
-    "vite": "6.1.1",
+    "vite": "6.3.3",
     "vite-plugin-checker": "0.8.0",
     "workbox-build": "7.3.0",
     "workbox-core": "7.3.0",
@@ -78,9 +78,9 @@
       "@vaadin/vaadin-lumo-styles": "24.7.0-alpha9",
       "@vaadin/vaadin-themable-mixin": "24.7.0-alpha9",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.2.1",
-      "react": "18.3.1",
-      "react-dom": "18.3.1",
+      "lit": "3.3.0",
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
       "react-router": "7.5.2"
     },
     "devDependencies": {
@@ -109,7 +109,7 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.7.3",
-      "vite": "6.1.1",
+      "vite": "6.3.3",
       "vite-plugin-checker": "0.8.0",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
