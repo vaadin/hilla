@@ -10,7 +10,11 @@ const hoistedVitePackageDir = new URL('node_modules/vite/', root);
 const cwd = pathToFileURL(process.env['INIT_CWD'] ?? process.cwd()).toString();
 const cwdPathPrefix = cwd.startsWith(root.toString()) ? decodeURIComponent(cwd.substring(root.toString().length)) : '';
 
-const workspacesToMaintain = ['packages/java/tests/*', 'packages/java/tests/gradle/*', 'packages/java/tests/spring/*'];
+const workspacesToMaintain = [
+  'packages/java/tests/*',
+  'packages/java/tests/gradle/*',
+  'packages/java/tests/spring/*'
+].map(workspacePathPattern => `${workspacePathPattern}/package.json`);
 const workspaceFiles = await glob(workspacesToMaintain, { cwd: root });
 const targetWorkspaceFiles = workspaceFiles.filter((file) => file.startsWith(cwdPathPrefix));
 for (const file of targetWorkspaceFiles) {
