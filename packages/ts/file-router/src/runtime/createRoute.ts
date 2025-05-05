@@ -1,4 +1,5 @@
-import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
+import type { ComponentType } from 'react';
+import type { AgnosticRoute, Module, RouteModule, ViewConfig } from '../types.js';
 
 /**
  * Extends a router module's config with additional properties. The original
@@ -7,6 +8,8 @@ import type { AgnosticRoute, Module, ViewConfig } from '../types.js';
  * @param module - The module to extend.
  * @param config - The extension config.
  * @returns
+ *
+ * @deprecated Use object spread syntax instead.
  */
 export function extendModule(module: Module | null, config?: ViewConfig): Module {
   return {
@@ -16,6 +19,14 @@ export function extendModule(module: Module | null, config?: ViewConfig): Module
       ...(module?.config as ViewConfig),
     },
   };
+}
+
+function isReactComponent(value: unknown): value is ComponentType {
+  return (
+    !!value &&
+    (typeof value === 'function' ||
+      (typeof value === 'object' && '$$typeof' in value && value.$$typeof === Symbol.for('react.lazy')))
+  );
 }
 
 /**
@@ -28,23 +39,60 @@ export function extendModule(module: Module | null, config?: ViewConfig): Module
  * @returns A framework-agnostic route object.
  */
 export function createRoute(path: string, children?: readonly AgnosticRoute[]): AgnosticRoute;
+/**
+ * Create a single framework-agnostic route object. Later, it can be transformed into a framework-specific route object,
+ * e.g., the one used by React Router.
+ *
+ * @param path - A route path segment.
+ * @param module - A module that exports a component and an optional config object.
+ * @param children - An array of child routes.
+ *
+ * @deprecated Use `createRoute(path, component, config, children)` instead.
+ */
 export function createRoute(path: string, module: Module, children?: readonly AgnosticRoute[]): AgnosticRoute;
+/**
+ * Create a single framework-agnostic route object. Later, it can be transformed into a framework-specific route object,
+ * e.g., the one used by React Router.
+ *
+ * @param path - A route path segment.
+ * @param component - A React component.
+ * @param config - An optional config object.
+ * @param children - An array of child routes.
+ */
 export function createRoute(
   path: string,
-  moduleOrChildren?: Module | readonly AgnosticRoute[],
+  component: ComponentType,
+  config: ViewConfig | undefined,
+  children?: readonly AgnosticRoute[],
+): AgnosticRoute;
+export function createRoute(
+  path: string,
+  moduleOrChildrenOrComponent?: Module | ComponentType | readonly AgnosticRoute[],
+  childrenOrConfig?: readonly AgnosticRoute[] | ViewConfig,
   children?: readonly AgnosticRoute[],
 ): AgnosticRoute {
-  let module: Module | undefined;
-  if (Array.isArray(moduleOrChildren)) {
+  let isDeprecatedModuleUsed = false;
+  let component: ComponentType | undefined;
+  let config: ViewConfig | undefined;
+  if (Array.isArray(moduleOrChildrenOrComponent)) {
     // eslint-disable-next-line no-param-reassign
-    children = moduleOrChildren;
-  } else {
-    module = moduleOrChildren as Module | undefined;
+    children = moduleOrChildrenOrComponent;
+  } else if (
+    isReactComponent(moduleOrChildrenOrComponent) ||
+    (!moduleOrChildrenOrComponent && !!childrenOrConfig && typeof childrenOrConfig === 'object')
+  ) {
+    component = moduleOrChildrenOrComponent;
+    config = childrenOrConfig as ViewConfig;
+  } else if (moduleOrChildrenOrComponent) {
+    ({ default: component, config } = moduleOrChildrenOrComponent as RouteModule);
+    isDeprecatedModuleUsed = true;
   }
 
   return {
     path,
-    module,
+    module: isDeprecatedModuleUsed ? { default: component, config } : undefined,
+    component,
+    config,
     children,
   };
 }
