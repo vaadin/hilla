@@ -13,6 +13,7 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
     override fun setup() {
         super.setup()
         getDriver().get(testPath)
+        `$`(ButtonElement::class.java).withId("save").waitForFirst()
     }
 
     override fun getTestPath(): String = "$rootURL/person-form"
@@ -39,11 +40,13 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
 
         emailField.sendKeys("invalid")
         saveButton.focus()
+        waitUntil { emailField.getPropertyString("errorMessage") != null }
         Assert.assertEquals("must be a well-formed email address",
             emailField.getPropertyString("errorMessage"))
 
         emailField.sendKeys("valid@foofle.co")
         saveButton.focus()
+        waitUntil { emailField.getPropertyString("errorMessage").isEmpty() }
         Assert.assertEquals("", emailField.getPropertyString("errorMessage"))
     }
 
