@@ -54,6 +54,9 @@ public class SecurityIT extends ChromeBrowserTest {
                             + "a status of 401")
                     || msg.contains("expected \"200 OK\" response, but got 401")
                     || msg.contains("webpack-internal://")
+            // TODO: Remove when
+            // https://github.com/vaadin/web-components/issues/8889 is fixed
+                    || msg.contains(".slotStyles is not iterable")
                     || msg.contains("BalanceEndpoint.getBalanceUpdates([])")
                             && msg.contains("Access denied");
         });
