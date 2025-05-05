@@ -15,7 +15,7 @@ const workspacesToMaintain = [
   'packages/java/tests/gradle/*',
   'packages/java/tests/spring/*'
 ].map(workspacePathPattern => `${workspacePathPattern}/package.json`);
-const workspaceFiles = await glob(workspacesToMaintain, { cwd: root });
+const workspaceFiles = await glob(workspacesToMaintain, { cwd: root, posix: true });
 const targetWorkspaceFiles = workspaceFiles.filter((file) => file.startsWith(cwdPathPrefix));
 for (const file of targetWorkspaceFiles) {
   const workspaceFile = new URL(file, root);
