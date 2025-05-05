@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-parent</artifactId>
-    <version>2.2.1</version>
+    <version>2.2.2</version>
   </parent>
 
   <modules>
@@ -54,6 +54,17 @@
       <modules>
         <module>packages/java/gradle-plugin</module>
         <module>packages/java/gradle-plugin/pom-portal.xml</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>scripts</id>
+      <activation>
+        <property>
+          <name>!release</name>
+        </property>
+      </activation>
+      <modules>
+        <module>scripts/java/hilla-scripts</module>
       </modules>
     </profile>
   </profiles>
