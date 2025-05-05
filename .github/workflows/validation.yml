@@ -300,6 +300,11 @@ jobs:
         with:
           name: saved-outputs-gradle-${{ matrix.os }}
           path: |
+            package.json
+            package-lock.json
+            node_modules/**/package.json
+            packages/java/tests/gradle/**/package.json
+            packages/java/tests/gradle/**/node_modules/**/package.json
             packages/java/tests/**/target/*-reports/*
             packages/java/tests/**/error-screenshots/*.png
             packages/java/gradle-plugin/build/test-results/*
