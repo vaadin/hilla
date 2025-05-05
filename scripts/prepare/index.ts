@@ -1,27 +1,9 @@
 /* eslint-disable no-console */
-import { spawn, type SpawnOptions } from 'node:child_process';
-import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
-import { componentOptions, destination, local, remote, type Versions } from './config.js';
+import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
-
-async function run(command: string, args: string[] = [], options: SpawnOptions = {}): Promise<void> {
-  return new Promise((resolve, reject) => {
-    console.log(`> ${command} ${args.join(' ')}`);
-    const childProcess = spawn(command, args, {
-      shell: true,
-      stdio: 'inherit',
-      ...options,
-    });
-    childProcess.on('exit', (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Child process exited with non-zero exit code ${code}`));
-      }
-    });
-  });
-}
 
 const [{ version }, versions] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
@@ -61,13 +43,88 @@ await Promise.all(
   }),
 );
 
-const reactComponentsPackageName = '@vaadin/react-components';
+// Known packages to synchronise with Vaadin web components version
+const KNOWN_COMPONENT_PACKAGES = ['@vaadin/vaadin-themable-mixin'];
+const componentsVersion = versions.core['component-base'].jsVersion ?? '';
+
+// Known packages to synchronise with Vaadin React components version
+const KNOWN_REACT_COMPONENT_PACKAGES = ['@vaadin/react-components', '@vaadin/react-components-pro'];
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
-const reactComponentsSpec = `${reactComponentsPackageName}@${reactComponentsVersion}`;
-console.log(`Installing "${reactComponentsSpec}".`);
-// The root hoisted version should be updated first, before the workspaces
-await run('npm', ['install', reactComponentsSpec, '--save-dev', '--save-exact']);
-const workspaceArg = `--workspace=@vaadin/hilla-react-crud`;
-// Workaround: doing "npm uninstall" first, the package.json in the workspace is not updated otherwise
-await run('npm', ['uninstall', reactComponentsPackageName, workspaceArg, '--save']);
-await run('npm', ['install', reactComponentsSpec, workspaceArg, '--save', '--save-exact']);
+
+let rootPackageJson: PackageJson | undefined;
+
+function updateDependencyVersion(json: PackageJson, npmName: string, versionSpec: string) {
+  if (json.devDependencies?.[npmName] !== undefined) {
+    json.devDependencies[npmName] = versionSpec;
+  }
+  if (json.dependencies?.[npmName] !== undefined) {
+    json.dependencies[npmName] = versionSpec;
+  }
+}
+
+async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
+  const fileUrl = new URL(file, root);
+  const originalContents = (await readFile(fileUrl, 'utf-8')).trim();
+  const json = JSON.parse(originalContents) as PackageJson;
+  for (const packages of Object.values(versions)) {
+    for (const { npmName, jsVersion } of Object.values(
+      packages as Record<string, Readonly<{ npmName?: string; jsVersion?: string }>>,
+    )) {
+      if (!npmName || !jsVersion) {
+        continue;
+      }
+      updateDependencyVersion(json, npmName, jsVersion);
+    }
+  }
+  for (const packageName of KNOWN_COMPONENT_PACKAGES) {
+    updateDependencyVersion(json, packageName, componentsVersion);
+  }
+  for (const packageName of KNOWN_REACT_COMPONENT_PACKAGES) {
+    updateDependencyVersion(json, packageName, reactComponentsVersion);
+  }
+
+  if (rootPackageJson && file !== 'package.json') {
+    for (const [packageName, versionSpec] of [
+      ...Object.entries(rootPackageJson.dependencies ?? {}),
+      ...Object.entries(rootPackageJson.devDependencies ?? {}),
+    ]) {
+      if (!versionSpec) {
+        continue;
+      }
+      updateDependencyVersion(json, packageName, versionSpec);
+    }
+  }
+
+  const contents = JSON.stringify(json, undefined, 2).trim();
+  if (contents !== originalContents) {
+    console.log(`Updating ${file}.`);
+    await writeFile(fileUrl, contents, 'utf-8');
+  } else {
+    console.log(`Nothing to update in ${file}, skipping.`);
+  }
+
+  return json;
+}
+
+rootPackageJson = await getPackageJsonWithUpdates('package.json');
+
+const workspaces = Array.isArray(rootPackageJson.workspaces) ? rootPackageJson.workspaces : [];
+
+const [patterns, ignore] = workspaces.reduce<readonly [string[], string[]]>(
+  ([_patterns, _ignore], pattern) => {
+    if (pattern.startsWith('!')) {
+      _ignore.push(`${pattern.substring(1)}/package.json`);
+    } else {
+      _patterns.push(`${pattern}/package.json`);
+    }
+    return [_patterns, _ignore];
+  },
+  [[], []],
+);
+
+for await (const file of globIterate(patterns, { cwd: root, ignore })) {
+  await getPackageJsonWithUpdates(file);
+  // Clean old IT node_modules installation
+  const nodeModulesDir = new URL('node_modules/', new URL(file, root));
+  await rm(nodeModulesDir, { recursive: true, force: true });
+}

@@ -9,14 +9,13 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
+import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -231,11 +230,10 @@ public class CommandRunnerTest {
 
         assertEquals(expectedJavaHome, runner.environment().get("JAVA_HOME"));
 
-        assertEquals(expectedJavaHome,
-                runner.createProcessBuilder(List.of(), false).environment()
-                        .get("JAVA_HOME"));
+        assertEquals(expectedJavaHome, runner.createProcessBuilder(List.of())
+                .environment().get("JAVA_HOME"));
 
-        var ProcessBuilder = runner.createProcessBuilder(List.of(), false);
+        var ProcessBuilder = runner.createProcessBuilder(List.of());
         assertEquals(expectedJavaHome,
                 ProcessBuilder.environment().get("JAVA_HOME"));
     }
@@ -251,17 +249,17 @@ public class CommandRunnerTest {
             }
 
             @Override
-            public ProcessBuilder createProcessBuilder(
-                    List<String> commandWithArgs, boolean stdOut) {
-                stdOutRequested.add(stdOut);
-                return super.createProcessBuilder(commandWithArgs, stdOut);
+            public void run(Consumer<OutputStream> stdIn,
+                    Consumer<InputStream> stdOut, Consumer<InputStream> stdErr)
+                    throws CommandRunnerException {
+                stdOutRequested.add(stdOut != null && stdErr != null);
+                super.run(stdIn, stdOut, stdErr);
             }
         };
 
         assertDoesNotThrow(() -> runner.run(null));
-        assertEquals(2, stdOutRequested.size());
-        assertEquals(false, stdOutRequested.get(0));
-        assertEquals(true, stdOutRequested.get(1));
+        assertEquals(1, stdOutRequested.size());
+        assertEquals(true, stdOutRequested.get(0));
     }
 
     @Test
@@ -275,17 +273,17 @@ public class CommandRunnerTest {
             }
 
             @Override
-            public ProcessBuilder createProcessBuilder(
-                    List<String> commandWithArgs, boolean stdOut) {
-                stdOutRequested.add(stdOut);
-                return super.createProcessBuilder(commandWithArgs, stdOut);
+            public void run(Consumer<OutputStream> stdIn,
+                    Consumer<InputStream> stdOut, Consumer<InputStream> stdErr)
+                    throws CommandRunnerException {
+                stdOutRequested.add(stdOut != null && stdErr != null);
+                super.run(stdIn, stdOut, stdErr);
             }
         };
 
         assertDoesNotThrow(() -> runner.run(null, false));
-        assertEquals(2, stdOutRequested.size());
+        assertEquals(1, stdOutRequested.size());
         assertEquals(false, stdOutRequested.get(0));
-        assertEquals(false, stdOutRequested.get(1));
     }
 
 }
