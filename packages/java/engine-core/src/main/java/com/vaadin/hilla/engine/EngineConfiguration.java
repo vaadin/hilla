@@ -298,7 +298,9 @@ public interface EngineConfiguration {
                 return finder.find(this);
             } catch (ExecutionFailedException e) {
                 if (iterator.hasNext()) {
-                    LOGGER.debug("Failed to find browser-callables", e);
+                    LOGGER.debug(
+                            "An attempt to find browser-callables has failed, trying next finder",
+                            e);
                 } else {
                     throw e;
                 }
