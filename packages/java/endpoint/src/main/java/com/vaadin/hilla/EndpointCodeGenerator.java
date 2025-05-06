@@ -170,8 +170,7 @@ public class EndpointCodeGenerator {
     public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            var conf = EngineConfiguration.load();
-            var openApiPath = conf.getOpenAPIFile();
+            var openApiPath = engineConfiguration.getOpenAPIFile();
             if (openApiPath != null && openApiPath.toFile().exists()) {
                 try {
                     classesUsedInOpenApi = OpenAPIUtil
