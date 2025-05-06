@@ -290,26 +290,34 @@ public interface EngineConfiguration {
     default List<Class<?>> findBrowserCallables()
             throws ExecutionFailedException {
         var iterator = getBrowserCallableFinders().iterator();
+        ExecutionFailedException exception = null;
 
         while (iterator.hasNext()) {
             var finder = iterator.next();
 
             try {
-                return finder.find(this);
-            } catch (ExecutionFailedException e) {
-                if (iterator.hasNext()) {
-                    LOGGER.debug(
-                            "An attempt to find browser-callables has failed, trying next finder",
-                            e);
-                } else {
-                    throw e;
+                var callables = finder.find(this);
+
+                if (LOGGER.isDebugEnabled() && exception != null) {
+                    for (var suppressed : exception.getSuppressed()) {
+                        LOGGER.debug(
+                                "An attempt to find browser-callables has failed, trying next finder",
+                                suppressed);
+                    }
                 }
+
+                return callables;
+            } catch (Exception e) {
+                if (exception == null) {
+                    exception = new ExecutionFailedException(
+                            "Failed to find browser-callable classes. See suppressed exceptions for details.");
+                }
+
+                exception.addSuppressed(e);
             }
         }
 
-        // should never happen, as the last one throws
-        throw new IllegalStateException(
-                "No other browser-callable finders available");
+        throw exception;
     }
 
     default EngineConfiguration setProductionMode(boolean productionMode) {

@@ -18,9 +18,6 @@ public interface BrowserCallableFinder {
      * @param engineConfiguration
      *            The configuration to use for finding classes.
      * @return A list of classes that are browser-callable.
-     * @throws ExecutionFailedException
-     *             If something goes wrong during the lookup.
      */
-    List<Class<?>> find(EngineConfiguration engineConfiguration)
-            throws ExecutionFailedException;
+    List<Class<?>> find(EngineConfiguration engineConfiguration);
 }

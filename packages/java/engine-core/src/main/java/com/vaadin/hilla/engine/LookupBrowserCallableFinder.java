@@ -5,31 +5,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.server.ExecutionFailedException;
-
 public class LookupBrowserCallableFinder {
 
-    public static List<Class<?>> find(EngineConfiguration engineConfiguration)
-            throws ExecutionFailedException {
-        try {
-            var annotations = engineConfiguration.getEndpointAnnotations();
+    public static List<Class<?>> find(EngineConfiguration engineConfiguration) {
+        var annotations = engineConfiguration.getEndpointAnnotations();
 
-            return annotations.stream()
-                    .map(engineConfiguration
-                            .getClassFinder()::getAnnotatedClasses)
-                    .flatMap(Set::stream).distinct()
-                    .collect(Collectors.toMap(
-                            clazz -> findEndpointName(annotations, clazz),
-                            clazz -> clazz, (existing, duplicate) -> {
-                                throw new IllegalStateException(
-                                        "Duplicate key found: "
-                                                + findEndpointName(annotations,
-                                                        existing));
-                            }))
-                    .values().stream().collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new ExecutionFailedException(e.getMessage());
-        }
+        return annotations.stream()
+                .map(engineConfiguration.getClassFinder()::getAnnotatedClasses)
+                .flatMap(Set::stream).distinct()
+                .collect(Collectors.toMap(
+                        clazz -> findEndpointName(annotations, clazz),
+                        clazz -> clazz, (existing, duplicate) -> {
+                            throw new IllegalStateException(
+                                    "Duplicate key found: " + findEndpointName(
+                                            annotations, existing));
+                        }))
+                .values().stream().collect(Collectors.toList());
     }
 
     private static String findEndpointName(
