@@ -66,29 +66,27 @@ public class LookupBrowserCallableFinderTest {
     }
 
     @Test
-    public void shouldThrowWhenTwoBrowserCallablesHaveSameName()
-            throws ExecutionFailedException {
+    public void shouldThrowWhenTwoBrowserCallablesHaveSameName() {
         when(classFinderMock.getAnnotatedClasses(Endpoint.class))
                 .thenReturn(Set.of(NameClash.class));
         when(classFinderMock.getAnnotatedClasses(BrowserCallable.class))
                 .thenReturn(Set.of(com.vaadin.hilla.engine.NameClash.class));
         var exception = assertThrows(
-            ExecutionFailedException.class,
+            IllegalStateException.class,
             () -> LookupBrowserCallableFinder.find(engineConfigurationMock)
         );
         assertTrue(exception.getMessage().contains("NameClash"));
     }
 
     @Test
-    public void shouldThrowWhenTwoBrowserCallablesHaveSameNameWithCustomName()
-            throws ExecutionFailedException {
+    public void shouldThrowWhenTwoBrowserCallablesHaveSameNameWithCustomName() {
         when(classFinderMock.getAnnotatedClasses(Endpoint.class))
                 .thenReturn(Set.of(NameClash.class,
                         AnnotatedWithEndpointAndCustomName.class));
         when(classFinderMock.getAnnotatedClasses(BrowserCallable.class))
                 .thenReturn(Set.of(CustomNameClash.class));
         var exception = assertThrows(
-            ExecutionFailedException.class,
+            IllegalStateException.class,
             () -> LookupBrowserCallableFinder.find(engineConfigurationMock)
         );
         assertTrue(exception.getMessage().contains("CustomNameClash"));
