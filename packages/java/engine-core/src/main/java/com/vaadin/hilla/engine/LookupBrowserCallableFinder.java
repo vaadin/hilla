@@ -46,8 +46,6 @@ public class LookupBrowserCallableFinder {
                     return name == null || name.isEmpty()
                             ? clazz.getSimpleName()
                             : name;
-                }).orElseThrow(() -> new IllegalStateException(
-                        "No endpoint annotation found for " + clazz.getName()));
+                }).orElse(clazz.getSimpleName());
     }
-
 }

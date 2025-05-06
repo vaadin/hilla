@@ -58,25 +58,21 @@ public class AutoFormViewIT extends ChromeBrowserTest {
     }
 
     private void submit() {
-        var submitButton = $(ButtonElement.class).all().stream()
-                .filter(button -> button.getText().equals("Submit"))
-                .findFirst();
-        if (submitButton.isPresent()) {
-            submitButton.get().click();
-        } else {
-            Assert.fail("Submit button not found");
-        }
+        $(ButtonElement.class).withText("Submit").waitForFirst().click();
     }
 
     private TextFieldElement getTextField(String name) {
-        return $(TextFieldElement.class).attribute("name", name).first();
+        return $(TextFieldElement.class).withAttribute("name", name)
+                .waitForFirst();
     }
 
     private IntegerFieldElement getIntegerField(String name) {
-        return $(IntegerFieldElement.class).attribute("name", name).first();
+        return $(IntegerFieldElement.class).withAttribute("name", name)
+                .waitForFirst();
     }
 
     private NumberFieldElement getNumberField(String name) {
-        return $(NumberFieldElement.class).attribute("name", name).first();
+        return $(NumberFieldElement.class).withAttribute("name", name)
+                .waitForFirst();
     }
 }

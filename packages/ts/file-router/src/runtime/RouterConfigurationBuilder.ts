@@ -18,7 +18,7 @@ interface RouteBase {
   children?: readonly this[];
 }
 
-function isReactRouteModule(module: Module): module is RouteModule<ComponentType> {
+function isReactRouteModule(module: Module): module is RouteModule {
   return (
     ('default' in module && typeof module.default === 'function') ||
     ('config' in module && typeof module.config === 'object')
@@ -84,18 +84,19 @@ export class RouterConfigurationBuilder {
   withFileRoutes(routes: readonly AgnosticRoute[]): this {
     return this.update(routes, ({ original, overriding: added, children }) => {
       if (added) {
-        const { module, path, flowLayout } = added;
+        const { module, component = module?.default, config = module?.config, path, flowLayout } = added;
+
         if (module && !isReactRouteModule(module)) {
           throw new Error(
             `The module for the "${path}" section doesn't have the React component exported by default or a ViewConfig object exported as "config"`,
           );
         }
 
-        const element = module?.default ? createElement(module.default) : undefined;
+        const element = component ? createElement(component) : undefined;
         const handle = {
-          ...module?.config,
-          title: module?.config?.title ?? convertComponentNameToTitle(module?.default),
-          flowLayout: module?.config?.flowLayout ?? flowLayout,
+          ...config,
+          title: config?.title ?? convertComponentNameToTitle(component),
+          flowLayout: config?.flowLayout ?? flowLayout,
         };
 
         if (path === '' && !children) {
@@ -109,7 +110,7 @@ export class RouterConfigurationBuilder {
 
         return {
           ...original,
-          path: module?.config?.route ?? path,
+          path: config?.route ?? path,
           element,
           children,
           handle,

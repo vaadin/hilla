@@ -3,6 +3,7 @@ import { basename, extname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Logger } from 'vite';
 import { RouteParamType } from '../shared/routeParamType.js';
+import type { ViewConfig } from '../types.js';
 import { cleanUp, routeParamTypeMap } from './utils.js';
 
 export type RouteMeta = Readonly<{
@@ -10,6 +11,7 @@ export type RouteMeta = Readonly<{
   file?: URL;
   layout?: URL;
   flowLayout?: boolean;
+  config?: ViewConfig;
   children?: readonly RouteMeta[];
 }>;
 
