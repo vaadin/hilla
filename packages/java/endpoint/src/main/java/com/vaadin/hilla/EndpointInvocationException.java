@@ -105,7 +105,7 @@ public abstract class EndpointInvocationException extends Exception {
     /**
      * Allows to specify the HTTP status code and message to return as error.
      */
-    public static class EndpointHttpException
+    public static abstract class EndpointHttpException
             extends EndpointInvocationException {
         private final int httpStatusCode;
 
