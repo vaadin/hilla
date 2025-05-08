@@ -64,6 +64,6 @@
     "@vaadin/hilla-generator-utils": "24.7.3",
     "@vaadin/hilla-react-auth": "24.7.3",
     "@vaadin/hilla-react-signals": "24.7.3",
-    "typescript": "5.8.3"
+    "typescript": "5.7.3"
   }
 }
