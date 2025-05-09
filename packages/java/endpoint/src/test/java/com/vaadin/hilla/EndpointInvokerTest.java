@@ -178,13 +178,19 @@ public class EndpointInvokerTest {
                 .check(any(Class.class), any(), any());
     }
 
+    static class TeapotException extends EndpointHttpException {
+        TeapotException() {
+            super(418, "I'm a teapot");
+        }
+    }
+
     @Test
     public void httpExceptionIsRethrown() {
         @Endpoint
         class TestEndpoint {
 
-            public String sayHello() throws EndpointHttpException {
-                throw new EndpointHttpException(418, "I'm a teapot");
+            public String sayHello() throws TeapotException {
+                throw new TeapotException();
             }
         }
 
@@ -192,7 +198,7 @@ public class EndpointInvokerTest {
 
         endpointRegistry.registerEndpoint(test);
 
-        var ex = assertThrows(EndpointHttpException.class,
+        var ex = assertThrows(TeapotException.class,
                 () -> endpointInvoker.invoke("TestEndpoint", "sayhello", body,
                         principal, requestMock::isUserInRole));
         assertEquals(418, ex.getHttpStatusCode());
