@@ -10,6 +10,10 @@ public interface CustomEngineConfiguration {
         return defaultFinder;
     }
 
+    default String getNodeCommand(String defaultNodeCommand) {
+        return defaultNodeCommand;
+    }
+
     static CustomEngineConfiguration load() {
         return pick(ServiceLoader.load(CustomEngineConfiguration.class).stream()
                 .map(ServiceLoader.Provider::get)

@@ -108,7 +108,7 @@ public class EngineConfiguration {
     }
 
     public String getNodeCommand() {
-        return nodeCommand;
+        return getCustomEngineConfiguration().getNodeCommand(nodeCommand);
     }
 
     public ClassFinder getClassFinder() {
