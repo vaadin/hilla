@@ -2,7 +2,7 @@ import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import CookieManager from '../src/CookieManager.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
@@ -323,6 +323,20 @@ describe('@vaadin/hilla-frontend', () => {
         verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
         expect(onSuccess).to.be.calledBefore(navigate);
         expect(navigate).to.be.calledOnceWithExactly('logout?login');
+      });
+
+      it('should perform a form submit when LogoutOptions does not contain navigate and onSuccess', async () => {
+        const submitSpy = vi.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(() => {
+          // noop to prevent navigation
+        });
+        try {
+          await originalLogout();
+          expect(fetchMock.callHistory.calls()).to.have.lengthOf(0);
+          expect(submitSpy).toHaveBeenCalled();
+          verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
+        } finally {
+          submitSpy.mockRestore();
+        }
       });
     });
 

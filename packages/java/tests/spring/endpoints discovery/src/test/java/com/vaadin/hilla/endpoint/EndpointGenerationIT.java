@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,12 +25,13 @@ public class EndpointGenerationIT {
     }
 
     /**
-     * Endpoint not in configured packages should not be generated
+     * As we are now using the lookup-based endpoint finder, all the endpoints
+     * are generated, even those that will not be available as Spring beans.
      */
     @Test
-    public void shouldNotGenerateExternalEndpoint() {
-        assertFalse(Files.exists(frontendDir.resolve("ExternalEndpoint.ts")));
-        assertFalse(Files
+    public void shouldGenerateExternalEndpoint() {
+        assertTrue(Files.exists(frontendDir.resolve("ExternalEndpoint.ts")));
+        assertTrue(Files
                 .exists(frontendDir.resolve("com/external/ExternalEntity.ts")));
     }
 

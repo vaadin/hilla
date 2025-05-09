@@ -87,10 +87,10 @@ export async function generateRuntimeFiles(
     logger.info('Collected file-based routes');
   }
   routeMeta = await applyLayouts(routeMeta, urls.layouts);
-  const runtimeRoutesCode = createRoutesFromMeta(routeMeta, urls);
   const viewConfigJson = await createViewConfigJson(routeMeta);
+  const runtimeRoutesCode = createRoutesFromMeta(routeMeta, viewConfigJson, urls);
 
-  const jsonWritten = await generateRuntimeFile(urls.json, viewConfigJson);
+  const jsonWritten = await generateRuntimeFile(urls.json, JSON.stringify(viewConfigJson, null, 2));
   if (debug) {
     logger.info(`Frontend route list is generated: ${String(urls.json)}`);
   }

@@ -14,7 +14,8 @@
       "icon": null,
       "menuClass": null
     },
-    "flowLayout":false
+    "flowLayout":false,
+    "detail": null
   },
   "/profile": {
     "params": {},
@@ -34,7 +35,8 @@
       "icon": null,
       "menuClass": null
     },
-    "flowLayout":false
+    "flowLayout":false,
+    "detail": null
   },
   "/": {
     "params": {},
@@ -51,7 +53,8 @@
       "icon": null,
       "menuClass": null
     },
-    "flowLayout":false
+    "flowLayout":false,
+    "detail": null
   },
   "/orders": {
     "params": {},
@@ -68,6 +71,7 @@
       "icon": null,
       "menuClass": null
     },
-    "flowLayout":false
+    "flowLayout":false,
+    "detail": null
   }
 }

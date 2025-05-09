@@ -134,17 +134,23 @@ public class EngineConfiguration {
 
         return () -> {
             try {
-                return AotBrowserCallableFinder.findEndpointClasses(this);
-            } catch (Exception e) {
                 if (classFinder != null) {
-                    LOGGER.info(
-                            "AOT-based detection of browser-callable classes failed."
-                                    + " Falling back to classpath scan."
-                                    + " Enable debug logging for more information.");
                     return LookupBrowserCallableFinder
                             .findEndpointClasses(classFinder, this);
                 } else {
-                    throw new ExecutionFailedException(e);
+                    throw new IllegalStateException(
+                            "ClassFinder is not available");
+                }
+            } catch (Exception e) {
+                LOGGER.info(
+                        "Lookup-based detection of browser-callable classes failed."
+                                + " Falling back to AOT-based detection."
+                                + " Enable debug logging for more information.",
+                        e);
+                try {
+                    return AotBrowserCallableFinder.findEndpointClasses(this);
+                } catch (Exception ex) {
+                    throw new ExecutionFailedException(ex);
                 }
             }
         };
