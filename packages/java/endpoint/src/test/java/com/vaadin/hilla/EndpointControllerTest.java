@@ -203,14 +203,26 @@ public class EndpointControllerTest {
                     : "Check multiple files FAILED";
         }
 
-        @AnonymousAllowed
-        public void throwCustomHttpException() throws EndpointHttpException {
-            throw new EndpointHttpException(418, "I'm a teapot");
+        static class TeapotException extends EndpointHttpException {
+            TeapotException() {
+                super(418, "I'm a teapot");
+            }
         }
 
         @AnonymousAllowed
-        public void throwInvalidHttpException() throws EndpointHttpException {
-            throw new EndpointHttpException(200, "All right!");
+        public void throwCustomHttpException() throws TeapotException {
+            throw new TeapotException();
+        }
+
+        static class InvalidHttpException extends EndpointHttpException {
+            InvalidHttpException() {
+                super(200, "All right!");
+            }
+        }
+
+        @AnonymousAllowed
+        public void throwInvalidHttpException() throws InvalidHttpException {
+            throw new InvalidHttpException();
         }
     }
 
