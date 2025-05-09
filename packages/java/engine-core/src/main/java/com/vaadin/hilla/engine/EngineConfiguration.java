@@ -1,20 +1,21 @@
 package com.vaadin.hilla.engine;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 
@@ -129,31 +130,33 @@ public class EngineConfiguration {
     }
 
     public BrowserCallableFinder getBrowserCallableFinder() {
-        var result = browserCallableFinder;
+        BrowserCallableFinder result = browserCallableFinder;
 
         if (result == null) {
-            result = () -> {
-                try {
-                    if (classFinder != null) {
-                        return LookupBrowserCallableFinder
-                                .findEndpointClasses(classFinder, this);
-                    } else {
-                        throw new IllegalStateException(
-                                "ClassFinder is not available");
-                    }
-                } catch (Exception e) {
-                    LOGGER.info(
-                            "Lookup-based detection of browser-callable classes failed."
-                                    + " Falling back to AOT-based detection."
-                                    + " Enable debug logging for more information.",
-                            e);
-                    try {
-                        return AotBrowserCallableFinder
-                                .findEndpointClasses(this);
-                    } catch (Exception ex) {
-                        throw new ExecutionFailedException(ex);
-                    }
-                }
+            result = (conf) -> {
+                var exceptions = new ArrayList<RuntimeException>();
+
+                return Stream.<BrowserCallableFinder> of(
+                        LookupBrowserCallableFinder::find,
+                        AotBrowserCallableFinder::find).map(finder -> {
+                            try {
+                                return finder.find(conf);
+                            } catch (RuntimeException e) {
+                                exceptions.add(e);
+                                return null;
+                            }
+                        }).filter(Objects::nonNull).findFirst()
+                        .orElseThrow(() -> {
+                            if (exceptions.isEmpty()) {
+                                return new IllegalStateException(
+                                        "No browser-callable classes found");
+                            } else {
+                                var exception = new IllegalStateException(
+                                        "Failed to find browser-callable classes");
+                                exceptions.forEach(exception::addSuppressed);
+                                return exception;
+                            }
+                        });
             };
         }
 
@@ -342,15 +345,5 @@ public class EngineConfiguration {
             return path.isAbsolute() ? path.normalize()
                     : configuration.baseDir.resolve(path).normalize();
         }
-    }
-
-    /**
-     * Functional interface for finding browser-callable classes.
-     * Implementations of this interface are responsible for locating and
-     * returning a list of endpoint classes.
-     */
-    @FunctionalInterface
-    public interface BrowserCallableFinder {
-        List<Class<?>> findBrowserCallables() throws ExecutionFailedException;
     }
 }

@@ -5,8 +5,8 @@ import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 public interface CustomEngineConfiguration {
-    default EngineConfiguration.BrowserCallableFinder getBrowserCallableFinder(
-            EngineConfiguration.BrowserCallableFinder defaultFinder) {
+    default BrowserCallableFinder getBrowserCallableFinder(
+            BrowserCallableFinder defaultFinder) {
         return defaultFinder;
     }
 

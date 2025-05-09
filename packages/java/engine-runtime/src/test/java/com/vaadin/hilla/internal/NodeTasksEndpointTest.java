@@ -84,7 +84,8 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
             throws Exception {
         options = options.withProductionMode(true);
         var engineConfiguration = new EngineConfiguration.Builder()
-                .browserCallableFinder(() -> List.of(MyEndpoint.class)).build();
+                .browserCallableFinder((conf) -> List.of(MyEndpoint.class))
+                .build();
         EngineConfiguration.setDefault(engineConfiguration);
 
         new NodeTasks(options).execute();
