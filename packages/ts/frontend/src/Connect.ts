@@ -1,5 +1,5 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
-import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
+import type * as CommonFrontendModule from '@vaadin/common-frontend';
 import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
 import {
   EndpointError,
@@ -15,6 +15,11 @@ import {
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
 import type { VaadinGlobal } from './types.js';
+
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+const commonFrontendModule: Partial<typeof CommonFrontendModule> = globalThis.document
+  ? await import('@vaadin/common-frontend')
+  : {};
 
 const $wnd = globalThis as VaadinGlobal;
 
@@ -291,21 +296,24 @@ export class ConnectClient {
       this.atmosphereOptions = options.atmosphereOptions;
     }
 
-    // add connection indicator to DOM
-    ConnectionIndicator.create();
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (globalThis.document) {
+      // add connection indicator to DOM
+      commonFrontendModule.ConnectionIndicator?.create();
 
-    // Listen to browser online/offline events and update the loading indicator accordingly.
-    // Note: if Flow.ts is loaded, it instead handles the state transitions.
-    addEventListener('online', () => {
-      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTED;
-      }
-    });
-    addEventListener('offline', () => {
-      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
-      }
-    });
+      // Listen to browser online/offline events and update the loading indicator accordingly.
+      // Note: if Flow.ts is loaded, it instead handles the state transitions.
+      addEventListener('online', () => {
+        if (!isFlowLoaded() && $wnd.Vaadin?.connectionState && commonFrontendModule.ConnectionState) {
+          $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTED;
+        }
+      });
+      addEventListener('offline', () => {
+        if (!isFlowLoaded() && $wnd.Vaadin?.connectionState && commonFrontendModule.ConnectionState) {
+          $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTION_LOST;
+        }
+      });
+    }
   }
 
   /**
