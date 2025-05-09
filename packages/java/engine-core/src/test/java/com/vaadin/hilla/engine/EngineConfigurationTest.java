@@ -74,4 +74,39 @@ public class EngineConfigurationTest {
                     conf.getBrowserCallableFinder().find(conf));
         }
     }
+
+    public static class FirstLoadedConfiguration
+            implements CustomEngineConfiguration {
+        @Override
+        public String getNodeCommand(String defaultNodeCommand) {
+            return "my-node";
+        }
+    }
+
+    public static class SecondLoadedConfiguration
+            implements CustomEngineConfiguration {
+        @Override
+        public String getNodeCommand(String defaultNodeCommand) {
+            return "other-node";
+        }
+    }
+
+    @Test
+    public void shouldThrowWhenMultipleCustomConfigurations() {
+        var ex = assertThrows(ConfigurationException.class,
+                () -> CustomEngineConfiguration.pick(
+                        new FirstLoadedConfiguration(),
+                        new SecondLoadedConfiguration()));
+        assertTrue(ex.getMessage().contains(
+                "Multiple EngineConfiguration implementations found:"));
+        assertTrue(ex.getMessage().contains("TestService"));
+        assertTrue(ex.getMessage().contains("OtherTestService"));
+    }
+
+    @Test
+    public void shouldUseServiceLoader() {
+        // expected to use TestService loaded from META-INF/services
+        var conf = EngineConfiguration.getDefault();
+        assertEquals("my-node", conf.getNodeCommand());
+    }
 }
