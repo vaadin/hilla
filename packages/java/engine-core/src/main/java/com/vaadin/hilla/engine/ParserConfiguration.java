@@ -1,6 +1,5 @@
 package com.vaadin.hilla.engine;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,19 +22,8 @@ import org.slf4j.LoggerFactory;
 public final class ParserConfiguration {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ParserConfiguration.class);
-    private List<Class<? extends Annotation>> endpointAnnotations = List.of();
-    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
-            .of();
     private String openAPIBasePath;
     private Plugins plugins;
-
-    public List<Class<? extends Annotation>> getEndpointAnnotations() {
-        return endpointAnnotations;
-    }
-
-    public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
-        return endpointExposedAnnotations;
-    }
 
     public Optional<String> getOpenAPIBasePath() {
         return Optional.ofNullable(openAPIBasePath);
@@ -43,16 +31,6 @@ public final class ParserConfiguration {
 
     public Optional<Plugins> getPlugins() {
         return Optional.ofNullable(plugins);
-    }
-
-    public void setEndpointAnnotations(
-            @NonNull List<Class<? extends Annotation>> endpointAnnotations) {
-        this.endpointAnnotations = endpointAnnotations;
-    }
-
-    public void setEndpointExposedAnnotations(
-            @NonNull List<Class<? extends Annotation>> endpointExposedAnnotations) {
-        this.endpointExposedAnnotations = endpointExposedAnnotations;
     }
 
     void setOpenAPIBasePath(String openAPIBasePath) {

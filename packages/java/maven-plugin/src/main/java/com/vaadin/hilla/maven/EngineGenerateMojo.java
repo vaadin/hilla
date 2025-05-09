@@ -11,6 +11,7 @@ import org.apache.maven.project.MavenProject;
 
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
 import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
@@ -56,12 +57,12 @@ public final class EngineGenerateMojo extends AbstractMojo
             return;
         }
         try {
-            var conf = configure();
+            configure();
+            var conf = EngineConfiguration.load();
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 
-            var browserCallables = conf.getBrowserCallableFinder()
-                    .findBrowserCallables();
+            var browserCallables = conf.findBrowserCallables();
             parserProcessor.process(browserCallables);
             generatorProcessor.process();
         } catch (ExecutionFailedException e) {

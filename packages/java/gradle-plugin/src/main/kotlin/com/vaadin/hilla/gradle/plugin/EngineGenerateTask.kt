@@ -17,7 +17,7 @@ package com.vaadin.hilla.gradle.plugin
 
 import java.io.IOException
 import com.vaadin.flow.gradle.PluginEffectiveConfiguration
-import com.vaadin.flow.gradle.VaadinFlowPluginExtension
+import com.vaadin.hilla.engine.EngineConfiguration
 import com.vaadin.hilla.engine.GeneratorException
 import com.vaadin.hilla.engine.GeneratorProcessor
 import com.vaadin.hilla.engine.ParserException
@@ -49,7 +49,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
         description = "Hilla Generate Task"
 
         // we need the compiled classes:
-        dependsOn("classes")
+        this.dependsOn("classes", "hillaConfigure")
 
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
@@ -63,10 +63,8 @@ public abstract class EngineGenerateTask : DefaultTask() {
         groupId.set(project.group.toString())
         artifactId.set(project.name)
         mainClass.set(project.findProperty("mainClass") as String?)
-        val engineConfig = HillaPlugin.createEngineConfiguration(
-            project,
-            VaadinFlowPluginExtension.get(project)
-        )
+        HillaPlugin.createEngineConfiguration(project)
+        val engineConfig = EngineConfiguration.load()
         engineConfigurationSettings.set(engineConfig.toInputs())
         effectiveConfig.set(PluginEffectiveConfiguration.get(project))
         classpath.from(engineConfig.classpath.map { it.toFile() })
@@ -107,12 +105,13 @@ public abstract class EngineGenerateTask : DefaultTask() {
         logger.info("Running the engineGenerate task with effective Vaadin configuration ${effectiveConfig.get()}")
 
         try {
-            val conf = engineConfigurationSettings.get().toEngineConfiguration()
+            engineConfigurationSettings.get().toEngineConfiguration()
+            val conf = EngineConfiguration.load()
 
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
 
-            val endpoints = conf.browserCallableFinder.findBrowserCallables();
+            val endpoints = conf.findBrowserCallables();
             parserProcessor.process(endpoints)
             generatorProcessor.process()
         } catch (e: IOException) {

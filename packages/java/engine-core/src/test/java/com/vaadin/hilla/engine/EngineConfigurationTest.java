@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
@@ -40,21 +41,22 @@ public class EngineConfigurationTest {
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
-        var conf = new EngineConfiguration.Builder().classFinder(classFinder)
-                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
+                .setEndpointAnnotationNames(
+                        BrowserCallableEndpoint.class.getName());
         assertEquals(List.of(EndpointFromClassFinder.class),
-                conf.getBrowserCallableFinder().findBrowserCallables());
+                conf.findBrowserCallables());
     }
 
     @Test
     public void shouldUseAotWhenNoClassFinder() throws Exception {
         // classFinder is null by default in configuration
-        var conf = EngineConfiguration.getDefault();
+        var conf = EngineConfiguration.STATE;
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
-            when(AotBrowserCallableFinder.findEndpointClasses(conf))
+            when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
             assertEquals(List.of(EndpointFromAot.class),
-                    conf.getBrowserCallableFinder().findBrowserCallables());
+                    conf.findBrowserCallables());
         }
     }
 
@@ -65,13 +67,52 @@ public class EngineConfigurationTest {
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class,
                         EndpointFromClassFinderWithCustomName.class));
-        var conf = new EngineConfiguration.Builder().classFinder(classFinder)
-                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        var conf = EngineConfiguration.STATE.setClassFinder(classFinder)
+                .setEndpointAnnotationNames(
+                        BrowserCallableEndpoint.class.getName());
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
-            when(AotBrowserCallableFinder.findEndpointClasses(conf))
+            when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
             assertEquals(List.of(EndpointFromAot.class),
-                    conf.getBrowserCallableFinder().findBrowserCallables());
+                    conf.findBrowserCallables());
         }
+    }
+
+    public static class TestService implements EngineConfiguration {
+        @Override
+        public String getGroupId() {
+            return "com.example";
+        }
+    }
+
+    @Test
+    public void shouldLoadCustomConfiguration() {
+        var conf = EngineConfiguration.load(new TestService());
+        assertEquals("com.example", conf.getGroupId());
+    }
+
+    public static class OtherTestService implements EngineConfiguration {
+        @Override
+        public String getGroupId() {
+            return "com.other";
+        }
+    }
+
+    @Test
+    public void shouldThrowWhenMultipleCustomConfigurations() {
+        var ex = assertThrows(ConfigurationException.class,
+                () -> EngineConfiguration.load(new TestService(),
+                        new OtherTestService()));
+        assertTrue(ex.getMessage().contains(
+                "Multiple EngineConfiguration implementations found:"));
+        assertTrue(ex.getMessage().contains("TestService"));
+        assertTrue(ex.getMessage().contains("OtherTestService"));
+    }
+
+    @Test
+    public void shouldUseServiceLoader() {
+        // loads TestService from META-INF/services
+        var conf = EngineConfiguration.load();
+        assertEquals("com.example", conf.getGroupId());
     }
 }
