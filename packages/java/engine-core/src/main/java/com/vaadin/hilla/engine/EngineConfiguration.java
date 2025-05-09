@@ -44,6 +44,7 @@ public class EngineConfiguration {
     private boolean productionMode = false;
     private String nodeCommand = "node";
     private ClassFinder classFinder;
+    private CustomEngineConfiguration customEngineConfiguration;
 
     private EngineConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -128,32 +129,42 @@ public class EngineConfiguration {
     }
 
     public BrowserCallableFinder getBrowserCallableFinder() {
-        if (browserCallableFinder != null) {
-            return browserCallableFinder;
+        var result = browserCallableFinder;
+
+        if (result == null) {
+            result = () -> {
+                try {
+                    if (classFinder != null) {
+                        return LookupBrowserCallableFinder
+                                .findEndpointClasses(classFinder, this);
+                    } else {
+                        throw new IllegalStateException(
+                                "ClassFinder is not available");
+                    }
+                } catch (Exception e) {
+                    LOGGER.info(
+                            "Lookup-based detection of browser-callable classes failed."
+                                    + " Falling back to AOT-based detection."
+                                    + " Enable debug logging for more information.",
+                            e);
+                    try {
+                        return AotBrowserCallableFinder
+                                .findEndpointClasses(this);
+                    } catch (Exception ex) {
+                        throw new ExecutionFailedException(ex);
+                    }
+                }
+            };
         }
 
-        return () -> {
-            try {
-                if (classFinder != null) {
-                    return LookupBrowserCallableFinder
-                            .findEndpointClasses(classFinder, this);
-                } else {
-                    throw new IllegalStateException(
-                            "ClassFinder is not available");
-                }
-            } catch (Exception e) {
-                LOGGER.info(
-                        "Lookup-based detection of browser-callable classes failed."
-                                + " Falling back to AOT-based detection."
-                                + " Enable debug logging for more information.",
-                        e);
-                try {
-                    return AotBrowserCallableFinder.findEndpointClasses(this);
-                } catch (Exception ex) {
-                    throw new ExecutionFailedException(ex);
-                }
-            }
-        };
+        return getCustomEngineConfiguration().getBrowserCallableFinder(result);
+    }
+
+    private CustomEngineConfiguration getCustomEngineConfiguration() {
+        if (customEngineConfiguration == null) {
+            customEngineConfiguration = CustomEngineConfiguration.load();
+        }
+        return customEngineConfiguration;
     }
 
     public static EngineConfiguration getDefault() {
