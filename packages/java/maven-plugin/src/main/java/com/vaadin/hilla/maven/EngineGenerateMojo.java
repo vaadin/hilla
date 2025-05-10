@@ -10,7 +10,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
-import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
@@ -60,13 +59,9 @@ public final class EngineGenerateMojo extends AbstractMojo
             var parserProcessor = new ParserProcessor(conf);
             var generatorProcessor = new GeneratorProcessor(conf);
 
-            var browserCallables = conf.getBrowserCallableFinder()
-                    .findBrowserCallables();
+            var browserCallables = conf.getBrowserCallableFinder().find(conf);
             parserProcessor.process(browserCallables);
             generatorProcessor.process();
-        } catch (ExecutionFailedException e) {
-            throw new EngineGenerateMojoException("Endpoint collection failed",
-                    e);
         } catch (GeneratorException | ParserException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }

@@ -5,12 +5,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.server.frontend.scanner.ClassFinder;
+public class LookupBrowserCallableFinder {
 
-class LookupBrowserCallableFinder {
-
-    static List<Class<?>> findEndpointClasses(ClassFinder classFinder,
-            EngineConfiguration engineConfiguration) {
+    public static List<Class<?>> find(EngineConfiguration engineConfiguration) {
         var annotations = engineConfiguration.getEndpointAnnotations();
 
         return annotations.stream()

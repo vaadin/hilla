@@ -53,7 +53,7 @@ public class AbstractMojoTest {
 
         engineConfiguration = new EngineConfiguration.Builder()
                 .baseDir(temporaryDirectory)
-                .browserCallableFinder(() -> List.of()).build();
+                .browserCallableFinder((conf) -> List.of()).build();
         EngineConfiguration.setDefault(engineConfiguration);
     }
 
