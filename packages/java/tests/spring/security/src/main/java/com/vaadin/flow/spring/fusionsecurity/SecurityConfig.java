@@ -1,10 +1,13 @@
 package com.vaadin.flow.spring.fusionsecurity;
 
-import javax.crypto.spec.SecretKeySpec;
-
 import java.util.Base64;
 import java.util.stream.Collectors;
+import javax.crypto.spec.SecretKeySpec;
 
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
+import com.vaadin.flow.spring.security.RequestUtil;
+import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,11 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
-import com.vaadin.flow.spring.security.RequestUtil;
-import com.vaadin.flow.spring.security.VaadinWebSecurity;
 
 @EnableWebSecurity
 @Configuration
@@ -50,32 +48,27 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // Public access
-        http.authorizeHttpRequests()
+        http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(new AntPathRequestMatcher("/public/**"))
-                .permitAll();
-        http.authorizeHttpRequests()
+                .permitAll()
                 .requestMatchers(
                         new AntPathRequestMatcher(applyUrlMapping("/")))
-                .permitAll();
-        http.authorizeHttpRequests()
+                .permitAll()
                 .requestMatchers(
                         new AntPathRequestMatcher(applyUrlMapping("/form")))
-                .permitAll();
-        http.authorizeHttpRequests().requestMatchers(
-                new AntPathRequestMatcher(applyUrlMapping("/proxied-service")))
-                .permitAll();
-
-        // Admin only access
-        http.authorizeHttpRequests()
+                .permitAll()
+                .requestMatchers(new AntPathRequestMatcher(
+                        applyUrlMapping("/proxied-service")))
+                .permitAll()
+                // Admin only access
                 .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
-                .hasAnyRole(ROLE_ADMIN);
-        http.authorizeHttpRequests()
+                .hasAnyRole(ROLE_ADMIN)
                 .requestMatchers(new AntPathRequestMatcher("/error/**"))
-                .permitAll();
+                .permitAll());
 
         super.configure(http);
         setLoginView(http, "/login", applyUrlMapping("/"));
-        http.logout().logoutUrl(applyUrlMapping("/logout"));
+        http.logout(cfg -> cfg.logoutUrl(applyUrlMapping("/logout")));
 
         if (stateless) {
             setStatelessAuthentication(http,
