@@ -35,7 +35,7 @@ public final class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
-    private final Map<Id, InternalSignal<?>> signals = new WeakHashMap<>();
+    private final Map<Id, InternalSignal> signals = new WeakHashMap<>();
     private final Map<String, Id> clientSignalToSignalMapping = new HashMap<>();
 
     SignalsRegistry() {
@@ -56,7 +56,8 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} or {@code signal} is null
      */
-    public synchronized void register(String clientSignalId, InternalSignal<?> signal) {
+    public synchronized void register(String clientSignalId,
+            InternalSignal signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Objects.requireNonNull(signal, "Signal must not be null");
@@ -82,7 +83,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} is null
      */
-    public synchronized InternalSignal<?> get(String clientSignalId) {
+    public synchronized InternalSignal get(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Id signalId = clientSignalToSignalMapping.get(clientSignalId);
@@ -106,7 +107,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized InternalSignal<?> getBySignalId(Id signalId) {
+    public synchronized InternalSignal getBySignalId(Id signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
         return signals.get(signalId);
     }

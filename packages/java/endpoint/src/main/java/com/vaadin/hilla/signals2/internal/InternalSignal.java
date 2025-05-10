@@ -2,32 +2,29 @@ package com.vaadin.hilla.signals2.internal;
 
 import com.vaadin.signals.Id;
 import com.vaadin.signals.Signal;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.signals.SignalCommand;
 import com.vaadin.signals.SignalUtils;
-import com.vaadin.signals.impl.CommandResult;
 import com.vaadin.signals.impl.SignalTree;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
-import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class InternalSignal<T> {
+public class InternalSignal {
 
-    private final ReentrantLock lock = new ReentrantLock();
+    private final Set<Sinks.Many<ObjectNode>> subscribers = ConcurrentHashMap
+            .newKeySet();
 
-    private final Set<Sinks.Many<ObjectNode>> subscribers = new HashSet<>();
-
-    private final Signal<T> signal;
+    private final Signal<?> signal;
     private final SignalTree tree;
     private Runnable treeSubscriptionCanceler;
 
-    public InternalSignal(Signal<T> signal) {
+    public InternalSignal(Signal<?> signal) {
         this.signal = signal;
         this.tree = SignalUtils.treeOf(signal);
     }
@@ -43,36 +40,28 @@ public class InternalSignal<T> {
      */
     public Flux<ObjectNode> subscribe() {
         Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
-            .onBackpressureBuffer();
+                .onBackpressureBuffer();
         return sink.asFlux().doOnSubscribe(ignore -> {
             getLogger().debug("New Flux subscription...");
-            lock.lock();
-            try {
-                treeSubscriptionCanceler = tree.subscribeToPublished(this::notifySubscribers);
-                var snapshot = signal.peekConfirmed();
-                // sink.tryEmitNext(snapshot); TODO: serialize snapshot to JSON
-                subscribers.add(sink);
-            } finally {
-                lock.unlock();
-            }
+            subscribers.add(sink);
+            treeSubscriptionCanceler = tree
+                    .subscribeToPublished(this::notifySubscribers);
+            var snapshot = signal.peekConfirmed();
+            // sink.tryEmitNext(snapshot); TODO: serialize snapshot to JSON
         }).doFinally(ignore -> {
-            lock.lock();
-            try {
-                getLogger().debug("Unsubscribing from Signal...");
-                subscribers.remove(sink);
-                if (subscribers.isEmpty()) {
-                    getLogger().debug("No more subscribers, canceling tree subscription");
-                    assert treeSubscriptionCanceler != null;
-                    treeSubscriptionCanceler.run();
-                    treeSubscriptionCanceler = null;
-                }
-            } finally {
-                lock.unlock();
+            getLogger().debug("Unsubscribing from Signal...");
+            subscribers.remove(sink);
+            if (subscribers.isEmpty()) {
+                getLogger().debug(
+                        "No more subscribers, canceling tree subscription");
+                assert treeSubscriptionCanceler != null;
+                treeSubscriptionCanceler.run();
+                treeSubscriptionCanceler = null;
             }
         });
     }
 
-    private void notifySubscribers(SignalCommand command, CommandResult result) {
+    private void notifySubscribers(SignalCommand command) {
         subscribers.removeIf(sink -> {
             ObjectNode processedEvent = null; // TODO: serialize to JSON
             boolean failure = sink.tryEmitNext(processedEvent).isFailure();
@@ -91,13 +80,9 @@ public class InternalSignal<T> {
      *            the event to submit
      */
     public void submit(ObjectNode event) {
-        lock.lock();
-        try {
-            SignalCommand command = null; // TODO: deserialize event JSON to SignalCommand
-            tree.commitSingleCommand(command);
-        } finally {
-            lock.unlock();
-        }
+        SignalCommand command = null; // TODO: deserialize event JSON to
+                                      // SignalCommand
+        tree.commitSingleCommand(command);
     }
 
     private Logger getLogger() {

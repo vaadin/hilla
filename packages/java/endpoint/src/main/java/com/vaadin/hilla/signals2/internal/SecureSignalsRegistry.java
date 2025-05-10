@@ -62,7 +62,7 @@ public class SecureSignalsRegistry {
                 body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
-        delegate.register(clientSignalId, new InternalSignal<>(signal));
+        delegate.register(clientSignalId, new InternalSignal(signal));
     }
 
     public synchronized void unsubscribe(String clientSignalId) {
@@ -74,7 +74,7 @@ public class SecureSignalsRegistry {
         endpointMethods.remove(clientSignalId);
     }
 
-    public synchronized InternalSignal<?> get(String clientSignalId)
+    public synchronized InternalSignal get(String clientSignalId)
             throws EndpointInvocationException.EndpointHttpException {
         var endpointMethodInfo = endpointMethods.get(clientSignalId);
         if (endpointMethodInfo == null) {

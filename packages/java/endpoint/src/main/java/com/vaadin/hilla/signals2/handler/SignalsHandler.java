@@ -68,9 +68,9 @@ public class SignalsHandler {
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));
         }
         try {
-//            if (parentClientSignalId != null) {
-//                return subscribe(parentClientSignalId, clientSignalId);
-//            }
+            // if (parentClientSignalId != null) {
+            // return subscribe(parentClientSignalId, clientSignalId);
+            // }
             var signal = registry.get(clientSignalId);
             if (signal != null) {
                 return signal.subscribe().doFinally(
@@ -85,18 +85,18 @@ public class SignalsHandler {
         }
     }
 
-    /*private Flux<ObjectNode> subscribe(String parentClientSignalId,
-            String clientSignalId)
-            throws EndpointInvocationException.EndpointHttpException {
-        var parentSignal = registry.get(parentClientSignalId);
-        if (parentSignal == null) {
-            throw new IllegalStateException(String.format(
-                    "Parent Signal not found for parent client signal id: %s",
-                    parentClientSignalId));
-        }
-        return parentSignal.subscribe(clientSignalId)
-                .doFinally((event) -> registry.unsubscribe(clientSignalId));
-    }*/
+//    private Flux<ObjectNode> subscribe(String parentClientSignalId,
+//            String clientSignalId)
+//            throws EndpointInvocationException.EndpointHttpException {
+//        var parentSignal = registry.get(parentClientSignalId);
+//        if (parentSignal == null) {
+//            throw new IllegalStateException(String.format(
+//                    "Parent Signal not found for parent client signal id: %s",
+//                    parentClientSignalId));
+//        }
+//        return parentSignal.subscribe(clientSignalId)
+//                .doFinally((event) -> registry.unsubscribe(clientSignalId));
+//    }
 
     /**
      * Updates a signal with an event.
