@@ -5,7 +5,8 @@ import java.util.List;
 /**
  * Functional interface for finding browser-callable classes. Implementations of
  * this interface are responsible for locating and returning a list of endpoint
- * classes.
+ * classes, or throwing an exception if the search cannot be completed due to an
+ * error.
  */
 @FunctionalInterface
 public interface BrowserCallableFinder {
@@ -16,6 +17,9 @@ public interface BrowserCallableFinder {
      * @param engineConfiguration
      *            The configuration to use for finding classes.
      * @return A list of classes that are browser-callable.
+     * @throws BrowserCallableFinderException
+     *             If an error occurs while finding the classes.
      */
-    List<Class<?>> find(EngineConfiguration engineConfiguration);
+    List<Class<?>> find(EngineConfiguration engineConfiguration)
+            throws BrowserCallableFinderException;
 }

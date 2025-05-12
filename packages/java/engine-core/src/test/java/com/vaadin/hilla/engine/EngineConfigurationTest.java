@@ -98,9 +98,9 @@ public class EngineConfigurationTest {
                         new FirstLoadedConfiguration(),
                         new SecondLoadedConfiguration()));
         assertTrue(ex.getMessage().contains(
-                "Multiple EngineConfiguration implementations found:"));
-        assertTrue(ex.getMessage().contains("TestService"));
-        assertTrue(ex.getMessage().contains("OtherTestService"));
+                "Multiple CustomEngineConfiguration implementations found:"));
+        assertTrue(ex.getMessage().contains("FirstLoadedConfiguration"));
+        assertTrue(ex.getMessage().contains("SecondLoadedConfiguration"));
     }
 
     @Test

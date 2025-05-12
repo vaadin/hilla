@@ -134,24 +134,24 @@ public class EngineConfiguration {
 
         if (result == null) {
             result = (conf) -> {
-                var exceptions = new ArrayList<RuntimeException>();
+                var exceptions = new ArrayList<BrowserCallableFinderException>();
 
                 return Stream.<BrowserCallableFinder> of(
                         LookupBrowserCallableFinder::find,
                         AotBrowserCallableFinder::find).map(finder -> {
                             try {
                                 return finder.find(conf);
-                            } catch (RuntimeException e) {
+                            } catch (BrowserCallableFinderException e) {
                                 exceptions.add(e);
                                 return null;
                             }
                         }).filter(Objects::nonNull).findFirst()
                         .orElseThrow(() -> {
                             if (exceptions.isEmpty()) {
-                                return new IllegalStateException(
+                                return new ParserException(
                                         "No browser-callable classes found");
                             } else {
-                                var exception = new IllegalStateException(
+                                var exception = new ParserException(
                                         "Failed to find browser-callable classes");
                                 exceptions.forEach(exception::addSuppressed);
                                 return exception;

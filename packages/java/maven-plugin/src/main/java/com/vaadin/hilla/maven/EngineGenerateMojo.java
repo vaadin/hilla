@@ -16,6 +16,7 @@ import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+import com.vaadin.hilla.engine.BrowserCallableFinderException;
 
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating
@@ -62,7 +63,8 @@ public final class EngineGenerateMojo extends AbstractMojo
             var browserCallables = conf.getBrowserCallableFinder().find(conf);
             parserProcessor.process(browserCallables);
             generatorProcessor.process();
-        } catch (GeneratorException | ParserException e) {
+        } catch (GeneratorException | ParserException
+                | BrowserCallableFinderException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }
     }

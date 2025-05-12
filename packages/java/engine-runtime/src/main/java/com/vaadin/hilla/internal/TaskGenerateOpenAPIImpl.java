@@ -60,10 +60,15 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         var engineConfiguration = getEngineConfiguration();
         if (engineConfiguration.isProductionMode()) {
-            var browserCallables = engineConfiguration
-                    .getBrowserCallableFinder().find(engineConfiguration);
-            var processor = new ParserProcessor(engineConfiguration);
-            processor.process(browserCallables);
+            try {
+                var browserCallables = engineConfiguration
+                        .getBrowserCallableFinder().find(engineConfiguration);
+                var processor = new ParserProcessor(engineConfiguration);
+                processor.process(browserCallables);
+            } catch (Exception e) {
+                throw new ExecutionFailedException(
+                        "Failed to generate OpenAPI spec", e);
+            }
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
                 List<Class<?>> browserCallables = EndpointCodeGenerator
