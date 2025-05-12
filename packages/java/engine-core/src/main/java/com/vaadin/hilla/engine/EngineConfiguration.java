@@ -45,6 +45,7 @@ public class EngineConfiguration {
     private boolean productionMode = false;
     private String nodeCommand = "node";
     private ClassFinder classFinder;
+    private ClassLoader classLoader;
     private CustomEngineConfiguration customEngineConfiguration;
 
     private EngineConfiguration() {
@@ -113,6 +114,26 @@ public class EngineConfiguration {
 
     public ClassFinder getClassFinder() {
         return classFinder;
+    }
+
+    public ClassLoader getClassLoader() {
+        if (classLoader == null && getClassFinder() != null) {
+            classLoader = getClassFinder().getClassLoader();
+        }
+
+        if (classLoader == null) {
+            var urls = getClasspath().stream().map(path -> {
+                try {
+                    return path.toUri().toURL();
+                } catch (MalformedURLException e) {
+                    throw new ConfigurationException(
+                            "Classpath contains invalid elements", e);
+                }
+            }).toArray(URL[]::new);
+            classLoader = new URLClassLoader(urls, getClass().getClassLoader());
+        }
+
+        return classLoader;
     }
 
     public List<Class<? extends Annotation>> getEndpointAnnotations() {
@@ -204,6 +225,7 @@ public class EngineConfiguration {
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.classFinder = configuration.classFinder;
+            this.configuration.classLoader = configuration.classLoader;
             this.configuration.parser.setEndpointAnnotations(
                     configuration.getEndpointAnnotations());
             this.configuration.parser.setEndpointExposedAnnotations(
@@ -291,6 +313,11 @@ public class EngineConfiguration {
 
         public Builder classFinder(ClassFinder value) {
             configuration.classFinder = value;
+            return this;
+        }
+
+        public Builder classLoader(ClassLoader value) {
+            configuration.classLoader = value;
             return this;
         }
 

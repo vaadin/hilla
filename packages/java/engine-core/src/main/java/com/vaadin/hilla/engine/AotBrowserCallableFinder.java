@@ -176,7 +176,7 @@ public class AotBrowserCallableFinder {
 
         var annotationNames = engineConfiguration.getEndpointAnnotations()
                 .stream().map(Class::getName).toList();
-        var classLoader = engineConfiguration.getClassFinder().getClassLoader();
+        var classLoader = engineConfiguration.getClassLoader();
         return candidates.stream().map(name -> {
             try {
                 return Class.forName(name, false, classLoader);
