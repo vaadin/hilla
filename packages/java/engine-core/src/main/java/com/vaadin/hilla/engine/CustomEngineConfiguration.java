@@ -4,8 +4,6 @@ package com.vaadin.hilla.engine;
  * Configuration for the generator engine. It exposes all properties that can be
  * overridden by an alternative implementation. All methods take the default
  * value as a parameter and return the default value if not overridden.
- *
- * @see #load() for details on how to override the default configuration
  */
 public interface CustomEngineConfiguration {
     /**
