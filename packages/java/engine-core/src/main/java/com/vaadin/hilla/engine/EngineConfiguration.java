@@ -20,14 +20,14 @@ public interface EngineConfiguration {
     }
 
     /**
-     * Returns the node command to use for running the generator. Other parts of
-     * the software can still use a different command.
+     * Returns the class loader to use for loading classes. This is used when
+     * building the application for production.
      *
-     * @param defaultNodeCommand
-     *            the default node command
-     * @return the node command to use
+     * @param defaultClassLoader
+     *            the default class loader
+     * @return the class loader to use
      */
-    default String getNodeCommand(String defaultNodeCommand) {
-        return defaultNodeCommand;
+    default ClassLoader getClassLoader(ClassLoader defaultClassLoader) {
+        return defaultClassLoader;
     }
 }

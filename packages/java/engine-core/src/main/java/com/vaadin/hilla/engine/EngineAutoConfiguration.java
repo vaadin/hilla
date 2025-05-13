@@ -47,7 +47,7 @@ public class EngineAutoConfiguration {
     private String nodeCommand = "node";
     private ClassFinder classFinder;
     private ClassLoader classLoader;
-    private EngineConfiguration customEngineConfiguration;
+    private EngineConfiguration userEngineConfiguration;
 
     private EngineAutoConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -110,7 +110,7 @@ public class EngineAutoConfiguration {
     }
 
     public String getNodeCommand() {
-        return getCustomEngineConfiguration().getNodeCommand(nodeCommand);
+        return nodeCommand;
     }
 
     public ClassFinder getClassFinder() {
@@ -134,7 +134,7 @@ public class EngineAutoConfiguration {
             classLoader = new URLClassLoader(urls, getClass().getClassLoader());
         }
 
-        return classLoader;
+        return getUserEngineConfiguration().getClassLoader(classLoader);
     }
 
     public List<Class<? extends Annotation>> getEndpointAnnotations() {
@@ -182,14 +182,14 @@ public class EngineAutoConfiguration {
             };
         }
 
-        return getCustomEngineConfiguration().getBrowserCallableFinder(result);
+        return getUserEngineConfiguration().getBrowserCallableFinder(result);
     }
 
-    private EngineConfiguration getCustomEngineConfiguration() {
-        if (customEngineConfiguration == null) {
-            customEngineConfiguration = load();
+    private EngineConfiguration getUserEngineConfiguration() {
+        if (userEngineConfiguration == null) {
+            userEngineConfiguration = load();
         }
-        return customEngineConfiguration;
+        return userEngineConfiguration;
     }
 
     public static EngineAutoConfiguration getDefault() {
