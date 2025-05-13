@@ -94,8 +94,7 @@ public class EngineConfigurationTest {
     @Test
     public void shouldThrowWhenMultipleCustomConfigurations() {
         var ex = assertThrows(ConfigurationException.class,
-                () -> CustomEngineConfiguration.pick(
-                        new FirstLoadedConfiguration(),
+                () -> EngineConfiguration.pick(new FirstLoadedConfiguration(),
                         new SecondLoadedConfiguration()));
         assertTrue(ex.getMessage().contains(
                 "Multiple CustomEngineConfiguration implementations found:"));

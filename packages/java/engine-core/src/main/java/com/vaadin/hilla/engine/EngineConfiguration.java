@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -186,7 +187,7 @@ public class EngineConfiguration {
 
     private CustomEngineConfiguration getCustomEngineConfiguration() {
         if (customEngineConfiguration == null) {
-            customEngineConfiguration = CustomEngineConfiguration.load();
+            customEngineConfiguration = load();
         }
         return customEngineConfiguration;
     }
@@ -201,6 +202,40 @@ public class EngineConfiguration {
 
     public static void setDefault(EngineConfiguration config) {
         INSTANCE = config;
+    }
+
+    /**
+     * Loads the customized configuration using the Java ServiceLoader
+     * mechanism.
+     */
+    static CustomEngineConfiguration load() {
+        return pick(ServiceLoader.load(CustomEngineConfiguration.class).stream()
+                .map(ServiceLoader.Provider::get)
+                .toArray(CustomEngineConfiguration[]::new));
+    }
+
+    /**
+     * Picks the first customized configuration from the provided array. If
+     * there are no configurations, a default one is returned. If there are
+     * multiple configurations, an exception is thrown.
+     *
+     * @param configurations
+     *            the configurations to pick from
+     * @return the picked configuration
+     */
+    static CustomEngineConfiguration pick(
+            CustomEngineConfiguration... configurations) {
+        return switch (configurations.length) {
+        case 0 -> new CustomEngineConfiguration() {
+        };
+        case 1 -> configurations[0];
+        default -> throw new ConfigurationException(Arrays
+                .stream(configurations)
+                .map(config -> config.getClass().getName())
+                .collect(Collectors.joining("\", \"",
+                        "Multiple CustomEngineConfiguration implementations found: \"",
+                        "\"")));
+        };
     }
 
     public static final class Builder {
