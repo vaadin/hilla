@@ -25,7 +25,7 @@ import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
 import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = { CustomEndpoint.class, EndpointNoValue.class,
@@ -83,10 +83,10 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
-        var engineConfiguration = new EngineConfiguration.Builder()
+        var engineConfiguration = new EngineAutoConfiguration.Builder()
                 .browserCallableFinder((conf) -> List.of(MyEndpoint.class))
                 .build();
-        EngineConfiguration.setDefault(engineConfiguration);
+        EngineAutoConfiguration.setDefault(engineConfiguration);
 
         new NodeTasks(options).execute();
         assertEndpointFilesInProductionMode(true);

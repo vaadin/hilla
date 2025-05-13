@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 
-public class EngineConfigurationTest {
+public class EngineAutoConfigurationTest {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     public @interface BrowserCallableEndpoint {
@@ -40,7 +40,8 @@ public class EngineConfigurationTest {
         when(classFinder
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
-        var conf = new EngineConfiguration.Builder().classFinder(classFinder)
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder)
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
         assertEquals(List.of(EndpointFromClassFinder.class),
                 conf.getBrowserCallableFinder().find(conf));
@@ -49,7 +50,7 @@ public class EngineConfigurationTest {
     @Test
     public void shouldUseAotWhenNoClassFinder() throws Exception {
         // classFinder is null by default in configuration
-        var conf = EngineConfiguration.getDefault();
+        var conf = EngineAutoConfiguration.getDefault();
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
@@ -65,7 +66,8 @@ public class EngineConfigurationTest {
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class,
                         EndpointFromClassFinderWithCustomName.class));
-        var conf = new EngineConfiguration.Builder().classFinder(classFinder)
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder)
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
@@ -76,7 +78,7 @@ public class EngineConfigurationTest {
     }
 
     public static class FirstLoadedConfiguration
-            implements CustomEngineConfiguration {
+            implements EngineConfiguration {
         @Override
         public String getNodeCommand(String defaultNodeCommand) {
             return "my-node";
@@ -84,7 +86,7 @@ public class EngineConfigurationTest {
     }
 
     public static class SecondLoadedConfiguration
-            implements CustomEngineConfiguration {
+            implements EngineConfiguration {
         @Override
         public String getNodeCommand(String defaultNodeCommand) {
             return "other-node";
@@ -94,10 +96,11 @@ public class EngineConfigurationTest {
     @Test
     public void shouldThrowWhenMultipleCustomConfigurations() {
         var ex = assertThrows(ConfigurationException.class,
-                () -> EngineConfiguration.pick(new FirstLoadedConfiguration(),
+                () -> EngineAutoConfiguration.pick(
+                        new FirstLoadedConfiguration(),
                         new SecondLoadedConfiguration()));
         assertTrue(ex.getMessage().contains(
-                "Multiple CustomEngineConfiguration implementations found:"));
+                "Multiple EngineConfiguration implementations found:"));
         assertTrue(ex.getMessage().contains("FirstLoadedConfiguration"));
         assertTrue(ex.getMessage().contains("SecondLoadedConfiguration"));
     }
@@ -105,7 +108,7 @@ public class EngineConfigurationTest {
     @Test
     public void shouldUseServiceLoader() {
         // expected to use TestService loaded from META-INF/services
-        var conf = EngineConfiguration.getDefault();
+        var conf = EngineAutoConfiguration.getDefault();
         assertEquals("my-node", conf.getNodeCommand());
     }
 }

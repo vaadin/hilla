@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointCodeGenerator;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -47,7 +47,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      * @param engineConfiguration
      *            Hilla engine configuration instance
      */
-    TaskGenerateOpenAPIImpl(EngineConfiguration engineConfiguration) {
+    TaskGenerateOpenAPIImpl(EngineAutoConfiguration engineConfiguration) {
         super(engineConfiguration);
     }
 

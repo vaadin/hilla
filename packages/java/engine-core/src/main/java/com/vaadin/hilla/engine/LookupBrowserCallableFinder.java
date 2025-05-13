@@ -20,7 +20,8 @@ public class LookupBrowserCallableFinder {
      * @throws BrowserCallableFinderException
      *             if an error occurs while finding the browser callables
      */
-    public static List<Class<?>> find(EngineConfiguration engineConfiguration)
+    public static List<Class<?>> find(
+            EngineAutoConfiguration engineConfiguration)
             throws BrowserCallableFinderException {
         var annotations = engineConfiguration.getEndpointAnnotations();
 

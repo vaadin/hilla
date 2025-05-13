@@ -36,7 +36,8 @@ public class AotBrowserCallableFinder {
      * @throws BrowserCallableFinderException
      *             if an error occurs while finding the browser callables
      */
-    public static List<Class<?>> find(EngineConfiguration engineConfiguration)
+    public static List<Class<?>> find(
+            EngineAutoConfiguration engineConfiguration)
             throws BrowserCallableFinderException {
         try {
             // Determine the main application class
@@ -62,7 +63,7 @@ public class AotBrowserCallableFinder {
     }
 
     private static String determineApplicationClass(
-            EngineConfiguration engineConfiguration) {
+            EngineAutoConfiguration engineConfiguration) {
         var mainClass = engineConfiguration.getMainClass();
         if (mainClass != null) {
             return mainClass;
@@ -96,8 +97,8 @@ public class AotBrowserCallableFinder {
     }
 
     private static Path generateAotArtifacts(
-            EngineConfiguration engineConfiguration, String applicationClass)
-            throws IOException, InterruptedException,
+            EngineAutoConfiguration engineConfiguration,
+            String applicationClass) throws IOException, InterruptedException,
             BrowserCallableFinderException {
         var aotOutput = engineConfiguration.getBuildDir()
                 .resolve("spring-aot/main");
@@ -152,7 +153,7 @@ public class AotBrowserCallableFinder {
     }
 
     private static List<Class<?>> loadAnnotatedClasses(
-            EngineConfiguration engineConfiguration, Path reflectConfigPath)
+            EngineAutoConfiguration engineConfiguration, Path reflectConfigPath)
             throws IOException, BrowserCallableFinderException {
         // The file simply contains a list of beans, we just need their names,
         // which are class names.

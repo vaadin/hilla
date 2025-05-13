@@ -20,6 +20,6 @@ public interface BrowserCallableFinder {
      * @throws BrowserCallableFinderException
      *             If an error occurs while finding the classes.
      */
-    List<Class<?>> find(EngineConfiguration engineConfiguration)
+    List<Class<?>> find(EngineAutoConfiguration engineConfiguration)
             throws BrowserCallableFinderException;
 }
