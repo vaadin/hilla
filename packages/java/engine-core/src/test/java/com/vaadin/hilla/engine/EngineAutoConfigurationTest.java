@@ -77,19 +77,21 @@ public class EngineAutoConfigurationTest {
         }
     }
 
+    private static final ClassLoader testClassLoader = mock(ClassLoader.class);
+
     public static class FirstLoadedConfiguration
             implements EngineConfiguration {
         @Override
-        public String getNodeCommand(String defaultNodeCommand) {
-            return "my-node";
+        public ClassLoader getClassLoader(ClassLoader defaultClassLoader) {
+            return testClassLoader;
         }
     }
 
     public static class SecondLoadedConfiguration
             implements EngineConfiguration {
         @Override
-        public String getNodeCommand(String defaultNodeCommand) {
-            return "other-node";
+        public ClassLoader getClassLoader(ClassLoader defaultClassLoader) {
+            return defaultClassLoader;
         }
     }
 
@@ -109,6 +111,6 @@ public class EngineAutoConfigurationTest {
     public void shouldUseServiceLoader() {
         // expected to use TestService loaded from META-INF/services
         var conf = EngineAutoConfiguration.getDefault();
-        assertEquals("my-node", conf.getNodeCommand());
+        assertEquals(testClassLoader, conf.getClassLoader());
     }
 }
