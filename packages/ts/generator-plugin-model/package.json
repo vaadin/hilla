@@ -15,7 +15,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:update": "vitest --run --update",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
