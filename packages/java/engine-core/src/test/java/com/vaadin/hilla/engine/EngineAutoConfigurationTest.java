@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -20,6 +21,11 @@ public class EngineAutoConfigurationTest {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface BrowserCallableEndpoint {
         String value() default "";
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface BrowserCallableExposed {
     }
 
     @BrowserCallableEndpoint
@@ -77,13 +83,16 @@ public class EngineAutoConfigurationTest {
         }
     }
 
-    private static final ClassLoader testClassLoader = mock(ClassLoader.class);
+    private static final ClassLoader testClassLoader1 = mock(ClassLoader.class);
+    private static final ClassLoader testClassLoader2 = mock(ClassLoader.class);
 
     public static class FirstLoadedConfiguration
             implements EngineConfiguration {
         @Override
         public ClassLoader getClassLoader(ClassLoader defaultClassLoader) {
-            return testClassLoader;
+            // avoid interfering with other tests
+            return defaultClassLoader == testClassLoader1 ? testClassLoader2
+                    : defaultClassLoader;
         }
     }
 
@@ -110,7 +119,66 @@ public class EngineAutoConfigurationTest {
     @Test
     public void shouldUseServiceLoader() {
         // expected to use TestService loaded from META-INF/services
-        var conf = EngineAutoConfiguration.getDefault();
-        assertEquals(testClassLoader, conf.getClassLoader());
+        var conf = new EngineAutoConfiguration.Builder()
+                .classLoader(testClassLoader1).build();
+        assertEquals(testClassLoader2, conf.getClassLoader());
+    }
+
+    @Test
+    public void builderShouldRetainAllPassedValues() {
+        var baseDir = Path.of("/tmp/base");
+        var buildDir = Path.of("/tmp/build");
+        var classesDirs = List.of(Path.of("/tmp/classes1"),
+                Path.of("/tmp/classes2"));
+        var classpathStrings = Set.of("/tmp/cp1", "/tmp/cp2");
+        var generator = new GeneratorConfiguration();
+        var parser = new ParserConfiguration();
+        var outputDir = Path.of("/tmp/output");
+        var groupId = "test.group";
+        var artifactId = "test-artifact";
+        var mainClass = "com.example.Main";
+        var productionMode = true;
+        var nodeCommand = "node-custom";
+        var classFinder = mock(ClassFinder.class);
+        var classLoader = mock(ClassLoader.class);
+        // when(classFinder.getClassLoader()).thenReturn(classLoader);
+        var browserCallableFinder = (BrowserCallableFinder) (conf) -> List
+                .of(EndpointFromAot.class);
+        var endpointAnnotation = BrowserCallableEndpoint.class;
+        var endpointExposedAnnotation = BrowserCallableExposed.class;
+
+        var config = new EngineAutoConfiguration.Builder().baseDir(baseDir)
+                .buildDir(buildDir).classesDirs(classesDirs)
+                .classpath(classpathStrings).generator(generator).parser(parser)
+                .outputDir(outputDir).groupId(groupId).artifactId(artifactId)
+                .mainClass(mainClass).productionMode(productionMode)
+                .nodeCommand(nodeCommand).classFinder(classFinder)
+                .classLoader(classLoader)
+                .browserCallableFinder(browserCallableFinder)
+                .endpointAnnotations(endpointAnnotation)
+                .endpointExposedAnnotations(endpointExposedAnnotation).build();
+
+        assertEquals(baseDir, config.getBaseDir());
+        assertEquals(buildDir, config.getBuildDir());
+        assertEquals(classesDirs, config.getClassesDirs());
+        assertEquals(
+                classpathStrings.stream().map(Path::of)
+                        .collect(java.util.stream.Collectors.toSet()),
+                config.getClasspath());
+        assertSame(generator, config.getGenerator());
+        assertSame(parser, config.getParser());
+        assertEquals(outputDir, config.getOutputDir());
+        assertEquals(groupId, config.getGroupId());
+        assertEquals(artifactId, config.getArtifactId());
+        assertEquals(mainClass, config.getMainClass());
+        assertTrue(config.isProductionMode());
+        assertEquals(nodeCommand, config.getNodeCommand());
+        assertSame(classFinder, config.getClassFinder());
+        assertSame(classLoader, config.getClassLoader());
+        assertSame(browserCallableFinder, config.getBrowserCallableFinder());
+        assertEquals(List.of(endpointAnnotation),
+                config.getEndpointAnnotations());
+        assertEquals(List.of(endpointExposedAnnotation),
+                config.getEndpointExposedAnnotations());
     }
 }
