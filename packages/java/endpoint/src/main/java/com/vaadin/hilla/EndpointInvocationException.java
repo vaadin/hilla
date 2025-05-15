@@ -150,13 +150,11 @@ public abstract class EndpointInvocationException extends Exception {
          * @return the HTTP status code
          */
         public final int getHttpStatusCode() {
-            switch (getHttpStatus().series()) {
-            case CLIENT_ERROR, SERVER_ERROR -> {
-                return getHttpStatus().value();
-            }
+            return switch (getHttpStatus().series()) {
+            case CLIENT_ERROR, SERVER_ERROR -> getHttpStatus().value();
             default -> throw new IllegalArgumentException(
                     "Only 4xx and 5xx status codes are allowed");
-            }
+            };
         }
     }
 

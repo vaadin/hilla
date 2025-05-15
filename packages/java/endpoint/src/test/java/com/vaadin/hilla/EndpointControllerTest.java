@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -558,13 +559,12 @@ public class EndpointControllerTest {
         var vaadinController = createVaadinController(TEST_ENDPOINT,
                 new EndpointAccessChecker(new AccessAnnotationChecker()));
 
-        var response = vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
-                "throwInvalidHttpException", createRequestParameters("{}"),
-                requestMock);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-                response.getStatusCode());
-        assertTrue(response.getBody().contains("throwInvalidHttpException"));
+        var e = assertThrows(IllegalArgumentException.class,
+                () -> vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
+                        "throwInvalidHttpException",
+                        createRequestParameters("{}"), requestMock));
+        assertEquals("Only 4xx and 5xx status codes are allowed",
+                e.getMessage());
     }
 
     @Test
