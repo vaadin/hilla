@@ -205,7 +205,12 @@ public class EndpointControllerTest {
 
         static class TeapotException extends EndpointHttpException {
             TeapotException() {
-                super(418, "I'm a teapot");
+                super("I'm a teapot");
+            }
+
+            @Override
+            public HttpStatus getHttpStatus() {
+                return HttpStatus.I_AM_A_TEAPOT;
             }
         }
 
@@ -216,7 +221,12 @@ public class EndpointControllerTest {
 
         static class InvalidHttpException extends EndpointHttpException {
             InvalidHttpException() {
-                super(200, "All right!");
+                super("All right!");
+            }
+
+            @Override
+            public HttpStatus getHttpStatus() {
+                return HttpStatus.OK;
             }
         }
 
