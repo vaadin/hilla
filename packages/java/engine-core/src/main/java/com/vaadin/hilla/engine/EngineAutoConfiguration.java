@@ -23,6 +23,14 @@ import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The default configuration for the Hilla engine. This class is a singleton
+ * and can be used to configure the engine using the builder pattern.
+ * 
+ * This class is for internal use only.
+ *
+ * @see EngineConfiguration to customize the engine
+ */
 public class EngineAutoConfiguration {
     private static EngineAutoConfiguration INSTANCE;
     private static final Logger LOGGER = LoggerFactory
