@@ -18,7 +18,7 @@
                 <artifactId>hilla-maven-plugin</artifactId>
 
                 <configuration>
-                  <!-- intentionally empty, expected to use EngineConfiguration.load() -->
+                  <!-- intentionally empty, expected to use EngineAutoConfiguration.load() -->
                 </configuration>
             </plugin>
         </plugins>

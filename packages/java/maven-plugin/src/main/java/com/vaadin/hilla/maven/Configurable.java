@@ -8,7 +8,7 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 import static com.vaadin.flow.plugin.maven.FlowModeAbstractMojo.getClasspathElements;
 import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
@@ -24,7 +24,7 @@ interface Configurable {
 
     String getMainClass();
 
-    default EngineConfiguration configure() {
+    default EngineAutoConfiguration configure() {
         var project = (MavenProject) getPluginContext().get("project");
 
         var isProduction = project.getActiveProfiles().stream()
@@ -37,7 +37,7 @@ interface Configurable {
                     "mainClass");
         }
 
-        var conf = new EngineConfiguration.Builder()
+        var conf = new EngineAutoConfiguration.Builder()
                 .baseDir(project.getBasedir().toPath())
                 .buildDir(project.getBuild().getDirectory())
                 .outputDir(generatedOrOldLocation().toPath())
@@ -46,7 +46,7 @@ interface Configurable {
                 .classpath(getClasspathElements(project))
                 .withDefaultAnnotations().mainClass(mainClass)
                 .nodeCommand(getNode()).productionMode(isProduction).build();
-        EngineConfiguration.setDefault(conf);
+        EngineAutoConfiguration.setDefault(conf);
         return conf;
     }
 

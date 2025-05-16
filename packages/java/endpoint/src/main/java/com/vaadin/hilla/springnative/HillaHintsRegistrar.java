@@ -20,7 +20,7 @@ import org.springframework.aot.hint.TypeReference;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.vaadin.hilla.OpenAPIUtil;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -31,7 +31,7 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
     private static final String openApiResourceName = "/"
-            + EngineConfiguration.OPEN_API_PATH;
+            + EngineAutoConfiguration.OPEN_API_PATH;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -81,7 +81,8 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             logger.error("Error while scanning and registering endpoint types",
                     e);
         }
-        hints.resources().registerPattern(EngineConfiguration.OPEN_API_PATH);
+        hints.resources()
+                .registerPattern(EngineAutoConfiguration.OPEN_API_PATH);
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {

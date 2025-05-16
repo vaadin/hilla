@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointCodeGenerator;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 import com.vaadin.flow.server.ExecutionFailedException;
@@ -47,7 +47,7 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
      * @param engineConfiguration
      *            Hilla engine configuration instance
      */
-    TaskGenerateOpenAPIImpl(EngineConfiguration engineConfiguration) {
+    TaskGenerateOpenAPIImpl(EngineAutoConfiguration engineConfiguration) {
         super(engineConfiguration);
     }
 
@@ -60,10 +60,15 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     public void execute() throws ExecutionFailedException {
         var engineConfiguration = getEngineConfiguration();
         if (engineConfiguration.isProductionMode()) {
-            var browserCallables = engineConfiguration
-                    .getBrowserCallableFinder().findBrowserCallables();
-            var processor = new ParserProcessor(engineConfiguration);
-            processor.process(browserCallables);
+            try {
+                var browserCallables = engineConfiguration
+                        .getBrowserCallableFinder().find(engineConfiguration);
+                var processor = new ParserProcessor(engineConfiguration);
+                processor.process(browserCallables);
+            } catch (Exception e) {
+                throw new ExecutionFailedException(
+                        "Failed to generate OpenAPI spec", e);
+            }
         } else {
             ApplicationContextProvider.runOnContext(applicationContext -> {
                 List<Class<?>> browserCallables = EndpointCodeGenerator

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 public class TaskTest {
     private Path temporaryDirectory;
@@ -48,7 +48,7 @@ public class TaskTest {
 
     protected Path getOpenAPIFile() {
         return getTemporaryDirectory().resolve(getBuildDirectory())
-                .resolve(EngineConfiguration.OPEN_API_PATH);
+                .resolve(EngineAutoConfiguration.OPEN_API_PATH);
     }
 
     protected String getFrontendDirectory() {
@@ -63,8 +63,8 @@ public class TaskTest {
         return temporaryDirectory;
     }
 
-    protected EngineConfiguration getEngineConfiguration() {
-        return new EngineConfiguration.Builder()
+    protected EngineAutoConfiguration getEngineConfiguration() {
+        return new EngineAutoConfiguration.Builder()
                 .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
                 .outputDir(getOutputDirectory()).withDefaultAnnotations()
                 .build();

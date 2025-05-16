@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -185,7 +185,8 @@ public class EndpointWithRestControllerTest {
         try {
             return projectFolder.getRoot().toPath()
                     .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
+                    .toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

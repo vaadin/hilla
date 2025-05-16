@@ -32,7 +32,7 @@ public final class GeneratorProcessor {
     private final Path outputDirectory;
     private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
 
-    public GeneratorProcessor(EngineConfiguration conf) {
+    public GeneratorProcessor(EngineAutoConfiguration conf) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
         this.outputDirectory = conf.getOutputDir();

@@ -12,16 +12,16 @@ import org.jspecify.annotations.NonNull;
 
 /**
  * A converter for relative paths of
- * com.vaadin.hilla.engine.EngineConfiguration. It solves an issue of testing
- * absolute paths on different OSes.
+ * com.vaadin.hilla.engine.EngineAutoConfiguration. It solves an issue of
+ * testing absolute paths on different OSes.
  * <p>
  * The class is detached (has no dependency to the real
- * com.vaadin.hilla.engine.EngineConfiguration class) to avoid circular
+ * com.vaadin.hilla.engine.EngineAutoConfiguration class) to avoid circular
  * dependencies with the `engine-core` package.
  */
 public final class TestEngineConfigurationPathResolver {
     private static final String BASE_FIELD_NAME = "baseDir";
-    private static final String CLASS_NAME = "com.vaadin.hilla.engine.EngineConfiguration";
+    private static final String CLASS_NAME = "com.vaadin.hilla.engine.EngineAutoConfiguration";
     private static final String CLASS_PATH_FIELD_NAME = "classPath";
 
     public static <T> T resolve(@NonNull T obj, @NonNull Path baseDir)

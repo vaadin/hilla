@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +91,9 @@ public class EndpointGeneratorTaskFactoryImpl
         }
     }
 
-    private static EngineConfiguration configureFromOptions(Options options) {
-        return new EngineConfiguration.Builder()
+    private static EngineAutoConfiguration configureFromOptions(
+            Options options) {
+        return new EngineAutoConfiguration.Builder()
                 .baseDir(options.getNpmFolder().toPath())
                 .buildDir(options.getBuildDirectoryName())
                 .outputDir(options.getFrontendGeneratedFolder().toPath())

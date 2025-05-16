@@ -31,7 +31,7 @@ import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.FrontendTools;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
 
@@ -55,7 +55,7 @@ public class EndpointCodeGenerator {
 
     private ApplicationConfiguration configuration;
     private Set<String> classesUsedInOpenApi = null;
-    private EngineConfiguration engineConfiguration;
+    private EngineAutoConfiguration engineConfiguration;
 
     /**
      * Creates the singleton.
@@ -137,7 +137,7 @@ public class EndpointCodeGenerator {
      * @return a list of classes that qualify as browser callables
      */
     public static List<Class<?>> findBrowserCallables(
-            EngineConfiguration engineConfiguration,
+            EngineAutoConfiguration engineConfiguration,
             ApplicationContext applicationContext) {
         return engineConfiguration.getEndpointAnnotations().stream()
                 .map(applicationContext::getBeansWithAnnotation)
@@ -154,7 +154,7 @@ public class EndpointCodeGenerator {
 
             var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());
-            engineConfiguration = new EngineConfiguration.Builder()
+            engineConfiguration = new EngineAutoConfiguration.Builder()
                     .baseDir(configuration.getProjectFolder().toPath())
                     .buildDir(configuration.getBuildFolder())
                     .outputDir(
@@ -170,7 +170,7 @@ public class EndpointCodeGenerator {
     public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            var conf = EngineConfiguration.getDefault();
+            var conf = EngineAutoConfiguration.getDefault();
             var openApiPath = conf.getOpenAPIFile();
             if (openApiPath != null && openApiPath.toFile().exists()) {
                 try {

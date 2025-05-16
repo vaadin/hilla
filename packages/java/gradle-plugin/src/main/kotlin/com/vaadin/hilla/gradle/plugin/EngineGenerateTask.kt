@@ -112,7 +112,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
 
-            val endpoints = conf.browserCallableFinder.findBrowserCallables();
+            val endpoints = conf.browserCallableFinder.find(conf);
             parserProcessor.process(endpoints)
             generatorProcessor.process()
         } catch (e: IOException) {
