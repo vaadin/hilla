@@ -154,24 +154,23 @@ public class EndpointCodeGenerator {
 
             var frontendTools = new FrontendTools(configuration,
                     configuration.getProjectFolder());
-            engineConfiguration = new EngineConfiguration.Builder()
-                    .baseDir(configuration.getProjectFolder().toPath())
-                    .buildDir(configuration.getBuildFolder())
-                    .outputDir(
+            engineConfiguration = EngineConfiguration.load()
+                    .setBaseDir(configuration.getProjectFolder().toPath())
+                    .setBuildDir(configuration.getBuildFolder())
+                    .setOutputDir(
                             FrontendUtils
                                     .getFrontendGeneratedFolder(
                                             configuration.getFrontendFolder())
                                     .toPath())
-                    .productionMode(false).withDefaultAnnotations()
-                    .nodeCommand(frontendTools.getNodeBinary()).build();
+                    .setProductionMode(false)
+                    .setNodeCommand(frontendTools.getNodeBinary());
         }
     }
 
     public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
         if (classesUsedInOpenApi == null) {
             initIfNeeded();
-            var conf = EngineConfiguration.getDefault();
-            var openApiPath = conf.getOpenAPIFile();
+            var openApiPath = engineConfiguration.getOpenAPIFile();
             if (openApiPath != null && openApiPath.toFile().exists()) {
                 try {
                     classesUsedInOpenApi = OpenAPIUtil
