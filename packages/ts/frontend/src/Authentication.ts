@@ -57,7 +57,7 @@ async function doFetchLogout(logoutUrl: URL | string, headers: Record<string, st
   return response;
 }
 
-function doFormLogout(url: URL | string, parameters: Record<string, string>) {
+async function doFormLogout(url: URL | string, parameters: Record<string, string>): Promise<void> {
   const logoutUrl = typeof url === 'string' ? url : url.toString();
 
   // Create form to send POST request
@@ -78,7 +78,13 @@ function doFormLogout(url: URL | string, parameters: Record<string, string>) {
 
   // Append form to page and submit it to perform logout and redirect
   document.body.appendChild(form);
-  form.submit();
+
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Form submission did not navigate away after 10 seconds.'));
+    }, 10000);
+    form.submit();
+  });
 }
 
 async function doLogout(doc: Document, options?: LogoutOptions): Promise<Response> {
@@ -89,8 +95,12 @@ async function doLogout(doc: Document, options?: LogoutOptions): Promise<Respons
   const logoutUrl = options?.logoutUrl ?? 'logout';
   if (shouldSubmitFormLogout) {
     const parameters = getSpringCsrfTokenParametersForAuthRequest(doc);
-    doFormLogout(logoutUrl, parameters);
-    return new Response(undefined, { status: 200, statusText: 'OK' } as ResponseInit);
+    await doFormLogout(logoutUrl, parameters);
+    // This should never be reached, as form submission will navigate away
+    return new Response(null, {
+      status: 500,
+      statusText: 'Form submission did not navigate away.',
+    } as ResponseInit);
   }
   const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
   return await doFetchLogout(logoutUrl, headers);

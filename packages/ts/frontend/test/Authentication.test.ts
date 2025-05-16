@@ -325,12 +325,12 @@ describe('@vaadin/hilla-frontend', () => {
         expect(navigate).to.be.calledOnceWithExactly('logout?login');
       });
 
-      it('should perform a form submit when LogoutOptions does not contain navigate and onSuccess', async () => {
+      it('should perform a form submit when LogoutOptions does not contain navigate and onSuccess', () => {
         const submitSpy = vi.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(() => {
           // noop to prevent navigation
         });
         try {
-          await originalLogout();
+          originalLogout().catch(() => {});
           expect(fetchMock.callHistory.calls()).to.have.lengthOf(0);
           expect(submitSpy).toHaveBeenCalled();
           verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
