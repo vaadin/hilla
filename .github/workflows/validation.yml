@@ -25,10 +25,13 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
+  group: ${{ github.head_ref }} || ${{ github.ref_name }}
   cancel-in-progress: true
 env:
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+  HEAD_REF: ${{ github.head_ref }}
+  REF_NAME: ${{ github.ref_name }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
@@ -56,7 +59,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -97,7 +100,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -124,7 +127,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -165,7 +168,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -216,7 +219,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -276,7 +279,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -325,7 +328,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env.HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup

@@ -63,7 +63,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             secondWindowDriver.get(getRootURL() + "/SharedNumberSignal");
 
-            Thread.sleep(100);
+            waitForElementPresent(By.id("sharedValue"));
 
             var secondWindowSharedValue = Double.parseDouble(secondWindowDriver
                     .findElement(By.id("sharedValue")).getText());
@@ -90,8 +90,6 @@ public class NumberSignalIT extends ChromeBrowserTest {
             Assert.assertEquals(0.5, getSharedValue(), 0.0);
             Assert.assertEquals(0, getCounterValue());
 
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } finally {
             secondWindowDriver.close();
         }
