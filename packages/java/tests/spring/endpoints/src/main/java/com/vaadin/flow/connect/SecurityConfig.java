@@ -23,7 +23,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
-        throws Exception {
+            throws Exception {
         http.csrf((h) -> h
                 .ignoringRequestMatchers(new AntPathRequestMatcher("/login")));
 
