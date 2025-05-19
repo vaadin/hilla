@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla;
 
-import com.vaadin.hilla.signals.handler.SignalsHandler;
+import com.vaadin.hilla.signals2.handler.SignalsHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

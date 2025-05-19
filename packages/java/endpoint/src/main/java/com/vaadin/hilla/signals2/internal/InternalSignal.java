@@ -1,8 +1,11 @@
 package com.vaadin.hilla.signals2.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.SignalCommand;
+import com.vaadin.signals.SignalEnvironment;
 import com.vaadin.signals.SignalUtils;
 import com.vaadin.signals.impl.SignalTree;
 
@@ -45,9 +48,9 @@ public class InternalSignal {
             getLogger().debug("New Flux subscription...");
             subscribers.add(sink);
             treeSubscriptionCanceler = tree
-                    .subscribeToPublished(this::notifySubscribers);
+                    .subscribeToProcessed(this::notifySubscribers);
             var snapshot = signal.peekConfirmed();
-            // sink.tryEmitNext(snapshot); TODO: serialize snapshot to JSON
+            sink.tryEmitNext(toJson(snapshot));
         }).doFinally(ignore -> {
             getLogger().debug("Unsubscribing from Signal...");
             subscribers.remove(sink);
@@ -63,7 +66,7 @@ public class InternalSignal {
 
     private void notifySubscribers(SignalCommand command) {
         subscribers.removeIf(sink -> {
-            ObjectNode processedEvent = null; // TODO: serialize to JSON
+            ObjectNode processedEvent = toJson(command);
             boolean failure = sink.tryEmitNext(processedEvent).isFailure();
             if (failure) {
                 getLogger().debug("Failed push");
@@ -80,12 +83,24 @@ public class InternalSignal {
      *            the event to submit
      */
     public void submit(ObjectNode event) {
-        SignalCommand command = null; // TODO: deserialize event JSON to
-                                      // SignalCommand
+        SignalCommand command = fromJson(event, SignalCommand.class);
         tree.commitSingleCommand(command);
     }
 
     private Logger getLogger() {
         return LoggerFactory.getLogger(InternalSignal.class);
+    }
+
+    static ObjectNode toJson(Object value) {
+        return SignalEnvironment.objectMapper().valueToTree(value);
+    }
+
+    static <T> T fromJson(JsonNode value, Class<T> targetType) {
+        try {
+            return SignalEnvironment.objectMapper().treeToValue(value,
+                    targetType);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

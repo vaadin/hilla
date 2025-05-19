@@ -112,21 +112,11 @@ public class SignalsHandler {
             throw new IllegalStateException(
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));
         }
-//        var parentSignalId = ListStateEvent.extractParentSignalId(event);
-//        if (parentSignalId != null) {
-//            if (registry.get(parentSignalId) == null) {
-//                throw new IllegalStateException(String.format(
-//                        "Parent Signal not found for signal id: %s",
-//                        parentSignalId));
-//            }
-//            registry.get(parentSignalId).submit(event);
-//        } else {
-            if (registry.get(clientSignalId) == null) {
-                throw new IllegalStateException(
-                        String.format("Signal not found for client signal: %s",
-                                clientSignalId));
-            }
-            registry.get(clientSignalId).submit(event);
-//        }
+        if (registry.get(clientSignalId) == null) {
+            throw new IllegalStateException(
+                    String.format("Signal not found for client signal: %s",
+                            clientSignalId));
+        }
+        registry.get(clientSignalId).submit(event);
     }
 }
