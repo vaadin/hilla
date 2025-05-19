@@ -2,7 +2,7 @@ import chaiDom from 'chai-dom';
 import fetchMock from 'fetch-mock';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll, vi, assert } from 'vitest';
 import CookieManager from '../src/CookieManager.js';
 import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
 import {
@@ -330,7 +330,9 @@ describe('@vaadin/hilla-frontend', () => {
           // noop to prevent navigation
         });
         try {
-          originalLogout().catch(() => {});
+          originalLogout().catch(() => {
+            assert.fail('Logout should not throw an error');
+          });
           expect(fetchMock.callHistory.calls()).to.have.lengthOf(0);
           expect(submitSpy).toHaveBeenCalled();
           verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
