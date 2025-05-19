@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-parent</artifactId>
-    <version>2.2.2</version>
+    <version>3.0.0</version>
   </parent>
 
   <modules>
@@ -81,8 +81,8 @@
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.14.0</jna.version>
-    <swagger.core.version>2.2.29</swagger.core.version>
-    <swagger.models.version>2.2.29</swagger.models.version>
+    <swagger.core.version>2.2.30</swagger.core.version>
+    <swagger.models.version>2.2.30</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
     <jackson.version>2.19.0</jackson.version>
     <junit.version>5.10.1</junit.version>
