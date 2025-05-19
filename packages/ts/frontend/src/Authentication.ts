@@ -79,6 +79,9 @@ async function doFormLogout(url: URL | string, parameters: Record<string, string
   // Append form to page and submit it to perform logout and redirect
   document.body.appendChild(form);
 
+  // No code should run after a form submission, as it will navigate away.
+  // The promise will reject after a long timeout to avoid executing code after
+  // (old user code has a `reload` call that could happen before the form submission).
   return new Promise((_, reject) => {
     setTimeout(() => {
       reject(new Error('Form submission did not navigate away after 10 seconds.'));
