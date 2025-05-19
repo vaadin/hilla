@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-auth",
-  "version": "24.8.0-alpha6",
+  "version": "24.8.0-alpha7",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:react": "npm run test",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -44,7 +44,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.8.0-alpha6"
+    "@vaadin/hilla-frontend": "24.8.0-alpha7"
   },
   "peerDependencies": {
     "react": "18 || 19",
