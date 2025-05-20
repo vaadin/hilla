@@ -51,22 +51,22 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
     protected void configure(HttpSecurity http) throws Exception {
         // Public access
         http.authorizeHttpRequests(auth -> auth
-            .requestMatchers(new AntPathRequestMatcher("/public/**"))
-            .permitAll()
-            .requestMatchers(
-                new AntPathRequestMatcher(applyUrlMapping("/")))
-            .permitAll()
-            .requestMatchers(
-                new AntPathRequestMatcher(applyUrlMapping("/form")))
-            .permitAll()
-            .requestMatchers(new AntPathRequestMatcher(
-                applyUrlMapping("/proxied-service")))
-            .permitAll()
-            // Admin only access
-            .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
-            .hasAnyRole(ROLE_ADMIN)
-            .requestMatchers(new AntPathRequestMatcher("/error/**"))
-            .permitAll());
+                .requestMatchers(new AntPathRequestMatcher("/public/**"))
+                .permitAll()
+                .requestMatchers(
+                        new AntPathRequestMatcher(applyUrlMapping("/")))
+                .permitAll()
+                .requestMatchers(
+                        new AntPathRequestMatcher(applyUrlMapping("/form")))
+                .permitAll()
+                .requestMatchers(new AntPathRequestMatcher(
+                        applyUrlMapping("/proxied-service")))
+                .permitAll()
+                // Admin only access
+                .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
+                .hasAnyRole(ROLE_ADMIN)
+                .requestMatchers(new AntPathRequestMatcher("/error/**"))
+                .permitAll());
 
         super.configure(http);
         setLoginView(http, "/login", applyUrlMapping("/"));
@@ -74,10 +74,10 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
 
         if (stateless) {
             setStatelessAuthentication(http,
-                new SecretKeySpec(Base64.getUrlDecoder().decode(
-                    "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
-                    JwsAlgorithms.HS256),
-                "statelessapp");
+                    new SecretKeySpec(Base64.getUrlDecoder().decode(
+                            "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
+                            JwsAlgorithms.HS256),
+                    "statelessapp");
         }
     }
 

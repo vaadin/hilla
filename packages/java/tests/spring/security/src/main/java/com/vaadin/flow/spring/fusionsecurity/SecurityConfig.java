@@ -51,39 +51,41 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http, RequestUtil requestUtil)
-        throws Exception {
+    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http,
+            RequestUtil requestUtil) throws Exception {
         // Public access
         http.authorizeHttpRequests(auth -> {
             auth.requestMatchers(new AntPathRequestMatcher("/public/**"))
-                .permitAll()
-                .requestMatchers(
-                    new AntPathRequestMatcher(requestUtil.applyUrlMapping("/")))
-                .permitAll().requestMatchers(
-                    new AntPathRequestMatcher(requestUtil.applyUrlMapping("/form")))
-                .permitAll()
-                .requestMatchers(
-                    new AntPathRequestMatcher(requestUtil.applyUrlMapping("/proxied-service")))
-                .permitAll();
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(
+                            requestUtil.applyUrlMapping("/")))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(
+                            requestUtil.applyUrlMapping("/form")))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(
+                            requestUtil.applyUrlMapping("/proxied-service")))
+                    .permitAll();
 
             // Admin only access
-            auth
-                .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
-                .hasAnyRole(ROLE_ADMIN)
-                .requestMatchers(new AntPathRequestMatcher("/error/**"))
-                .permitAll();
+            auth.requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
+                    .hasAnyRole(ROLE_ADMIN)
+                    .requestMatchers(new AntPathRequestMatcher("/error/**"))
+                    .permitAll();
         });
 
-        http.with(vaadin(), cfg -> cfg.loginView("/login", requestUtil.applyUrlMapping("/")));
-        http.logout(cfg -> cfg.logoutUrl(requestUtil.applyUrlMapping("/logout")));
+        http.with(vaadin(), cfg -> cfg.loginView("/login",
+                requestUtil.applyUrlMapping("/")));
+        http.logout(
+                cfg -> cfg.logoutUrl(requestUtil.applyUrlMapping("/logout")));
 
         if (stateless) {
-            VaadinStatelessSecurityConfigurer.apply(http,
-                cfg -> cfg.withSecretKey(
-                    keyCfg -> keyCfg.secretKey(new SecretKeySpec(Base64.getUrlDecoder().decode(
-                        "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
-                        JwsAlgorithms.HS256))).issuer("statelessapp")
-            );
+            VaadinStatelessSecurityConfigurer.apply(http, cfg -> cfg
+                    .withSecretKey(keyCfg -> keyCfg.secretKey(new SecretKeySpec(
+                            Base64.getUrlDecoder().decode(
+                                    "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
+                            JwsAlgorithms.HS256)))
+                    .issuer("statelessapp"));
         }
         return http.build();
     }
@@ -93,18 +95,18 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager() {
             @Override
             public UserDetails loadUserByUsername(String username)
-                throws UsernameNotFoundException {
+                    throws UsernameNotFoundException {
                 UserInfo userInfo = userInfoRepository.findByUsername(username);
                 if (userInfo == null) {
                     throw new UsernameNotFoundException(
-                        "No user present with username: " + username);
+                            "No user present with username: " + username);
                 } else {
                     return new User(userInfo.getUsername(),
-                        userInfo.getEncodedPassword(),
-                        userInfo.getRoles().stream()
-                            .map(role -> new SimpleGrantedAuthority(
-                                "ROLE_" + role))
-                            .collect(Collectors.toList()));
+                            userInfo.getEncodedPassword(),
+                            userInfo.getRoles().stream()
+                                    .map(role -> new SimpleGrantedAuthority(
+                                            "ROLE_" + role))
+                                    .collect(Collectors.toList()));
                 }
             }
         };
