@@ -33,7 +33,7 @@ public final class ParserProcessor {
             .of();
     private String openAPIBasePath;
 
-    public ParserProcessor(EngineConfiguration conf) {
+    public ParserProcessor(EngineAutoConfiguration conf) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
         this.classPath = conf.getClasspath();
