@@ -27,7 +27,7 @@ public class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
-        throws Exception {
+            throws Exception {
         // Public access
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll());
