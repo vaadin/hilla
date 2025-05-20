@@ -16,7 +16,7 @@
 package com.vaadin.hilla.gradle.plugin
 
 import com.vaadin.flow.gradle.VaadinFlowPluginExtension
-import com.vaadin.hilla.engine.EngineConfiguration
+import com.vaadin.hilla.engine.EngineAutoConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
@@ -47,7 +47,7 @@ public abstract class EngineConfigureTask : DefaultTask() {
 
     @TaskAction
     public fun engineConfigure() {
-        EngineConfiguration.setDefault(
+        EngineAutoConfiguration.setDefault(
             engineConfigurationSettings.get().toEngineConfiguration()
         )
     }
