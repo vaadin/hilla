@@ -142,7 +142,7 @@ public abstract class EndpointInvocationException extends Exception {
          *
          * @return the HTTP status
          */
-        public abstract HttpStatus getHttpStatus();
+        protected abstract HttpStatus getHttpStatus();
 
         /**
          * Returns the HTTP status code.
