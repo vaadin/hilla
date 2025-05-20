@@ -5,7 +5,7 @@ import { Detail } from './detail';
 
 export const config: ViewConfig<Detail> = {
   title: 'viewtitle.basic',
-  lazy: true,
+  lazy: false,
   detail: {
     description: 'viewdescription.basic',
   },
