@@ -1,10 +1,9 @@
 package com.vaadin.hilla.test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.function.Predicate;
-import java.util.stream.StreamSupport;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,17 +39,37 @@ public class ChunksTest {
         CONTAINS, EQUALS
     }
 
-    private void checkKeys(String chunkName, Mode mode,
-            String... expectedKeys) {
-        var node = chunks.path(chunkName).path("keys");
+    private void checkKeys(String chunk, Mode mode, String... expectedKeys) {
+        // Find the entry whose name contains the chunk as a substring
+        String entry = null;
+        for (var it = chunks.fieldNames(); it.hasNext();) {
+            String name = it.next();
+            if (name.contains(chunk)) {
+                entry = name;
+                break;
+            }
+        }
+        if (entry == null) {
+            throw new AssertionError(
+                    "No chunk found containing " + chunk + " in its name");
+        }
+        var node = chunks.path(entry).path("keys");
         Assert.assertTrue(node.isArray());
+
         // a set of expected keys, to be removed as we find them
         var remaining = new HashSet<>(Arrays.asList(expectedKeys));
-        // streams the keys from the json and removes the expected ones
-        var unexpected = StreamSupport.stream(node.spliterator(), false)
-                .map(JsonNode::asText).filter(Predicate.not(remaining::remove))
-                .toList();
+
+        // Collect keys from the json and remove the expected ones
+        var unexpected = new ArrayList<String>();
+        for (var it = node.elements(); it.hasNext();) {
+            String key = it.next().asText();
+            if (!remaining.remove(key)) {
+                unexpected.add(key);
+            }
+        }
+
         Assert.assertTrue("Missing keys: " + remaining, remaining.isEmpty());
+
         if (mode == Mode.EQUALS && !unexpected.isEmpty()) {
             Assert.fail("Unexpected keys found: " + unexpected);
         }
