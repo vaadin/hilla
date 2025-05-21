@@ -4,15 +4,25 @@ import {AppEndpoint} from "Frontend/generated/endpoints";
 
 declare var self: ServiceWorkerGlobalScope;
 
-async function main() {
-  const hello = await AppEndpoint.helloAnonymous();
-  const clients = await self.clients.matchAll({ type: "window" });
-  for (const client of clients) {
-    client.postMessage({
-      type: 'sw-app-hello',
-      hello,
-    });
-  }
+async function getHelloAnonymous(client: Client) {
+  const text = 'SW: ' + await AppEndpoint.helloAnonymous();
+  client.postMessage({
+    type: 'sw-app-message',
+    text,
+  });
 }
-// TODO: enable endpoints and call main()
-Promise.reject().then(main, () => {});
+
+self.addEventListener('message', (e: ExtendableMessageEvent) => {
+  let endpoint: undefined | (() => Promise<string | undefined>) = undefined;
+  if (e.data === 'helloAnonymous') {
+    endpoint = AppEndpoint.helloAnonymous;
+  }
+  if (endpoint) {
+    e.waitUntil(endpoint()?.then((result) => {
+      e.source?.postMessage({
+        type: 'sw-app-message',
+        text: `SW message: ${result}`,
+      });
+    }));
+  }
+});

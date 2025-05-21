@@ -1,6 +1,6 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
 import type * as CommonFrontendModule from '@vaadin/common-frontend';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import defaultCsrfInfoSource from './CsrfInfoSource.js';
 import {
   EndpointError,
   EndpointResponseError,
@@ -356,11 +356,10 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
+    const csrfInfo = await defaultCsrfInfoSource.get();
     const headers: Record<string, string> = {
       Accept: 'application/json',
-      ...csrfHeaders,
+      ...Object.fromEntries(csrfInfo.headerEntries),
     };
 
     const [paramsWithoutFiles, files] = extractFiles(params ?? {});
