@@ -26,6 +26,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assume.assumeThat;
+
 /**
  * Class for testing issues in a spring-boot container.
  */
@@ -268,6 +271,18 @@ public class AppViewIT extends ChromeBrowserTest {
         // Wait for the server connect response
         verifyContent(
                 "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"property\":\"qty\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\"}]}}}");
+    }
+
+    @Test
+    public void should_requestAnonymously_when_calledInServiceWorker() {
+        assumeThat("Service workers require secure context deployment", this.getDeploymentHostname(), is("localhost"));
+
+        WebElement button = testComponent.$(TestBenchElement.class)
+            .id("helloAnonymousFromServiceWorker");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent( "SW message: Hello, stranger!");
     }
 
     private void load() {

@@ -51,6 +51,11 @@ export function getSpringCsrfTokenHeadersForAuthRequest(doc: Document): Record<s
 }
 
 /** @internal */
+export function getVaadinCsrfToken(): string {
+  return CookieManager.get(VAADIN_CSRF_COOKIE_NAME) ?? '';
+}
+
+/** @internal */
 export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<string, string> {
   const headers: Record<string, string> = {};
 
@@ -58,7 +63,7 @@ export function getCsrfTokenHeadersForEndpointRequest(doc: Document): Record<str
   if (csrfInfo._csrf && csrfInfo._csrf_header) {
     headers[csrfInfo._csrf_header] = csrfInfo._csrf;
   } else {
-    headers[VAADIN_CSRF_HEADER] = CookieManager.get(VAADIN_CSRF_COOKIE_NAME) ?? '';
+    headers[VAADIN_CSRF_HEADER] = getVaadinCsrfToken();
   }
 
   return headers;
