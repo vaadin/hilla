@@ -2,7 +2,7 @@ package com.vaadin.hilla.internal;
 
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
 import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
 import com.vaadin.hilla.internal.fixtures.MyEndpoint;
@@ -22,7 +22,7 @@ class AbstractTaskEndpointGeneratorTest extends EndpointsTaskTest {
 
     private class TestTaskEndpointGenerator
             extends AbstractTaskEndpointGenerator {
-        TestTaskEndpointGenerator(EngineConfiguration engineConfiguration) {
+        TestTaskEndpointGenerator(EngineAutoConfiguration engineConfiguration) {
             super(engineConfiguration);
         }
 
