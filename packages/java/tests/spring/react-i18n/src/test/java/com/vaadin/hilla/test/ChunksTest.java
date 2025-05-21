@@ -20,8 +20,8 @@ public class ChunksTest {
     @Before
     public void loadChunks() throws IOException {
         chunks = new ObjectMapper()
-                .readTree(ChunksTest.class
-                        .getResource("/META-INF/VAADIN/config/i18n.json"))
+                .readTree(
+                        ChunksTest.class.getResource("/vaadin-i18n/i18n.json"))
                 .path("chunks");
     }
 
