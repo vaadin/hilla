@@ -18,7 +18,7 @@ import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 /**
  * Base class for Engine Maven plugin tests. Delegates to
@@ -28,7 +28,7 @@ import com.vaadin.hilla.engine.EngineConfiguration;
 public class AbstractMojoTest {
     private final DelegateMojoTestCase testCase = new DelegateMojoTestCase();
     private Path buildDirectory;
-    private EngineConfiguration engineConfiguration;
+    private EngineAutoConfiguration engineConfiguration;
     private Path outputDirectory;
     private MavenProject project;
     private Path temporaryDirectory;
@@ -51,10 +51,10 @@ public class AbstractMojoTest {
         // Maven project is not initialized on the mojo, setup a mock manually
         project = createMavenProject();
 
-        engineConfiguration = new EngineConfiguration.Builder()
+        engineConfiguration = new EngineAutoConfiguration.Builder()
                 .baseDir(temporaryDirectory)
-                .browserCallableFinder(() -> List.of()).build();
-        EngineConfiguration.setDefault(engineConfiguration);
+                .browserCallableFinder((conf) -> List.of()).build();
+        EngineAutoConfiguration.setDefault(engineConfiguration);
     }
 
     @AfterEach
@@ -73,7 +73,7 @@ public class AbstractMojoTest {
         return buildDirectory;
     }
 
-    protected EngineConfiguration getEngineConfiguration() {
+    protected EngineAutoConfiguration getEngineConfiguration() {
         return engineConfiguration;
     }
 
