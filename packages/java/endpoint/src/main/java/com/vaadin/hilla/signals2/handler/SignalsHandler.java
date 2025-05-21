@@ -16,6 +16,7 @@
 
 package com.vaadin.hilla.signals2.handler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.signals2.internal.SecureSignalsRegistry;
@@ -60,9 +61,9 @@ public class SignalsHandler {
      *
      * @return a Flux of JSON events
      */
-    public Flux<ObjectNode> subscribe(String providerEndpoint,
-            String providerMethod, String clientSignalId, ObjectNode body,
-            @Nullable String parentClientSignalId) {
+    public Flux<JsonNode> subscribe(String providerEndpoint,
+                                    String providerMethod, String clientSignalId, ObjectNode body,
+                                    @Nullable String parentClientSignalId) {
         if (registry == null) {
             throw new IllegalStateException(
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));

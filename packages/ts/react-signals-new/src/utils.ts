@@ -15,3 +15,18 @@ export async function createPromiseFromSignal<T, U, E>(
     });
   });
 }
+
+/**
+ * Generates a random base64-encoded string of the specified size in bytes.
+ * @param sizeBytes - The size of the random string in bytes. Default is 8 bytes.
+ * @returns A base64-encoded string.
+ */
+export function randomId(sizeBytes = 8): string {
+  const bytes = new Uint8Array(sizeBytes);
+  crypto.getRandomValues(bytes);
+  let binary = '';
+  for (const value of bytes) {
+    binary += String.fromCharCode(value);
+  }
+  return btoa(binary).replace(/[=]+$/u, '');
+}

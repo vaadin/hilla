@@ -39,7 +39,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @returns An operation object that allows to perform additional actions.
    */
   set(value: T): Operation {
-    const command = createSetCommand(this.id, value);
+    const command = createSetCommand('', value);
     const promise = this[$update](command);
     this[$setValueQuietly](value);
     return this[$createOperation]({ id: command.commandId, promise });

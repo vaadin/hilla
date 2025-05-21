@@ -66,7 +66,7 @@ public class SignalsConfiguration {
      *
      * @return SignalsHandler endpoint instance
      */
-    @Bean
+    @Bean(name = "hillaSignalsHandler")
     public SignalsHandler signalsHandler(
             @Autowired(required = false) SecureSignalsRegistry signalsRegistry) {
         if (signalsHandler == null) {

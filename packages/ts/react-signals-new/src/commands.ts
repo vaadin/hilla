@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import { randomId } from './utils';
 
 /**
  * A base64 string value emitted by Jackson's JsonValue annotated properties.
@@ -31,7 +31,7 @@ export type ValueCondition<V> = CreateCommandType<'ValueCondition', { expectedVa
 
 export function createValueCondition<V>(targetNodeId: Id, expectedValue: V): ValueCondition<V> {
   return {
-    commandId: nanoid(),
+    commandId: randomId(),
     targetNodeId,
     type: 'ValueCondition',
     expectedValue,
@@ -41,13 +41,13 @@ export function createValueCondition<V>(targetNodeId: Id, expectedValue: V): Val
 /**
  * A signal command that sets a value.
  */
-export type SetCommand<V> = CreateCommandType<'set', { value: V }>;
+export type SetCommand<V> = CreateCommandType<'SetCommand', { value: V }>;
 
 export function createSetCommand<V>(targetNodeId: Id, value: V): SetCommand<V> {
   return {
-    commandId: nanoid(),
+    commandId: randomId(),
     targetNodeId,
-    type: 'set',
+    type: 'SetCommand',
     value,
   };
 }
@@ -65,7 +65,7 @@ export type TransactionCommand = CreateCommandType<
 
 export function createTransactionCommand(commands: SignalCommand[]): TransactionCommand {
   return {
-    commandId: nanoid(),
+    commandId: randomId(),
     targetNodeId: '',
     type: 'TransactionCommand',
     commands,
@@ -85,7 +85,7 @@ function isSignalCommand(command: unknown): command is SignalCommand {
 }
 
 export function isSetCommand<V>(command: unknown): command is SetCommand<V> {
-  return isSignalCommand(command) && command.type === 'set';
+  return isSignalCommand(command) && command.type === 'SetCommand';
 }
 
 export function isValueCondition<V>(command: unknown): command is ValueCondition<V> {

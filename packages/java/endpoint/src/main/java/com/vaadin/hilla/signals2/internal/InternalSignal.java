@@ -1,11 +1,9 @@
 package com.vaadin.hilla.signals2.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.SignalCommand;
-import com.vaadin.signals.SignalEnvironment;
 import com.vaadin.signals.SignalUtils;
 import com.vaadin.signals.impl.SignalTree;
 
@@ -20,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InternalSignal {
 
-    private final Set<Sinks.Many<ObjectNode>> subscribers = ConcurrentHashMap
+    private final Set<Sinks.Many<JsonNode>> subscribers = ConcurrentHashMap
             .newKeySet();
 
     private final Signal<?> signal;
@@ -33,7 +31,7 @@ public class InternalSignal {
     }
 
     public Id id() {
-        return signal.id();
+        return SignalUtils.treeOf(signal).id();
     }
 
     /**
@@ -41,8 +39,8 @@ public class InternalSignal {
      *
      * @return a Flux of JSON events
      */
-    public Flux<ObjectNode> subscribe() {
-        Sinks.Many<ObjectNode> sink = Sinks.many().unicast()
+    public Flux<JsonNode> subscribe() {
+        Sinks.Many<JsonNode> sink = Sinks.many().unicast()
                 .onBackpressureBuffer();
         return sink.asFlux().doOnSubscribe(ignore -> {
             getLogger().debug("New Flux subscription...");
@@ -50,7 +48,9 @@ public class InternalSignal {
             treeSubscriptionCanceler = tree
                     .subscribeToProcessed(this::notifySubscribers);
             var snapshot = signal.peekConfirmed();
-            sink.tryEmitNext(toJson(snapshot));
+            // TODO: the targetNodeId is ZERO for single-valued signals:
+            var setCommand = new SignalCommand.SetCommand(Id.random(), Id.ZERO, CommandUtils.toJson(snapshot));
+            sink.tryEmitNext(CommandUtils.toJson(setCommand));
         }).doFinally(ignore -> {
             getLogger().debug("Unsubscribing from Signal...");
             subscribers.remove(sink);
@@ -66,7 +66,7 @@ public class InternalSignal {
 
     private void notifySubscribers(SignalCommand command) {
         subscribers.removeIf(sink -> {
-            ObjectNode processedEvent = toJson(command);
+            JsonNode processedEvent = CommandUtils.toJson(command);
             boolean failure = sink.tryEmitNext(processedEvent).isFailure();
             if (failure) {
                 getLogger().debug("Failed push");
@@ -83,24 +83,11 @@ public class InternalSignal {
      *            the event to submit
      */
     public void submit(ObjectNode event) {
-        SignalCommand command = fromJson(event, SignalCommand.class);
+        SignalCommand command = CommandUtils.fromJson(event);
         tree.commitSingleCommand(command);
     }
 
     private Logger getLogger() {
         return LoggerFactory.getLogger(InternalSignal.class);
-    }
-
-    static ObjectNode toJson(Object value) {
-        return SignalEnvironment.objectMapper().valueToTree(value);
-    }
-
-    static <T> T fromJson(JsonNode value, Class<T> targetType) {
-        try {
-            return SignalEnvironment.objectMapper().treeToValue(value,
-                    targetType);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

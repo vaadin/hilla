@@ -4,9 +4,9 @@ import type {
   EndpointRequestInit,
   Subscription,
 } from '@vaadin/hilla-frontend';
-import { nanoid } from 'nanoid';
 import { createSetCommand, type SignalCommand } from './commands.js';
 import { computed, signal, Signal } from './core.js';
+import { randomId } from './utils.js';
 
 const ENDPOINT = 'SignalsHandler';
 
@@ -205,7 +205,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
       () => this.#connect(),
       () => this.#disconnect(),
     );
-    this.id = id ?? nanoid();
+    this.id = id ?? randomId();
     this.server = new ServerConnection(this.id, config);
 
     this.subscribe((v) => {
@@ -214,7 +214,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
         this.#error.value = undefined;
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this[$update](createSetCommand(this.id, v));
+        this[$update](createSetCommand('', v));
       }
     });
 
