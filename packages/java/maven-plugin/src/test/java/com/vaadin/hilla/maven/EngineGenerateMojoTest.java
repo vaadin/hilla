@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mockito;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserProcessor;
 
@@ -26,7 +26,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                             "expected 1 ParserProcessor argument");
 
                     // Verify configuration argument
-                    var conf = (EngineConfiguration) context.arguments().get(0);
+                    var conf = (EngineAutoConfiguration) context.arguments()
+                            .get(0);
                     verifyConfiguration(conf);
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
@@ -38,8 +39,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
                                     "expected 1 GeneratorProcessor argument");
 
                             // Verify configuration argument
-                            var conf = (EngineConfiguration) context.arguments()
-                                    .get(0);
+                            var conf = (EngineAutoConfiguration) context
+                                    .arguments().get(0);
                             verifyConfiguration(conf);
                         }));) {
 
@@ -65,7 +66,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
         }
     }
 
-    private void verifyConfiguration(EngineConfiguration conf) {
+    private void verifyConfiguration(EngineAutoConfiguration conf) {
         assertEquals(conf.getBaseDir(), getTemporaryDirectory());
     }
 }

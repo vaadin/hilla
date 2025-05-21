@@ -21,7 +21,7 @@ import java.nio.file.Path
 import java.util.stream.Stream
 import com.vaadin.flow.gradle.VaadinFlowPluginExtension
 import com.vaadin.flow.gradle.FlowPlugin
-import com.vaadin.hilla.engine.EngineConfiguration
+import com.vaadin.hilla.engine.EngineAutoConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
@@ -101,7 +101,7 @@ public class HillaPlugin : Plugin<Project> {
     }
 
     public companion object {
-        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension): EngineConfiguration {
+        public fun createEngineConfiguration(project: Project, vaadinExtension: VaadinFlowPluginExtension): EngineAutoConfiguration {
             val baseDir: Path = project.projectDir.toPath()
             val buildDir: Path = baseDir.resolve(vaadinExtension.projectBuildDir.get())
 
@@ -114,7 +114,7 @@ public class HillaPlugin : Plugin<Project> {
                 .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
             val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
 
-            return EngineConfiguration.Builder()
+            return EngineAutoConfiguration.Builder()
                 .baseDir(baseDir)
                 .buildDir(buildDir)
                 .classesDirs(sourceSet.output.classesDirs.map { it.toPath() }.toList())
@@ -131,10 +131,10 @@ public class HillaPlugin : Plugin<Project> {
 }
 
 /**
- * A serializable data container that stores EngineConfiguration settings to
+ * A serializable data container that stores EngineAutoConfiguration settings to
  * provide an instance at execution time.
  * It is needed to support gradle configuration cache, because
- * EngineConfiguration has unserializable private members (e.g. Path references)
+ * EngineAutoConfiguration has unserializable private members (e.g. Path references)
  */
 internal data class EngineConfigurationSettings(
     val baseDir: File,
@@ -147,8 +147,8 @@ internal data class EngineConfigurationSettings(
     val mainClass: String?,
     val productionMode: Boolean
 ) : Serializable {
-    fun toEngineConfiguration(): EngineConfiguration {
-        return EngineConfiguration.Builder()
+    fun toEngineConfiguration(): EngineAutoConfiguration {
+        return EngineAutoConfiguration.Builder()
             .baseDir(baseDir.toPath())
             .buildDir(buildDir.toPath())
             .classesDirs(classesDirs.map { it.toPath() })
@@ -163,7 +163,7 @@ internal data class EngineConfigurationSettings(
     }
 }
 
-internal fun EngineConfiguration.toInputs(): EngineConfigurationSettings {
+internal fun EngineAutoConfiguration.toInputs(): EngineConfigurationSettings {
     return EngineConfigurationSettings(
         baseDir = this.baseDir.toFile(), buildDir = this.buildDir.toFile(),
         classesDirs = this.classesDirs.map { it.toFile() }.toSet(),
