@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class OpenAPIUtil {
      */
     public static Optional<Path> getCurrentOpenAPIPath(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        var engineConfiguration = new EngineConfiguration.Builder()
+        var engineConfiguration = new EngineAutoConfiguration.Builder()
                 .buildDir(buildDirectory).productionMode(isProductionMode)
                 .withDefaultAnnotations().build();
         return Optional.of(engineConfiguration.getOpenAPIFile());
