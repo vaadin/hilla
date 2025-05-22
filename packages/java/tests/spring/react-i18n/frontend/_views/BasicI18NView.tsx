@@ -5,8 +5,8 @@ export default function BasicI18NView() {
   return (
     <>
       <section className="flex p-m gap-m items-end">
-        <TextField id='name' label={translate('basic.form.name.label')}/>
-        <TextField id='address' label={translate('basic.form.address.label')}/>
+        <TextField id='name' label={translate(i18n`basic.form.name.label`)}/>
+        <TextField id='address' label={translate(i18n`basic.form.address.label`)}/>
         <TextField
           id='language'
           label='Language'
