@@ -1,6 +1,6 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
-import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import type * as CommonFrontendModule from '@vaadin/common-frontend';
+import defaultCsrfInfoSource from './CsrfInfoSource.js';
 import {
   EndpointError,
   EndpointResponseError,
@@ -15,6 +15,11 @@ import {
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
 import type { VaadinGlobal } from './types.js';
+
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+const commonFrontendModulePromise: Promise<typeof CommonFrontendModule | undefined> = globalThis.document
+  ? import('@vaadin/common-frontend')
+  : Promise.resolve(undefined);
 
 const $wnd = globalThis as VaadinGlobal;
 
@@ -275,6 +280,8 @@ export class ConnectClient {
 
   #fluxConnection?: FluxConnection;
 
+  readonly #ready: Promise<void>;
+
   /**
    * @param options - Constructor options.
    */
@@ -291,19 +298,28 @@ export class ConnectClient {
       this.atmosphereOptions = options.atmosphereOptions;
     }
 
-    // add connection indicator to DOM
-    ConnectionIndicator.create();
-
-    // Listen to browser online/offline events and update the loading indicator accordingly.
-    // Note: if Flow.ts is loaded, it instead handles the state transitions.
-    addEventListener('online', () => {
-      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTED;
+    this.#ready = commonFrontendModulePromise.then((commonFrontendModule?: typeof CommonFrontendModule) => {
+      if (!commonFrontendModule) {
+        return;
       }
-    });
-    addEventListener('offline', () => {
-      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (globalThis.document) {
+        // add connection indicator to DOM
+        commonFrontendModule.ConnectionIndicator.create();
+
+        // Listen to browser online/offline events and update the loading indicator accordingly.
+        // Note: if Flow.ts is loaded, it instead handles the state transitions.
+        addEventListener('online', () => {
+          if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
+            $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTED;
+          }
+        });
+        addEventListener('offline', () => {
+          if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
+            $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTION_LOST;
+          }
+        });
       }
     });
   }
@@ -340,11 +356,10 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
+    const csrfInfo = await defaultCsrfInfoSource.get();
     const headers: Record<string, string> = {
       Accept: 'application/json',
-      ...csrfHeaders,
+      ...Object.fromEntries(csrfInfo.headerEntries),
     };
 
     const [paramsWithoutFiles, files] = extractFiles(params ?? {});
@@ -453,5 +468,12 @@ export class ConnectClient {
    */
   subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
     return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
+  }
+
+  /**
+   * Promise that resolves when the instance is initialized.
+   */
+  get ready(): Promise<void> {
+    return this.#ready;
   }
 }

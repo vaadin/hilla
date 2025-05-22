@@ -6,6 +6,13 @@ import { AppEndpoint, PagedEndpoint } from '../generated/endpoints';
 import Direction from '../generated/org/springframework/data/domain/Sort/Direction';
 
 class TestComponent extends PolymerElement {
+  #boundSwMessageListener;
+
+  constructor(props) {
+    super(props);
+    this.#boundSwMessageListener = this.swMessageListener.bind(this);
+  }
+
   static get template() {
     return html`
       <button id="button">vaadin hello</button><br />
@@ -31,6 +38,7 @@ class TestComponent extends PolymerElement {
       <button id="pageOfEntities" on-click="getPageOfEntities">Get page of entities</button>
       <button id="denied" on-click="denied">endpoint denied</button><br />
       <button id="logout" on-click="logout">logout</button><br />
+      <button id="helloAnonymousFromServiceWorker" on-click="helloAnonymousFromServiceWorker">helloAnonymous from serviceWorker</button><br />
       <form method="POST" action="login">
         <input id="username" name="username" />
         <input id="password" name="password" />
@@ -46,6 +54,22 @@ class TestComponent extends PolymerElement {
 
   async logout() {
     await fetch('logout');
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    navigator.serviceWorker?.addEventListener('message', this.#boundSwMessageListener);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    navigator.serviceWorker?.removeEventListener('message', this.#boundSwMessageListener);
+  }
+
+  swMessageListener(event) {
+    if (event.data && event.data.type === 'sw-app-message') {
+      this.$.content.textContent = event.data.text;
+    }
   }
 
   hello(e) {
@@ -157,6 +181,12 @@ class TestComponent extends PolymerElement {
       .denied()
       .then((response) => (this.$.content.textContent = response))
       .catch((error) => (this.$.content.textContent = 'Error:' + error));
+  }
+
+  helloAnonymousFromServiceWorker(e) {
+    window.navigator.serviceWorker?.ready.then((registration) => {
+      registration.active.postMessage('helloAnonymous');
+    });
   }
 }
 customElements.define(TestComponent.is, TestComponent);
