@@ -63,6 +63,12 @@ public class CrudRepositoryServiceTest {
         }
 
         @Override
+        public Page<TestObject> findAll(Specification<TestObject> spec,
+                Specification<TestObject> countSpec, Pageable pageable) {
+            return null;
+        }
+
+        @Override
         public long count(Specification<TestObject> spec) {
             return 0;
         }
@@ -80,7 +86,7 @@ public class CrudRepositoryServiceTest {
         @Override
         public <S extends TestObject, R> R findBy(
                 Specification<TestObject> spec,
-                Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+                Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
             return null;
         }
 
@@ -193,6 +199,12 @@ public class CrudRepositoryServiceTest {
         }
 
         @Override
+        public Page<TestObject> findAll(Specification<TestObject> spec,
+                Specification<TestObject> countSpec, Pageable pageable) {
+            return null;
+        }
+
+        @Override
         public <S extends TestObject> List<S> findAll(Example<S> example,
                 Sort sort) {
             return null;
@@ -238,7 +250,7 @@ public class CrudRepositoryServiceTest {
         @Override
         public <S extends TestObject, R> R findBy(
                 Specification<TestObject> spec,
-                Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+                Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
             return null;
         }
 
