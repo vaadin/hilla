@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterAll, afterEach, beforeAll, beforeEach, chai, describe, expect, it } from 'vitest';
 import { FormatCache } from '../src/FormatCache.js';
-import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
+import { i18n as globalI18n, I18n, key, translate as globalTranslate } from '../src/index.js';
 import type { LanguageSettings } from '../src/settings.js';
 
 chai.use(sinonChai);
@@ -240,8 +240,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.registerChunk('city');
 
         // Neither chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('addresses.form.city.label');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('addresses.form.street.label');
         expect(fetchMock.callHistory.called()).to.be.false;
       });
 
@@ -250,10 +250,10 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure({ language });
 
         // City chunk is loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City Chunked');
 
         // Street chunk is not loaded yet
-        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('addresses.form.street.label');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
@@ -265,8 +265,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.configure({ language });
 
         // Both chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City Chunked');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Street Chunked');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
@@ -280,8 +280,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.registerChunk('street');
 
         // Both chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City Chunked');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Street Chunked');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City Chunked');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Street Chunked');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
@@ -295,10 +295,10 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.setLanguage('en-AU');
 
         // City chunk is loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('Australian City Chunked');
 
         // Street chunk is not loaded yet
-        expect(i18n.translate('addresses.form.street.label')).to.equal('addresses.form.street.label');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('addresses.form.street.label');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
@@ -313,8 +313,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.setLanguage('en-AU');
 
         // Both chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Australian Street Chunked');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('Australian City Chunked');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Australian Street Chunked');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city', 'street']);
@@ -329,8 +329,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.registerChunk('street');
 
         // Both chunks are loaded
-        expect(i18n.translate('addresses.form.city.label')).to.equal('Australian City Chunked');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Australian Street Chunked');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('Australian City Chunked');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Australian Street Chunked');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['street']);
@@ -343,12 +343,12 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
 
       it('should return translated string', () => {
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City');
-        expect(i18n.translate('addresses.form.street.label')).to.equal('Street');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('Street');
       });
 
       it('should return key when there is no translation', () => {
-        expect(i18n.translate('unknown.key')).to.equal('unknown.key');
+        expect(i18n.translate(key`unknown.key`)).to.equal('unknown.key');
       });
     });
 
@@ -357,7 +357,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         const effectSpy = sinon.spy();
         effect(() => {
           // Use multiple signals in the effect to verify signals are updated in batch
-          effectSpy(i18n.language.value, i18n.translate('addresses.form.city.label'));
+          effectSpy(i18n.language.value, i18n.translate(key`addresses.form.city.label`));
         });
 
         // Runs once initially
@@ -393,22 +393,23 @@ describe('@vaadin/hilla-react-i18n', () => {
     describe('global instance', () => {
       it('should expose a global I18n instance', () => {
         expect(globalI18n).to.exist;
-        expect(globalI18n).to.be.instanceof(I18n);
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        expect(globalI18n.registerChunk).to.be.a('function');
       });
 
       it('should expose a global translate function that delegates to global I18n instance', async () => {
         await globalI18n.configure({ language: 'en-US' });
-        expect(globalTranslate('addresses.form.city.label')).to.equal('City');
+        expect(globalTranslate(key`addresses.form.city.label`)).to.equal('City');
 
         await globalI18n.setLanguage('de-DE');
-        expect(globalTranslate('addresses.form.city.label')).to.equal('Stadt');
+        expect(globalTranslate(key`addresses.form.city.label`)).to.equal('Stadt');
       });
     });
 
     describe('react integration', () => {
       it('should re-render when language changes', async () => {
         function TestTranslateComponent() {
-          return <div>{i18n.translate('addresses.form.city.label')}</div>;
+          return <div>{i18n.translate(key`addresses.form.city.label`)}</div>;
         }
 
         const { getByText } = render(<TestTranslateComponent />);
@@ -430,7 +431,7 @@ describe('@vaadin/hilla-react-i18n', () => {
 
         function TestUseSignalEffectComponent() {
           useSignalEffect(() => {
-            signalEffectResult = i18n.translate('addresses.form.city.label');
+            signalEffectResult = i18n.translate(key`addresses.form.city.label`);
           });
           return <div></div>;
         }
@@ -452,7 +453,7 @@ describe('@vaadin/hilla-react-i18n', () => {
       it('should update computed signals when language changes', async () => {
         function TestUseComputedComponent() {
           const computedTranslation = useComputed(
-            () => `Computed translation: ${i18n.translate('addresses.form.city.label')}`,
+            () => `Computed translation: ${i18n.translate(key`addresses.form.city.label`)}`,
           );
           return <div>{computedTranslation.value}</div>;
         }
@@ -476,7 +477,7 @@ describe('@vaadin/hilla-react-i18n', () => {
 
         function TestUseEffectComponent() {
           useEffect(() => {
-            defaultEffectResult = i18n.translate('addresses.form.city.label');
+            defaultEffectResult = i18n.translate(key`addresses.form.city.label`);
           }, [i18n.language.value]);
           return <div></div>;
         }
@@ -498,7 +499,7 @@ describe('@vaadin/hilla-react-i18n', () => {
       it('should update memoizations when language changes', async () => {
         function TestUseMemoComponent() {
           const memoizedTranslation = useMemo(
-            () => `Memoized translation: ${i18n.translate('addresses.form.city.label')}`,
+            () => `Memoized translation: ${i18n.translate(key`addresses.form.city.label`)}`,
             [i18n.language.value],
           );
           return <div>{memoizedTranslation}</div>;
@@ -562,57 +563,59 @@ describe('@vaadin/hilla-react-i18n', () => {
 
       it('should support ICU message format', () => {
         const sampleDate = new Date(2024, 10, 12, 22, 33, 44);
-        expect(i18n.translate('param.basic', { value: 'foo' })).to.equal('Value: foo');
+        expect(i18n.translate(key`param.basic`, { value: 'foo' })).to.equal('Value: foo');
 
-        expect(i18n.translate('param.number', { value: 123.456 })).to.equal('Value: 123.456');
-        expect(i18n.translate('param.number.integer', { value: 123.456 })).to.equal('Value: 123');
-        expect(i18n.translate('param.number.skeleton', { value: 123.456 })).to.equal('Value: 123.46');
-        expect(i18n.translate('param.number.currency', { value: 123.456 })).to.equal('Value: $123.46');
+        expect(i18n.translate(key`param.number`, { value: 123.456 })).to.equal('Value: 123.456');
+        expect(i18n.translate(key`param.number.integer`, { value: 123.456 })).to.equal('Value: 123');
+        expect(i18n.translate(key`param.number.skeleton`, { value: 123.456 })).to.equal('Value: 123.46');
+        expect(i18n.translate(key`param.number.currency`, { value: 123.456 })).to.equal('Value: $123.46');
 
-        expect(i18n.translate('param.date', { value: sampleDate })).to.equal('Value: 11/12/2024');
-        expect(i18n.translate('param.date.short', { value: sampleDate })).to.equal('Value: 11/12/24');
-        expect(i18n.translate('param.date.medium', { value: sampleDate })).to.equal('Value: Nov 12, 2024');
-        expect(i18n.translate('param.date.long', { value: sampleDate })).to.equal('Value: November 12, 2024');
-        expect(i18n.translate('param.date.full', { value: sampleDate })).to.equal('Value: Tuesday, November 12, 2024');
-        expect(i18n.translate('param.date.skeleton', { value: sampleDate })).to.equal('Value: Tue, Nov 12, 24');
+        expect(i18n.translate(key`param.date`, { value: sampleDate })).to.equal('Value: 11/12/2024');
+        expect(i18n.translate(key`param.date.short`, { value: sampleDate })).to.equal('Value: 11/12/24');
+        expect(i18n.translate(key`param.date.medium`, { value: sampleDate })).to.equal('Value: Nov 12, 2024');
+        expect(i18n.translate(key`param.date.long`, { value: sampleDate })).to.equal('Value: November 12, 2024');
+        expect(i18n.translate(key`param.date.full`, { value: sampleDate })).to.equal(
+          'Value: Tuesday, November 12, 2024',
+        );
+        expect(i18n.translate(key`param.date.skeleton`, { value: sampleDate })).to.equal('Value: Tue, Nov 12, 24');
 
-        expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 10:33:44 PM');
-        expect(i18n.translate('param.time.short', { value: sampleDate })).to.equal('Value: 10:33 PM');
-        expect(i18n.translate('param.time.medium', { value: sampleDate })).to.equal('Value: 10:33:44 PM');
-        expect(i18n.translate('param.time.long', { value: sampleDate })).to.match(/Value: 10:33:44 PM (GMT|UTC)/u);
-        expect(i18n.translate('param.time.full', { value: sampleDate })).to.match(/Value: 10:33:44 PM (GMT|UTC)/u);
+        expect(i18n.translate(key`param.time`, { value: sampleDate })).to.equal('Value: 10:33:44 PM');
+        expect(i18n.translate(key`param.time.short`, { value: sampleDate })).to.equal('Value: 10:33 PM');
+        expect(i18n.translate(key`param.time.medium`, { value: sampleDate })).to.equal('Value: 10:33:44 PM');
+        expect(i18n.translate(key`param.time.long`, { value: sampleDate })).to.match(/Value: 10:33:44 PM (GMT|UTC)/u);
+        expect(i18n.translate(key`param.time.full`, { value: sampleDate })).to.match(/Value: 10:33:44 PM (GMT|UTC)/u);
 
-        expect(i18n.translate('param.plural', { value: 0 })).to.equal('You have no new messages');
-        expect(i18n.translate('param.plural', { value: 1 })).to.equal('You have one new message');
-        expect(i18n.translate('param.plural', { value: 2 })).to.equal('You have 2 new messages');
-        expect(i18n.translate('param.plural', { value: 10 })).to.equal('You have 10 new messages');
+        expect(i18n.translate(key`param.plural`, { value: 0 })).to.equal('You have no new messages');
+        expect(i18n.translate(key`param.plural`, { value: 1 })).to.equal('You have one new message');
+        expect(i18n.translate(key`param.plural`, { value: 2 })).to.equal('You have 2 new messages');
+        expect(i18n.translate(key`param.plural`, { value: 10 })).to.equal('You have 10 new messages');
 
-        expect(i18n.translate('param.select', { value: 'male' })).to.equal('He liked this');
-        expect(i18n.translate('param.select', { value: 'female' })).to.equal('She liked this');
-        expect(i18n.translate('param.select', { value: 'other' })).to.equal('They liked this');
-        expect(i18n.translate('param.select', { value: 'diverse' })).to.equal('They liked this');
+        expect(i18n.translate(key`param.select`, { value: 'male' })).to.equal('He liked this');
+        expect(i18n.translate(key`param.select`, { value: 'female' })).to.equal('She liked this');
+        expect(i18n.translate(key`param.select`, { value: 'other' })).to.equal('They liked this');
+        expect(i18n.translate(key`param.select`, { value: 'diverse' })).to.equal('They liked this');
 
-        expect(i18n.translate('param.selectordinal', { value: 1 })).to.equal('You are 1st in the queue');
-        expect(i18n.translate('param.selectordinal', { value: 2 })).to.equal('You are 2nd in the queue');
-        expect(i18n.translate('param.selectordinal', { value: 3 })).to.equal('You are 3rd in the queue');
-        expect(i18n.translate('param.selectordinal', { value: 4 })).to.equal('You are 4th in the queue');
-        expect(i18n.translate('param.selectordinal', { value: 10 })).to.equal('You are 10th in the queue');
+        expect(i18n.translate(key`param.selectordinal`, { value: 1 })).to.equal('You are 1st in the queue');
+        expect(i18n.translate(key`param.selectordinal`, { value: 2 })).to.equal('You are 2nd in the queue');
+        expect(i18n.translate(key`param.selectordinal`, { value: 3 })).to.equal('You are 3rd in the queue');
+        expect(i18n.translate(key`param.selectordinal`, { value: 4 })).to.equal('You are 4th in the queue');
+        expect(i18n.translate(key`param.selectordinal`, { value: 10 })).to.equal('You are 10th in the queue');
 
-        expect(i18n.translate('param.escaping')).to.equal("No need to escape 'this'. But {this}");
+        expect(i18n.translate(key`param.escaping`)).to.equal("No need to escape 'this'. But {this}");
       });
 
       it('should update formats when changing language', async () => {
         const sampleDate = new Date(2024, 10, 12, 22, 33, 44);
 
-        expect(i18n.translate('param.number', { value: 123.456 })).to.equal('Value: 123.456');
-        expect(i18n.translate('param.date.medium', { value: sampleDate })).to.equal('Value: Nov 12, 2024');
-        expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 10:33:44 PM');
+        expect(i18n.translate(key`param.number`, { value: 123.456 })).to.equal('Value: 123.456');
+        expect(i18n.translate(key`param.date.medium`, { value: sampleDate })).to.equal('Value: Nov 12, 2024');
+        expect(i18n.translate(key`param.time`, { value: sampleDate })).to.equal('Value: 10:33:44 PM');
 
         await i18n.setLanguage('de');
 
-        expect(i18n.translate('param.number', { value: 123.456 })).to.equal('Value: 123,456');
-        expect(i18n.translate('param.date.medium', { value: sampleDate })).to.equal('Value: 12. Nov. 2024');
-        expect(i18n.translate('param.time', { value: sampleDate })).to.equal('Value: 22:33:44');
+        expect(i18n.translate(key`param.number`, { value: 123.456 })).to.equal('Value: 123,456');
+        expect(i18n.translate(key`param.date.medium`, { value: sampleDate })).to.equal('Value: 12. Nov. 2024');
+        expect(i18n.translate(key`param.time`, { value: sampleDate })).to.equal('Value: 22:33:44');
       });
     });
 
@@ -628,14 +631,14 @@ describe('@vaadin/hilla-react-i18n', () => {
       }
 
       it('should not update translations if not initialized', async () => {
-        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('addresses.form.city.label');
         await triggerHmrEvent();
-        expect(i18n.translate('addresses.form.city.label')).to.equal('addresses.form.city.label');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('addresses.form.city.label');
       });
 
       it('should update translations on HMR event', async () => {
         await i18n.configure({ language: 'en-US' });
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City');
 
         fetchMock
           .removeRoutes()
@@ -650,7 +653,7 @@ describe('@vaadin/hilla-react-i18n', () => {
 
         await triggerHmrEvent();
 
-        expect(i18n.translate('addresses.form.city.label')).to.equal('City updated');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City updated');
       });
 
       it('should update resolved language on HMR event', async () => {

@@ -1,12 +1,12 @@
-import { i18n, translate } from '@vaadin/hilla-react-i18n';
+import { i18n, key, translate } from '@vaadin/hilla-react-i18n';
 import { TextField } from '@vaadin/react-components';
 
 export default function BasicI18NView() {
   return (
     <>
       <section className="flex p-m gap-m items-end">
-        <TextField id='name' label={translate('basic.form.name.label')}/>
-        <TextField id='address' label={translate('basic.form.address.label')}/>
+        <TextField id='name' label={translate(key`basic.form.name.label`)}/>
+        <TextField id='address' label={translate(key`basic.form.address.label`)}/>
         <TextField
           id='language'
           label='Language'
