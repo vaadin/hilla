@@ -33,10 +33,6 @@ const keyLiteralMarker: unique symbol = Symbol('keyMarker');
  */
 export type I18nKey = string & { [keyLiteralMarker]: unknown };
 
-function key(strings: readonly string[], ..._values: never[]): I18nKey {
-  return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
-}
-
 export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
@@ -275,6 +271,16 @@ export class I18n {
 const i18n: I18n = new I18n();
 
 /**
+ * A tagged template literal function to create translation keys.
+ * The {@link translate} function requires using this tag.
+ * E.g.:
+ *   translate(key`my.translation.key`)
+ */
+export function key(strings: readonly string[], ..._values: never[]): I18nKey {
+  return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
+}
+
+/**
  * Returns a translated string for the given translation key. The key should
  * match a key in the loaded translations. If no translation is found for the
  * key, the key itself is returned.
@@ -302,4 +308,4 @@ export function translate(k: I18nKey, params?: Record<string, unknown>): string 
   return i18n.translate(k, params);
 }
 
-export { i18n, key };
+export { i18n };
