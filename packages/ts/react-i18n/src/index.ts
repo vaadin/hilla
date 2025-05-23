@@ -26,15 +26,15 @@ function determineInitialLanguage(options?: I18nOptions): string {
   return navigator.language;
 }
 
-const i18nLiteralMarker: unique symbol = Symbol('i18nMarker');
+const keyLiteralMarker: unique symbol = Symbol('keyMarker');
 
 /**
  * A type for translation keys. It is a string with a special marker.
  */
-export type I18nKey = string & { [i18nLiteralMarker]: unknown };
+export type I18nKey = string & { [keyLiteralMarker]: unknown };
 
 function key(strings: readonly string[], ..._values: never[]): I18nKey {
-  return Object.assign(strings[0], { [i18nLiteralMarker]: undefined }) as I18nKey;
+  return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
 }
 
 export class I18n {
