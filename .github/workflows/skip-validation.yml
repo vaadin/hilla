@@ -2,7 +2,7 @@ name: Validation
 
 on:
   push:
-    branches: [ main, '24.6', '24.5', '2.5', '1.5' ]
+    branches: [ main, '24.8', '24.7', '24.6', '2.5', '1.5' ]
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
