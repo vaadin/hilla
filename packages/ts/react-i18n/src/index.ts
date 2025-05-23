@@ -26,6 +26,17 @@ function determineInitialLanguage(options?: I18nOptions): string {
   return navigator.language;
 }
 
+const i18nLiteralMarker: unique symbol = Symbol('i18nMarker');
+
+/**
+ * A type for translation keys. It is a string with a special marker.
+ */
+export type I18nKey = string & { [i18nLiteralMarker]: unknown };
+
+function key(strings: readonly string[], ..._values: never[]): I18nKey {
+  return Object.assign(strings[0], { [i18nLiteralMarker]: undefined }) as I18nKey;
+}
+
 export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
@@ -244,13 +255,13 @@ export class I18n {
    * Likewise, signal effects automatically subscribe to translation changes
    * when calling this method.
    *
-   * @param key - The translation key to translate
+   * @param k - The translation key to translate
    * @param params - Optional object with placeholder values
    */
-  translate(key: I18nKey, params?: Record<string, unknown>): string {
-    const translation = this.#translations.value[key];
+  translate(k: I18nKey, params?: Record<string, unknown>): string {
+    const translation = this.#translations.value[k];
     if (!translation) {
-      return key.toString();
+      return k.toString();
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
@@ -261,7 +272,7 @@ export class I18n {
  * The global I18n instance that is used to initialize translations, change the
  * current language, and translate strings.
  */
-const i18nInstance: I18n = new I18n();
+const i18n: I18n = new I18n();
 
 /**
  * Returns a translated string for the given translation key. The key should
@@ -284,39 +295,11 @@ const i18nInstance: I18n = new I18n();
  *
  * This function is a shorthand for `i18n.translate` of the global I18n instance.
  *
- * @param key - The translation key to translate
+ * @param k - The translation key to translate
  * @param params - Optional object with placeholder values
  */
-export function translate(key: I18nKey, params?: Record<string, unknown>): string {
-  return i18nInstance.translate(key, params);
+export function translate(k: I18nKey, params?: Record<string, unknown>): string {
+  return i18n.translate(k, params);
 }
 
-const i18nLiteralMarker: unique symbol = Symbol('i18nMarker');
-
-/**
- * A type for translation keys. It is a string with a special marker.
- */
-export type I18nKey = string & { [i18nLiteralMarker]: unknown };
-
-/**
- * A tagged template literal function that marks a string as a translation key.
- * Example: i18n`page.title`. Values are not allowed in the template literal.
- */
-export type I18nFunction = ((strings: readonly string[], ..._values: never[]) => I18nKey) & InstanceType<typeof I18n>;
-
-function i18nTag(strings: readonly string[], ..._values: never[]): I18nKey {
-  return Object.assign(strings[0], { [i18nLiteralMarker]: undefined }) as I18nKey;
-}
-
-// Re-exports the `I18n` class members on top of the `i18n` tag function
-const i18n = i18nTag as I18nFunction;
-
-Object.defineProperty(i18n, 'initialized', { get: () => i18nInstance.initialized });
-Object.defineProperty(i18n, 'language', { get: () => i18nInstance.language });
-Object.defineProperty(i18n, 'resolvedLanguage', { get: () => i18nInstance.resolvedLanguage });
-i18n.configure = i18nInstance.configure.bind(i18nInstance);
-i18n.setLanguage = i18nInstance.setLanguage.bind(i18nInstance);
-i18n.registerChunk = i18nInstance.registerChunk.bind(i18nInstance);
-i18n.translate = i18nInstance.translate.bind(i18nInstance);
-
-export { i18n };
+export { i18n, key };
