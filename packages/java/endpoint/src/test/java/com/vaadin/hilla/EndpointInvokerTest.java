@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -180,7 +181,12 @@ public class EndpointInvokerTest {
 
     static class TeapotException extends EndpointHttpException {
         TeapotException() {
-            super(418, "I'm a teapot");
+            super("I'm a teapot");
+        }
+
+        @Override
+        public HttpStatus getHttpStatus() {
+            return HttpStatus.I_AM_A_TEAPOT;
         }
     }
 
