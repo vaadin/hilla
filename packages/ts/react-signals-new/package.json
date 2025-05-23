@@ -1,0 +1,55 @@
+{
+  "name": "@vaadin/hilla-react-signals-new",
+  "version": "24.8.0-alpha6",
+  "description": "Signals for Hilla React",
+  "main": "index.js",
+  "module": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/hilla.git",
+    "directory": "packages/ts/react-signals-new"
+  },
+  "keywords": [
+    "Hilla",
+    "Signals",
+    "React"
+  ],
+  "scripts": {
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
+    "build": "tsx ../../../scripts/build.ts",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:react": "npm run test",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    }
+  },
+  "author": "Vaadin Ltd",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/hilla/issues"
+  },
+  "homepage": "https://hilla.dev",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@preact/signals-react": "3.0.1",
+    "@vaadin/hilla-frontend": "24.8.0-alpha6",
+    "nanoid": "5.0.9"
+  },
+  "peerDependencies": {
+    "react": "18 || 19",
+    "react-dom": "18 || 19"
+  }
+}
