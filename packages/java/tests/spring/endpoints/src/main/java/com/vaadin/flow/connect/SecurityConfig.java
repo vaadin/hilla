@@ -1,22 +1,29 @@
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.spring.security.VaadinWebSecurity;
-
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends VaadinWebSecurity {
+@Profile("default")
+@Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
+public class SecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
+            throws Exception {
         http.csrf((h) -> h
                 .ignoringRequestMatchers(new AntPathRequestMatcher("/login")));
 
@@ -26,8 +33,8 @@ public class SecurityConfig extends VaadinWebSecurity {
         http.authorizeHttpRequests((h) -> h
                 .requestMatchers(new AntPathRequestMatcher("/type-script"))
                 .permitAll());
-        super.configure(http);
-        setLoginView(http, "/login");
+        http.with(vaadin(), cfg -> cfg.loginView("/login"));
+        return http.build();
     }
 
     @Bean

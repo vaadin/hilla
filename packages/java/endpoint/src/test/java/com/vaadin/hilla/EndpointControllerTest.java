@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -1366,7 +1366,8 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         try {
             return projectFolder.getRoot().toPath()
                     .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
+                    .toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

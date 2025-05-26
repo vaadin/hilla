@@ -7,11 +7,14 @@ import javax.crypto.spec.SecretKeySpec;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
 import com.vaadin.flow.spring.security.RequestUtil;
-import com.vaadin.flow.spring.security.VaadinWebSecurity;
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
+import com.vaadin.flow.spring.security.stateless.VaadinStatelessSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,20 +25,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends VaadinWebSecurity {
+@Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
+@Profile("default")
+public class SecurityConfig {
 
     public static String ROLE_USER = "user";
     public static String ROLE_ADMIN = "admin";
 
     @Autowired
     private UserInfoRepository userInfoRepository;
-
-    @Autowired
-    protected RequestUtil requestUtil;
 
     @Value("${springSecurityTestApp.security.stateless:false}")
     private boolean stateless;
@@ -45,38 +50,44 @@ public class SecurityConfig extends VaadinWebSecurity {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http,
+            RequestUtil requestUtil) throws Exception {
         // Public access
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(new AntPathRequestMatcher("/public/**"))
-                .permitAll()
-                .requestMatchers(
-                        new AntPathRequestMatcher(applyUrlMapping("/")))
-                .permitAll()
-                .requestMatchers(
-                        new AntPathRequestMatcher(applyUrlMapping("/form")))
-                .permitAll()
-                .requestMatchers(new AntPathRequestMatcher(
-                        applyUrlMapping("/proxied-service")))
-                .permitAll()
-                // Admin only access
-                .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
-                .hasAnyRole(ROLE_ADMIN)
-                .requestMatchers(new AntPathRequestMatcher("/error/**"))
-                .permitAll());
+        http.authorizeHttpRequests(auth -> {
+            auth.requestMatchers(new AntPathRequestMatcher("/public/**"))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(
+                            requestUtil.applyUrlMapping("/")))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(
+                            requestUtil.applyUrlMapping("/form")))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(
+                            requestUtil.applyUrlMapping("/proxied-service")))
+                    .permitAll();
 
-        super.configure(http);
-        setLoginView(http, "/login", applyUrlMapping("/"));
-        http.logout(cfg -> cfg.logoutUrl(applyUrlMapping("/logout")));
+            // Admin only access
+            auth.requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
+                    .hasAnyRole(ROLE_ADMIN)
+                    .requestMatchers(new AntPathRequestMatcher("/error/**"))
+                    .permitAll();
+        });
+
+        http.with(vaadin(), cfg -> cfg.loginView("/login",
+                requestUtil.applyUrlMapping("/")));
+        http.logout(
+                cfg -> cfg.logoutUrl(requestUtil.applyUrlMapping("/logout")));
 
         if (stateless) {
-            setStatelessAuthentication(http,
-                    new SecretKeySpec(Base64.getUrlDecoder().decode(
-                            "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
-                            JwsAlgorithms.HS256),
-                    "statelessapp");
+            VaadinStatelessSecurityConfigurer.apply(http, cfg -> cfg
+                    .withSecretKey(keyCfg -> keyCfg.secretKey(new SecretKeySpec(
+                            Base64.getUrlDecoder().decode(
+                                    "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
+                            JwsAlgorithms.HS256)))
+                    .issuer("statelessapp"));
         }
+        return http.build();
     }
 
     @Bean
