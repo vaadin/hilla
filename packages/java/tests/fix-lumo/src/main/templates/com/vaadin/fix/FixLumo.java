@@ -25,7 +25,6 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * @deprecated internal API
  */
 @NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "${vaadin.components.npmVersion}")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "${vaadin.components.npmVersion}")
 @NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "${vaadin.components.npmVersion}")
 public class FixLumo {
 }
