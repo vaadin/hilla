@@ -1,6 +1,6 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
 import type { Subscription } from './Connect.js';
-import defaultCsrfInfoSource from './CsrfInfoSource.js';
+import csrfInfoSource from './CsrfInfoSource.js';
 import {
   isClientMessage,
   type ServerCloseMessage,
@@ -195,7 +195,7 @@ export class FluxConnection extends EventTarget {
 
   async #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const extraHeaders = Object.fromEntries((await defaultCsrfInfoSource.get()).headerEntries);
+    const extraHeaders = Object.fromEntries((await csrfInfoSource.get()).headerEntries);
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
     return atmospherePromise.then((atmosphere: Atmosphere.Atmosphere | undefined) => {

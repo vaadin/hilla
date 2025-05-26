@@ -14,26 +14,53 @@ function isCsrfInfo(o: unknown): o is CsrfInfo {
   return o !== null && typeof o === 'object' && 'headerEntries' in o && 'formDataEntries' in o;
 }
 
-/** @internal */
+/**
+ * The source of CSRF related headers and parameters for endpoint requests.
+ *
+ * @internal may change or be removed in a future version.
+ **/
 export interface CsrfInfoSource {
+  /**
+   * Get an up-to-date value.
+   */
   get(): Promise<CsrfInfo>;
-  open(): void;
+
+  /**
+   * Reset back to initial value and re-initialize.
+   */
+  reset(): void;
+
+  /**
+   * Close internal message channels. May be called to free resources up
+   * whenever the value is not needed.
+   */
   close(): void;
+
+  /**
+   * Reopen internal message channels after prior closing and request a shared
+   * value from another clients.
+   */
+  open(): void;
 }
 
-class SharedCsrfInfoSource implements CsrfInfoSource {
+/** @internal */
+export class SharedCsrfInfoSource implements CsrfInfoSource {
   #updateChannel: BroadcastChannel | undefined;
   #requestUpdateChannel: BroadcastChannel | undefined;
-  #valuePromise: Promise<CsrfInfo>;
+  #valuePromise!: Promise<CsrfInfo>;
   #resolveInitialValue?: (csrfInfo: CsrfInfo) => void;
   #requestUpdateResponded: boolean = false;
 
   constructor() {
-    this.#valuePromise = this._getInitialValue();
-    this.open();
+    this.reset();
   }
 
-  open() {
+  open(): void {
+    const reopen = !!this.#updateChannel && !!this.#requestUpdateChannel;
+    if (reopen) {
+      this.close();
+    }
+
     this.#updateChannel = new BroadcastChannel(this.#getBroadcastChannelName('update'));
     this.#updateChannel.onmessage = (e: MessageEvent) => {
       if (!isCsrfInfo(e.data)) {
@@ -41,44 +68,32 @@ class SharedCsrfInfoSource implements CsrfInfoSource {
       }
       this.#requestUpdateResponded = true;
       this.#receiveCsrfInfo(e.data);
-      if ('waitUntil' in e) {
-        (e as ExtendableMessageEvent).waitUntil(this.#valuePromise);
-      }
     };
 
     this.#requestUpdateChannel = new BroadcastChannel(this.#getBroadcastChannelName('requestUpdate'));
-    this.#requestUpdateChannel.onmessage = (e: MessageEvent) => {
+    this.#requestUpdateChannel.onmessage = () => {
       this.#requestUpdateResponded = false;
-      const promise = this.get().then((csrfInfo: CsrfInfo) => {
+      this.get().then((csrfInfo: CsrfInfo) => {
         if (!this.#requestUpdateResponded) {
           this.#sendCsrfInfo(csrfInfo);
         }
-      });
-      if ('waitUntil' in e) {
-        (e as ExtendableMessageEvent).waitUntil(promise);
-      }
+      }, console.error);
     };
 
-    if (this.#resolveInitialValue) {
+    if (this.#resolveInitialValue || reopen) {
       this.#requestUpdateChannel.postMessage(undefined);
-    } else {
-      this.#valuePromise.then((csrfInfo: CsrfInfo) => {
-        this.#sendCsrfInfo(csrfInfo);
-      }, console.error);
     }
   }
 
   close(): void {
-    if (this.#requestUpdateChannel) {
+    if (this.#requestUpdateChannel?.onmessage) {
       this.#requestUpdateChannel.onmessage = null;
       this.#requestUpdateChannel.close();
-      this.#requestUpdateChannel = undefined;
     }
 
-    if (this.#updateChannel) {
+    if (this.#updateChannel?.onmessage) {
       this.#updateChannel.onmessage = null;
       this.#updateChannel.close();
-      this.#updateChannel = undefined;
     }
   }
 
@@ -90,7 +105,29 @@ class SharedCsrfInfoSource implements CsrfInfoSource {
     return this.#valuePromise;
   }
 
-  protected async _getInitialValue(): Promise<CsrfInfo> {
+  reset(): void {
+    this.close();
+    // Remove message channel instances to make sure the following open()
+    // works from a clean state instead of reopening.
+    this.#updateChannel = undefined;
+    this.#requestUpdateChannel = undefined;
+    this.open();
+    this.#valuePromise = this._getInitial();
+    if (this.#resolveInitialValue) {
+      this.get()
+        .then((csrfInfo: CsrfInfo) => {
+          this.#sendCsrfInfo(csrfInfo);
+        })
+        .catch(console.error);
+    }
+  }
+
+  /**
+   * Provides initial value for both constructor and `reset()`. The default
+   * implementation uses messages to get a shared value from another window
+   * or worker client.
+   */
+  protected async _getInitial(): Promise<CsrfInfo> {
     return new Promise<CsrfInfo>((resolve) => {
       this.#resolveInitialValue = resolve;
     });
@@ -112,7 +149,8 @@ class SharedCsrfInfoSource implements CsrfInfoSource {
   }
 }
 
-export async function extractCsrfInfoFromDocument(document: Document): Promise<CsrfInfo> {
+/** @internal */
+export async function extractCsrfInfoFromMeta(document: Document): Promise<CsrfInfo> {
   const csrfUtils = await csrfUtilsPromise!;
   const headerEntries: NameValueEntry[] = [];
   const formDataEntries: NameValueEntry[] = [];
@@ -128,25 +166,26 @@ export async function extractCsrfInfoFromDocument(document: Document): Promise<C
   return { headerEntries, formDataEntries };
 }
 
-class BrowserCsrfInfoSource extends SharedCsrfInfoSource {
+/** @internal */
+export class BrowserCsrfInfoSource extends SharedCsrfInfoSource {
   constructor() {
     super();
     globalThis.addEventListener('pagehide', this.close.bind(this));
     globalThis.addEventListener('pageshow', this.open.bind(this));
   }
 
-  protected override async _getInitialValue(): Promise<CsrfInfo> {
-    return extractCsrfInfoFromDocument(globalThis.document);
+  protected override async _getInitial(): Promise<CsrfInfo> {
+    return extractCsrfInfoFromMeta(globalThis.document);
   }
 }
 
 /** @internal */
 // eslint-disable-next-line import/no-mutable-exports
-let defaultCsrfInfoSource: CsrfInfoSource;
+let csrfInfoSource: CsrfInfoSource;
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 if (globalThis.document) {
-  defaultCsrfInfoSource = new BrowserCsrfInfoSource();
+  csrfInfoSource = new BrowserCsrfInfoSource();
 } else {
-  defaultCsrfInfoSource = new SharedCsrfInfoSource();
+  csrfInfoSource = new SharedCsrfInfoSource();
 }
-export default defaultCsrfInfoSource;
+export default csrfInfoSource;

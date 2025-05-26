@@ -1,6 +1,6 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
 import type * as CommonFrontendModule from '@vaadin/common-frontend';
-import defaultCsrfInfoSource from './CsrfInfoSource.js';
+import csrfInfoSource from './CsrfInfoSource.js';
 import {
   EndpointError,
   EndpointResponseError,
@@ -356,7 +356,7 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    const csrfInfo = await defaultCsrfInfoSource.get();
+    const csrfInfo = await csrfInfoSource.get();
     const headers: Record<string, string> = {
       Accept: 'application/json',
       ...Object.fromEntries(csrfInfo.headerEntries),
