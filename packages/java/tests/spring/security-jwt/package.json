@@ -218,7 +218,7 @@
       "@vaadin/hilla-generator-plugin-subtypes": "24.8.0-alpha7",
       "@vaadin/hilla-generator-plugin-transfertypes": "24.8.0-alpha7",
       "@vaadin/hilla-generator-utils": "24.8.0-alpha7",
-      "@vitejs/plugin-react": "4.4.1",
+      "@vitejs/plugin-react": "4.5.0",
       "async": "3.2.6",
       "glob": "11.0.2",
       "rollup-plugin-brotli": "3.1.0",
@@ -232,7 +232,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "ad24397fe15ea1f56c2784f697fc0246babd1259f83f0f142aa7fcaa8abebd05"
+    "hash": "65df0ce7ee04cc3e6ba4d43d655819a00c397faeafe49be36084e817d058d789"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
