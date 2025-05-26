@@ -62,42 +62,25 @@ public class SignalsHandler {
      * @return a Flux of JSON events
      */
     public Flux<JsonNode> subscribe(String providerEndpoint,
-                                    String providerMethod, String clientSignalId, ObjectNode body,
-                                    @Nullable String parentClientSignalId) {
+            String providerMethod, String clientSignalId, ObjectNode body) {
         if (registry == null) {
             throw new IllegalStateException(
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));
         }
         try {
-            // if (parentClientSignalId != null) {
-            // return subscribe(parentClientSignalId, clientSignalId);
-            // }
             var signal = registry.get(clientSignalId);
             if (signal != null) {
-                return signal.subscribe().doFinally(
+                return signal.subscribe(clientSignalId).doFinally(
                         (event) -> registry.unsubscribe(clientSignalId));
             }
             registry.register(clientSignalId, providerEndpoint, providerMethod,
                     body);
-            return registry.get(clientSignalId).subscribe()
+            return registry.get(clientSignalId).subscribe(clientSignalId)
                     .doFinally((event) -> registry.unsubscribe(clientSignalId));
         } catch (Exception e) {
             return Flux.error(e);
         }
     }
-
-//    private Flux<ObjectNode> subscribe(String parentClientSignalId,
-//            String clientSignalId)
-//            throws EndpointInvocationException.EndpointHttpException {
-//        var parentSignal = registry.get(parentClientSignalId);
-//        if (parentSignal == null) {
-//            throw new IllegalStateException(String.format(
-//                    "Parent Signal not found for parent client signal id: %s",
-//                    parentClientSignalId));
-//        }
-//        return parentSignal.subscribe(clientSignalId)
-//                .doFinally((event) -> registry.unsubscribe(clientSignalId));
-//    }
 
     /**
      * Updates a signal with an event.
@@ -114,10 +97,9 @@ public class SignalsHandler {
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));
         }
         if (registry.get(clientSignalId) == null) {
-            throw new IllegalStateException(
-                    String.format("Signal not found for client signal: %s",
-                            clientSignalId));
+            throw new IllegalStateException(String.format(
+                    "Signal not found for client signal: %s", clientSignalId));
         }
-        registry.get(clientSignalId).submit(event);
+        registry.get(clientSignalId).submit(clientSignalId, event);
     }
 }

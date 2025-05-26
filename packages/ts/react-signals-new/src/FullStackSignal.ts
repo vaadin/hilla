@@ -90,11 +90,6 @@ export type ServerConnectionConfig = Readonly<{
    * method that provides the signal when subscribing to it.
    */
   params?: Record<string, unknown>;
-
-  /**
-   * The unique identifier of the parent signal in the client.
-   */
-  parentClientSignalId?: string;
 }>;
 
 /**
@@ -115,14 +110,13 @@ class ServerConnection {
   }
 
   connect() {
-    const { client, endpoint, method, params, parentClientSignalId } = this.config;
+    const { client, endpoint, method, params } = this.config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
       params,
-      parentClientSignalId,
     });
 
     return this.#subscription;

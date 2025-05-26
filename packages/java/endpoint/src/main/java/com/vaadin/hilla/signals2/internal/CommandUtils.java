@@ -15,11 +15,14 @@ class CommandUtils {
 
     static JsonNode toJson(Object object) {
         if (object instanceof SignalCommand.SetCommand setCommand) {
-            ObjectNode commandNode = SignalEnvironment.objectMapper().createObjectNode();
+            ObjectNode commandNode = SignalEnvironment.objectMapper()
+                    .createObjectNode();
             commandNode.set("type", new TextNode("SetCommand"));
-            commandNode.set("targetNodeId", new TextNode(setCommand.targetNodeId().toString()));
+            commandNode.set("targetNodeId",
+                    new TextNode(setCommand.targetNodeId().toString()));
             commandNode.set("value", setCommand.value());
-            commandNode.set("commandId", SignalEnvironment.objectMapper().valueToTree(setCommand.commandId()));
+            commandNode.set("commandId", SignalEnvironment.objectMapper()
+                    .valueToTree(setCommand.commandId()));
             return commandNode;
         }
         return SignalEnvironment.objectMapper().valueToTree(object);
@@ -29,7 +32,7 @@ class CommandUtils {
         try {
             Class<T> targetType = determineCommandClass(value);
             return SignalEnvironment.objectMapper().treeToValue(value,
-                targetType);
+                    targetType);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -39,13 +42,14 @@ class CommandUtils {
         if (value.has("type")) {
             String type = value.get("type").asText();
             switch (type) {
-                case "SetCommand" -> {
-                    return (Class<T>) SignalCommand.SetCommand.class;
-                }
-                case "TransactionCommand" -> {
-                    return (Class<T>) SignalCommand.TransactionCommand.class;
-                }
-                default -> throw new RuntimeException("Unknown command type: " + type);
+            case "SetCommand" -> {
+                return (Class<T>) SignalCommand.SetCommand.class;
+            }
+            case "TransactionCommand" -> {
+                return (Class<T>) SignalCommand.TransactionCommand.class;
+            }
+            default ->
+                throw new RuntimeException("Unknown command type: " + type);
             }
         }
         return (Class<T>) Object.class;

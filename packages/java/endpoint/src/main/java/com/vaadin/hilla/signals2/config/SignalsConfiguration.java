@@ -40,9 +40,10 @@ public class SignalsConfiguration {
     private final EndpointInvoker endpointInvoker;
 
     public SignalsConfiguration(EndpointInvoker endpointInvoker,
-                                @Qualifier("hillaEndpointObjectMapper") ObjectMapper hillaEndpointObjectMapper) {
+            @Qualifier("hillaEndpointObjectMapper") ObjectMapper hillaEndpointObjectMapper) {
         this.endpointInvoker = endpointInvoker;
-        SignalEnvironment.tryInitialize(hillaEndpointObjectMapper, Runnable::run);
+        SignalEnvironment.tryInitialize(hillaEndpointObjectMapper,
+                Runnable::run);
     }
 
     /**
