@@ -12,7 +12,6 @@
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "@vaadin/icon": "24.8.0-alpha11",
     "@vaadin/icons": "24.8.0-alpha11",
-    "@vaadin/polymer-legacy-adapter": "24.8.0-alpha8",
     "@vaadin/tooltip": "24.8.0-alpha11",
     "@vaadin/vaadin-lumo-styles": "24.8.0-alpha11",
     "@vaadin/vaadin-themable-mixin": "24.8.0-alpha11",
@@ -49,7 +48,6 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/icon": "24.8.0-alpha5",
       "@vaadin/icons": "24.8.0-alpha5",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha4",
       "@vaadin/tooltip": "24.8.0-alpha5",
       "@vaadin/vaadin-lumo-styles": "24.8.0-alpha4",
       "@vaadin/vaadin-themable-mixin": "24.8.0-alpha4",
@@ -92,7 +90,6 @@
     "react-router": "$react-router",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
-    "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/tooltip": "$@vaadin/tooltip"
