@@ -26,6 +26,13 @@ function determineInitialLanguage(options?: I18nOptions): string {
   return navigator.language;
 }
 
+const keyLiteralMarker: unique symbol = Symbol('keyMarker');
+
+/**
+ * A type for translation keys. It is a string with a special marker.
+ */
+export type I18nKey = string & { [keyLiteralMarker]: unknown };
+
 export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
@@ -244,13 +251,13 @@ export class I18n {
    * Likewise, signal effects automatically subscribe to translation changes
    * when calling this method.
    *
-   * @param key - The translation key to translate
+   * @param k - The translation key to translate
    * @param params - Optional object with placeholder values
    */
-  translate(key: string, params?: Record<string, unknown>): string {
-    const translation = this.#translations.value[key];
+  translate(k: I18nKey, params?: Record<string, unknown>): string {
+    const translation = this.#translations.value[k];
     if (!translation) {
-      return key;
+      return k.toString();
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
@@ -261,7 +268,17 @@ export class I18n {
  * The global I18n instance that is used to initialize translations, change the
  * current language, and translate strings.
  */
-export const i18n: I18n = new I18n();
+const i18n: I18n = new I18n();
+
+/**
+ * A tagged template literal function to create translation keys.
+ * The {@link translate} function requires using this tag.
+ * E.g.:
+ *   translate(key`my.translation.key`)
+ */
+export function key(strings: readonly string[], ..._values: never[]): I18nKey {
+  return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
+}
 
 /**
  * Returns a translated string for the given translation key. The key should
@@ -284,8 +301,11 @@ export const i18n: I18n = new I18n();
  *
  * This function is a shorthand for `i18n.translate` of the global I18n instance.
  *
- * @param key - The translation key to translate
+ * @param k - The translation key to translate
  * @param params - Optional object with placeholder values
- */ export function translate(key: string, params?: Record<string, unknown>): string {
-  return i18n.translate(key, params);
+ */
+export function translate(k: I18nKey, params?: Record<string, unknown>): string {
+  return i18n.translate(k, params);
 }
+
+export { i18n };
