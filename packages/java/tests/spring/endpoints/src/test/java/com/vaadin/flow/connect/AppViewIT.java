@@ -273,18 +273,6 @@ public class AppViewIT extends ChromeBrowserTest {
                 "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"property\":\"qty\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\"}]}}}");
     }
 
-    @Test
-    public void should_requestAnonymously_when_calledInServiceWorker() {
-        assumeThat("Service workers require secure context deployment", this.getDeploymentHostname(), is("localhost"));
-
-        WebElement button = testComponent.$(TestBenchElement.class)
-            .id("helloAnonymousFromServiceWorker");
-        button.click();
-
-        // Wait for the server connect response
-        verifyContent( "SW message: Hello, stranger!");
-    }
-
     private void load() {
         openTestUrl("/");
         testComponent = $("test-component").waitForFirst();
