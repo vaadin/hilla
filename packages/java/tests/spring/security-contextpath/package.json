@@ -63,7 +63,6 @@
     "@vaadin/number-field": "25.0.0-alpha1",
     "@vaadin/overlay": "25.0.0-alpha1",
     "@vaadin/password-field": "25.0.0-alpha1",
-    "@vaadin/polymer-legacy-adapter": "24.8.0-alpha18",
     "@vaadin/popover": "25.0.0-alpha1",
     "@vaadin/progress-bar": "25.0.0-alpha1",
     "@vaadin/radio-group": "25.0.0-alpha1",
@@ -178,7 +177,6 @@
       "@vaadin/number-field": "24.8.0-alpha4",
       "@vaadin/overlay": "24.8.0-alpha4",
       "@vaadin/password-field": "24.8.0-alpha4",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha18",
       "@vaadin/popover": "24.8.0-alpha4",
       "@vaadin/progress-bar": "24.8.0-alpha4",
       "@vaadin/radio-group": "24.8.0-alpha4",
@@ -241,7 +239,6 @@
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
-    "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/router": "$@vaadin/router",
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

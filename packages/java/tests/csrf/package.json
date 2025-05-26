@@ -9,7 +9,6 @@
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
     "@vaadin/icon": "25.0.0-alpha1",
     "@vaadin/icons": "25.0.0-alpha1",
-    "@vaadin/polymer-legacy-adapter": "24.8.0-alpha18",
     "@vaadin/router": "2.0.0",
     "@vaadin/tooltip": "25.0.0-alpha1",
     "@vaadin/vaadin-lumo-styles": "25.0.0-alpha1",
@@ -55,7 +54,6 @@
       "@vaadin/hilla-lit-form": "24.8.0-alpha7",
       "@vaadin/icon": "24.8.0-alpha18",
       "@vaadin/icons": "24.8.0-alpha18",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha18",
       "@vaadin/router": "2.0.0",
       "@vaadin/tooltip": "24.8.0-alpha18",
       "@vaadin/vaadin-lumo-styles": "24.8.0-alpha18",
@@ -114,7 +112,6 @@
     "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
-    "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/tooltip": "$@vaadin/tooltip"
