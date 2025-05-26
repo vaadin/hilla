@@ -8,13 +8,13 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "24.8.0-alpha18",
-    "@vaadin/icons": "24.8.0-alpha18",
-    "@vaadin/polymer-legacy-adapter": "24.8.0-alpha18",
+    "@vaadin/icon": "24.8.0-alpha19",
+    "@vaadin/icons": "24.8.0-alpha19",
+    "@vaadin/polymer-legacy-adapter": "24.8.0-alpha19",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "24.8.0-alpha18",
-    "@vaadin/vaadin-lumo-styles": "24.8.0-alpha18",
-    "@vaadin/vaadin-themable-mixin": "24.8.0-alpha18",
+    "@vaadin/tooltip": "24.8.0-alpha19",
+    "@vaadin/vaadin-lumo-styles": "24.8.0-alpha19",
+    "@vaadin/vaadin-themable-mixin": "24.8.0-alpha19",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.3.0"
   },
@@ -54,13 +54,13 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "24.8.0-alpha7",
       "@vaadin/hilla-lit-form": "24.8.0-alpha7",
-      "@vaadin/icon": "24.8.0-alpha18",
-      "@vaadin/icons": "24.8.0-alpha18",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha18",
+      "@vaadin/icon": "24.8.0-alpha19",
+      "@vaadin/icons": "24.8.0-alpha19",
+      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha19",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "24.8.0-alpha18",
-      "@vaadin/vaadin-lumo-styles": "24.8.0-alpha18",
-      "@vaadin/vaadin-themable-mixin": "24.8.0-alpha18",
+      "@vaadin/tooltip": "24.8.0-alpha19",
+      "@vaadin/vaadin-lumo-styles": "24.8.0-alpha19",
+      "@vaadin/vaadin-themable-mixin": "24.8.0-alpha19",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.3.0"
     },
@@ -94,7 +94,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "63bfaeab373e73a0d18acd3904ec4f2fa0be5c2ffb19683747c116568cb435de"
+    "hash": "c329cdc97029e39b40cd464d25c65f8ca3050ddd99e1247f099ffcc038f8e3fd"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
