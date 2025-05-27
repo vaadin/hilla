@@ -44,11 +44,11 @@ public class ServiceWorkerIT extends ChromeDeviceTest {
     @Test
     public void should_requestAnonymously_when_calledInServiceWorker() {
         WebElement button = testComponent.$(TestBenchElement.class)
-            .id("helloAnonymousFromServiceWorker");
+                .id("helloAnonymousFromServiceWorker");
         button.click();
 
         // Wait for the server connect response
-        verifyContent( "SW message: Hello, stranger!");
+        verifyContent("SW message: Hello, stranger!");
     }
 
     private void load() {
