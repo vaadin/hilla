@@ -4,14 +4,6 @@ import {AppEndpoint} from "Frontend/generated/endpoints";
 
 declare var self: ServiceWorkerGlobalScope;
 
-async function getHelloAnonymous(client: Client) {
-  const text = 'SW: ' + await AppEndpoint.helloAnonymous();
-  client.postMessage({
-    type: 'sw-app-message',
-    text,
-  });
-}
-
 self.addEventListener('message', (e: ExtendableMessageEvent) => {
   let endpoint: undefined | (() => Promise<string | undefined>) = undefined;
   if (e.data === 'helloAnonymous') {
