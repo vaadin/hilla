@@ -6,7 +6,7 @@ export function calculatePath({ pathname }: URL): string {
 
 const CookieManager: typeof Cookies = Cookies.withAttributes({
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  path: calculatePath(new URL(globalThis.document?.baseURI ?? '/')),
+  path: calculatePath(new URL(globalThis.document?.baseURI ?? globalThis.location?.href ?? 'data:')),
 });
 
 export default CookieManager;

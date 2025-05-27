@@ -70,17 +70,10 @@ type EndpointInfo = {
   reconnect?(): ActionOnLostSubscription | void;
 };
 
-let atmosphere: Atmosphere.Atmosphere | undefined;
-
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-if (globalThis.document) {
-  // In case we are in the browser environment, we have to load atmosphere.js
-  try {
-    atmosphere = (await import('atmosphere.js')).default;
-  } catch (e: unknown) {
-    console.error('Failed to load atmosphere.js', e);
-  }
-}
+const atmospherePromise: Promise<Atmosphere.Atmosphere | undefined> = globalThis.document
+  ? import('atmosphere.js')
+  : Promise.resolve(undefined);
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
@@ -97,10 +90,11 @@ export class FluxConnection extends EventTarget {
   readonly #statusOfSubscriptions = new Map<string, FluxSubscriptionState>();
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
+  readonly #ready: Promise<void>;
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
-    this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
+    this.#ready = this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
   #resubscribeIfWasClosed() {
@@ -123,6 +117,13 @@ export class FluxConnection extends EventTarget {
       });
       toBeRemoved.forEach((id) => this.#removeSubscription(id));
     }
+  }
+
+  /**
+   * Promise that resolves when the instance is initialized.
+   */
+  get ready(): Promise<void> {
+    return this.#ready;
   }
 
   /**
@@ -192,76 +193,85 @@ export class FluxConnection extends EventTarget {
     return hillaSubscription;
   }
 
-  #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
+  async #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const extraHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
-    this.#socket = atmosphere?.subscribe?.({
-      contentType: 'application/json; charset=UTF-8',
-      enableProtocol: true,
-      transport: 'websocket',
-      fallbackTransport: 'websocket',
-      headers: extraHeaders,
-      maxReconnectOnClose: 10000000,
-      reconnectInterval: 5000,
-      timeout: -1,
-      trackMessageLength: true,
-      url,
-      onClose: () => {
-        this.wasClosed = true;
-        if (this.state !== State.INACTIVE) {
-          this.state = State.INACTIVE;
-          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
-        }
-      },
-      onError: (response) => {
-        // eslint-disable-next-line no-console
-        console.error('error in push communication', response);
-      },
-      onMessage: (response) => {
-        if (response.responseBody) {
-          this.#handleMessage(JSON.parse(response.responseBody));
-        }
-      },
-      onMessagePublished: (response) => {
-        if (response?.responseBody) {
-          this.#handleMessage(JSON.parse(response.responseBody));
-        }
-      },
-      onOpen: () => {
-        if (this.state !== State.ACTIVE) {
-          this.#resubscribeIfWasClosed();
-          this.state = State.ACTIVE;
-          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-          this.#sendPendingMessages();
-        }
-      },
-      onReopen: () => {
-        if (this.state !== State.ACTIVE) {
-          this.#resubscribeIfWasClosed();
-          this.state = State.ACTIVE;
-          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-          this.#sendPendingMessages();
-        }
-      },
-      onReconnect: () => {
-        if (this.state !== State.RECONNECTING) {
-          this.state = State.RECONNECTING;
-          this.#endpointInfos.forEach((_, id) => {
-            this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
-          });
-        }
-      },
-      onFailureToReconnect: () => {
-        if (this.state !== State.INACTIVE) {
-          this.state = State.INACTIVE;
-          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
-          this.#endpointInfos.forEach((_, id) => this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED));
-        }
-      },
-      ...atmosphereOptions,
-    } satisfies Atmosphere.Request);
+    return atmospherePromise.then((atmosphere: Atmosphere.Atmosphere | undefined) => {
+      if (!atmosphere) {
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (globalThis.document) {
+        this.#socket = atmosphere.subscribe?.({
+          contentType: 'application/json; charset=UTF-8',
+          enableProtocol: true,
+          transport: 'websocket',
+          fallbackTransport: 'websocket',
+          headers: extraHeaders,
+          maxReconnectOnClose: 10000000,
+          reconnectInterval: 5000,
+          timeout: -1,
+          trackMessageLength: true,
+          url,
+          onClose: () => {
+            this.wasClosed = true;
+            if (this.state !== State.INACTIVE) {
+              this.state = State.INACTIVE;
+              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+            }
+          },
+          onError: (response) => {
+            // eslint-disable-next-line no-console
+            console.error('error in push communication', response);
+          },
+          onMessage: (response) => {
+            if (response.responseBody) {
+              this.#handleMessage(JSON.parse(response.responseBody));
+            }
+          },
+          onMessagePublished: (response) => {
+            if (response?.responseBody) {
+              this.#handleMessage(JSON.parse(response.responseBody));
+            }
+          },
+          onOpen: () => {
+            if (this.state !== State.ACTIVE) {
+              this.#resubscribeIfWasClosed();
+              this.state = State.ACTIVE;
+              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+              this.#sendPendingMessages();
+            }
+          },
+          onReopen: () => {
+            if (this.state !== State.ACTIVE) {
+              this.#resubscribeIfWasClosed();
+              this.state = State.ACTIVE;
+              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+              this.#sendPendingMessages();
+            }
+          },
+          onReconnect: () => {
+            if (this.state !== State.RECONNECTING) {
+              this.state = State.RECONNECTING;
+              this.#endpointInfos.forEach((_, id) => {
+                this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
+              });
+            }
+          },
+          onFailureToReconnect: () => {
+            if (this.state !== State.INACTIVE) {
+              this.state = State.INACTIVE;
+              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+              this.#endpointInfos.forEach((_, id) => this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED));
+            }
+          },
+          ...atmosphereOptions,
+        } satisfies Atmosphere.Request);
+      }
+    });
   }
 
   #setSubscriptionConnState(id: string, state: FluxSubscriptionState) {

@@ -79,8 +79,8 @@ describe('@vaadin/hilla-frontend', () => {
       expect(client).to.be.instanceOf(ConnectClient);
     });
 
-    it('should add a global connection indicator', () => {
-      new ConnectClient();
+    it('should add a global connection indicator', async () => {
+      await new ConnectClient().ready;
       expect($wnd.Vaadin?.connectionIndicator).is.not.undefined;
     });
 
@@ -682,9 +682,10 @@ describe('@vaadin/hilla-frontend', () => {
     describe('atmosphere configuration', () => {
       let client: ConnectClient;
 
-      it('should pass custom configuration to flux connection', () => {
+      it('should pass custom configuration to flux connection', async () => {
         client = new ConnectClient({ atmosphereOptions: { fallbackMethod: 'fake' } });
-        const { fluxConnection: _ } = client;
+        const { fluxConnection } = client;
+        await fluxConnection.ready;
         expect(subscribeStub.lastCall.firstArg).to.have.property('fallbackMethod').which.equals('fake');
       });
     });
