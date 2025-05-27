@@ -15,19 +15,12 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.flow.testutil.ChromeDeviceTest;
 import com.vaadin.testbench.TestBenchElement;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assume.assumeThat;
 
 /**
  * Class for testing issues in a spring-boot container.
@@ -50,8 +43,6 @@ public class ServiceWorkerIT extends ChromeDeviceTest {
 
     @Test
     public void should_requestAnonymously_when_calledInServiceWorker() {
-        assumeThat("Service workers require secure context deployment", this.getDeploymentHostname(), is("localhost"));
-
         WebElement button = testComponent.$(TestBenchElement.class)
             .id("helloAnonymousFromServiceWorker");
         button.click();

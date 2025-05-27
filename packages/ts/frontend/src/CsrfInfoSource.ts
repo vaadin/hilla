@@ -8,6 +8,7 @@ export type NameValueEntry = readonly [name: string, name: string];
 export type CsrfInfo = {
   readonly headerEntries: readonly NameValueEntry[];
   readonly formDataEntries: readonly NameValueEntry[];
+  readonly timestamp: number;
 };
 
 function isCsrfInfo(o: unknown): o is CsrfInfo {
@@ -49,7 +50,7 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
   #requestUpdateChannel: BroadcastChannel | undefined;
   #valuePromise!: Promise<CsrfInfo>;
   #resolveInitialValue?: (csrfInfo: CsrfInfo) => void;
-  #requestUpdateResponded: boolean = false;
+  #lastUpdateTimestamp: number = 0;
 
   constructor() {
     this.reset();
@@ -66,17 +67,17 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
       if (!isCsrfInfo(e.data)) {
         return;
       }
-      this.#requestUpdateResponded = true;
-      this.#receiveCsrfInfo(e.data);
+      const csrfInfo: CsrfInfo = e.data;
+      if (csrfInfo.timestamp > this.#lastUpdateTimestamp) {
+        this.#lastUpdateTimestamp = csrfInfo.timestamp;
+        this.#receiveCsrfInfo(csrfInfo);
+      }
     };
 
     this.#requestUpdateChannel = new BroadcastChannel(this.#getBroadcastChannelName('requestUpdate'));
     this.#requestUpdateChannel.onmessage = () => {
-      this.#requestUpdateResponded = false;
       this.get().then((csrfInfo: CsrfInfo) => {
-        if (!this.#requestUpdateResponded) {
-          this.#sendCsrfInfo(csrfInfo);
-        }
+        this.#sendCsrfInfo(csrfInfo);
       }, console.error);
     };
 
@@ -111,9 +112,9 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
     // works from a clean state instead of reopening.
     this.#updateChannel = undefined;
     this.#requestUpdateChannel = undefined;
-    this.open();
     this.#valuePromise = this._getInitial();
-    if (this.#resolveInitialValue) {
+    this.open();
+    if (!this.#resolveInitialValue) {
       this.get()
         .then((csrfInfo: CsrfInfo) => {
           this.#sendCsrfInfo(csrfInfo);
@@ -163,7 +164,7 @@ export async function extractCsrfInfoFromMeta(document: Document): Promise<CsrfI
   if (springCsrfInfo._csrf && springCsrfInfo._csrf_parameter) {
     formDataEntries.push([springCsrfInfo._csrf_parameter, springCsrfInfo._csrf]);
   }
-  return { headerEntries, formDataEntries };
+  return { headerEntries, formDataEntries, timestamp: Date.now() };
 }
 
 /** @internal */

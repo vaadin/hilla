@@ -26,9 +26,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assume.assumeThat;
-
 /**
  * Class for testing issues in a spring-boot container.
  */
