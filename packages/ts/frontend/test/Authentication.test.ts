@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll, vi, assert } from 'vitest';
 import CookieManager from '../src/CookieManager.js';
-import { VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
+import csrfInfoSource, { VAADIN_CSRF_HEADER } from '../src/CsrfInfoSource.js';
 import {
   ConnectClient,
   InvalidSessionMiddleware,
@@ -36,7 +36,6 @@ const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
 describe('@vaadin/hilla-frontend', () => {
   describe('Authentication', () => {
     const requestHeaders: Record<string, string> = {};
-    const vaadinCsrfToken = '6a60700e-852b-420f-a126-a1c61b73d1ba';
     const happyCaseLogoutResponseText = `<head><meta name="_csrf" content="spring-csrf-token"></meta><meta name="_csrf_header" content="${TEST_SPRING_CSRF_HEADER_NAME}"></meta></head>"}};</script>`;
     const happyCaseLoginResponseText = '';
     const happyCaseResponseHeaders = {
@@ -44,7 +43,6 @@ describe('@vaadin/hilla-frontend', () => {
       Result: 'success',
       'Spring-CSRF-header': TEST_SPRING_CSRF_HEADER_NAME,
       'Spring-CSRF-token': TEST_SPRING_CSRF_TOKEN_VALUE,
-      'Vaadin-CSRF': vaadinCsrfToken,
     };
 
     function verifySpringCsrfToken(token: string) {
@@ -80,12 +78,14 @@ describe('@vaadin/hilla-frontend', () => {
 
     beforeEach(() => {
       setupSpringCsrfMetaTags();
+      csrfInfoSource.reset();
       requestHeaders[TEST_SPRING_CSRF_HEADER_NAME] = TEST_SPRING_CSRF_TOKEN_VALUE;
     });
 
     afterEach(() => {
       // delete window.Vaadin.TypeScript;
       clearSpringCsrfMetaTags();
+      csrfInfoSource.reset();
       onSuccess.resetHistory();
       navigate.resetHistory();
       fetchMock.removeRoutes().clearHistory();
@@ -121,7 +121,6 @@ describe('@vaadin/hilla-frontend', () => {
           defaultUrl: '/',
           error: false,
           redirectUrl: undefined,
-          token: vaadinCsrfToken,
         };
 
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
@@ -148,7 +147,6 @@ describe('@vaadin/hilla-frontend', () => {
           defaultUrl: '/',
           error: false,
           redirectUrl: '/protected-view',
-          token: vaadinCsrfToken,
         };
 
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(1);
@@ -245,6 +243,7 @@ describe('@vaadin/hilla-frontend', () => {
       // when started the app offline, the spring csrf meta tags are not available
       it('should retry when no spring csrf metas in the doc', async () => {
         clearSpringCsrfMetaTags();
+        csrfInfoSource.reset();
 
         verifySpringCsrfTokenIsCleared();
         fetchMock.post('logout', 403, { repeat: 1 });
@@ -268,6 +267,7 @@ describe('@vaadin/hilla-frontend', () => {
       // when started the app offline, the spring csrf meta tags are not available
       it('should retry when no spring csrf metas in the doc and clear the csrf token on failed server logout with the retry', async () => {
         clearSpringCsrfMetaTags();
+        csrfInfoSource.reset();
 
         verifySpringCsrfTokenIsCleared();
 
@@ -293,8 +293,6 @@ describe('@vaadin/hilla-frontend', () => {
         expect(thrownError).to.equal(fakeError);
         expect(fetchMock.callHistory.calls()).to.have.lengthOf(3);
         expect(navigate).to.not.be.called;
-
-        setupSpringCsrfMetaTags();
       });
 
       // when the page has been opend too long the session has expired
@@ -302,6 +300,7 @@ describe('@vaadin/hilla-frontend', () => {
         const expiredSpringCsrfToken = `expired-${TEST_SPRING_CSRF_TOKEN_VALUE}`;
 
         setupSpringCsrfMetaTags(expiredSpringCsrfToken);
+        csrfInfoSource.reset();
 
         const headersWithExpiredSpringCsrfToken: Record<string, string> = {};
         headersWithExpiredSpringCsrfToken[TEST_SPRING_CSRF_HEADER_NAME] = expiredSpringCsrfToken;
@@ -325,7 +324,7 @@ describe('@vaadin/hilla-frontend', () => {
         expect(navigate).to.be.calledOnceWithExactly('logout?login');
       });
 
-      it('should perform a form submit when LogoutOptions does not contain navigate and onSuccess', () => {
+      it('should perform a form submit when LogoutOptions does not contain navigate and onSuccess', async () => {
         const submitSpy = vi.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation(() => {
           // noop to prevent navigation
         });
@@ -333,6 +332,8 @@ describe('@vaadin/hilla-frontend', () => {
           originalLogout().catch(() => {
             assert.fail('Logout should not throw an error');
           });
+          // Wait for CSRF info source init before assertions
+          await csrfInfoSource.get();
           expect(fetchMock.callHistory.calls()).to.have.lengthOf(0);
           expect(submitSpy).toHaveBeenCalled();
           verifySpringCsrfToken(TEST_SPRING_CSRF_TOKEN_VALUE);
