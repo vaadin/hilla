@@ -3,7 +3,7 @@
 const csrfUtilsPromise = globalThis.document ? import('./CsrfUtils.js') : undefined;
 
 /** @internal */
-export type NameValueEntry = readonly [name: string, name: string];
+export type NameValueEntry = readonly [name: string, value: string];
 /** @internal */
 export type CsrfInfo = {
   readonly headerEntries: readonly NameValueEntry[];

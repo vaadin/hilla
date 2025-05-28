@@ -1,5 +1,6 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import CookieManager from './CookieManager.js';
+import csrfInfoSource from './CsrfInfoSource.js';
 import {
   getSpringCsrfInfo,
   getSpringCsrfTokenHeadersForAuthRequest,
@@ -30,20 +31,13 @@ function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
   tokenMeta.name = '_csrf';
   tokenMeta.content = springCsrfInfo._csrf;
   document.head.appendChild(tokenMeta);
+  csrfInfoSource.reset();
 }
 
-const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined => {
-  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"\}\};/iu.exec(body);
-  return match ? match[1] : undefined;
-};
-
-async function updateCsrfTokensBasedOnResponse(response: Response): Promise<string | undefined> {
+async function updateCsrfTokensBasedOnResponse(response: Response): Promise<void> {
   const responseText = await response.text();
-  const token = getVaadinCsrfTokenFromResponseBody(responseText);
   const springCsrfTokenInfo = getSpringCsrfTokenFromResponseBody(responseText);
   updateSpringCsrfMetaTags(springCsrfTokenInfo);
-
-  return token;
 }
 
 async function doFetchLogout(logoutUrl: URL | string, headers: Record<string, string>) {
@@ -217,8 +211,6 @@ export async function login(username: string, password: string, options?: LoginO
     const loginSuccessful = response.ok && result === 'success';
 
     if (loginSuccessful) {
-      const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') ?? undefined;
-
       const springCsrfHeader = response.headers.get('Spring-CSRF-header') ?? undefined;
       const springCsrfToken = response.headers.get('Spring-CSRF-token') ?? undefined;
       if (springCsrfHeader && springCsrfToken) {
@@ -242,7 +234,6 @@ export async function login(username: string, password: string, options?: LoginO
         defaultUrl,
         error: false,
         redirectUrl: savedUrl,
-        token: vaadinCsrfToken,
       };
     }
     return {
