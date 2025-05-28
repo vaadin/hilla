@@ -57,8 +57,7 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
   }
 
   open(): void {
-    const reopen = !!this.#updateChannel && !!this.#requestUpdateChannel;
-    if (reopen) {
+    if (this.#updateChannel || this.#requestUpdateChannel) {
       this.close();
     }
 
@@ -81,20 +80,23 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
       }, console.error);
     };
 
-    if (this.#resolveInitialValue || reopen) {
+    // Request an update from peer clients on reopen
+    if (this.#lastUpdateTimestamp > 0) {
       this.#requestUpdateChannel.postMessage(undefined);
     }
   }
 
   close(): void {
-    if (this.#requestUpdateChannel?.onmessage) {
+    if (this.#requestUpdateChannel) {
       this.#requestUpdateChannel.onmessage = null;
       this.#requestUpdateChannel.close();
+      this.#requestUpdateChannel = undefined;
     }
 
-    if (this.#updateChannel?.onmessage) {
+    if (this.#updateChannel) {
       this.#updateChannel.onmessage = null;
       this.#updateChannel.close();
+      this.#updateChannel = undefined;
     }
   }
 
@@ -107,13 +109,13 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
   }
 
   reset(): void {
+    this.#lastUpdateTimestamp = 0;
     this.close();
-    // Remove message channel instances to make sure the following open()
-    // works from a clean state instead of reopening.
-    this.#updateChannel = undefined;
-    this.#requestUpdateChannel = undefined;
-    this.#valuePromise = this._getInitial();
     this.open();
+    this.#valuePromise = this._getInitial().then((csrfInfo: CsrfInfo) => {
+      this.#lastUpdateTimestamp = csrfInfo.timestamp;
+      return csrfInfo;
+    });
     if (!this.#resolveInitialValue) {
       this.get()
         .then((csrfInfo: CsrfInfo) => {
@@ -131,13 +133,12 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
   protected async _getInitial(): Promise<CsrfInfo> {
     return new Promise<CsrfInfo>((resolve) => {
       this.#resolveInitialValue = resolve;
+      this.#requestUpdateChannel?.postMessage(undefined);
     });
   }
 
   #sendCsrfInfo(csrfInfo: CsrfInfo) {
-    if (this.#updateChannel) {
-      this.#updateChannel.postMessage(csrfInfo);
-    }
+    this.#updateChannel?.postMessage(csrfInfo);
   }
 
   #receiveCsrfInfo(csrfInfo: CsrfInfo) {
