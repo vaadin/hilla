@@ -4,14 +4,6 @@ import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
 import type { I18nOptions, Translations, TranslationsResult } from './types.js';
 
-interface VaadinGlobal {
-  Vaadin?: {
-    featureFlags?: {
-      hillaI18n?: boolean;
-    };
-  };
-}
-
 function determineInitialLanguage(options?: I18nOptions): string {
   // Use explicitly configured language if defined
   if (options?.language) {
@@ -45,13 +37,6 @@ export class I18n {
   #formatCache: FormatCache = new FormatCache(navigator.language);
 
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!(globalThis as VaadinGlobal).Vaadin?.featureFlags?.hillaI18n) {
-      // Remove when removing feature flag
-      throw new Error(
-        `The Hilla I18n API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.hillaI18n=true to vaadin-featureflags.properties`,
-      );
-    }
     // @ts-expect-error import.meta.hot does not have TS definitions
     if (import.meta.hot) {
       // @ts-expect-error import.meta.hot does not have TS definitions
