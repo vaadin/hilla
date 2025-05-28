@@ -77,6 +77,10 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
+
+    // Functional tests (must supply the JUnit capability here too)
+    functionalTestImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    functionalTestImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
 
 idea {
