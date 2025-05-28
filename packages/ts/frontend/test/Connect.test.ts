@@ -9,8 +9,11 @@ import type { WritableDeep } from 'type-fest';
 import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import type { MiddlewareContext, MiddlewareNext } from '../src/Connect.js';
 import CookieManager from '../src/CookieManager.js';
-import csrfInfoSource from '../src/CsrfInfoSource.js';
-import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
+import csrfInfoSource, {
+  SPRING_CSRF_COOKIE_NAME,
+  VAADIN_CSRF_COOKIE_NAME,
+  VAADIN_CSRF_HEADER,
+} from '../src/CsrfInfoSource.js';
 import {
   ConnectClient,
   EndpointError,

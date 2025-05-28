@@ -1,18 +1,102 @@
 /// <reference lib="webworker" />
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const csrfUtilsPromise = globalThis.document ? import('./CsrfUtils.js') : undefined;
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+const cookieManagerPromise = globalThis.document ? import('./CookieManager.js') : undefined;
 
 /** @internal */
 export type NameValueEntry = readonly [name: string, value: string];
+export enum CsrfInfoType {
+  SPRING = 'Spring',
+  VAADIN = 'Vaadin',
+}
+
 /** @internal */
 export type CsrfInfo = {
   readonly headerEntries: readonly NameValueEntry[];
   readonly formDataEntries: readonly NameValueEntry[];
+  readonly type: CsrfInfoType;
   readonly timestamp: number;
 };
 
 function isCsrfInfo(o: unknown): o is CsrfInfo {
-  return o !== null && typeof o === 'object' && 'headerEntries' in o && 'formDataEntries' in o;
+  return o !== null && typeof o === 'object' && 'headerEntries' in o && 'formDataEntries' in o && 'timestamp' in o;
+}
+
+/** @internal */
+export const VAADIN_CSRF_HEADER = 'X-CSRF-Token';
+/** @internal */
+export const VAADIN_CSRF_COOKIE_NAME = 'csrfToken';
+/** @internal */
+export const SPRING_CSRF_COOKIE_NAME = 'XSRF-TOKEN';
+
+function extractContentFromMetaTag(doc: Document, metaTag: string): string | undefined {
+  const element = doc.head.querySelector<HTMLMetaElement>(`meta[name="${metaTag}"]`);
+  const value = element?.content;
+  if (value && value.toLowerCase() !== 'undefined') {
+    return value;
+  }
+
+  return undefined;
+}
+
+function updateMetaTag(doc: Document, name: string, content: string): void {
+  const meta = doc.createElement('meta');
+  meta.name = name;
+  meta.content = content;
+  const existing = doc.head.querySelector(`meta[name="${name}"]`);
+  if (existing) {
+    existing.replaceWith(meta);
+  } else {
+    doc.head.appendChild(meta);
+  }
+}
+
+export function clearCsrfInfoMeta(doc: Document): void {
+  Array.from(
+    doc.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"], meta[name="_csrf_parameter"]'),
+  ).forEach((el) => el.remove());
+}
+
+export function updateCsrfInfoMeta(csrfInfo: CsrfInfo, doc: Document): void {
+  if (csrfInfo.type !== CsrfInfoType.SPRING) {
+    return;
+  }
+
+  if (csrfInfo.headerEntries.length > 0) {
+    const [[csrfHeader, csrf]] = csrfInfo.headerEntries;
+    updateMetaTag(doc, '_csrf_header', csrfHeader);
+    updateMetaTag(doc, '_csrf', csrf);
+  }
+
+  if (csrfInfo.formDataEntries.length > 0) {
+    const [[csrfParameter]] = csrfInfo.formDataEntries;
+    updateMetaTag(doc, '_csrf_parameter', csrfParameter);
+  }
+}
+
+/** @internal */
+export async function extractCsrfInfoFromMeta(doc: Document): Promise<CsrfInfo> {
+  const cookieManager = (await cookieManagerPromise!).default;
+  const timestamp = Date.now();
+  const springCsrf = cookieManager.get(SPRING_CSRF_COOKIE_NAME) ?? extractContentFromMetaTag(doc, '_csrf');
+  if (springCsrf) {
+    const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
+    const csrfParameter = extractContentFromMetaTag(doc, '_csrf_parameter');
+    return {
+      headerEntries: csrfHeader ? [[csrfHeader, springCsrf]] : [],
+      formDataEntries: csrfParameter ? [[csrfParameter, springCsrf]] : [],
+      timestamp,
+      type: CsrfInfoType.SPRING,
+    };
+  }
+
+  const vaadinCsrf = cookieManager.get(VAADIN_CSRF_COOKIE_NAME) ?? '';
+  return {
+    type: CsrfInfoType.VAADIN,
+    headerEntries: [[VAADIN_CSRF_HEADER, vaadinCsrf]],
+    formDataEntries: [],
+    timestamp,
+  };
 }
 
 /**
@@ -149,23 +233,6 @@ export class SharedCsrfInfoSource implements CsrfInfoSource {
       this.#valuePromise = Promise.resolve(csrfInfo);
     }
   }
-}
-
-/** @internal */
-export async function extractCsrfInfoFromMeta(document: Document): Promise<CsrfInfo> {
-  const csrfUtils = await csrfUtilsPromise!;
-  const headerEntries: NameValueEntry[] = [];
-  const formDataEntries: NameValueEntry[] = [];
-  const springCsrfInfo = csrfUtils.getSpringCsrfInfo(document);
-  if (springCsrfInfo._csrf && springCsrfInfo._csrf_header) {
-    headerEntries.push([springCsrfInfo._csrf_header, springCsrfInfo._csrf]);
-  } else {
-    headerEntries.push([csrfUtils.VAADIN_CSRF_HEADER, csrfUtils.getVaadinCsrfToken()]);
-  }
-  if (springCsrfInfo._csrf && springCsrfInfo._csrf_parameter) {
-    formDataEntries.push([springCsrfInfo._csrf_parameter, springCsrfInfo._csrf]);
-  }
-  return { headerEntries, formDataEntries, timestamp: Date.now() };
 }
 
 /** @internal */
