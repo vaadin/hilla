@@ -40,9 +40,10 @@ describe('@vaadin/hilla-frontend', () => {
       handleMessage(msg: AbstractMessage): unknown;
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/connect');
+      await fluxConnection.ready;
       _fluxConnectionHelper = {
         handleMessage(msg) {
           getSubscriptionEventSpies()?.onMessage?.({ responseBody: JSON.stringify(msg) });
