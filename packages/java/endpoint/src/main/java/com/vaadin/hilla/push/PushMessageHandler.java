@@ -10,8 +10,6 @@ import jakarta.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.server.VaadinServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vaadin.hilla.AuthenticationUtil;
-import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.EndpointInvocationException.EndpointNotFoundException;
 import com.vaadin.hilla.EndpointInvoker;
