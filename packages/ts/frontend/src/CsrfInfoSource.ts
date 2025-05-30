@@ -1,8 +1,6 @@
 /// <reference lib="webworker" />
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
-
-const cookieManagerPromise = VAADIN_BROWSER_ENVIRONMENT ? import('./CookieManager.js') : undefined;
+import CookieManager from './CookieManager.js';
 
 /** @internal */
 export type NameValueEntry = readonly [name: string, value: string];
@@ -77,9 +75,12 @@ export function updateCsrfInfoMeta(csrfInfo: CsrfInfo, doc: Document): void {
 
 /** @internal */
 export async function extractCsrfInfoFromMeta(doc: Document): Promise<CsrfInfo> {
-  const cookieManager = (await cookieManagerPromise!).default;
   const timestamp = Date.now();
-  const springCsrf = cookieManager.get(SPRING_CSRF_COOKIE_NAME) ?? extractContentFromMetaTag(doc, '_csrf');
+  // TODO: Replace CookieManager with CookieStore API once it is available.
+  // As CookieStore is async, it will require this function to be async also.
+  const springCsrf =
+    (await Promise.resolve().then(() => CookieManager.get(SPRING_CSRF_COOKIE_NAME))) ??
+    extractContentFromMetaTag(doc, '_csrf');
   if (springCsrf) {
     const csrfHeader = extractContentFromMetaTag(doc, '_csrf_header');
     const csrfParameter = extractContentFromMetaTag(doc, '_csrf_parameter');
@@ -91,7 +92,7 @@ export async function extractCsrfInfoFromMeta(doc: Document): Promise<CsrfInfo> 
     };
   }
 
-  const vaadinCsrf = cookieManager.get(VAADIN_CSRF_COOKIE_NAME) ?? '';
+  const vaadinCsrf = CookieManager.get(VAADIN_CSRF_COOKIE_NAME) ?? '';
   return {
     type: CsrfInfoType.VAADIN,
     headerEntries: [[VAADIN_CSRF_HEADER, vaadinCsrf]],
