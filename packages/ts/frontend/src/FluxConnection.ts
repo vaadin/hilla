@@ -7,6 +7,7 @@ import {
   type ServerConnectMessage,
   type ServerMessage,
 } from './FluxMessages.js';
+import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
 
 export enum State {
   ACTIVE = 'active',
@@ -71,9 +72,7 @@ type EndpointInfo = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const atmospherePromise: Promise<Atmosphere.Atmosphere | undefined> = globalThis.document
-  ? import('atmosphere.js')
-  : Promise.resolve(undefined);
+const atmospherePromise = VAADIN_BROWSER_ENVIRONMENT ? import('atmosphere.js') : undefined;
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
@@ -194,84 +193,80 @@ export class FluxConnection extends EventTarget {
   }
 
   async #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
+    if (!atmospherePromise) {
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const extraHeaders = Object.fromEntries((await csrfInfoSource.get()).headerEntries);
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
-    return atmospherePromise.then((atmosphere: Atmosphere.Atmosphere | undefined) => {
-      if (!atmosphere) {
-        return;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (globalThis.document) {
-        this.#socket = atmosphere.subscribe?.({
-          contentType: 'application/json; charset=UTF-8',
-          enableProtocol: true,
-          transport: 'websocket',
-          fallbackTransport: 'websocket',
-          headers: extraHeaders,
-          maxReconnectOnClose: 10000000,
-          reconnectInterval: 5000,
-          timeout: -1,
-          trackMessageLength: true,
-          url,
-          onClose: () => {
-            this.wasClosed = true;
-            if (this.state !== State.INACTIVE) {
-              this.state = State.INACTIVE;
-              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
-            }
-          },
-          onError: (response) => {
-            // eslint-disable-next-line no-console
-            console.error('error in push communication', response);
-          },
-          onMessage: (response) => {
-            if (response.responseBody) {
-              this.#handleMessage(JSON.parse(response.responseBody));
-            }
-          },
-          onMessagePublished: (response) => {
-            if (response?.responseBody) {
-              this.#handleMessage(JSON.parse(response.responseBody));
-            }
-          },
-          onOpen: () => {
-            if (this.state !== State.ACTIVE) {
-              this.#resubscribeIfWasClosed();
-              this.state = State.ACTIVE;
-              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-              this.#sendPendingMessages();
-            }
-          },
-          onReopen: () => {
-            if (this.state !== State.ACTIVE) {
-              this.#resubscribeIfWasClosed();
-              this.state = State.ACTIVE;
-              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
-              this.#sendPendingMessages();
-            }
-          },
-          onReconnect: () => {
-            if (this.state !== State.RECONNECTING) {
-              this.state = State.RECONNECTING;
-              this.#endpointInfos.forEach((_, id) => {
-                this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
-              });
-            }
-          },
-          onFailureToReconnect: () => {
-            if (this.state !== State.INACTIVE) {
-              this.state = State.INACTIVE;
-              this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
-              this.#endpointInfos.forEach((_, id) => this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED));
-            }
-          },
-          ...atmosphereOptions,
-        } satisfies Atmosphere.Request);
-      }
-    });
+    const atmosphere = (await atmospherePromise).default;
+    this.#socket = atmosphere.subscribe?.({
+      contentType: 'application/json; charset=UTF-8',
+      enableProtocol: true,
+      transport: 'websocket',
+      fallbackTransport: 'websocket',
+      headers: extraHeaders,
+      maxReconnectOnClose: 10000000,
+      reconnectInterval: 5000,
+      timeout: -1,
+      trackMessageLength: true,
+      url,
+      onClose: () => {
+        this.wasClosed = true;
+        if (this.state !== State.INACTIVE) {
+          this.state = State.INACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+        }
+      },
+      onError: (response) => {
+        // eslint-disable-next-line no-console
+        console.error('error in push communication', response);
+      },
+      onMessage: (response) => {
+        if (response.responseBody) {
+          this.#handleMessage(JSON.parse(response.responseBody));
+        }
+      },
+      onMessagePublished: (response) => {
+        if (response?.responseBody) {
+          this.#handleMessage(JSON.parse(response.responseBody));
+        }
+      },
+      onOpen: () => {
+        if (this.state !== State.ACTIVE) {
+          this.#resubscribeIfWasClosed();
+          this.state = State.ACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+          this.#sendPendingMessages();
+        }
+      },
+      onReopen: () => {
+        if (this.state !== State.ACTIVE) {
+          this.#resubscribeIfWasClosed();
+          this.state = State.ACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: true } }));
+          this.#sendPendingMessages();
+        }
+      },
+      onReconnect: () => {
+        if (this.state !== State.RECONNECTING) {
+          this.state = State.RECONNECTING;
+          this.#endpointInfos.forEach((_, id) => {
+            this.#setSubscriptionConnState(id, FluxSubscriptionState.CONNECTING);
+          });
+        }
+      },
+      onFailureToReconnect: () => {
+        if (this.state !== State.INACTIVE) {
+          this.state = State.INACTIVE;
+          this.dispatchEvent(new CustomEvent('state-changed', { detail: { active: false } }));
+          this.#endpointInfos.forEach((_, id) => this.#setSubscriptionConnState(id, FluxSubscriptionState.CLOSED));
+        }
+      },
+      ...atmosphereOptions,
+    } satisfies Atmosphere.Request);
   }
 
   #setSubscriptionConnState(id: string, state: FluxSubscriptionState) {
