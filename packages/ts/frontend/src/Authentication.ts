@@ -1,5 +1,4 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
-import CookieManager from './CookieManager.js';
 import csrfInfoSource, {
   VAADIN_CSRF_HEADER,
   clearCsrfInfoMeta,
@@ -8,6 +7,10 @@ import csrfInfoSource, {
   extractCsrfInfoFromMeta,
   updateCsrfInfoMeta,
 } from './CsrfInfoSource.js';
+import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
+
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+const cookieManagerPromise = VAADIN_BROWSER_ENVIRONMENT ? import('./CookieManager.js') : undefined;
 
 function createHeaders(headerEntries: ReadonlyArray<readonly [name: string, value: string]>): Headers {
   const headers = new Headers();
@@ -280,7 +283,10 @@ export async function logout(options?: LogoutOptions): Promise<void> {
       throw error;
     }
   } finally {
-    CookieManager.remove(JWT_COOKIE_NAME);
+    if (cookieManagerPromise) {
+      const cookieManager = (await cookieManagerPromise).default;
+      cookieManager.remove(JWT_COOKIE_NAME);
+    }
     if (response && response.ok && response.redirected) {
       if (options?.onSuccess) {
         await options.onSuccess();

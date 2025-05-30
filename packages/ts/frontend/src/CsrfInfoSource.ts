@@ -1,6 +1,8 @@
 /// <reference lib="webworker" />
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const cookieManagerPromise = globalThis.document ? import('./CookieManager.js') : undefined;
+import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
+
+const cookieManagerPromise = VAADIN_BROWSER_ENVIRONMENT ? import('./CookieManager.js') : undefined;
 
 /** @internal */
 export type NameValueEntry = readonly [name: string, value: string];
