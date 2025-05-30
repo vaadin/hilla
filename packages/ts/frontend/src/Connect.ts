@@ -1,5 +1,4 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
-import type * as CommonFrontendModule from '@vaadin/common-frontend';
 import csrfInfoSource from './CsrfInfoSource.js';
 import {
   EndpointError,
@@ -15,11 +14,10 @@ import {
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
 import type { VaadinGlobal } from './types.js';
+import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const commonFrontendModulePromise: Promise<typeof CommonFrontendModule | undefined> = globalThis.document
-  ? import('@vaadin/common-frontend')
-  : Promise.resolve(undefined);
+const commonFrontendModulePromise = VAADIN_BROWSER_ENVIRONMENT ? import('@vaadin/common-frontend') : undefined;
 
 const $wnd = globalThis as VaadinGlobal;
 
@@ -298,30 +296,25 @@ export class ConnectClient {
       this.atmosphereOptions = options.atmosphereOptions;
     }
 
-    this.#ready = commonFrontendModulePromise.then((commonFrontendModule?: typeof CommonFrontendModule) => {
-      if (!commonFrontendModule) {
-        return;
-      }
+    this.#ready = commonFrontendModulePromise
+      ? commonFrontendModulePromise.then((commonFrontendModule) => {
+          // add connection indicator to DOM
+          commonFrontendModule.ConnectionIndicator.create();
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (globalThis.document) {
-        // add connection indicator to DOM
-        commonFrontendModule.ConnectionIndicator.create();
-
-        // Listen to browser online/offline events and update the loading indicator accordingly.
-        // Note: if Flow.ts is loaded, it instead handles the state transitions.
-        addEventListener('online', () => {
-          if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-            $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTED;
-          }
-        });
-        addEventListener('offline', () => {
-          if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-            $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTION_LOST;
-          }
-        });
-      }
-    });
+          // Listen to browser online/offline events and update the loading indicator accordingly.
+          // Note: if Flow.ts is loaded, it instead handles the state transitions.
+          addEventListener('online', () => {
+            if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
+              $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTED;
+            }
+          });
+          addEventListener('offline', () => {
+            if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
+              $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTION_LOST;
+            }
+          });
+        })
+      : Promise.resolve();
   }
 
   /**
