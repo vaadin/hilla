@@ -32,7 +32,7 @@
     "@preact/signals-react-transform": "0.5.1",
     "@rollup/plugin-replace": "6.0.2",
     "@rollup/pluginutils": "5.1.4",
-    "@types/react": "19.1.5",
+    "@types/react": "19.1.6",
     "@types/react-dom": "19.1.5",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -91,7 +91,7 @@
       "@preact/signals-react-transform": "0.5.1",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.1.4",
-      "@types/react": "19.1.5",
+      "@types/react": "19.1.6",
       "@types/react-dom": "19.1.5",
       "@vaadin/hilla-generator-cli": "24.8.0-beta2",
       "@vaadin/hilla-generator-core": "24.8.0-beta2",
@@ -119,7 +119,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "7962ae04a47e5a1c1db552a453850cb7136bec2d89fbefabfed2378d13be2a66"
+    "hash": "91b8070fcfacd251fe0389f509a203ec09195404c9156ccf54c0666bae2d7df1"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
