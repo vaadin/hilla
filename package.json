@@ -57,7 +57,7 @@
     "@types/deep-equal-in-any-order": "1.0.4",
     "@types/js-cookie": "3.0.6",
     "@types/node": "22.13.4",
-    "@types/react": "19.1.5",
+    "@types/react": "19.1.6",
     "@types/react-dom": "19.1.5",
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "4.0.0",
