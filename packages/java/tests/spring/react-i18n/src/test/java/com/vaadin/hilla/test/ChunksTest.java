@@ -32,7 +32,8 @@ public class ChunksTest {
 
     @Test
     public void shouldPutKeysInSeparatedChunkForLazyView() {
-        checkKeys("lazy", Mode.EQUALS, "lazy.intro", "lazy.button.label");
+        checkKeys("lazy", Mode.EQUALS, "lazy.intro", "lazy.button.label",
+                "viewtitle.lazy", "viewdescription.lazy");
     }
 
     private static enum Mode {

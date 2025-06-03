@@ -1,4 +1,4 @@
-import { batch, type ReadonlySignal, signal, type Signal } from '@vaadin/hilla-react-signals';
+import { batch, computed, type ReadonlySignal, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
 import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
@@ -33,6 +33,7 @@ export class I18n {
   readonly #translations: Signal<Translations> = signal({});
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
   readonly #chunks = new Set<string>();
+  readonly #alreadyRequestedKeys = new Set<string>();
 
   #formatCache: FormatCache = new FormatCache(navigator.language);
 
@@ -154,20 +155,29 @@ export class I18n {
     }
   }
 
-  private async updateLanguage(newLanguage: string, updateSettings = false, newChunk?: string) {
-    if (this.#language.value === newLanguage && !newChunk) {
-      return;
+  private async updateLanguage(
+    newLanguage: string,
+    updateSettings = false,
+    newChunk?: string,
+    keys?: readonly string[],
+  ) {
+    if (this.#language.value === newLanguage) {
+      if (!newChunk && !keys?.length) {
+        return;
+      }
+    } else {
+      this.#alreadyRequestedKeys.clear(); // Clear previously requested keys when changing language
     }
 
     const chunks = newChunk
       ? [newChunk] // New chunk is registered, load only that
-      : this.#chunks.size > 0
+      : this.#chunks.size && !keys?.length
         ? [...this.#chunks.values()] // Load the new language for all chunks registered so far
-        : undefined; // Load the new language without specifying chunks, assuming dev. mode
+        : undefined; // Load the new language without specifying chunks, assuming dev. mode or keys requested
 
     let translationsResult: TranslationsResult;
     try {
-      translationsResult = await this.#backend.loadTranslations(newLanguage, chunks);
+      translationsResult = await this.#backend.loadTranslations(newLanguage, chunks, keys);
     } catch (e) {
       console.error(`Failed to load translations for language: ${newLanguage}`, e);
       return;
@@ -175,9 +185,10 @@ export class I18n {
 
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this.#translations.value = newChunk
-        ? { ...this.#translations.value, ...translationsResult.translations }
-        : translationsResult.translations;
+      this.#translations.value =
+        newChunk || keys?.length
+          ? { ...this.#translations.value, ...translationsResult.translations }
+          : translationsResult.translations;
       this.#language.value = newLanguage;
       this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
       this.#formatCache = new FormatCache(newLanguage);
@@ -246,6 +257,30 @@ export class I18n {
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
+  }
+
+  translateDynamic(k: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
+    return computed(() => {
+      // eslint-disable-next-line no-console
+      console.log(`Translating key: ${k}`);
+      if (!k) {
+        return '';
+      }
+      const translation = this.#translations.value[k];
+      // eslint-disable-next-line no-console
+      console.log(`Translation for key "${k}":`, translation);
+      if (!translation) {
+        if (this.#language.value && !this.#alreadyRequestedKeys.has(k)) {
+          this.#alreadyRequestedKeys.add(k);
+          this.updateLanguage(this.#language.value, false, undefined, [k])
+            .then(() => console.warn(`A server call was made to translate a key that was not loaded: ${k}`))
+            .catch((error: unknown) => console.error(`Failed to translate key: ${k}`, error));
+        }
+        return k;
+      }
+      const format = this.#formatCache.getFormat(translation);
+      return format.format(params) as string;
+    });
   }
 }
 
