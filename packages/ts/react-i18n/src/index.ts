@@ -260,20 +260,33 @@ export class I18n {
   }
 
   translateDynamic(k: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
+    // Return a signal that depends on #translations and #language signals.
+    // If the key is not found, it will wait for a language to be defined
+    // and then try to load the key from the server.
     return computed(() => {
       if (!k) {
         return '';
       }
+
       const translation = this.#translations.value[k];
+
       if (!translation) {
-        if (this.#language.value && !this.#alreadyRequestedKeys.has(k)) {
+        if (this.#alreadyRequestedKeys.has(k)) {
+          // No hope to load this key, return it as is
+          return k;
+        }
+
+        if (this.#language.value) {
           this.#alreadyRequestedKeys.add(k);
           this.updateLanguage(this.#language.value, false, undefined, [k])
             .then(() => console.warn(`A server call was made to translate a key that was not loaded: ${k}`))
             .catch((error: unknown) => console.error(`Failed to translate key: ${k}`, error));
         }
-        return k;
+
+        // Prevent flashing the key in the UI
+        return '';
       }
+
       const format = this.#formatCache.getFormat(translation);
       return format.format(params) as string;
     });
