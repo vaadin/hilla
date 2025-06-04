@@ -62,7 +62,7 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.2",
-      "@vaadin/bundles": "24.8.0-alpha11",
+      "@vaadin/bundles": "25.0.0-alpha3",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-file-router": "25.0.0-alpha0",
       "@vaadin/hilla-frontend": "25.0.0-alpha0",
@@ -72,8 +72,8 @@
       "@vaadin/hilla-react-form": "25.0.0-alpha0",
       "@vaadin/hilla-react-i18n": "25.0.0-alpha0",
       "@vaadin/hilla-react-signals": "25.0.0-alpha0",
-      "@vaadin/react-components": "24.8.0-alpha11",
-      "@vaadin/react-components-pro": "24.8.0-alpha11",
+      "@vaadin/react-components": "25.0.0-alpha3",
+      "@vaadin/react-components-pro": "25.0.0-alpha3",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.0.0-alpha3",
       "@vaadin/vaadin-themable-mixin": "25.0.0-alpha3",
