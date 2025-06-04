@@ -6,7 +6,7 @@ import { AppLayout } from '@vaadin/react-components/AppLayout.js';
 import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
 import { Scroller } from '@vaadin/react-components/Scroller.js';
 import { Outlet } from 'react-router';
-import type { Detail } from './detail';
+import type { Detail } from '../types/detail.js';
 
 effect(() => {
   i18n.configure();

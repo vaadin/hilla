@@ -1,7 +1,7 @@
 import type { ViewConfig } from '@vaadin/hilla-file-router/types.js';
 import { key, translate } from '@vaadin/hilla-react-i18n';
 import { Button } from '@vaadin/react-components';
-import type { Detail } from './detail';
+import type { Detail } from '../types/detail.js';
 
 export const config: ViewConfig<Detail> = {
   title: key`viewtitle.lazy`,
