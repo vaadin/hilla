@@ -261,14 +261,10 @@ export class I18n {
 
   translateDynamic(k: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
     return computed(() => {
-      // eslint-disable-next-line no-console
-      console.log(`Translating key: ${k}`);
       if (!k) {
         return '';
       }
       const translation = this.#translations.value[k];
-      // eslint-disable-next-line no-console
-      console.log(`Translation for key "${k}":`, translation);
       if (!translation) {
         if (this.#language.value && !this.#alreadyRequestedKeys.has(k)) {
           this.#alreadyRequestedKeys.add(k);
