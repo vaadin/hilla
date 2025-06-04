@@ -1,5 +1,5 @@
 import { createMenuItems } from '@vaadin/hilla-file-router/runtime.js';
-import { i18n } from '@vaadin/hilla-react-i18n';
+import { i18n, key, translate } from '@vaadin/hilla-react-i18n';
 import { effect } from '@vaadin/hilla-react-signals';
 import { SideNavItem } from '@vaadin/react-components';
 import { AppLayout } from '@vaadin/react-components/AppLayout.js';
@@ -23,7 +23,7 @@ export default function MainLayout() {
           <ul>
             {createMenuItems<Detail>().map(({ to, title, detail }) => (
               <SideNavItem key={to} path={to} title={i18n.translateDynamic(detail?.description).value}>
-                {i18n.translateDynamic(title)}
+                {i18n.translateDynamic(title)} - {translate(key`layout.title`)}
               </SideNavItem>
             ))}
           </ul>
