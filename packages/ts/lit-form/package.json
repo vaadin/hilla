@@ -69,7 +69,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-.*": "25.0.0-alpha0",
+    "@vaadin/hilla-frontend": "25.0.0-alpha0",
     "validator": "13.12.0"
   },
   "peerDependencies": {

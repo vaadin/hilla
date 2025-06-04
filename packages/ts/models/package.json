@@ -43,7 +43,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-.*": "25.0.0-alpha0"
+    "@vaadin/hilla-lit-form": "25.0.0-alpha0"
   },
   "peerDependencies": {
     "react": "18 || 19",

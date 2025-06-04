@@ -49,10 +49,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-.*": "25.0.0-alpha0",
-    "@vaadin/hilla-.*": "25.0.0-alpha0",
-    "@vaadin/hilla-.*": "25.0.0-alpha0",
-    "@vaadin/hilla-.*": "25.0.0-alpha0",
+    "@vaadin/hilla-generator-core": "25.0.0-alpha0",
+    "@vaadin/hilla-generator-plugin-client": "25.0.0-alpha0",
+    "@vaadin/hilla-generator-plugin-model": "25.0.0-alpha0",
+    "@vaadin/hilla-generator-utils": "25.0.0-alpha0",
     "fast-deep-equal": "3.1.3",
     "openapi-types": "12.1.3",
     "typescript": "5.8.3"
