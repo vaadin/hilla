@@ -160,20 +160,34 @@ export class I18n {
 
   private async requestKeys(keys: readonly string[]): Promise<void> {
     if (this.#batchedKeysPromise) {
-      // Keys request is queued - add keys to the batch
-      keys.forEach((keyToBatch) => {
-        this.#batchedKeys.add(keyToBatch);
-      });
+      // Keys request is being queued - add keys to the batch.
+      for (const k of keys) {
+        this.#batchedKeys.add(k);
+      }
       return;
     }
 
+    const nonBatchedKeys = keys.filter((k) => !this.#batchedKeys.has(k));
+    if (nonBatchedKeys.length === 0) {
+      // Keys request for these is already in progress - skip another request.
+      return;
+    }
+
+    // New request
     this.#batchedKeys.clear();
-    this.#batchedKeysPromise = Promise.resolve(this.#batchedKeys);
+    for (const k of nonBatchedKeys) {
+      this.#batchedKeys.add(k);
+    }
     // Wait to possibly collect other synchronously requested keys
+    this.#batchedKeysPromise = Promise.resolve(this.#batchedKeys);
     await this.#batchedKeysPromise;
     this.#batchedKeysPromise = undefined;
-    const batchedKeys = ([] as string[]).concat(keys, Array.from(this.#batchedKeys));
-    return this.updateLanguage({ keys: batchedKeys });
+    const batchedKeys = [...this.#batchedKeys];
+    return this.updateLanguage({ keys: batchedKeys }).then(() => {
+      console.warn(
+        `A server call was made to translate keys those were not loaded:\n${batchedKeys.map((k) => `  - ${k}`).join('\n')}`,
+      );
+    });
   }
 
   private async updateLanguage(
@@ -320,10 +334,6 @@ export class I18n {
     }
 
     const translationSignal = computed(() => {
-      if (!k) {
-        return '';
-      }
-
       const translation = this.#translations.value[k];
 
       if (!translation) {
@@ -333,9 +343,8 @@ export class I18n {
         }
 
         if (this.#language.value) {
-          this.requestKeys([k])
-            .then(() => console.warn(`A server call was made to translate a key that was not loaded: ${k}`))
-            .catch(console.error);
+          // eslint-disable-next-line no-void
+          void this.requestKeys([k]);
         }
 
         // Prevent flashing the key in the UI

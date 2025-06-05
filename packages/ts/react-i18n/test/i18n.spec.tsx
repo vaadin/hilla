@@ -351,20 +351,37 @@ describe('@vaadin/hilla-react-i18n', () => {
 
     describe('translateDynamic', () => {
       let consoleWarnStub: sinon.SinonStub<Parameters<typeof console.warn>, ReturnType<typeof console.warn>>;
+      let respondKeys: (() => void) | undefined;
 
       beforeAll(() => {
         consoleWarnStub = sinon.stub(console, 'warn');
       });
 
       beforeEach(async () => {
+        respondKeys = undefined;
         await i18n.configure();
         fetchMock
           .removeRoutes()
           .clearHistory()
-          .get(/\?v-r=i18n&langtag=.*&keys=addresses.form.buildingNo.label&keys=addresses.form.apartmentNo.label$/u, {
+          .get(
+            /\?v-r=i18n&langtag=.*&keys=addresses.form.buildingNo.label&keys=addresses.form.apartmentNo.label$/u,
+            new Promise((resolve) => {
+              respondKeys = () => {
+                respondKeys = undefined;
+                resolve({
+                  body: {
+                    'addresses.form.buildingNo.label': 'Building',
+                    'addresses.form.apartmentNo.label': 'Apartment',
+                  },
+                  status: 200,
+                  headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+                });
+              };
+            }),
+          )
+          .get(/\?v-r=i18n&langtag=.*&chunks=postalCode$/u, {
             body: {
-              'addresses.form.buildingNo.label': 'Building',
-              'addresses.form.apartmentNo.label': 'Apartment',
+              'addresses.form.postalCode.label': 'Postal code',
             },
             status: 200,
             headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
@@ -379,7 +396,12 @@ describe('@vaadin/hilla-react-i18n', () => {
           });
       });
 
-      afterAll(() => {
+      afterAll(async () => {
+        // Wait for batched keys loading is flushed
+        respondKeys?.();
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1);
+        });
         consoleWarnStub.restore();
       });
 
@@ -394,18 +416,66 @@ describe('@vaadin/hilla-react-i18n', () => {
         // Keys should not flash in the UI before loading
         expect(buildingNo.value).to.equal('');
         expect(apartmentNo.value).to.equal('');
-        // Wait for batched keys loading is flushed
-        await new Promise((resolve) => {
+
+        // Wait for batched keys request
+        await new Promise<void>(queueMicrotask);
+
+        expect(fetchMock.callHistory.callLogs.length).to.equal(1);
+
+        // Wait for batched keys response
+        respondKeys?.();
+        await new Promise<void>((resolve) => {
           setTimeout(resolve, 1);
         });
-        // expect(fetchMock.callHistory.callLogs.length).to.equal(1);
+
         // Translations should show up
         expect(buildingNo.value).to.equal('Building');
         expect(apartmentNo.value).to.equal('Apartment');
         // Warn about dynamic keys
-        expect(consoleWarnStub.callCount).to.equal(2);
-        expect(consoleWarnStub.calledWith(sinon.match('addresses.form.buildingNo.label'))).to.be.true;
-        expect(consoleWarnStub.calledWith(sinon.match('addresses.form.apartmentNo.label'))).to.be.true;
+        expect(consoleWarnStub.calledOnce).to.be.true;
+        expect(String(consoleWarnStub.getCall(0).args[0]).split('\n')).to.deep.equal([
+          'A server call was made to translate keys those were not loaded:',
+          '  - addresses.form.buildingNo.label',
+          '  - addresses.form.apartmentNo.label',
+        ]);
+      });
+
+      it('should cache computed signals', () => {
+        const buildingNo = i18n.translateDynamic('addresses.form.buildingNo.label');
+        const apartmentNo = i18n.translateDynamic('addresses.form.apartmentNo.label');
+
+        expect(i18n.translateDynamic('addresses.form.buildingNo.label')).to.equal(buildingNo);
+        expect(i18n.translateDynamic('addresses.form.apartmentNo.label')).to.equal(apartmentNo);
+      });
+
+      it('should avoid multiple batch requests', async () => {
+        let buildingNo = i18n.translateDynamic('addresses.form.buildingNo.label');
+        let apartmentNo = i18n.translateDynamic('addresses.form.apartmentNo.label');
+        // Trigger computed signals
+        expect(buildingNo.value).to.equal('');
+        expect(apartmentNo.value).to.equal('');
+
+        // Wait for batched keys request
+        await new Promise<void>(queueMicrotask);
+
+        // Partial translation update and another rendering
+        await i18n.registerChunk('postalCode');
+        buildingNo = i18n.translateDynamic('addresses.form.buildingNo.label');
+        apartmentNo = i18n.translateDynamic('addresses.form.apartmentNo.label');
+        // Re-trigger computed signals
+        expect(buildingNo.value).to.equal('');
+        expect(apartmentNo.value).to.equal('');
+
+        // Wait for batched keys response
+        respondKeys?.();
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 1);
+        });
+
+        expect(fetchMock.callHistory.callLogs.length).to.equal(2);
+        // Translations should show up
+        expect(buildingNo.value).to.equal('Building');
+        expect(apartmentNo.value).to.equal('Apartment');
       });
     });
 
