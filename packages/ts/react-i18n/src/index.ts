@@ -33,9 +33,12 @@ export class I18n {
   readonly #translations: Signal<Translations> = signal({});
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
   readonly #chunks = new Set<string>();
-  readonly #alreadyRequestedKeys = new Set<string>();
+  readonly #alreadyRequestedKeys: Signal<ReadonlySet<string>> = signal(new Set());
+  readonly #batchedKeys = new Set<string>();
+  #batchedKeysPromise: Promise<ReadonlySet<string>> | undefined = undefined;
 
   #formatCache: FormatCache = new FormatCache(navigator.language);
+  readonly #translationSignalCache = new Map<string, ReadonlySignal<string>>();
 
   constructor() {
     // @ts-expect-error import.meta.hot does not have TS definitions
@@ -106,8 +109,8 @@ export class I18n {
    * @param options - Optional options object to specify the initial language.
    */
   async configure(options?: I18nOptions): Promise<void> {
-    const initialLanguage = determineInitialLanguage(options);
-    await this.updateLanguage(initialLanguage);
+    const language = determineInitialLanguage(options);
+    await this.updateLanguage({ language });
   }
 
   /**
@@ -132,7 +135,7 @@ export class I18n {
    * @param newLanguage - a valid IETF BCP 47 language tag, such as `en` or `en-US`
    */
   async setLanguage(newLanguage: string): Promise<void> {
-    await this.updateLanguage(newLanguage, true);
+    await this.updateLanguage({ language: newLanguage, updateSettings: true });
   }
 
   /**
@@ -151,53 +154,82 @@ export class I18n {
     this.#chunks.add(chunkName);
 
     if (this.#language.value) {
-      await this.updateLanguage(this.#language.value, false, chunkName);
+      await this.updateLanguage({ chunkName });
     }
   }
 
-  private async updateLanguage(
-    newLanguage: string,
-    updateSettings = false,
-    newChunk?: string,
-    keys?: readonly string[],
-  ) {
-    if (this.#language.value === newLanguage) {
-      if (!newChunk && !keys?.length) {
-        return;
-      }
-    } else {
-      this.#alreadyRequestedKeys.clear(); // Clear previously requested keys when changing language
+  private async requestKeys(keys: readonly string[]): Promise<void> {
+    if (this.#batchedKeysPromise) {
+      // Keys request is queued - add keys to the batch
+      keys.forEach((keyToBatch) => {
+        this.#batchedKeys.add(keyToBatch);
+      });
+      return;
     }
 
-    const chunks = newChunk
-      ? [newChunk] // New chunk is registered, load only that
+    this.#batchedKeys.clear();
+    this.#batchedKeysPromise = Promise.resolve(this.#batchedKeys);
+    // Wait to possibly collect other synchronously requested keys
+    await this.#batchedKeysPromise;
+    this.#batchedKeysPromise = undefined;
+    const batchedKeys = ([] as string[]).concat(keys, Array.from(this.#batchedKeys));
+    return this.updateLanguage({ keys: batchedKeys });
+  }
+
+  private async updateLanguage(
+    options:
+      | { readonly language: string; updateSettings?: boolean }
+      | { readonly chunkName: string }
+      | { readonly keys: string[] },
+  ) {
+    const { language, updateSettings, chunkName, keys } = {
+      language: this.#language.value,
+      updateSettings: false,
+      chunkName: undefined,
+      keys: undefined,
+      ...options,
+    };
+
+    const partialLoad = !!chunkName || !!keys?.length;
+
+    if (language === undefined || (language === this.#language.value && !partialLoad)) {
+      return;
+    }
+
+    const chunks = chunkName
+      ? [chunkName] // New chunk is registered, load only that
       : this.#chunks.size && !keys?.length
         ? [...this.#chunks.values()] // Load the new language for all chunks registered so far
         : undefined; // Load the new language without specifying chunks, assuming dev. mode or keys requested
 
     let translationsResult: TranslationsResult;
     try {
-      translationsResult = await this.#backend.loadTranslations(newLanguage, chunks, keys);
+      translationsResult = await this.#backend.loadTranslations(language, chunks, keys);
     } catch (e) {
-      console.error(`Failed to load translations for language: ${newLanguage}`, e);
+      console.error(`Failed to load translations for language: ${language}`, e);
       return;
     }
 
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this.#translations.value =
-        newChunk || keys?.length
-          ? { ...this.#translations.value, ...translationsResult.translations }
-          : translationsResult.translations;
-      this.#language.value = newLanguage;
+      this.#translations.value = partialLoad
+        ? { ...this.#translations.value, ...translationsResult.translations }
+        : translationsResult.translations;
       this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
-      this.#formatCache = new FormatCache(newLanguage);
-      this.#initialized.value = true;
+      if (language !== this.#language.value) {
+        this.#language.value = language;
+        this.#formatCache = new FormatCache(language);
+      }
+      this.#initialized.value = !!language;
+
+      if (!partialLoad) {
+        this.#alreadyRequestedKeys.value = new Set<string>();
+      } else if (keys?.length) {
+        this.#alreadyRequestedKeys.value = new Set([...this.#alreadyRequestedKeys.value, ...keys]);
+      }
 
       if (updateSettings) {
-        updateLanguageSettings({
-          language: newLanguage,
-        });
+        updateLanguageSettings({ language });
       }
     });
   }
@@ -259,11 +291,35 @@ export class I18n {
     return format.format(params) as string;
   }
 
+  /**
+   * Creates a computed signal with translated string for to the given key.
+   * This method uses dynamic loading and does not guarantee immediate
+   * availability of the translation.
+   *
+   * If the translation for the given key has not been loaded yet at the time
+   * of the call, loads the translation for the key and updates the returned
+   * signal value.
+   *
+   * When given an `undefined` key, returns empty string signal value.
+   *
+   * @param k - The translation key to translate
+   * @param params - Optional object with placeholder values
+   */
   translateDynamic(k: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
     // Return a signal that depends on #translations and #language signals.
     // If the key is not found, it will wait for a language to be defined
     // and then try to load the key from the server.
-    return computed(() => {
+    if (this.#translationSignalCache.has(k ?? '')) {
+      return this.#translationSignalCache.get(k ?? '')!;
+    }
+
+    if (!k) {
+      const translationSignal = computed(() => '');
+      this.#translationSignalCache.set('', translationSignal);
+      return translationSignal;
+    }
+
+    const translationSignal = computed(() => {
       if (!k) {
         return '';
       }
@@ -271,16 +327,15 @@ export class I18n {
       const translation = this.#translations.value[k];
 
       if (!translation) {
-        if (this.#alreadyRequestedKeys.has(k)) {
+        if (this.#alreadyRequestedKeys.value.has(k)) {
           // No hope to load this key, return it as is
           return k;
         }
 
         if (this.#language.value) {
-          this.#alreadyRequestedKeys.add(k);
-          this.updateLanguage(this.#language.value, false, undefined, [k])
+          this.requestKeys([k])
             .then(() => console.warn(`A server call was made to translate a key that was not loaded: ${k}`))
-            .catch((error: unknown) => console.error(`Failed to translate key: ${k}`, error));
+            .catch(console.error);
         }
 
         // Prevent flashing the key in the UI
@@ -290,6 +345,9 @@ export class I18n {
       const format = this.#formatCache.getFormat(translation);
       return format.format(params) as string;
     });
+
+    this.#translationSignalCache.set(k, translationSignal);
+    return translationSignal;
   }
 }
 

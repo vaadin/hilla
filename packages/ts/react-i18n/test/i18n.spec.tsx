@@ -349,6 +349,66 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
     });
 
+    describe('translateDynamic', () => {
+      let consoleWarnStub: sinon.SinonStub<Parameters<typeof console.warn>, ReturnType<typeof console.warn>>;
+
+      beforeAll(() => {
+        consoleWarnStub = sinon.stub(console, 'warn');
+      });
+
+      beforeEach(async () => {
+        await i18n.configure();
+        fetchMock
+          .removeRoutes()
+          .clearHistory()
+          .get(/\?v-r=i18n&langtag=.*&keys=addresses.form.buildingNo.label&keys=addresses.form.apartmentNo.label$/u, {
+            body: {
+              'addresses.form.buildingNo.label': 'Building',
+              'addresses.form.apartmentNo.label': 'Apartment',
+            },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+          })
+          .get(/\?v-r=i18n&.*$/u, {
+            body: {
+              'addresses.form.city.label': 'City',
+              'addresses.form.street.label': 'Street',
+            },
+            status: 200,
+            headers: { 'X-Vaadin-Retrieved-Locale': 'und' },
+          });
+      });
+
+      afterAll(() => {
+        consoleWarnStub.restore();
+      });
+
+      it('should return translated string signal for loaded keys', () => {
+        expect(i18n.translateDynamic('addresses.form.city.label').value).to.equal('City');
+        expect(fetchMock.callHistory.called()).to.be.false;
+      });
+
+      it('should load keys dynamically', async () => {
+        const buildingNo = i18n.translateDynamic('addresses.form.buildingNo.label');
+        const apartmentNo = i18n.translateDynamic('addresses.form.apartmentNo.label');
+        // Keys should not flash in the UI before loading
+        expect(buildingNo.value).to.equal('');
+        expect(apartmentNo.value).to.equal('');
+        // Wait for batched keys loading is flushed
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1);
+        });
+        // expect(fetchMock.callHistory.callLogs.length).to.equal(1);
+        // Translations should show up
+        expect(buildingNo.value).to.equal('Building');
+        expect(apartmentNo.value).to.equal('Apartment');
+        // Warn about dynamic keys
+        expect(consoleWarnStub.callCount).to.equal(2);
+        expect(consoleWarnStub.calledWith(sinon.match('addresses.form.buildingNo.label'))).to.be.true;
+        expect(consoleWarnStub.calledWith(sinon.match('addresses.form.apartmentNo.label'))).to.be.true;
+      });
+    });
+
     describe('global side effects', () => {
       it('should run effects when language changes', async () => {
         const effectSpy = sinon.spy();
