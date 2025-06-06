@@ -1,15 +1,20 @@
 import type { Translations, TranslationsResult } from './types.js';
 
 export interface I18nBackend {
-  loadTranslations(language: string, chunks?: readonly string[]): Promise<TranslationsResult>;
+  loadTranslations(language: string, chunks?: readonly string[], keys?: readonly string[]): Promise<TranslationsResult>;
 }
 
 export class DefaultBackend implements I18nBackend {
-  async loadTranslations(language: string, chunks?: readonly string[]): Promise<TranslationsResult> {
+  async loadTranslations(
+    language: string,
+    chunks?: readonly string[],
+    keys?: readonly string[],
+  ): Promise<TranslationsResult> {
     const params = new URLSearchParams([
       ['v-r', 'i18n'],
       ['langtag', language],
       ...(chunks ?? []).map((chunk) => ['chunks', chunk]),
+      ...(keys ?? []).map((key) => ['keys', key]),
     ]);
     const response = await fetch(`./?${params.toString()}`);
     if (!response.ok) {
