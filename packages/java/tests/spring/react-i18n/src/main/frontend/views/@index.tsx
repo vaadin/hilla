@@ -4,7 +4,6 @@ import type { Detail } from '../types/detail.js';
 
 export const config: ViewConfig<Detail> = {
   title: key`viewtitle.home`,
-  lazy: false,
   detail: {
     description: key`viewdescription.home`,
   },
