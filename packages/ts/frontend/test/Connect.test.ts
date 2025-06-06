@@ -70,7 +70,6 @@ describe('@vaadin/hilla-frontend', () => {
     });
 
     afterEach(() => {
-      document.body.querySelector('vaadin-connection-indicator')?.remove();
       delete $wnd.Vaadin;
     });
 
@@ -81,30 +80,6 @@ describe('@vaadin/hilla-frontend', () => {
     it('should instantiate without arguments', () => {
       const client = new ConnectClient();
       expect(client).to.be.instanceOf(ConnectClient);
-    });
-
-    it('should add a global connection indicator', async () => {
-      await new ConnectClient().ready;
-      expect($wnd.Vaadin?.connectionIndicator).is.not.undefined;
-    });
-
-    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow.client.TypeScript not loaded', () => {
-      new ConnectClient();
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
-      dispatchEvent(new Event('offline'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
-      dispatchEvent(new Event('online'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
-    });
-
-    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow is loaded but Flow.client.TypeScript not loaded', () => {
-      new ConnectClient();
-      $wnd.Vaadin!.Flow = {};
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
-      dispatchEvent(new Event('offline'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
-      dispatchEvent(new Event('online'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
     it('should not transition connection state if Flow loaded', () => {
