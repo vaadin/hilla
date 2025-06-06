@@ -14,10 +14,6 @@ import {
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
 import type { VaadinGlobal } from './types.js';
-import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
-
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const commonFrontendModulePromise = VAADIN_BROWSER_ENVIRONMENT ? import('@vaadin/common-frontend') : undefined;
 
 const $wnd = globalThis as VaadinGlobal;
 
@@ -188,10 +184,6 @@ export type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNe
  */
 export type Middleware = MiddlewareClass | MiddlewareFunction;
 
-function isFlowLoaded(): boolean {
-  return $wnd.Vaadin?.Flow?.clients?.TypeScript !== undefined;
-}
-
 /**
  * Extracts file objects from the object that is used to build the request body.
  *
@@ -278,8 +270,6 @@ export class ConnectClient {
 
   #fluxConnection?: FluxConnection;
 
-  readonly #ready: Promise<void>;
-
   /**
    * @param options - Constructor options.
    */
@@ -295,26 +285,6 @@ export class ConnectClient {
     if (options.atmosphereOptions) {
       this.atmosphereOptions = options.atmosphereOptions;
     }
-
-    this.#ready = commonFrontendModulePromise
-      ? commonFrontendModulePromise.then((commonFrontendModule) => {
-          // add connection indicator to DOM
-          commonFrontendModule.ConnectionIndicator.create();
-
-          // Listen to browser online/offline events and update the loading indicator accordingly.
-          // Note: if Flow.ts is loaded, it instead handles the state transitions.
-          addEventListener('online', () => {
-            if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-              $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTED;
-            }
-          });
-          addEventListener('offline', () => {
-            if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-              $wnd.Vaadin.connectionState.state = commonFrontendModule.ConnectionState.CONNECTION_LOST;
-            }
-          });
-        })
-      : Promise.resolve();
   }
 
   /**
@@ -461,12 +431,5 @@ export class ConnectClient {
    */
   subscribe(endpoint: string, method: string, params?: any): Subscription<any> {
     return this.fluxConnection.subscribe(endpoint, method, params ? Object.values(params) : []);
-  }
-
-  /**
-   * Promise that resolves when the instance is initialized.
-   */
-  get ready(): Promise<void> {
-    return this.#ready;
   }
 }
