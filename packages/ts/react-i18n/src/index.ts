@@ -184,9 +184,7 @@ export class I18n {
     this.#batchedKeysPromise = undefined;
     const batchedKeys = [...this.#batchedKeys];
     return this.updateLanguage({ keys: batchedKeys }).then(() => {
-      console.warn(
-        `A server call was made to translate keys those were not loaded:\n${batchedKeys.map((k) => `  - ${k}`).join('\n')}`,
-      );
+      console.warn(['A server call was made to translate keys those were not loaded', ...batchedKeys].join('\n - '));
     });
   }
 
