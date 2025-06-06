@@ -1,12 +1,12 @@
 import { createMenuItems } from '@vaadin/hilla-file-router/runtime.js';
-import { i18n, I18nKey, translate } from '@vaadin/hilla-react-i18n';
+import { i18n, key, translate } from '@vaadin/hilla-react-i18n';
 import { effect } from '@vaadin/hilla-react-signals';
 import { SideNavItem } from '@vaadin/react-components';
 import { AppLayout } from '@vaadin/react-components/AppLayout.js';
 import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
 import { Scroller } from '@vaadin/react-components/Scroller.js';
 import { Outlet } from 'react-router';
-import { Detail } from './detail';
+import type { Detail } from '../types/detail.js';
 
 effect(() => {
   i18n.configure();
@@ -22,8 +22,8 @@ export default function MainLayout() {
         <nav>
           <ul>
             {createMenuItems<Detail>().map(({ to, title, detail }) => (
-              <SideNavItem key={to} path={to} title={translate(detail?.description as I18nKey)}>
-                {translate(title as I18nKey)}
+              <SideNavItem key={to} path={to} title={i18n.translateDynamic(detail?.description).value}>
+                {i18n.translateDynamic(title)} - {translate(key`layout.title`)}
               </SideNavItem>
             ))}
           </ul>
