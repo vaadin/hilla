@@ -61,10 +61,15 @@ describe('@vaadin/hilla-file-router', () => {
 
     it('should add console.error calls for duplicated paths', async () => {
       const metaWithDuplicatedPaths = [
-        ...meta,
         {
-          path: 'profile',
-          file: new URL('profile/@index.tsx', dir),
+          ...meta[0],
+          children: [
+            ...(meta[0].children ?? []),
+            {
+              path: 'profile',
+              file: new URL('profile/@index.tsx', dir),
+            },
+          ],
         },
       ];
       configs = createTestingServerViewConfigs(metaWithDuplicatedPaths);
