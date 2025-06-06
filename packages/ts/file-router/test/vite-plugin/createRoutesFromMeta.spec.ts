@@ -65,7 +65,6 @@ describe('@vaadin/hilla-file-router', () => {
         {
           path: 'profile',
           file: new URL('profile/@index.tsx', dir),
-          children: [],
         },
       ];
       configs = createTestingServerViewConfigs(metaWithDuplicatedPaths);

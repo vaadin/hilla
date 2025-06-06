@@ -178,7 +178,7 @@ export default routes;`.source.statements,
         : module.configId;
     }
 
-    const _children = factory.createArrayLiteralExpression(children ?? [], true);
+    const _children = children ? factory.createArrayLiteralExpression(children, true) : '';
 
     // ```ts
     // createRoute("grandparent", {...grandparentConfig, flowLayout: true}, [
