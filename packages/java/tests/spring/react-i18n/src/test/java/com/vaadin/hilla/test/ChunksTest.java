@@ -26,12 +26,24 @@ public class ChunksTest {
 
     @Test
     public void shouldPutKeysInMainChunkForNonLazyView() {
+        // Keys from non-lazy views should be in the main chunk
         checkKeys("indexhtml", Mode.CONTAINS, "basic.form.name.label",
                 "basic.form.address.label");
+        // Keys from ViewConfig should also be in the main chunk
+        checkKeys("indexhtml", Mode.CONTAINS, "viewtitle.basic",
+                "viewdescription.basic", "viewtitle.lazy",
+                "viewdescription.lazy");
+        // Keys from the index.html file should also be in the main chunk
+        checkKeys("indexhtml", Mode.CONTAINS, "viewtitle.home",
+                "viewdescription.home", "home.intro");
+        // Keys from the layout should also be in the main chunk
+        checkKeys("indexhtml", Mode.CONTAINS, "layout.title");
     }
 
     @Test
     public void shouldPutKeysInSeparatedChunkForLazyView() {
+        // Keys from lazy views should be in a separate chunk
+        // (but not those from its ViewConfig)
         checkKeys("lazy", Mode.EQUALS, "lazy.intro", "lazy.button.label");
     }
 
