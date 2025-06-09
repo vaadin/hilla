@@ -237,8 +237,8 @@ describe('@vaadin/hilla-react-i18n', () => {
         await i18n.registerChunk('city');
 
         // Neither chunks are loaded
-        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('addresses.form.city.label');
-        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('addresses.form.street.label');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('!addresses.form.city.label');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('!addresses.form.street.label');
         expect(fetchMock.callHistory.called()).to.be.false;
       });
 
@@ -250,7 +250,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.translate(key`addresses.form.city.label`)).to.equal('City Chunked');
 
         // Street chunk is not loaded yet
-        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('addresses.form.street.label');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('!en: addresses.form.street.label');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
@@ -295,7 +295,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         expect(i18n.translate(key`addresses.form.city.label`)).to.equal('Australian City Chunked');
 
         // Street chunk is not loaded yet
-        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('addresses.form.street.label');
+        expect(i18n.translate(key`addresses.form.street.label`)).to.equal('!en: addresses.form.street.label');
         expect(fetchMock.callHistory.called()).to.be.true;
         expect(fetchMock.callHistory.calls()).to.have.length(1);
         expect(getLastUrlParams().getAll('chunks')).to.deep.equal(['city']);
@@ -345,7 +345,7 @@ describe('@vaadin/hilla-react-i18n', () => {
       });
 
       it('should return key when there is no translation', () => {
-        expect(i18n.translate(key`unknown.key`)).to.equal('unknown.key');
+        expect(i18n.translate(key`unknown.key`)).to.equal('!en: unknown.key');
       });
     });
 
@@ -488,7 +488,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         });
 
         // Runs once initially
-        expect(effectSpy.calledOnceWith(undefined, 'addresses.form.city.label')).to.be.true;
+        expect(effectSpy.calledOnceWith(undefined, '!addresses.form.city.label')).to.be.true;
         effectSpy.resetHistory();
 
         // Configure initial language
@@ -542,7 +542,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         const { getByText } = render(<TestTranslateComponent />);
 
         // No language
-        expect(getByText('addresses.form.city.label')).to.exist;
+        expect(getByText('!addresses.form.city.label')).to.exist;
 
         // Configure initial language
         await i18n.configure({ language: 'en-US' });
@@ -566,7 +566,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         render(<TestUseSignalEffectComponent />);
 
         // No language
-        expect(signalEffectResult).to.equal('addresses.form.city.label');
+        expect(signalEffectResult).to.equal('!addresses.form.city.label');
 
         // Configure initial language
         await i18n.configure({ language: 'en-US' });
@@ -588,7 +588,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         const { getByText } = render(<TestUseComputedComponent />);
 
         // No language
-        expect(getByText('Computed translation: addresses.form.city.label')).to.exist;
+        expect(getByText('Computed translation: !addresses.form.city.label')).to.exist;
 
         // Configure initial language
         await i18n.configure({ language: 'en-US' });
@@ -612,7 +612,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         render(<TestUseEffectComponent />);
 
         // No language
-        expect(defaultEffectResult).to.equal('addresses.form.city.label');
+        expect(defaultEffectResult).to.equal('!addresses.form.city.label');
 
         // Configure initial language
         await i18n.configure({ language: 'en-US' });
@@ -635,7 +635,7 @@ describe('@vaadin/hilla-react-i18n', () => {
         const { getByText } = render(<TestUseMemoComponent />);
 
         // No language
-        expect(getByText('Memoized translation: addresses.form.city.label')).to.exist;
+        expect(getByText('Memoized translation: !addresses.form.city.label')).to.exist;
 
         // Configure initial language
         await i18n.configure({ language: 'en-US' });
@@ -758,9 +758,9 @@ describe('@vaadin/hilla-react-i18n', () => {
       }
 
       it('should not update translations if not initialized', async () => {
-        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('addresses.form.city.label');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('!addresses.form.city.label');
         await triggerHmrEvent();
-        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('addresses.form.city.label');
+        expect(i18n.translate(key`addresses.form.city.label`)).to.equal('!addresses.form.city.label');
       });
 
       it('should update translations on HMR event', async () => {
