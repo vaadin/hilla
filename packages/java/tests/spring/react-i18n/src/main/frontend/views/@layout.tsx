@@ -1,6 +1,5 @@
 import { createMenuItems } from '@vaadin/hilla-file-router/runtime.js';
 import { i18n, key, translate } from '@vaadin/hilla-react-i18n';
-import { effect } from '@vaadin/hilla-react-signals';
 import { SideNavItem } from '@vaadin/react-components';
 import { AppLayout } from '@vaadin/react-components/AppLayout.js';
 import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
@@ -8,9 +7,7 @@ import { Scroller } from '@vaadin/react-components/Scroller.js';
 import { Outlet } from 'react-router';
 import type { Detail } from '../types/detail.js';
 
-effect(() => {
-  i18n.configure();
-});
+await i18n.configure();
 
 export default function MainLayout() {
   return (
