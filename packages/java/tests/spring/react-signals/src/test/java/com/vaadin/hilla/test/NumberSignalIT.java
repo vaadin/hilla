@@ -29,6 +29,9 @@ public class NumberSignalIT extends ChromeBrowserTest {
         waitForElementPresent(By.ById.id("counter"));
         waitUntil(driver -> $("span").id("sharedValue").getText() != null);
         waitUntil(driver -> $("span").id("counter").getText() != null);
+        // Make sure the initial signal subscription round trip
+        // completes (on CI):
+        waitForMillis(1000);
     }
 
     @Test
@@ -74,6 +77,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             // press reset button on the second window
             secondWindowDriver.findElement(By.id("reset")).click();
+            waitForMillis(500);
 
             secondWindowSharedValue = Double.parseDouble(secondWindowDriver
                     .findElement(By.id("sharedValue")).getText());
@@ -85,6 +89,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             // check that the first window is also updated:
             getDriver().switchTo().window(firstWindowHandle);
+            waitForMillis(500);
             Assert.assertEquals(0.5, getSharedValue(), 0.0);
             Assert.assertEquals(0, getCounterValue());
 
@@ -114,5 +119,13 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
     private void clickButton(String id) {
         $(ButtonElement.class).id(id).click();
+    }
+
+    private void waitForMillis(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
