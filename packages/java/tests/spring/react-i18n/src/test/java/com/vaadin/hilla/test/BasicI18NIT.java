@@ -35,9 +35,9 @@ public class BasicI18NIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void setLangWithoutCountry_onlyLangWithCountryAvailable_shouldUseLangWithCountry()
+    public void setLangWithoutCountry_onlyLangWithCountryAvailable_shouldUseDefaultTranslation()
             throws InterruptedException {
-        assertTranslations("es", "es-ES", "Nombre", "Direccion");
+        assertTranslations("es", "es", "Name", "Address");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class BasicI18NIT extends ChromeBrowserTest {
     @Test
     public void setLangWithCountry_langWithDifferentCountryAvailable_shouldUseLangWithDifferentCountry()
             throws InterruptedException {
-        assertTranslations("es_AR", "es-ES", "Nombre", "Direccion");
+        assertTranslations("es_AR", "es-AR", "Nombre", "Direccion");
     }
 
     @Test
@@ -73,13 +73,15 @@ public class BasicI18NIT extends ChromeBrowserTest {
     @Test
     public void setLangEmpty_defaultTranslationAvailable_shouldUseDefaultTranslation()
             throws InterruptedException {
+        // Change away from default empty value to ensure change event
+        languageField.setValue("nonempty");
         assertTranslations("", "und", "Name", "Address");
     }
 
     @Test
     public void setInvalidLang_defaultTranslationAvailable_shouldUseDefaultTranslation()
             throws InterruptedException {
-        assertTranslations("KLINGON", "und", "Name", "Address");
+        assertTranslations("KLINGON", "klingon", "Name", "Address");
     }
 
     private void assertTranslations(String languageTag,
