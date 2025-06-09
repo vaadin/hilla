@@ -297,7 +297,7 @@ export class I18n {
   translate(k: I18nKey, params?: Record<string, unknown>): string {
     const translation = this.#translations.value[k];
     if (!translation) {
-      return k.toString();
+      return this.handleMissingTranslation(k);
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
@@ -337,7 +337,7 @@ export class I18n {
       if (!translation) {
         if (this.#alreadyRequestedKeys.value.has(k)) {
           // No hope to load this key, return it as is
-          return k;
+          return this.handleMissingTranslation(k);
         }
 
         if (this.#language.value) {
@@ -355,6 +355,11 @@ export class I18n {
 
     this.#translationSignalCache.set(k, translationSignal);
     return translationSignal;
+  }
+
+  private handleMissingTranslation(k: string): string {
+    const lang = this.#language.value ? `${this.#language.value.split(/[_-]/u)[0]}: ` : '';
+    return `!${lang}${k}`;
   }
 }
 
