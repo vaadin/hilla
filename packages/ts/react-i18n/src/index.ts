@@ -375,7 +375,7 @@ const i18n: I18n = new I18n();
  * E.g.:
  *   translate(key`my.translation.key`)
  */
-export function key(strings: readonly string[], ..._values: never[]): I18nKey {
+function keyTag(strings: readonly string[], ..._values: never[]): I18nKey {
   return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
 }
 
@@ -400,11 +400,11 @@ export function key(strings: readonly string[], ..._values: never[]): I18nKey {
  *
  * This function is a shorthand for `i18n.translate` of the global I18n instance.
  *
- * @param k - The translation key to translate
+ * @param key - The translation key to translate
  * @param params - Optional object with placeholder values
  */
-export function translate(k: I18nKey, params?: Record<string, unknown>): string {
-  return i18n.translate(k, params);
+export function translate(key: I18nKey, params?: Record<string, unknown>): string {
+  return i18n.translate(key, params);
 }
 
-export { i18n };
+export { i18n, keyTag as key };
