@@ -291,7 +291,7 @@ export class I18n {
    * Likewise, signal effects automatically subscribe to translation changes
    * when calling this method.
    *
-   * @param k - The translation key to translate
+   * @param k - The key to translate
    * @param params - Optional object with placeholder values
    */
   translate(k: I18nKey, params?: Record<string, unknown>): string {
@@ -314,35 +314,35 @@ export class I18n {
    *
    * When given an `undefined` key, returns empty string signal value.
    *
-   * @param k - The translation key to translate
+   * @param key - The translation key to translate
    * @param params - Optional object with placeholder values
    */
-  translateDynamic(k: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
+  translateDynamic(key: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
     // Return a signal that depends on #translations and #language signals.
     // If the key is not found, it will wait for a language to be defined
     // and then try to load the key from the server.
-    if (this.#translationSignalCache.has(k ?? '')) {
-      return this.#translationSignalCache.get(k ?? '')!;
+    if (this.#translationSignalCache.has(key ?? '')) {
+      return this.#translationSignalCache.get(key ?? '')!;
     }
 
-    if (!k) {
+    if (!key) {
       const translationSignal = computed(() => '');
       this.#translationSignalCache.set('', translationSignal);
       return translationSignal;
     }
 
     const translationSignal = computed(() => {
-      const translation = this.#translations.value[k];
+      const translation = this.#translations.value[key];
 
       if (!translation) {
-        if (this.#alreadyRequestedKeys.value.has(k)) {
+        if (this.#alreadyRequestedKeys.value.has(key)) {
           // No hope to load this key, return it as is
-          return this.handleMissingTranslation(k);
+          return this.handleMissingTranslation(key);
         }
 
         if (this.#language.value) {
           // eslint-disable-next-line no-void
-          void this.requestKeys([k]);
+          void this.requestKeys([key]);
         }
 
         // Prevent flashing the key in the UI
@@ -353,7 +353,7 @@ export class I18n {
       return format.format(params) as string;
     });
 
-    this.#translationSignalCache.set(k, translationSignal);
+    this.#translationSignalCache.set(key, translationSignal);
     return translationSignal;
   }
 
@@ -382,7 +382,8 @@ function keyTag(strings: readonly string[], ..._values: never[]): I18nKey {
 /**
  * Returns a translated string for the given translation key. The key should
  * match a key in the loaded translations. If no translation is found for the
- * key, the key itself is returned.
+ * key, a modified version of the key is returned to indicate that the translation
+ * is missing.
  *
  * Translations may contain placeholders, following the ICU MessageFormat
  * syntax. They can be replaced by passing a `params` object with placeholder
