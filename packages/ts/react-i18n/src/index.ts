@@ -161,13 +161,13 @@ export class I18n {
   private async requestKeys(keys: readonly string[]): Promise<void> {
     if (this.#batchedKeysPromise) {
       // Keys request is being queued - add keys to the batch.
-      for (const k of keys) {
-        this.#batchedKeys.add(k);
+      for (const key of keys) {
+        this.#batchedKeys.add(key);
       }
       return;
     }
 
-    const nonBatchedKeys = keys.filter((k) => !this.#batchedKeys.has(k));
+    const nonBatchedKeys = keys.filter((key) => !this.#batchedKeys.has(key));
     if (nonBatchedKeys.length === 0) {
       // Keys request for these is already in progress - skip another request.
       return;
@@ -175,8 +175,8 @@ export class I18n {
 
     // New request
     this.#batchedKeys.clear();
-    for (const k of nonBatchedKeys) {
-      this.#batchedKeys.add(k);
+    for (const key of nonBatchedKeys) {
+      this.#batchedKeys.add(key);
     }
     // Wait to possibly collect other synchronously requested keys
     this.#batchedKeysPromise = Promise.resolve(this.#batchedKeys);
@@ -291,13 +291,13 @@ export class I18n {
    * Likewise, signal effects automatically subscribe to translation changes
    * when calling this method.
    *
-   * @param k - The key to translate
+   * @param key - The key to translate
    * @param params - Optional object with placeholder values
    */
-  translate(k: I18nKey, params?: Record<string, unknown>): string {
-    const translation = this.#translations.value[k];
+  translate(key: I18nKey, params?: Record<string, unknown>): string {
+    const translation = this.#translations.value[key];
     if (!translation) {
-      return this.handleMissingTranslation(k);
+      return this.handleMissingTranslation(key);
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
@@ -357,9 +357,9 @@ export class I18n {
     return translationSignal;
   }
 
-  private handleMissingTranslation(k: string): string {
+  private handleMissingTranslation(key: string): string {
     const lang = this.#language.value ? `${this.#language.value.split(/[_-]/u)[0]}: ` : '';
-    return `!${lang}${k}`;
+    return `!${lang}${key}`;
   }
 }
 
