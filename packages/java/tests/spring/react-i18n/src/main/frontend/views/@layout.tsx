@@ -1,12 +1,15 @@
+import { createMenuItems } from '@vaadin/hilla-file-router/runtime.js';
+import { i18n, key, translate } from '@vaadin/hilla-react-i18n';
+import { SideNavItem } from '@vaadin/react-components';
 import { AppLayout } from '@vaadin/react-components/AppLayout.js';
 import { DrawerToggle } from '@vaadin/react-components/DrawerToggle.js';
 import { Scroller } from '@vaadin/react-components/Scroller.js';
-import { routes } from 'Frontend/routes.js';
-import { NavLink, Outlet } from 'react-router';
+import { Outlet } from 'react-router';
+import type { Detail } from '../types/detail.js';
+
+await i18n.configure();
 
 export default function MainLayout() {
-  const menuRoutes = routes[0]!.children;
-
   return (
     <AppLayout className="block h-full" primarySection="drawer">
       <header slot="drawer">
@@ -15,10 +18,10 @@ export default function MainLayout() {
       <Scroller slot="drawer" scroll-direction="vertical">
         <nav>
           <ul>
-            {menuRoutes.map(({ path }) => (
-              <li key={path}>
-                <NavLink to={path}>{path}</NavLink>
-              </li>
+            {createMenuItems<Detail>().map(({ to, title, detail }) => (
+              <SideNavItem key={to} path={to} title={i18n.translateDynamic(detail?.description).value}>
+                {i18n.translateDynamic(title)} - {translate(key`layout.title`)}
+              </SideNavItem>
             ))}
           </ul>
         </nav>
