@@ -161,13 +161,13 @@ export class I18n {
   private async requestKeys(keys: readonly string[]): Promise<void> {
     if (this.#batchedKeysPromise) {
       // Keys request is being queued - add keys to the batch.
-      for (const k of keys) {
-        this.#batchedKeys.add(k);
+      for (const key of keys) {
+        this.#batchedKeys.add(key);
       }
       return;
     }
 
-    const nonBatchedKeys = keys.filter((k) => !this.#batchedKeys.has(k));
+    const nonBatchedKeys = keys.filter((key) => !this.#batchedKeys.has(key));
     if (nonBatchedKeys.length === 0) {
       // Keys request for these is already in progress - skip another request.
       return;
@@ -175,8 +175,8 @@ export class I18n {
 
     // New request
     this.#batchedKeys.clear();
-    for (const k of nonBatchedKeys) {
-      this.#batchedKeys.add(k);
+    for (const key of nonBatchedKeys) {
+      this.#batchedKeys.add(key);
     }
     // Wait to possibly collect other synchronously requested keys
     this.#batchedKeysPromise = Promise.resolve(this.#batchedKeys);
@@ -291,13 +291,13 @@ export class I18n {
    * Likewise, signal effects automatically subscribe to translation changes
    * when calling this method.
    *
-   * @param k - The translation key to translate
+   * @param key - The key to translate
    * @param params - Optional object with placeholder values
    */
-  translate(k: I18nKey, params?: Record<string, unknown>): string {
-    const translation = this.#translations.value[k];
+  translate(key: I18nKey, params?: Record<string, unknown>): string {
+    const translation = this.#translations.value[key];
     if (!translation) {
-      return this.handleMissingTranslation(k);
+      return this.handleMissingTranslation(key);
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
@@ -314,35 +314,35 @@ export class I18n {
    *
    * When given an `undefined` key, returns empty string signal value.
    *
-   * @param k - The translation key to translate
+   * @param key - The translation key to translate
    * @param params - Optional object with placeholder values
    */
-  translateDynamic(k: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
+  translateDynamic(key: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
     // Return a signal that depends on #translations and #language signals.
     // If the key is not found, it will wait for a language to be defined
     // and then try to load the key from the server.
-    if (this.#translationSignalCache.has(k ?? '')) {
-      return this.#translationSignalCache.get(k ?? '')!;
+    if (this.#translationSignalCache.has(key ?? '')) {
+      return this.#translationSignalCache.get(key ?? '')!;
     }
 
-    if (!k) {
+    if (!key) {
       const translationSignal = computed(() => '');
       this.#translationSignalCache.set('', translationSignal);
       return translationSignal;
     }
 
     const translationSignal = computed(() => {
-      const translation = this.#translations.value[k];
+      const translation = this.#translations.value[key];
 
       if (!translation) {
-        if (this.#alreadyRequestedKeys.value.has(k)) {
+        if (this.#alreadyRequestedKeys.value.has(key)) {
           // No hope to load this key, return it as is
-          return this.handleMissingTranslation(k);
+          return this.handleMissingTranslation(key);
         }
 
         if (this.#language.value) {
           // eslint-disable-next-line no-void
-          void this.requestKeys([k]);
+          void this.requestKeys([key]);
         }
 
         // Prevent flashing the key in the UI
@@ -353,13 +353,13 @@ export class I18n {
       return format.format(params) as string;
     });
 
-    this.#translationSignalCache.set(k, translationSignal);
+    this.#translationSignalCache.set(key, translationSignal);
     return translationSignal;
   }
 
-  private handleMissingTranslation(k: string): string {
+  private handleMissingTranslation(key: string): string {
     const lang = this.#language.value ? `${this.#language.value.split(/[_-]/u)[0]}: ` : '';
-    return `!${lang}${k}`;
+    return `!${lang}${key}`;
   }
 }
 
@@ -375,14 +375,15 @@ const i18n: I18n = new I18n();
  * E.g.:
  *   translate(key`my.translation.key`)
  */
-export function key(strings: readonly string[], ..._values: never[]): I18nKey {
+function keyTag(strings: readonly string[], ..._values: never[]): I18nKey {
   return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
 }
 
 /**
  * Returns a translated string for the given translation key. The key should
  * match a key in the loaded translations. If no translation is found for the
- * key, the key itself is returned.
+ * key, a modified version of the key is returned to indicate that the translation
+ * is missing.
  *
  * Translations may contain placeholders, following the ICU MessageFormat
  * syntax. They can be replaced by passing a `params` object with placeholder
@@ -400,11 +401,11 @@ export function key(strings: readonly string[], ..._values: never[]): I18nKey {
  *
  * This function is a shorthand for `i18n.translate` of the global I18n instance.
  *
- * @param k - The translation key to translate
+ * @param key - The translation key to translate
  * @param params - Optional object with placeholder values
  */
-export function translate(k: I18nKey, params?: Record<string, unknown>): string {
-  return i18n.translate(k, params);
+export function translate(key: I18nKey, params?: Record<string, unknown>): string {
+  return i18n.translate(key, params);
 }
 
-export { i18n };
+export { i18n, keyTag as key };

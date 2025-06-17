@@ -7,6 +7,7 @@ import java.util.Map;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,8 +17,6 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 import static java.util.Map.entry;
 
