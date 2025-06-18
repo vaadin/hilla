@@ -101,8 +101,8 @@ public abstract class BaseTypeConversionTest {
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         String body = String.format("{\"value\": %s}", requestValue);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE).content(body)
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                .accept(MediaType.APPLICATION_JSON_VALUE).content(body)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
         return mockMvc.perform(requestBuilder).andReturn().getResponse();
     }
 
