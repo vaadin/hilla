@@ -10,6 +10,7 @@
   </parent>
 
   <artifactId>com.vaadin.hilla.gradle.plugin</artifactId>
+  <name>Gradle Plugin portal for Hilla Engine </name>
   <packaging>pom</packaging>
   <dependencies>
     <dependency>
