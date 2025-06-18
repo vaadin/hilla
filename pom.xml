@@ -92,7 +92,7 @@
     <spring.boot.version>4.0.0-SNAPSHOT</spring.boot.version>
     <testbench.version>9.4.0</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
-    <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
+    <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
