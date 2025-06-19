@@ -204,7 +204,10 @@ public class AotBrowserCallableFinder {
         return '"' + path.toString().replace("\\", "\\\\") + '"';
     }
 
-    private static void throwUnknownMetadataFormat(String reason) throws BrowserCallableFinderException {
-        throw new BrowserCallableFinderException(String.format("Unable to read information about beans from the AOT metadata output file `%s`: %s", METADATA_FILE_NAME, reason));
+    private static void throwUnknownMetadataFormat(String reason)
+            throws BrowserCallableFinderException {
+        throw new BrowserCallableFinderException(String.format(
+                "Unable to read information about beans from the AOT metadata output file `%s`: %s",
+                METADATA_FILE_NAME, reason));
     }
 }
