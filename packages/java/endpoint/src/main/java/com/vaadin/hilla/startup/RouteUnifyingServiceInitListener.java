@@ -24,7 +24,6 @@ import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.shared.ApplicationConstants;
@@ -57,8 +56,6 @@ public class RouteUnifyingServiceInitListener
 
     private final NavigationAccessControl accessControl;
 
-    private final ViewAccessChecker viewAccessChecker;
-
     private final RouteUtil routeUtil;
 
     /**
@@ -70,12 +67,10 @@ public class RouteUnifyingServiceInitListener
     @Autowired
     public RouteUnifyingServiceInitListener(RouteUtil routeUtil,
             RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties,
-            @Nullable NavigationAccessControl accessControl,
-            @Nullable ViewAccessChecker viewAccessChecker) {
+            @Nullable NavigationAccessControl accessControl) {
         this.routeUtil = routeUtil;
         this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
         this.accessControl = accessControl;
-        this.viewAccessChecker = viewAccessChecker;
     }
 
     @Override
@@ -87,7 +82,7 @@ public class RouteUnifyingServiceInitListener
         boolean hasHillaFsRoute = false;
         if (deploymentConfiguration.isReactEnabled()) {
             var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, accessControl, viewAccessChecker,
+                    deploymentConfiguration, accessControl,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(

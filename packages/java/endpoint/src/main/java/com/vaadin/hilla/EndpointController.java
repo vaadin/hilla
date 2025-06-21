@@ -182,7 +182,7 @@ public class EndpointController {
      *            the current response
      * @return execution result as a JSON string or an error message string
      */
-    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> serveEndpoint(
             @PathVariable("endpoint") String endpointName,
             @PathVariable("method") String methodName,

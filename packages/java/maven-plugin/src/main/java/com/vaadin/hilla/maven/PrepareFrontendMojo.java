@@ -2,6 +2,7 @@ package com.vaadin.hilla.maven;
 
 import java.io.File;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -46,7 +47,11 @@ public class PrepareFrontendMojo
     @Override
     protected void executeInternal()
             throws MojoExecutionException, MojoFailureException {
-        configure();
+        try {
+            configure();
+        } catch (DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException(e);
+        }
         super.executeInternal();
     }
 

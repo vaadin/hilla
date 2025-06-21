@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
@@ -25,7 +27,6 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.menu.RouteParamType;
@@ -36,7 +37,6 @@ public class ServerAndClientViewsProvider {
     private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final ViewAccessChecker viewAccessChecker;
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ServerAndClientViewsProvider.class);
@@ -52,11 +52,9 @@ public class ServerAndClientViewsProvider {
     public ServerAndClientViewsProvider(
             DeploymentConfiguration deploymentConfiguration,
             @Nullable NavigationAccessControl accessControl,
-            @Nullable ViewAccessChecker viewAccessChecker,
             boolean exposeServerRoutesToClient) {
         this.deploymentConfiguration = deploymentConfiguration;
         this.accessControl = accessControl;
-        this.viewAccessChecker = viewAccessChecker;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
 
         mapper.addMixIn(AvailableViewInfo.class, IgnoreMixin.class);
@@ -137,7 +135,7 @@ public class ServerAndClientViewsProvider {
         }
         final var serverRouteRegistry = vaadinService.getRouter().getRegistry();
 
-        var accessControls = Stream.of(accessControl, viewAccessChecker)
+        var accessControls = Stream.<BeforeEnterListener> of(accessControl)
                 .filter(Objects::nonNull).toList();
 
         var serverRoutes = new HashMap<String, AvailableViewInfo>();
