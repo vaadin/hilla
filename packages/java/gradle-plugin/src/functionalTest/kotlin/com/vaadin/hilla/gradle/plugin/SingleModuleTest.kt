@@ -200,6 +200,8 @@ class SingleModuleTest : AbstractGradleTest() {
                 repositories {
                     mavenLocal()
                     mavenCentral()
+                    maven { setUrl("https://repo.spring.io/snapshot") }
+                    maven { setUrl("https://repo.spring.io/milestone") }
                     maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
                 }
                 dependencies {
@@ -207,7 +209,7 @@ class SingleModuleTest : AbstractGradleTest() {
                 }
             }
             plugins {
-                id 'org.springframework.boot' version '3.3.6'
+                id 'org.springframework.boot' version '$springBootVersion'
                 id 'io.spring.dependency-management' version '1.0.15.RELEASE'
                 id 'java'
             }
@@ -225,6 +227,8 @@ class SingleModuleTest : AbstractGradleTest() {
             repositories {
                 mavenLocal()
                 mavenCentral()
+                maven { setUrl("https://repo.spring.io/snapshot") }
+                maven { setUrl("https://repo.spring.io/milestone") }
                 maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
                 maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
             }

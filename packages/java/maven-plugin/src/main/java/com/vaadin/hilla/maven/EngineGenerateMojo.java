@@ -2,6 +2,7 @@ package com.vaadin.hilla.maven;
 
 import java.io.File;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -64,7 +65,8 @@ public final class EngineGenerateMojo extends AbstractMojo
             parserProcessor.process(browserCallables);
             generatorProcessor.process();
         } catch (GeneratorException | ParserException
-                | BrowserCallableFinderException e) {
+                | BrowserCallableFinderException
+                | DependencyResolutionRequiredException e) {
             throw new EngineGenerateMojoException("Execution failed", e);
         }
     }
