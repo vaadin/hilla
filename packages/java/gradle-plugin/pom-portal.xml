@@ -11,6 +11,7 @@
 
   <artifactId>com.vaadin.hilla.gradle.plugin</artifactId>
   <packaging>pom</packaging>
+  <name>Gradle Plugin for Hilla Engine portal</name>
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
