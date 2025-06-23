@@ -85,7 +85,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Mockito.when(vaadinService.getDeploymentConfiguration())
                 .thenReturn(deploymentConfiguration);
         serverClientViewsProvider = new ServerAndClientViewsProvider(
-                deploymentConfiguration, null, null, true);
+                deploymentConfiguration, null, true);
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
                 serverClientViewsProvider);
 
@@ -474,7 +474,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
             var serverClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, null, null, false);
+                    deploymentConfiguration, null, false);
             var requestListener = new RouteUnifyingIndexHtmlRequestListener(
                     serverClientViewsProvider);
 
@@ -541,7 +541,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
             var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, null, null, true);
+                    deploymentConfiguration, null, true);
             var requestListener = new RouteUnifyingIndexHtmlRequestListener(
                     serverAndClientViewsProvider);
 
@@ -614,7 +614,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
             var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, null, null, true);
+                    deploymentConfiguration, null, true);
             var requestListener = new RouteUnifyingIndexHtmlRequestListener(
                     serverAndClientViewsProvider);
 

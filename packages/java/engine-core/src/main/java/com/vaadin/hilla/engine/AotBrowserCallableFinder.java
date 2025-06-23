@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,8 @@ public class AotBrowserCallableFinder {
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
+    private static final String METADATA_FILE_NAME = "reachability-metadata.json";
+
     /**
      * Finds the classes annotated with the endpoint annotations.
      *
@@ -48,11 +51,11 @@ public class AotBrowserCallableFinder {
                         "Application has no main class");
             }
 
-            // Generate the AOT artifacts, including reflect-config.json
+            // Generate the AOT artifacts, including reachability metadata JSON
             var reflectConfigPath = generateAotArtifacts(engineConfiguration,
                     applicationClass);
 
-            // Load annotated classes from reflect-config.json
+            // Load annotated classes from reachability metadata JSON
             return loadAnnotatedClasses(engineConfiguration, reflectConfigPath);
         } catch (Exception e) {
             if (e instanceof BrowserCallableFinderException bce) {
@@ -139,14 +142,14 @@ public class AotBrowserCallableFinder {
 
         var json = aotOutput.resolve(Path.of("resources", "META-INF",
                 "native-image", engineConfiguration.getGroupId(),
-                engineConfiguration.getArtifactId(), "reflect-config.json"));
+                engineConfiguration.getArtifactId(), METADATA_FILE_NAME));
 
         if (!Files.isRegularFile(json)) {
             throw new BrowserCallableFinderException(String.format(
                     "The `%s` tool has not produced the expected"
-                            + " `reflect-config.json` file, which is used to"
+                            + " `%s` file, which is used to"
                             + " identify available endpoints.",
-                    SPRING_AOT_PROCESSOR));
+                    SPRING_AOT_PROCESSOR, METADATA_FILE_NAME));
         }
 
         return json;
@@ -161,26 +164,32 @@ public class AotBrowserCallableFinder {
         var objectMapper = new ObjectMapper();
         var rootNode = objectMapper.readTree(jsonContent);
 
-        if (!rootNode.isArray()) {
-            throw new BrowserCallableFinderException(
-                    "Aot output file reflect-config.json does not contain"
-                            + " information about beans, so endpoint detection"
-                            + " cannot be performed");
+        if (!rootNode.isObject()) {
+            throwUnknownMetadataFormat("root node is not an object");
+        }
+
+        var reflectionsNode = rootNode.get("reflection");
+        if (reflectionsNode == null) {
+            throwUnknownMetadataFormat("\"reflection\" key is null");
+        }
+
+        if (!reflectionsNode.isArray()) {
+            throwUnknownMetadataFormat("\"reflection\" key is not an array");
         }
 
         // Extract candidate class names
         var candidates = new ArrayList<String>();
-        for (var node : rootNode) {
-            String name = node.get("name").asText();
-            candidates.add(name);
+        for (var node : reflectionsNode) {
+            String type = node.get("type").asText();
+            candidates.add(type);
         }
 
         var annotationNames = engineConfiguration.getEndpointAnnotations()
                 .stream().map(Class::getName).toList();
         var classLoader = engineConfiguration.getClassLoader();
-        return candidates.stream().map(name -> {
+        return candidates.stream().map(type -> {
             try {
-                return Class.forName(name, false, classLoader);
+                return Class.forName(type, false, classLoader);
             } catch (Throwable t) {
                 return null;
             }
@@ -193,5 +202,12 @@ public class AotBrowserCallableFinder {
 
     private static String quotePath(Path path) {
         return '"' + path.toString().replace("\\", "\\\\") + '"';
+    }
+
+    private static void throwUnknownMetadataFormat(String reason)
+            throws BrowserCallableFinderException {
+        throw new BrowserCallableFinderException(String.format(
+                "Unable to read information about beans from the AOT metadata output file `%s`: %s",
+                METADATA_FILE_NAME, reason));
     }
 }

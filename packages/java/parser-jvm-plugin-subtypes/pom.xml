@@ -30,6 +30,11 @@
       <artifactId>classgraph</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-models-jakarta</artifactId>
+      <version>${swagger.models.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>

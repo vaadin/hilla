@@ -1,16 +1,18 @@
 package com.vaadin.hilla.maven;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Profile;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
-import static com.vaadin.flow.plugin.maven.FlowModeAbstractMojo.getClasspathElements;
 import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
 
 interface Configurable {
@@ -24,7 +26,8 @@ interface Configurable {
 
     String getMainClass();
 
-    default EngineAutoConfiguration configure() {
+    default EngineAutoConfiguration configure()
+            throws DependencyResolutionRequiredException {
         var project = (MavenProject) getPluginContext().get("project");
 
         var isProduction = project.getActiveProfiles().stream()
@@ -43,7 +46,7 @@ interface Configurable {
                 .outputDir(generatedOrOldLocation().toPath())
                 .groupId(project.getGroupId())
                 .artifactId(project.getArtifactId())
-                .classpath(getClasspathElements(project))
+                .classpath(project.getRuntimeClasspathElements())
                 .withDefaultAnnotations().mainClass(mainClass)
                 .nodeCommand(getNode()).productionMode(isProduction).build();
         EngineAutoConfiguration.setDefault(conf);
