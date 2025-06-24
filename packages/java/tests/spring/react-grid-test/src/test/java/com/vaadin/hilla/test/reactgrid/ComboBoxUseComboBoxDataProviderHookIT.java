@@ -55,12 +55,14 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
     public void filteringUsingSignalWorks() {
         ComboBoxElement comboBox = $(ComboBoxElement.class).id("prependFilter");
         List<String> options = getOptions(comboBox);
+        int size = options.size();
         Assert.assertEquals("Adams", options.get(0));
         Assert.assertEquals("Evans", options.get(9));
         comboBox.closePopup();
 
         TestBenchElement filterInput = $("input").id("filter");
         filterInput.sendKeys("c");
+        waitUntil(driver -> getOptions(comboBox).size() < size);
         options = getOptions(comboBox);
         Assert.assertEquals("Baker", options.get(0)); // Zack
         Assert.assertEquals("Johnson", options.get(9)); // Alice
