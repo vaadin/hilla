@@ -9,7 +9,11 @@ import type { WritableDeep } from 'type-fest';
 import { expect, chai, describe, it, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import type { MiddlewareContext, MiddlewareNext } from '../src/Connect.js';
 import CookieManager from '../src/CookieManager.js';
-import { SPRING_CSRF_COOKIE_NAME, VAADIN_CSRF_COOKIE_NAME, VAADIN_CSRF_HEADER } from '../src/CsrfUtils.js';
+import csrfInfoSource, {
+  SPRING_CSRF_COOKIE_NAME,
+  VAADIN_CSRF_COOKIE_NAME,
+  VAADIN_CSRF_HEADER,
+} from '../src/CsrfInfoSource.js';
 import {
   ConnectClient,
   EndpointError,
@@ -66,7 +70,6 @@ describe('@vaadin/hilla-frontend', () => {
     });
 
     afterEach(() => {
-      document.body.querySelector('vaadin-connection-indicator')?.remove();
       delete $wnd.Vaadin;
     });
 
@@ -77,30 +80,6 @@ describe('@vaadin/hilla-frontend', () => {
     it('should instantiate without arguments', () => {
       const client = new ConnectClient();
       expect(client).to.be.instanceOf(ConnectClient);
-    });
-
-    it('should add a global connection indicator', () => {
-      new ConnectClient();
-      expect($wnd.Vaadin?.connectionIndicator).is.not.undefined;
-    });
-
-    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow.client.TypeScript not loaded', () => {
-      new ConnectClient();
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
-      dispatchEvent(new Event('offline'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
-      dispatchEvent(new Event('online'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
-    });
-
-    it('should transition to CONNECTION_LOST on offline and to CONNECTED on subsequent online if Flow is loaded but Flow.client.TypeScript not loaded', () => {
-      new ConnectClient();
-      $wnd.Vaadin!.Flow = {};
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
-      dispatchEvent(new Event('offline'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTION_LOST);
-      dispatchEvent(new Event('online'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
     });
 
     it('should not transition connection state if Flow loaded', () => {
@@ -280,6 +259,7 @@ describe('@vaadin/hilla-frontend', () => {
         try {
           CookieManager.set(SPRING_CSRF_COOKIE_NAME, TEST_SPRING_CSRF_TOKEN_VALUE);
           setupSpringCsrfMetaTags();
+          csrfInfoSource.reset();
 
           await client.call('FooEndpoint', 'fooMethod');
 
@@ -289,12 +269,14 @@ describe('@vaadin/hilla-frontend', () => {
         } finally {
           CookieManager.remove(SPRING_CSRF_COOKIE_NAME);
           clearSpringCsrfMetaTags();
+          csrfInfoSource.reset();
         }
       });
 
       it('should set header for preventing CSRF using Spring csrf when presents in meta tags', async () => {
         try {
           setupSpringCsrfMetaTags();
+          csrfInfoSource.reset();
 
           await client.call('FooEndpoint', 'fooMethod');
 
@@ -303,18 +285,24 @@ describe('@vaadin/hilla-frontend', () => {
           });
         } finally {
           clearSpringCsrfMetaTags();
+          csrfInfoSource.reset();
         }
       });
 
       it('should set header for preventing CSRF using Hilla csrfToken cookie when no Spring csrf token presents', async () => {
-        const csrfToken = 'foo';
-        CookieManager.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
+        try {
+          const csrfToken = 'foo';
+          CookieManager.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
+          csrfInfoSource.reset();
 
-        await client.call('FooEndpoint', 'fooMethod');
+          await client.call('FooEndpoint', 'fooMethod');
 
-        expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
-          [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
-        });
+          expect(fetchMock.callHistory.lastCall()?.options.headers).to.deep.include({
+            [VAADIN_CSRF_HEADER.toLowerCase()]: csrfToken,
+          });
+        } finally {
+          csrfInfoSource.reset();
+        }
       });
 
       it('should set header for preventing CSRF using Hilla csrf when having Spring csrf meta tags with string undefined', async () => {
@@ -325,6 +313,7 @@ describe('@vaadin/hilla-frontend', () => {
 
           const csrfToken = 'foo';
           CookieManager.set(VAADIN_CSRF_COOKIE_NAME, csrfToken);
+          csrfInfoSource.reset();
 
           await client.call('FooEndpoint', 'fooMethod');
 
@@ -334,6 +323,7 @@ describe('@vaadin/hilla-frontend', () => {
         } finally {
           CookieManager.remove('csrfToken');
           clearSpringCsrfMetaTags();
+          csrfInfoSource.reset();
         }
       });
 
@@ -682,9 +672,10 @@ describe('@vaadin/hilla-frontend', () => {
     describe('atmosphere configuration', () => {
       let client: ConnectClient;
 
-      it('should pass custom configuration to flux connection', () => {
+      it('should pass custom configuration to flux connection', async () => {
         client = new ConnectClient({ atmosphereOptions: { fallbackMethod: 'fake' } });
-        const { fluxConnection: _ } = client;
+        const { fluxConnection } = client;
+        await fluxConnection.ready;
         expect(subscribeStub.lastCall.firstArg).to.have.property('fallbackMethod').which.equals('fake');
       });
     });

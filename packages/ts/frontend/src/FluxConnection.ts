@@ -1,12 +1,13 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
 import type { Subscription } from './Connect.js';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import csrfInfoSource from './CsrfInfoSource.js';
 import {
   isClientMessage,
   type ServerCloseMessage,
   type ServerConnectMessage,
   type ServerMessage,
 } from './FluxMessages.js';
+import { VAADIN_BROWSER_ENVIRONMENT } from './utils.js';
 
 export enum State {
   ACTIVE = 'active',
@@ -70,17 +71,8 @@ type EndpointInfo = {
   reconnect?(): ActionOnLostSubscription | void;
 };
 
-let atmosphere: Atmosphere.Atmosphere | undefined;
-
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-if (globalThis.document) {
-  // In case we are in the browser environment, we have to load atmosphere.js
-  try {
-    atmosphere = (await import('atmosphere.js')).default;
-  } catch (e: unknown) {
-    console.error('Failed to load atmosphere.js', e);
-  }
-}
+const atmospherePromise = VAADIN_BROWSER_ENVIRONMENT ? import('atmosphere.js') : undefined;
 
 /**
  * A representation of the underlying persistent network connection used for subscribing to Flux type endpoint methods.
@@ -97,10 +89,11 @@ export class FluxConnection extends EventTarget {
   readonly #statusOfSubscriptions = new Map<string, FluxSubscriptionState>();
   #pendingMessages: ServerMessage[] = [];
   #socket?: Atmosphere.Request;
+  readonly #ready: Promise<void>;
 
   constructor(connectPrefix: string, atmosphereOptions?: Partial<Atmosphere.Request>) {
     super();
-    this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
+    this.#ready = this.#connectWebsocket(connectPrefix.replace(/connect$/u, ''), atmosphereOptions ?? {});
   }
 
   #resubscribeIfWasClosed() {
@@ -123,6 +116,13 @@ export class FluxConnection extends EventTarget {
       });
       toBeRemoved.forEach((id) => this.#removeSubscription(id));
     }
+  }
+
+  /**
+   * Promise that resolves when the instance is initialized.
+   */
+  get ready(): Promise<void> {
+    return this.#ready;
   }
 
   /**
@@ -192,12 +192,17 @@ export class FluxConnection extends EventTarget {
     return hillaSubscription;
   }
 
-  #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
+  async #connectWebsocket(prefix: string, atmosphereOptions: Partial<Atmosphere.Request>) {
+    if (!atmospherePromise) {
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const extraHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
+    const extraHeaders = Object.fromEntries((await csrfInfoSource.get()).headerEntries);
     const pushUrl = 'HILLA/push';
     const url = prefix.length === 0 ? pushUrl : (prefix.endsWith('/') ? prefix : `${prefix}/`) + pushUrl;
-    this.#socket = atmosphere?.subscribe?.({
+    const atmosphere = (await atmospherePromise).default;
+    this.#socket = atmosphere.subscribe?.({
       contentType: 'application/json; charset=UTF-8',
       enableProtocol: true,
       transport: 'websocket',

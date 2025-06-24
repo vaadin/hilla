@@ -1,6 +1,5 @@
 import type { ReactiveControllerHost } from '@lit/reactive-element';
-import { ConnectionIndicator, ConnectionState } from '@vaadin/common-frontend';
-import { getCsrfTokenHeadersForEndpointRequest } from './CsrfUtils.js';
+import csrfInfoSource from './CsrfInfoSource.js';
 import {
   EndpointError,
   EndpointResponseError,
@@ -185,10 +184,6 @@ export type MiddlewareFunction = (context: MiddlewareContext, next: MiddlewareNe
  */
 export type Middleware = MiddlewareClass | MiddlewareFunction;
 
-function isFlowLoaded(): boolean {
-  return $wnd.Vaadin?.Flow?.clients?.TypeScript !== undefined;
-}
-
 /**
  * Extracts file objects from the object that is used to build the request body.
  *
@@ -290,22 +285,6 @@ export class ConnectClient {
     if (options.atmosphereOptions) {
       this.atmosphereOptions = options.atmosphereOptions;
     }
-
-    // add connection indicator to DOM
-    ConnectionIndicator.create();
-
-    // Listen to browser online/offline events and update the loading indicator accordingly.
-    // Note: if Flow.ts is loaded, it instead handles the state transitions.
-    addEventListener('online', () => {
-      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTED;
-      }
-    });
-    addEventListener('offline', () => {
-      if (!isFlowLoaded() && $wnd.Vaadin?.connectionState) {
-        $wnd.Vaadin.connectionState.state = ConnectionState.CONNECTION_LOST;
-      }
-    });
   }
 
   /**
@@ -340,11 +319,10 @@ export class ConnectClient {
       throw new TypeError(`2 arguments required, but got only ${arguments.length}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
+    const csrfInfo = await csrfInfoSource.get();
     const headers: Record<string, string> = {
       Accept: 'application/json',
-      ...csrfHeaders,
+      ...Object.fromEntries(csrfInfo.headerEntries),
     };
 
     const [paramsWithoutFiles, files] = extractFiles(params ?? {});

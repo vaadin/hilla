@@ -15,7 +15,7 @@ import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
-import { convertFSRouteSegmentToURLPatternFormat, strip } from './utils.js';
+import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
 const printer = createPrinter({ newLine: NewLineKind.LineFeed });
 
@@ -39,6 +39,17 @@ type RegularModule = Readonly<{
 
 function isLazyModule(mod: LazyModule | RegularModule | undefined): mod is LazyModule {
   return !!mod && 'path' in mod;
+}
+
+function isLazyRoute(pathContext: readonly string[], path: string, config: Readonly<ServerViewConfig>): boolean {
+  if (config.lazy !== undefined) {
+    return config.lazy;
+  }
+
+  // "/" and "/login" are eager by default
+  const rootContext = !pathContext.some(Boolean);
+  const eagerDefault = rootContext && (path === '' || path === 'login');
+  return !eagerDefault;
 }
 
 class RouteFromMetaProcessor {
@@ -69,9 +80,9 @@ class RouteFromMetaProcessor {
     const errors: string[] = [];
 
     const routes = transformTree<
-      [metas: readonly RouteMeta[], configs: readonly ServerViewConfig[]],
+      [pathContext: readonly string[], metas: readonly RouteMeta[], configs: readonly ServerViewConfig[]],
       readonly CallExpression[]
-    >([this.#views, this.#configs], null, ([metas, configs], next) => {
+    >([[], this.#views, this.#configs], null, ([pathContext, metas, configs], next) => {
       errors.push(
         ...metas
           .map((route) => route.path)
@@ -86,7 +97,7 @@ class RouteFromMetaProcessor {
         if (children) {
           // Assuming that if we have `children` in the route, we also have
           // `children` in the config.
-          _children = next([children, config.children!]);
+          _children = next([[...pathContext, path], children, config.children!]);
         }
 
         let module: LazyModule | RegularModule | undefined;
@@ -105,7 +116,7 @@ class RouteFromMetaProcessor {
         }
 
         if (relativePath && fileName) {
-          if (this.#isLazy(path, config)) {
+          if (isLazyRoute(pathContext, path, config)) {
             module = {
               path: relativePath,
               config,
@@ -178,7 +189,7 @@ export default routes;`.source.statements,
         : module.configId;
     }
 
-    const _children = children && children.length > 0 ? factory.createArrayLiteralExpression(children, true) : '';
+    const _children = children ? factory.createArrayLiteralExpression(children, true) : '';
 
     // ```ts
     // createRoute("grandparent", {...grandparentConfig, flowLayout: true}, [
@@ -188,16 +199,6 @@ export default routes;`.source.statements,
     // ]),
     // ```
     return ast`${createRouteId}("${path}", ${component ?? ''}, ${config ?? ''}, ${_children})`.node as CallExpression;
-  }
-
-  #isLazy(path: string, config: ServerViewConfig): boolean {
-    const strippedPath = strip(path);
-
-    if (this.#configs.includes(config) && (strippedPath === '' || strippedPath === 'login')) {
-      return false;
-    }
-
-    return config.lazy ?? true;
   }
 }
 

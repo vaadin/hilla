@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [ main, '24.6', '24.5', '2.5', '1.5' ]
+    branches: [ main, '24.8', '24.7', '24.6', '2.5', '1.5' ]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -73,7 +73,6 @@ jobs:
             mvn -q -DskipTests \
               -Dexec.executable='echo' \
               -Dexec.args='${project.groupId}:${project.artifactId}' \
-              -Dexec.skip='${maven.deploy.skip}' \
               exec:exec \
             | perl -pe 's/\.(?=.*:)/\//g' \
             | sed -e 's/:/\//' \
@@ -231,9 +230,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -291,9 +287,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}

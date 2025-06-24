@@ -59,7 +59,12 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'config') {
               if (node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
                 const code = node.initializer.getText(sourceFile);
-                const script = new Script(`(${code})`);
+                const script = new Script(`
+                  function key(x) {
+                    return x[0];
+                  }
+                  (${code})
+                `);
                 config = script.runInThisContext() as ViewConfig;
                 if (config.flowLayout === undefined) {
                   const copy = JSON.parse(JSON.stringify(config));

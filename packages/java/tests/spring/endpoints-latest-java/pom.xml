@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>tests-spring</artifactId>
-        <version>24.8-SNAPSHOT</version>
+        <version>25.0-SNAPSHOT</version>
     </parent>
     <artifactId>tests-spring-endpoints-latest-java</artifactId>
     <name>ITs for Endpoints / latest Java</name>
@@ -28,7 +28,6 @@
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>${jakarta.annotation.api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

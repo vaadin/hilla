@@ -166,8 +166,8 @@ public class EndpointWithRestControllerTest {
         String endpointName = TestEndpoints.class.getSimpleName();
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         return mockMvcForEndpoint.perform(requestBuilder).andReturn()
                 .getResponse().getContentAsString();
