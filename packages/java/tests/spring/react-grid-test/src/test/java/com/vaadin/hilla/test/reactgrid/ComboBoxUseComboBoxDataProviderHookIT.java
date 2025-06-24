@@ -58,6 +58,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .withId("prependFilter").waitForFirst();
         List<String> options = getOptions(comboBox);
+        int size = options.size();
         Assert.assertEquals("Adams", options.get(0));
         Assert.assertEquals("Evans", options.get(9));
         comboBox.closePopup();
@@ -65,6 +66,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
         TestBenchElement filterInput = $("input").withId("filter")
                 .waitForFirst();
         filterInput.sendKeys("c");
+        waitUntil(driver -> getOptions(comboBox).size() < size);
         options = getOptions(comboBox);
         Assert.assertEquals("Baker", options.get(0)); // Zack
         Assert.assertEquals("Johnson", options.get(9)); // Alice
