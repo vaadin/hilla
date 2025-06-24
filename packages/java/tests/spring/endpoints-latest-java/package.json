@@ -18,9 +18,9 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.27.1",
-    "@preact/signals-react-transform": "0.5.1",
+    "@preact/signals-react-transform": "0.5.2",
     "@rollup/plugin-replace": "6.0.2",
-    "@rollup/pluginutils": "5.1.4",
+    "@rollup/pluginutils": "5.2.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -32,9 +32,9 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "4.5.0",
+    "@vitejs/plugin-react": "4.6.0",
     "async": "3.2.6",
-    "glob": "11.0.2",
+    "glob": "11.0.3",
     "magic-string": "0.30.17",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "5.14.0",
@@ -64,9 +64,9 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.27.1",
-      "@preact/signals-react-transform": "0.5.1",
+      "@preact/signals-react-transform": "0.5.2",
       "@rollup/plugin-replace": "6.0.2",
-      "@rollup/pluginutils": "5.1.4",
+      "@rollup/pluginutils": "5.2.0",
       "@vaadin/hilla-generator-cli": "25.0.0-alpha1",
       "@vaadin/hilla-generator-core": "25.0.0-alpha1",
       "@vaadin/hilla-generator-plugin-backbone": "25.0.0-alpha1",
@@ -78,9 +78,9 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.0.0-alpha1",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.0.0-alpha1",
       "@vaadin/hilla-generator-utils": "25.0.0-alpha1",
-      "@vitejs/plugin-react": "4.5.0",
+      "@vitejs/plugin-react": "4.6.0",
       "async": "3.2.6",
-      "glob": "11.0.2",
+      "glob": "11.0.3",
       "magic-string": "0.30.17",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "5.14.0",
@@ -93,7 +93,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "ed07ea81a1d099b90da69e43ad21f6db86d9af10104f440d3ea01f08cd3794a9"
+    "hash": "6f8ca26cb86ea9eccf87fb1b72007a55e4ae5fc3206d3eb996a6e940735d2c48"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
