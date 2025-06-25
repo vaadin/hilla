@@ -34,7 +34,7 @@ import java.util.function.Function;
 /**
  * Proxy for the accessing the SignalRegistry.
  */
-@Component
+//@Component
 public class SecureSignalsRegistry {
 
     record EndpointMethod(String endpoint, String method) {
