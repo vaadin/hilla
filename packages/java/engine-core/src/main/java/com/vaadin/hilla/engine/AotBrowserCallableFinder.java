@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class AotBrowserCallableFinder {
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
-    private static final String METADATA_FILE_NAME = "reachability-metadata.json";
+    private static final String METADATA_FILE_NAME = "reflect-config.json";
 
     /**
      * Finds the classes annotated with the endpoint annotations.
@@ -164,32 +163,26 @@ public class AotBrowserCallableFinder {
         var objectMapper = new ObjectMapper();
         var rootNode = objectMapper.readTree(jsonContent);
 
-        if (!rootNode.isObject()) {
-            throwUnknownMetadataFormat("root node is not an object");
-        }
-
-        var reflectionsNode = rootNode.get("reflection");
-        if (reflectionsNode == null) {
-            throwUnknownMetadataFormat("\"reflection\" key is null");
-        }
-
-        if (!reflectionsNode.isArray()) {
-            throwUnknownMetadataFormat("\"reflection\" key is not an array");
+        if (!rootNode.isArray()) {
+            throw new BrowserCallableFinderException(
+                    "Aot output file reflect-config.json does not contain"
+                            + " information about beans, so endpoint detection"
+                            + " cannot be performed");
         }
 
         // Extract candidate class names
         var candidates = new ArrayList<String>();
-        for (var node : reflectionsNode) {
-            String type = node.get("type").asText();
-            candidates.add(type);
+        for (var node : rootNode) {
+            String name = node.get("name").asText();
+            candidates.add(name);
         }
 
         var annotationNames = engineConfiguration.getEndpointAnnotations()
                 .stream().map(Class::getName).toList();
         var classLoader = engineConfiguration.getClassLoader();
-        return candidates.stream().map(type -> {
+        return candidates.stream().map(name -> {
             try {
-                return Class.forName(type, false, classLoader);
+                return Class.forName(name, false, classLoader);
             } catch (Throwable t) {
                 return null;
             }
@@ -202,12 +195,5 @@ public class AotBrowserCallableFinder {
 
     private static String quotePath(Path path) {
         return '"' + path.toString().replace("\\", "\\\\") + '"';
-    }
-
-    private static void throwUnknownMetadataFormat(String reason)
-            throws BrowserCallableFinderException {
-        throw new BrowserCallableFinderException(String.format(
-                "Unable to read information about beans from the AOT metadata output file `%s`: %s",
-                METADATA_FILE_NAME, reason));
     }
 }
