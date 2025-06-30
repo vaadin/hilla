@@ -93,7 +93,8 @@ public class InternalSignal {
 
     private void notifySubscribers(SignalCommand processedCommand,
             CommandResult result) {
-        var commandToEmit = inProgressCommands.remove(processedCommand.commandId());
+        var commandToEmit = inProgressCommands
+                .remove(processedCommand.commandId());
         if (result.accepted()) {
             subscribers.entrySet().removeIf(
                     client -> tryEmitCommandToSubscriber(commandToEmit,

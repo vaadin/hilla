@@ -29,7 +29,7 @@ import reactor.core.publisher.Flux;
  * Handler Endpoint for Fullstack Signals' subscription and update events.
  */
 @AnonymousAllowed
-//@Component
+// @Component
 public class SignalsHandler {
 
     private static final String FEATURE_FLAG_ERROR_MESSAGE = """
