@@ -89,12 +89,12 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>4.0.0-SNAPSHOT</spring.boot.version>
-    <testbench.version>9.4.0</testbench.version>
+    <spring.boot.version>3.5.3</spring.boot.version>
+    <testbench.version>10.0.0-alpha2</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
-    <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
+    <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
-    <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
+    <hibernate.validator.version>8.0.2.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
     <github.javaparser.core.version>3.27.0</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
@@ -132,20 +132,6 @@
       </snapshots>
     </repository>
     <repository>
-      <id>spring-snapshots</id>
-      <url>https://repo.spring.io/snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>spring-milestones</id>
-      <url>https://repo.spring.io/milestone</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
       <id>vaadin-prereleases</id>
       <url>https://maven.vaadin.com/vaadin-prereleases/</url>
       <snapshots>
@@ -167,20 +153,6 @@
     <pluginRepository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring-snapshots</id>
-      <url>https://repo.spring.io/snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring-milestones</id>
-      <url>https://repo.spring.io/milestone</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>

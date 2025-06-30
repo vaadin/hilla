@@ -27,7 +27,7 @@ abstract class AbstractGradleTest {
 
     val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "25.0-SNAPSHOT"
     val flowVersion = System.getenv("flow.version").takeUnless { it.isNullOrEmpty() } ?: "25.0-SNAPSHOT"
-    val springBootVersion = System.getenv("spring.boot.version").takeUnless { it.isNullOrEmpty() } ?: "4.0.0-SNAPSHOT"
+    val springBootVersion = System.getenv("spring.boot.version").takeUnless { it.isNullOrEmpty() } ?: "3.5.3"
 
     /**
      * The testing Gradle project. Automatically deleted after every test.
