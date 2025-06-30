@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.hilla.signals2.internal;
+package com.vaadin.hilla.signals.internal;
 
 import com.vaadin.signals.Id;
 

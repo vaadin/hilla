@@ -1,4 +1,4 @@
-package com.vaadin.hilla.signals2.internal;
+package com.vaadin.hilla.signals.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
