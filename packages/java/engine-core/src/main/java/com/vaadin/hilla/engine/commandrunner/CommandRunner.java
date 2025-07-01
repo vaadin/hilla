@@ -1,13 +1,13 @@
 package com.vaadin.hilla.engine.commandrunner;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,26 +175,30 @@ public interface CommandRunner {
 
             var process = processBuilder.start();
 
+            var optOut = Optional.ofNullable(stdOut).map(out -> {
+                var t = new Thread(() -> out.accept(process.getInputStream()));
+                t.start();
+                return t;
+            });
+            var optErr = Optional.ofNullable(stdErr).map(err -> {
+                var t = new Thread(() -> err.accept(process.getErrorStream()));
+                t.start();
+                return t;
+            });
+
             if (stdIn != null) {
-                // Allow the caller to write to the command's standard input
-                try (var outputStream = process.getOutputStream()) {
-                    stdIn.accept(outputStream);
-                }
-            }
-
-            if (stdOut != null) {
-                try (var inputStream = process.getInputStream()) {
-                    stdOut.accept(inputStream);
-                }
-            }
-
-            if (stdErr != null) {
-                try (var inputStream = process.getErrorStream()) {
-                    stdErr.accept(inputStream);
+                try (var os = process.getOutputStream()) {
+                    stdIn.accept(os);
                 }
             }
 
             exitCode = process.waitFor();
+
+            var threads = Stream.of(optOut, optErr).flatMap(Optional::stream)
+                    .toList();
+            for (var thread : threads) {
+                thread.join();
+            }
         } catch (IOException | InterruptedException e) {
             // Tries to figure out if the command is not found. This is not a
             // 100% reliable way to do it, but an exception will be thrown
