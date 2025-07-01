@@ -7,7 +7,6 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,27 +174,27 @@ public interface CommandRunner {
 
             var process = processBuilder.start();
 
-            var optOut = Optional.ofNullable(stdOut).map(out -> {
-                var t = new Thread(() -> out.accept(process.getInputStream()));
-                t.start();
-                return t;
-            });
-            var optErr = Optional.ofNullable(stdErr).map(err -> {
-                var t = new Thread(() -> err.accept(process.getErrorStream()));
-                t.start();
-                return t;
-            });
-
-            if (stdIn != null) {
-                try (var os = process.getOutputStream()) {
-                    stdIn.accept(os);
-                }
-            }
+            var threads = Stream
+                    .of(new Pipe<>(stdOut, process.getInputStream()),
+                            new Pipe<>(stdErr, process.getErrorStream()),
+                            new Pipe<>(stdIn, process.getOutputStream()))
+                    .filter(handler -> handler.consumer() != null)
+                    .map(handler -> {
+                        var t = new Thread(() -> {
+                            try (var stream = handler.stream()) {
+                                ((Consumer<Closeable>) handler.consumer())
+                                        .accept(stream);
+                            } catch (IOException e) {
+                                getLogger().error("Error while handling stream",
+                                        e);
+                            }
+                        });
+                        t.start();
+                        return t;
+                    }).toList();
 
             exitCode = process.waitFor();
 
-            var threads = Stream.of(optOut, optErr).flatMap(Optional::stream)
-                    .toList();
             for (var thread : threads) {
                 thread.join();
             }
@@ -288,4 +287,9 @@ public interface CommandRunner {
     default Map<String, String> environment() {
         return Map.of("JAVA_HOME", getCurrentJavaProcessJavaHome());
     }
-}
+    // end of interface (comment added to help formatter)
+    }
+
+    // used internally to pair consumers with their streams
+    record Pipe<T extends Closeable>(Consumer<T> consumer, T stream)
+    {}
