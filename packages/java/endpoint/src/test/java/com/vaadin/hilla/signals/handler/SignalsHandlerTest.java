@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.signals.Signal;
-import com.vaadin.hilla.signals.core.event.ListStateEvent;
 
 import org.junit.*;
 import org.mockito.Mockito;
@@ -130,103 +129,6 @@ public class SignalsHandlerTest {
         StepVerifier.create(firstFlux)
                 .expectNext(expectedUpdatedSignalEventJson).thenCancel()
                 .verify();
-    }
-
-    @Test
-    @Ignore("Parent logic to be verified")
-    public void when_parentClientSignalIdIsNotNull_andParentSignalExists_subscribe_returnsSubscription()
-            throws Exception {
-        String parentClientSignalId = "parent-signal-id";
-        String clientSignalId = CLIENT_SIGNAL_ID_1;
-
-        // Mock parent signal
-        InternalSignal parentSignal = Mockito.mock(InternalSignal.class);
-        Mockito.when(signalsRegistry.get(parentClientSignalId))
-                .thenReturn(parentSignal);
-
-        ObjectNode expectedNode = mapper.createObjectNode();
-        expectedNode.put("key", "value");
-        Flux<JsonNode> expectedFlux = Flux.just(expectedNode);
-        Mockito.when(parentSignal.subscribe(clientSignalId))
-                .thenReturn(expectedFlux);
-
-        Flux<JsonNode> resultFlux = signalsHandler.subscribe("endpoint",
-                "method", clientSignalId, null);
-
-        StepVerifier.create(resultFlux).expectNext(expectedNode).thenCancel()
-                .verify();
-
-        Mockito.verify(signalsRegistry).unsubscribe(clientSignalId);
-    }
-
-    @Test
-    @Ignore("Parent logic to be verified")
-    public void when_parentClientSignalIdIsNotNull_andParentSignalDoesNotExist_subscribe_returnsErrorFlux()
-            throws Exception {
-        String parentClientSignalId = "parent-signal-id";
-        String clientSignalId = CLIENT_SIGNAL_ID_1;
-
-        Mockito.when(signalsRegistry.get(parentClientSignalId))
-                .thenReturn(null);
-
-        Flux<JsonNode> resultFlux = signalsHandler.subscribe("endpoint",
-                "method", clientSignalId, null);
-
-        StepVerifier.create(resultFlux).expectErrorMatches(
-                throwable -> throwable instanceof IllegalStateException
-                        && throwable.getMessage().contains(
-                                "Parent Signal not found for parent client signal id: "
-                                        + parentClientSignalId))
-                .verify();
-
-        Mockito.verify(signalsRegistry, Mockito.never())
-                .unsubscribe(clientSignalId);
-    }
-
-    @Test
-    @Ignore("Parent logic to be verified")
-    public void when_parentSignalIdIsNotNull_andParentSignalExists_update_callsSubmitOnParentSignal()
-            throws Exception {
-        String parentSignalId = "parent-signal-id";
-
-        ObjectNode event = mapper.createObjectNode();
-        event.put(ListStateEvent.Field.PARENT_SIGNAL_ID, parentSignalId);
-        event.put("id", UUID.randomUUID().toString());
-        event.put("type", "someType");
-
-        InternalSignal parentSignal = Mockito.mock(InternalSignal.class);
-        Mockito.when(signalsRegistry.get(parentSignalId))
-                .thenReturn(parentSignal);
-
-        signalsHandler.update(CLIENT_SIGNAL_ID_1, event);
-
-        Mockito.verify(parentSignal).submit(CLIENT_SIGNAL_ID_1, event);
-    }
-
-    @Test
-    @Ignore("Parent logic to be verified")
-    public void when_parentSignalIdIsNotNull_andParentSignalDoesNotExist_update_throwsException()
-            throws Exception {
-        String parentSignalId = "parent-signal-id";
-
-        ObjectNode event = mapper.createObjectNode();
-        event.put(ListStateEvent.Field.PARENT_SIGNAL_ID, parentSignalId);
-        event.put("id", UUID.randomUUID().toString());
-        event.put("type", "someType");
-
-        Mockito.when(signalsRegistry.get(parentSignalId)).thenReturn(null);
-
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class, () -> {
-                    signalsHandler.update(CLIENT_SIGNAL_ID_1, event);
-                });
-
-        String expectedMessage = "Parent Signal not found for signal id: "
-                + parentSignalId;
-        assertEquals(expectedMessage, exception.getMessage());
-
-        Mockito.verify(signalsRegistry, Mockito.never())
-                .get(CLIENT_SIGNAL_ID_1);
     }
 
     @Test
