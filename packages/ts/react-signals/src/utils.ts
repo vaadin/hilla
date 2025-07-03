@@ -28,5 +28,10 @@ export function randomId(sizeBytes = 8): string {
   for (const value of bytes) {
     binary += String.fromCharCode(value);
   }
-  return btoa(binary).replace(/[=]+$/u, '');
+  const base64 = btoa(binary);
+  let end = base64.length;
+  while (end > 0 && base64[end - 1] === '=') {
+    end -= 1;
+  }
+  return base64.slice(0, end);
 }
