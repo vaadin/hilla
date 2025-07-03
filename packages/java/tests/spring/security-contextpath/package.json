@@ -330,6 +330,8 @@
     "mobx": "$mobx",
     "@vaadin/card": "$@vaadin/card",
     "@vaadin/master-detail-layout": "$@vaadin/master-detail-layout",
-    "@vaadin/markdown": "$@vaadin/markdown"
+    "@vaadin/markdown": "$@vaadin/markdown",
+    "@vaadin/react-components": "25.0.0-alpha5",
+    "@vaadin/react-components-pro": "25.0.0-alpha5"
   }
 }
