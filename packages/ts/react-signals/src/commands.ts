@@ -53,6 +53,20 @@ export function createSetCommand<V>(targetNodeId: Id, value: V): SetCommand<V> {
 }
 
 /**
+ * A signal command that increments a numeric value.
+ */
+export type IncrementCommand = CreateCommandType<'IncrementCommand', { value: number }>;
+
+export function createIncrementCommand(targetNodeId: Id, value: number): IncrementCommand {
+  return {
+    commandId: randomId(),
+    targetNodeId,
+    type: 'IncrementCommand',
+    value,
+  };
+}
+
+/**
  * A sequence of commands that should be applied atomically and only if all
  * commands are individually accepted.
  */
@@ -90,6 +104,10 @@ export function isSetCommand<V>(command: unknown): command is SetCommand<V> {
 
 export function isValueCondition<V>(command: unknown): command is ValueCondition<V> {
   return isSignalCommand(command) && command.type === 'ValueCondition';
+}
+
+export function isIncrementCommand(command: unknown): command is IncrementCommand {
+  return isSignalCommand(command) && command.type === 'IncrementCommand';
 }
 
 export function isTransactionCommand(command: unknown): command is TransactionCommand {
