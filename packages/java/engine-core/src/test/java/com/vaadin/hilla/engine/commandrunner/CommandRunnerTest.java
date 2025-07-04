@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -165,8 +166,8 @@ public class CommandRunnerTest {
 
     static class JavaExecTestArgs implements ArgumentsProvider {
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext ec)
-                throws Exception {
+        public Stream<? extends Arguments> provideArguments(
+                ExtensionContext ec) {
             return CommandRunner.IS_WINDOWS ? Stream.of(
                     Arguments.of("c:\\path\\to\\java\\home\\bin\\java.exe",
                             "c:\\path\\to\\java\\home"),
@@ -284,6 +285,84 @@ public class CommandRunnerTest {
         assertDoesNotThrow(() -> runner.run(null, false));
         assertEquals(1, stdOutRequested.size());
         assertEquals(false, stdOutRequested.get(0));
+    }
+
+    @Test
+    void processInputOutput_isHandledCorrectly() throws CommandRunnerException {
+        String input = "Hello, CommandRunner!"
+                + (CommandRunner.IS_WINDOWS ? "\r\n" : "\n");
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        CommandRunner runner = new TestRunner() {
+            @Override
+            public List<String> executables() {
+                return CommandRunner.IS_WINDOWS ? List.of("cmd.exe")
+                        : List.of("cat");
+            }
+
+            @Override
+            public String[] arguments() {
+                return CommandRunner.IS_WINDOWS ? new String[] { "/c", "more" }
+                        : new String[] {};
+            }
+
+            @Override
+            public String[] testArguments() {
+                return CommandRunner.IS_WINDOWS ? new String[] { "/c", "ver" }
+                        : new String[] { "--version" };
+            }
+        };
+        runner.run(os -> {
+            try {
+                os.write(input.getBytes(StandardCharsets.UTF_8));
+                os.flush();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }, is -> {
+            try {
+                output.write(is.readAllBytes());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }, null);
+        assertEquals(input, output.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void processOutputWithNullStdIn_isHandledCorrectly()
+            throws CommandRunnerException {
+        String input = "Hello, CommandRunner!"
+                + (CommandRunner.IS_WINDOWS ? "\r\n" : "\n");
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        CommandRunner runner = new TestRunner() {
+            @Override
+            public List<String> executables() {
+                return CommandRunner.IS_WINDOWS ? List.of("cmd.exe")
+                        : List.of("echo");
+            }
+
+            @Override
+            public String[] arguments() {
+                return CommandRunner.IS_WINDOWS
+                        ? new String[] { "/c", "echo", input.trim() }
+                        : new String[] { input.trim() };
+            }
+
+            @Override
+            public String[] testArguments() {
+                return CommandRunner.IS_WINDOWS ? new String[] { "/c", "ver" }
+                        : new String[] { "--version" };
+            }
+        };
+        runner.run(null, is -> {
+            try {
+                output.write(is.readAllBytes());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }, null);
+        assertTrue(
+                output.toString(StandardCharsets.UTF_8).contains(input.trim()));
     }
 
 }
