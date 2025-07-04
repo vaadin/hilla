@@ -328,4 +328,41 @@ public class CommandRunnerTest {
         assertEquals(input, output.toString(StandardCharsets.UTF_8));
     }
 
+    @Test
+    void processOutputWithNullStdIn_isHandledCorrectly()
+            throws CommandRunnerException {
+        String input = "Hello, CommandRunner!"
+                + (CommandRunner.IS_WINDOWS ? "\r\n" : "\n");
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        CommandRunner runner = new TestRunner() {
+            @Override
+            public List<String> executables() {
+                return CommandRunner.IS_WINDOWS ? List.of("cmd.exe")
+                        : List.of("echo");
+            }
+
+            @Override
+            public String[] arguments() {
+                return CommandRunner.IS_WINDOWS
+                        ? new String[] { "/c", "echo", input.trim() }
+                        : new String[] { input.trim() };
+            }
+
+            @Override
+            public String[] testArguments() {
+                return CommandRunner.IS_WINDOWS ? new String[] { "/c", "ver" }
+                        : new String[] { "--version" };
+            }
+        };
+        runner.run(null, is -> {
+            try {
+                output.write(is.readAllBytes());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }, null);
+        assertTrue(
+                output.toString(StandardCharsets.UTF_8).contains(input.trim()));
+    }
+
 }
