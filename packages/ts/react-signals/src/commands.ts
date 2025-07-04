@@ -92,18 +92,16 @@ export function createTransactionCommand(commands: SignalCommand[]): Transaction
 export type InsertCommand<V> = CreateCommandType<
   'InsertCommand',
   {
-    parentNodeId: Id;
     value: V;
     position: ListPosition;
   }
 >;
 
-export function createInsertCommand<V>(parentNodeId: Id, value: V, position: ListPosition): InsertCommand<V> {
+export function createInsertCommand<V>(targetNodeId: Id, value: V, position: ListPosition): InsertCommand<V> {
   return {
     commandId: randomId(),
-    targetNodeId: parentNodeId,
+    targetNodeId,
     type: 'InsertCommand',
-    parentNodeId,
     value,
     position,
   };
@@ -112,6 +110,52 @@ export function createInsertCommand<V>(parentNodeId: Id, value: V, position: Lis
 export type ListPosition = {
   after?: Id | null;
   before?: Id | null;
+};
+
+// EDGE constant to represent the edge of the list (like Id.EDGE in Java)
+export const EDGE: Id = '';
+
+function idOf(signal: { id: Id } | null | undefined): Id {
+  return signal?.id ?? EDGE;
+}
+
+// ListPosition helpers to match Java API.
+export const ListPosition = {
+  /**
+   * Gets the insertion position that corresponds to the beginning of the list.
+   * After edge.
+   */
+  first(): ListPosition {
+    return { after: EDGE, before: null };
+  },
+  /**
+   * Gets the insertion position that corresponds to the end of the list.
+   * Before edge.
+   */
+  last(): ListPosition {
+    return { after: null, before: EDGE };
+  },
+  /**
+   * Gets the insertion position immediately after the given signal.
+   * Inserting after null is interpreted as after the start of the list (first).
+   */
+  after(signal: { id: Id } | null): ListPosition {
+    return { after: idOf(signal), before: null };
+  },
+  /**
+   * Gets the insertion position immediately before the given signal.
+   * Inserting before null is interpreted as before the end of the list (last).
+   */
+  before(signal: { id: Id } | null): ListPosition {
+    return { after: null, before: idOf(signal) };
+  },
+  /**
+   * Gets the insertion position between the given signals.
+   * Inserting after null is after the start (first), before null is before the end (last).
+   */
+  between(after: { id: Id } | null, before: { id: Id } | null): ListPosition {
+    return { after: idOf(after), before: idOf(before) };
+  },
 };
 
 /**
@@ -125,10 +169,10 @@ export type AdoptAtCommand = CreateCommandType<
   }
 >;
 
-export function createAdoptAtCommand(parentNodeId: Id, childId: Id, position: ListPosition): AdoptAtCommand {
+export function createAdoptAtCommand(targetNodeId: Id, childId: Id, position: ListPosition): AdoptAtCommand {
   return {
     commandId: randomId(),
-    targetNodeId: parentNodeId,
+    targetNodeId,
     type: 'AdoptAtCommand',
     childId,
     position,
@@ -147,13 +191,13 @@ export type PositionCondition = CreateCommandType<
 >;
 
 export function createPositionCondition(
-  parentNodeId: Id,
+  targetNodeId: Id,
   childId: Id,
   expectedPosition: ListPosition,
 ): PositionCondition {
   return {
     commandId: randomId(),
-    targetNodeId: parentNodeId,
+    targetNodeId,
     type: 'PositionCondition',
     childId,
     expectedPosition,
@@ -170,10 +214,10 @@ export type RemoveCommand = CreateCommandType<
   }
 >;
 
-export function createRemoveCommand(parentNodeId: Id, childId: Id): RemoveCommand {
+export function createRemoveCommand(targetNodeId: Id, childId: Id): RemoveCommand {
   return {
     commandId: randomId(),
-    targetNodeId: parentNodeId,
+    targetNodeId,
     type: 'RemoveCommand',
     childId,
   };

@@ -5,7 +5,7 @@ import {
   type RemoveCommand,
   type AdoptAtCommand,
   type PositionCondition,
-  type ListPosition,
+  ListPosition,
   isInsertCommand,
   isRemoveCommand,
   isAdoptAtCommand,
@@ -36,7 +36,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing a signal for the inserted entry and the eventual result
    */
   insertFirst(value: T): Operation {
-    return this.insertAt(value, { after: null, before: null }); // TODO: ListPosition.first()
+    return this.insertAt(value, ListPosition.first());
   }
 
   /**
@@ -45,7 +45,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing a signal for the inserted entry and the eventual result
    */
   insertLast(value: T): Operation {
-    return this.insertAt(value, { after: null, before: null }); // TODO: ListPosition.last()
+    return this.insertAt(value, ListPosition.last());
   }
 
   /**
