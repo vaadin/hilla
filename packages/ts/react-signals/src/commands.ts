@@ -86,6 +86,99 @@ export function createTransactionCommand(commands: SignalCommand[]): Transaction
   };
 }
 
+/**
+ * A signal command that inserts a value into a list at a given position.
+ */
+export type InsertCommand<V> = CreateCommandType<
+  'InsertCommand',
+  {
+    parentNodeId: Id;
+    value: V;
+    position: ListPosition;
+  }
+>;
+
+export function createInsertCommand<V>(parentNodeId: Id, value: V, position: ListPosition): InsertCommand<V> {
+  return {
+    commandId: randomId(),
+    targetNodeId: parentNodeId,
+    type: 'InsertCommand',
+    parentNodeId,
+    value,
+    position,
+  };
+}
+
+export type ListPosition = {
+  after?: Id | null;
+  before?: Id | null;
+};
+
+/**
+ * A signal command that moves a child to a new position in a list.
+ */
+export type AdoptAtCommand = CreateCommandType<
+  'AdoptAtCommand',
+  {
+    childId: Id;
+    position: ListPosition;
+  }
+>;
+
+export function createAdoptAtCommand(parentNodeId: Id, childId: Id, position: ListPosition): AdoptAtCommand {
+  return {
+    commandId: randomId(),
+    targetNodeId: parentNodeId,
+    type: 'AdoptAtCommand',
+    childId,
+    position,
+  };
+}
+
+/**
+ * A signal command that checks a child's position in a list.
+ */
+export type PositionCondition = CreateCommandType<
+  'PositionCondition',
+  {
+    childId: Id;
+    expectedPosition: ListPosition;
+  }
+>;
+
+export function createPositionCondition(
+  parentNodeId: Id,
+  childId: Id,
+  expectedPosition: ListPosition,
+): PositionCondition {
+  return {
+    commandId: randomId(),
+    targetNodeId: parentNodeId,
+    type: 'PositionCondition',
+    childId,
+    expectedPosition,
+  };
+}
+
+/**
+ * A signal command that removes a child from a list.
+ */
+export type RemoveCommand = CreateCommandType<
+  'RemoveCommand',
+  {
+    childId: Id;
+  }
+>;
+
+export function createRemoveCommand(parentNodeId: Id, childId: Id): RemoveCommand {
+  return {
+    commandId: randomId(),
+    targetNodeId: parentNodeId,
+    type: 'RemoveCommand',
+    childId,
+  };
+}
+
 // TypeGuard functions:
 
 function isSignalCommand(command: unknown): command is SignalCommand {
@@ -117,4 +210,20 @@ export function isTransactionCommand(command: unknown): command is TransactionCo
     command.targetNodeId === '' &&
     Array.isArray((command as TransactionCommand).commands)
   );
+}
+
+export function isInsertCommand<V>(command: unknown): command is InsertCommand<V> {
+  return isSignalCommand(command) && command.type === 'InsertCommand';
+}
+
+export function isAdoptAtCommand(command: unknown): command is AdoptAtCommand {
+  return isSignalCommand(command) && command.type === 'AdoptAtCommand';
+}
+
+export function isPositionCondition(command: unknown): command is PositionCondition {
+  return isSignalCommand(command) && command.type === 'PositionCondition';
+}
+
+export function isRemoveCommand(command: unknown): command is RemoveCommand {
+  return isSignalCommand(command) && command.type === 'RemoveCommand';
 }

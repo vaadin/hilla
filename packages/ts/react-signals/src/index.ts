@@ -8,3 +8,4 @@ export type { OperationSubscription } from './ValueSignal.js';
 export { FullStackSignal } from './FullStackSignal.js';
 export type { Operation } from './FullStackSignal.js';
 export { NumberSignal } from './NumberSignal.js';
+export { ListSignal } from './ListSignal.js';

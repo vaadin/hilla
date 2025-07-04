@@ -48,6 +48,12 @@ class CommandUtils {
             case "TransactionCommand" -> {
                 return (Class<T>) SignalCommand.TransactionCommand.class;
             }
+            case "InsertCommand" -> {
+                return (Class<T>) SignalCommand.InsertCommand.class;
+            }
+            case "RemoveCommand" -> {
+                return (Class<T>) SignalCommand.RemoveCommand.class;
+            }
             default ->
                 throw new RuntimeException("Unknown command type: " + type);
             }
