@@ -54,6 +54,18 @@ class CommandUtils {
             case "RemoveCommand" -> {
                 return (Class<T>) SignalCommand.RemoveCommand.class;
             }
+            case "IncrementCommand" -> {
+                return (Class<T>) SignalCommand.IncrementCommand.class;
+            }
+            case "ValueCondition" -> {
+                return (Class<T>) SignalCommand.ValueCondition.class;
+            }
+            case "AdoptAtCommand" -> {
+                return (Class<T>) SignalCommand.AdoptAtCommand.class;
+            }
+            case "PositionCondition" -> {
+                return (Class<T>) SignalCommand.PositionCondition.class;
+            }
             default ->
                 throw new RuntimeException("Unknown command type: " + type);
             }
