@@ -1,23 +1,24 @@
 import {
   createInsertCommand,
   createRemoveCommand,
-  type InsertCommand,
-  type RemoveCommand,
-  type AdoptAtCommand,
-  type PositionCondition,
-  ListPosition,
-  isInsertCommand,
-  isRemoveCommand,
   isAdoptAtCommand,
+  isInsertCommand,
   isPositionCondition,
+  isRemoveCommand,
+  ListPosition,
+  ZERO,
+  type AdoptAtCommand,
+  type InsertCommand,
+  type PositionCondition,
+  type RemoveCommand,
 } from './commands.js';
 import {
   $createOperation,
   $processServerResponse,
   $resolveOperation,
   $update,
-  type Operation,
   FullStackSignal,
+  type Operation,
 } from './FullStackSignal.js';
 import type { ValueSignal } from './ValueSignal.js';
 
@@ -55,7 +56,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing a signal for the inserted entry and the eventual result
    */
   insertAt(value: T, at: ListPosition): Operation {
-    const command = createInsertCommand<T>(this.id, value, at);
+    const command = createInsertCommand<T>(ZERO, value, at);
     const promise = this[$update](command);
     return this[$createOperation]({ id: command.commandId, promise });
   }

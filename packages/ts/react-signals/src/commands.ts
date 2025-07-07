@@ -97,6 +97,9 @@ export type InsertCommand<V> = CreateCommandType<
   }
 >;
 
+// ZERO constant to represent the default id (like Id.ZERO in Java)
+export const ZERO: Id = '';
+
 export function createInsertCommand<V>(targetNodeId: Id, value: V, position: ListPosition): InsertCommand<V> {
   return {
     commandId: randomId(),
