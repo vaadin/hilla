@@ -1,7 +1,6 @@
 package com.vaadin.hilla.engine.commandrunner;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 import java.io.*;
@@ -175,26 +174,30 @@ public interface CommandRunner {
 
             var process = processBuilder.start();
 
-            if (stdIn != null) {
-                // Allow the caller to write to the command's standard input
-                try (var outputStream = process.getOutputStream()) {
-                    stdIn.accept(outputStream);
-                }
-            }
-
-            if (stdOut != null) {
-                try (var inputStream = process.getInputStream()) {
-                    stdOut.accept(inputStream);
-                }
-            }
-
-            if (stdErr != null) {
-                try (var inputStream = process.getErrorStream()) {
-                    stdErr.accept(inputStream);
-                }
-            }
+            var threads = Stream
+                    .of(new Pipe<>(stdOut, process.getInputStream()),
+                            new Pipe<>(stdErr, process.getErrorStream()),
+                            new Pipe<>(stdIn, process.getOutputStream()))
+                    .filter(handler -> handler.consumer() != null)
+                    .map(handler -> {
+                        var t = new Thread(() -> {
+                            try (var stream = handler.stream()) {
+                                ((Consumer<Closeable>) handler.consumer())
+                                        .accept(stream);
+                            } catch (IOException e) {
+                                getLogger().error("Error while handling stream",
+                                        e);
+                            }
+                        });
+                        t.start();
+                        return t;
+                    }).toList();
 
             exitCode = process.waitFor();
+
+            for (var thread : threads) {
+                thread.join();
+            }
         } catch (IOException | InterruptedException e) {
             // Tries to figure out if the command is not found. This is not a
             // 100% reliable way to do it, but an exception will be thrown
@@ -284,4 +287,9 @@ public interface CommandRunner {
     default Map<String, String> environment() {
         return Map.of("JAVA_HOME", getCurrentJavaProcessJavaHome());
     }
-}
+    // end of interface (comment added to help formatter)
+    }
+
+    // used internally to pair consumers with their streams
+    record Pipe<T extends Closeable>(Consumer<T> consumer, T stream)
+    {}
