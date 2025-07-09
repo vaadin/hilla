@@ -19,15 +19,16 @@ import {
   $update,
   FullStackSignal,
   type Operation,
+  type ServerConnectionConfig,
 } from './FullStackSignal.js';
-import type { ValueSignal } from './ValueSignal.js';
+import { ValueSignal } from './ValueSignal.js';
 
 /**
  * A signal containing a list of values. Supports atomic updates to the list structure.
  * Each value in the list is accessed as a separate ValueSignal instance.
  */
 export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
-  constructor(config: ConstructorParameters<typeof FullStackSignal>[1], id?: string) {
+  constructor(config: ServerConnectionConfig, id?: string) {
     super([], config, id);
   }
 
@@ -67,7 +68,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing the eventual result
    */
   remove(child: ValueSignal<T>): Operation {
-    const command = createRemoveCommand(this.id, child.id);
+    const command = createRemoveCommand(ZERO, child.id);
     const promise = this[$update](command);
     return this[$createOperation]({ id: command.commandId, promise });
   }
@@ -76,7 +77,22 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
     command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition,
   ): void {
     if (isInsertCommand<T>(command)) {
-      // TODO: Update local state with inserted value
+      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.targetNodeId);
+      let insertIndex = this.value.length;
+      const pos = command.position;
+      if (pos.after === '' && pos.before == null) {
+        insertIndex = 0;
+      } else if (pos.after == null && pos.before === '') {
+        insertIndex = this.value.length;
+      } else if (typeof pos.after === 'string' && pos.after !== '') {
+        const idx = this.value.findIndex((v) => v.id === pos.after);
+        insertIndex = idx !== -1 ? idx + 1 : this.value.length;
+      } else if (typeof pos.before === 'string' && pos.before !== '') {
+        const idx = this.value.findIndex((v) => v.id === pos.before);
+        insertIndex = idx !== -1 ? idx : this.value.length;
+      }
+      const newList = [...this.value.slice(0, insertIndex), valueSignal, ...this.value.slice(insertIndex)];
+      this.value = newList;
       this[$resolveOperation](command.commandId, undefined);
     } else if (isRemoveCommand(command)) {
       // TODO: Update local state for removal

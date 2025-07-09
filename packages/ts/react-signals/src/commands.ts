@@ -11,14 +11,14 @@ export type Id = string;
 export type SignalCommand = Readonly<{
   commandId: Id;
   targetNodeId: Id;
-  type: string;
+  '@type': string;
 }>;
 
 /**
  * Creates a new state event type.
  */
 type CreateCommandType<T extends string, E extends Record<string, unknown> = Record<never, never>> = Readonly<{
-  type: T;
+  '@type': T;
 }> &
   Readonly<E> &
   SignalCommand;
@@ -27,13 +27,13 @@ type CreateCommandType<T extends string, E extends Record<string, unknown> = Rec
  * A signal command that doesn't apply any change but only performs a test
  * whether the given node has the expected value, based on JSON equality.
  */
-export type ValueCondition<V> = CreateCommandType<'ValueCondition', { expectedValue: V }>;
+export type ValueCondition<V> = CreateCommandType<'value', { expectedValue: V }>;
 
 export function createValueCondition<V>(targetNodeId: Id, expectedValue: V): ValueCondition<V> {
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'ValueCondition',
+    '@type': 'value',
     expectedValue,
   };
 }
@@ -41,13 +41,13 @@ export function createValueCondition<V>(targetNodeId: Id, expectedValue: V): Val
 /**
  * A signal command that sets a value.
  */
-export type SetCommand<V> = CreateCommandType<'SetCommand', { value: V }>;
+export type SetCommand<V> = CreateCommandType<'set', { value: V }>;
 
 export function createSetCommand<V>(targetNodeId: Id, value: V): SetCommand<V> {
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'SetCommand',
+    '@type': 'set',
     value,
   };
 }
@@ -55,13 +55,13 @@ export function createSetCommand<V>(targetNodeId: Id, value: V): SetCommand<V> {
 /**
  * A signal command that increments a numeric value.
  */
-export type IncrementCommand = CreateCommandType<'IncrementCommand', { value: number }>;
+export type IncrementCommand = CreateCommandType<'inc', { value: number }>;
 
 export function createIncrementCommand(targetNodeId: Id, value: number): IncrementCommand {
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'IncrementCommand',
+    '@type': 'inc',
     value,
   };
 }
@@ -71,7 +71,7 @@ export function createIncrementCommand(targetNodeId: Id, value: number): Increme
  * commands are individually accepted.
  */
 export type TransactionCommand = CreateCommandType<
-  'TransactionCommand',
+  'tx',
   {
     commands: SignalCommand[];
   }
@@ -81,7 +81,7 @@ export function createTransactionCommand(commands: SignalCommand[]): Transaction
   return {
     commandId: randomId(),
     targetNodeId: '',
-    type: 'TransactionCommand',
+    '@type': 'tx',
     commands,
   };
 }
@@ -90,7 +90,7 @@ export function createTransactionCommand(commands: SignalCommand[]): Transaction
  * A signal command that inserts a value into a list at a given position.
  */
 export type InsertCommand<V> = CreateCommandType<
-  'InsertCommand',
+  'insert',
   {
     value: V;
     position: ListPosition;
@@ -104,7 +104,7 @@ export function createInsertCommand<V>(targetNodeId: Id, value: V, position: Lis
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'InsertCommand',
+    '@type': 'insert',
     value,
     position,
   };
@@ -165,7 +165,7 @@ export const ListPosition = {
  * A signal command that moves a child to a new position in a list.
  */
 export type AdoptAtCommand = CreateCommandType<
-  'AdoptAtCommand',
+  'at',
   {
     childId: Id;
     position: ListPosition;
@@ -176,17 +176,14 @@ export function createAdoptAtCommand(targetNodeId: Id, childId: Id, position: Li
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'AdoptAtCommand',
+    '@type': 'at',
     childId,
     position,
   };
 }
 
-/**
- * A signal command that checks a child's position in a list.
- */
 export type PositionCondition = CreateCommandType<
-  'PositionCondition',
+  'pos',
   {
     childId: Id;
     expectedPosition: ListPosition;
@@ -201,17 +198,14 @@ export function createPositionCondition(
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'PositionCondition',
+    '@type': 'pos',
     childId,
     expectedPosition,
   };
 }
 
-/**
- * A signal command that removes a child from a list.
- */
 export type RemoveCommand = CreateCommandType<
-  'RemoveCommand',
+  'remove',
   {
     childId: Id;
   }
@@ -221,7 +215,7 @@ export function createRemoveCommand(targetNodeId: Id, childId: Id): RemoveComman
   return {
     commandId: randomId(),
     targetNodeId,
-    type: 'RemoveCommand',
+    '@type': 'remove',
     childId,
   };
 }
@@ -234,43 +228,43 @@ function isSignalCommand(command: unknown): command is SignalCommand {
     command !== null &&
     typeof (command as { commandId?: unknown }).commandId === 'string' &&
     typeof (command as { targetNodeId?: unknown }).targetNodeId === 'string' &&
-    typeof (command as { type?: unknown }).type === 'string'
+    typeof (command as { ['@type']?: unknown })['@type'] === 'string'
   );
 }
 
 export function isSetCommand<V>(command: unknown): command is SetCommand<V> {
-  return isSignalCommand(command) && command.type === 'SetCommand';
+  return isSignalCommand(command) && command['@type'] === 'set';
 }
 
 export function isValueCondition<V>(command: unknown): command is ValueCondition<V> {
-  return isSignalCommand(command) && command.type === 'ValueCondition';
+  return isSignalCommand(command) && command['@type'] === 'value';
 }
 
 export function isIncrementCommand(command: unknown): command is IncrementCommand {
-  return isSignalCommand(command) && command.type === 'IncrementCommand';
+  return isSignalCommand(command) && command['@type'] === 'inc';
 }
 
 export function isTransactionCommand(command: unknown): command is TransactionCommand {
   return (
     isSignalCommand(command) &&
-    command.type === 'TransactionCommand' &&
+    command['@type'] === 'tx' &&
     command.targetNodeId === '' &&
     Array.isArray((command as TransactionCommand).commands)
   );
 }
 
 export function isInsertCommand<V>(command: unknown): command is InsertCommand<V> {
-  return isSignalCommand(command) && command.type === 'InsertCommand';
+  return isSignalCommand(command) && command['@type'] === 'insert';
 }
 
 export function isAdoptAtCommand(command: unknown): command is AdoptAtCommand {
-  return isSignalCommand(command) && command.type === 'AdoptAtCommand';
+  return isSignalCommand(command) && command['@type'] === 'at';
 }
 
 export function isPositionCondition(command: unknown): command is PositionCondition {
-  return isSignalCommand(command) && command.type === 'PositionCondition';
+  return isSignalCommand(command) && command['@type'] === 'pos';
 }
 
 export function isRemoveCommand(command: unknown): command is RemoveCommand {
-  return isSignalCommand(command) && command.type === 'RemoveCommand';
+  return isSignalCommand(command) && command['@type'] === 'remove';
 }

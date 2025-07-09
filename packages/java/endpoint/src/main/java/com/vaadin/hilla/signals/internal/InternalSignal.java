@@ -1,6 +1,5 @@
 package com.vaadin.hilla.signals.internal;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.SignalCommand;
@@ -8,7 +7,6 @@ import com.vaadin.signals.SignalUtils;
 import com.vaadin.signals.impl.CommandResult;
 import com.vaadin.signals.impl.SignalTree;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -26,14 +24,14 @@ import java.util.HashMap;
 public class InternalSignal {
 
     // ClientSignalId -> Subscriber's sink
-    private final Map<String, Sinks.Many<JsonNode>> subscribers = new HashMap<>();
+    private final Map<String, Sinks.Many<SignalCommand>> subscribers = new HashMap<>();
 
     private final Signal<?> signal;
     private final SignalTree tree;
     private Runnable treeSubscriptionCanceler;
 
     // Commands in processing, mapping commandId -> clientSignalId
-    private final Map<Id, ObjectNode> inProgressCommands = new HashMap<>();
+    private final Map<Id, SignalCommand> inProgressCommands = new HashMap<>();
     // Lookup for clientSignalId by commandId
     private final Map<Id, String> commandsOfSubscribers = new HashMap<>();
 
@@ -53,8 +51,8 @@ public class InternalSignal {
      *            the clientSignalId associated with the signal to update
      * @return a Flux of JSON events
      */
-    public Flux<JsonNode> subscribe(String clientSignalId) {
-        Sinks.Many<JsonNode> sink = Sinks.many().unicast()
+    public Flux<SignalCommand> subscribe(String clientSignalId) {
+        Sinks.Many<SignalCommand> sink = Sinks.many().unicast()
                 .onBackpressureBuffer();
         return sink.asFlux().doOnSubscribe(ignore -> {
             tree.getLock().lock();
@@ -69,7 +67,7 @@ public class InternalSignal {
                 // TODO: the targetNodeId is ZERO for single-valued signals:
                 var setCommand = new SignalCommand.SetCommand(Id.random(),
                         Id.ZERO, CommandUtils.toJson(snapshot));
-                sink.tryEmitNext(CommandUtils.toJson(setCommand));
+                sink.tryEmitNext(setCommand);
             } finally {
                 tree.getLock().unlock();
             }
@@ -93,9 +91,14 @@ public class InternalSignal {
 
     private void notifySubscribers(SignalCommand processedCommand,
             CommandResult result) {
+        getLogger().debug("Notifying subscribers for command: {}, accepted: {}",
+                processedCommand.commandId(), result.accepted());
+
         var commandToEmit = inProgressCommands
                 .remove(processedCommand.commandId());
         if (result.accepted()) {
+            getLogger().debug("Command {} accepted, notifying all subscribers.",
+                    processedCommand.commandId());
             subscribers.entrySet().removeIf(
                     client -> tryEmitCommandToSubscriber(commandToEmit,
                             client.getKey(), client.getValue()));
@@ -114,19 +117,26 @@ public class InternalSignal {
                     clientSignalId, subscribers.get(clientSignalId));
             if (failure) {
                 // remove the subscriber if it failed to emit to:
+                getLogger().debug(
+                        "Failed to notify client {} for command {}. Removing from subscribers.",
+                        clientSignalId, processedCommand.commandId());
                 subscribers.remove(clientSignalId);
             }
         }
         commandsOfSubscribers.remove(processedCommand.commandId());
     }
 
-    private boolean tryEmitCommandToSubscriber(ObjectNode processedCommand,
-            String clientSignalId, Sinks.Many<JsonNode> clientSink) {
+    private boolean tryEmitCommandToSubscriber(SignalCommand processedCommand,
+            String clientSignalId, Sinks.Many<SignalCommand> clientSink) {
+        getLogger().debug(
+                "Attempting to notify subscriber {} with command: {}.",
+                clientSignalId, processedCommand.commandId());
+
         boolean failure = clientSink.tryEmitNext(processedCommand).isFailure();
         if (failure) {
             getLogger().debug(
                     "Failed to emit notification to client with signal id {} and command {}",
-                    clientSignalId, processedCommand.get("commandId"));
+                    clientSignalId, processedCommand.commandId());
         }
         return failure;
     }
@@ -140,13 +150,20 @@ public class InternalSignal {
      * @param commandJson
      *            the command to submit in JSON format
      */
-    public void submit(String clientSignalId, ObjectNode commandJson) {
+    public void submit(String clientSignalId, SignalCommand command) {
         tree.getLock().lock();
         try {
-            SignalCommand command = CommandUtils.fromJson(commandJson);
-            inProgressCommands.put(command.commandId(), commandJson);
+            // Log the received command
+            getLogger().debug("Received command: {}, by client: {}",
+                    command.commandId(), clientSignalId);
+
+            inProgressCommands.put(command.commandId(), command);
             commandsOfSubscribers.put(command.commandId(), clientSignalId);
             tree.commitSingleCommand(command);
+
+            // Log after committing to the signal tree
+            getLogger().debug("Committed command {} for client {}.",
+                    command.commandId(), clientSignalId);
         } finally {
             tree.getLock().unlock();
         }
