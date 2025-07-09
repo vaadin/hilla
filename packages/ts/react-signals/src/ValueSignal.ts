@@ -1,4 +1,5 @@
-import { createSetCommand, isSetCommand, type SignalCommand } from './commands.js';
+import type { Node } from './commands.js';
+import { createSetCommand, isSetCommand, isSnapshotCommand, type SignalCommand } from './commands.js';
 import {
   $createOperation,
   $processServerResponse,
@@ -61,6 +62,12 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   #recalculateState(command: SignalCommand): void {
     if (isSetCommand<T>(command)) {
       this.value = command.value;
+    } else if (isSnapshotCommand(command)) {
+      // Assign the value from the root node (id = '') if present
+      const rootNode = command.nodes[''] as Node | undefined;
+      if (rootNode && 'value' in rootNode) {
+        this.value = rootNode.value as T;
+      }
     }
   }
 }

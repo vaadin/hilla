@@ -220,6 +220,38 @@ export function createRemoveCommand(targetNodeId: Id, childId: Id): RemoveComman
   };
 }
 
+/**
+ * A node in the signal tree, as used in SnapshotCommand.
+ */
+export type Node = {
+  '@type': string;
+  parent: Id | null;
+  lastUpdate: Id | null;
+  scopeOwner: Id | null;
+  value?: unknown;
+  listChildren: Id[];
+  mapChildren: Record<string, Id>;
+};
+
+/**
+ * A signal command that initializes a tree based on a collection of pre-existing nodes.
+ */
+export type SnapshotCommand = CreateCommandType<
+  'snapshot',
+  {
+    nodes: Record<Id, Node>;
+  }
+>;
+
+export function createSnapshotCommand(nodes: Record<Id, Node>): SnapshotCommand {
+  return {
+    commandId: randomId(),
+    targetNodeId: '', // global command
+    '@type': 'snapshot',
+    nodes,
+  };
+}
+
 // TypeGuard functions:
 
 function isSignalCommand(command: unknown): command is SignalCommand {
@@ -227,7 +259,7 @@ function isSignalCommand(command: unknown): command is SignalCommand {
     typeof command === 'object' &&
     command !== null &&
     typeof (command as { commandId?: unknown }).commandId === 'string' &&
-    typeof (command as { targetNodeId?: unknown }).targetNodeId === 'string' &&
+    // typeof (command as { targetNodeId?: unknown }).targetNodeId === 'string' &&
     typeof (command as { ['@type']?: unknown })['@type'] === 'string'
   );
 }
@@ -267,4 +299,8 @@ export function isPositionCondition(command: unknown): command is PositionCondit
 
 export function isRemoveCommand(command: unknown): command is RemoveCommand {
   return isSignalCommand(command) && command['@type'] === 'remove';
+}
+
+export function isSnapshotCommand(command: unknown): command is SnapshotCommand {
+  return isSignalCommand(command) && command['@type'] === 'snapshot';
 }

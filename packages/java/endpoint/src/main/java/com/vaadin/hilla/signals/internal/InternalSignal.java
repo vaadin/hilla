@@ -67,11 +67,9 @@ public class InternalSignal {
                     treeSubscriptionCanceler = tree
                             .subscribeToProcessed(this::notifySubscribers);
                 }
-                var snapshot = signal.peekConfirmed();
                 // TODO: the targetNodeId is ZERO for single-valued signals:
-                var setCommand = new SignalCommand.SetCommand(Id.random(),
-                        Id.ZERO,
-                        SignalEnvironment.objectMapper().valueToTree(snapshot));
+                var setCommand = new SignalCommand.SnapshotCommand(Id.random(),
+                        SignalUtils.treeOf(signal).confirmed().nodes());
                 sink.tryEmitNext(SignalEnvironment.objectMapper()
                         .valueToTree(setCommand));
             } finally {
