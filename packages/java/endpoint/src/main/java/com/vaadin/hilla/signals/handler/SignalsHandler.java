@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
-import com.vaadin.signals.SignalCommand;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nullable;
@@ -62,7 +61,7 @@ public class SignalsHandler {
      *
      * @return a Flux of JSON events
      */
-    public Flux<SignalCommand> subscribe(String providerEndpoint,
+    public Flux<JsonNode> subscribe(String providerEndpoint,
             String providerMethod, String clientSignalId, ObjectNode body) {
         if (registry == null) {
             throw new IllegalStateException(
@@ -91,7 +90,7 @@ public class SignalsHandler {
      * @param event
      *            the event to update with
      */
-    public void update(String clientSignalId, SignalCommand event)
+    public void update(String clientSignalId, ObjectNode event)
             throws EndpointInvocationException.EndpointHttpException {
         if (registry == null) {
             throw new IllegalStateException(
