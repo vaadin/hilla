@@ -5,12 +5,14 @@ import {
   isInsertCommand,
   isPositionCondition,
   isRemoveCommand,
+  isSnapshotCommand,
   ListPosition,
   ZERO,
   type AdoptAtCommand,
   type InsertCommand,
   type PositionCondition,
   type RemoveCommand,
+  type SnapshotCommand,
 } from './commands.js';
 import {
   $createOperation,
@@ -74,10 +76,10 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
   }
 
   protected override [$processServerResponse](
-    command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition,
+    command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition | SnapshotCommand,
   ): void {
     if (isInsertCommand<T>(command)) {
-      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.targetNodeId);
+      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.commandId);
       let insertIndex = this.value.length;
       const pos = command.position;
       if (pos.after === '' && pos.before == null) {
@@ -102,6 +104,27 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
       this[$resolveOperation](command.commandId, undefined);
     } else if (isPositionCondition(command)) {
       // TODO: Handle position verification
+      this[$resolveOperation](command.commandId, undefined);
+    } else if (isSnapshotCommand(command)) {
+      const { nodes } = command;
+      const listNode = nodes[''];
+
+      // Create new value signals for each child in the list
+      const childrenIds = listNode.listChildren;
+      const valueSignals = childrenIds
+        .map((childId) => {
+          const childNode = nodes[childId];
+          if ('value' in childNode) {
+            return new ValueSignal<T>(childNode.value as T, this.server.config, childId);
+          }
+          return null;
+        })
+        .filter(Boolean) as Array<ValueSignal<T>>;
+
+      // Update the list's value with these signals
+      this.value = valueSignals;
+
+      // Resolve the operation
       this[$resolveOperation](command.commandId, undefined);
     }
   }

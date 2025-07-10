@@ -63,10 +63,9 @@ export class ValueSignal<T> extends FullStackSignal<T> {
     if (isSetCommand<T>(command)) {
       this.value = command.value;
     } else if (isSnapshotCommand(command)) {
-      // Assign the value from the root node (id = '') if present
-      const rootNode = command.nodes[''] as Node | undefined;
-      if (rootNode && 'value' in rootNode) {
-        this.value = rootNode.value as T;
+      const node = command.nodes[this.id] as Node | undefined;
+      if (node && 'value' in node) {
+        this.value = node.value as T;
       }
     }
   }
