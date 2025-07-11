@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.7.9",
+  "version": "24.7.10",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -61,9 +61,9 @@
     "react-router": "7"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "24.7.9",
-    "@vaadin/hilla-react-auth": "24.7.9",
-    "@vaadin/hilla-react-signals": "24.7.9",
+    "@vaadin/hilla-generator-utils": "24.7.10",
+    "@vaadin/hilla-react-auth": "24.7.10",
+    "@vaadin/hilla-react-signals": "24.7.10",
     "typescript": "5.7.3"
   }
 }
