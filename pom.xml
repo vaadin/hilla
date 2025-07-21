@@ -299,6 +299,11 @@
         <version>1.3</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.lucee</groupId>
+        <artifactId>jcip-annotations</artifactId>
+        <version>1.0.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
