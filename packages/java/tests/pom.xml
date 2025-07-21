@@ -18,7 +18,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <vaadin.components.version>24.8-SNAPSHOT</vaadin.components.version>
+        <vaadin.components.version>24.9-SNAPSHOT</vaadin.components.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.scantrigger></jetty.scantrigger>
 
