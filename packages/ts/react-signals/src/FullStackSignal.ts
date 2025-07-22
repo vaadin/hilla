@@ -208,7 +208,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
         this.#error.value = undefined;
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this[$update](createSetCommand('', v));
+        this[$update](createSetCommand(this.id, v));
       }
     });
 
