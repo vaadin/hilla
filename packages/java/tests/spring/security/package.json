@@ -155,8 +155,8 @@
       "@vaadin/hilla-frontend": "24.7.10",
       "@vaadin/hilla-lit-form": "24.7.10",
       "@vaadin/horizontal-layout": "24.7.3",
-      "@vaadin/icon": "24.7.10",
-      "@vaadin/icons": "24.7.10",
+      "@vaadin/icon": "24.7.11",
+      "@vaadin/icons": "24.7.11",
       "@vaadin/input-container": "24.7.3",
       "@vaadin/integer-field": "24.7.3",
       "@vaadin/item": "24.7.3",
@@ -172,7 +172,7 @@
       "@vaadin/number-field": "24.7.3",
       "@vaadin/overlay": "24.7.3",
       "@vaadin/password-field": "24.7.3",
-      "@vaadin/polymer-legacy-adapter": "24.7.10",
+      "@vaadin/polymer-legacy-adapter": "24.7.11",
       "@vaadin/popover": "24.7.3",
       "@vaadin/progress-bar": "24.7.3",
       "@vaadin/radio-group": "24.7.3",
@@ -187,12 +187,12 @@
       "@vaadin/text-area": "24.7.3",
       "@vaadin/text-field": "24.7.3",
       "@vaadin/time-picker": "24.7.3",
-      "@vaadin/tooltip": "24.7.10",
+      "@vaadin/tooltip": "24.7.11",
       "@vaadin/upload": "24.7.3",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "24.7.10",
+      "@vaadin/vaadin-lumo-styles": "24.7.11",
       "@vaadin/vaadin-material-styles": "24.7.3",
-      "@vaadin/vaadin-themable-mixin": "24.7.10",
+      "@vaadin/vaadin-themable-mixin": "24.7.11",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "@vaadin/vertical-layout": "24.7.3",
       "@vaadin/virtual-list": "24.7.3",
@@ -230,7 +230,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "41d92e9e92c1becd4c59249142f32dc85acf48ba94f805ab78d368a92e742b94"
+    "hash": "5035722c8586411c7bd32f816716a543f1a6c695053fdbc9f123216cea690755"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -322,7 +322,7 @@
     "@vaadin/popover": "$@vaadin/popover",
     "@vaadin/dashboard": "$@vaadin/dashboard",
     "@vaadin/card": "$@vaadin/card",
-    "@vaadin/react-components": "24.7.10",
-    "@vaadin/react-components-pro": "24.7.10"
+    "@vaadin/react-components": "24.7.11",
+    "@vaadin/react-components-pro": "24.7.11"
   }
 }
