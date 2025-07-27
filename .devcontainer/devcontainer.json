@@ -1,0 +1,46 @@
+{
+  "name": "Vaadin DevContainer",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "containerEnv": {
+    "USERNAME": "vaadin",
+    "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
+    "CHROME_BIN": "/usr/local/bin/chrome",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "vaadin",
+      "userUid": "1000",
+      "userGid": "1000",
+      "addsudo": true,
+      "installZsh": false
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "jdkDistro": "tem",
+      "installGradle": true,
+      "installMaven": true
+    },
+    "ghcr.io/devcontainers-extra/features/kotlin-sdkman:2": {
+      "jdkVersion": "21",
+      "jdkDistro": "tem"
+    },
+    "ghcr.io/kreemer/features/chrometesting:1": {},
+    "./local-features/volta": {
+      "nodeVersion": "24",
+      "targetUser": "vaadin"
+    }
+  },
+  "forwardPorts": [9876, 8080, 8000],
+  "remoteUser": "vaadin",
+  "mounts": [
+    // This mount creates a named Docker volume for node_modules
+    // It will 'overlay' the node_modules directory within your mounted project
+    "source=node_modules_volume,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=vite_cache_volume,target=${containerWorkspaceFolder}/.vite,type=volume",
+    "source=cache_volume,target=${containerWorkspaceFolder}/.cache,type=volume"
+  ],
+  "postCreateCommand": "/tmp/postinstall.sh"
+}
