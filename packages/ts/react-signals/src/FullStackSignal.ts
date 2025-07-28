@@ -193,22 +193,27 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   // value to the server.
   #paused = true;
 
-  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string) {
+  /**
+   * Optional parent signal for command routing.
+   */
+  protected readonly parent?: FullStackSignal<any>;
+
+  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string, parent?: FullStackSignal<any>) {
     super(
       value,
-      () => this.#connect(),
-      () => this.#disconnect(),
+      () => (!parent ? this.#connect() : undefined),
+      () => (!parent ? this.#disconnect() : undefined),
     );
     this.id = id ?? randomId();
     this.server = new ServerConnection(this.id, config);
+    this.parent = parent;
 
     this.subscribe((v) => {
       if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
-
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this[$update](createSetCommand(this.id, v));
+        this[$update](createSetCommand('', v));
       }
     });
 
@@ -271,12 +276,17 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   }
 
   /**
-   * A method to update the server with the new value.
+   * A method to update the server with the new value or via parent.
    *
    * @param command - The command to update the server with.
    * @returns The server response promise.
    */
   protected async [$update](command: SignalCommand): Promise<void> {
+    if (this.parent) {
+      // Route command via parent, set targetNodeId
+      const routedCommand = { ...command, targetNodeId: this.id };
+      return this.parent[$update](routedCommand);
+    }
     return this.server
       .update(command)
       .catch((error: unknown) => {

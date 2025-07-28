@@ -78,8 +78,17 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
   protected override [$processServerResponse](
     command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition | SnapshotCommand,
   ): void {
+    // Check if the command has a targetNodeId and reroute it to the corresponding child
+    const targetChild = this.value.find((child) => child.id === command.targetNodeId);
+
+    if (targetChild) {
+      // Route the command to the specific child signal
+      targetChild[$processServerResponse](command);
+      return;
+    }
+
     if (isInsertCommand<T>(command)) {
-      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.commandId);
+      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.commandId, this);
       let insertIndex = this.value.length;
       const pos = command.position;
       if (pos.after === '' && pos.before == null) {
@@ -115,7 +124,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
         .map((childId) => {
           const childNode = nodes[childId];
           if ('value' in childNode) {
-            return new ValueSignal<T>(childNode.value as T, this.server.config, childId);
+            return new ValueSignal<T>(childNode.value as T, this.server.config, childId, this);
           }
           return null;
         })

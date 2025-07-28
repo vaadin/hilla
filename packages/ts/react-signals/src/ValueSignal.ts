@@ -1,5 +1,4 @@
-import type { Node } from './commands.js';
-import { createSetCommand, isSetCommand, isSnapshotCommand, type SignalCommand } from './commands.js';
+import { createSetCommand, isSetCommand, isSnapshotCommand, type Node, type SignalCommand } from './commands.js';
 import {
   $createOperation,
   $processServerResponse,
@@ -40,7 +39,7 @@ export class ValueSignal<T> extends FullStackSignal<T> {
    * @returns An operation object that allows to perform additional actions.
    */
   set(value: T): Operation {
-    const command = createSetCommand(this.id, value);
+    const command = createSetCommand('', value);
     const promise = this[$update](command);
     this[$setValueQuietly](value);
     return this[$createOperation]({ id: command.commandId, promise });
@@ -60,10 +59,10 @@ export class ValueSignal<T> extends FullStackSignal<T> {
   }
 
   #recalculateState(command: SignalCommand): void {
-    if (isSetCommand<T>(command) && command.targetNodeId === this.id) {
+    if (isSetCommand<T>(command)) {
       this.value = command.value;
     } else if (isSnapshotCommand(command)) {
-      const node = command.nodes[this.id] as Node | undefined;
+      const node = (command.nodes[this.id] ?? command.nodes['']) as Node | undefined;
       if (node && 'value' in node) {
         this.value = node.value as T;
       }
