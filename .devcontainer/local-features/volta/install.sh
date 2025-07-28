@@ -11,14 +11,12 @@ VOLTA_VERSION="${VOLTAVERSION:-latest}"
 NODE_VERSION="${NODEVERSION:-lts}"
 NPM_VERSION="${NPMVERSION:-none}"
 YARN_VERSION="${YARNVERSION:-none}"
-TARGET_USER="${TARGETUSER:-vscode}"
 
 echo "--- Starting Volta Node.js Toolchain installation (verbose) ---"
 echo "Volta Version: ${VOLTA_VERSION}"
 echo "Node Version: ${NODE_VERSION}"
 echo "NPM Version: ${NPM_VERSION}"
 echo "Yarn Version: ${YARN_VERSION}"
-echo "Target User for permissions: ${TARGET_USER}"
 
 install_apt_packages() {
     echo "Installing apt packages: $*"

@@ -28,11 +28,6 @@
       "type": "string",
       "description": "The Yarn version to install via Volta (e.g., 'latest'). Set to 'none' to skip Yarn installation.",
       "default": "none"
-    },
-    "targetUser": {
-      "type": "string",
-      "description": "The user for whom Volta will be installed. Defaults to 'vscode'.",
-      "default": "vscode"
     }
   },
   "installsAfter": [
