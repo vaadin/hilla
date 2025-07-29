@@ -19,7 +19,7 @@ export default class SelectController {
   async select(option: string): Promise<void> {
     const btn = await waitFor(() => this.instance.querySelector('[role="button"]')!);
     await this.#user.click(btn);
-    const opts = await waitFor(() => document.querySelector('[role="listbox"]')!);
+    const opts = await waitFor(() => this.instance.querySelector('[role="listbox"]')!);
     await this.#user.selectOptions(opts, option);
   }
 }
