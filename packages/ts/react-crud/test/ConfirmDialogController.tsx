@@ -32,7 +32,19 @@ export default class ConfirmDialogController {
   }
 
   get text(): string {
-    return this.instance.textContent ?? '';
+    return (
+      Array.from(this.instance.childNodes)
+        // Only select default slot assigned nodes: no header, no buttons
+        .filter((child: Node) => {
+          if ('assignedSlot' in child) {
+            const slottable = child as Slottable;
+            return slottable.assignedSlot && !slottable.assignedSlot.name;
+          }
+          return false;
+        })
+        .map((n) => n.textContent)
+        .join('')
+    );
   }
 
   async confirm(): Promise<void> {
