@@ -1,7 +1,7 @@
 {
   "name": "Hilla",
   "image": "debian:bookworm-slim",
-  "runArgs": ["--name", "hilla_dev"],
+  "runArgs": ["--name=hilla_dev"],
   "containerEnv": {
     "CHROME_BIN": "/usr/local/bin/chrome",
     "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
@@ -30,12 +30,16 @@
     }
   },
   "forwardPorts": [9876, 8080, 8000],
+  "containerUser": "vaadin",
   "remoteUser": "vaadin",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
   "mounts": [
-    // This mount creates a named Docker volume for node_modules
-    // It will 'overlay' the node_modules directory within your mounted project
-    "source=node_modules_volume,target=${containerWorkspaceFolder}/node_modules,type=volume"
-  ]
+    {
+      "source": "hilla_nodemodules",
+      "target": "${containerWorkspaceFolder}/node_modules",
+      "type": "volume"
+    },
+  ],
+  "postCreateCommand": "sudo chown -R vaadin:vaadin ${containerWorkspaceFolder}/node_modules"
 }
