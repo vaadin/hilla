@@ -25,7 +25,9 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
+
 import net.jcip.annotations.NotThreadSafe;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,13 +35,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
@@ -64,7 +67,7 @@ public class PushMessageHandlerTest {
     @Autowired
     private PushMessageHandler pushMessageHandler;
 
-    @MockBean
+    @MockitoBean
     private EndpointInvoker endpointInvoker;
 
     @Autowired

@@ -5,12 +5,13 @@ import java.util.List;
 
 import com.vaadin.hilla.crud.filter.PropertyStringFilter;
 import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.SpringDataWebProperties;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;

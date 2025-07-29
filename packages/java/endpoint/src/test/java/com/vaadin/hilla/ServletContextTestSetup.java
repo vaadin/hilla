@@ -10,14 +10,14 @@ import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.ServletContextAware;
 
 @Component
 public class ServletContextTestSetup implements ServletContextAware {
 
-    @MockBean
+    @MockitoBean
     private FeatureFlagCondition featureFlagCondition;
 
     @Override

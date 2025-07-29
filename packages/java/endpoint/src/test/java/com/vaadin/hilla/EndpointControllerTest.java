@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -38,7 +39,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.context.ApplicationContext;

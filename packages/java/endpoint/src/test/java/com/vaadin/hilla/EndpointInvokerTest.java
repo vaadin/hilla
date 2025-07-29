@@ -1,6 +1,7 @@
 package com.vaadin.hilla;
 
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -10,13 +11,14 @@ import java.security.Principal;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
