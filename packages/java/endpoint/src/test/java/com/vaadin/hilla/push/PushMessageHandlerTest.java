@@ -25,9 +25,7 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
-
 import net.jcip.annotations.NotThreadSafe;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,7 +40,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,

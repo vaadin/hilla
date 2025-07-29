@@ -1,7 +1,6 @@
 package com.vaadin.hilla;
 
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -11,7 +10,6 @@ import java.security.Principal;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

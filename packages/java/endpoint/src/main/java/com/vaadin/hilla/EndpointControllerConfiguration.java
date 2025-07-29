@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
