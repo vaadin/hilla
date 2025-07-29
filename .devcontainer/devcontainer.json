@@ -36,10 +36,9 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
   "mounts": [
     {
-      "source": "hilla_nodemodules",
+      "source": "${localWorkspaceFolderBasename}_nodemodules",
       "target": "${containerWorkspaceFolder}/node_modules",
       "type": "volume"
-    },
-  ],
-  "postCreateCommand": "sudo chown -R vaadin:vaadin ${containerWorkspaceFolder}/node_modules"
+    }
+  ]
 }
