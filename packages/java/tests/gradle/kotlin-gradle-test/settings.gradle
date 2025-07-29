@@ -4,6 +4,8 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven { url = 'https://repo.spring.io/snapshot' }
+        maven { url = 'https://repo.spring.io/milestone' }
         maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
         maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
     }
