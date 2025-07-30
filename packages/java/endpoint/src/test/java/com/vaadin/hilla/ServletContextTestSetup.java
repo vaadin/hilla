@@ -11,13 +11,11 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.ServletContextAware;
 
 @Component
 public class ServletContextTestSetup implements ServletContextAware {
 
-    @MockitoBean
     private FeatureFlagCondition featureFlagCondition;
 
     @Override
@@ -28,6 +26,7 @@ public class ServletContextTestSetup implements ServletContextAware {
                 .mock(ApplicationConfiguration.class);
         servletContext.setAttribute(ApplicationConfiguration.class.getName(),
                 applicationConfiguration);
+        featureFlagCondition = Mockito.mock(FeatureFlagCondition.class);
         Mockito.when(featureFlagCondition.matches(Mockito.any(), Mockito.any()))
                 .thenReturn(true);
 

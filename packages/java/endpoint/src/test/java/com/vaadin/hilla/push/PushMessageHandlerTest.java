@@ -38,7 +38,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
 
@@ -64,7 +63,6 @@ public class PushMessageHandlerTest {
     @Autowired
     private PushMessageHandler pushMessageHandler;
 
-    @MockitoBean
     private EndpointInvoker endpointInvoker;
 
     @Autowired
@@ -79,6 +77,7 @@ public class PushMessageHandlerTest {
 
     @Before
     public void setup() throws EndpointHttpException {
+        endpointInvoker = Mockito.mock(EndpointInvoker.class);
         Mockito.when(endpointInvoker.getReturnType(Mockito.anyString(),
                 Mockito.anyString())).thenAnswer(request -> {
                     if (!request.getArgument(0).equals(ENDPOINT_NAME)) {
