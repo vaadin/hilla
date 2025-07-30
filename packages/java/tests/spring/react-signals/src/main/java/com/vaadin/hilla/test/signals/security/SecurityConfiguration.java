@@ -27,12 +27,10 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/").permitAll()
+        http.authorizeHttpRequests(auth -> auth.requestMatchers("/").permitAll()
                 .requestMatchers("/images/*.png").permitAll()
                 .requestMatchers("/line-awesome/**/*.svg").permitAll()
-                .anyRequest().authenticated()
-        );
+                .anyRequest().authenticated());
 
         http.with(vaadin(), cfg -> cfg.loginView("/login"));
         return http.build();
