@@ -9,26 +9,23 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
 @Profile("legacy-vaadin-web-security")
 public class LegacySecurityConfig extends VaadinWebSecurity {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf((h) -> h
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/login")));
-
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/login"));
         http.authorizeHttpRequests(
-                (h) -> h.requestMatchers(new AntPathRequestMatcher("/flux"))
-                        .permitAll());
-        http.authorizeHttpRequests((h) -> h
-                .requestMatchers(new AntPathRequestMatcher("/type-script"))
-                .permitAll());
+                authz -> authz.requestMatchers("/flux", "/type-script")
+                        .permitAll().anyRequest().authenticated());
         super.configure(http);
         setLoginView(http, "/login");
+        return http.build();
     }
 
     @Bean

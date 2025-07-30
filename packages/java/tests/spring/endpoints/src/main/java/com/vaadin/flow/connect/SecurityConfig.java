@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
 
@@ -24,15 +23,12 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
             throws Exception {
-        http.csrf((h) -> h
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/login")));
+        http.csrf((h) -> h.ignoringRequestMatchers("/login"));
 
         http.authorizeHttpRequests(
-                (h) -> h.requestMatchers(new AntPathRequestMatcher("/flux"))
-                        .permitAll());
-        http.authorizeHttpRequests((h) -> h
-                .requestMatchers(new AntPathRequestMatcher("/type-script"))
-                .permitAll());
+                (h) -> h.requestMatchers("/flux").permitAll());
+        http.authorizeHttpRequests(
+                (h) -> h.requestMatchers("/type-script").permitAll());
         http.with(vaadin(), cfg -> cfg.loginView("/login"));
         return http.build();
     }
