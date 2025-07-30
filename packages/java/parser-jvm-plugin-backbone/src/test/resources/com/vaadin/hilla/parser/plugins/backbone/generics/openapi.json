@@ -578,6 +578,11 @@
                       "allOf": [
                         {
                           "nullable": true,
+                          "anyOf": [
+                            {
+                              "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                            }
+                          ],
                           "x-type-arguments": {
                             "allOf": [
                               {
@@ -585,12 +590,7 @@
                                 "nullable": true
                               }
                             ]
-                          },
-                          "anyOf": [
-                            {
-                              "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                            }
-                          ]
+                          }
                         }
                       ]
                     }
@@ -616,6 +616,11 @@
                     "allOf": [
                       {
                         "nullable": true,
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
+                          }
+                        ],
                         "x-type-arguments": {
                           "allOf": [
                             {
@@ -623,12 +628,7 @@
                               "nullable": true
                             }
                           ]
-                        },
-                        "anyOf": [
-                          {
-                            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.backbone.generics.GenericsBareRefEntity"
-                          }
-                        ]
+                        }
                       }
                     ]
                   }
