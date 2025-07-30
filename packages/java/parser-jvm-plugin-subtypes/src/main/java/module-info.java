@@ -7,6 +7,7 @@ module com.vaadin.hilla.parser.plugins.subtypes {
     requires io.swagger.v3.oas.models;
     requires io.github.classgraph;
     requires com.vaadin.hilla.parser.core;
+    requires org.apache.commons.lang3;
 
     exports com.vaadin.hilla.parser.plugins.subtypes;
 }
