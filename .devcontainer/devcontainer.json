@@ -33,7 +33,7 @@
   "containerUser": "vaadin",
   "remoteUser": "vaadin",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
+  "workspaceMount": "source=${localEnv:PODMAN_DIR}${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
   "mounts": [
     {
       "source": "${localWorkspaceFolderBasename}_nodemodules",
