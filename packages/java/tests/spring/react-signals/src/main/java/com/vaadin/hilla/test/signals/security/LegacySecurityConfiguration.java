@@ -23,8 +23,8 @@ public class LegacySecurityConfiguration extends VaadinWebSecurity {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers("/").permitAll()
-                .requestMatchers("/images/*.png", "/line-awesome/**")
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/images/*.png", "/line-awesome/**")
                 .permitAll());
 
         super.configure(http);

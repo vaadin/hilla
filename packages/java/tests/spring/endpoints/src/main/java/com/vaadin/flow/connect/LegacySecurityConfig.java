@@ -20,9 +20,8 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/login"));
-        http.authorizeHttpRequests(
-                authz -> authz.requestMatchers("/flux", "/type-script")
-                        .permitAll().anyRequest().authenticated());
+        http.authorizeHttpRequests(authz -> authz
+                .requestMatchers("/flux", "/type-script").permitAll());
         super.configure(http);
         setLoginView(http, "/login");
         return http.build();
