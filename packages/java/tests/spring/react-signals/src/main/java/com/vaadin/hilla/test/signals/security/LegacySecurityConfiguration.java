@@ -24,10 +24,8 @@ public class LegacySecurityConfiguration extends VaadinWebSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
         http.authorizeHttpRequests(auth -> auth.requestMatchers("/").permitAll()
-                .requestMatchers("/images/*.png").permitAll()
-                // Icons from the line-awesome addon
-                .requestMatchers("/line-awesome/**/*.svg").permitAll()
-                .anyRequest().authenticated());
+                .requestMatchers("/images/*.png", "/line-awesome/**")
+                .permitAll());
 
         super.configure(http);
         setLoginView(http, "/login");
