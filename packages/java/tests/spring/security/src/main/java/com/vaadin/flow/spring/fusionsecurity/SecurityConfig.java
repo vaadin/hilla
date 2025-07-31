@@ -52,20 +52,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
             RequestUtil requestUtil) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                // Public access
-                .requestMatchers("/public/**").permitAll()
-                .requestMatchers(requestUtil.applyUrlMapping("/")).permitAll()
-                .requestMatchers(requestUtil.applyUrlMapping("/form"))
-                .permitAll()
-                .requestMatchers(
-                        requestUtil.applyUrlMapping("/proxied-service"))
-                .permitAll()
-
-                // Admin only access
-                .requestMatchers("/admin-only/**").hasRole("ADMIN")
-                .requestMatchers("/error/**").permitAll().anyRequest()
-                .authenticated());
+        http.authorizeHttpRequests(auth -> {
+            auth
+                    // Public access
+                    .requestMatchers("/public/**").permitAll()
+                    .requestMatchers(requestUtil.applyUrlMapping("/"))
+                    .permitAll()
+                    .requestMatchers(requestUtil.applyUrlMapping("/form"))
+                    .permitAll()
+                    .requestMatchers(
+                            requestUtil.applyUrlMapping("/proxied-service"))
+                    .permitAll()
+                    // Admin only access
+                    .requestMatchers("/admin-only/**").hasAnyRole(ROLE_ADMIN)
+                    .requestMatchers("/error/**").permitAll();
+        });
 
         http.with(vaadin(), cfg -> cfg.loginView("/login",
                 requestUtil.applyUrlMapping("/")));
