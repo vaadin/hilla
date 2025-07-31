@@ -1,13 +1,9 @@
 import { EndpointValidationError, type ValidationErrorData } from '@vaadin/hilla-frontend/EndpointErrors.js';
+import { $owner, type Model } from '@vaadin/hilla-models';
 import { _clearValidation, _setErrorsWithDescendants, _update, BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import {
-  _parent,
-  type AbstractModel,
-  createDetachedModel,
-  type DetachedModelConstructor,
-  type Value,
-} from './Models.js';
+import { AbstractModel, createDetachedModel, type DetachedModelConstructor, type Value } from './Models.js';
+import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { ClassStaticProperties } from './types.js';
 import {
   type InterpolateMessageCallback,
@@ -35,7 +31,7 @@ export type BinderRootConfiguration<T> = BinderConfiguration<T> &
  * @typeParam T - Type of the value that binds to a form
  * @typeParam M - Type of the model that describes the structure of the value
  */
-export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderNode<M> {
+export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends BinderNode<M> {
   static interpolateMessageCallback?: InterpolateMessageCallback<any>;
 
   #defaultValue!: Value<M>; // Initialized in the `read()` method
@@ -52,7 +48,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   readonly #config?: BinderRootConfiguration<Value<M>>;
 
-  readonly #validations = new Map<AbstractModel, Map<Validator, Promise<readonly ValueError[]>>>();
+  readonly #validations = new Map<ProvisionalModel, Map<Validator, Promise<readonly ValueError[]>>>();
 
   readonly #context: unknown = this;
 
@@ -60,7 +56,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
 
   /**
    *
-   * @param Model - The constructor (the class reference) of the form model. The Binder instantiates the top-level model
+   * @param modelClass - The constructor (the class reference) of the form model. The Binder instantiates the top-level model
    * @param config - The options object, which can be used to config the onChange and onSubmit callbacks.
    *
    * ```
@@ -69,10 +65,17 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(Model: DetachedModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
-    super(createDetachedModel(Model));
+  constructor(
+    modelClass: DetachedModelConstructor<M & AbstractModel> | (M & Model),
+    config?: BinderRootConfiguration<Value<M>>,
+  ) {
+    super(
+      'prototype' in modelClass && Object.prototype.isPrototypeOf.call(AbstractModel.prototype, modelClass.prototype)
+        ? createDetachedModel(modelClass)
+        : (modelClass as M),
+    );
     // @ts-expect-error the model's parent is the binder
-    this.model[_parent] = this;
+    this.model[$owner] = this;
     this.#context = config?.context ?? this;
     this.#config = config;
     // Initialize value instead of the parent.
@@ -231,7 +234,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
     }
   }
 
-  async requestValidation<NM extends AbstractModel>(
+  async requestValidation<NM extends ProvisionalModel>(
     model: NM,
     validator: Validator<Value<NM>>,
   ): Promise<ReadonlyArray<ValueError<Value<NM>>>> {
@@ -278,7 +281,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    */
   // eslint ignored to allow overriding
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  getFieldStrategy<TField>(elm: HTMLElement, model?: AbstractModel<TField>): FieldStrategy {
+  getFieldStrategy<TField>(elm: HTMLElement, model?: ProvisionalModel<TField>): FieldStrategy {
     return getDefaultFieldStrategy(elm as FieldElement, model);
   }
 

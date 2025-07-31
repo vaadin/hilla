@@ -3,6 +3,7 @@ export * from './BinderRoot.js';
 export * from './BinderNode.js';
 export * from './Field.js';
 export * from './Models.js';
+export type * from './ProvisionalModel.js';
 export * from './Validation.js';
 export * from './Validators.js';
 export * from './Validity.js';

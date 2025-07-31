@@ -1,33 +1,45 @@
+import { $enum, $key, $meta, $optional, $owner } from '@vaadin/hilla-models';
 import isNumeric from 'validator/es/lib/isNumeric.js';
 import { type BinderNode, getBinderNode } from './BinderNode.js';
+import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { Validator } from './Validation.js';
 import { IsNumber } from './Validators.js';
 
 export const _createEmptyItemValue = Symbol('createEmptyItemValue');
-export const _parent = Symbol('parent');
-export const _key = Symbol('key');
+
+/** @deprecated use `$key` from the '\@vaadin/hilla-models' package. */
+export const _key = $key;
+
+/** @deprecated use `$optional` from the '\@vaadin/hilla-models' package. */
+export const _optional = $optional;
+
+/** @deprecated use `$owner` from the '\@vaadin/hilla-models' package. */
+export const _parent = $owner;
+
+/** @deprecated use `$meta` from the '\@vaadin/hilla-models' package. */
+export const _meta = $meta;
+
+/** @deprecated use `$enum` from the '\@vaadin/hilla-models' package. */
+export const _enum = $enum;
+
 export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');
-export const _meta = Symbol('meta');
 export const _getPropertyModel = Symbol('getPropertyModel');
-export const _enum = Symbol('enum');
 export const _items = Symbol('items');
-
-const _optional = Symbol('optional');
 
 export interface HasFromString<T> {
   [_fromString](value: string): T;
 }
 
-export function hasFromString<T>(model: AbstractModel<T>): model is AbstractModel<T> & HasFromString<T> {
+export function hasFromString<T>(model: ProvisionalModel<T>): model is ProvisionalModel<T> & HasFromString<T> {
   return _fromString in model;
 }
 
-export type Value<M> = M extends AbstractModel<infer T> ? T : never;
+export type Value<M> = M extends ProvisionalModel<infer T> ? T : never;
 
 export const modelDetachedParent = { $value$: undefined };
 
-export type ModelParent = AbstractModel | BinderNode | typeof modelDetachedParent;
+export type ModelParent = ProvisionalModel | BinderNode | typeof modelDetachedParent;
 
 export interface Annotation {
   name: string;
@@ -60,22 +72,22 @@ export abstract class AbstractModel<T = unknown> {
 
   declare readonly ['constructor']: typeof AbstractModel<T>;
 
-  readonly [_parent]?: ModelParent;
+  readonly [$owner]?: ModelParent;
 
   readonly [_validators]: ReadonlyArray<Validator<T>>;
 
-  readonly [_meta]: ModelMetadata;
+  readonly [$meta]: ModelMetadata;
 
-  readonly [_optional]: boolean;
+  readonly [$optional]: boolean;
 
-  [_key]: keyof any;
+  [$key]: keyof any;
 
   constructor(parent: ModelParent, key: keyof any, optional: boolean, options?: ModelOptions<T>) {
-    this[_parent] = parent;
-    this[_key] = key;
-    this[_optional] = optional;
+    this[$owner] = parent;
+    this[$key] = key;
+    this[$optional] = optional;
     this[_validators] = options?.validators ?? [];
-    this[_meta] = options?.meta ?? {};
+    this[$meta] = options?.meta ?? {};
   }
 
   /**
@@ -151,7 +163,7 @@ export class StringModel extends PrimitiveModel<string> implements HasFromString
 declare enum Enum {}
 
 export function makeEnumEmptyValueCreator<M extends EnumModel>(type: DetachedModelConstructor<M>): () => Value<M> {
-  const { [_enum]: enumObject } = createDetachedModel(type);
+  const { [$enum]: enumObject } = createDetachedModel(type);
   const defaultValue = Object.values(enumObject)[0] as Value<M>;
 
   return () => defaultValue;
@@ -161,10 +173,10 @@ export abstract class EnumModel<E extends typeof Enum = typeof Enum>
   extends AbstractModel<E[keyof E]>
   implements HasFromString<E[keyof E] | undefined>
 {
-  abstract readonly [_enum]: E;
+  abstract readonly [$enum]: E;
 
   [_fromString](value: string): E[keyof E] | undefined {
-    return value in this[_enum] ? (value as E[keyof E]) : undefined;
+    return value in this[$enum] ? (value as E[keyof E]) : undefined;
   }
 }
 
@@ -198,7 +210,7 @@ export function makeObjectEmptyValueCreator<M extends ObjectModel>(type: Detache
     for (const [key, getter] of getObjectModelOwnAndParentGetters(model)) {
       const propertyModel = getter.call(model);
       obj[key] = (
-        propertyModel[_optional] ? undefined : propertyModel.constructor.createEmptyValue()
+        propertyModel[$optional] ? undefined : propertyModel.constructor.createEmptyValue()
       ) as Value<M>[keyof Value<M>];
     }
 
