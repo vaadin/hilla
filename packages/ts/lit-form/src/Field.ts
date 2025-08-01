@@ -12,6 +12,7 @@ import {
   ObjectModel,
 } from './Models.js';
 import { StringModel } from './Models.js';
+import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -49,7 +50,7 @@ interface FieldElementHolder<T> {
 }
 
 interface Field<T> extends FieldBase<T> {
-  readonly model?: AbstractModel<T>;
+  readonly model?: ProvisionalModel<T>;
 }
 
 interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
@@ -74,7 +75,7 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
 
   abstract invalid: boolean;
 
-  readonly model?: AbstractModel<T>;
+  readonly model?: ProvisionalModel<T>;
 
   #element: E;
 
@@ -86,7 +87,7 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
 
   readonly #eventHandlers = new Map<string, EventHandler>();
 
-  constructor(element: E, model?: AbstractModel<T>) {
+  constructor(element: E, model?: ProvisionalModel<T>) {
     this.#element = element;
     this.model = model;
   }
@@ -212,7 +213,7 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
   readonly #boundOnValidated = this.#onValidated.bind(this);
   readonly #boundOnUnparsableChange = this.#onUnparsableChange.bind(this);
 
-  constructor(element: E, model?: AbstractModel<T>) {
+  constructor(element: E, model?: ProvisionalModel<T>) {
     super(element, model);
     element.addEventListener('validated', this.#boundOnValidated);
     element.addEventListener('unparsable-change', this.#boundOnUnparsableChange);
@@ -423,7 +424,10 @@ type MaybeVaadinElementConstructor = {
   readonly version?: string;
 };
 
-export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: AbstractModel<T>): AbstractFieldStrategy<T> {
+export function getDefaultFieldStrategy<T>(
+  elm: FieldElement<T>,
+  model?: ProvisionalModel<T>,
+): AbstractFieldStrategy<T> {
   switch (elm.localName) {
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
@@ -441,7 +445,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
     case 'vaadin-time-picker':
       return new VaadinStringFieldStrategy(
         elm as FieldElement<string>,
-        model as AbstractModel<string>,
+        model as ProvisionalModel<string>,
       ) as AbstractFieldStrategy<T>;
     case 'vaadin-date-time-picker':
       return new VaadinDateTimeFieldStrategy(elm, model) as AbstractFieldStrategy<T>;
@@ -456,7 +460,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
   }
 }
 
-function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
+function convertFieldValue<T extends ProvisionalModel>(model: T, fieldValue: unknown) {
   return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
 }
 
