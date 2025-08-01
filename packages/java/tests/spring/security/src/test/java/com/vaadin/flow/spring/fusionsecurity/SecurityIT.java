@@ -291,24 +291,19 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void private_page_endpoint_works() {
+    public void private_page_endpoints_work() {
         open("login");
         loginUser();
         navigateTo("private", true);
-        assertPrivateEndpointWorks();
-    }
 
-    @Test
-    public void private_page_reactive_endpoint_works() {
-        open("login");
-        loginUser();
-        navigateTo("private");
         waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
                 .exists());
         waitUntil(driver -> !$("output").id("balanceUpdates").getText()
                 .isEmpty());
         String balanceUpdates = $("output").id("balanceUpdates").getText();
         Assert.assertEquals("10000", balanceUpdates);
+
+        assertPrivateEndpointWorks();
     }
 
     protected void navigateTo(String path) {
