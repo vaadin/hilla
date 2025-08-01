@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
 
@@ -26,20 +25,10 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        // Public access
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(new AntPathRequestMatcher("/")).permitAll());
-
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(new AntPathRequestMatcher("/images/*.png"))
-                .permitAll());
-
-        // Icons from the line-awesome addon
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(
-                        new AntPathRequestMatcher("/line-awesome/**/*.svg"))
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/images/*.png", "/line-awesome/**")
                 .permitAll());
 
         http.with(vaadin(), cfg -> cfg.loginView("/login"));

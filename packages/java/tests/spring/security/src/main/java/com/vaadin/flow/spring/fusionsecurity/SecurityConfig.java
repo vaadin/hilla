@@ -26,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
 
@@ -51,27 +50,22 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http,
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
             RequestUtil requestUtil) throws Exception {
-        // Public access
         http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers(new AntPathRequestMatcher("/public/**"))
+            auth
+                    // Public access
+                    .requestMatchers("/public/**").permitAll()
+                    .requestMatchers(requestUtil.applyUrlMapping("/"))
                     .permitAll()
-                    .requestMatchers(new AntPathRequestMatcher(
-                            requestUtil.applyUrlMapping("/")))
+                    .requestMatchers(requestUtil.applyUrlMapping("/form"))
                     .permitAll()
-                    .requestMatchers(new AntPathRequestMatcher(
-                            requestUtil.applyUrlMapping("/form")))
+                    .requestMatchers(
+                            requestUtil.applyUrlMapping("/proxied-service"))
                     .permitAll()
-                    .requestMatchers(new AntPathRequestMatcher(
-                            requestUtil.applyUrlMapping("/proxied-service")))
-                    .permitAll();
-
-            // Admin only access
-            auth.requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
-                    .hasAnyRole(ROLE_ADMIN)
-                    .requestMatchers(new AntPathRequestMatcher("/error/**"))
-                    .permitAll();
+                    // Admin only access
+                    .requestMatchers("/admin-only/**").hasAnyRole(ROLE_ADMIN)
+                    .requestMatchers("/error/**").permitAll();
         });
 
         http.with(vaadin(), cfg -> cfg.loginView("/login",

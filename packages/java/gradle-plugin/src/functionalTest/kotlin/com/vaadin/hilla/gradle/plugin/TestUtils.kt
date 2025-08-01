@@ -209,6 +209,7 @@ fun addConfigurationsToSettingsForUsingPluginFromLocalRepo(testProject: TestProj
            pluginManagement {
               repositories {
                   mavenLocal()
+                  maven { url = 'https://repo.spring.io/milestone' }
                   maven { url = 'https://maven.vaadin.com/vaadin-prereleases' }
                   gradlePluginPortal()
               }
