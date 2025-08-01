@@ -24,7 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
@@ -48,26 +48,14 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // Public access
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(new AntPathRequestMatcher("/public/**"))
-                .permitAll()
-                .requestMatchers(
-                        new AntPathRequestMatcher(applyUrlMapping("/")))
-                .permitAll()
-                .requestMatchers(
-                        new AntPathRequestMatcher(applyUrlMapping("/form")))
-                .permitAll()
-                .requestMatchers(new AntPathRequestMatcher(
-                        applyUrlMapping("/proxied-service")))
-                .permitAll()
-                // Admin only access
-                .requestMatchers(new AntPathRequestMatcher("/admin-only/**"))
-                .hasAnyRole(ROLE_ADMIN)
-                .requestMatchers(new AntPathRequestMatcher("/error/**"))
-                .permitAll());
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
+        http.authorizeHttpRequests(auth -> auth.requestMatchers("/public/**")
+                .permitAll().requestMatchers(applyUrlMapping("/")).permitAll()
+                .requestMatchers(applyUrlMapping("/form")).permitAll()
+                .requestMatchers("/admin-only/**").hasRole("ADMIN")
+                .requestMatchers("/error/**").permitAll());
 
         super.configure(http);
 
@@ -89,6 +77,7 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
                             JwsAlgorithms.HS256),
                     "statelessapp");
         }
+        return http.build();
     }
 
     @Bean
