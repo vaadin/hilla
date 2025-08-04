@@ -202,9 +202,7 @@ public class ReadOnlyGridWithHeaderFilterIT extends AbstractGridTest {
         SelectElement filterSelect = cont.$(SelectElement.class).first();
         String text = filter == null ? "" : filter ? "Yes" : "No";
         filterSelect.openPopup();
-
-        filterSelect.getPropertyElement("_overlayElement").$("vaadin-item")
-                .attribute("label", text).first().click();
+        filterSelect.$("vaadin-item").attribute("label", text).first().click();
     }
 
     private void setEnumHeaderFilter(int columnIndex, String label) {
