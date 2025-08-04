@@ -15,8 +15,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,7 @@ public class EndpointInvokerTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         when(requestMock.getUserPrincipal()).thenReturn(principal);
 
         when(endpointNameChecker.check(any())).thenReturn(null);
