@@ -6,8 +6,8 @@ import type { RouteTransformer } from './utils.js';
  * Creates a route transformer that applies route protection to a given route,
  * optionally redirecting unauthorized access to a specified path.
  *
- * @param redirectPath - Optional path to redirect unauthorized users to. If not
- * provided, redirects to '/login'.
+ * @param redirectPath - Optional path to redirect unauthorized users to.
+ * Defaults to '/login'.
  *
  * @returns A route transformer function that applies protection to the route.
  */

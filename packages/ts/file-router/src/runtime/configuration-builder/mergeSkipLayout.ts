@@ -15,8 +15,8 @@ import { getHandleFlag, RouteHandleFlag } from './utils.js';
  *
  * @param originalRoutes - The current route tree to process.
  *
- * @returns A new array containing reorganized routes with skipped routes first (wrapped
- * in an ignore-fallback container) followed by regular routes.
+ * @returns A new array containing reorganized routes with skipped routes first
+ * (wrapped in an ignore-fallback container) followed by regular routes.
  */
 export default function mergeSkipLayouts(
   originalRoutes: readonly RouteObject[] | undefined,

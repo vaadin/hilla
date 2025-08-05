@@ -30,22 +30,19 @@ type TransformerContext<T extends RouteLike> = Readonly<{
  * Updates a route tree by merging, transforming, or replacing route objects.
  *
  * This function takes an existing route tree and a new tree of routes, then
- * applies a transformer to produce an updated route tree. The update strategy
- * depends on the presence of the original and added trees:
- * - If both `existingRoutes` and `tree` are provided, merges them using the
- * provided transformer.
- * - If only `existingRoutes` is provided, transforms the original routes.
- * - If only `tree` is provided, transforms and returns the new routes.
- * - If neither is provided, returns `undefined`.
+ * applies a transformer recursively to produce an updated route tree. The
+ * update strategy depends on the presence of the original and added trees:
+ * - If both `existingRoutes` and `tree` are provided, they are recursively
+ * merged them using the provided transformer.
+ * - If only `existingRoutes` is provided, only the original routes are
+ * transformed.
+ * - If only `tree` is provided, it is transformed and used as a new route tree.
  *
  * @typeParam T - The type of the route-like objects in the tree.
  *
- * @param existingRoutes - The current route tree, or `undefined` if none
- * exists.
- * @param tree - The new tree of routes to apply, or `undefined` if not
- * updating.
- * @param transformer - Optional. A function to transform route objects.
- * Defaults to `defaultRouteTransformer`.
+ * @param existingRoutes - The current route tree.
+ * @param tree - The new tree of route-like objects to merge recursively.
+ * @param transformer - A function to transform route objects.
  *
  * @returns The updated route tree as an array of `RouteObject`, or `undefined`
  * if no routes are present.
@@ -73,24 +70,21 @@ export function mergeRouteTrees<T extends RouteLike>(
 }
 
 /**
- * Merges two arrays of route-like objects — originals and overrides — into a
- * single array, applying transformations and overrides as specified by the
- * provided context.
+ * Merges two route trees into a single one, applying transformations and
+ * overrides as specified by the provided context.
  *
- * For each unique route key (as determined by `createRouteKey`), this function:
+ * For each unique path, this function:
  * - Applies the override to all matching original routes if both exist.
  * - Transforms original routes if no override exists.
- * - Transforms and adds the override if no original route exists.
- *
- * Throws an error if multiple overrides with the same route key are provided.
+ * - Transforms override and adds it as a new route if no original route exists.
  *
  * @typeParam T - The type of the override route, extending `RouteLike`.
  *
- * @param originals - The original array of route objects.
- * @param overrides - The array of override route objects.
+ * @param originals - The original tree of route objects.
+ * @param overrides - The tree of override route objects.
  * @param ctx - The context used for transforming and applying overrides.
  *
- * @returns A new array of merged and transformed route objects.
+ * @returns A new tree of merged and transformed route objects.
  * @throws If multiple overrides with the same route key are found.
  */
 function mergeBothTrees<T extends RouteLike>(
@@ -215,9 +209,9 @@ const transformOriginalRoutesOnly = createOriginalRoutesOnlyTransformer(false);
 
 /**
  * In this case, we have no original routes, so we simply apply the
- * transformer to the override and its children, creating a new route object.
+ * transformer to the override tree, creating a new route object.
  *
- * This method adds a completely new route to the tree.
+ * This function adds a completely new route to the tree.
  *
  * @param override - The override route-like to apply.
  * @param transformer - The transformer function to apply to the override.

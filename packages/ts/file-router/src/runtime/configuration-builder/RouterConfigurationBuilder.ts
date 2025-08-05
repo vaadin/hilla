@@ -28,8 +28,6 @@ import type { RouteLike, RouteTreeModifier, RouteTransformer } from './utils.js'
  *   .protect('/login')
  *   .build();
  * ```
- *
- * @public
  */
 export class RouterConfigurationBuilder {
   readonly #modifiers: RouteTreeModifier[] = [];
