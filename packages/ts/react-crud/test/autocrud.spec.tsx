@@ -1,4 +1,4 @@
-import { render, screen, waitForElementToBeRemoved, within, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, within, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TextField } from '@vaadin/react-components/TextField.js';
 import { page } from '@vitest/browser/context';
@@ -43,10 +43,15 @@ describe('@vaadin/hilla-react-crud', () => {
       return <AutoCrud service={personService()} model={PersonModel} {...props} />;
     }
 
-    async function waitForClosingDialog(): Promise<void> {
-      if (screen.queryByRole('dialog') !== null) {
-        await waitForElementToBeRemoved(() => screen.queryByRole('dialog'));
+    async function waitForClosingDialog(dialogElement: HTMLElement): Promise<void> {
+      if ('opened' in dialogElement && dialogElement.opened) {
+        (dialogElement as { opened: boolean }).opened = false;
+        await waitFor(() => !dialogElement.hasAttribute('opened') && !dialogElement.hasAttribute('closing'));
       }
+    }
+
+    async function waitForClosingDialogs(): Promise<void> {
+      await Promise.all(screen.queryAllByRole('dialog').map(waitForClosingDialog));
     }
 
     it('shows a grid and a form', async () => {
@@ -113,12 +118,12 @@ describe('@vaadin/hilla-react-crud', () => {
     });
 
     it('can hide new button', async () => {
-      const { rerender } = render(<AutoCrud service={personService()} model={PersonModel} />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      const { rerender, container } = render(<AutoCrud service={personService()} model={PersonModel} />);
+      await waitFor(() => expect(within(container).queryByText('+ New')).to.exist);
       rerender(<AutoCrud service={personService()} model={PersonModel} noNewButton={false} />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.exist);
+      await waitFor(() => expect(within(container).queryByText('+ New')).to.exist);
       rerender(<AutoCrud service={personService()} model={PersonModel} noNewButton />);
-      await waitFor(() => expect(screen.queryByText('+ New')).to.be.null);
+      await waitFor(() => expect(within(container).queryByText('+ New')).to.be.null);
     });
 
     it('can add a new item', async () => {
@@ -336,16 +341,7 @@ describe('@vaadin/hilla-react-crud', () => {
       });
 
       afterEach(async () => {
-        // cleanup dangling overlays
-        await Promise.all(
-          Array.from(document.querySelectorAll('vaadin-dialog-overlay')).map(async (overlay) => {
-            await new Promise<void>((resolve) => {
-              overlay.addEventListener('vaadin-overlay-closed', () => resolve());
-              (overlay as unknown as { opened: boolean }).opened = false;
-            });
-            overlay.remove();
-          }),
-        );
+        await waitForClosingDialogs();
         await waitFor(() => {
           expect(document.body.style.pointerEvents).to.not.equal('none');
         });
@@ -364,7 +360,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
       it('opens the form in a dialog when creating a new item', async () => {
         const result = render(<TestAutoCrud service={service} />);
-        const newButton = await result.findByText('+ New');
+        const newButton = await within(result.container).findByText('+ New');
         await user.click(newButton);
 
         const form = await FormController.init(user);
@@ -415,7 +411,7 @@ describe('@vaadin/hilla-react-crud', () => {
         await form.typeInField('First name', 'J'); // to enable the submit button
         await form.submit();
 
-        await waitForClosingDialog();
+        await waitForClosingDialogs();
 
         // grid selection is cleared
         expect(grid.isSelected(0)).to.be.false;
@@ -430,10 +426,10 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(result.queryByRole('heading', { name: 'New item' })).to.not.exist;
 
         // Create new item
-        const newButton = await result.findByText('+ New');
+        const newButton = await within(result.container).findByText('+ New');
         await user.click(newButton);
 
-        let dialogOverlay = await screen.findByRole('dialog');
+        let dialogOverlay = await within(result.container).findByRole('dialog');
         let header = await within(dialogOverlay).findByRole('heading', { name: 'New item' });
         expect(header).to.exist;
         expect(header.style.color).to.contain('lumo-text-color');
@@ -442,7 +438,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
 
-        await waitForClosingDialog();
+        await waitForClosingDialogs();
 
         // Edit existing item
         const grid = await GridController.init(result, user);
@@ -465,7 +461,7 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(result.queryByRole('heading', { name: 'Create person' })).to.not.exist;
 
         // Create new item
-        const newButton = await result.findByText('+ New');
+        const newButton = await within(result.container).findByText('+ New');
         await user.click(newButton);
 
         let dialogOverlay = await screen.findByRole('dialog');
@@ -475,7 +471,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const closeButton = await within(dialogOverlay).findByRole('button', { name: 'Close' });
         await user.click(closeButton);
 
-        await waitForClosingDialog();
+        await waitForClosingDialogs();
 
         // Edit existing item
         const grid = await GridController.init(result, user);

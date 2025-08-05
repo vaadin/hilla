@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -67,6 +68,14 @@ public class SecurityConfig {
                     .requestMatchers("/admin-only/**").hasAnyRole(ROLE_ADMIN)
                     .requestMatchers("/error/**").permitAll();
         });
+
+        if (stateless) {
+            // Disable creating and using sessions in Spring Security
+            http.sessionManagement((sessionManagement) -> {
+                sessionManagement
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            });
+        }
 
         http.with(vaadin(), cfg -> cfg.loginView("/login",
                 requestUtil.applyUrlMapping("/")));
