@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import org.junit.After;
 import org.junit.Assert;
@@ -14,7 +15,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
@@ -327,7 +327,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void assertLoginViewShown() {
         assertPathShown("login");
-        waitUntil(driver -> $(LoginFormElement.class).exists());
+        waitUntil(driver -> $(LoginOverlayElement.class).exists());
     }
 
     private void assertRootPageShown() {
@@ -388,12 +388,12 @@ public class SecurityIT extends ChromeBrowserTest {
     private void login(String username, String password) {
         assertLoginViewShown();
 
-        LoginFormElement form = $(LoginFormElement.class).first();
+        LoginOverlayElement form = $(LoginOverlayElement.class).first();
         form.getUsernameField().setValue(username);
         form.getPasswordField().setValue(password);
         form.submit();
         waitForDocumentReady();
-        waitUntilNot(driver -> $(LoginFormElement.class).exists());
+        waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
         waitForDocumentReady();
     }
 
