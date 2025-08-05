@@ -200,7 +200,6 @@ class SingleModuleTest : AbstractGradleTest() {
                 repositories {
                     mavenLocal()
                     mavenCentral()
-                    maven { setUrl("https://repo.spring.io/milestone") }
                     maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
                 }
                 dependencies {
@@ -226,7 +225,6 @@ class SingleModuleTest : AbstractGradleTest() {
             repositories {
                 mavenLocal()
                 mavenCentral()
-                maven { setUrl("https://repo.spring.io/milestone") }
                 maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
                 maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
             }
