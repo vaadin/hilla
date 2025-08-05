@@ -1,4 +1,4 @@
-import type { RenderResult } from '@testing-library/react';
+import { type RenderResult, within } from '@testing-library/react';
 import type userEvent from '@testing-library/user-event';
 import FormController from './FormController.js';
 import GridController from './GridController.js';
@@ -13,7 +13,7 @@ export class CrudController {
       GridController.init(result, user),
       FormController.init(user, result.container),
     ]);
-    const newButton = await result.findByText('+ New');
+    const newButton = await within(result.container).findByText('+ New');
 
     return new CrudController(grid, form, newButton);
   }
