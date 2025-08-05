@@ -290,16 +290,19 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void private_page_reactive_endpoint_works() {
+    public void private_page_endpoints_work() {
         open("login");
         loginUser();
-        navigateTo("private");
+        navigateTo("private", true);
+
         waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
                 .exists());
         waitUntil(driver -> !$("output").id("balanceUpdates").getText()
                 .isEmpty());
         String balanceUpdates = $("output").id("balanceUpdates").getText();
         Assert.assertEquals("10000", balanceUpdates);
+
+        assertPrivateEndpointWorks();
     }
 
     protected void navigateTo(String path) {
@@ -433,6 +436,10 @@ public class SecurityIT extends ChromeBrowserTest {
         return waitUntil(driver -> $("public-view").get(0));
     }
 
+    private TestBenchElement getPrivateView() {
+        return waitUntil(driver -> $("private-view").get(0));
+    }
+
     protected void simulateNewServer() {
         TestBenchElement mainView = waitUntil(driver -> $("main-view").get(0));
         callAsyncMethod(mainView, "invalidateSessionIfPresent");
@@ -463,6 +470,17 @@ public class SecurityIT extends ChromeBrowserTest {
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);
+    }
+
+    protected void assertPrivateEndpointWorks() {
+        String balanceBefore = getPrivateView().findElement(By.id("balance"))
+                .getText();
+        Assert.assertNotNull(balanceBefore);
+        callAsyncMethod(getPrivateView(), "applyForLoan");
+        String balanceAfter = getPrivateView().findElement(By.id("balance"))
+                .getText();
+        Assert.assertNotNull(balanceAfter);
+        Assert.assertNotEquals(balanceAfter, balanceBefore);
     }
 
     private String formatArgumentRef(int index) {
