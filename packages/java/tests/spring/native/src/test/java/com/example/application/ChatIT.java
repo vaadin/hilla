@@ -10,7 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
+import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBench;
@@ -96,8 +96,8 @@ public class ChatIT extends ChromeBrowserTest {
         driver.get(url);
         TestBenchElement element = (TestBenchElement) driver
                 .findElement(By.tagName("vaadin-login-form"));
-        LoginFormElement login = TestBench.wrap(element,
-                LoginFormElement.class);
+        LoginOverlayElement login = TestBench.wrap(element,
+                LoginOverlayElement.class);
         login.getUsernameField().setValue(username);
         login.getPasswordField().setValue(password);
         login.submit();
