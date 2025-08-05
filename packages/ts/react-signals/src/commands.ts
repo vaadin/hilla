@@ -55,14 +55,14 @@ export function createSetCommand<V>(targetNodeId: Id, value: V): SetCommand<V> {
 /**
  * A signal command that increments a numeric value.
  */
-export type IncrementCommand = CreateCommandType<'inc', { value: number }>;
+export type IncrementCommand = CreateCommandType<'inc', { delta: number }>;
 
-export function createIncrementCommand(targetNodeId: Id, value: number): IncrementCommand {
+export function createIncrementCommand(targetNodeId: Id, delta: number): IncrementCommand {
   return {
     commandId: randomId(),
     targetNodeId,
     '@type': 'inc',
-    value,
+    delta,
   };
 }
 

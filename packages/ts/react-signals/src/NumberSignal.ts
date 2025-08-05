@@ -3,6 +3,7 @@ import {
   $createOperation,
   $processServerResponse,
   $resolveOperation,
+  $setValueQuietly,
   $update,
   type Operation,
 } from './FullStackSignal.js';
@@ -12,9 +13,6 @@ import { ValueSignal } from './ValueSignal.js';
  * A signal containing a numeric value. The value is updated as a single atomic change.
  */
 export class NumberSignal extends ValueSignal<number> {
-  // Track commands that have already been processed to avoid double-increment
-  readonly #processedCommands = new Set<string>();
-
   /**
    * Atomically increments the value of this signal by the given delta amount.
    * The value is decremented if the delta is negative.
@@ -23,7 +21,6 @@ export class NumberSignal extends ValueSignal<number> {
    */
   incrementBy(delta: number): Operation {
     const command = createIncrementCommand('', delta);
-    this.#processedCommands.add(command.commandId);
     const promise = this[$update](command);
     return this[$createOperation]({ id: command.commandId, promise });
   }
@@ -37,10 +34,7 @@ export class NumberSignal extends ValueSignal<number> {
 
   protected override [$processServerResponse](command: SignalCommand): void {
     if (isIncrementCommand(command)) {
-      if (!this.#processedCommands.has(command.commandId)) {
-        this.value += command.value;
-      }
-      this.#processedCommands.delete(command.commandId);
+      this[$setValueQuietly](this.value + command.delta);
       this[$resolveOperation](command.commandId, undefined);
     } else {
       super[$processServerResponse](command);
