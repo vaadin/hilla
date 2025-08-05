@@ -118,12 +118,12 @@ public class SignalBasicSecurityIT extends ChromeBrowserTest {
 
     private void loginAs(String user) {
         clickButton("loginBtn");
-        waitUntil(driver -> $("vaadin-login-form").first() != null);
+        waitUntil(driver -> $("vaadin-login-overlay").first() != null);
         $(TextFieldElement.class).withLabel("Username").first().setValue(user);
         $(PasswordFieldElement.class).withLabel("Password").first()
                 .setValue(user);
         $(ButtonElement.class).first().click();
-        waitUntil(driver -> $("vaadin-login-form").all().isEmpty());
+        waitUntil(driver -> $("vaadin-login-overlay").all().isEmpty());
         getDriver().get(getRootURL() + "/SharedSignalSecurity");
         waitUntil(driver -> $("span").id("userSpan").getText() != null
                 && !$("span").id("userSpan").getText()

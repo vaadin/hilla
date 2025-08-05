@@ -95,7 +95,7 @@ public class ChatIT extends ChromeBrowserTest {
             String password) {
         driver.get(url);
         TestBenchElement element = (TestBenchElement) driver
-                .findElement(By.tagName("vaadin-login-form"));
+                .findElement(By.tagName("vaadin-login-overlay"));
         LoginOverlayElement login = TestBench.wrap(element,
                 LoginOverlayElement.class);
         login.getUsernameField().setValue(username);
