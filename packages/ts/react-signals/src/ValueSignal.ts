@@ -60,11 +60,11 @@ export class ValueSignal<T> extends FullStackSignal<T> {
 
   #recalculateState(command: SignalCommand): void {
     if (isSetCommand<T>(command)) {
-      this.value = command.value;
+      this[$setValueQuietly](command.value);
     } else if (isSnapshotCommand(command)) {
-      const node = (command.nodes[this.id] ?? command.nodes['']) as Node | undefined;
+      const node = command.nodes[''] as Node | undefined;
       if (node && 'value' in node) {
-        this.value = node.value as T;
+        this[$setValueQuietly](node.value as T);
       }
     }
   }

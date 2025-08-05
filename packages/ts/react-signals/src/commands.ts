@@ -207,16 +207,16 @@ export function createPositionCondition(
 export type RemoveCommand = CreateCommandType<
   'remove',
   {
-    childId: Id;
+    expectedParentId: Id;
   }
 >;
 
-export function createRemoveCommand(targetNodeId: Id, childId: Id): RemoveCommand {
+export function createRemoveCommand(targetNodeId: Id, expectedParentId: Id): RemoveCommand {
   return {
     commandId: randomId(),
     targetNodeId,
     '@type': 'remove',
-    childId,
+    expectedParentId,
   };
 }
 

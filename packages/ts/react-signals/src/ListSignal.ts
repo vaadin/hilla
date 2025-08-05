@@ -5,6 +5,7 @@ import {
   isInsertCommand,
   isPositionCondition,
   isRemoveCommand,
+  isSetCommand,
   isSnapshotCommand,
   ListPosition,
   ZERO,
@@ -12,6 +13,7 @@ import {
   type InsertCommand,
   type PositionCondition,
   type RemoveCommand,
+  type SetCommand,
   type SnapshotCommand,
 } from './commands.js';
 import {
@@ -70,21 +72,23 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing the eventual result
    */
   remove(child: ValueSignal<T>): Operation {
-    const command = createRemoveCommand(ZERO, child.id);
+    const command = createRemoveCommand(child.id, ZERO);
     const promise = this[$update](command);
     return this[$createOperation]({ id: command.commandId, promise });
   }
 
   protected override [$processServerResponse](
-    command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition | SnapshotCommand,
+    command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition | SnapshotCommand | SetCommand<T>,
   ): void {
     // Check if the command has a targetNodeId and reroute it to the corresponding child
-    const targetChild = this.value.find((child) => child.id === command.targetNodeId);
+    if ((isSnapshotCommand(command) || isSetCommand(command)) && command.targetNodeId) {
+      const targetChild = this.value.find((child) => child.id === command.targetNodeId);
 
-    if (targetChild) {
-      // Route the command to the specific child signal
-      targetChild[$processServerResponse](command);
-      return;
+      if (targetChild) {
+        // Route the command to the specific child signal
+        targetChild[$processServerResponse](command);
+        return;
+      }
     }
 
     if (isInsertCommand<T>(command)) {
@@ -106,10 +110,31 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
       this.value = newList;
       this[$resolveOperation](command.commandId, undefined);
     } else if (isRemoveCommand(command)) {
-      // TODO: Update local state for removal
+      const removeIndex = this.value.findIndex((child) => child.id === command.targetNodeId);
+      if (removeIndex !== -1) {
+        const newList = [...this.value.slice(0, removeIndex), ...this.value.slice(removeIndex + 1)];
+        this.value = newList;
+      }
       this[$resolveOperation](command.commandId, undefined);
     } else if (isAdoptAtCommand(command)) {
-      // TODO: Update local state for move
+      const moveIndex = this.value.findIndex((child) => child.id === command.childId);
+      if (moveIndex !== -1) {
+        const [movedChild] = this.value.splice(moveIndex, 1);
+        let newIndex = this.value.length;
+        const pos = command.position;
+        if (pos.after === '' && pos.before == null) {
+          newIndex = 0;
+        } else if (pos.after == null && pos.before === '') {
+          newIndex = this.value.length;
+        } else if (typeof pos.after === 'string' && pos.after !== '') {
+          const idx = this.value.findIndex((v) => v.id === pos.after);
+          newIndex = idx !== -1 ? idx + 1 : this.value.length;
+        } else if (typeof pos.before === 'string' && pos.before !== '') {
+          const idx = this.value.findIndex((v) => v.id === pos.before);
+          newIndex = idx !== -1 ? idx : this.value.length;
+        }
+        this.value.splice(newIndex, 0, movedChild);
+      }
       this[$resolveOperation](command.commandId, undefined);
     } else if (isPositionCondition(command)) {
       // TODO: Handle position verification
