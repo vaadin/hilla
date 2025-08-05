@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -69,6 +70,15 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
                 .permitAll());
 
         super.configure(http);
+
+        if (stateless) {
+            // Disable creating and using sessions in Spring Security
+            http.sessionManagement((sessionManagement) -> {
+                sessionManagement
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            });
+        }
+
         setLoginView(http, "/login", applyUrlMapping("/"));
         http.logout(cfg -> cfg.logoutUrl(applyUrlMapping("/logout")));
 
