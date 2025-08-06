@@ -24,10 +24,10 @@
       "jdkVersion": "21",
       "jdkDistro": "tem"
     },
-    "ghcr.io/kreemer/features/chrometesting:1": {},
-    "./local-features/volta": {
-      "nodeVersion": "24"
-    }
+    "ghcr.io/roul/devcontainer-features/mise-node:1": {
+      "version": "24"
+    },
+    "ghcr.io/kreemer/features/chrometesting:1": {}
   },
   "forwardPorts": [9876, 8080, 8000],
   "containerUser": "vaadin",
