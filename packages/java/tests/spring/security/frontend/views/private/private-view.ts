@@ -17,7 +17,11 @@ export class PrivateTSView extends View {
   render() {
     return html`
       <div style="display:flex;flex-direction:column;align-items:flex-start;padding: var(--lumo-space-m);">
-        <span id="balanceText">Hello ${appStore.user!.fullName}, your bank account balance is $${this.balance}.</span>
+        <span id="balanceText">
+          Hello ${appStore.user!.fullName}, your bank account balance is
+          <output id="balance">$${this.balance}</output>
+          .
+        </span>
 
         <vaadin-button @click="${this.applyForLoan}">Apply for a loan</vaadin-button>
       </div>
@@ -28,7 +32,7 @@ export class PrivateTSView extends View {
     `;
   }
 
-  async applyForLoan() {
+  public async applyForLoan() {
     await BalanceEndpoint.applyForLoan();
     this.balance = (await BalanceEndpoint.getBalance()) ?? 0;
   }
