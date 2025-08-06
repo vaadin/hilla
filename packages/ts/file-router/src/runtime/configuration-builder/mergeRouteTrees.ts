@@ -194,8 +194,8 @@ function createOriginalRoutesOnlyTransformer(shouldHandleDuplicates: boolean) {
 const transformOriginalRoutesWithSamePath = createOriginalRoutesOnlyTransformer(true);
 
 /**
- * This transformer in case we have no overrides, so we simply apply the
- * transformer to the original routes, creating a new route object.
+ * In this case, we don't have override tree at all, so we simply transform the
+ * original routes only.
  *
  * @typeParam T - The type of the route-like to apply.
  *
