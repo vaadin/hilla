@@ -91,7 +91,7 @@ class RouteFromMetaProcessor {
       );
 
       return metas.map(({ file, layout, path, children, flowLayout }, index) => {
-        const config = configs[index];
+        const config = configs[index]!;
         let _children: readonly CallExpression[] | undefined;
 
         if (children) {

@@ -2,7 +2,7 @@ import chaiLike from 'chai-like';
 import { createElement } from 'react';
 import sinonChai from 'sinon-chai';
 import { expect, chai, describe, it, beforeEach, afterEach } from 'vitest';
-import { RouterConfigurationBuilder } from '../../src/runtime/RouterConfigurationBuilder.js';
+import { RouterConfigurationBuilder } from '../../src/runtime/configuration-builder/RouterConfigurationBuilder.js';
 import { mockDocumentBaseURI } from '../mocks/dom.js';
 import { protectRoute } from '../mocks/vaadin-hilla-react-auth.js';
 
@@ -808,7 +808,7 @@ describe('RouterBuilder', () => {
       const { routes } = builder.protect('/login').build();
 
       const [root] = routes;
-      const [test] = root.children!;
+      const [test] = root!.children!;
 
       expect(protectRoute).to.have.been.calledWith(root, '/login');
       expect(protectRoute).to.have.been.calledWith(test, '/login');
@@ -816,6 +816,7 @@ describe('RouterBuilder', () => {
   });
 
   describe('issues', () => {
+    // https://github.com/vaadin/hilla/issues/2954
     it('#2954', () => {
       const { routes } = new RouterConfigurationBuilder()
         .withFileRoutes([
@@ -836,6 +837,7 @@ describe('RouterBuilder', () => {
                 path: 'login',
                 module: {
                   config: {
+                    title: 'Login',
                     menu: { exclude: true },
                     flowLayout: false,
                   },
@@ -859,7 +861,7 @@ describe('RouterBuilder', () => {
                   exclude: true,
                 },
                 flowLayout: false,
-                title: 'undefined',
+                title: 'Login',
               },
             },
           ],
