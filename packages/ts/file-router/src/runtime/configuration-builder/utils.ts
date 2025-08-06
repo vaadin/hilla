@@ -72,6 +72,20 @@ export function createRouteKey<T extends RouteLike>(route: T): string {
 /**
  * A set of flags that can be used to control the behavior of routes in the
  * router configuration.
+ *
+ * @remarks
+ * These flags work together to control route rendering behavior:
+ *
+ * **Layout Control:**
+ * - `FLOW_LAYOUT: true` - Route renders with server-side layout (Flow
+ * component)
+ * - `FLOW_LAYOUT: false` - Route renders without server-side layout
+ * (client-only)
+ * - `SKIP_LAYOUTS: true` - Route bypasses ALL layouts (overrides FLOW_LAYOUT)
+ *
+ * **Fallback Control:**
+ * - `IGNORE_FALLBACK: true` - Route ignores fallback components, used
+ * internally by {@link mergeLayout} and {@link mergeSkipLayouts}
  */
 export const RouteHandleFlag = {
   FLOW_LAYOUT: 'flowLayout',
