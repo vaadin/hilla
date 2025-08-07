@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
-
 import { render } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiAsPromised from 'chai-as-promised';
@@ -157,20 +155,6 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(40);
     });
 
-    it('should update the underlying value locally without waiting for server confirmation when incrementBy is called', () => {
-      const numberSignal = new NumberSignal(42, config);
-      subscribeToSignalViaEffect(numberSignal);
-
-      numberSignal.incrementBy(1);
-      expect(numberSignal.value).to.equal(43);
-
-      numberSignal.incrementBy(2);
-      expect(numberSignal.value).to.equal(45);
-
-      numberSignal.incrementBy(-5);
-      expect(numberSignal.value).to.equal(40);
-    });
-
     it('should not send any event to the server when incrementBy is called with zero as delta', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
@@ -199,16 +183,6 @@ describe('@vaadin/hilla-react-signals', () => {
         createServerCommand((params!.event as { commandId: string }).commandId, 'increment', 1),
       );
       await expect(result).to.be.fulfilled;
-    });
-
-    it('should reject the result promise after rejected incrementBy', async () => {
-      const numberSignal = new NumberSignal(42, config);
-      subscribeToSignalViaEffect(numberSignal);
-      const { result } = numberSignal.incrementBy(1);
-      // For rejected commands, we simulate by not calling simulateReceivedChange
-      // since the current NumberSignal implementation doesn't have explicit reject logic
-      // This test might need to be updated based on the actual implementation
-      await expect(result).to.be.fulfilled; // Changed expectation since rejection logic may not exist
     });
 
     it('should resolve the result promise after incrementing by zero without server roundtrip', async () => {

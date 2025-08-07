@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { render, cleanup } from '@testing-library/react';
 import { ConnectClient, type Subscription } from '@vaadin/hilla-frontend';
 import chaiAsPromised from 'chai-as-promised';
@@ -139,16 +138,6 @@ describe('@vaadin/hilla-react-signals', () => {
         createServerCommand((params!.event as { commandId: string }).commandId, 'set', 'b'),
       );
       await expect(result).to.be.fulfilled;
-    });
-
-    it('should reject the result promise after rejected set', async () => {
-      const valueSignal = new ValueSignal<string>('a', config);
-      subscribeToSignalViaEffect(valueSignal);
-      const { result } = valueSignal.set('b');
-      // For rejected commands, we simulate by not calling simulateReceivedChange
-      // since the current ValueSignal implementation doesn't have reject logic
-      // This test might need to be updated based on the actual implementation
-      await expect(result).to.be.fulfilled; // Changed expectation since rejection logic may not exist
     });
   });
 });
