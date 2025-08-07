@@ -1,3 +1,4 @@
+import { CollectionSignal } from './CollectionSignal.js';
 import {
   createInsertCommand,
   createRemoveCommand,
@@ -20,8 +21,8 @@ import {
   $createOperation,
   $processServerResponse,
   $resolveOperation,
+  $setValueQuietly,
   $update,
-  FullStackSignal,
   type Operation,
   type ServerConnectionConfig,
 } from './FullStackSignal.js';
@@ -31,7 +32,7 @@ import { ValueSignal } from './ValueSignal.js';
  * A signal containing a list of values. Supports atomic updates to the list structure.
  * Each value in the list is accessed as a separate ValueSignal instance.
  */
-export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
+export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
   constructor(config: ServerConnectionConfig, id?: string) {
     super([], config, id);
   }
@@ -107,13 +108,13 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
         insertIndex = idx !== -1 ? idx : this.value.length;
       }
       const newList = [...this.value.slice(0, insertIndex), valueSignal, ...this.value.slice(insertIndex)];
-      this.value = newList;
+      this[$setValueQuietly](newList);
       this[$resolveOperation](command.commandId, undefined);
     } else if (isRemoveCommand(command)) {
       const removeIndex = this.value.findIndex((child) => child.id === command.targetNodeId);
       if (removeIndex !== -1) {
         const newList = [...this.value.slice(0, removeIndex), ...this.value.slice(removeIndex + 1)];
-        this.value = newList;
+        this[$setValueQuietly](newList);
       }
       this[$resolveOperation](command.commandId, undefined);
     } else if (isAdoptAtCommand(command)) {
@@ -156,7 +157,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
         .filter(Boolean) as Array<ValueSignal<T>>;
 
       // Update the list's value with these signals
-      this.value = valueSignals;
+      this[$setValueQuietly](valueSignals);
 
       // Resolve the operation
       this[$resolveOperation](command.commandId, undefined);
