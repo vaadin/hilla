@@ -21,7 +21,7 @@ describe('@vaadin/hilla-react-signals', () => {
     function createServerInsertCommand(commandId: string, value: string, entryId?: string): SignalCommand {
       const targetNodeId = entryId ?? commandId;
       const command = createInsertCommand(targetNodeId, value, ListPosition.last());
-      return { ...command, commandId, targetNodeId };  // Ensure targetNodeId is set correctly
+      return { ...command, commandId, targetNodeId }; // Ensure targetNodeId is set correctly
     }
 
     // Helper function to create remove commands for testing
@@ -130,12 +130,12 @@ describe('@vaadin/hilla-react-signals', () => {
         'update',
         {
           clientSignalId: listSignal.id,
-          event: { 
-            commandId: (params?.event as { commandId: string }).commandId, 
-            targetNodeId: '', 
-            '@type': 'insert', 
-            position: { after: null, before: '' }, 
-            value: 'Alice' 
+          event: {
+            commandId: (params?.event as { commandId: string }).commandId,
+            targetNodeId: '',
+            '@type': 'insert',
+            position: { after: null, before: '' },
+            value: 'Alice',
           },
         },
         { mute: true },
@@ -178,11 +178,11 @@ describe('@vaadin/hilla-react-signals', () => {
         'update',
         {
           clientSignalId: listSignal.id,
-          event: { 
-            commandId: (params?.event as { commandId: string }).commandId, 
-            targetNodeId: firstElement.id, 
-            '@type': 'remove', 
-            expectedParentId: '' 
+          event: {
+            commandId: (params?.event as { commandId: string }).commandId,
+            targetNodeId: firstElement.id,
+            '@type': 'remove',
+            expectedParentId: '',
           },
         },
         { mute: true },
@@ -354,7 +354,10 @@ describe('@vaadin/hilla-react-signals', () => {
       // Check if a server call was made and simulate a response if needed
       if (client.call.called) {
         const [, , params] = client.call.firstCall.args;
-        const removeCommand = createServerRemoveCommand((params!.event as { commandId: string }).commandId, nonExistentSignal.id);
+        const removeCommand = createServerRemoveCommand(
+          (params!.event as { commandId: string }).commandId,
+          nonExistentSignal.id,
+        );
         simulateReceivedChange(subscription, removeCommand);
       }
       await expect(result).to.be.fulfilled;
