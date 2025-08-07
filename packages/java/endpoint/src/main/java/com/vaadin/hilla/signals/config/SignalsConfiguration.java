@@ -17,17 +17,15 @@
 package com.vaadin.hilla.signals.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.hilla.ConditionalOnFeatureFlag;
+import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
+import com.vaadin.hilla.signals.handler.SignalsHandler;
+import com.vaadin.signals.SignalEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.vaadin.hilla.ConditionalOnFeatureFlag;
-import com.vaadin.hilla.EndpointInvoker;
-
-import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
-import com.vaadin.hilla.signals.handler.SignalsHandler;
-import com.vaadin.signals.SignalEnvironment;
 
 /**
  * Spring beans configuration for signals.
