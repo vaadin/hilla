@@ -2,12 +2,9 @@ package com.vaadin.hilla.test.signals.service;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.core.event.StateEvent;
+import com.vaadin.signals.NumberSignal;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
-
-import java.util.UUID;
 
 @BrowserCallable
 public class SecureNumberSignalService {
@@ -27,22 +24,17 @@ public class SecureNumberSignalService {
 
     @AnonymousAllowed
     public Long fetchUserCounterValue() {
-        return userCounter.getValue().longValue();
+        return userCounter.value().longValue();
     }
 
     @AnonymousAllowed
     public Long fetchAdminCounterValue() {
-        return adminCounter.getValue().longValue();
+        return adminCounter.value().longValue();
     }
 
     @AnonymousAllowed
     public void resetCounters() {
-        var setValueTo20 = new StateEvent<>(UUID.randomUUID().toString(),
-                StateEvent.EventType.SET, 20d);
-        userCounter.submit(setValueTo20.toJson());
-
-        var setValueTo30 = new StateEvent<>(UUID.randomUUID().toString(),
-                StateEvent.EventType.SET, 30d);
-        adminCounter.submit(setValueTo30.toJson());
+        userCounter.value(20d);
+        adminCounter.value(30d);
     }
 }
