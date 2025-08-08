@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import type { SignalCommand } from '../src/commands.js';
-import { createSetCommand, createIncrementCommand, createSnapshotCommand } from '../src/commands.js';
+import { createSetCommand, createSnapshotCommand } from '../src/commands.js';
 import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
 import { computed, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange } from './utils.js';
@@ -54,36 +54,6 @@ describe('@vaadin/hilla-react-signals', () => {
   });
 
   describe('FullStackSignal', () => {
-    function createAcceptedCommand(value: number, type: 'increment' | 'set' | 'snapshot'): SignalCommand {
-      const targetNodeId = ''; // Use empty string for tests
-
-      switch (type) {
-        case 'increment': {
-          return createIncrementCommand(targetNodeId, value);
-        }
-        case 'set': {
-          return createSetCommand(targetNodeId, value);
-        }
-        case 'snapshot': {
-          const nodes = {
-            [targetNodeId]: {
-              '@type': 'ValueSignal',
-              parent: null,
-              lastUpdate: null,
-              scopeOwner: null,
-              value,
-              listChildren: [],
-              mapChildren: {},
-            },
-          };
-          return createSnapshotCommand(nodes);
-        }
-        default: {
-          throw new Error(`Unknown command type: ${type as string}`);
-        }
-      }
-    }
-
     function simulateResubscription(
       connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<SignalCommand>>,
       client: sinon.SinonStubbedInstance<ConnectClient>,
@@ -209,7 +179,18 @@ describe('@vaadin/hilla-react-signals', () => {
       await nextFrame();
 
       // Simulate the command received from the server:
-      const snapshotCommand = createAcceptedCommand(42, 'snapshot');
+      const nodes = {
+        '': {
+          '@type': 'ValueSignal',
+          parent: null,
+          lastUpdate: null,
+          scopeOwner: null,
+          value: 42,
+          listChildren: [],
+          mapChildren: {},
+        },
+      };
+      const snapshotCommand = createSnapshotCommand(nodes);
       simulateReceivedChange(subscription, snapshotCommand);
 
       // Check if the signal value is updated:
@@ -221,13 +202,24 @@ describe('@vaadin/hilla-react-signals', () => {
 
       let result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
-      simulateReceivedChange(subscription, createAcceptedCommand(42, 'snapshot'));
+      const nodes = {
+        '': {
+          '@type': 'ValueSignal',
+          parent: null,
+          lastUpdate: null,
+          scopeOwner: null,
+          value: 42,
+          listChildren: [],
+          mapChildren: {},
+        },
+      };
+      simulateReceivedChange(subscription, createSnapshotCommand(nodes));
 
       result = render(<span>Value is {numberSignal}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
-      simulateReceivedChange(subscription, createAcceptedCommand(99, 'set'));
+      simulateReceivedChange(subscription, createSetCommand('', 99));
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 99');
     });
