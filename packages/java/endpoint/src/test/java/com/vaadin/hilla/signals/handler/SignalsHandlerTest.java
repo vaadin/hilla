@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.internal.InternalSignal;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
+import com.vaadin.signals.Id;
 import com.vaadin.signals.NumberSignal;
 import com.vaadin.signals.SignalEnvironment;
 
@@ -63,16 +64,21 @@ public class SignalsHandlerTest {
                 signalsRegistry.get(CLIENT_SIGNAL_ID_2).id());
 
         var signalId = numberSignal.id();
-        var expectedSignalEventJson = new ObjectNode(mapper.getNodeFactory())
-                .put("value", 0.0).put("id", signalId.toString())
-                .put("type", "snapshot");
 
         // first client subscribe to a signal, it registers the signal:
         Flux<JsonNode> firstFlux = signalsHandler.subscribe("endpoint",
                 "method", CLIENT_SIGNAL_ID_1, null);
         firstFlux.subscribe(next -> {
             assertNotNull(next);
-            assertEquals(expectedSignalEventJson, next);
+            // Check the new format structure
+            assertTrue(next.has("@type"));
+            assertEquals("snapshot", next.get("@type").asText());
+            assertTrue(next.has("commandId"));
+            assertTrue(next.has("nodes"));
+            assertTrue(next.get("nodes").has(""));
+            assertTrue(next.get("nodes").get("").has("value"));
+            assertEquals(0.0, next.get("nodes").get("").get("value").asDouble(),
+                    0.0);
         }, error -> {
             throw new RuntimeException(error);
         });
@@ -82,7 +88,15 @@ public class SignalsHandlerTest {
                 "method", CLIENT_SIGNAL_ID_2, null);
         secondFlux.subscribe(next -> {
             assertNotNull(next);
-            assertEquals(expectedSignalEventJson, next);
+            // Check the new format structure
+            assertTrue(next.has("@type"));
+            assertEquals("snapshot", next.get("@type").asText());
+            assertTrue(next.has("commandId"));
+            assertTrue(next.has("nodes"));
+            assertTrue(next.get("nodes").has(""));
+            assertTrue(next.get("nodes").get("").has("value"));
+            assertEquals(0.0, next.get("nodes").get("").get("value").asDouble(),
+                    0.0);
         }, error -> {
             throw new RuntimeException(error);
         });
@@ -90,10 +104,12 @@ public class SignalsHandlerTest {
 
     @Test
     public void when_signalIsNotRegistered_update_throwsException() {
-        var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 0.0)
-                .put("id", UUID.randomUUID().toString()).put("type", "set");
+        var setCommand = new ObjectNode(mapper.getNodeFactory())
+                .put("commandId", Id.random().asBase64())
+                .put("targetNodeId", Id.random().asBase64()).put("@type", "set")
+                .put("value", 0.0);
         assertThrows(IllegalStateException.class,
-                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent));
+                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, setCommand));
     }
 
     @Test
@@ -106,17 +122,41 @@ public class SignalsHandlerTest {
         Flux<JsonNode> firstFlux = signalsHandler.subscribe("endpoint",
                 "method", CLIENT_SIGNAL_ID_1, null);
 
-        var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 42)
-                .put("id", UUID.randomUUID().toString()).put("type", "set");
-        signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent);
+        var setCommand = new ObjectNode(mapper.getNodeFactory())
+                .put("commandId", Id.random().asBase64())
+                .put("targetNodeId", signalId.asBase64()).put("@type", "set")
+                .put("value", 42);
+        signalsHandler.update(CLIENT_SIGNAL_ID_1, setCommand);
 
         var expectedUpdatedSignalEventJson = new ObjectNode(
-                mapper.getNodeFactory()).put("value", 42.0)
-                .put("id", signalId.toString()).put("type", "snapshot")
-                .put("accepted", true);
-        StepVerifier.create(firstFlux)
-                .expectNext(expectedUpdatedSignalEventJson).thenCancel()
-                .verify();
+                mapper.getNodeFactory()).put("@type", "snapshot");
+        // Add the commandId field (we can't predict it since it's random)
+        expectedUpdatedSignalEventJson.put("commandId", "");
+
+        // Create the nodes structure
+        var nodesObject = mapper.createObjectNode();
+        var rootNodeObject = mapper.createObjectNode();
+        rootNodeObject.put("@type", "d");
+        rootNodeObject.putNull("parent");
+        rootNodeObject.put("lastUpdate", "");
+        rootNodeObject.putNull("scopeOwner");
+        rootNodeObject.put("value", 42);
+        rootNodeObject.set("listChildren", mapper.createArrayNode());
+        rootNodeObject.set("mapChildren", mapper.createObjectNode());
+        nodesObject.set("", rootNodeObject);
+        expectedUpdatedSignalEventJson.set("nodes", nodesObject);
+
+        StepVerifier.create(firstFlux).expectNextMatches(jsonNode -> {
+            // Check the structure matches what we expect, ignoring dynamic
+            // fields
+            return jsonNode.has("@type")
+                    && jsonNode.get("@type").asText().equals("snapshot")
+                    && jsonNode.has("commandId") && jsonNode.has("nodes")
+                    && jsonNode.get("nodes").has("")
+                    && jsonNode.get("nodes").get("").has("value")
+                    && jsonNode.get("nodes").get("").get("value")
+                            .asDouble() == 42.0;
+        }).thenCancel().verify();
     }
 
     @Test

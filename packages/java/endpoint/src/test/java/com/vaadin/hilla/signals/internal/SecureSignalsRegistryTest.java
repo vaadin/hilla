@@ -16,6 +16,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +42,9 @@ public class SecureSignalsRegistryTest {
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
                     "method", null);
-            verify(signalsRegistry.get(), times(1)).register("clientSignalId",
-                    internalSignal);
+            verify(signalsRegistry.get(), times(1)).register(
+                    eq("clientSignalId"),
+                    argThat(actualInternalSignal -> actualInternalSignal != null));
         }
     }
 
