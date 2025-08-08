@@ -6,7 +6,7 @@ import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, describe, expect, it, chai } from 'vitest';
-import type { SignalCommand, SetCommand, SnapshotCommand } from '../src/commands.js';
+import type { SignalCommand, SetCommand } from '../src/commands.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { ValueSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
@@ -21,41 +21,6 @@ describe('@vaadin/hilla-react-signals', () => {
     age: number;
     registered: boolean;
   };
-
-  // Helper function to create commands for testing server responses
-  function createServerCommand<T>(commandId: string, type: 'set' | 'snapshot', value: T): SignalCommand {
-    const targetNodeId = '';
-
-    if (type === 'set') {
-      const command: SetCommand<T> = {
-        commandId,
-        targetNodeId,
-        '@type': 'set',
-        value,
-      };
-      return command;
-    }
-
-    const nodes = {
-      [targetNodeId]: {
-        '@type': 'ValueSignal',
-        parent: null,
-        lastUpdate: null,
-        scopeOwner: null,
-        value,
-        listChildren: [],
-        mapChildren: {},
-      },
-    };
-
-    const command: SnapshotCommand = {
-      commandId,
-      targetNodeId: '',
-      '@type': 'snapshot',
-      nodes,
-    };
-    return command;
-  }
 
   let config: ServerConnectionConfig;
   let subscription: sinon.SinonSpiedInstance<Subscription<SignalCommand>>;
@@ -143,10 +108,12 @@ describe('@vaadin/hilla-react-signals', () => {
       subscribeToSignalViaEffect(valueSignal);
       const { result } = valueSignal.set('b');
       const [, , params] = client.call.firstCall.args;
-      simulateReceivedChange(
-        subscription,
-        createServerCommand((params!.command as { commandId: string }).commandId, 'set', 'b'),
-      );
+      simulateReceivedChange(subscription, {
+        commandId: (params!.command as { commandId: string }).commandId,
+        targetNodeId: '',
+        '@type': 'set',
+        value: 'b',
+      } as SetCommand<string>);
       await expect(result).to.be.fulfilled;
     });
   });
