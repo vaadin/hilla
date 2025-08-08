@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-signals",
-  "version": "24.8.5",
+  "version": "24.8.6",
   "description": "Signals for Hilla React",
   "main": "index.js",
   "module": "index.js",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@preact/signals-react": "3.0.1",
-    "@vaadin/hilla-frontend": "24.8.5",
+    "@vaadin/hilla-frontend": "24.8.6",
     "nanoid": "5.0.9"
   },
   "peerDependencies": {
