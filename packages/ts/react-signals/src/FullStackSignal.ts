@@ -134,7 +134,7 @@ class ServerConnection {
       'update',
       {
         clientSignalId: this.#id,
-        event: command,
+        command,
       },
       init ?? { mute: true },
     );
@@ -283,7 +283,7 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    */
   protected async [$update](command: SignalCommand): Promise<void> {
     if (this.parent) {
-      // Route command via parent, set targetNodeId
+      // Route command via parent
       const routedCommand = { ...command, targetNodeId: this.id };
       return this.parent[$update](routedCommand);
     }

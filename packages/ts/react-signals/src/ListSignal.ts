@@ -86,7 +86,6 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
       const targetChild = this.value.find((child) => child.id === command.targetNodeId);
 
       if (targetChild) {
-        // Route the command to the specific child signal
         targetChild[$processServerResponse](command);
         return;
       }
@@ -138,13 +137,11 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
       }
       this[$resolveOperation](command.commandId, undefined);
     } else if (isPositionCondition(command)) {
-      // TODO: Handle position verification
       this[$resolveOperation](command.commandId, undefined);
     } else if (isSnapshotCommand(command)) {
       const { nodes } = command;
       const listNode = nodes[''];
 
-      // Create new value signals for each child in the list
       const childrenIds = listNode.listChildren;
       const valueSignals = childrenIds
         .map((childId) => {
@@ -156,10 +153,7 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
         })
         .filter(Boolean) as Array<ValueSignal<T>>;
 
-      // Update the list's value with these signals
       this[$setValueQuietly](valueSignals);
-
-      // Resolve the operation
       this[$resolveOperation](command.commandId, undefined);
     }
   }

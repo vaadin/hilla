@@ -20,7 +20,6 @@ export class NumberSignal extends ValueSignal<number> {
    * @returns An operation containing the eventual result
    */
   incrementBy(delta: number): Operation {
-    // If delta is zero, no need to send command to server
     if (delta === 0) {
       const resolvedPromise = Promise.resolve(undefined);
       return this[$createOperation]({ id: '', promise: resolvedPromise });

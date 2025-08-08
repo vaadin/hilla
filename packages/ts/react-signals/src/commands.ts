@@ -246,7 +246,7 @@ export type SnapshotCommand = CreateCommandType<
 export function createSnapshotCommand(nodes: Record<Id, Node>): SnapshotCommand {
   return {
     commandId: randomId(),
-    targetNodeId: '', // global command
+    targetNodeId: '',
     '@type': 'snapshot',
     nodes,
   };
@@ -259,7 +259,6 @@ function isSignalCommand(command: unknown): command is SignalCommand {
     typeof command === 'object' &&
     command !== null &&
     typeof (command as { commandId?: unknown }).commandId === 'string' &&
-    // typeof (command as { targetNodeId?: unknown }).targetNodeId === 'string' &&
     typeof (command as { ['@type']?: unknown })['@type'] === 'string'
   );
 }
