@@ -6,8 +6,7 @@ import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, describe, expect, it, chai } from 'vitest';
-import type { SignalCommand } from '../src/commands.js';
-import { createSetCommand, createSnapshotCommand } from '../src/commands.js';
+import type { SignalCommand, SetCommand, SnapshotCommand } from '../src/commands.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { ValueSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
@@ -28,9 +27,13 @@ describe('@vaadin/hilla-react-signals', () => {
     const targetNodeId = '';
 
     if (type === 'set') {
-      const command = createSetCommand(targetNodeId, value);
-      // Override the commandId to match what the test expects
-      return { ...command, commandId };
+      const command: SetCommand<T> = {
+        commandId,
+        targetNodeId,
+        '@type': 'set',
+        value,
+      };
+      return command;
     }
 
     const nodes = {
@@ -44,8 +47,14 @@ describe('@vaadin/hilla-react-signals', () => {
         mapChildren: {},
       },
     };
-    const command = createSnapshotCommand(nodes);
-    return { ...command, commandId };
+
+    const command: SnapshotCommand = {
+      commandId,
+      targetNodeId: '',
+      '@type': 'snapshot',
+      nodes,
+    };
+    return command;
   }
 
   let config: ServerConnectionConfig;
@@ -136,7 +145,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(
         subscription,
-        createServerCommand((params!.event as { commandId: string }).commandId, 'set', 'b'),
+        createServerCommand((params!.command as { commandId: string }).commandId, 'set', 'b'),
       );
       await expect(result).to.be.fulfilled;
     });

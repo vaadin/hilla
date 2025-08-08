@@ -46,7 +46,6 @@ describe('@vaadin/hilla-react-signals', () => {
         },
       };
 
-      // Add each entry as a node
       entries.forEach((entry) => {
         nodes[entry.id] = {
           '@type': 'ValueSignal',
@@ -130,8 +129,8 @@ describe('@vaadin/hilla-react-signals', () => {
         'update',
         {
           clientSignalId: listSignal.id,
-          event: {
-            commandId: (params?.event as { commandId: string }).commandId,
+          command: {
+            commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: '',
             '@type': 'insert',
             position: { after: null, before: '' },
@@ -178,8 +177,8 @@ describe('@vaadin/hilla-react-signals', () => {
         'update',
         {
           clientSignalId: listSignal.id,
-          event: {
-            commandId: (params?.event as { commandId: string }).commandId,
+          command: {
+            commandId: (params?.command as { commandId: string }).commandId,
             targetNodeId: firstElement.id,
             '@type': 'remove',
             expectedParentId: '',
@@ -324,7 +323,11 @@ describe('@vaadin/hilla-react-signals', () => {
       subscribeToSignalViaEffect(listSignal);
       const { result } = listSignal.insertLast('Alice');
       const [, , params] = client.call.firstCall.args;
-      const insertCommand = createServerInsertCommand((params!.event as { commandId: string }).commandId, 'Alice', '1');
+      const insertCommand = createServerInsertCommand(
+        (params!.command as { commandId: string }).commandId,
+        'Alice',
+        '1',
+      );
       simulateReceivedChange(subscription, insertCommand);
       await expect(result).to.be.fulfilled;
     });
@@ -336,7 +339,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const firstElement = listSignal.value.values().next().value!;
       const { result } = listSignal.remove(firstElement);
       const [, , params] = client.call.firstCall.args;
-      const removeCommand = createServerRemoveCommand((params!.event as { commandId: string }).commandId, '1');
+      const removeCommand = createServerRemoveCommand((params!.command as { commandId: string }).commandId, '1');
       simulateReceivedChange(subscription, removeCommand);
       await expect(result).to.be.fulfilled;
     });
@@ -351,11 +354,11 @@ describe('@vaadin/hilla-react-signals', () => {
       });
 
       const { result } = listSignal.remove(nonExistentSignal);
-      // Check if a server call was made and simulate a response if needed
+
       if (client.call.called) {
         const [, , params] = client.call.firstCall.args;
         const removeCommand = createServerRemoveCommand(
-          (params!.event as { commandId: string }).commandId,
+          (params!.command as { commandId: string }).commandId,
           nonExistentSignal.id,
         );
         simulateReceivedChange(subscription, removeCommand);

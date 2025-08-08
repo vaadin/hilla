@@ -65,7 +65,6 @@ describe('@vaadin/hilla-react-signals', () => {
           return createSetCommand(targetNodeId, value);
         }
         case 'snapshot': {
-          // Create a simple node structure for snapshot commands
           const nodes = {
             [targetNodeId]: {
               '@type': 'ValueSignal',
@@ -189,7 +188,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'update',
         {
           clientSignalId: signal.id,
-          event: { '@type': 'set', value: 42 },
+          command: { '@type': 'set', value: 42 },
         },
         { mute: true },
       );
@@ -253,7 +252,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          event: { '@type': 'set', value: 42 },
+          command: { '@type': 'set', value: 42 },
         },
         { mute: true },
       );
@@ -268,14 +267,14 @@ describe('@vaadin/hilla-react-signals', () => {
         'SignalsHandler',
         'update',
         {
-          event: { '@type': 'set', value: 1 },
+          command: { '@type': 'set', value: 1 },
         },
         { mute: true },
       );
 
       const [, , params] = client.call.firstCall.args;
 
-      expect(params!.event).to.have.property('commandId');
+      expect(params!.command).to.have.property('commandId');
     });
 
     it('should provide a way to access connection errors', async () => {

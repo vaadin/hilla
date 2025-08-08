@@ -7,8 +7,7 @@ import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { beforeEach, describe, expect, it, chai } from 'vitest';
-import type { SignalCommand } from '../src/commands.js';
-import { createIncrementCommand, createSnapshotCommand } from '../src/commands.js';
+import type { SignalCommand, IncrementCommand, SnapshotCommand } from '../src/commands.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
@@ -27,8 +26,13 @@ describe('@vaadin/hilla-react-signals', () => {
     const targetNodeId = '';
 
     if (type === 'increment') {
-      const command = createIncrementCommand(targetNodeId, value);
-      return { ...command, commandId };
+      const command: IncrementCommand = {
+        commandId,
+        targetNodeId,
+        '@type': 'inc',
+        delta: value,
+      };
+      return command;
     }
 
     const nodes = {
@@ -42,8 +46,14 @@ describe('@vaadin/hilla-react-signals', () => {
         mapChildren: {},
       },
     };
-    const command = createSnapshotCommand(nodes);
-    return { ...command, commandId };
+
+    const command: SnapshotCommand = {
+      commandId,
+      targetNodeId: '',
+      '@type': 'snapshot',
+      nodes,
+    };
+    return command;
   }
 
   function simulateReceivingAcceptedCommand(command: SignalCommand): void {
@@ -106,13 +116,17 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(1);
       const [, , params1] = client.call.firstCall.args;
-      const expectedCommand1 = createServerCommand((params1!.event as { commandId: string }).commandId, 'increment', 1);
+      const expectedCommand1 = createServerCommand(
+        (params1!.command as { commandId: string }).commandId,
+        'increment',
+        1,
+      );
       expect(client.call).to.have.been.calledWithMatch(
         'SignalsHandler',
         'update',
         {
           clientSignalId: numberSignal.id,
-          event: expectedCommand1,
+          command: expectedCommand1,
         },
         { mute: true },
       );
@@ -122,13 +136,17 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(2);
       const [, , params2] = client.call.secondCall.args;
-      const expectedCommand2 = createServerCommand((params2!.event as { commandId: string }).commandId, 'increment', 2);
+      const expectedCommand2 = createServerCommand(
+        (params2!.command as { commandId: string }).commandId,
+        'increment',
+        2,
+      );
       expect(client.call).to.have.been.calledWithMatch(
         'SignalsHandler',
         'update',
         {
           clientSignalId: numberSignal.id,
-          event: expectedCommand2,
+          command: expectedCommand2,
         },
         { mute: true },
       );
@@ -139,7 +157,7 @@ describe('@vaadin/hilla-react-signals', () => {
       numberSignal.incrementBy(-5);
       const [, , params3] = client.call.thirdCall.args;
       const expectedCommand3 = createServerCommand(
-        (params3!.event as { commandId: string }).commandId,
+        (params3!.command as { commandId: string }).commandId,
         'increment',
         -5,
       );
@@ -148,7 +166,7 @@ describe('@vaadin/hilla-react-signals', () => {
         'update',
         {
           clientSignalId: numberSignal.id,
-          event: expectedCommand3,
+          command: expectedCommand3,
         },
         { mute: true },
       );
@@ -182,7 +200,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(
         subscription,
-        createServerCommand((params!.event as { commandId: string }).commandId, 'increment', 1),
+        createServerCommand((params!.command as { commandId: string }).commandId, 'increment', 1),
       );
       await expect(result).to.be.fulfilled;
     });
