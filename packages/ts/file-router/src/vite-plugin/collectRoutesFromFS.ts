@@ -101,7 +101,7 @@ export default async function collectRoutesFromFS(
         logger,
         parent: dir,
       });
-      if (directoryRoutes.length === 1 && directoryRoutes[0].layout) {
+      if (directoryRoutes.length === 1 && directoryRoutes[0]?.layout) {
         const [layoutRoute] = directoryRoutes;
         children.push(layoutRoute);
       } else if (directoryRoutes.length > 0) {
