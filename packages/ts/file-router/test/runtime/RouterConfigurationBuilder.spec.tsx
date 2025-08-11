@@ -704,6 +704,7 @@ describe('RouterBuilder', () => {
           },
         ])
         .withLayout(Server)
+        .withLayoutSkipping()
         .build();
 
       expect(routes).to.be.like([
@@ -798,6 +799,89 @@ describe('RouterBuilder', () => {
               path: '/deep-skip-excluded-2',
             },
           ],
+        },
+      ]);
+    });
+  });
+
+  describe('withDeepWildcard', () => {
+    it('should merge deep wildcard routes', () => {
+      const { routes } = builder
+        .withReactRoutes([
+          {
+            path: 'deep',
+            children: [
+              {
+                path: 'deep-child',
+                children: [
+                  { path: 'deep-deep-child-1', children: [{ path: 'deep-deep-deep-child' }] },
+                  { path: 'deep-deep-child-2' },
+                ],
+              },
+              {
+                path: 'deep-child-with-own-wildcard',
+                children: [{ path: 'deep-deep-child-3' }, { path: '*', handle: { title: 'Deep Deep Wildcard' } }],
+              },
+              {
+                path: '*',
+                handle: {
+                  title: 'Deep Wildcard',
+                },
+              },
+            ],
+          },
+        ])
+        .withDeepWildcard()
+        .build();
+
+      expect(routes).to.be.like([
+        {
+          children: [
+            {
+              element: <div>Test</div>,
+              path: '/test',
+            },
+          ],
+          path: '',
+        },
+        {
+          children: [
+            {
+              children: [
+                {
+                  children: [
+                    { path: 'deep-deep-deep-child' },
+                    {
+                      handle: { title: 'Deep Wildcard' },
+                      path: '*',
+                    },
+                  ],
+                  path: 'deep-deep-child-1',
+                },
+                { path: 'deep-deep-child-2' },
+                {
+                  handle: { title: 'Deep Wildcard' },
+                  path: '*',
+                },
+              ],
+              path: 'deep-child',
+            },
+            {
+              children: [
+                { path: 'deep-deep-child-3' },
+                {
+                  handle: { title: 'Deep Deep Wildcard' },
+                  path: '*',
+                },
+              ],
+              path: 'deep-child-with-own-wildcard',
+            },
+            {
+              handle: { title: 'Deep Wildcard' },
+              path: '*',
+            },
+          ],
+          path: 'deep',
         },
       ]);
     });
