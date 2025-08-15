@@ -78,9 +78,9 @@ function isWildcardRoute(route: RouteObject): boolean {
  */
 export default function createFallbackTransformer([notFoundFallback, indexFallback]: FallbackRoutes): RouteTransformer {
   return ({ original, override, children, dupe }) => {
-    if (original && !original.index && !getHandleFlag(original, RouteHandleFlag.IGNORE_FALLBACK) && !dupe) {
+    if (original && !getHandleFlag(original, RouteHandleFlag.IGNORE_FALLBACK) && !dupe) {
       if (!children) {
-        return original;
+        return original; //: IndexRouteObject;
       }
 
       let fallback: RouteObject[];
@@ -93,10 +93,11 @@ export default function createFallbackTransformer([notFoundFallback, indexFallba
         fallback = [notFoundFallback, indexFallback];
       }
 
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return {
         ...original,
         children: [...children, ...fallback],
-      } satisfies NonIndexRouteObject;
+      } as NonIndexRouteObject;
     }
 
     return override as RouteObject | undefined;
