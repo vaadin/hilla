@@ -18,7 +18,7 @@ export function AutoCrudDialog(props: AutoCrudDialogProps): JSX.Element {
   const { header, children, opened, onClose } = props;
   return (
     <Dialog
-      overlayClass="auto-crud-dialog"
+      className="auto-crud-dialog"
       opened={opened}
       headerRenderer={() => (
         <div className="auto-crud-dialog-header">

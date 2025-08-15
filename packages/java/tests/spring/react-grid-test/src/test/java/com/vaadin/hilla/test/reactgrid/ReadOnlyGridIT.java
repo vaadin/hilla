@@ -21,7 +21,7 @@ public class ReadOnlyGridIT extends AbstractGridTest {
 
     @Test
     public void dataShown() {
-        Assert.assertEquals(8, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(7, grid.getLastVisibleRowIndex());
         Assert.assertEquals("1", grid.getCell(0, 0).getText());
         assertName(0, "Abigail", "Carter");
         Assert.assertEquals("9", grid.getCell(8, 0).getText());
@@ -39,12 +39,12 @@ public class ReadOnlyGridIT extends AbstractGridTest {
 
     @Test
     public void scrollingLoadsData() {
-        Assert.assertEquals(8, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(7, grid.getLastVisibleRowIndex());
         grid.scrollToRow(10);
         waitUntil(driver -> {
-            return grid.getLastVisibleRowIndex() == 18;
+            return grid.getLastVisibleRowIndex() == 17;
         });
-        assertName(18, "Jack", "Lewis");
+        assertName(17, "Isabella", "King");
     }
 
     @Test
