@@ -5,6 +5,7 @@ import type { AgnosticRoute, RouterBuildOptions, RouterConfiguration, ViewConfig
 import createFallbackTransformer, { createFallbackRoutes } from './createFallbackTransformer.js';
 import createProtectTransformer from './createProtectTransformer.js';
 import fileRouteTransformer from './fileRouteTransformer.js';
+import mergeDeepWildcard from './mergeDeepWildcard.js';
 import mergeLayout from './mergeLayout.js';
 import { mergeRouteTrees } from './mergeRouteTrees.js';
 import mergeSkipLayouts from './mergeSkipLayout.js';
@@ -99,6 +100,11 @@ export class RouterConfigurationBuilder {
     return this;
   }
 
+  withDeepWildcard(): this {
+    this.#modifiers.push((originalRoutes) => mergeDeepWildcard(originalRoutes));
+    return this;
+  }
+
   /**
    * Adds the parent layout to all views with the `flowLayouts` flag set in the
    * ViewConfiguration.
@@ -116,6 +122,11 @@ export class RouterConfigurationBuilder {
       this.#isLayoutSet = true;
       this.#modifiers.push((originalRoutes) => mergeLayout(originalRoutes, component));
     }
+    return this;
+  }
+
+  withLayoutSkipping(): this {
+    this.#modifiers.push((originalRoutes) => mergeSkipLayouts(originalRoutes));
     return this;
   }
 
@@ -178,7 +189,6 @@ export class RouterConfigurationBuilder {
    * configured browser router
    */
   build(options?: RouterBuildOptions): RouterConfiguration {
-    this.#modifiers.push((originalRoutes) => mergeSkipLayouts(originalRoutes));
     const routes =
       this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 
