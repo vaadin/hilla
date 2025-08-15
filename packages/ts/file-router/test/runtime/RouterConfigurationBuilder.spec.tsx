@@ -252,6 +252,32 @@ describe('RouterBuilder', () => {
         ...serverRoutes,
       ]);
     });
+
+    it('should not break the root index route (vaadin/hilla#3881)', () => {
+      const { routes } = new RouterConfigurationBuilder()
+        .withReactRoutes([
+          {
+            index: true,
+            element: <div>Index</div>,
+          },
+        ])
+        .withFallback(Server, { title: 'Server' })
+        .build();
+
+      const serverWildcard = {
+        path: '*',
+        element: <Server />,
+        handle: { title: 'Server' },
+      };
+
+      expect(routes).to.be.like([
+        {
+          index: true,
+          element: <div>Index</div>,
+        },
+        serverWildcard,
+      ]);
+    });
   });
 
   describe('withFileRoutes', () => {
