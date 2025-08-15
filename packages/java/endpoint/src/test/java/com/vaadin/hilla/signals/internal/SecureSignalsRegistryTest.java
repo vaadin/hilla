@@ -1,11 +1,10 @@
-package com.vaadin.hilla.signals.core.registry;
+package com.vaadin.hilla.signals.internal;
 
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.ValueSignal;
+import com.vaadin.signals.Signal;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
@@ -17,6 +16,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,36 +28,37 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsAllowed_signalInstanceIsRegistered()
             throws Exception {
-        NumberSignal signal = new NumberSignal();
+        Signal<?> signal = Mockito.mock(Signal.class);
+        InternalSignal internalSignal = new InternalSignal(signal);
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
-
         AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                            .thenAnswer(invocation -> signal);
+                            .thenReturn(internalSignal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
                     "method", null);
-            verify(signalsRegistry.get(), times(1)).register("clientSignalId",
-                    signal);
+            verify(signalsRegistry.get(), times(1)).register(
+                    eq("clientSignalId"),
+                    argThat(actualInternalSignal -> actualInternalSignal != null));
         }
     }
 
     @Test
     public void when_unsubscribedIsCalled_underlyingRegistryRemovesClientSignalToSignalMapping()
             throws Exception {
-        NumberSignal signal = new NumberSignal();
+        Signal<?> signal = Mockito.mock(Signal.class);
+        InternalSignal internalSignal = new InternalSignal(signal);
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
-
         AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                            .thenAnswer(invocation -> signal);
+                            .thenReturn(internalSignal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
@@ -74,7 +77,6 @@ public class SecureSignalsRegistryTest {
         EndpointInvoker invoker = mockEndpointInvokerThatDeniesAccess();
         SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                 invoker);
-
         assertThrows(
                 EndpointInvocationException.EndpointUnauthorizedException.class,
                 () -> secureSignalsRegistry.register("clientSignalId",
@@ -84,23 +86,23 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsAllowed_get_returnsSignal()
             throws Exception {
-        NumberSignal signal = new NumberSignal();
+        Signal<?> signal = Mockito.mock(Signal.class);
+        InternalSignal internalSignal = new InternalSignal(signal);
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
-
         AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
                 (mockSignalRegistry, context) -> {
                     when(mockSignalRegistry.get("clientSignalId"))
-                            .thenAnswer(invocation -> signal);
+                            .thenReturn(internalSignal);
                     signalsRegistry.set(mockSignalRegistry);
                 })) {
             SecureSignalsRegistry secureSignalsRegistry = new SecureSignalsRegistry(
                     invoker);
             secureSignalsRegistry.register("clientSignalId", "endpoint",
                     "method", null);
-            NumberSignal result = (NumberSignal) secureSignalsRegistry
+            InternalSignal result = (InternalSignal) secureSignalsRegistry
                     .get("clientSignalId");
-            assertEquals(signal, result);
+            assertEquals(internalSignal, result);
             verify(signalsRegistry.get(), times(1)).get("clientSignalId");
         }
     }
@@ -142,7 +144,7 @@ public class SecureSignalsRegistryTest {
     }
 
     private EndpointInvoker mockEndpointInvokerThatGrantsAccess(
-            ValueSignal<?> signal) throws Exception {
+            Signal<?> signal) throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
         when(invoker.invoke(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any()))
@@ -172,9 +174,5 @@ public class SecureSignalsRegistryTest {
     }
 
     public void aFakeMethod() {
-    }
-
-    private static <T> ValueSignal<T> typedValueSignal(ValueSignal<T> signal) {
-        return signal;
     }
 }
