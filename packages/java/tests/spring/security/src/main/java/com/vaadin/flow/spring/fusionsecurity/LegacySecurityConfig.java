@@ -54,8 +54,11 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
         http.authorizeHttpRequests(auth -> auth.requestMatchers("/public/**")
                 .permitAll().requestMatchers(applyUrlMapping("/")).permitAll()
                 .requestMatchers(applyUrlMapping("/form")).permitAll()
-                .requestMatchers("/admin-only/**").hasRole("ADMIN")
-                .requestMatchers("/error/**").permitAll());
+                .requestMatchers(applyUrlMapping("/private"),
+                        "/all-logged-in/**")
+                .authenticated()
+                .requestMatchers(applyUrlMapping("/admin"), "/admin-only/**")
+                .hasRole("ADMIN").requestMatchers("/error/**").permitAll());
 
         super.configure(http);
 

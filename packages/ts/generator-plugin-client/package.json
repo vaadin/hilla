@@ -51,6 +51,6 @@
   "dependencies": {
     "@vaadin/hilla-generator-core": "25.0.0-alpha4",
     "@vaadin/hilla-generator-utils": "25.0.0-alpha4",
-    "typescript": "5.8.3"
+    "typescript": "5.9.2"
   }
 }
