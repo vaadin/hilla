@@ -1,0 +1,44 @@
+{
+  "name": "Hilla",
+  "image": "debian:bookworm-slim",
+  "runArgs": ["--name=hilla_dev"],
+  "containerEnv": {
+    "CHROME_BIN": "/usr/local/bin/chrome",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "vaadin",
+      "userUid": "1000",
+      "userGid": "1000",
+      "addsudo": true,
+      "installZsh": false
+    },
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "jdkDistro": "tem",
+      "installGradle": true,
+      "installMaven": true
+    },
+    "ghcr.io/devcontainers-extra/features/kotlin-sdkman:2": {
+      "jdkVersion": "21",
+      "jdkDistro": "tem"
+    },
+    "ghcr.io/roul/devcontainer-features/mise-node:1": {
+      "version": "24"
+    },
+    "ghcr.io/kreemer/features/chrometesting:1": {}
+  },
+  "forwardPorts": [9876, 8080, 8000],
+  "containerUser": "vaadin",
+  "remoteUser": "vaadin",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localEnv:PODMAN_DIR}${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
+  "mounts": [
+    {
+      "source": "${localWorkspaceFolderBasename}_nodemodules",
+      "target": "${containerWorkspaceFolder}/node_modules",
+      "type": "volume"
+    }
+  ]
+}
