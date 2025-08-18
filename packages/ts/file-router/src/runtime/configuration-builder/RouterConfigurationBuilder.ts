@@ -189,6 +189,7 @@ export class RouterConfigurationBuilder {
    * configured browser router
    */
   build(options?: RouterBuildOptions): RouterConfiguration {
+    this.withLayoutSkipping();
     const routes =
       this.#modifiers.reduce<readonly RouteObject[] | undefined>((acc, mod) => mod(acc) ?? acc, undefined) ?? [];
 

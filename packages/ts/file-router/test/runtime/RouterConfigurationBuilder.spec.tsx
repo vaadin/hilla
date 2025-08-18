@@ -730,7 +730,6 @@ describe('RouterBuilder', () => {
           },
         ])
         .withLayout(Server)
-        .withLayoutSkipping()
         .build();
 
       expect(routes).to.be.like([
