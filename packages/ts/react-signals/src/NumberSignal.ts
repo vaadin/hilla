@@ -1,4 +1,4 @@
-import { createIncrementStateEvent, isIncrementStateEvent, type StateEvent } from './events.js';
+import { createIncrementCommand, isIncrementCommand, type SignalCommand } from './commands.js';
 import {
   $createOperation,
   $processServerResponse,
@@ -10,65 +10,39 @@ import {
 import { ValueSignal } from './ValueSignal.js';
 
 /**
- * A signal that holds a number value. The underlying
- * value of this signal is stored and updated as a
- * shared value on the server.
- *
- * After obtaining the NumberSignal instance from
- * a server-side service that returns one, the value
- * can be updated using the `value` property,
- * and it can be read with or without the
- * `value` property (similar to a normal signal):
- *
- * @example
- * ```tsx
- * const counter = CounterService.counter();
- *
- * return (
- *    <Button onClick={() => counter.incrementBy(1)}>
- *      Click count: { counter }
- *    </Button>
- *    <Button onClick={() => counter.value = 0}>Reset</Button>
- * );
- * ```
+ * A signal containing a numeric value. The value is updated as a single atomic change.
  */
 export class NumberSignal extends ValueSignal<number> {
-  readonly #sentIncrementEvents = new Map<string, StateEvent>();
   /**
-   * Increments the value by the specified delta. The delta can be negative to
-   * decrease the value.
-   *
-   * This method differs from using the `++` or `+=` operators directly on the
-   * signal value. It performs an atomic operation to prevent conflicts from
-   * concurrent changes, ensuring that other users' modifications are not
-   * accidentally overwritten.
-   *
-   * @param delta - The delta to increment the value by. The delta can be
-   * negative.
-   * @returns An operation object that allows to perform additional actions.
+   * Atomically increments the value of this signal by the given delta amount.
+   * The value is decremented if the delta is negative.
+   * @param delta - The increment amount
+   * @returns An operation containing the eventual result
    */
   incrementBy(delta: number): Operation {
     if (delta === 0) {
-      return { result: Promise.resolve() };
+      const resolvedPromise = Promise.resolve(undefined);
+      return this[$createOperation]({ id: '', promise: resolvedPromise });
     }
-    this[$setValueQuietly](this.value + delta);
-    const event = createIncrementStateEvent(delta);
-    this.#sentIncrementEvents.set(event.id, event);
-    const promise = this[$update](event);
-    return this[$createOperation]({ id: event.id, promise });
+
+    const command = createIncrementCommand('', delta);
+    const promise = this[$update](command);
+    return this[$createOperation]({ id: command.commandId, promise });
   }
 
-  protected override [$processServerResponse](event: StateEvent): void {
-    if (event.accepted && isIncrementStateEvent(event)) {
-      const sentEvent = this.#sentIncrementEvents.get(event.id);
-      if (sentEvent) {
-        this.#sentIncrementEvents.delete(event.id);
-      } else {
-        this[$setValueQuietly](this.value + event.value);
-      }
-      this[$resolveOperation](event.id);
+  /**
+   * Gets the value of this signal as an integer.
+   */
+  valueAsInt(): number {
+    return Math.trunc(this.value);
+  }
+
+  protected override [$processServerResponse](command: SignalCommand): void {
+    if (isIncrementCommand(command)) {
+      this[$setValueQuietly](this.value + command.delta);
+      this[$resolveOperation](command.commandId, undefined);
     } else {
-      super[$processServerResponse](event);
+      super[$processServerResponse](command);
     }
   }
 }

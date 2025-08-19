@@ -1,3 +1,3 @@
-package com.vaadin.hilla.signals;
+package com.vaadin.signals;
 
 public record ListSignal<T>() {}
