@@ -89,7 +89,7 @@
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>4.0.0-M1</spring.boot.version>
+    <spring.boot.version>4.0.0-M2</spring.boot.version>
     <testbench.version>10.0.0-alpha4</testbench.version>
     <jakarta.validation.version>3.0.2</jakarta.validation.version>
     <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
