@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-cli",
-  "version": "24.9.0-alpha5",
+  "version": "24.9.0-alpha6",
   "description": "A Hilla tool to generate TypeScript code from the OpenAPI document",
   "main": "index.js",
   "type": "module",
@@ -43,7 +43,7 @@
     "tsgen": "bin/index.js"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-core": "24.9.0-alpha5",
-    "@vaadin/hilla-generator-utils": "24.9.0-alpha5"
+    "@vaadin/hilla-generator-core": "24.9.0-alpha6",
+    "@vaadin/hilla-generator-utils": "24.9.0-alpha6"
   }
 }
