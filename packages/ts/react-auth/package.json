@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-auth",
-  "version": "24.8.6",
+  "version": "24.8.7",
   "description": "Hilla auth utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -44,7 +44,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.8.6"
+    "@vaadin/hilla-frontend": "24.8.7"
   },
   "peerDependencies": {
     "react": "18 || 19",
