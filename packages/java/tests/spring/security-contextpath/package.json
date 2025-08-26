@@ -230,7 +230,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "6666f844dd7cb578eab72216ca07b6f3b74d90a8774fc8d8a117dcd26b8c825a"
+    "hash": "0abe03691032f94dbddeddcb758395c70f4bf2f451a44ed2baf18002bf5b3714"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
