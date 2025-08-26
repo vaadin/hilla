@@ -63,7 +63,6 @@
                     <arguments>
                         <argument>default</argument>
                         <argument>react-router</argument>
-                        <argument>react19</argument>
                         <argument>vite</argument>
                     </arguments>
                 </configuration>
