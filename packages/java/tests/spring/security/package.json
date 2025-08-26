@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@adobe/lit-mobx": "2.0.0-rc.4",
-    "@polymer/polymer": "3.5.2",
     "@vaadin/a11y-base": "25.0.0-alpha16",
     "@vaadin/accordion": "25.0.0-alpha16",
     "@vaadin/app-layout": "25.0.0-alpha16",
@@ -117,7 +116,6 @@
   "vaadin": {
     "dependencies": {
       "@adobe/lit-mobx": "2.0.0-rc.4",
-      "@polymer/polymer": "3.5.2",
       "@vaadin/a11y-base": "24.8.0-alpha4",
       "@vaadin/accordion": "24.8.0-alpha4",
       "@vaadin/app-layout": "24.8.0-alpha4",
@@ -227,14 +225,13 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "adbab2f221b6389db5b63cd295814799261d33a3982e2458ab7847aa26d8e43b"
+    "hash": "56cbaab79a0311405ad217a393240e6b38e6acdaee225ea5e21b4773668ce3e5"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "lit": "$lit",
     "@vaadin/router": "$@vaadin/router",
-    "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
