@@ -7,7 +7,7 @@ import chaiLike from 'chai-like';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { beforeEach, describe, expect, it, chai } from 'vitest';
-import type { IncrementStateEvent, StateEvent } from '../src/events.js';
+import type { SignalCommand, IncrementCommand } from '../src/commands.js';
 import type { ServerConnectionConfig } from '../src/FullStackSignal.js';
 import { effect, NumberSignal } from '../src/index.js';
 import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
@@ -18,12 +18,12 @@ chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-signals', () => {
   let config: ServerConnectionConfig;
-  let subscription: sinon.SinonSpiedInstance<Subscription<StateEvent>>;
+  let subscription: sinon.SinonSpiedInstance<Subscription<SignalCommand>>;
   let client: sinon.SinonStubbedInstance<ConnectClient>;
 
-  function simulateReceivingAcceptedEvent(event: StateEvent): void {
+  function simulateReceivingAcceptedCommand(command: SignalCommand): void {
     const [onNextCallback] = subscription.onNext.firstCall.args;
-    onNextCallback({ ...event, accepted: true });
+    onNextCallback(command);
   }
 
   beforeEach(() => {
@@ -81,77 +81,65 @@ describe('@vaadin/hilla-react-signals', () => {
 
       numberSignal.incrementBy(1);
       const [, , params1] = client.call.firstCall.args;
-      const expectedEvent1: IncrementStateEvent = {
-        // @ts-expect-error params.event type has id property
-        id: params1?.event.id,
-        type: 'increment',
-        value: 1,
-        accepted: false,
+      const expectedCommand1: IncrementCommand = {
+        commandId: (params1!.command as { commandId: string }).commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 1,
       };
       expect(client.call).to.have.been.calledWithMatch(
         'SignalsHandler',
         'update',
         {
           clientSignalId: numberSignal.id,
-          event: expectedEvent1,
+          command: expectedCommand1,
         },
         { mute: true },
       );
 
-      simulateReceivingAcceptedEvent(expectedEvent1);
+      simulateReceivingAcceptedCommand(expectedCommand1);
       expect(numberSignal.value).to.equal(43);
 
       numberSignal.incrementBy(2);
       const [, , params2] = client.call.secondCall.args;
-      // @ts-expect-error params.event type has id property
-      const expectedEvent2: IncrementStateEvent = { id: params2?.event.id, type: 'increment', value: 2 };
-      expect(client.call).to.have.been.calledWithMatch(
-        'SignalsHandler',
-        'update',
-        {
-          clientSignalId: numberSignal.id,
-          event: expectedEvent2,
-        },
-        { mute: true },
-      );
-
-      simulateReceivingAcceptedEvent(expectedEvent2);
-      expect(numberSignal.value).to.equal(45);
-
-      numberSignal.incrementBy(-5);
-      const [, , params3] = client.call.thirdCall.args;
-      const expectedEvent3: IncrementStateEvent = {
-        // @ts-expect-error params.event type has id property
-        id: params3?.event.id,
-        type: 'increment',
-        value: -5,
-        accepted: false,
+      const expectedCommand2: IncrementCommand = {
+        commandId: (params2!.command as { commandId: string }).commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 2,
       };
       expect(client.call).to.have.been.calledWithMatch(
         'SignalsHandler',
         'update',
         {
           clientSignalId: numberSignal.id,
-          event: expectedEvent3,
+          command: expectedCommand2,
         },
         { mute: true },
       );
 
-      simulateReceivingAcceptedEvent(expectedEvent3);
-      expect(numberSignal.value).to.equal(40);
-    });
-
-    it('should update the underlying value locally without waiting for server confirmation when incrementBy is called', () => {
-      const numberSignal = new NumberSignal(42, config);
-      subscribeToSignalViaEffect(numberSignal);
-
-      numberSignal.incrementBy(1);
-      expect(numberSignal.value).to.equal(43);
-
-      numberSignal.incrementBy(2);
+      simulateReceivingAcceptedCommand(expectedCommand2);
       expect(numberSignal.value).to.equal(45);
 
       numberSignal.incrementBy(-5);
+      const [, , params3] = client.call.thirdCall.args;
+      const expectedCommand3: IncrementCommand = {
+        commandId: (params3!.command as { commandId: string }).commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: -5,
+      };
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: numberSignal.id,
+          command: expectedCommand3,
+        },
+        { mute: true },
+      );
+
+      simulateReceivingAcceptedCommand(expectedCommand3);
       expect(numberSignal.value).to.equal(40);
     });
 
@@ -167,8 +155,13 @@ describe('@vaadin/hilla-react-signals', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
 
-      const expectedEvent: IncrementStateEvent = { id: 'testId', type: 'increment', value: 1, accepted: true };
-      simulateReceivingAcceptedEvent(expectedEvent);
+      const expectedCommand: IncrementCommand = {
+        commandId: 'testId',
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 1,
+      };
+      simulateReceivingAcceptedCommand(expectedCommand);
 
       expect(numberSignal.value).to.equal(43);
     });
@@ -179,26 +172,12 @@ describe('@vaadin/hilla-react-signals', () => {
       const { result } = numberSignal.incrementBy(1);
       const [, , params] = client.call.firstCall.args;
       simulateReceivedChange(subscription, {
-        id: (params!.event as { id: string }).id,
-        type: 'increment',
-        value: 43,
-        accepted: true,
-      });
+        commandId: (params!.command as { commandId: string }).commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 1,
+      } as IncrementCommand);
       await expect(result).to.be.fulfilled;
-    });
-
-    it('should reject the result promise after rejected incrementBy', async () => {
-      const numberSignal = new NumberSignal(42, config);
-      subscribeToSignalViaEffect(numberSignal);
-      const { result } = numberSignal.incrementBy(1);
-      const [, , params] = client.call.firstCall.args;
-      simulateReceivedChange(subscription, {
-        id: (params!.event as { id: string }).id,
-        type: 'increment',
-        value: 43,
-        accepted: false,
-      });
-      await expect(result).to.be.rejected;
     });
 
     it('should resolve the result promise after incrementing by zero without server roundtrip', async () => {

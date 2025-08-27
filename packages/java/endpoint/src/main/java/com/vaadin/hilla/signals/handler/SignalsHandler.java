@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,11 +16,11 @@
 
 package com.vaadin.hilla.signals.handler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.EndpointInvocationException;
-import com.vaadin.hilla.signals.core.event.ListStateEvent;
-import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -60,42 +60,25 @@ public class SignalsHandler {
      *
      * @return a Flux of JSON events
      */
-    public Flux<ObjectNode> subscribe(String providerEndpoint,
-            String providerMethod, String clientSignalId, ObjectNode body,
-            @Nullable String parentClientSignalId) {
+    public Flux<JsonNode> subscribe(String providerEndpoint,
+            String providerMethod, String clientSignalId, ObjectNode body) {
         if (registry == null) {
             throw new IllegalStateException(
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));
         }
         try {
-            if (parentClientSignalId != null) {
-                return subscribe(parentClientSignalId, clientSignalId);
-            }
             var signal = registry.get(clientSignalId);
             if (signal != null) {
-                return signal.subscribe().doFinally(
+                return signal.subscribe(clientSignalId).doFinally(
                         (event) -> registry.unsubscribe(clientSignalId));
             }
             registry.register(clientSignalId, providerEndpoint, providerMethod,
                     body);
-            return registry.get(clientSignalId).subscribe()
+            return registry.get(clientSignalId).subscribe(clientSignalId)
                     .doFinally((event) -> registry.unsubscribe(clientSignalId));
         } catch (Exception e) {
             return Flux.error(e);
         }
-    }
-
-    private Flux<ObjectNode> subscribe(String parentClientSignalId,
-            String clientSignalId)
-            throws EndpointInvocationException.EndpointHttpException {
-        var parentSignal = registry.get(parentClientSignalId);
-        if (parentSignal == null) {
-            throw new IllegalStateException(String.format(
-                    "Parent Signal not found for parent client signal id: %s",
-                    parentClientSignalId));
-        }
-        return parentSignal.subscribe(clientSignalId)
-                .doFinally((event) -> registry.unsubscribe(clientSignalId));
     }
 
     /**
@@ -112,21 +95,10 @@ public class SignalsHandler {
             throw new IllegalStateException(
                     String.format(FEATURE_FLAG_ERROR_MESSAGE));
         }
-        var parentSignalId = ListStateEvent.extractParentSignalId(event);
-        if (parentSignalId != null) {
-            if (registry.get(parentSignalId) == null) {
-                throw new IllegalStateException(String.format(
-                        "Parent Signal not found for signal id: %s",
-                        parentSignalId));
-            }
-            registry.get(parentSignalId).submit(event);
-        } else {
-            if (registry.get(clientSignalId) == null) {
-                throw new IllegalStateException(
-                        String.format("Signal not found for client signal: %s",
-                                clientSignalId));
-            }
-            registry.get(clientSignalId).submit(event);
+        if (registry.get(clientSignalId) == null) {
+            throw new IllegalStateException(String.format(
+                    "Signal not found for client signal: %s", clientSignalId));
         }
+        registry.get(clientSignalId).submit(clientSignalId, event);
     }
 }

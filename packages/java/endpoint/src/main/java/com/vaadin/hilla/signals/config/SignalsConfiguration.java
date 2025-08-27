@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,9 +19,9 @@ package com.vaadin.hilla.signals.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.signals.Signal;
-import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
+import com.vaadin.signals.SignalEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Spring beans configuration for signals.
  */
-@Configuration
+@Configuration("signalsConfiguration")
 public class SignalsConfiguration {
 
     private SecureSignalsRegistry signalsRegistry;
@@ -40,7 +40,8 @@ public class SignalsConfiguration {
     public SignalsConfiguration(EndpointInvoker endpointInvoker,
             @Qualifier("hillaEndpointObjectMapper") ObjectMapper hillaEndpointObjectMapper) {
         this.endpointInvoker = endpointInvoker;
-        Signal.setMapper(hillaEndpointObjectMapper);
+        SignalEnvironment.tryInitialize(hillaEndpointObjectMapper,
+                Runnable::run);
     }
 
     /**
@@ -64,7 +65,7 @@ public class SignalsConfiguration {
      *
      * @return SignalsHandler endpoint instance
      */
-    @Bean
+    @Bean(name = "hillaSignalsHandler")
     public SignalsHandler signalsHandler(
             @Autowired(required = false) SecureSignalsRegistry signalsRegistry) {
         if (signalsHandler == null) {
