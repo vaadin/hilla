@@ -57,16 +57,19 @@ public class SecurityConfig {
             auth
                     // Public access
                     .requestMatchers("/public/**").permitAll()
-                    .requestMatchers(requestUtil.applyUrlMapping("/"))
-                    .permitAll()
-                    .requestMatchers(requestUtil.applyUrlMapping("/form"))
-                    .permitAll()
-                    .requestMatchers(
+                    .requestMatchers(requestUtil.applyUrlMapping("/"),
+                            requestUtil.applyUrlMapping("/form"),
                             requestUtil.applyUrlMapping("/proxied-service"))
                     .permitAll()
+                    // Authenticated access
+                    .requestMatchers(requestUtil.applyUrlMapping("/private"),
+                            "/all-logged-in/**")
+                    .authenticated()
                     // Admin only access
-                    .requestMatchers("/admin-only/**").hasAnyRole(ROLE_ADMIN)
-                    .requestMatchers("/error/**").permitAll();
+                    .requestMatchers(requestUtil.applyUrlMapping("/admin"),
+                            "/admin-only/**")
+                    .hasAnyRole(ROLE_ADMIN).requestMatchers("/error/**")
+                    .permitAll();
         });
 
         if (stateless) {

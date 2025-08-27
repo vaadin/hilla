@@ -5,8 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -23,14 +25,13 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
             throws Exception {
-        http.csrf((h) -> h.ignoringRequestMatchers("/login"));
-
-        http.authorizeHttpRequests(
-                (h) -> h.requestMatchers("/flux").permitAll());
-        http.authorizeHttpRequests(
-                (h) -> h.requestMatchers("/type-script").permitAll());
-        http.with(vaadin(), cfg -> cfg.loginView("/login"));
-        return http.build();
+        return http.csrf((h) -> h.ignoringRequestMatchers("/login"))
+                .authorizeHttpRequests((h) -> h
+                        .requestMatchers("/flux", "/type-script").permitAll())
+                .authorizeHttpRequests(h -> h
+                        .requestMatchers("/", "/access-mod", "/more/levels/url")
+                        .authenticated())
+                .with(vaadin(), cfg -> cfg.loginView("/login")).build();
     }
 
     @Bean

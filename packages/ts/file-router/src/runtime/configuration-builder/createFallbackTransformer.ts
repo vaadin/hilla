@@ -1,7 +1,14 @@
 import { type ComponentType, createElement } from 'react';
 import type { RouteObject, NonIndexRouteObject } from 'react-router';
 import type { ViewConfig } from '../../types.js';
-import { getHandleFlag, RouteHandleFlag, type RouteTransformer } from './utils.js';
+import {
+  getHandleFlag,
+  isIndexRoute,
+  isOptionalRoute,
+  isWildcardRoute,
+  RouteHandleFlag,
+  type RouteTransformer,
+} from './utils.js';
 
 /**
  * A tuple of fallback routes:
@@ -28,33 +35,6 @@ export function createFallbackRoutes(component: ComponentType, config?: ViewConf
 }
 
 /**
- * Determines whether the given route object represents an index route.
- *
- * @param route - The route object to check.
- */
-function isIndexRoute(route: RouteObject): boolean {
-  return !!route.index;
-}
-
-/**
- * Determines whether the given route is optional based on its path.
- *
- * @param route - The route object to check.
- */
-function isOptionalRoute(route: RouteObject): boolean {
-  return !!route.path?.includes('?');
-}
-
-/**
- * Determines whether the given route is a wildcard route.
- *
- * @param route - The route object to check.
- */
-function isWildcardRoute(route: RouteObject): boolean {
-  return route.path === '*';
-}
-
-/**
  * Creates a route transformer that adds fallback routes to handle unmatched
  * paths.
  *
@@ -78,9 +58,9 @@ function isWildcardRoute(route: RouteObject): boolean {
  */
 export default function createFallbackTransformer([notFoundFallback, indexFallback]: FallbackRoutes): RouteTransformer {
   return ({ original, override, children, dupe }) => {
-    if (original && !original.index && !getHandleFlag(original, RouteHandleFlag.IGNORE_FALLBACK) && !dupe) {
+    if (original && !getHandleFlag(original, RouteHandleFlag.IGNORE_FALLBACK) && !dupe) {
       if (!children) {
-        return original;
+        return original; //: IndexRouteObject;
       }
 
       let fallback: RouteObject[];
@@ -93,10 +73,11 @@ export default function createFallbackTransformer([notFoundFallback, indexFallba
         fallback = [notFoundFallback, indexFallback];
       }
 
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return {
         ...original,
         children: [...children, ...fallback],
-      } satisfies NonIndexRouteObject;
+      } as NonIndexRouteObject;
     }
 
     return override as RouteObject | undefined;

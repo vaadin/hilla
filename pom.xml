@@ -90,10 +90,11 @@
     <flow.version>25.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>4.0.0-M1</spring.boot.version>
-    <testbench.version>10.0.0-alpha3</testbench.version>
-    <jakarta.validation.version>3.0.2</jakarta.validation.version>
+    <testbench.version>10.0.0-alpha4</testbench.version>
+    <jakarta.validation.version>3.1.1</jakarta.validation.version>
     <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
+    <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
     <hibernate.validator.version>8.0.2.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
     <github.javaparser.core.version>3.27.0</github.javaparser.core.version>
@@ -245,7 +246,7 @@
       <dependency>
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
-        <version>6.0.0</version>
+        <version>${jakarta.servlet.api.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
