@@ -7,8 +7,11 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.Optional;
 
+import org.springframework.context.annotation.DependsOn;
+
 @AnonymousAllowed
 @BrowserCallable
+@DependsOn("signalsConfiguration")
 public class NumberSignalService {
     private final NumberSignal counter = new NumberSignal();
     private final NumberSignal sharedValue = new NumberSignal(0.5);

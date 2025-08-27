@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Spring beans configuration for signals.
  */
-@Configuration
+@Configuration("signalsConfiguration")
 public class SignalsConfiguration {
 
     private SecureSignalsRegistry signalsRegistry;
