@@ -240,12 +240,12 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
     }
 
     if (id) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const { promise: p, resolve, reject } = Promise.withResolvers<void>();
+
       // Create a promise to be associated to the provided id
-      promises.push(
-        new Promise<void>((resolve, reject) => {
-          thens.set(id, { resolve, reject });
-        }),
-      );
+      promises.push(p);
+      thens.set(id, { resolve, reject });
     }
 
     if (promises.length === 0) {
