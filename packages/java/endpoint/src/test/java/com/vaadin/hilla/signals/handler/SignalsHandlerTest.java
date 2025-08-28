@@ -37,7 +37,6 @@ public class SignalsHandlerTest {
 
     @BeforeClass
     public static void setup() {
-        SignalEnvironment.tryInitialize(new ObjectMapper(), Runnable::run);
     }
 
     @AfterClass
@@ -56,9 +55,11 @@ public class SignalsHandlerTest {
 
         NumberSignal numberSignal = new NumberSignal();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
-                .thenAnswer(invocation -> new InternalSignal(numberSignal));
+                .thenAnswer(invocation -> new InternalSignal(numberSignal,
+                        new ObjectMapper()));
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_2))
-                .thenAnswer(invocation -> new InternalSignal(numberSignal));
+                .thenAnswer(invocation -> new InternalSignal(numberSignal,
+                        new ObjectMapper()));
 
         assertEquals(signalsRegistry.get(CLIENT_SIGNAL_ID_1).id(),
                 signalsRegistry.get(CLIENT_SIGNAL_ID_2).id());
@@ -118,7 +119,8 @@ public class SignalsHandlerTest {
         NumberSignal numberSignal = new NumberSignal(10.0);
         var signalId = numberSignal.id();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
-                .thenAnswer(invocation -> new InternalSignal(numberSignal));
+                .thenAnswer(invocation -> new InternalSignal(numberSignal,
+                        new ObjectMapper()));
         Flux<JsonNode> firstFlux = signalsHandler.subscribe("endpoint",
                 "method", CLIENT_SIGNAL_ID_1, null);
 

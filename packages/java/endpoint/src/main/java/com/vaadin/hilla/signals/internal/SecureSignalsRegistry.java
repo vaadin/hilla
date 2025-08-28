@@ -16,6 +16,7 @@
 
 package com.vaadin.hilla.signals.internal;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
@@ -23,6 +24,7 @@ import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
 import com.vaadin.signals.Signal;
 import jakarta.validation.constraints.NotNull;
+
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -43,8 +45,11 @@ public class SecureSignalsRegistry {
     private final Map<String, EndpointMethod> endpointMethods = new HashMap<>();
     private final SignalsRegistry delegate;
     private final EndpointInvoker invoker;
+    private final ObjectMapper objectMapper;
 
-    public SecureSignalsRegistry(EndpointInvoker invoker) {
+    public SecureSignalsRegistry(EndpointInvoker invoker,
+            ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.invoker = invoker;
         this.delegate = new SignalsRegistry();
     }
@@ -62,7 +67,8 @@ public class SecureSignalsRegistry {
                 body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
-        delegate.register(clientSignalId, new InternalSignal(signal));
+        delegate.register(clientSignalId,
+                new InternalSignal(signal, objectMapper));
     }
 
     public synchronized void unsubscribe(String clientSignalId) {

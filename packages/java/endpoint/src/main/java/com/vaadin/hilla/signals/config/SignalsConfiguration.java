@@ -21,7 +21,6 @@ import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 import com.vaadin.hilla.signals.handler.SignalsHandler;
-import com.vaadin.signals.SignalEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -36,12 +35,12 @@ public class SignalsConfiguration {
     private SecureSignalsRegistry signalsRegistry;
     private SignalsHandler signalsHandler;
     private final EndpointInvoker endpointInvoker;
+    private final ObjectMapper objectMapper;
 
     public SignalsConfiguration(EndpointInvoker endpointInvoker,
             @Qualifier("hillaEndpointObjectMapper") ObjectMapper hillaEndpointObjectMapper) {
         this.endpointInvoker = endpointInvoker;
-        SignalEnvironment.tryInitialize(hillaEndpointObjectMapper,
-                Runnable::run);
+        this.objectMapper = hillaEndpointObjectMapper;
     }
 
     /**
@@ -54,7 +53,8 @@ public class SignalsConfiguration {
     @Bean
     public SecureSignalsRegistry signalsRegistry() {
         if (signalsRegistry == null) {
-            signalsRegistry = new SecureSignalsRegistry(endpointInvoker);
+            signalsRegistry = new SecureSignalsRegistry(endpointInvoker,
+                    objectMapper);
         }
         return signalsRegistry;
     }

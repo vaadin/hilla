@@ -2,11 +2,11 @@ package com.vaadin.hilla.signals.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.SignalCommand;
-import com.vaadin.signals.SignalEnvironment;
 import com.vaadin.signals.SignalUtils;
 import com.vaadin.signals.impl.CommandResult;
 import com.vaadin.signals.impl.SignalTree;
@@ -38,10 +38,12 @@ public class InternalSignal {
     private final Map<Id, ObjectNode> inProgressCommands = new HashMap<>();
     // Lookup for clientSignalId by commandId
     private final Map<Id, String> commandsOfSubscribers = new HashMap<>();
+    private final ObjectMapper objectMapper;
 
-    public InternalSignal(Signal<?> signal) {
+    public InternalSignal(Signal<?> signal, ObjectMapper objectMapper) {
         this.signal = signal;
         this.tree = SignalUtils.treeOf(signal);
+        this.objectMapper = objectMapper;
     }
 
     public Id id() {
@@ -70,8 +72,7 @@ public class InternalSignal {
                 // TODO: the targetNodeId is ZERO for single-valued signals:
                 var setCommand = new SignalCommand.SnapshotCommand(Id.random(),
                         SignalUtils.treeOf(signal).confirmed().nodes());
-                sink.tryEmitNext(SignalEnvironment.objectMapper()
-                        .valueToTree(setCommand));
+                sink.tryEmitNext(objectMapper.valueToTree(setCommand));
             } finally {
                 tree.getLock().unlock();
             }
@@ -145,8 +146,8 @@ public class InternalSignal {
     public void submit(String clientSignalId, ObjectNode commandJson) {
         tree.getLock().lock();
         try {
-            SignalCommand command = SignalEnvironment.objectMapper()
-                    .treeToValue(commandJson, SignalCommand.class);
+            SignalCommand command = objectMapper.treeToValue(commandJson,
+                    SignalCommand.class);
             inProgressCommands.put(command.commandId(), commandJson);
             commandsOfSubscribers.put(command.commandId(), clientSignalId);
             tree.commitSingleCommand(command);
