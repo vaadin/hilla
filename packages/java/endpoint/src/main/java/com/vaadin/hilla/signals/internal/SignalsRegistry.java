@@ -50,11 +50,12 @@ public final class SignalsRegistry {
      * {@code signal} is already registered, the mapping is skipped, too.
      *
      * @param clientSignalId
-     *            the client signal id, must not be null
+     *                       the client signal id, must not be null
      * @param signal
-     *            the signal instance, must not be null
+     *                       the signal instance, must not be null
      * @throws NullPointerException
-     *             if {@code clientSignalId} or {@code signal} is null
+     *                              if {@code clientSignalId} or {@code signal} is
+     *                              null
      */
     public synchronized void register(String clientSignalId,
             InternalSignal signal) {
@@ -76,12 +77,12 @@ public final class SignalsRegistry {
      * <p>
      *
      * @param clientSignalId
-     *            the client signal id, must not be null
+     *                       the client signal id, must not be null
      *
      * @return the signal instance, or null if no signal is found for the
      *         provided {@code clientSignalId}
      * @throws NullPointerException
-     *             if {@code clientSignalId} is null
+     *                              if {@code clientSignalId} is null
      */
     public synchronized InternalSignal get(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
@@ -100,12 +101,12 @@ public final class SignalsRegistry {
      * <p>
      *
      * @param signalId
-     *            the signal id, must not be null
+     *                 the signal id, must not be null
      *
      * @return the signal instance, or null if no signal is found for the
      *         provided {@code signalId}
      * @throws NullPointerException
-     *             if {@code signalId} is null
+     *                              if {@code signalId} is null
      */
     public synchronized InternalSignal getBySignalId(Id signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
@@ -117,10 +118,10 @@ public final class SignalsRegistry {
      * provided {@code clientSignalId}.
      *
      * @param clientSignalId
-     *            the client signal id, must not be null
+     *                       the client signal id, must not be null
      * @return true if the signal instance is registered, false otherwise
      * @throws NullPointerException
-     *             if {@code signalId} is null
+     *                              if {@code signalId} is null
      */
     public synchronized boolean contains(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
@@ -143,9 +144,9 @@ public final class SignalsRegistry {
      * It also removes all the possible associated client signals, too.
      *
      * @param signalId
-     *            the signal id, must not be null
+     *                 the signal id, must not be null
      * @throws NullPointerException
-     *             if {@code signalId} is null
+     *                              if {@code signalId} is null
      */
     public synchronized void unregister(Id signalId) {
         Objects.requireNonNull(signalId,
@@ -162,9 +163,9 @@ public final class SignalsRegistry {
      * {@code clientSignalId}.
      *
      * @param clientSignalId
-     *            the client signal id, must not be null
+     *                       the client signal id, must not be null
      * @throws NullPointerException
-     *             if {@code clientSignalId} is null
+     *                              if {@code clientSignalId} is null
      */
     public synchronized void removeClientSignalToSignalMapping(
             String clientSignalId) {
@@ -208,10 +209,10 @@ public final class SignalsRegistry {
      * {@code signalId}.
      *
      * @param signalId
-     *            the signal id, must not be null
+     *                 the signal id, must not be null
      * @return the Set of registered client signal ids
      * @throws NullPointerException
-     *             if {@code signalId} is null
+     *                              if {@code signalId} is null
      */
     public synchronized Set<String> getAllClientSignalIdsFor(Id signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
