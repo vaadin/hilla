@@ -53,7 +53,8 @@ public class SignalsConfiguration {
     @Bean
     public SecureSignalsRegistry signalsRegistry() {
         if (signalsRegistry == null) {
-            signalsRegistry = new SecureSignalsRegistry(endpointInvoker, objectMapper);
+            signalsRegistry = new SecureSignalsRegistry(endpointInvoker,
+                    objectMapper);
         }
         return signalsRegistry;
     }

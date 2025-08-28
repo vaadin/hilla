@@ -54,7 +54,7 @@ public class InternalSignal {
      * Subscribes to the signal.
      *
      * @param clientSignalId
-     *                       the clientSignalId associated with the signal to update
+     *            the clientSignalId associated with the signal to update
      * @return a Flux of JSON events
      */
     public Flux<JsonNode> subscribe(String clientSignalId) {
@@ -72,8 +72,7 @@ public class InternalSignal {
                 // TODO: the targetNodeId is ZERO for single-valued signals:
                 var setCommand = new SignalCommand.SnapshotCommand(Id.random(),
                         SignalUtils.treeOf(signal).confirmed().nodes());
-                sink.tryEmitNext(objectMapper
-                        .valueToTree(setCommand));
+                sink.tryEmitNext(objectMapper.valueToTree(setCommand));
             } finally {
                 tree.getLock().unlock();
             }
@@ -140,15 +139,15 @@ public class InternalSignal {
      * change of the signal value.
      *
      * @param clientSignalId
-     *                       the clientSignalId associated with the signal to update
+     *            the clientSignalId associated with the signal to update
      * @param commandJson
-     *                       the command to submit in JSON format
+     *            the command to submit in JSON format
      */
     public void submit(String clientSignalId, ObjectNode commandJson) {
         tree.getLock().lock();
         try {
-            SignalCommand command = objectMapper
-                    .treeToValue(commandJson, SignalCommand.class);
+            SignalCommand command = objectMapper.treeToValue(commandJson,
+                    SignalCommand.class);
             inProgressCommands.put(command.commandId(), commandJson);
             commandsOfSubscribers.put(command.commandId(), clientSignalId);
             tree.commitSingleCommand(command);

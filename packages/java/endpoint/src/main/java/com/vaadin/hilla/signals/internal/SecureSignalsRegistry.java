@@ -47,7 +47,8 @@ public class SecureSignalsRegistry {
     private final EndpointInvoker invoker;
     private final ObjectMapper objectMapper;
 
-    public SecureSignalsRegistry(EndpointInvoker invoker, ObjectMapper objectMapper) {
+    public SecureSignalsRegistry(EndpointInvoker invoker,
+            ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.invoker = invoker;
         this.delegate = new SignalsRegistry();
@@ -66,7 +67,8 @@ public class SecureSignalsRegistry {
                 body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
-        delegate.register(clientSignalId, new InternalSignal(signal, objectMapper));
+        delegate.register(clientSignalId,
+                new InternalSignal(signal, objectMapper));
     }
 
     public synchronized void unsubscribe(String clientSignalId) {

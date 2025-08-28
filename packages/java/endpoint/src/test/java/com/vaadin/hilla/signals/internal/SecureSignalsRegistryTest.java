@@ -29,7 +29,8 @@ public class SecureSignalsRegistryTest {
     public void when_accessToEndpointIsAllowed_signalInstanceIsRegistered()
             throws Exception {
         Signal<?> signal = Mockito.mock(Signal.class);
-        InternalSignal internalSignal = new InternalSignal(signal, new ObjectMapper());
+        InternalSignal internalSignal = new InternalSignal(signal,
+                new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
         AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
@@ -52,7 +53,8 @@ public class SecureSignalsRegistryTest {
     public void when_unsubscribedIsCalled_underlyingRegistryRemovesClientSignalToSignalMapping()
             throws Exception {
         Signal<?> signal = Mockito.mock(Signal.class);
-        InternalSignal internalSignal = new InternalSignal(signal, new ObjectMapper());
+        InternalSignal internalSignal = new InternalSignal(signal,
+                new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
         AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
@@ -87,7 +89,8 @@ public class SecureSignalsRegistryTest {
     public void when_accessToEndpointIsAllowed_get_returnsSignal()
             throws Exception {
         Signal<?> signal = Mockito.mock(Signal.class);
-        InternalSignal internalSignal = new InternalSignal(signal, new ObjectMapper());
+        InternalSignal internalSignal = new InternalSignal(signal,
+                new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
         AtomicReference<SignalsRegistry> signalsRegistry = new AtomicReference<>();
         try (var dummy = Mockito.mockConstruction(SignalsRegistry.class,
