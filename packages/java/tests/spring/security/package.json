@@ -106,7 +106,7 @@
     "rollup-plugin-visualizer": "5.14.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.8.3",
+    "typescript": "5.9.2",
     "vite": "7.1.0",
     "vite-plugin-checker": "0.10.2",
     "workbox-build": "7.3.0",
@@ -218,14 +218,14 @@
       "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.8.3",
+      "typescript": "5.9.2",
       "vite": "7.1.0",
       "vite-plugin-checker": "0.10.2",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "56cbaab79a0311405ad217a393240e6b38e6acdaee225ea5e21b4773668ce3e5"
+    "hash": "9f08247fd22734c8b9f16e29f930be9b4f4b507cf2e6aa5a336fdc5849a29ee5"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

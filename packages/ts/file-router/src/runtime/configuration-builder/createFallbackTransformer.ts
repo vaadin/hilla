@@ -1,7 +1,14 @@
 import { type ComponentType, createElement } from 'react';
 import type { RouteObject, NonIndexRouteObject } from 'react-router';
 import type { ViewConfig } from '../../types.js';
-import { getHandleFlag, RouteHandleFlag, type RouteTransformer } from './utils.js';
+import {
+  getHandleFlag,
+  isIndexRoute,
+  isOptionalRoute,
+  isWildcardRoute,
+  RouteHandleFlag,
+  type RouteTransformer,
+} from './utils.js';
 
 /**
  * A tuple of fallback routes:
@@ -25,33 +32,6 @@ export function createFallbackRoutes(component: ComponentType, config?: ViewConf
     { path: '*', element: createElement(component), handle: config },
     { index: true, element: createElement(component), handle: config },
   ];
-}
-
-/**
- * Determines whether the given route object represents an index route.
- *
- * @param route - The route object to check.
- */
-function isIndexRoute(route: RouteObject): boolean {
-  return !!route.index;
-}
-
-/**
- * Determines whether the given route is optional based on its path.
- *
- * @param route - The route object to check.
- */
-function isOptionalRoute(route: RouteObject): boolean {
-  return !!route.path?.includes('?');
-}
-
-/**
- * Determines whether the given route is a wildcard route.
- *
- * @param route - The route object to check.
- */
-function isWildcardRoute(route: RouteObject): boolean {
-  return route.path === '*';
 }
 
 /**

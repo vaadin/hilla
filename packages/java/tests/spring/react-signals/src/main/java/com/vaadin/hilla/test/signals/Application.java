@@ -1,6 +1,5 @@
 package com.vaadin.hilla.test.signals;
 
-import com.vaadin.hilla.test.signals.data.UserRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

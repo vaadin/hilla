@@ -27,7 +27,6 @@ import com.vaadin.flow.server.frontend.NodeUpdater;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
