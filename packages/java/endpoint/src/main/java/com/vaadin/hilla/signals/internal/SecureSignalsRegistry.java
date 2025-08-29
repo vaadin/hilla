@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,15 +14,17 @@
  * the License.
  */
 
-package com.vaadin.hilla.signals.core.registry;
+package com.vaadin.hilla.signals.internal;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.hilla.signals.Signal;
+import com.vaadin.signals.Signal;
 import jakarta.validation.constraints.NotNull;
+
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -43,8 +45,11 @@ public class SecureSignalsRegistry {
     private final Map<String, EndpointMethod> endpointMethods = new HashMap<>();
     private final SignalsRegistry delegate;
     private final EndpointInvoker invoker;
+    private final ObjectMapper objectMapper;
 
-    public SecureSignalsRegistry(EndpointInvoker invoker) {
+    public SecureSignalsRegistry(EndpointInvoker invoker,
+            ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.invoker = invoker;
         this.delegate = new SignalsRegistry();
     }
@@ -62,7 +67,8 @@ public class SecureSignalsRegistry {
                 body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));
-        delegate.register(clientSignalId, signal);
+        delegate.register(clientSignalId,
+                new InternalSignal(signal, objectMapper));
     }
 
     public synchronized void unsubscribe(String clientSignalId) {
@@ -74,7 +80,7 @@ public class SecureSignalsRegistry {
         endpointMethods.remove(clientSignalId);
     }
 
-    public synchronized Signal<?> get(String clientSignalId)
+    public synchronized InternalSignal get(String clientSignalId)
             throws EndpointInvocationException.EndpointHttpException {
         var endpointMethodInfo = endpointMethods.get(clientSignalId);
         if (endpointMethodInfo == null) {

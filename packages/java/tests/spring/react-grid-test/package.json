@@ -3,7 +3,6 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@polymer/polymer": "3.5.2",
     "@vaadin/bundles": "25.0.0-alpha16",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
@@ -52,7 +51,7 @@
     "rollup-plugin-visualizer": "5.14.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.8.3",
+    "typescript": "5.9.2",
     "vite": "7.1.0",
     "vite-plugin-checker": "0.10.2",
     "workbox-build": "7.3.0",
@@ -61,7 +60,6 @@
   },
   "vaadin": {
     "dependencies": {
-      "@polymer/polymer": "3.5.2",
       "@vaadin/bundles": "24.8.0-alpha11",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-file-router": "25.0.0-alpha6",
@@ -110,20 +108,19 @@
       "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.8.3",
+      "typescript": "5.9.2",
       "vite": "7.1.0",
       "vite-plugin-checker": "0.10.2",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "ebc1fa37a9154a89744fc9b192d759b78c515dac2d2f5e9776ba07b99c5c740e"
+    "hash": "6673338bf580b5b744a8fd20a6d0fdae20be4fcc38e211a82270f2339d9c4a31"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "lit": "$lit",
-    "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
     "@vaadin/hilla-generator-plugin-barrel": "$@vaadin/hilla-generator-plugin-barrel",
     "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",

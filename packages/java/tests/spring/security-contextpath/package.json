@@ -3,13 +3,12 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@adobe/lit-mobx": "2.0.0-rc.4",
+    "@adobe/lit-mobx": "2.2.2",
     "@polymer/iron-icon": "3.0.1",
     "@polymer/iron-iconset-svg": "3.0.1",
     "@polymer/iron-list": "3.1.0",
     "@polymer/iron-meta": "3.0.1",
     "@polymer/iron-resizable-behavior": "3.0.1",
-    "@polymer/polymer": "3.5.2",
     "@vaadin/a11y-base": "25.0.0-alpha16",
     "@vaadin/accordion": "25.0.0-alpha16",
     "@vaadin/app-layout": "25.0.0-alpha16",
@@ -112,7 +111,7 @@
     "rollup-plugin-visualizer": "5.14.0",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.8.3",
+    "typescript": "5.9.2",
     "vite": "7.1.0",
     "vite-plugin-checker": "0.10.2",
     "workbox-build": "7.3.0",
@@ -122,7 +121,6 @@
   "vaadin": {
     "dependencies": {
       "@adobe/lit-mobx": "2.0.0-rc.4",
-      "@polymer/polymer": "3.5.2",
       "@vaadin/a11y-base": "24.8.0-alpha4",
       "@vaadin/accordion": "24.8.0-alpha4",
       "@vaadin/app-layout": "24.8.0-alpha4",
@@ -225,14 +223,14 @@
       "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.8.3",
+      "typescript": "5.9.2",
       "vite": "7.1.0",
       "vite-plugin-checker": "0.10.2",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "fa8a056b33150f45c453c6bf1dda078099453798ea92a98535fec22784fa77a1"
+    "hash": "dc62091b35f3f37e36154e4af5f476f431a74336cf11ced694ab1b58ad3845cb"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
@@ -242,7 +240,6 @@
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "lit": "$lit",
-    "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
     "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
     "@vaadin/hilla-generator-core": "$@vaadin/hilla-generator-core",

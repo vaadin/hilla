@@ -1,9 +1,8 @@
-package com.vaadin.hilla.signals.core.registry;
+package com.vaadin.hilla.signals.internal;
 
-import com.vaadin.hilla.signals.NumberSignal;
+import com.vaadin.signals.Id;
 import org.junit.Test;
-
-import java.util.UUID;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -17,11 +16,14 @@ public class SignalsRegistryTest {
     @Test
     public void when_inputsAreNull_throws() {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
         assertThrows(NullPointerException.class,
-                () -> signalsRegistry.register(null, new NumberSignal()));
-        assertThrows(NullPointerException.class, () -> signalsRegistry
-                .register(UUID.randomUUID().toString(), null));
+                () -> signalsRegistry.register(null, mockSignal));
+        assertThrows(NullPointerException.class,
+                () -> signalsRegistry.register("clientId", null));
         assertThrows(NullPointerException.class,
                 () -> signalsRegistry.register(null, null));
     }
@@ -31,18 +33,19 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
-        assertEquals(signal, signalsRegistry.getBySignalId(signal.getId()));
-
+        assertEquals(mockSignal, signalsRegistry.getBySignalId(mockId));
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(1, signalsRegistry.getAllClientSignalIdsFor(signal.getId())
-                .size());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(1,
+                signalsRegistry.getAllClientSignalIdsFor(mockId).size());
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
     }
 
     @Test
@@ -50,23 +53,25 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
-        String anotherClientSignalId = UUID.randomUUID().toString();
-        signalsRegistry.register(anotherClientSignalId, signal);
+        String anotherClientSignalId = "anotherClientId";
+        signalsRegistry.register(anotherClientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
         assertEquals(2, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(2, signalsRegistry.getAllClientSignalIdsFor(signal.getId())
-                .size());
-        assertEquals(signal, signalsRegistry.get(anotherClientSignalId));
+        assertEquals(2,
+                signalsRegistry.getAllClientSignalIdsFor(mockId).size());
+        assertEquals(mockSignal, signalsRegistry.get(anotherClientSignalId));
     }
 
     @Test
@@ -81,16 +86,18 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
-        String anotherClientSignalId = UUID.randomUUID().toString();
+        String anotherClientSignalId = "anotherClientId";
         assertNull(signalsRegistry.get(anotherClientSignalId));
     }
 
@@ -106,16 +113,19 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
-        assertNull(signalsRegistry.getBySignalId(UUID.randomUUID()));
+        Id anotherId = Mockito.mock(Id.class);
+        assertNull(signalsRegistry.getBySignalId(anotherId));
     }
 
     @Test
@@ -130,14 +140,16 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
         assertTrue(signalsRegistry.contains(clientSignalId));
     }
@@ -146,18 +158,20 @@ public class SignalsRegistryTest {
     public void when_signalIsNotRegistered_contains_returnsFalse() {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
-        assertFalse(signalsRegistry.contains(UUID.randomUUID().toString()));
+        assertFalse(signalsRegistry.contains("randomId"));
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
         assertEquals(1, signalsRegistry.getAllClientSubscriptionsSize());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
-        assertFalse(signalsRegistry.contains(UUID.randomUUID().toString()));
+        assertFalse(signalsRegistry.contains("anotherRandomId"));
     }
 
     @Test
@@ -165,13 +179,15 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
         assertFalse(signalsRegistry.isEmpty());
 
-        signalsRegistry.unregister(signal.getId());
+        signalsRegistry.unregister(mockId);
         assertTrue(signalsRegistry.isEmpty());
     }
 
@@ -187,23 +203,25 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
-        assertEquals(1, signalsRegistry.getAllClientSignalIdsFor(signal.getId())
-                .size());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(1,
+                signalsRegistry.getAllClientSignalIdsFor(mockId).size());
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
-        signalsRegistry.unregister(signal.getId());
+        signalsRegistry.unregister(mockId);
 
         assertTrue(signalsRegistry.isEmpty());
         assertNull(signalsRegistry.get(clientSignalId));
         assertEquals(0, signalsRegistry.size());
-        assertEquals(0, signalsRegistry.getAllClientSignalIdsFor(signal.getId())
-                .size());
+        assertEquals(0,
+                signalsRegistry.getAllClientSignalIdsFor(mockId).size());
     }
 
     @Test
@@ -211,23 +229,25 @@ public class SignalsRegistryTest {
         SignalsRegistry signalsRegistry = new SignalsRegistry();
         assertTrue(signalsRegistry.isEmpty());
 
-        String clientSignalId = UUID.randomUUID().toString();
-        NumberSignal signal = new NumberSignal();
+        String clientSignalId = "clientId";
+        InternalSignal mockSignal = Mockito.mock(InternalSignal.class);
+        Id mockId = Mockito.mock(Id.class);
+        Mockito.when(mockSignal.id()).thenReturn(mockId);
 
-        signalsRegistry.register(clientSignalId, signal);
+        signalsRegistry.register(clientSignalId, mockSignal);
 
         assertEquals(1, signalsRegistry.size());
-        assertEquals(1, signalsRegistry.getAllClientSignalIdsFor(signal.getId())
-                .size());
-        assertEquals(signal, signalsRegistry.get(clientSignalId));
+        assertEquals(1,
+                signalsRegistry.getAllClientSignalIdsFor(mockId).size());
+        assertEquals(mockSignal, signalsRegistry.get(clientSignalId));
 
         signalsRegistry.removeClientSignalToSignalMapping(clientSignalId);
 
         assertFalse(signalsRegistry.isEmpty());
         assertNull(signalsRegistry.get(clientSignalId));
-        assertNotNull(signalsRegistry.getBySignalId(signal.getId()));
+        assertNotNull(signalsRegistry.getBySignalId(mockId));
         assertEquals(1, signalsRegistry.size());
-        assertEquals(0, signalsRegistry.getAllClientSignalIdsFor(signal.getId())
-                .size());
+        assertEquals(0,
+                signalsRegistry.getAllClientSignalIdsFor(mockId).size());
     }
 }

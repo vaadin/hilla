@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,9 +14,10 @@
  * the License.
  */
 
-package com.vaadin.hilla.signals.core.registry;
+package com.vaadin.hilla.signals.internal;
 
-import com.vaadin.hilla.signals.Signal;
+import com.vaadin.signals.Id;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
@@ -35,8 +35,8 @@ public final class SignalsRegistry {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SignalsRegistry.class);
-    private final Map<UUID, Signal<?>> signals = new WeakHashMap<>();
-    private final Map<String, UUID> clientSignalToSignalMapping = new HashMap<>();
+    private final Map<Id, InternalSignal> signals = new WeakHashMap<>();
+    private final Map<String, Id> clientSignalToSignalMapping = new HashMap<>();
 
     SignalsRegistry() {
     }
@@ -56,18 +56,19 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} or {@code signal} is null
      */
-    public synchronized void register(String clientSignalId, Signal<?> signal) {
+    public synchronized void register(String clientSignalId,
+            InternalSignal signal) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
         Objects.requireNonNull(signal, "Signal must not be null");
-        if (!signals.containsKey(signal.getId())) {
-            signals.put(signal.getId(), signal);
+        if (!signals.containsKey(signal.id())) {
+            signals.put(signal.id(), signal);
         }
         if (!clientSignalToSignalMapping.containsKey(clientSignalId)) {
-            clientSignalToSignalMapping.put(clientSignalId, signal.getId());
+            clientSignalToSignalMapping.put(clientSignalId, signal.id());
         }
         LOGGER.debug("Registered client-signal: {} => signal: {}",
-                clientSignalId, signal.getId());
+                clientSignalId, signal.id());
     }
 
     /**
@@ -82,10 +83,10 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code clientSignalId} is null
      */
-    public synchronized Signal<?> get(String clientSignalId) {
+    public synchronized InternalSignal get(String clientSignalId) {
         Objects.requireNonNull(clientSignalId,
                 "Client signal id must not be null");
-        UUID signalId = clientSignalToSignalMapping.get(clientSignalId);
+        Id signalId = clientSignalToSignalMapping.get(clientSignalId);
         if (signalId == null) {
             LOGGER.debug("No associated signal found for client signal id: {}",
                     clientSignalId);
@@ -106,7 +107,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized Signal<?> getBySignalId(UUID signalId) {
+    public synchronized InternalSignal getBySignalId(Id signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
         return signals.get(signalId);
     }
@@ -146,7 +147,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized void unregister(UUID signalId) {
+    public synchronized void unregister(Id signalId) {
         Objects.requireNonNull(signalId,
                 "Signal id to remove must not be null");
         signals.remove(signalId);
@@ -212,7 +213,7 @@ public final class SignalsRegistry {
      * @throws NullPointerException
      *             if {@code signalId} is null
      */
-    public synchronized Set<String> getAllClientSignalIdsFor(UUID signalId) {
+    public synchronized Set<String> getAllClientSignalIdsFor(Id signalId) {
         Objects.requireNonNull(signalId, "Signal id must not be null");
         if (!signals.containsKey(signalId)) {
             return Set.of();
