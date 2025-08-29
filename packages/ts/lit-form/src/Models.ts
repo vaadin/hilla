@@ -8,19 +8,19 @@ import { IsNumber } from './Validators.js';
 export const _createEmptyItemValue = Symbol('createEmptyItemValue');
 
 /** @deprecated use `$key` from the '\@vaadin/hilla-models' package. */
-export const _key = $key;
+export const _key: typeof $key = $key;
 
 /** @deprecated use `$optional` from the '\@vaadin/hilla-models' package. */
-export const _optional = $optional;
+export const _optional: typeof $optional = $optional;
 
 /** @deprecated use `$owner` from the '\@vaadin/hilla-models' package. */
-export const _parent = $owner;
+export const _parent: typeof $owner = $owner;
 
 /** @deprecated use `$meta` from the '\@vaadin/hilla-models' package. */
-export const _meta = $meta;
+export const _meta: typeof $meta = $meta;
 
 /** @deprecated use `$enum` from the '\@vaadin/hilla-models' package. */
-export const _enum = $enum;
+export const _enum: typeof $enum = $enum;
 
 export const _fromString = Symbol('fromString');
 export const _validators = Symbol('validators');

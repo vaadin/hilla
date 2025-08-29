@@ -72,7 +72,7 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
     super(
       'prototype' in modelClass && Object.prototype.isPrototypeOf.call(AbstractModel.prototype, modelClass.prototype)
         ? createDetachedModel(modelClass)
-        : (modelClass as M),
+        : Object.create(modelClass), // FIXME: use m.attach() instead
     );
     // @ts-expect-error the model's parent is the binder
     this.model[$owner] = this;

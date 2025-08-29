@@ -69,12 +69,17 @@ export const $meta = Symbol('meta');
 /**
  * The symbol that represents the {@link Model[$optional]} property.
  */
-export const $optional = Symbol('optional');
+export const $optional: unique symbol = Symbol('optional');
 
 /**
- * The symbol that represents the {@link Model[$value]} property.
+ * The symbol that represents the {@link Model[$defaultValue]} property.
  */
-export const $defaultValue = Symbol('value');
+export const $defaultValue = Symbol('defaultValue');
+
+/**
+ * The symbol that represents the {@link Model[$constraints]} property.
+ */
+export const $constraints = Symbol('constraints');
 
 /**
  * The symbol that represents the {@link EnumModel[$enumerate]} property.
@@ -108,6 +113,46 @@ export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? E
  */
 export type References<M extends Model> = M extends Model<unknown, AnyObject, infer R> ? R : never;
 
+export type ConstrainableModel<M extends Model> = M & {
+  readonly [$constraints]: ConstraintDescriptor[];
+};
+
+export type ConstrainedModel<M extends Model> = M & {
+  readonly [$constraints]: readonly ConstraintDescriptor[];
+};
+
+export type UnknownConstraintDeclaration = ((attributes?: unknown) => Constraint<unknown>) & {
+  readonly name: string;
+};
+
+export type ConstraintAttributes<D extends ConstraintDeclaration<any> = UnknownConstraintDeclaration> =
+  D extends ConstraintDeclaration<any, string, infer A> ? A : EmptyObject;
+
+export type ConstraintDescriptor<D extends ConstraintDeclaration<any> = UnknownConstraintDeclaration> = Readonly<{
+  attributes: ConstraintAttributes<D>;
+  declaration: D;
+}>;
+
+export type ConstraintFn<V = unknown, A extends AnyObject = EmptyObject> = EmptyObject extends A
+  ? (attributes?: A) => Constraint<V>
+  : { readonly value: never } extends A
+    ? (valueOrAttributes: (A & { readonly value: unknown })['value'] | A) => Constraint<V>
+    : (attributes: A) => Constraint<V>;
+
+export type ConstraintDeclaration<
+  V = unknown,
+  N extends string = string,
+  A extends AnyObject = EmptyObject,
+> = ConstraintFn<V, A> & {
+  readonly name: N;
+};
+
+export const $constraintBrand = Symbol('constraintBrand');
+
+export type Constraint<V> = ((target: ConstrainableModel<Model<V>>) => void) & {
+  readonly [$constraintBrand]: unknown;
+};
+
 /**
  * A model that represents a specific type of data.
  *
@@ -125,7 +170,7 @@ export type References<M extends Model> = M extends Model<unknown, AnyObject, in
  */
 export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends keyof any = never> = EX &
   Readonly<{
-    [P in R]: Model<V, EX, R>;
+    [P in R]: Model<V | undefined, EX, R>;
   }> &
   Readonly<{
     /**
@@ -149,6 +194,11 @@ export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends key
      * The metadata of the model.
      */
     [$meta]?: ModelMetadata;
+
+    /**
+     * The list of validation constraints for the model.
+     */
+    [$constraints]?: readonly ConstraintDescriptor[];
 
     /**
      * Whether the model is optional. It describes if the data described by

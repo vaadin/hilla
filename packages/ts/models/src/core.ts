@@ -27,7 +27,7 @@ export type BooleanModel = PrimitiveModel<boolean>;
 export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
 /**
- * The model of an array data.
+ * The model of array data.
  */
 export type ArrayModel<M extends Model = Model> = Model<
   Array<Value<M>>,
@@ -35,21 +35,29 @@ export type ArrayModel<M extends Model = Model> = Model<
     [$itemModel]: M;
   }>
 >;
-
 export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .name('Array')
   .define($itemModel, { value: Model })
   .build();
 
 /**
- * The model of an object data.
+ * The model of object data.
  */
 export type ObjectModel<V, EX extends AnyObject = EmptyObject, R extends keyof any = never> = Model<V, EX, R>;
-
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();
 
 /**
- * The model of an enum data.
+ * The model of a `Record<string, V>` data, which is a special case
+ * of `ObjectModel<Record<string, V>>` that is used to represent an arbitrary
+ * object with string keys, such as a Java `Map<String, Object>`.
+ */
+export type RecordModel<K extends string, V> = Model<Record<K, V>>;
+export const RecordModel = new CoreModelBuilder(ObjectModel, (): Record<string, unknown> => ({}))
+  .name('Record')
+  .build();
+
+/**
+ * The model of enum data.
  */
 export type EnumModel<T extends typeof Enum> = Model<
   T[keyof T],

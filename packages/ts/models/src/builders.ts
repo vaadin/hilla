@@ -1,25 +1,26 @@
 import type { EmptyObject } from 'type-fest';
-import type { ObjectModel } from './core';
+import type { ObjectModel } from './core.js';
 import {
+  $constraints,
   $defaultValue,
   $key,
   $meta,
   $name,
+  type $optional,
   $owner,
   type AnyObject,
+  type ConstrainableModel,
+  type ConstraintDeclaration,
+  type ConstraintDescriptor,
+  type ConstraintFn,
   type DefaultValueProvider,
   type Model,
   type ModelMetadata,
+  type UnknownConstraintDeclaration,
+  type Value,
 } from './model.js';
 
 const { create, defineProperty } = Object;
-
-/**
- * The options for creating the model property.
- */
-export type ModelBuilderPropertyOptions = Readonly<{
-  meta?: ModelMetadata;
-}>;
 
 const $model = Symbol('model');
 
@@ -47,6 +48,7 @@ export type Flags = {
 
 /**
  * A builder class for creating all basic models.
+ * @internal low-level API for internal use only.
  *
  * @typeParam V - The final value type of the model.
  * @typeParam EX - The extra properties of the model.
@@ -58,7 +60,7 @@ export class CoreModelBuilder<
   EX extends AnyObject = EmptyObject,
   F extends Flags = { named: false; selfRefKeys: never },
 > {
-  protected readonly [$model]: Model<V, EX>;
+  protected readonly [$model]: Model<V, EX, F['selfRefKeys']>;
 
   /**
    * @param base - The base model to extend.
@@ -97,7 +99,7 @@ export class CoreModelBuilder<
    * @param value - The descriptor of the property.
    * @returns The current builder instance.
    */
-  define<DK extends symbol, DV>(
+  define<const DK extends symbol, const DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
   ): CoreModelBuilder<V, EX & Readonly<Record<DK, DV>>, F> {
@@ -137,11 +139,11 @@ export class CoreModelBuilder<
 
   /**
    * Builds the model. On the typing level, it checks if all the model parts are
-   * set correctly, and raises an error if not.
+   * set correctly and raises an error if not.
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): Model<V, EX> {
+  build(this: F['named'] extends true ? this : never): Model<V, EX, F['selfRefKeys']> {
     return this[$model];
   }
 }
@@ -157,6 +159,7 @@ const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
 
 /**
  * A builder class for creating object models.
+ * @internal low-level API for internal use only.
  *
  * @typeParam V - The final value type of the model.
  * @typeParam CV - The current value type of the model. It changes as the model
@@ -204,7 +207,7 @@ export class ObjectModelBuilder<
   /**
    * {@inheritDoc CoreModelBuilder.define}
    */
-  declare ['define']: <DK extends symbol, DV>(
+  declare ['define']: <const DK extends symbol, DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
   ) => ObjectModelBuilder<V, CV, EX & Readonly<Record<DK, DV>>, F>;
@@ -223,7 +226,6 @@ export class ObjectModelBuilder<
    * @param key - The key of the property.
    * @param model - The model of the property value. You can also provide a
    * function that produces the model based on the current model.
-   * @param options - Additional options for the property.
    *
    * @returns The current builder instance updated with the new property type.
    * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
@@ -232,7 +234,6 @@ export class ObjectModelBuilder<
   property<PK extends string & keyof V, EXK extends AnyObject = EmptyObject>(
     key: PK,
     model: Model<V[PK], EXK> | ((model: Model<V, EX & Readonly<Record<PK, Model<V[PK], EXK>>>>) => Model<V[PK], EXK>),
-    options?: ModelBuilderPropertyOptions,
   ): // It is a workaround for the self-referencing models.
   // If the type of the model property is not the model itself,
   Extract<V[PK], V> extends never
@@ -267,7 +268,6 @@ export class ObjectModelBuilder<
         )
           .define($key, { value: key })
           .define($owner, { value: this })
-          .define($meta, { value: options?.meta })
           .build();
 
         return props[key];
@@ -283,4 +283,101 @@ export class ObjectModelBuilder<
   declare build: (
     this: F['named'] extends true ? (CV extends V ? this : never) : never,
   ) => ObjectModel<V, EX, F['selfRefKeys']>;
+}
+
+/**
+ * A builder class for declaring constraints.
+ * @internal low-level API for internal use only.
+ *
+ * @typeParam V - The value type of the constraint.
+ * @typeParam N - The name of the constraint.
+ * @typeParam A - The attributes for the constraint function. It is an object with string
+ * keys and arbitrary values. When the `value` attribute is the only one,
+ * the value can be given directly as the first argument of the constraint
+ * function; otherwise the attribute object should be provided.
+ */
+export class ConstraintDeclarationBuilder<
+  V = unknown,
+  const N extends string = string,
+  A extends AnyObject = EmptyObject,
+> {
+  private readonly referenceModel: Model<V>;
+  private [$name]: N | undefined;
+  private readonly attributeDefaults: Partial<A> = {};
+
+  /**
+   * @param referenceModel - The model that the constraint is applicable to.
+   */
+  constructor(referenceModel: Model<V>) {
+    this.referenceModel = referenceModel;
+  }
+
+  /**
+   * Sets the name of the constraint.
+   *
+   * @param name - the name of the constraint.
+   * @returns The current builder instance updated with the new name.
+   */
+  name<const NN extends N>(name: NN): ConstraintDeclarationBuilder<V, N & NN, A> {
+    this[$name] = name;
+    return this as any;
+  }
+
+  /**
+   * Defines a new attribute for the constraint.
+   *
+   * @param name - the name of the attribute.
+   * @param model - the model of the attribute value.
+   * @returns The current builder instance updated with the new attribute.
+   */
+  attribute<AN extends string, AM extends Model>(
+    name: AN,
+    model: AM,
+  ): ConstraintDeclarationBuilder<
+    V,
+    N,
+    A & Readonly<AM extends { readonly [$optional]: true } ? Partial<Record<AN, Value<AM>>> : Record<AN, Value<AM>>>
+  > {
+    (this.attributeDefaults as Record<string, unknown>)[name] = model[$defaultValue];
+    return this as any;
+  }
+
+  /**
+   * Builds the constraint declaration. On the typing level, it checks if all the
+   * constraint parts are set correctly and raises an error if not.
+   *
+   * @returns The constraint declaration.
+   */
+  build(this: string extends N ? never : this): ConstraintDeclaration<V | undefined, N, A> {
+    const name = this[$name];
+    const { attributeDefaults, referenceModel } = this;
+    const declaration = defineProperty(
+      ((valueOrAttributes?: unknown) => {
+        const attributes: A = {
+          ...attributeDefaults,
+          ...((typeof valueOrAttributes === 'object' && valueOrAttributes !== null
+            ? valueOrAttributes
+            : { value: valueOrAttributes }) as A),
+        };
+
+        const descriptor: ConstraintDescriptor = {
+          declaration: declaration as UnknownConstraintDeclaration,
+          attributes,
+        };
+
+        function constraint(model: ConstrainableModel<Model<V>>): void {
+          if (!(model instanceof referenceModel)) {
+            throw new Error(`The constraint "${name}" is not applicable to the model "${model[$name]}".`);
+          }
+          model[$constraints].push(descriptor);
+        }
+
+        return Object.defineProperty(constraint, 'name', { value: name });
+      }) as ConstraintFn<V | undefined, A>,
+      'name',
+      { value: name },
+    ) as ConstraintDeclaration<V | undefined, N, A>;
+
+    return declaration;
+  }
 }

@@ -10,6 +10,7 @@ import m, {
   $name,
   $optional,
   $owner,
+  $constraints,
   ArrayModel,
   BooleanModel,
   type EnumModel,
@@ -19,6 +20,16 @@ import m, {
   PrimitiveModel,
   StringModel,
   type Target,
+  Null,
+  NotNull,
+  NotBlank,
+  NotEmpty,
+  Min,
+  Max,
+  Size,
+  type Value,
+  type Constraint,
+  type ConstraintDescriptor,
 } from '../src/index.js';
 
 chai.use(chaiLike);
@@ -115,14 +126,14 @@ describe('@vaadin/hilla-form-models', () => {
       supervisor?: Employee;
     }
 
-    const EmployeeModel = m
-      .object<Employee>('Employee')
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      .property('supervisor', m.optional)
-      .build();
+    const EmployeeModel = m.object<Employee>('Employee').property('supervisor', m.optional).build();
 
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
+
+    // Type assertion to verify that the resulting type is optional.
+    const optionalEmployee: Value<typeof EmployeeModel.supervisor> = undefined;
+    expect(optionalEmployee).to.be.undefined;
   });
 
   it('should allow array types', () => {
@@ -193,7 +204,10 @@ describe('@vaadin/hilla-form-models', () => {
       name: string;
     }
 
-    const NamedWithMetaModel = m.object<NamedWithMeta>('NamedWithMeta').property('name', StringModel, { meta }).build();
+    const NamedWithMetaModel = m.meta(
+      m.object<NamedWithMeta>('NamedWithMeta').property('name', StringModel).build(),
+      meta,
+    );
 
     expect(NamedWithMetaModel.name).to.have.property($meta).which.is.equal(meta);
   });
@@ -324,6 +338,77 @@ describe('@vaadin/hilla-form-models', () => {
       it('should have a default value', () => {
         expect(ObjectModel[$defaultValue]).to.be.like({});
       });
+    });
+  });
+
+  describe('Validation support', () => {
+    it('should support defining validators on properties', () => {
+      const Titled = ((_model: unknown) => undefined) as unknown as Constraint<{
+        readonly title: string;
+        readonly titledMarker?: string;
+      }>;
+
+      // Verify the type of the constraints
+      m.constrained(StringModel, NotNull());
+      m.constrained(NumberModel, NotNull());
+      m.constrained(BooleanModel, NotNull());
+      m.constrained(m.array(StringModel), NotNull());
+      m.constrained(m.optional(NamedModel), NotNull());
+      m.constrained(m.optional(NamedModel), NotNull({ message: 'message' }));
+
+      m.constrained(m.array(StringModel), Null());
+      m.constrained(m.optional(NamedModel), Null({ message: 'message' }));
+
+      m.constrained(m.array(NumberModel), NotEmpty());
+      m.constrained(StringModel, NotEmpty());
+      m.constrained(NumberModel, Min(1));
+      m.constrained(NumberModel, Max(10));
+
+      const commentModelWithConstraints = m
+        .object<Comment>('Comment')
+        .property('title', StringModel)
+        .property('text', m.constrained(StringModel, NotBlank(), NotEmpty(), Size({ max: 140 })))
+        .build();
+
+      // Verify the type of the constrained model
+      CommentModel = commentModelWithConstraints;
+
+      m.constrained(commentModelWithConstraints.text, NotBlank());
+      m.constrained(m.optional(CommentModel.text), NotBlank());
+      m.constrained(commentModelWithConstraints.text, NotEmpty());
+      m.constrained(commentModelWithConstraints.text, NotEmpty(), NotBlank());
+
+      m.constrained(CommentModel, Titled);
+
+      m.constrained(NumberModel, Min(1));
+
+      expect(CommentModel[$constraints]).to.be.undefined;
+      expect(CommentModel.text[$constraints]).to.be.an('array').with.lengthOf(1);
+      const [, descriptor] = CommentModel.text[$constraints]!;
+      expect(descriptor.declaration).to.equal(Size);
+      if (descriptor.declaration === Size) {
+        const {
+          attributes: { min, max },
+        } = descriptor as ConstraintDescriptor<typeof Size>;
+        expect(min).to.be.equal(1);
+        expect(max).to.be.equal(140);
+      }
+      expect(descriptor.attributes).to.be.like({});
+      expect(descriptor.declaration).to.equal(NotEmpty);
+    });
+
+    it('should support defining validators on the model', () => {
+      PersonModel = m
+        .extend(PersonModel)
+        .object<Person>('Person')
+        .property('comments', m.constrained(m.array(CommentModel), NotEmpty()))
+        .build();
+
+      expect(PersonModel[$constraints]).to.be.undefined;
+      expect(PersonModel.comments).to.be.an('array').with.lengthOf(1);
+      expect(PersonModel.comments[$constraints]![0].attributes).to.be.like({});
+      expect(PersonModel.comments[$constraints]![0].declaration).to.equal(NotEmpty);
+      expect(PersonModel.comments[$itemModel].text).to.be.undefined;
     });
   });
 });
