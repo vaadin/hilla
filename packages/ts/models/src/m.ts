@@ -1,5 +1,12 @@
 import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder, ObjectModelBuilder } from './builders.js';
+import {
+  $assertSupportedModel,
+  $constraints,
+  type ConstrainedModel,
+  type Constraint,
+  type NonAttributedConstraint,
+} from './constraint';
 import { ArrayModel, EnumModel, ObjectModel, type UnionModel } from './core.js';
 import {
   Model,
@@ -19,9 +26,6 @@ import {
   $defaultValue,
   $members,
   type ModelMetadata,
-  type Constraint,
-  type ConstrainableModel,
-  type ConstrainedModel,
 } from './model.js';
 
 const { defineProperty } = Object;
@@ -180,15 +184,21 @@ const m = {
    * @param constraint - The constraint to apply.
    * @param moreConstraints - Additional constraints to apply.
    */
-  constrained<V = unknown>(
+  constrained<const M extends Model>(
     this: void,
-    model: Model<V>,
-    constraint: Constraint<V>,
-    ...moreConstraints: ReadonlyArray<Constraint<V>>
-  ): ConstrainedModel<typeof model> {
-    const constrainedModel = Object.create(model) as ConstrainableModel<typeof model>;
-    [constraint, ...moreConstraints].forEach((c) => c(constrainedModel));
-    return constrainedModel as ConstrainedModel<typeof model>;
+    model: M,
+    constraint: Constraint<Value<M>>,
+    ...moreConstraints: ReadonlyArray<Constraint<Value<M>>>
+  ): M & Model<Value<M>, Extensions<M> & { readonly [$constraints]: readonly Constraint[] }, References<M>> {
+    const previousConstraints = m.hasConstraints(model) ? model[$constraints] : [];
+    const newConstraints = [constraint, ...moreConstraints];
+    for (const newConstraint of newConstraints) {
+      newConstraint[$assertSupportedModel](model as Model<Value<M>>);
+    }
+    return new CoreModelBuilder(model)
+      .name(model[$name])
+      .define($constraints, { value: [...previousConstraints, ...newConstraints] })
+      .build() as any;
   },
 
   /**
@@ -199,6 +209,29 @@ const m = {
    */
   withDefaultValue<const M extends Model>(this: void, model: M, defaultValue: Value<M>): M {
     return new CoreModelBuilder(model, () => defaultValue).name(model[$name]).build() as M;
+  },
+
+  /**
+   * Checks if the given model has constraints.
+   *
+   * @param model - The model to check.
+   */
+  hasConstraints<const M extends Model>(this: void, model: M): model is ConstrainedModel<M> {
+    return $constraints in model;
+  },
+
+  /**
+   * Checks if the given value is a constraint of the given type.
+   *
+   * @param arg - The argument to check.
+   * @param constraintType - The constraint to check against.
+   */
+  isConstraint<V, N extends string = string, A extends AnyObject = EmptyObject>(
+    this: void,
+    arg: unknown,
+    constraintType: NonAttributedConstraint<V, N, A>,
+  ): arg is Constraint<V, N, A> {
+    return arg instanceof constraintType;
   },
 
   /**

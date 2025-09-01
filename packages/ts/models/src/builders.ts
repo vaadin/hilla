@@ -1,22 +1,21 @@
 import type { EmptyObject } from 'type-fest';
+import {
+  $assertSupportedModel,
+  type Constraint,
+  type ConstraintFn,
+  type NonAttributedConstraint,
+} from './constraint.js';
 import type { ObjectModel } from './core.js';
 import {
-  $constraints,
   $defaultValue,
   $key,
   $meta,
   $name,
-  type $optional,
   $owner,
   type AnyObject,
-  type ConstrainableModel,
-  type ConstraintDeclaration,
-  type ConstraintDescriptor,
-  type ConstraintFn,
   type DefaultValueProvider,
-  type Model,
+  Model,
   type ModelMetadata,
-  type UnknownConstraintDeclaration,
   type Value,
 } from './model.js';
 
@@ -231,15 +230,15 @@ export class ObjectModelBuilder<
    * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
    * flag for the specific property is set.
    */
-  property<PK extends string & keyof V, EXK extends AnyObject = EmptyObject>(
+  property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
-    model: Model<V[PK], EXK> | ((model: Model<V, EX & Readonly<Record<PK, Model<V[PK], EXK>>>>) => Model<V[PK], EXK>),
+    model: M | ((model: Model<V, EX>) => M),
   ): // It is a workaround for the self-referencing models.
   // If the type of the model property is not the model itself,
   Extract<V[PK], V> extends never
     ? // Then we simply extend the model with the property, and update the
       // current value type of the model.
-      ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, Model<V[PK], EXK>>>, F>
+      ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>
     : // Otherwise, we set a flag of the model that it contains a self-reference
       // property.
       ObjectModelBuilder<
@@ -256,14 +255,14 @@ export class ObjectModelBuilder<
       > {
     defineProperty(this[$model], key, {
       enumerable: true,
-      get(this: Model<V, EX & Readonly<Record<PK, Model<V[PK], EXK>>>>) {
+      get(this: Model<V, EX & Readonly<Record<PK, M>>>) {
         if (!propertyRegistry.has(this)) {
           propertyRegistry.set(this, {});
         }
 
         const props = propertyRegistry.get(this)!;
 
-        props[key] ??= new CoreModelBuilder<V[PK], EXK, { named: true; selfRefKeys: never }>(
+        props[key] ??= new CoreModelBuilder<V[PK], EmptyObject, { named: true; selfRefKeys: never }>(
           typeof model === 'function' ? model(this) : model,
         )
           .define($key, { value: key })
@@ -296,20 +295,24 @@ export class ObjectModelBuilder<
  * the value can be given directly as the first argument of the constraint
  * function; otherwise the attribute object should be provided.
  */
-export class ConstraintDeclarationBuilder<
-  V = unknown,
-  const N extends string = string,
-  A extends AnyObject = EmptyObject,
-> {
-  private readonly referenceModel: Model<V>;
+export class ConstraintBuilder<V = unknown, const N extends string = string, A extends AnyObject = EmptyObject> {
+  private supportedModel: Model<V>;
   private [$name]: N | undefined;
-  private readonly attributeDefaults: Partial<A> = {};
+  private readonly attributeDefaults: Required<A>;
+
+  constructor() {
+    this.supportedModel = Model as unknown as Model<V>;
+    this.attributeDefaults = {} as unknown as Required<A>;
+  }
 
   /**
-   * @param referenceModel - The model that the constraint is applicable to.
+   * Sets the model that the constraint is applicable to.
+   *
+   * @param supportedModel - The model that the constraint is applicable to.
    */
-  constructor(referenceModel: Model<V>) {
-    this.referenceModel = referenceModel;
+  model<const M extends Model<V>>(supportedModel: M): ConstraintBuilder<Value<M>, N, A> {
+    this.supportedModel = supportedModel;
+    return this as any;
   }
 
   /**
@@ -318,7 +321,7 @@ export class ConstraintDeclarationBuilder<
    * @param name - the name of the constraint.
    * @returns The current builder instance updated with the new name.
    */
-  name<const NN extends N>(name: NN): ConstraintDeclarationBuilder<V, N & NN, A> {
+  name<const NN extends N>(name: NN): ConstraintBuilder<V, N & NN, A> {
     this[$name] = name;
     return this as any;
   }
@@ -330,14 +333,10 @@ export class ConstraintDeclarationBuilder<
    * @param model - the model of the attribute value.
    * @returns The current builder instance updated with the new attribute.
    */
-  attribute<AN extends string, AM extends Model>(
+  attribute<AN extends string, AV>(
     name: AN,
-    model: AM,
-  ): ConstraintDeclarationBuilder<
-    V,
-    N,
-    A & Readonly<AM extends { readonly [$optional]: true } ? Partial<Record<AN, Value<AM>>> : Record<AN, Value<AM>>>
-  > {
+    model: Model<AV>,
+  ): ConstraintBuilder<V, N, A & Readonly<undefined extends AV ? Partial<Record<AN, AV>> : Record<AN, AV>>> {
     (this.attributeDefaults as Record<string, unknown>)[name] = model[$defaultValue];
     return this as any;
   }
@@ -348,36 +347,35 @@ export class ConstraintDeclarationBuilder<
    *
    * @returns The constraint declaration.
    */
-  build(this: string extends N ? never : this): ConstraintDeclaration<V | undefined, N, A> {
+  build(this: string extends N ? never : this): NonAttributedConstraint<V | undefined, N, A> {
     const name = this[$name];
-    const { attributeDefaults, referenceModel } = this;
-    const declaration = defineProperty(
-      ((valueOrAttributes?: unknown) => {
-        const attributes: A = {
-          ...attributeDefaults,
-          ...((typeof valueOrAttributes === 'object' && valueOrAttributes !== null
-            ? valueOrAttributes
-            : { value: valueOrAttributes }) as A),
-        };
+    const { attributeDefaults, supportedModel } = this;
 
-        const descriptor: ConstraintDescriptor = {
-          declaration: declaration as UnknownConstraintDeclaration,
-          attributes,
-        };
+    function assertSupportedModel(model: Model<V>): void {
+      if (!(model instanceof supportedModel)) {
+        throw new Error(`The constraint "${name}" is not applicable to the model "${model[$name]}".`);
+      }
+    }
 
-        function constraint(model: ConstrainableModel<Model<V>>): void {
-          if (!(model instanceof referenceModel)) {
-            throw new Error(`The constraint "${name}" is not applicable to the model "${model[$name]}".`);
-          }
-          model[$constraints].push(descriptor);
-        }
+    let NonAttributedConstraint = ((valueOrAttributes?: unknown) => {
+      const attributes: Required<A> = {
+        ...attributeDefaults,
+        ...(typeof valueOrAttributes === 'object' && valueOrAttributes !== null
+          ? valueOrAttributes
+          : { value: valueOrAttributes }),
+      };
 
-        return Object.defineProperty(constraint, 'name', { value: name });
-      }) as ConstraintFn<V | undefined, A>,
-      'name',
-      { value: name },
-    ) as ConstraintDeclaration<V | undefined, N, A>;
+      return Object.defineProperties(Object.create(NonAttributedConstraint), {
+        attributes: { value: attributes },
+      }) as Constraint<V | undefined, N, A>;
+    }) as unknown as ConstraintFn<V | undefined, A>;
 
-    return declaration;
+    NonAttributedConstraint = Object.defineProperties(NonAttributedConstraint, {
+      name: { value: name },
+      supportedModel: { value: supportedModel },
+      [$assertSupportedModel]: { value: assertSupportedModel },
+    }) as NonAttributedConstraint<V | undefined, N, A>;
+
+    return NonAttributedConstraint as NonAttributedConstraint<V | undefined, N, A>;
   }
 }

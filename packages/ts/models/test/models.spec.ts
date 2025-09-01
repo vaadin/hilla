@@ -29,7 +29,6 @@ import m, {
   Size,
   type Value,
   type Constraint,
-  type ConstraintDescriptor,
 } from '../src/index.js';
 
 chai.use(chaiLike);
@@ -341,74 +340,101 @@ describe('@vaadin/hilla-form-models', () => {
     });
   });
 
-  describe('Validation support', () => {
+  describe('Validation constraints support', () => {
     it('should support defining validators on properties', () => {
-      const Titled = ((_model: unknown) => undefined) as unknown as Constraint<{
-        readonly title: string;
-        readonly titledMarker?: string;
-      }>;
-
-      // Verify the type of the constraints
+      // Verify the type of the constraints, correct cases:
+      m.constrained(StringModel, NotNull({}));
       m.constrained(StringModel, NotNull());
+      m.constrained(StringModel, NotNull);
       m.constrained(NumberModel, NotNull());
       m.constrained(BooleanModel, NotNull());
-      m.constrained(m.array(StringModel), NotNull());
+      m.constrained(m.array(StringModel), NotNull, NotEmpty, Size({ min: 1 }));
+      m.constrained(m.array(StringModel), NotNull, NotEmpty, Size({ max: 10 }));
       m.constrained(m.optional(NamedModel), NotNull());
       m.constrained(m.optional(NamedModel), NotNull({ message: 'message' }));
 
       m.constrained(m.array(StringModel), Null());
       m.constrained(m.optional(NamedModel), Null({ message: 'message' }));
 
-      m.constrained(m.array(NumberModel), NotEmpty());
+      // ..., error cases;
+      [
+        () => {
+          // @ts-expect-error TS2345 - Max constraint is not applicable to StringModel
+          m.constrained(StringModel, Max(10));
+        },
+        () => {
+          // @ts-expect-error TS2345 - NotBlank constraint is not applicable to NumberModel
+          m.constrained(NumberModel, NotBlank);
+        },
+        () => {
+          // @ts-expect-error TS2345 - Email constraint is not applicable to ArrayModel<StringModel>
+          m.constrained(m.array(StringModel), Email);
+        },
+      ].forEach((errorCase) => {
+        expect(errorCase).to.throw();
+      });
+
       m.constrained(StringModel, NotEmpty());
-      m.constrained(NumberModel, Min(1));
+      m.constrained(NumberModel, Min({ value: 1 }));
       m.constrained(NumberModel, Max(10));
 
-      const commentModelWithConstraints = m
+      // Verify the type of the constrained model, inner model
+      const constrainedNumbersModel = m.constrained(m.array(NumberModel), NotEmpty(), Size({ min: 3 }));
+      ((_numbersModel: ArrayModel<NumberModel>) => {})(constrainedNumbersModel);
+
+      const commentModelWithConstrainedText = m
         .object<Comment>('Comment')
         .property('title', StringModel)
         .property('text', m.constrained(StringModel, NotBlank(), NotEmpty(), Size({ max: 140 })))
         .build();
+      ((_commentModel: typeof CommentModel) => {})(commentModelWithConstrainedText);
+      const commentTextModelWithConstraints = commentModelWithConstrainedText.text;
+      expect(commentTextModelWithConstraints[$constraints]).to.be.like([]);
 
-      // Verify the type of the constrained model
-      CommentModel = commentModelWithConstraints;
+      // Verify that the original model is not modified
+      const _textStringModel: StringModel = CommentModel.text;
+      expect((CommentModel.text as Model<string, { readonly [$constraints]?: Constraint }>)[$constraints]).to.be.equal(
+        undefined,
+      );
 
-      m.constrained(commentModelWithConstraints.text, NotBlank());
-      m.constrained(m.optional(CommentModel.text), NotBlank());
-      m.constrained(commentModelWithConstraints.text, NotEmpty());
-      m.constrained(commentModelWithConstraints.text, NotEmpty(), NotBlank());
-
-      m.constrained(CommentModel, Titled);
-
-      m.constrained(NumberModel, Min(1));
-
-      expect(CommentModel[$constraints]).to.be.undefined;
-      expect(CommentModel.text[$constraints]).to.be.an('array').with.lengthOf(1);
-      const [, descriptor] = CommentModel.text[$constraints]!;
-      expect(descriptor.declaration).to.equal(Size);
-      if (descriptor.declaration === Size) {
+      const [, constraintDescriptor] = commentTextModelWithConstraints[$constraints];
+      ((_constraintType: Constraint) => {})(Size);
+      expect(constraintDescriptor).to.be.instanceof(Size);
+      if (m.isConstraint(constraintDescriptor, Size)) {
         const {
+          name,
           attributes: { min, max },
-        } = descriptor as ConstraintDescriptor<typeof Size>;
+        } = constraintDescriptor;
+        expect(name).to.be.equal('Size');
         expect(min).to.be.equal(1);
         expect(max).to.be.equal(140);
       }
-      expect(descriptor.attributes).to.be.like({});
-      expect(descriptor.declaration).to.equal(NotEmpty);
     });
 
-    it('should support defining validators on the model', () => {
-      PersonModel = m
+    it('should support defining validators on array items', () => {
+      const personModelWithNonEmptyComments = m
         .extend(PersonModel)
         .object<Person>('Person')
         .property('comments', m.constrained(m.array(CommentModel), NotEmpty()))
         .build();
 
-      expect(PersonModel[$constraints]).to.be.undefined;
-      expect(PersonModel.comments).to.be.an('array').with.lengthOf(1);
-      expect(PersonModel.comments[$constraints]![0].attributes).to.be.like({});
-      expect(PersonModel.comments[$constraints]![0].declaration).to.equal(NotEmpty);
-      expect(PersonModel.comments[$itemModel].text).to.be.undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect((personModelWithNonEmptyComments as any)[$constraints]).to.be.equal(undefined);
+      expect(personModelWithNonEmptyComments.comments).to.be.an('array').with.lengthOf(1);
+      expect(personModelWithNonEmptyComments.comments[$constraints][0]).to.be.instanceof(NotEmpty);
+      expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
+      expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
+    });
+
+    it('should support custom constraints', () => {
+      const Titled = ((_model: unknown) => undefined) as unknown as Constraint<{
+        readonly title: string;
+        readonly titledMarker?: string;
+      }>;
+
+      const titledConstrainedModel = m.constrained(CommentModel, Titled);
+      ((_commentModel: typeof CommentModel) => {})(titledConstrainedModel);
+      expect(titledConstrainedModel[$constraints]).to.be.like([Titled]);
     });
   });
 });
