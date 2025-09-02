@@ -93,7 +93,8 @@ export const DecimalMax = new ConstraintBuilder().model(m.union(NumberModel, Str
 export const Negative = new ConstraintBuilder()
   .model(NumberModel)
   .attribute('message', m.optional(StringModel))
-  .name('Negative');
+  .name('Negative')
+  .build();
 
 /**
  * The constrained model value must be below zero or equal to zero.
@@ -103,7 +104,8 @@ export const Negative = new ConstraintBuilder()
 export const NegativeOrZero = new ConstraintBuilder()
   .model(NumberModel)
   .attribute('message', m.optional(StringModel))
-  .name('NegativeOrZero');
+  .name('NegativeOrZero')
+  .build();
 
 /**
  * The constrained model value must be strictly above zero.
@@ -113,7 +115,8 @@ export const NegativeOrZero = new ConstraintBuilder()
 export const Positive = new ConstraintBuilder()
   .model(NumberModel)
   .attribute('message', m.optional(StringModel))
-  .name('Positive');
+  .name('Positive')
+  .build();
 
 /**
  * The constrained model value must be above zero or equal to zero.
@@ -123,7 +126,8 @@ export const Positive = new ConstraintBuilder()
 export const PositiveOrZero = new ConstraintBuilder()
   .model(NumberModel)
   .attribute('message', m.optional(StringModel))
-  .name('PositiveOrZero');
+  .name('PositiveOrZero')
+  .build();
 
 /**
  * The length of the constrained value must be between the specified boundaries.

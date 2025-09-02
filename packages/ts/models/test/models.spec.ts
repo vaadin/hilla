@@ -1,5 +1,6 @@
 import chaiLike from 'chai-like';
 import { beforeEach, chai, describe, expect, it } from 'vitest';
+import { ConstraintBuilder } from '../src/builders.js';
 import m, {
   $defaultValue,
   $enum,
@@ -203,10 +204,10 @@ describe('@vaadin/hilla-form-models', () => {
       name: string;
     }
 
-    const NamedWithMetaModel = m.meta(
-      m.object<NamedWithMeta>('NamedWithMeta').property('name', StringModel).build(),
-      meta,
-    );
+    const NamedWithMetaModel = m
+      .object<NamedWithMeta>('NamedWithMeta')
+      .property('name', m.meta(StringModel, meta))
+      .build();
 
     expect(NamedWithMetaModel.name).to.have.property($meta).which.is.equal(meta);
   });
@@ -389,7 +390,10 @@ describe('@vaadin/hilla-form-models', () => {
         .build();
       ((_commentModel: typeof CommentModel) => {})(commentModelWithConstrainedText);
       const commentTextModelWithConstraints = commentModelWithConstrainedText.text;
-      expect(commentTextModelWithConstraints[$constraints]).to.be.like([]);
+      expect(commentTextModelWithConstraints[$constraints]).to.be.an('array').with.lengthOf(3);
+      expect(m.isConstraint(commentTextModelWithConstraints[$constraints][0], NotBlank)).to.be.true;
+      expect(m.isConstraint(commentTextModelWithConstraints[$constraints][1], NotEmpty)).to.be.true;
+      expect(m.isConstraint(commentTextModelWithConstraints[$constraints][2], Size)).to.be.true;
 
       // Verify that the original model is not modified
       const _textStringModel: StringModel = CommentModel.text;
@@ -397,16 +401,16 @@ describe('@vaadin/hilla-form-models', () => {
         undefined,
       );
 
-      const [, constraintDescriptor] = commentTextModelWithConstraints[$constraints];
+      const [, , sizeConstraintDescriptor] = commentTextModelWithConstraints[$constraints];
       ((_constraintType: Constraint) => {})(Size);
-      expect(constraintDescriptor).to.be.instanceof(Size);
-      if (m.isConstraint(constraintDescriptor, Size)) {
+      expect(m.isConstraint(sizeConstraintDescriptor, Size)).to.be.true;
+      if (m.isConstraint(sizeConstraintDescriptor, Size)) {
         const {
           name,
           attributes: { min, max },
-        } = constraintDescriptor;
+        } = sizeConstraintDescriptor;
         expect(name).to.be.equal('Size');
-        expect(min).to.be.equal(1);
+        expect(min).to.be.equal(0);
         expect(max).to.be.equal(140);
       }
     });
@@ -420,21 +424,22 @@ describe('@vaadin/hilla-form-models', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect((personModelWithNonEmptyComments as any)[$constraints]).to.be.equal(undefined);
-      expect(personModelWithNonEmptyComments.comments).to.be.an('array').with.lengthOf(1);
-      expect(personModelWithNonEmptyComments.comments[$constraints][0]).to.be.instanceof(NotEmpty);
+      expect(personModelWithNonEmptyComments.comments[$constraints]).to.be.an('array').with.lengthOf(1);
+      expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], NotEmpty)).to.be.true;
+      expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;
       expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
       expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
     });
 
     it('should support custom constraints', () => {
-      const Titled = ((_model: unknown) => undefined) as unknown as Constraint<{
-        readonly title: string;
-        readonly titledMarker?: string;
-      }>;
+      const HasTitle = new ConstraintBuilder().model(ObjectModel).name('HasTitle').build();
+      expect(HasTitle.name).to.equal('HasTitle');
 
-      const titledConstrainedModel = m.constrained(CommentModel, Titled);
-      ((_commentModel: typeof CommentModel) => {})(titledConstrainedModel);
-      expect(titledConstrainedModel[$constraints]).to.be.like([Titled]);
+      const hasTitleConstrainedModel = m.constrained(CommentModel, HasTitle);
+      // Verify the type of the constrained model
+      ((_commentModel: typeof CommentModel) => {})(hasTitleConstrainedModel);
+      expect(m.hasConstraints(hasTitleConstrainedModel)).to.be.true;
+      expect(hasTitleConstrainedModel[$constraints]).to.be.like([HasTitle]);
     });
   });
 });

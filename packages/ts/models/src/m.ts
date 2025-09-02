@@ -138,6 +138,9 @@ const m = {
     return new CoreModelBuilder(Model, () => members[0][$defaultValue] as Value<MM[number]>)
       .name(members.map((model) => model[$name]).join(' | '))
       .define($members, { value: members })
+      .define(Symbol.hasInstance, {
+        value: (value: unknown): value is Value<MM[number]> => members.some((member) => value instanceof member),
+      })
       .build();
   },
 
@@ -231,7 +234,18 @@ const m = {
     arg: unknown,
     constraintType: NonAttributedConstraint<V, N, A>,
   ): arg is Constraint<V, N, A> {
-    return arg instanceof constraintType;
+    if (typeof arg !== 'object') {
+      return false;
+    }
+
+    let p: unknown = arg;
+    do {
+      if (p === constraintType) {
+        return true;
+      }
+      p = Object.getPrototypeOf(p);
+    } while (p !== undefined && p !== null);
+    return false;
   },
 
   /**
