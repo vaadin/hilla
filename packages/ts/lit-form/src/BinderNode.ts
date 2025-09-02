@@ -15,8 +15,38 @@
  * the License.
  */
 // TODO: Fix dependency cycle
-
-import { $defaultValue, $key, $owner } from '@vaadin/hilla-models';
+import m, {
+  $defaultValue,
+  $key,
+  $optional,
+  $owner,
+  NumberModel,
+  $constraints,
+  type Constraint,
+  Null,
+  NotNull,
+  AssertTrue,
+  AssertFalse,
+  Min,
+  Max,
+  DecimalMin,
+  Negative,
+  NegativeOrZero,
+  Positive,
+  PositiveOrZero,
+  Size,
+  Digits,
+  Past,
+  // PastOrPresent, // not supported
+  Future,
+  // FutureOrPresent, // not supported
+  Pattern,
+  NotEmpty,
+  NotBlank,
+  Email,
+  type NonAttributedConstraint,
+} from '@vaadin/hilla-models';
+import type { Constructor, EmptyObject } from 'type-fest';
 import type { BinderRoot } from './BinderRoot.js';
 import {
   _createEmptyItemValue,
@@ -31,7 +61,7 @@ import {
 import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { ClassStaticProperties } from './types.js';
 import type { Validator, ValueError } from './Validation.js';
-import { ValidityStateValidator } from './Validators.js';
+import * as Validators from './Validators.js';
 import { _validity } from './Validity.js';
 
 export const _updateValidation = Symbol('updateValidation');
@@ -52,14 +82,62 @@ export function getBinderNode<M extends ProvisionalModel>(model: M): BinderNode<
   return node as BinderNode<M>;
 }
 
+function getConstraintValidator<T>(constraint: Constraint<T>): Validator<T> {
+  const constraintTypes = [
+    Null,
+    NotNull,
+    AssertTrue,
+    AssertFalse,
+    Min,
+    Max,
+    DecimalMin,
+    Negative,
+    NegativeOrZero,
+    Positive,
+    PositiveOrZero,
+    Size,
+    Digits,
+    Past,
+    // PastOrPresent, // not supported
+    Future,
+    // FutureOrPresent, // not supported
+    Pattern,
+    NotEmpty,
+    NotBlank,
+    Email,
+  ];
+  for (const constraintType of constraintTypes) {
+    if (m.isConstraint(constraint, constraintType as NonAttributedConstraint)) {
+      // eslint-disable-next-line import/namespace
+      const Validator = Validators[constraintType.name] as Constructor<
+        Validator<T>,
+        EmptyObject extends typeof constraint.attributes
+          ? [typeof constraint.attributes | undefined]
+          : [typeof constraint.attributes]
+      >;
+      return new Validator(constraint.attributes);
+    }
+  }
+  throw new Error(`Unsupported constraint: ${constraint.name}`);
+}
+
 function getModelValidators<M extends ProvisionalModel>(model: M): ReadonlyArray<Validator<Value<M>>> {
   if (model instanceof AbstractModel) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return model[_validators];
   }
 
-  // FIXME: implement validators
-  return [];
+  const validators: Array<Validator<Value<M>>> =
+    model instanceof NumberModel ? [new Validators.IsNumber(model[$optional]) as Validator<Value<M>>] : [];
+
+  if (m.hasConstraints(model)) {
+    for (const constraint of model[$constraints]) {
+      const validator = getConstraintValidator<Value<M>>(constraint);
+      validators.push(validator);
+    }
+  }
+
+  return validators;
 }
 
 function createEmptyValue<M extends ProvisionalModel>(model: M) {
@@ -144,14 +222,14 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
   [_validity]?: ValidityState;
   #ownErrors?: ReadonlyArray<ValueError<Value<M>>>;
   #validators: ReadonlyArray<Validator<Value<M>>>;
-  readonly #validityStateValidator: ValidityStateValidator<Value<M>>;
+  readonly #validityStateValidator: Validators.ValidityStateValidator<Value<M>>;
   #visited = false;
 
   constructor(model: M) {
     super();
     this.model = model;
     nodes.set(model, this);
-    this.#validityStateValidator = new ValidityStateValidator<Value<M>>();
+    this.#validityStateValidator = new Validators.ValidityStateValidator<Value<M>>();
     this.#validators = getModelValidators(model);
 
     // Workaround for children initialization with private props
