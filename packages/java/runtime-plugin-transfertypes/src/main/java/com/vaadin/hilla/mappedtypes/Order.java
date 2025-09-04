@@ -21,9 +21,12 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
 
+import com.vaadin.hilla.transfertypes.annotations.FromModule;
+
 /**
  * A DTO for {@code org.springframework.data.domain.Sort.Order}.
  */
+@FromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "Order")
 public class Order {
     @NonNull
     private Direction direction;

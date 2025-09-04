@@ -17,9 +17,12 @@ package com.vaadin.hilla.mappedtypes;
 
 import org.jspecify.annotations.NonNull;
 
+import com.vaadin.hilla.transfertypes.annotations.FromModule;
+
 /**
  * A DTO for {@code org.springframework.data.domain.Pageable}.
  */
+@FromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "Pageable")
 public class Pageable {
     private int pageNumber;
     private int pageSize;
