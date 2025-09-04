@@ -1,6 +1,7 @@
 .auto-crud {
   display: flex;
   overflow: hidden;
+  position: relative;
   border: solid 1px var(--lumo-contrast-20pct);
   height: 462px; /* vaadin-grid intrinsic 400px + 62px for the button toolbar */
 }
@@ -87,10 +88,7 @@
 }
 
 .auto-crud-dialog {
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  --vaadin-overlay-viewport-inset: 0;
 }
 
 .auto-crud-dialog::part(overlay) {
