@@ -13,6 +13,7 @@ import {
   FluxConnection,
   type FluxSubscriptionStateChangeEvent,
 } from './FluxConnection.js';
+import { reviver } from './reviver.js';
 import type { VaadinGlobal } from './types.js';
 
 const $wnd = globalThis as VaadinGlobal;
@@ -369,7 +370,7 @@ export class ConnectClient {
       const response = await next(context);
       await assertResponseIsOk(response);
       const text = await response.text();
-      return JSON.parse(text, (_, value: any) => (value === null ? undefined : value));
+      return JSON.parse(text, reviver);
     }
 
     // The actual fetch call itself is expressed as a middleware

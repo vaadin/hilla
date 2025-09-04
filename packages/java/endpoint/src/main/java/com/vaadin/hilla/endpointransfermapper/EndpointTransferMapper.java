@@ -127,6 +127,7 @@ public class EndpointTransferMapper {
         registerMapper(new PageableMapper());
         registerMapper(new UUIDMapper());
         registerMapper(new PageMapper());
+        registerMapper(new SliceMapper());
     }
 
     /**

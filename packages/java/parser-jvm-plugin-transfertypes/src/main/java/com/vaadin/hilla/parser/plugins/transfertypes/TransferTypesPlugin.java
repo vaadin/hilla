@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.mappedtypes.Order;
+import com.vaadin.hilla.mappedtypes.Page;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -39,7 +40,7 @@ public final class TransferTypesPlugin
     private static final Map<String, Class<?>> classMap = new HashMap<>();
 
     static {
-        classMap.put("org.springframework.data.domain.Page", List.class);
+        classMap.put("org.springframework.data.domain.Page", Page.class);
         classMap.put("org.springframework.data.domain.Pageable",
                 Pageable.class);
         classMap.put("org.springframework.data.domain.Sort$Order", Order.class);

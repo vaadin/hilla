@@ -39,12 +39,16 @@ function createReplacedTypeMaker(name: string): ReplacedTypeMaker {
 
 type ReplacedTypes = Readonly<Record<string, ReplacedTypeMaker>>;
 
-const replacedTypes: ReplacedTypes = Object.fromEntries(
-  ['File', 'Signal', 'NumberSignal', 'ValueSignal', 'ListSignal'].map((name) => [
+const replacedTypes: ReplacedTypes = Object.fromEntries([
+  ...['File', 'Signal', 'NumberSignal', 'ValueSignal', 'ListSignal'].map((name) => [
     `com.vaadin.hilla.runtime.transfertypes.${name}`,
     createReplacedTypeMaker(name),
   ]),
-);
+  ...['Order', 'Page', 'Pageable', 'Slice', 'Sort'].map((name) => [
+    `com.vaadin.hilla.mappedtypes.${name}`,
+    createReplacedTypeMaker(name),
+  ]),
+]);
 
 export default class TransferTypesPlugin extends Plugin {
   declare ['constructor']: typeof TransferTypesPlugin;
