@@ -127,15 +127,15 @@
                 "nullable" : true,
                 "x-java-type" : "java.lang.String"
               },
+              "fullName" : {
+                "type" : "string",
+                "x-java-type" : "java.lang.String"
+              },
               "age" : {
                 "type" : "integer",
                 "format" : "int32",
                 "nullable" : true,
                 "x-java-type" : "java.lang.Integer"
-              },
-              "fullName" : {
-                "type" : "string",
-                "x-java-type" : "java.lang.String"
               }
             }
           }
