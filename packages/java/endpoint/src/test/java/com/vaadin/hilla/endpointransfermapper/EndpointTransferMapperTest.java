@@ -156,8 +156,6 @@ public class EndpointTransferMapperTest {
         content.add("Second");
         content.add("Third");
 
-        // Create a Page with pagination info - page 1 (0-indexed), size 3,
-        // total 10 elements
         org.springframework.data.domain.Pageable pageable = PageRequest.of(1,
                 3);
         Page<String> p = new PageImpl<>(content, pageable, 10);
@@ -165,7 +163,6 @@ public class EndpointTransferMapperTest {
         com.vaadin.hilla.mappedtypes.Page<?> mappedPage = (com.vaadin.hilla.mappedtypes.Page<?>) endpointTransferMapper
                 .toTransferType(p);
 
-        // Test common Slice properties
         Assert.assertEquals(content, mappedPage.getContent());
         Assert.assertEquals(3, mappedPage.getNumberOfElements());
         Assert.assertEquals(1, mappedPage.getNumber());
@@ -176,10 +173,8 @@ public class EndpointTransferMapperTest {
         Assert.assertTrue(mappedPage.isHasPrevious());
         Assert.assertTrue(mappedPage.isHasContent());
         Assert.assertFalse(mappedPage.isEmpty());
-
-        // Test Page-specific properties
         Assert.assertEquals(10, mappedPage.getTotalElements());
-        Assert.assertEquals(4, mappedPage.getTotalPages()); // 10 elements / 3
+        Assert.assertEquals(4, mappedPage.getTotalPages());
     }
 
     @Test
@@ -194,8 +189,7 @@ public class EndpointTransferMapperTest {
             endpointTransferMapper.toEndpointType(mappedPage, Page.class);
             Assert.fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
-            // Expected behavior - conversion from transfer Page to endpoint
-            // Page is not supported
+            // Page is unidirectional
             Assert.assertTrue(e.getMessage()
                     .contains("Cannot create a Page from a transfer Page"));
         }
@@ -208,17 +202,14 @@ public class EndpointTransferMapperTest {
         content.add("Second");
         content.add("Third");
 
-        // Create a Slice with pagination info - this is a middle slice that has
-        // next but not previous
+        // Create a middle slice that has next but not previous
         org.springframework.data.domain.Pageable pageable = PageRequest.of(1,
                 3);
-        Slice<String> s = new SliceImpl<>(content, pageable, true); // hasNext =
-                                                                    // true
+        Slice<String> s = new SliceImpl<>(content, pageable, true);
 
         com.vaadin.hilla.mappedtypes.Slice<?> mappedSlice = (com.vaadin.hilla.mappedtypes.Slice<?>) endpointTransferMapper
                 .toTransferType(s);
 
-        // Test Slice properties
         Assert.assertEquals(content, mappedSlice.getContent());
         Assert.assertEquals(3, mappedSlice.getNumberOfElements());
         Assert.assertEquals(1, mappedSlice.getNumber());
@@ -243,8 +234,7 @@ public class EndpointTransferMapperTest {
             endpointTransferMapper.toEndpointType(mappedSlice, Slice.class);
             Assert.fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
-            // Expected behavior - conversion from transfer Slice to endpoint
-            // Slice is not supported
+            // Slice is unidirectional
             Assert.assertTrue(e.getMessage()
                     .contains("Cannot create a Slice from a transfer Slice"));
         }
