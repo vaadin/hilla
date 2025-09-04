@@ -13,6 +13,8 @@ import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
 
@@ -29,8 +31,10 @@ public class EndpointTransferMapperTest {
                 .getTransferType(AbstractPageRequest.class));
         Assert.assertEquals(Pageable.class,
                 endpointTransferMapper.getTransferType(PageRequest.class));
-        Assert.assertEquals(List.class,
+        Assert.assertEquals(com.vaadin.hilla.mappedtypes.Page.class,
                 endpointTransferMapper.getTransferType(Page.class));
+        Assert.assertEquals(com.vaadin.hilla.mappedtypes.Slice.class,
+                endpointTransferMapper.getTransferType(Slice.class));
         Assert.assertEquals(String.class,
                 endpointTransferMapper.getTransferType(UUID.class));
         Assert.assertNull(
@@ -46,8 +50,10 @@ public class EndpointTransferMapperTest {
         // When defining the methods, the defined classes are used to we do not
         // need to
         // support e.g. AbstractPageRequest and PageRequest here
-        Assert.assertEquals(List.class.getName(),
+        Assert.assertEquals(com.vaadin.hilla.mappedtypes.Page.class.getName(),
                 endpointTransferMapper.getTransferType(Page.class.getName()));
+        Assert.assertEquals(com.vaadin.hilla.mappedtypes.Slice.class.getName(),
+                endpointTransferMapper.getTransferType(Slice.class.getName()));
         Assert.assertEquals(String.class.getName(),
                 endpointTransferMapper.getTransferType(UUID.class.getName()));
         Assert.assertNull(endpointTransferMapper
@@ -144,22 +150,103 @@ public class EndpointTransferMapperTest {
     }
 
     @Test
-    public void page_toTransferType() {
+    public void page_toTransferType_returnsMappedPage() {
         List<String> content = new ArrayList<>();
         content.add("First");
         content.add("Second");
+        content.add("Third");
 
-        Page p = new PageImpl<>(content);
-        List l = (List) endpointTransferMapper.toTransferType(p);
-        Assert.assertEquals(content, l);
+        // Create a Page with pagination info - page 1 (0-indexed), size 3,
+        // total 10 elements
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(1,
+                3);
+        Page<String> p = new PageImpl<>(content, pageable, 10);
+
+        com.vaadin.hilla.mappedtypes.Page<?> mappedPage = (com.vaadin.hilla.mappedtypes.Page<?>) endpointTransferMapper
+                .toTransferType(p);
+
+        // Test common Slice properties
+        Assert.assertEquals(content, mappedPage.getContent());
+        Assert.assertEquals(3, mappedPage.getNumberOfElements());
+        Assert.assertEquals(1, mappedPage.getNumber());
+        Assert.assertEquals(3, mappedPage.getSize());
+        Assert.assertFalse(mappedPage.isFirst());
+        Assert.assertFalse(mappedPage.isLast());
+        Assert.assertTrue(mappedPage.isHasNext());
+        Assert.assertTrue(mappedPage.isHasPrevious());
+        Assert.assertTrue(mappedPage.isHasContent());
+        Assert.assertFalse(mappedPage.isEmpty());
+
+        // Test Page-specific properties
+        Assert.assertEquals(10, mappedPage.getTotalElements());
+        Assert.assertEquals(4, mappedPage.getTotalPages()); // 10 elements / 3
     }
 
     @Test
-    public void page_fromTransferType() {
-        List<String> incoming = new ArrayList<>();
-        incoming.add("First");
-        incoming.add("Second");
-        Page p = endpointTransferMapper.toEndpointType(incoming, Page.class);
-        Assert.assertEquals(incoming, p.getContent());
+    public void page_fromTransferType_throwsUnsupportedOperation() {
+        com.vaadin.hilla.mappedtypes.Page<String> mappedPage = new com.vaadin.hilla.mappedtypes.Page<>();
+        List<String> content = new ArrayList<>();
+        content.add("First");
+        content.add("Second");
+        mappedPage.setContent(content);
+
+        try {
+            endpointTransferMapper.toEndpointType(mappedPage, Page.class);
+            Assert.fail("Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException e) {
+            // Expected behavior - conversion from transfer Page to endpoint
+            // Page is not supported
+            Assert.assertTrue(e.getMessage()
+                    .contains("Cannot create a Page from a transfer Page"));
+        }
+    }
+
+    @Test
+    public void slice_toTransferType_returnsMappedSlice() {
+        List<String> content = new ArrayList<>();
+        content.add("First");
+        content.add("Second");
+        content.add("Third");
+
+        // Create a Slice with pagination info - this is a middle slice that has
+        // next but not previous
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(1,
+                3);
+        Slice<String> s = new SliceImpl<>(content, pageable, true); // hasNext =
+                                                                    // true
+
+        com.vaadin.hilla.mappedtypes.Slice<?> mappedSlice = (com.vaadin.hilla.mappedtypes.Slice<?>) endpointTransferMapper
+                .toTransferType(s);
+
+        // Test Slice properties
+        Assert.assertEquals(content, mappedSlice.getContent());
+        Assert.assertEquals(3, mappedSlice.getNumberOfElements());
+        Assert.assertEquals(1, mappedSlice.getNumber());
+        Assert.assertEquals(3, mappedSlice.getSize());
+        Assert.assertFalse(mappedSlice.isFirst());
+        Assert.assertFalse(mappedSlice.isLast());
+        Assert.assertTrue(mappedSlice.isHasNext());
+        Assert.assertTrue(mappedSlice.isHasPrevious());
+        Assert.assertTrue(mappedSlice.isHasContent());
+        Assert.assertFalse(mappedSlice.isEmpty());
+    }
+
+    @Test
+    public void slice_fromTransferType_throwsUnsupportedOperation() {
+        com.vaadin.hilla.mappedtypes.Slice<String> mappedSlice = new com.vaadin.hilla.mappedtypes.Slice<>();
+        List<String> content = new ArrayList<>();
+        content.add("First");
+        content.add("Second");
+        mappedSlice.setContent(content);
+
+        try {
+            endpointTransferMapper.toEndpointType(mappedSlice, Slice.class);
+            Assert.fail("Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException e) {
+            // Expected behavior - conversion from transfer Slice to endpoint
+            // Slice is not supported
+            Assert.assertTrue(e.getMessage()
+                    .contains("Cannot create a Slice from a transfer Slice"));
+        }
     }
 }

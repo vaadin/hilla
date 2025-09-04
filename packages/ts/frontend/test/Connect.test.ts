@@ -23,6 +23,8 @@ import {
   type MiddlewareFunction,
   UnauthorizedResponseError,
   BODY_PART_NAME,
+  type Page,
+  type Slice,
 } from '../src/index.js';
 import type { Vaadin } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
@@ -144,6 +146,34 @@ describe('@vaadin/hilla-frontend', () => {
           fooData: 'foo',
           propWithNullValue: null,
         } satisfies FooMethodWithNullValueResponse);
+        fetchMock.post(`${base}/connect/FooEndpoint/getPage`, {
+          content: ['item1', 'item2', 'item3'],
+          number: 0,
+          numberOfElements: 3,
+          size: 10,
+          sort: { orders: [] },
+          hasContent: true,
+          hasNext: false,
+          hasPrevious: false,
+          first: true,
+          last: true,
+          empty: false,
+          totalElements: 3,
+          totalPages: 1,
+        });
+        fetchMock.post(`${base}/connect/FooEndpoint/getSlice`, {
+          content: ['slice1', 'slice2'],
+          number: 1,
+          numberOfElements: 2,
+          size: 2,
+          sort: { orders: [] },
+          hasContent: true,
+          hasNext: true,
+          hasPrevious: true,
+          first: false,
+          last: false,
+          empty: false,
+        });
         client = new ConnectClient();
       });
 
@@ -336,6 +366,71 @@ describe('@vaadin/hilla-frontend', () => {
         const data = (await client.call('FooEndpoint', 'fooMethodWithNullValue')) as FooMethodWithNullValueResponse;
         expect(data.propWithNullValue).to.be.undefined;
         expect(data).to.deep.equal({ fooData: 'foo' });
+      });
+
+      it('should enhance Page objects with array-like access', async () => {
+        const page = (await client.call('FooEndpoint', 'getPage')) as Page<string>;
+
+        // Test that it's recognized as a Page with all metadata
+        expect(page.content).to.deep.equal(['item1', 'item2', 'item3']);
+        expect(page.totalElements).to.equal(3);
+        expect(page.totalPages).to.equal(1);
+        expect(page.number).to.equal(0);
+        expect(page.first).to.be.true;
+        expect(page.last).to.be.true;
+
+        // Test array-like access behavior
+        expect(page.length).to.equal(3);
+        expect(page[0]).to.equal('item1');
+        expect(page[1]).to.equal('item2');
+        expect(page[2]).to.equal('item3');
+
+        // Test array methods work
+        const mapped = page.map((item) => item.toUpperCase());
+        expect(mapped).to.deep.equal(['ITEM1', 'ITEM2', 'ITEM3']);
+
+        const filtered = page.filter((item) => item.includes('1'));
+        expect(filtered).to.deep.equal(['item1']);
+
+        // Test iteration
+        const items: string[] = [];
+        for (const item of page) {
+          items.push(item);
+        }
+        expect(items).to.deep.equal(['item1', 'item2', 'item3']);
+      });
+
+      it('should enhance Slice objects with array-like access', async () => {
+        const slice = (await client.call('FooEndpoint', 'getSlice')) as Slice<string>;
+
+        // Test that it's recognized as a Slice with metadata
+        expect(slice.content).to.deep.equal(['slice1', 'slice2']);
+        expect(slice.number).to.equal(1);
+        expect(slice.numberOfElements).to.equal(2);
+        expect(slice.size).to.equal(2);
+        expect(slice.first).to.be.false;
+        expect(slice.last).to.be.false;
+        expect(slice.hasNext).to.be.true;
+        expect(slice.hasPrevious).to.be.true;
+
+        // Test array-like access behavior
+        expect(slice.length).to.equal(2);
+        expect(slice[0]).to.equal('slice1');
+        expect(slice[1]).to.equal('slice2');
+
+        // Test array methods work
+        const mapped = slice.map((item) => `enhanced-${item}`);
+        expect(mapped).to.deep.equal(['enhanced-slice1', 'enhanced-slice2']);
+
+        const found = slice.find((item) => item.includes('2'));
+        expect(found).to.equal('slice2');
+
+        // Test iteration
+        const items: string[] = [];
+        for (const item of slice) {
+          items.push(item);
+        }
+        expect(items).to.deep.equal(['slice1', 'slice2']);
       });
 
       it('should reject if response is not ok', async () => {

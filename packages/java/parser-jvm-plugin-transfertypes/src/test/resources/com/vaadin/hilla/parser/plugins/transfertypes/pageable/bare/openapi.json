@@ -58,6 +58,10 @@
               ]
             }
           }
+        },
+        "x-from-module": {
+          "named": "Sort",
+          "module": "@vaadin/hilla-frontend"
         }
       },
       "com.vaadin.hilla.mappedtypes.Order": {
@@ -86,15 +90,26 @@
               }
             ]
           }
+        },
+        "x-from-module": {
+          "named": "Order",
+          "module": "@vaadin/hilla-frontend"
         }
       },
       "org.springframework.data.domain.Sort$Direction": {
         "type": "string",
-        "enum": ["ASC", "DESC"]
+        "enum": [
+          "ASC",
+          "DESC"
+        ]
       },
       "org.springframework.data.domain.Sort$NullHandling": {
         "type": "string",
-        "enum": ["NATIVE", "NULLS_FIRST", "NULLS_LAST"]
+        "enum": [
+          "NATIVE",
+          "NULLS_FIRST",
+          "NULLS_LAST"
+        ]
       }
     }
   }
