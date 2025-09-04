@@ -32,13 +32,13 @@ public class PageMapper
     @Override
     @SuppressWarnings("unchecked")
     public Class<? extends org.springframework.data.domain.Page<?>> getEndpointType() {
-        return (Class<? extends org.springframework.data.domain.Page<?>>) org.springframework.data.domain.Page.class;
+        return (Class<? extends org.springframework.data.domain.Page<?>>) (Class<?>) org.springframework.data.domain.Page.class;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Class<? extends Page<?>> getTransferType() {
-        return (Class<? extends Page<?>>) Page.class;
+        return (Class<? extends Page<?>>) (Class<?>) Page.class;
     }
 
     @Override

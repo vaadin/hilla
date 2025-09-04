@@ -32,13 +32,13 @@ public class SliceMapper
     @Override
     @SuppressWarnings("unchecked")
     public Class<? extends org.springframework.data.domain.Slice<?>> getEndpointType() {
-        return (Class<? extends org.springframework.data.domain.Slice<?>>) org.springframework.data.domain.Slice.class;
+        return (Class<? extends org.springframework.data.domain.Slice<?>>) (Class<?>) org.springframework.data.domain.Slice.class;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Class<? extends Slice<?>> getTransferType() {
-        return (Class<? extends Slice<?>>) Slice.class;
+        return (Class<? extends Slice<?>>) (Class<?>) Slice.class;
     }
 
     @Override
