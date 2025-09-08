@@ -62,6 +62,10 @@
         "x-from-module": {
           "named": "Sort",
           "module": "@vaadin/hilla-frontend"
+        },
+        "x-model-from-module": {
+          "named": "SortModel",
+          "module": "@vaadin/hilla-frontend"
         }
       },
       "com.vaadin.hilla.mappedtypes.Order": {
@@ -93,6 +97,10 @@
         },
         "x-from-module": {
           "named": "Order",
+          "module": "@vaadin/hilla-frontend"
+        },
+        "x-model-from-module": {
+          "named": "OrderModel",
           "module": "@vaadin/hilla-frontend"
         }
       },

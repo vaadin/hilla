@@ -12,13 +12,15 @@ type FromModule = Readonly<{
   default?: string;
 }>;
 
-function createReplacedTypeMaker(name: string): ReplacedTypeMaker {
+type ReplacerKey = 'x-from-module' | 'x-model-from-module';
+
+function createReplacedTypeMaker(name: string, key: ReplacerKey): ReplacedTypeMaker {
   return (schema) =>
     ({ dependencies: { imports }, typeArguments }) => {
       let id: Identifier | undefined;
 
-      if (schema && 'x-from-module' in schema) {
-        const fromModule = schema['x-from-module'] as FromModule;
+      if (schema && key in schema) {
+        const fromModule = (schema as Record<string, unknown>)[key] as FromModule;
 
         if (fromModule.named) {
           id =
@@ -42,11 +44,15 @@ type ReplacedTypes = Readonly<Record<string, ReplacedTypeMaker>>;
 const replacedTypes: ReplacedTypes = Object.fromEntries([
   ...['File', 'Signal', 'NumberSignal', 'ValueSignal', 'ListSignal'].map((name) => [
     `com.vaadin.hilla.runtime.transfertypes.${name}`,
-    createReplacedTypeMaker(name),
+    createReplacedTypeMaker(name, 'x-from-module'),
   ]),
   ...['Order', 'Page', 'Pageable', 'Slice', 'Sort'].map((name) => [
     `com.vaadin.hilla.mappedtypes.${name}`,
-    createReplacedTypeMaker(name),
+    createReplacedTypeMaker(name, 'x-from-module'),
+  ]),
+  ...['Order', 'Page', 'Pageable', 'Slice', 'Sort'].map((name) => [
+    `com.vaadin.hilla.mappedtypes.${name}Model`,
+    createReplacedTypeMaker(`${name}`, 'x-model-from-module'),
   ]),
 ]);
 
@@ -59,7 +65,9 @@ export default class TransferTypesPlugin extends Plugin {
 
   override execute({ api: { components }, transferTypes }: SharedStorage): void {
     for (const [key, value] of Object.entries(replacedTypes)) {
-      transferTypes.set(key, value(components?.schemas?.[key]));
+      // For model transfer types, look up the schema under the base name (without 'Model' suffix)
+      const schemaKey = key.endsWith('Model') ? key.slice(0, -5) : key;
+      transferTypes.set(key, value(components?.schemas?.[schemaKey]));
     }
 
     if (components?.schemas) {

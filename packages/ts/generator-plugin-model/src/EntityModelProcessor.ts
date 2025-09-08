@@ -156,8 +156,12 @@ export class EntityClassModelProcessor extends EntityModelProcessor {
     }
 
     return Object.entries(properties).map(([name, schema]) => {
-      const type = new ModelSchemaTypeProcessor(schema, this[$dependencies]).process();
-      const args = new ModelSchemaExpressionProcessor(schema, this[$dependencies]).process();
+      const type = new ModelSchemaTypeProcessor(schema, this[$dependencies], this.#context.transferTypes).process();
+      const args = new ModelSchemaExpressionProcessor(
+        schema,
+        this[$dependencies],
+        this.#context.transferTypes,
+      ).process();
 
       return ts.factory.createGetAccessorDeclaration(
         undefined,

@@ -17,6 +17,29 @@
     }
   ],
   "paths": {
+    "/PageableEndpoint/getCustom": {
+      "post": {
+        "tags": ["PageableEndpoint"],
+        "operationId": "PageableEndpoint_getCustom_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.transfertypes.pageable.basic.PageableEndpoint$Custom"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/PageableEndpoint/getOrder": {
       "post": {
         "tags": ["PageableEndpoint"],
@@ -144,6 +167,19 @@
   },
   "components": {
     "schemas": {
+      "com.vaadin.hilla.parser.plugins.transfertypes.pageable.basic.PageableEndpoint$Custom": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "nullable": true,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/com.vaadin.hilla.mappedtypes.Page"
+              }
+            ]
+          }
+        }
+      },
       "com.vaadin.hilla.mappedtypes.Order": {
         "type": "object",
         "properties": {
@@ -173,6 +209,10 @@
         },
         "x-from-module": {
           "named": "Order",
+          "module": "@vaadin/hilla-frontend"
+        },
+        "x-model-from-module": {
+          "named": "OrderModel",
           "module": "@vaadin/hilla-frontend"
         }
       },
@@ -210,6 +250,10 @@
         "x-from-module": {
           "named": "Page",
           "module": "@vaadin/hilla-frontend"
+        },
+        "x-model-from-module": {
+          "named": "PageModel",
+          "module": "@vaadin/hilla-frontend"
         }
       },
       "com.vaadin.hilla.mappedtypes.Pageable": {
@@ -235,6 +279,10 @@
         "x-from-module": {
           "named": "Pageable",
           "module": "@vaadin/hilla-frontend"
+        },
+        "x-model-from-module": {
+          "named": "PageableModel",
+          "module": "@vaadin/hilla-frontend"
         }
       },
       "com.vaadin.hilla.mappedtypes.Sort": {
@@ -255,6 +303,10 @@
         },
         "x-from-module": {
           "named": "Sort",
+          "module": "@vaadin/hilla-frontend"
+        },
+        "x-model-from-module": {
+          "named": "SortModel",
           "module": "@vaadin/hilla-frontend"
         }
       },

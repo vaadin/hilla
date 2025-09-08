@@ -26,4 +26,12 @@ public class PageableEndpoint {
     public Sort getSort() {
         return null;
     }
+
+    public Custom getCustom() {
+        return null;
+    }
+
+    public static class Custom {
+        public Page page;
+    }
 }
