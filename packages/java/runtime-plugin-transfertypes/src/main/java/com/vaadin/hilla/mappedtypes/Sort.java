@@ -21,11 +21,13 @@ import java.util.List;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
+import com.vaadin.hilla.transfertypes.annotations.ModelFromModule;
 
 /**
  * A DTO for {@code org.springframework.data.domain.Sort}.
  */
 @FromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "Sort")
+@ModelFromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "SortModel")
 public class Sort {
     @NonNull
     private List<Order> orders = new ArrayList<>();

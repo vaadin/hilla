@@ -22,11 +22,13 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
 
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
+import com.vaadin.hilla.transfertypes.annotations.ModelFromModule;
 
 /**
  * A DTO for {@code org.springframework.data.domain.Sort.Order}.
  */
 @FromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "Order")
+@ModelFromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "OrderModel")
 public class Order {
     @NonNull
     private Direction direction;

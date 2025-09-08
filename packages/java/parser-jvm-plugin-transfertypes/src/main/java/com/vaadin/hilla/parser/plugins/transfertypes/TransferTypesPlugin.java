@@ -34,6 +34,7 @@ import com.vaadin.hilla.runtime.transfertypes.NumberSignal;
 import com.vaadin.hilla.runtime.transfertypes.Signal;
 import com.vaadin.hilla.runtime.transfertypes.ValueSignal;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
+import com.vaadin.hilla.transfertypes.annotations.ModelFromModule;
 
 public final class TransferTypesPlugin
         extends AbstractPlugin<PluginConfiguration> {
@@ -100,6 +101,31 @@ public final class TransferTypesPlugin
                             }
 
                             schema.addExtension("x-from-module", fromModule);
+                        });
+
+                cls.getAnnotations().stream()
+                        .filter((model) -> model.getName()
+                                .equals(ModelFromModule.class.getName()))
+                        .findFirst().ifPresent((annotationModel) -> {
+                            var annotation = (ModelFromModule) annotationModel
+                                    .get();
+                            var namedSpecifier = annotation.namedSpecifier();
+                            var defaultSpecifier = annotation
+                                    .defaultSpecifier();
+
+                            var modelMap = new HashMap<String, Object>();
+                            modelMap.put("module", annotation.module());
+
+                            if (!namedSpecifier.isBlank()) {
+                                modelMap.put("named", namedSpecifier);
+                            }
+
+                            if (!defaultSpecifier.isBlank()) {
+                                modelMap.put("default", defaultSpecifier);
+                            }
+
+                            schema.addExtension("x-model-from-module",
+                                    modelMap);
                         });
             }
         }

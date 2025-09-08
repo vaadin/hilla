@@ -1,8 +1,10 @@
 package com.vaadin.hilla.mappedtypes;
 
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
+import com.vaadin.hilla.transfertypes.annotations.ModelFromModule;
 
 @FromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "Page")
+@ModelFromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "PageModel")
 public class Page<T> extends Slice<T> {
     private long totalElements;
     private int totalPages;

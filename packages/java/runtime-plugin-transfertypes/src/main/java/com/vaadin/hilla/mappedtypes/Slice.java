@@ -3,8 +3,10 @@ package com.vaadin.hilla.mappedtypes;
 import java.util.List;
 
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
+import com.vaadin.hilla.transfertypes.annotations.ModelFromModule;
 
 @FromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "Slice")
+@ModelFromModule(module = "@vaadin/hilla-frontend", namedSpecifier = "SliceModel")
 public class Slice<T> {
     private List<T> content;
     private int number;
