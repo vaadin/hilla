@@ -17,6 +17,8 @@ export type AutoCrudFormHeaderRenderer<TItem> = (
   disabled: boolean,
 ) => JSX.Element | null | undefined;
 
+export type AutoCrudToolbarRenderer = (defaultContent: JSX.Element | null) => JSX.Element | null;
+
 export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
   Partial<AutoFormProps<TModel>>,
   'disabled' | 'item' | 'model' | 'onDeleteSuccess' | 'onSubmitSuccess' | 'service'
@@ -87,6 +89,12 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     noNewButton?: boolean;
     /**
+     * A custom renderer function to create the toolbar content. The function
+     * receives the default toolbar content as a parameter, which can be used
+     * or not, depending on the implementation.
+     */
+    toolbarRenderer?: AutoCrudToolbarRenderer;
+    /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
     formProps?: AutoCrudFormProps<TModel>;
@@ -121,6 +129,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   model,
   itemIdProperty,
   noNewButton,
+  toolbarRenderer,
   formProps,
   gridProps,
   style,
@@ -146,6 +155,13 @@ export function AutoCrud<TModel extends AbstractModel>({
 
   const formHeader = item && item !== emptyItem ? formHeaderRenderer(item, !item) : formHeaderRenderer(null, !item);
 
+  const defaultToolbarContent = noNewButton ? null : (
+    <Button theme="primary" onClick={() => setItem(emptyItem)}>
+      + New
+    </Button>
+  );
+  const toolbarContent = toolbarRenderer ? toolbarRenderer(defaultToolbarContent) : defaultToolbarContent;
+
   const mainSection = (
     <div className="auto-crud-main">
       <AutoGrid
@@ -161,15 +177,7 @@ export function AutoCrud<TModel extends AbstractModel>({
         ref={autoGridRef}
         aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
-      {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
-          renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {!noNewButton && (
-        <div className="auto-crud-toolbar">
-          <Button theme="primary" onClick={() => setItem(emptyItem)}>
-            + New
-          </Button>
-        </div>
-      )}
+      {toolbarContent && <div className="auto-crud-toolbar">{toolbarContent}</div>}
     </div>
   );
 
