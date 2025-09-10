@@ -1,15 +1,22 @@
 import { CollectionSignal } from './CollectionSignal.js';
 import {
-  createInsertLastStateEvent,
-  createRemoveStateEvent,
-  type InsertLastStateEvent,
-  isInsertLastStateEvent,
-  isListSnapshotStateEvent,
-  isRemoveStateEvent,
-  type ListSnapshotStateEvent,
-  type RemoveStateEvent,
-  type StateEvent,
-} from './events.js';
+  createInsertCommand,
+  createRemoveCommand,
+  isAdoptAtCommand,
+  isInsertCommand,
+  isPositionCondition,
+  isRemoveCommand,
+  isSetCommand,
+  isSnapshotCommand,
+  ListPosition,
+  ZERO,
+  type AdoptAtCommand,
+  type InsertCommand,
+  type PositionCondition,
+  type RemoveCommand,
+  type SetCommand,
+  type SnapshotCommand,
+} from './commands.js';
 import {
   $createOperation,
   $processServerResponse,
@@ -21,159 +28,133 @@ import {
 } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
-type EntryId = string;
-type Entry<T> = {
-  id: EntryId;
-  value: ValueSignal<T>;
-  next?: EntryId;
-  prev?: EntryId;
-};
-
 /**
- * A {@link FullStackSignal} that represents a shared list of values, where each
- * value is represented by a {@link ValueSignal}.
- * The list can be modified by calling the defined methods to insert or remove
- * items, but the `value` property of a `ListSignal` instance is read-only and
- * cannot be assigned directly.
- * The value of each item in the list can be manipulated similar to a regular
- * {@link ValueSignal}.
- *
- * @typeParam T - The type of the values in the list.
+ * A signal containing a list of values. Supports atomic updates to the list structure.
+ * Each value in the list is accessed as a separate ValueSignal instance.
  */
-export class ListSignal<T> extends CollectionSignal<ReadonlyArray<ValueSignal<T>>> {
-  #head?: EntryId;
-  #tail?: EntryId;
-
-  readonly #values = new Map<string, Entry<T>>();
-
-  constructor(config: ServerConnectionConfig) {
-    const initialValue: Array<ValueSignal<T>> = [];
-    super(initialValue, config);
-  }
-
-  #computeItems(): ReadonlyArray<ValueSignal<T>> {
-    let current = this.#head;
-    const result: Array<ValueSignal<T>> = [];
-    while (current !== undefined) {
-      const entry = this.#values.get(current)!;
-      result.push(entry.value);
-      current = entry.next;
-    }
-    return result;
-  }
-
-  protected override [$processServerResponse](event: StateEvent): void {
-    if (!event.accepted) {
-      this[$resolveOperation](
-        event.id,
-        `Server rejected the operation with id '${event.id}'. See the server log for more details.`,
-      );
-      return;
-    }
-    if (isListSnapshotStateEvent<T>(event)) {
-      this.#handleSnapshotEvent(event);
-    } else if (isInsertLastStateEvent<T>(event)) {
-      this.#handleInsertLastUpdate(event);
-    } else if (isRemoveStateEvent(event)) {
-      this.#handleRemoveUpdate(event);
-    }
-    this[$resolveOperation](event.id);
-  }
-
-  #handleInsertLastUpdate(event: InsertLastStateEvent<T>): void {
-    if (event.entryId === undefined) {
-      throw new Error('Unexpected state: Entry id should be defined when insert last event is accepted');
-    }
-    const valueSignal = new ValueSignal<T>(
-      event.value,
-      { ...this.server.config, parentClientSignalId: this.id },
-      event.entryId,
-    );
-    const newEntry: Entry<T> = { id: valueSignal.id, value: valueSignal };
-
-    if (this.#head === undefined) {
-      this.#head = newEntry.id;
-      this.#tail = this.#head;
-    } else {
-      const tailEntry = this.#values.get(this.#tail!)!;
-      tailEntry.next = newEntry.id;
-      newEntry.prev = this.#tail;
-      this.#tail = newEntry.id;
-    }
-    this.#values.set(valueSignal.id, newEntry);
-    this[$setValueQuietly](this.#computeItems());
-  }
-
-  #handleRemoveUpdate(event: RemoveStateEvent): void {
-    const entryToRemove = this.#values.get(event.entryId);
-    if (entryToRemove === undefined) {
-      return;
-    }
-    this.#values.delete(event.id);
-    if (this.#head === entryToRemove.id) {
-      if (entryToRemove.next === undefined) {
-        this.#head = undefined;
-        this.#tail = undefined;
-      } else {
-        const newHead = this.#values.get(entryToRemove.next)!;
-        this.#head = newHead.id;
-        newHead.prev = undefined;
-      }
-    } else {
-      const prevEntry = this.#values.get(entryToRemove.prev!)!;
-      const nextEntry = entryToRemove.next !== undefined ? this.#values.get(entryToRemove.next) : undefined;
-      if (nextEntry === undefined) {
-        this.#tail = prevEntry.id;
-        prevEntry.next = undefined;
-      } else {
-        prevEntry.next = nextEntry.id;
-        nextEntry.prev = prevEntry.id;
-      }
-    }
-    this[$setValueQuietly](this.#computeItems());
-  }
-
-  #handleSnapshotEvent(event: ListSnapshotStateEvent<T>): void {
-    event.entries.forEach((entry) => {
-      this.#values.set(entry.id, {
-        id: entry.id,
-        prev: entry.prev,
-        next: entry.next,
-        value: new ValueSignal(entry.value, { ...this.server.config, parentClientSignalId: this.id }, entry.id),
-      });
-      if (entry.prev === undefined) {
-        this.#head = entry.id;
-      }
-      if (entry.next === undefined) {
-        this.#tail = entry.id;
-      }
-    });
-    this[$setValueQuietly](this.#computeItems());
+export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
+  constructor(config: ServerConnectionConfig, id?: string) {
+    super([], config, id);
   }
 
   /**
-   * Inserts a new value at the end of the list.
-   * @param value - The value to insert.
-   * @returns An operation object that allows to perform additional actions.
+   * Inserts a value as the first entry in this list.
+   * @param value - The value to insert
+   * @returns An operation containing a signal for the inserted entry and the eventual result
+   */
+  insertFirst(value: T): Operation {
+    return this.insertAt(value, ListPosition.first());
+  }
+
+  /**
+   * Inserts a value as the last entry in this list.
+   * @param value - The value to insert
+   * @returns An operation containing a signal for the inserted entry and the eventual result
    */
   insertLast(value: T): Operation {
-    const event = createInsertLastStateEvent(value);
-    const promise = this[$update](event);
-    return this[$createOperation]({ id: event.id, promise });
+    return this.insertAt(value, ListPosition.last());
   }
 
   /**
-   * Removes the given item from the list.
-   * @param item - The item to remove.
-   * @returns An operation object that allows to perform additional actions.
+   * Inserts a value at the given position in this list.
+   * @param value - The value to insert
+   * @param at - The insert position
+   * @returns An operation containing a signal for the inserted entry and the eventual result
    */
-  remove(item: ValueSignal<T>): Operation {
-    const entryToRemove = this.#values.get(item.id);
-    if (entryToRemove === undefined) {
-      return { result: Promise.resolve() };
+  insertAt(value: T, at: ListPosition): Operation {
+    const command = createInsertCommand<T>(ZERO, value, at);
+    const promise = this[$update](command);
+    return this[$createOperation]({ id: command.commandId, promise });
+  }
+
+  /**
+   * Removes the given child from this list.
+   * @param child - The child to remove
+   * @returns An operation containing the eventual result
+   */
+  remove(child: ValueSignal<T>): Operation {
+    const command = createRemoveCommand(child.id, ZERO);
+    const promise = this[$update](command);
+    return this[$createOperation]({ id: command.commandId, promise });
+  }
+
+  protected override [$processServerResponse](
+    command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition | SnapshotCommand | SetCommand<T>,
+  ): void {
+    // Check if the command has a targetNodeId and reroute it to the corresponding child
+    if ((isSnapshotCommand(command) || isSetCommand(command)) && command.targetNodeId) {
+      const targetChild = this.value.find((child) => child.id === command.targetNodeId);
+
+      if (targetChild) {
+        targetChild[$processServerResponse](command);
+        return;
+      }
     }
-    const removeEvent = createRemoveStateEvent(entryToRemove.value.id);
-    const promise = this[$update](removeEvent);
-    return this[$createOperation]({ id: removeEvent.id, promise });
+
+    if (isInsertCommand<T>(command)) {
+      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.commandId, this);
+      let insertIndex = this.value.length;
+      const pos = command.position;
+      if (pos.after === '' && pos.before == null) {
+        insertIndex = 0;
+      } else if (pos.after == null && pos.before === '') {
+        insertIndex = this.value.length;
+      } else if (typeof pos.after === 'string' && pos.after !== '') {
+        const idx = this.value.findIndex((v) => v.id === pos.after);
+        insertIndex = idx !== -1 ? idx + 1 : this.value.length;
+      } else if (typeof pos.before === 'string' && pos.before !== '') {
+        const idx = this.value.findIndex((v) => v.id === pos.before);
+        insertIndex = idx !== -1 ? idx : this.value.length;
+      }
+      const newList = [...this.value.slice(0, insertIndex), valueSignal, ...this.value.slice(insertIndex)];
+      this[$setValueQuietly](newList);
+      this[$resolveOperation](command.commandId, undefined);
+    } else if (isRemoveCommand(command)) {
+      const removeIndex = this.value.findIndex((child) => child.id === command.targetNodeId);
+      if (removeIndex !== -1) {
+        const newList = [...this.value.slice(0, removeIndex), ...this.value.slice(removeIndex + 1)];
+        this[$setValueQuietly](newList);
+      }
+      this[$resolveOperation](command.commandId, undefined);
+    } else if (isAdoptAtCommand(command)) {
+      const moveIndex = this.value.findIndex((child) => child.id === command.childId);
+      if (moveIndex !== -1) {
+        const [movedChild] = this.value.splice(moveIndex, 1);
+        let newIndex = this.value.length;
+        const pos = command.position;
+        if (pos.after === '' && pos.before == null) {
+          newIndex = 0;
+        } else if (pos.after == null && pos.before === '') {
+          newIndex = this.value.length;
+        } else if (typeof pos.after === 'string' && pos.after !== '') {
+          const idx = this.value.findIndex((v) => v.id === pos.after);
+          newIndex = idx !== -1 ? idx + 1 : this.value.length;
+        } else if (typeof pos.before === 'string' && pos.before !== '') {
+          const idx = this.value.findIndex((v) => v.id === pos.before);
+          newIndex = idx !== -1 ? idx : this.value.length;
+        }
+        this.value.splice(newIndex, 0, movedChild);
+      }
+      this[$resolveOperation](command.commandId, undefined);
+    } else if (isPositionCondition(command)) {
+      this[$resolveOperation](command.commandId, undefined);
+    } else if (isSnapshotCommand(command)) {
+      const { nodes } = command;
+      const listNode = nodes[''];
+
+      const childrenIds = listNode.listChildren;
+      const valueSignals = childrenIds
+        .map((childId) => {
+          const childNode = nodes[childId];
+          if ('value' in childNode) {
+            return new ValueSignal<T>(childNode.value as T, this.server.config, childId, this);
+          }
+          return null;
+        })
+        .filter(Boolean) as Array<ValueSignal<T>>;
+
+      this[$setValueQuietly](valueSignals);
+      this[$resolveOperation](command.commandId, undefined);
+    }
   }
 }
