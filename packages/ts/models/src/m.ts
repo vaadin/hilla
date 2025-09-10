@@ -1,13 +1,13 @@
 import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder, ObjectModelBuilder } from './builders.js';
+import { ArrayModel, EnumModel, ObjectModel, type UnionModel, $itemModel, type OptionalModel } from './builtin.js';
 import {
   $assertSupportedModel,
   $constraints,
   type ConstrainedModel,
   type Constraint,
   type NonAttributedConstraint,
-} from './constraint.js';
-import { ArrayModel, EnumModel, ObjectModel, type UnionModel, $itemModel, type OptionalModel } from './core.js';
+} from './constraints/Constraint.js';
 import {
   Model,
   $owner,
@@ -25,7 +25,7 @@ import {
   $defaultValue,
   $members,
   type ModelMetadata,
-} from './model.js';
+} from './Model.js';
 
 const { defineProperty } = Object;
 

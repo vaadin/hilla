@@ -9,7 +9,7 @@ import {
   type Enum,
   Model,
   type Value,
-} from './model.js';
+} from './Model.js';
 
 /**
  * The symbol that represents the ArrayModel item property.

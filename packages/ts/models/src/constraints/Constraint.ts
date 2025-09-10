@@ -1,5 +1,5 @@
 import type { EmptyObject } from 'type-fest';
-import type { AnyObject, Model } from './model.js';
+import type { AnyObject, Model } from '../Model.js';
 
 /**
  * The symbol that represents the constraints property of the {@link Model} type.
