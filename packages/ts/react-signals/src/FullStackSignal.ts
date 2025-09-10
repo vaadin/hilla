@@ -4,9 +4,9 @@ import type {
   EndpointRequestInit,
   Subscription,
 } from '@vaadin/hilla-frontend';
-import { nanoid } from 'nanoid';
+import { createSetCommand, type SignalCommand } from './commands.js';
 import { computed, signal, Signal } from './core.js';
-import { createSetStateEvent, type StateEvent } from './events.js';
+import { randomId } from './utils.js';
 
 const ENDPOINT = 'SignalsHandler';
 
@@ -90,11 +90,6 @@ export type ServerConnectionConfig = Readonly<{
    * method that provides the signal when subscribing to it.
    */
   params?: Record<string, unknown>;
-
-  /**
-   * The unique identifier of the parent signal in the client.
-   */
-  parentClientSignalId?: string;
 }>;
 
 /**
@@ -103,7 +98,7 @@ export type ServerConnectionConfig = Readonly<{
 class ServerConnection {
   readonly #id: string;
   readonly config: ServerConnectionConfig;
-  #subscription?: Subscription<StateEvent>;
+  #subscription?: Subscription<SignalCommand>;
 
   constructor(id: string, config: ServerConnectionConfig) {
     this.config = config;
@@ -115,20 +110,19 @@ class ServerConnection {
   }
 
   connect() {
-    const { client, endpoint, method, params, parentClientSignalId } = this.config;
+    const { client, endpoint, method, params } = this.config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
       providerEndpoint: endpoint,
       providerMethod: method,
       clientSignalId: this.#id,
       params,
-      parentClientSignalId,
     });
 
     return this.#subscription;
   }
 
-  async update(event: StateEvent, init?: EndpointRequestInit): Promise<void> {
+  async update(command: SignalCommand, init?: EndpointRequestInit): Promise<void> {
     const onTheFly = !this.#subscription;
 
     if (onTheFly) {
@@ -140,7 +134,7 @@ class ServerConnection {
       'update',
       {
         clientSignalId: this.#id,
-        event,
+        command,
       },
       init ?? { mute: true },
     );
@@ -199,28 +193,27 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   // value to the server.
   #paused = true;
 
-  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string) {
+  /**
+   * Optional parent signal for command routing.
+   */
+  protected readonly parent?: FullStackSignal<any>;
+
+  constructor(value: T | undefined, config: ServerConnectionConfig, id?: string, parent?: FullStackSignal<any>) {
     super(
       value,
-      () => this.#connect(),
-      () => this.#disconnect(),
+      () => (!parent ? this.#connect() : undefined),
+      () => (!parent ? this.#disconnect() : undefined),
     );
-    this.id = id ?? nanoid();
+    this.id = id ?? randomId();
     this.server = new ServerConnection(this.id, config);
+    this.parent = parent;
 
     this.subscribe((v) => {
       if (!this.#paused) {
         this.#pending.value = true;
         this.#error.value = undefined;
-        // For internal signals, the provided non-null to the constructor should
-        // be used along with the parent client side signal id when sending the
-        // set event to the server. For internal signals this combination is
-        // needed for addressing the correct parent/child signal instances on
-        // the server. For a standalone signal, both of them should be passed in
-        // as undefined:
-        const signalId = config.parentClientSignalId !== undefined ? this.id : undefined;
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this[$update](createSetStateEvent(v, signalId, config.parentClientSignalId));
+        this[$update](createSetCommand('', v));
       }
     });
 
@@ -247,12 +240,12 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
     }
 
     if (id) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const { promise: p, resolve, reject } = Promise.withResolvers<void>();
+
       // Create a promise to be associated to the provided id
-      promises.push(
-        new Promise<void>((resolve, reject) => {
-          thens.set(id, { resolve, reject });
-        }),
-      );
+      promises.push(p);
+      thens.set(id, { resolve, reject });
     }
 
     if (promises.length === 0) {
@@ -283,14 +276,19 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   }
 
   /**
-   * A method to update the server with the new value.
+   * A method to update the server with the new value or via parent.
    *
-   * @param event - The event to update the server with.
+   * @param command - The command to update the server with.
    * @returns The server response promise.
    */
-  protected async [$update](event: StateEvent): Promise<void> {
+  protected async [$update](command: SignalCommand): Promise<void> {
+    if (this.parent) {
+      // Route command via parent
+      const routedCommand = { ...command, targetNodeId: this.id };
+      return this.parent[$update](routedCommand);
+    }
     return this.server
-      .update(event)
+      .update(command)
       .catch((error: unknown) => {
         this.#error.value = error instanceof Error ? error : new Error(String(error));
       })
@@ -302,13 +300,13 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
   /**
    * Resolves the operation promise associated with the given event id.
    *
-   * @param eventId - The event id.
+   * @param commandId - The command id.
    * @param reason - The reason to reject the promise (if any).
    */
-  protected [$resolveOperation](eventId: string, reason?: string): void {
-    const operationPromise = this.#operationPromises.get(eventId);
+  protected [$resolveOperation](commandId: string, reason?: string): void {
+    const operationPromise = this.#operationPromises.get(commandId);
     if (operationPromise) {
-      this.#operationPromises.delete(eventId);
+      this.#operationPromises.delete(commandId);
       if (reason) {
         operationPromise.reject(reason);
       } else {
@@ -321,17 +319,17 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    * A method with to process the server response. The implementation is
    * specific for each signal type.
    *
-   * @param event - The server response event.
+   * @param command - The server response command.
    */
-  protected abstract [$processServerResponse](event: StateEvent): void;
+  protected abstract [$processServerResponse](command: SignalCommand): void;
 
   #connect() {
     this.server
       .connect()
       .onSubscriptionLost(() => 'resubscribe' as ActionOnLostSubscription)
-      .onNext((event: StateEvent) => {
+      .onNext((command: SignalCommand) => {
         this.#paused = true;
-        this[$processServerResponse](event);
+        this[$processServerResponse](command);
         this.#paused = false;
       });
   }
