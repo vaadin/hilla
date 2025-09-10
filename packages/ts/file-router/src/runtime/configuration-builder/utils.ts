@@ -108,3 +108,30 @@ export function getHandleFlag<T extends RouteHandleFlag>(route: RouteObject, fla
 
   return undefined;
 }
+
+/**
+ * Determines whether the given route object represents an index route.
+ *
+ * @param route - The route object to check.
+ */
+export function isIndexRoute(route: RouteObject): boolean {
+  return !!route.index;
+}
+
+/**
+ * Determines whether the given route is optional based on its path.
+ *
+ * @param route - The route object to check.
+ */
+export function isOptionalRoute(route: RouteObject): boolean {
+  return !!route.path?.includes('?');
+}
+
+/**
+ * Determines whether the given route is a wildcard route.
+ *
+ * @param route - The route object to check.
+ */
+export function isWildcardRoute(route: RouteObject): boolean {
+  return route.path === '*';
+}

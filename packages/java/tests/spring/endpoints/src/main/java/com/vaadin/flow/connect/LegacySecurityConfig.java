@@ -22,6 +22,9 @@ public class LegacySecurityConfig extends VaadinWebSecurity {
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/login"));
         http.authorizeHttpRequests(authz -> authz
                 .requestMatchers("/flux", "/type-script").permitAll());
+        http.authorizeHttpRequests(authz -> authz
+                .requestMatchers("/", "/access-mod", "/more/levels/url")
+                .authenticated());
         super.configure(http);
         setLoginView(http, "/login");
         return http.build();

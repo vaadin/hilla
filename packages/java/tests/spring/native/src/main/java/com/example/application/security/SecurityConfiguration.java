@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.stream.Stream;
 
@@ -28,17 +27,20 @@ class SecurityConfiguration {
 
         http.authorizeHttpRequests(
                 authorize -> authorize
-                        .requestMatchers(new AntPathRequestMatcher(
-                                requestUtil.applyUrlMapping("/grid")))
+                        .requestMatchers(requestUtil.applyUrlMapping("/grid"))
                         .permitAll());
+        http.authorizeHttpRequests(
+                authorize -> authorize
+                        .requestMatchers(requestUtil.applyUrlMapping("/"))
+                    .authenticated()
+        );
 
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(new AntPathRequestMatcher("/images/*.png"))
+                .requestMatchers("/images/*.png")
                 .permitAll());
         // Icons from the line-awesome addon
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(
-                        new AntPathRequestMatcher("/line-awesome/**/*.svg"))
+                .requestMatchers("/line-awesome/**")
                 .permitAll());
 
         http.with(vaadin(), cfg -> cfg.loginView("login"));
