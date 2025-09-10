@@ -1,6 +1,20 @@
 import type { EmptyObject } from 'type-fest';
 import { CoreModelBuilder } from './builders.js';
-import { $enum, $itemModel, type $members, type AnyObject, type Enum, Model, type Value } from './model.js';
+import {
+  type $defaultValue,
+  $enum,
+  type $members,
+  type $optional,
+  type AnyObject,
+  type Enum,
+  Model,
+  type Value,
+} from './model.js';
+
+/**
+ * The symbol that represents the ArrayModel item property.
+ */
+export const $itemModel = Symbol('itemModel');
 
 /**
  * The model of a primitive value, like `string`, `number` or `boolean`.
@@ -77,3 +91,12 @@ export const EnumModel = new CoreModelBuilder<(typeof Enum)[keyof typeof Enum]>(
  * The model of a union data.
  */
 export type UnionModel<MM extends Model[]> = Model<Value<MM[number]>, Readonly<{ [$members]: MM }>>;
+
+/**
+ * The model of an optional type.
+ */
+export type OptionalModel<M extends Model> = Omit<M, typeof $defaultValue | typeof $optional> &
+  Readonly<{
+    [$defaultValue]: Value<M> | undefined;
+    [$optional]: true;
+  }>;

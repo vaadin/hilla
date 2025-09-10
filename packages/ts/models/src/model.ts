@@ -86,11 +86,6 @@ export const $enum = Symbol('enumerate');
  */
 export const $members = Symbol('members');
 
-/**
- * The symbol that represents the {@link ArrayModel[$itemModel]} property.
- */
-export const $itemModel = Symbol('itemModel');
-
 /* eslint-enable tsdoc/syntax */
 
 /**
@@ -181,7 +176,7 @@ export const Model: Model = Object.create(null, {
     value: 'model',
   },
   [$name]: {
-    value: 'Model',
+    value: 'unknown',
   },
   [$owner]: {
     value: detachedTarget,

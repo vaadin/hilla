@@ -6,8 +6,8 @@ import {
   type ConstrainedModel,
   type Constraint,
   type NonAttributedConstraint,
-} from './constraint';
-import { ArrayModel, EnumModel, ObjectModel, type UnionModel } from './core.js';
+} from './constraint.js';
+import { ArrayModel, EnumModel, ObjectModel, type UnionModel, $itemModel, type OptionalModel } from './core.js';
 import {
   Model,
   $owner,
@@ -20,7 +20,6 @@ import {
   $name,
   type AnyObject,
   $optional,
-  $itemModel,
   type Enum,
   $enum,
   $defaultValue,
@@ -85,13 +84,11 @@ const m = {
    *
    * @param base - The base model to extend.
    */
-  optional<M extends Model>(
-    this: void,
-    base: M,
-  ): Model<Value<M> | undefined, Extensions<M> & Readonly<Record<typeof $optional, true>>, References<M>> {
-    return new CoreModelBuilder<Value<M> | undefined, Extensions<M>, { named: true; selfRefKeys: References<M> }>(base)
+  optional<M extends Model>(this: void, base: M): OptionalModel<M> {
+    return new CoreModelBuilder<Value<M> | undefined>(base)
+      .name(base[$name])
       .define($optional, { value: true })
-      .build();
+      .build() as OptionalModel<M>;
   },
 
   /**
@@ -192,7 +189,7 @@ const m = {
     model: M,
     constraint: Constraint<Value<M>>,
     ...moreConstraints: ReadonlyArray<Constraint<Value<M>>>
-  ): M & Model<Value<M>, Extensions<M> & { readonly [$constraints]: readonly Constraint[] }, References<M>> {
+  ): ConstrainedModel<M> {
     const previousConstraints = m.hasConstraints(model) ? model[$constraints] : [];
     const newConstraints = [constraint, ...moreConstraints];
     for (const newConstraint of newConstraints) {
