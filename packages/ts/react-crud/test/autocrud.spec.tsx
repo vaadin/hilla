@@ -126,6 +126,65 @@ describe('@vaadin/hilla-react-crud', () => {
       await waitFor(() => expect(within(container).queryByText('+ New')).to.be.null);
     });
 
+    it('can customize toolbar with toolbarRenderer', async () => {
+      const { container } = render(
+        <AutoCrud
+          service={personService()}
+          model={PersonModel}
+          toolbarRenderer={(defaultContent) => (
+            <>
+              {defaultContent}
+              <button>Custom Action</button>
+            </>
+          )}
+        />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.exist;
+        expect(within(container).queryByText('Custom Action')).to.exist;
+      });
+    });
+
+    it('can replace toolbar content with toolbarRenderer', async () => {
+      const { container } = render(
+        <AutoCrud service={personService()} model={PersonModel} toolbarRenderer={() => <button>Replace All</button>} />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.be.null;
+        expect(within(container).queryByText('Replace All')).to.exist;
+      });
+    });
+
+    it('respects noNewButton with toolbarRenderer', async () => {
+      const { container } = render(
+        <AutoCrud
+          service={personService()}
+          model={PersonModel}
+          noNewButton
+          toolbarRenderer={(defaultContent) => (
+            <>
+              {defaultContent}
+              <button>Custom Action</button>
+            </>
+          )}
+        />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.be.null;
+        expect(within(container).queryByText('Custom Action')).to.exist;
+      });
+    });
+
+    it('can hide toolbar with renderer even if noNewButton is not used', async () => {
+      const { container } = render(
+        <AutoCrud service={personService()} model={PersonModel} toolbarRenderer={() => null} />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.be.null;
+        expect(container.querySelector('.auto-crud-toolbar')).to.be.null;
+      });
+    });
+
     it('can add a new item', async () => {
       const { grid, form, newButton } = await CrudController.init(
         render(<AutoCrud service={personService()} model={PersonModel} />),
