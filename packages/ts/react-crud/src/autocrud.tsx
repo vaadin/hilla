@@ -202,9 +202,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   // Otherwise, the form is only shown when an item is being edited.
   return (
     <div className={`auto-crud ${className ?? ''}`} id={id} style={style}>
-      {noNewButton && (!item || item === emptyItem) ? (
-        mainSection
-      ) : fullScreen ? (
+      {fullScreen ? (
         <>
           {mainSection}
           <AutoCrudDialog opened={!!item} header={formHeader} onClose={handleCancel}>
@@ -214,10 +212,12 @@ export function AutoCrud<TModel extends AbstractModel>({
       ) : (
         <SplitLayout theme="small">
           {mainSection}
-          <div className="auto-crud-form">
-            <div className="auto-crud-form-header">{formHeader}</div>
-            {autoForm}
-          </div>
+          {(!noNewButton || (item && item !== emptyItem)) && (
+            <div className="auto-crud-form">
+              <div className="auto-crud-form-header">{formHeader}</div>
+              {autoForm}
+            </div>
+          )}
         </SplitLayout>
       )}
     </div>
