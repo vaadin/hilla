@@ -26,7 +26,7 @@
   flex: 1 1 0;
   width: 80px;
 }
-.auto-grid-boolean-filter vaadin-select-item {
+.auto-grid-boolean-filter vaadin-select-value-button {
   font-size: 14px;
 }
 
@@ -53,7 +53,7 @@
   flex: 1 1 0;
   width: 120px;
 }
-.auto-grid-enum-filter vaadin-select-item {
+.auto-grid-enum-filter vaadin-select-value-button {
   font-size: 14px;
 }
 
