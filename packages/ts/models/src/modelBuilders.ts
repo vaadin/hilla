@@ -1,5 +1,4 @@
 import type { EmptyObject, IsAny } from 'type-fest';
-import type { ObjectModel } from './builtin.js';
 import {
   $defaultValue,
   $key,
@@ -11,6 +10,7 @@ import {
   type Model,
   type ModelMetadata,
 } from './Model.js';
+import type { ObjectModel } from './models.js';
 
 const { create, defineProperty } = Object;
 

@@ -1,11 +1,11 @@
 import type { EmptyObject } from 'type-fest';
-import { $defaultValue, $name, type AnyObject, Model, type Value } from '../Model.js';
 import {
   $assertSupportedModel,
   type Constraint,
   type ConstraintFn,
   type NonAttributedConstraint,
 } from './Constraint.js';
+import { $defaultValue, $name, type AnyObject, Model, type Value } from './Model.js';
 
 /**
  * A builder class for declaring constraints.

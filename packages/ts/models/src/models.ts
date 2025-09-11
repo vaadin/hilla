@@ -1,5 +1,4 @@
 import type { EmptyObject } from 'type-fest';
-import { CoreModelBuilder } from './builders.js';
 import {
   type $defaultValue,
   $enum,
@@ -10,6 +9,7 @@ import {
   Model,
   type Value,
 } from './Model.js';
+import { CoreModelBuilder } from './modelBuilders.js';
 
 /**
  * The symbol that represents the ArrayModel item property.

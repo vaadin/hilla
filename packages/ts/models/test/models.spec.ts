@@ -1,6 +1,6 @@
 import chaiLike from 'chai-like';
 import { beforeEach, chai, describe, expect, it } from 'vitest';
-import { ConstraintBuilder } from '../src/constraints/ConstraintBuilder.js';
+import { ConstraintBuilder } from '../src/ConstraintBuilder.js';
 import m, {
   $defaultValue,
   $enum,

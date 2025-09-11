@@ -1,7 +1,7 @@
-import { ArrayModel, BooleanModel, NumberModel, RecordModel, StringModel } from '../builtin.js';
-import m from '../m.js';
-import { Model } from '../Model.js';
 import { ConstraintBuilder } from './ConstraintBuilder.js';
+import m from './m.js';
+import { Model } from './Model.js';
+import { ArrayModel, BooleanModel, NumberModel, RecordModel, StringModel } from './models.js';
 
 /**
  * The constrained model value must be `undefined`.

@@ -1,10 +1,10 @@
 import m from './m.js';
 
 export * from './Model.js';
-export * from './builtin.js';
-export type * from './builders.js';
+export * from './models.js';
+export type * from './modelBuilders.js';
 
-export * from './constraints/Constraint.js';
-export * from './constraints/builtin.js';
+export * from './Constraint.js';
+export * from './constraints.js';
 
 export default m;
