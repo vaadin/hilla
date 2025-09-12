@@ -5,5 +5,6 @@ export default mergeConfig(sharedConfig, {
   test: {
     // TODO: Remove this option when all errors are properly handled
     dangerouslyIgnoreUnhandledErrors: true,
+    setupFiles: ['./test/setup.ts'],
   },
 });
