@@ -9,7 +9,7 @@ export type AnnotationValue = AnnotationValue[] | JvmTypeRef | boolean | number 
 
 export interface Annotation {
   jvmType: string;
-  arguments: Record<string, AnnotationValue>;
+  attributes?: Record<string, AnnotationValue>;
 }
 
 /**

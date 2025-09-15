@@ -121,7 +121,7 @@ describe('@vaadin/hilla-models', () => {
     );
   });
 
-  it('should allow self-reference', () => {
+  it('should allow self-reference with optional`', () => {
     interface Employee {
       supervisor?: Employee;
     }
@@ -134,6 +134,19 @@ describe('@vaadin/hilla-models', () => {
     // Type assertion to verify that the resulting type is optional.
     const optionalEmployee: Value<typeof EmployeeModel.supervisor> = undefined;
     expect(optionalEmployee).to.be.undefined;
+  });
+
+  it('should allow self-reference with array', () => {
+    interface Employee {
+      colleagues: Employee[];
+    }
+
+    const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.array).build();
+
+    expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like([]);
+    const items = Array.from(m.items(EmployeeModel.colleagues));
+    expect(items).to.be.an('array').with.lengthOf(0);
   });
 
   it('should allow array types', () => {

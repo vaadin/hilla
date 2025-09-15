@@ -29,7 +29,7 @@ import { ArrayModel, EnumModel, ObjectModel, type UnionModel, $itemModel, type O
 
 const { defineProperty } = Object;
 
-const arrayItemModels = new WeakMap<ArrayModel, Model[]>();
+const arrayItemModels = new WeakMap<ArrayModel | OptionalModel<ArrayModel>, Model[]>();
 
 function getRawValue<T>(model: Model<T>): T | typeof nothing {
   if (model[$owner] instanceof Model) {
@@ -96,7 +96,7 @@ const m = {
    *
    * @param itemModel - The model of the items in the array.
    */
-  array<M extends Model>(this: void, itemModel: M): ArrayModel<M> {
+  array<const M extends Model>(this: void, itemModel: M): ArrayModel<M> {
     return new CoreModelBuilder<Array<Value<M>>>(ArrayModel)
       .name(`Array<${itemModel[$name]}>`)
       .define($itemModel, { value: itemModel })
@@ -147,10 +147,13 @@ const m = {
    *
    * @param model - The array model to iterate over.
    */
-  *items<V extends Model>(this: void, model: ArrayModel<V>): Generator<V, undefined, void> {
+  *items<V extends Model>(
+    this: void,
+    model: ArrayModel<V> | OptionalModel<ArrayModel<V>>,
+  ): Generator<V, undefined, void> {
     const list = arrayItemModels.get(model) ?? [];
     arrayItemModels.set(model, list);
-    const value = m.value(model);
+    const value = m.value(model) ?? [];
 
     list.length = value.length;
 

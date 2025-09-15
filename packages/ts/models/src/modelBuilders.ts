@@ -1,4 +1,4 @@
-import type { EmptyObject, IsAny } from 'type-fest';
+import type { EmptyObject } from 'type-fest';
 import {
   $defaultValue,
   $key,
@@ -223,32 +223,37 @@ export class ObjectModelBuilder<
    * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
    * flag for the specific property is set.
    */
-  property<PK extends string & keyof V, M extends Model<V[PK]>>(
+  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+    key: PK,
+    model: M,
+  ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+    key: PK,
+    model: (model: Model<V, EX>) => M,
+  ): // Workaround for the self-referencing models.
+  // If the type of the model property is the model itself,
+  V extends V[PK]
+    ? // Then we set a flag of the model that it contains a self-reference
+      // property.
+      ObjectModelBuilder<
+        V,
+        CV & Readonly<Record<PK, V[PK]>>,
+        EX,
+        {
+          // Just inheriting the current flag.
+          named: F['named'];
+          // Adding the property name to all existing self-referencing
+          // properties.
+          selfRefKeys: F['selfRefKeys'] | PK;
+        }
+      >
+    : // Otherwise we simply extend the model with the property, and update the
+      // current value type of the model.
+      ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
     model: M | ((model: Model<V, EX>) => M),
-  ): // Workaround for the objects with `any` keys.
-  IsAny<V[PK]> extends true
-    ? ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>
-    : // Workaround for the self-referencing models.
-      // If the type of the model property is the model itself,
-      V extends V[PK]
-      ? // Then we set a flag of the model that it contains a self-reference
-        // property.
-        ObjectModelBuilder<
-          V,
-          CV & Readonly<Record<PK, V[PK]>>,
-          EX,
-          {
-            // Just inheriting the current flag.
-            named: F['named'];
-            // Adding the property name to all existing self-referencing
-            // properties.
-            selfRefKeys: F['selfRefKeys'] | PK;
-          }
-        >
-      : // Otherwise we simply extend the model with the property, and update the
-        // current value type of the model.
-        ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F> {
+  ): unknown {
     defineProperty(this[$model], key, {
       enumerable: true,
       get(this: Model<V, EX & Readonly<Record<PK, M>>>) {
@@ -269,7 +274,7 @@ export class ObjectModelBuilder<
       },
     });
 
-    return this as any;
+    return this;
   }
 
   /**
