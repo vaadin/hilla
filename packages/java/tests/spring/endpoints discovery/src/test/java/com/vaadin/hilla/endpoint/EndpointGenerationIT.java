@@ -2,7 +2,6 @@ package com.vaadin.hilla.endpoint;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -10,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EndpointGenerationIT {
-    Path frontendDir = Paths.get("frontend", "generated");
+    Path frontendDir = Path.of("src/main/frontend/generated");
 
     /**
      * Endpoint in com.example.application should be generated
