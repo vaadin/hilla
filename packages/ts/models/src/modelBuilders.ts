@@ -4,6 +4,7 @@ import {
   $key,
   $meta,
   $name,
+  $optional,
   $owner,
   type AnyObject,
   type DefaultValueProvider,
@@ -173,9 +174,10 @@ export class ObjectModelBuilder<
 
       // eslint-disable-next-line no-restricted-syntax
       for (const key in m) {
+        const keyModel = m[key as keyof Model<V, EX>] as Model;
         defineProperty(result, key, {
           enumerable: true,
-          get: () => (m[key as keyof Model<V, EX>] as Model)[$defaultValue],
+          get: () => (keyModel[$optional] ? undefined : keyModel[$defaultValue]),
         });
       }
 

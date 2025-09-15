@@ -52,16 +52,15 @@ const m = {
    * Attaches the given model to the target.
    *
    * @param model - The model to attach.
-   * @param target - The target to attach the model to. It could be a Binder
+   * @param targetProvider - The target to attach the model to. It could be a Binder
    * instance, a Signal, or another object. However, it could never be another
    * model.
    */
-  attach<M extends Model>(this: void, model: M, target: Target<Value<M>>): M {
+  attach<M extends Model>(this: void, model: M, targetProvider: () => Target<Value<M>>): M {
     const _model = new CoreModelBuilder<Value<M>, Extensions<M>, { named: false; selfRefKeys: References<M> }>(model)
       .name(`@${model[$name]}`)
       .build();
-    defineProperty(_model, $owner, { value: target });
-    defineProperty(target, 'model', { enumerable: true, configurable: true, value: model });
+    defineProperty(_model, $owner, { get: targetProvider });
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     return _model as any;

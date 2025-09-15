@@ -144,7 +144,7 @@ describe('@vaadin/hilla-models', () => {
     const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.array).build();
 
     expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
-    expect(EmployeeModel).to.have.property($defaultValue).which.is.like([]);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: [] });
     const items = Array.from(m.items(EmployeeModel.colleagues));
     expect(items).to.be.an('array').with.lengthOf(0);
   });
@@ -184,7 +184,7 @@ describe('@vaadin/hilla-models', () => {
 
   it('should has name prefixed with "@" if attached', () => {
     const target: Target<Named> = { value: { name: 'John Doe' } };
-    const AttachedNamedModel = m.attach(NamedModel, target);
+    const AttachedNamedModel = m.attach(NamedModel, () => target);
 
     expect(AttachedNamedModel).to.have.property($name, '@Named');
   });
@@ -241,6 +241,7 @@ describe('@vaadin/hilla-models', () => {
     expect(OptionalModel).to.have.property('name').which.is.instanceof(StringModel);
     expect(OptionalModel.name).to.have.property($optional).which.is.true;
     expect(OptionalModel.name.toString()).to.be.equal('[[:detached: / model] Optional / name?] string');
+    expect(OptionalModel[$defaultValue]).to.be.like({});
   });
 
   it('should make an any model', () => {
@@ -298,7 +299,7 @@ describe('@vaadin/hilla-models', () => {
     });
 
     it('returns the value from the attached target', () => {
-      const AttachedPersonModel = m.attach(PersonModel, target);
+      const AttachedPersonModel = m.attach(PersonModel, () => target);
 
       expect(AttachedPersonModel).to.have.property($owner).which.is.equal(target);
       expect(m.value(AttachedPersonModel)).to.be.equal(target.value);
@@ -346,7 +347,7 @@ describe('@vaadin/hilla-models', () => {
           ],
         };
 
-        const AttachedCommentsModel = m.attach(m.array(CommentModel), target);
+        const AttachedCommentsModel = m.attach(m.array(CommentModel), () => target);
 
         const items = [...m.items(AttachedCommentsModel)];
 
