@@ -1,0 +1,1 @@
+../../../../security/src/main/frontend/connect-client.ts

@@ -5,7 +5,7 @@ import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.Signal;
+import com.vaadin.signals.AbstractSignal;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
@@ -28,7 +28,7 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsAllowed_signalInstanceIsRegistered()
             throws Exception {
-        Signal<?> signal = Mockito.mock(Signal.class);
+        AbstractSignal<?> signal = Mockito.mock(AbstractSignal.class);
         InternalSignal internalSignal = new InternalSignal(signal,
                 new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
@@ -52,7 +52,7 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_unsubscribedIsCalled_underlyingRegistryRemovesClientSignalToSignalMapping()
             throws Exception {
-        Signal<?> signal = Mockito.mock(Signal.class);
+        AbstractSignal<?> signal = Mockito.mock(AbstractSignal.class);
         InternalSignal internalSignal = new InternalSignal(signal,
                 new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
@@ -88,7 +88,7 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsAllowed_get_returnsSignal()
             throws Exception {
-        Signal<?> signal = Mockito.mock(Signal.class);
+        AbstractSignal<?> signal = Mockito.mock(AbstractSignal.class);
         InternalSignal internalSignal = new InternalSignal(signal,
                 new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
@@ -147,7 +147,7 @@ public class SecureSignalsRegistryTest {
     }
 
     private EndpointInvoker mockEndpointInvokerThatGrantsAccess(
-            Signal<?> signal) throws Exception {
+            AbstractSignal<?> signal) throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
         when(invoker.invoke(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any()))
