@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.signals.AbstractSignal;
 import com.vaadin.signals.Id;
-import com.vaadin.signals.Signal;
 import com.vaadin.signals.SignalCommand;
 import com.vaadin.signals.SignalUtils;
 import com.vaadin.signals.impl.CommandResult;
@@ -30,7 +30,7 @@ public class InternalSignal {
     // ClientSignalId -> Subscriber's sink
     private final Map<String, Sinks.Many<JsonNode>> subscribers = new HashMap<>();
 
-    private final Signal<?> signal;
+    private final AbstractSignal<?> signal;
     private final SignalTree tree;
     private Runnable treeSubscriptionCanceler;
 
@@ -40,7 +40,7 @@ public class InternalSignal {
     private final Map<Id, String> commandsOfSubscribers = new HashMap<>();
     private final ObjectMapper objectMapper;
 
-    public InternalSignal(Signal<?> signal, ObjectMapper objectMapper) {
+    public InternalSignal(AbstractSignal<?> signal, ObjectMapper objectMapper) {
         this.signal = signal;
         this.tree = SignalUtils.treeOf(signal);
         this.objectMapper = objectMapper;
