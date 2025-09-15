@@ -129,7 +129,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   model,
   itemIdProperty,
   noNewButton,
-  toolbarRenderer = async (content) => content,
+  toolbarRenderer = (defaultContent): ReactNode => defaultContent,
   formProps,
   gridProps,
   style,
