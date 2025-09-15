@@ -387,6 +387,35 @@ describe('@vaadin/hilla-react-crud', () => {
       expect(form.instance).to.exist;
     });
 
+    it('maintains stable layout with SplitLayout when noNewButton is enabled', async () => {
+      const renderResult = render(<TestAutoCrud noNewButton />);
+      const { container } = renderResult;
+      const grid = await GridController.init(renderResult, user);
+
+      // No selection
+      const initialSplitLayout = container.querySelector('vaadin-split-layout');
+      expect(initialSplitLayout).to.exist;
+      expect(container.querySelector('.auto-crud-form')).to.not.exist;
+
+      // Select an item
+      await grid.toggleRowSelected(1);
+      await waitFor(() => expect(container.querySelector('.auto-crud-form')).to.exist);
+      const splitLayoutAfterSelect = container.querySelector('vaadin-split-layout');
+      expect(splitLayoutAfterSelect).to.equal(initialSplitLayout);
+
+      // Deselect the item
+      await grid.toggleRowSelected(1);
+      await waitFor(() => expect(container.querySelector('.auto-crud-form')).to.not.exist);
+      const splitLayoutAfterDeselect = container.querySelector('vaadin-split-layout');
+      expect(splitLayoutAfterDeselect).to.equal(initialSplitLayout);
+
+      // Select another item
+      await grid.toggleRowSelected(0);
+      await waitFor(() => expect(container.querySelector('.auto-crud-form')).to.exist);
+      const splitLayoutAfterReselect = container.querySelector('vaadin-split-layout');
+      expect(splitLayoutAfterReselect).to.equal(initialSplitLayout);
+    });
+
     describe('mobile layout', () => {
       let saveSpy: sinon.SinonSpy;
       let service: ReturnType<typeof personService>;
