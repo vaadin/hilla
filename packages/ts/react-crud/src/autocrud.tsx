@@ -212,7 +212,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       ) : (
         <SplitLayout theme="small">
           {mainSection}
-          {(!noNewButton || (item && item !== emptyItem)) && (
+          {(!noNewButton || item !== emptyItem) && (
             <div className="auto-crud-form">
               <div className="auto-crud-form-header">{formHeader}</div>
               {autoForm}
