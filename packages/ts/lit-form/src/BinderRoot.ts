@@ -1,8 +1,9 @@
 import { EndpointValidationError, type ValidationErrorData } from '@vaadin/hilla-frontend/EndpointErrors.js';
-import { $owner, type Model } from '@vaadin/hilla-models';
+import { $owner, Model, type Target } from '@vaadin/hilla-models';
+import m from '@vaadin/hilla-models';
 import { _clearValidation, _setErrorsWithDescendants, _update, BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
-import { AbstractModel, createDetachedModel, type DetachedModelConstructor, type Value } from './Models.js';
+import { type AbstractModel, createDetachedModel, type DetachedModelConstructor, type Value } from './Models.js';
 import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { ClassStaticProperties } from './types.js';
 import {
@@ -69,13 +70,16 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
     modelClass: DetachedModelConstructor<M & AbstractModel> | (M & Model),
     config?: BinderRootConfiguration<Value<M>>,
   ) {
+    const isModel = modelClass === Model || modelClass instanceof Model;
     super(
-      'prototype' in modelClass && Object.prototype.isPrototypeOf.call(AbstractModel.prototype, modelClass.prototype)
-        ? createDetachedModel(modelClass)
-        : Object.create(modelClass), // FIXME: use m.attach() instead
+      (isModel
+        ? m.attach(modelClass, () => this as Target<Value<M>>)
+        : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>)) as M,
     );
-    // @ts-expect-error the model's parent is the binder
-    this.model[$owner] = this;
+    if (!isModel) {
+      // @ts-expect-error the model's parent is the binder
+      this.model[$owner] = this;
+    }
     this.#context = config?.context ?? this;
     this.#config = config;
     // Initialize value instead of the parent.

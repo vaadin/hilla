@@ -45,6 +45,7 @@ import m, {
   NotBlank,
   Email,
   type NonAttributedConstraint,
+  Model,
 } from '@vaadin/hilla-models';
 import type { Constructor, EmptyObject } from 'type-fest';
 import type { BinderRoot } from './BinderRoot.js';
@@ -322,7 +323,9 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    */
   get parent(): BinderNode | undefined {
     const modelParent = this.model[$owner];
-    return modelParent instanceof AbstractModel ? getBinderNode(modelParent) : undefined;
+    return modelParent instanceof AbstractModel || modelParent === Model || modelParent instanceof Model
+      ? getBinderNode(modelParent)
+      : undefined;
   }
 
   /**
