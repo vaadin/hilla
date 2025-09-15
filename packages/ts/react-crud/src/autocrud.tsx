@@ -1,7 +1,7 @@
 import type { AbstractModel, DetachedModelConstructor, Value } from '@vaadin/hilla-lit-form';
 import { Button } from '@vaadin/react-components/Button.js';
 import { SplitLayout } from '@vaadin/react-components/SplitLayout.js';
-import { type JSX, useId, useRef, useState } from 'react';
+import { type JSX, type ReactNode, useId, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
@@ -17,7 +17,7 @@ export type AutoCrudFormHeaderRenderer<TItem> = (
   disabled: boolean,
 ) => JSX.Element | null | undefined;
 
-export type AutoCrudToolbarRenderer = (defaultContent: JSX.Element | null) => JSX.Element | null;
+export type AutoCrudToolbarRenderer = (defaultContent: ReactNode) => ReactNode;
 
 export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
   Partial<AutoFormProps<TModel>>,
@@ -129,7 +129,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   model,
   itemIdProperty,
   noNewButton,
-  toolbarRenderer,
+  toolbarRenderer = async (content) => content,
   formProps,
   gridProps,
   style,
@@ -155,12 +155,13 @@ export function AutoCrud<TModel extends AbstractModel>({
 
   const formHeader = item && item !== emptyItem ? formHeaderRenderer(item, !item) : formHeaderRenderer(null, !item);
 
-  const defaultToolbarContent = noNewButton ? null : (
-    <Button theme="primary" onClick={() => setItem(emptyItem)}>
-      + New
-    </Button>
+  const toolbarContent = toolbarRenderer(
+    noNewButton ? null : (
+      <Button theme="primary" onClick={() => setItem(emptyItem)}>
+        + New
+      </Button>
+    ),
   );
-  const toolbarContent = toolbarRenderer ? toolbarRenderer(defaultToolbarContent) : defaultToolbarContent;
 
   const mainSection = (
     <div className="auto-crud-main">
