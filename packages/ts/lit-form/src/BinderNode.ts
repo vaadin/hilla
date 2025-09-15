@@ -46,6 +46,9 @@ import m, {
   Email,
   type NonAttributedConstraint,
   Model,
+  ArrayModel,
+  ObjectModel,
+  $itemModel,
 } from '@vaadin/hilla-models';
 import type { Constructor, EmptyObject } from 'type-fest';
 import type { BinderRoot } from './BinderRoot.js';
@@ -54,9 +57,9 @@ import {
   _validators,
   AbstractModel,
   type ArrayItemModel,
-  ArrayModel,
+  ArrayModel as BinderArrayModel,
   getObjectModelOwnAndParentGetters,
-  ObjectModel,
+  ObjectModel as BinderObjectModel,
   type Value,
 } from './Models.js';
 import type { ProvisionalModel } from './ProvisionalModel.js';
@@ -159,7 +162,7 @@ function updateObjectOrArrayKey<M extends ProvisionalModel>(
   key: keyof any,
   keyValue: unknown,
 ): Value<M> {
-  if (model instanceof ObjectModel) {
+  if (model instanceof BinderObjectModel || model instanceof ObjectModel) {
     // Value contained in object - replace object in parent
     return {
       ...(value as Record<never, never> & Value<M>),
@@ -171,7 +174,7 @@ function updateObjectOrArrayKey<M extends ProvisionalModel>(
     throw new TypeError('Unexpected undefined value');
   }
 
-  if (model instanceof ArrayModel) {
+  if (model instanceof BinderArrayModel || model instanceof ArrayModel) {
     // Value contained in array - replace array in parent
     const array = (value as unknown[]).slice();
     array[key as number] = keyValue;
@@ -197,7 +200,7 @@ class NotArrayItemModelError extends Error {
 
 declare class ArrayItemBinderNode<M extends ProvisionalModel> extends BinderNode<M> {
   // @ts-expect-error: re-defining the parent getter.
-  declare readonly parent: BinderNode<ArrayModel<M>>;
+  declare readonly parent: BinderNode<BinderArrayModel<M>>;
 }
 
 const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
@@ -408,7 +411,11 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    */
   appendItem(item?: Value<ArrayItemModel<M>>): void {
     if (this.#isArray()) {
-      const itemValueOrEmptyValue = item ?? this.model[_createEmptyItemValue]();
+      const itemValueOrEmptyValue =
+        item ??
+        (this.model instanceof BinderArrayModel
+          ? this.model[_createEmptyItemValue]()
+          : this.model[$itemModel][$defaultValue]);
       const newValue = [...(this.value ?? []), itemValueOrEmptyValue];
       const newDefaultValue = [...(this.defaultValue ?? []), itemValueOrEmptyValue];
       this.#setValueState(newValue, newDefaultValue);
@@ -433,7 +440,11 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
 
   prependItem(item?: Value<ArrayItemModel<M>>): void {
     if (this.#isArray()) {
-      const itemValueOrEmptyValue = item ?? this.model[_createEmptyItemValue]();
+      const itemValueOrEmptyValue =
+        item ??
+        (this.model instanceof BinderArrayModel
+          ? this.model[_createEmptyItemValue]()
+          : this.model[$itemModel][$defaultValue]);
       const newValue = [itemValueOrEmptyValue, ...(this.value ?? [])];
       const newDefaultValue = [itemValueOrEmptyValue, ...(this.defaultValue ?? [])];
       this.#setValueState(newValue, newDefaultValue);
@@ -519,7 +530,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
       return;
     }
 
-    if (this.#isObject()) {
+    if (this.model instanceof BinderObjectModel) {
       for (const [, getter] of getObjectModelOwnAndParentGetters(this.model)) {
         const childModel = getter.call(this.model);
         // We need to skip all non-initialised optional fields here in order
@@ -533,23 +544,36 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
           yield getBinderNode(childModel);
         }
       }
-    } else if (this.#isArray()) {
+    } else if (this.model instanceof BinderArrayModel) {
       for (const childBinderNode of this.model) {
         yield childBinderNode;
+      }
+    } else if (this.model instanceof ObjectModel) {
+      for (const propName of Object.keys(this.model) as ReadonlyArray<string & keyof M>) {
+        // We need to skip all non-initialised optional fields here in order
+        // to prevent infinite recursion for circular references in the model.
+        // Here we rely on presence of keys in `defaultValue` to detect all
+        // initialised fields. The keys in `defaultValue` are defined for all
+        // non-optional fields plus those optional fields whose values were
+        // set from initial `binder.read()` or `binder.clear()` or by using a
+        // binder node (e.g., form binding) for a nested field.
+        if (propName in (this.defaultValue as Record<never, never>)) {
+          yield getBinderNode(this.model[propName]);
+        }
+      }
+    } else if (this.model instanceof ArrayModel) {
+      for (const childModel of m.items(this.model)) {
+        yield getBinderNode(childModel);
       }
     }
   }
 
-  #isArray(): this is BinderNode<ArrayModel> {
-    return this.model instanceof ArrayModel;
+  #isArray(): this is BinderNode<ArrayModel | BinderArrayModel> {
+    return this.model instanceof ArrayModel || this.model instanceof BinderArrayModel;
   }
 
   #isArrayItem(): this is ArrayItemBinderNode<M> {
-    return this.model[$owner] instanceof ArrayModel;
-  }
-
-  #isObject(): this is BinderNode<ObjectModel> {
-    return this.model instanceof ObjectModel;
+    return this.model[$owner] instanceof BinderArrayModel || this.model[$owner] instanceof ArrayModel;
   }
 
   *#requestValidationOfDescendants(): Generator<Promise<readonly ValueError[]>, void, void> {
@@ -607,7 +631,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
         value = createEmptyValue(this.model) as Value<M>;
         this.#setValueState(value, defaultValue === undefined ? value : defaultValue);
       } else if (
-        this.parent.model instanceof ObjectModel &&
+        this.parent.model instanceof BinderObjectModel &&
         !(key in ((this.parent.value || {}) as Partial<Record<typeof key, Value<M>>>))
       ) {
         this.#setValueState(undefined, defaultValue === undefined ? value : defaultValue);
