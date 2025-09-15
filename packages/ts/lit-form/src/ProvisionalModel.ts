@@ -8,4 +8,4 @@ import type { AbstractModel } from './Models.js';
  *
  * @deprecated use {@link Model} instead
  */
-export type ProvisionalModel<T = unknown> = (AbstractModel<T> | Model<T>) & {};
+export type ProvisionalModel<T = unknown> = (AbstractModel<T> & {}) | Model<T>;

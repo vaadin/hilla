@@ -2,17 +2,10 @@
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
-import {
-  _fromString,
-  type AbstractModel,
-  ArrayModel,
-  BooleanModel,
-  hasFromString,
-  NumberModel,
-  ObjectModel,
-} from './Models.js';
+import { _fromString, ArrayModel, BooleanModel, hasFromString, NumberModel, ObjectModel } from './Models.js';
 import { StringModel } from './Models.js';
 import type { ProvisionalModel } from './ProvisionalModel.js';
+import { getStringConverter } from './stringConverters.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -461,7 +454,20 @@ export function getDefaultFieldStrategy<T>(
 }
 
 function convertFieldValue<T extends ProvisionalModel>(model: T, fieldValue: unknown) {
-  return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
+  if (typeof fieldValue !== 'string') {
+    return fieldValue;
+  }
+
+  const stringConverter = getStringConverter(model);
+  if (stringConverter) {
+    return stringConverter.fromString(fieldValue);
+  }
+
+  if (hasFromString(model)) {
+    return model[_fromString](fieldValue);
+  }
+
+  return fieldValue;
 }
 
 /**
@@ -487,7 +493,7 @@ export const field = directive(
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    override render(_model: AbstractModel<any>, _effect?: (element: Element) => void) {
+    override render(_model: ProvisionalModel<any>, _effect?: (element: Element) => void) {
       return nothing;
     }
 

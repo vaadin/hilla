@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-expressions, no-shadow */
 import { EndpointValidationError, ValidationErrorData } from '@vaadin/hilla-frontend';
-import m, { $defaultValue } from '@vaadin/hilla-models';
 import chaiDom from 'chai-dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -19,7 +18,7 @@ import {
   ValidationError,
   type Validator,
   type ValueError,
-} from '../src/index.js';
+} from '../../src/index.js';
 import {
   type Customer,
   IdEntityModel,
@@ -67,7 +66,7 @@ class OrderView extends LitElement {
     }
   `;
 
-  binder = new Binder<OrderModel>(this, OrderModel);
+  binder = new Binder(this, OrderModel);
 
   @query('#submitting')
   accessor submitting: HTMLInputElement | null = null;
@@ -115,8 +114,8 @@ class OrderView extends LitElement {
       <mock-date-picker id="dateStart" ${field(dateStart)} />
       <button id="add" @click=${() => this.binder.for(products).appendItem()}>+</button>
       ${repeat(
-        m.items(products),
-        ({ description, price }, index) =>
+        products,
+        ({ model: { description, price } }, index) =>
           html` <div>
             <input id="description${index}" ${field(description)} />
             <input id="price${index}" ${field(price)} />
@@ -553,7 +552,7 @@ describe('@vaadin/hilla-lit-form', () => {
         return testBinder.validate().then((errors) => {
           expect(errors).has.lengthOf(3);
           expect(errors[0].message).to.equal('foo');
-          expect(errors[0].value).to.eql(TestModel[$defaultValue]);
+          expect(errors[0].value).to.eql(TestModel.createEmptyValue());
 
           expect(errors[0].property).to.equal(testBinder.model.fieldString);
           expect(errors[1].property).to.equal(testBinder.model.fieldNumber);
@@ -763,7 +762,7 @@ describe('@vaadin/hilla-lit-form', () => {
         binder.for(binder.model.customer.fullName).value = 'foobar';
         binder.for(binder.model.notes).value = 'whatever';
         await fireEvent(orderView.add, 'click');
-        const [productModel] = [...m.items(binder.model.products)];
+        const productModel = [...binder.model.products][0].model;
         binder.for(productModel.description).value = 'foobar';
         binder.for(productModel.price).value = 10;
         const requestUpdateSpy = sinon.spy(orderView, 'requestUpdate');
@@ -778,7 +777,7 @@ describe('@vaadin/hilla-lit-form', () => {
         } catch {
           sinon.assert.calledOnce(requestUpdateSpy);
           await orderView.updateComplete;
-          const binderInArray = binder.for([...m.items(binder.model.products)][0].description);
+          const binderInArray = binder.for([...binder.model.products][0].model.description);
           expect(binderInArray.invalid).to.be.true;
           expect(binderInArray.ownErrors[0].message).to.equal('Invalid description');
           expect(binderInArray.ownErrors[0].validatorMessage).to.equal('Invalid description');

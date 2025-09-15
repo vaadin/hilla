@@ -1,4 +1,12 @@
-import { $enum, $key, $meta, $optional, $owner } from '@vaadin/hilla-models';
+import {
+  $enum,
+  $key,
+  $meta,
+  $optional,
+  $owner,
+  type ArrayModel as LibraryArrayModel,
+  type $itemModel,
+} from '@vaadin/hilla-models';
 import isNumeric from 'validator/es/lib/isNumeric.js';
 import { type BinderNode, getBinderNode } from './BinderNode.js';
 import type { ProvisionalModel } from './ProvisionalModel.js';
@@ -237,7 +245,8 @@ export class ObjectModel<T extends Record<never, never> = Record<never, never>> 
   }
 }
 
-export type ArrayItemModel<M> = M extends ArrayModel<infer MItem> ? MItem : never;
+export type ArrayItemModel<M extends ProvisionalModel> =
+  M extends ArrayModel<infer MItem> ? MItem : M extends LibraryArrayModel ? M[typeof $itemModel] : never;
 
 export class ArrayModel<MItem extends AbstractModel = AbstractModel> extends AbstractModel<Array<Value<MItem>>> {
   static override createEmptyValue(): [] {

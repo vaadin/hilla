@@ -1,20 +1,27 @@
-import {
-  Model,
-  ArrayModel,
-  EnumModel,
-  type ModelMetadata,
-  NumberModel,
-  $defaultValue,
-  $meta,
-  $enum,
-  $key,
-} from '@vaadin/hilla-models';
-import m from '@vaadin/hilla-models';
 import { beforeEach, describe, expect, it } from 'vitest';
 // API to test
-import { Binder, type BinderNode, IsNumber, NotBlank, NotEmpty, NotNull, Positive, Size } from '../src/index.js';
+import {
+  _enum,
+  _fromString,
+  _key,
+  _meta,
+  type AbstractModel,
+  ArrayModel,
+  Binder,
+  type BinderNode,
+  EnumModel,
+  IsNumber,
+  m,
+  type ModelMetadata,
+  NotBlank,
+  NotEmpty,
+  NotNull,
+  NumberModel,
+  ObjectModel,
+  Positive,
+  Size,
+} from '../../src/index.js';
 
-import { getStringConverter } from '../src/stringConverters.js';
 import {
   type IdEntity,
   IdEntityModel,
@@ -22,7 +29,7 @@ import {
   RecordStatusModel,
   TestModel,
   WithPossibleCharListModel,
-} from './TestModels.js';
+} from './TestModels';
 
 describe('@vaadin/hilla-lit-form', () => {
   describe('Model', () => {
@@ -74,16 +81,11 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(value).to.be.undefined;
       });
 
-      describe('string converter', () => {
+      describe('_fromString', () => {
         let fromString: (str: string) => number | undefined;
 
         beforeEach(() => {
-          const stringConverter = getStringConverter(binder.model.fieldNumber);
-          if (stringConverter === undefined) {
-            expect.fail('stringConverter is undefined');
-          }
-          // eslint-disable-next-line @typescript-eslint/prefer-destructuring
-          fromString = stringConverter.fromString;
+          fromString = binder.model.fieldNumber[_fromString];
         });
 
         it('should disallow empty string', () => {
@@ -120,16 +122,11 @@ describe('@vaadin/hilla-lit-form', () => {
     });
 
     describe('boolean model', () => {
-      describe('string converter', () => {
-        let fromString: (str: string) => boolean | undefined;
+      describe('_fromString', () => {
+        let fromString: (str: string) => boolean;
 
         beforeEach(() => {
-          const stringConverter = getStringConverter(binder.model.fieldBoolean);
-          if (stringConverter === undefined) {
-            throw new Error('stringConverter is undefined');
-          }
-          // eslint-disable-next-line @typescript-eslint/prefer-destructuring
-          fromString = stringConverter.fromString;
+          fromString = binder.model.fieldBoolean[_fromString];
         });
 
         it('should do semantic conversion from string to boolean model', () => {
@@ -154,7 +151,9 @@ describe('@vaadin/hilla-lit-form', () => {
     });
 
     describe('array model', () => {
-      function* toBinderNode<M extends Model>(iterable: Iterable<M>): Generator<BinderNode<M>, undefined, void> {
+      function* toBinderNode<M extends AbstractModel>(
+        iterable: Iterable<M>,
+      ): Generator<BinderNode<M>, undefined, void> {
         for (const value of iterable) {
           yield binder.for(value);
         }
@@ -163,8 +162,8 @@ describe('@vaadin/hilla-lit-form', () => {
       const strings = ['foo', 'bar'];
 
       const idEntities: readonly IdEntity[] = [
-        { ...IdEntityModel[$defaultValue], idString: 'id0' },
-        { ...IdEntityModel[$defaultValue], idString: 'id1' },
+        { ...IdEntityModel.createEmptyValue(), idString: 'id0' },
+        { ...IdEntityModel.createEmptyValue(), idString: 'id1' },
       ];
 
       beforeEach(() => {
@@ -176,14 +175,14 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should be iterable', () => {
-        [binder.model.fieldArrayString, binder.model.fieldArrayModel].forEach((arrayModel: ArrayModel) => {
+        [binder.model.fieldArrayString, binder.model.fieldArrayModel].forEach((arrayModel) => {
           const values = binder.for(arrayModel).value!;
           const iterator = toBinderNode(m.items(arrayModel));
           for (let i = 0; i < values.length; i++) {
             const iteratorResult = iterator.next();
             expect(iteratorResult.done).to.be.false;
             const binderNode = iteratorResult.value!;
-            expect(binderNode.model[$key]).to.equal(i);
+            expect(binderNode.model[_key]).to.equal(i);
             expect(binderNode.value).to.equal(values[i]);
           }
 
@@ -234,20 +233,20 @@ describe('@vaadin/hilla-lit-form', () => {
        */
       it('array item defaultValue should not be undefined', () => {
         binder.for(binder.model.fieldArrayModel).appendItem();
-        const entityModels = [...m.items(binder.model.fieldArrayModel)];
-        expect(binder.for(entityModels[0]).defaultValue).to.be.not.undefined;
+        const entityModels = [...binder.model.fieldArrayModel];
+        expect(binder.for(entityModels[0].model).defaultValue).to.be.not.undefined;
       });
 
       it('should support removeSelf on binder node', () => {
         binder.for(binder.model.fieldArrayString).appendItem();
-        const stringModels = [...m.items(binder.model.fieldArrayString)];
-        binder.for(stringModels[1]).removeSelf();
+        const stringModels = [...binder.model.fieldArrayString];
+        binder.for(stringModels[1].model).removeSelf();
 
         expect(binder.for(binder.model.fieldArrayString).value).to.deep.equal(['foo', '']);
 
         binder.for(binder.model.fieldArrayModel).appendItem();
-        const entityModels = [...m.items(binder.model.fieldArrayModel)];
-        binder.for(entityModels[1]).removeSelf();
+        const entityModels = [...binder.model.fieldArrayModel];
+        binder.for(entityModels[1].model).removeSelf();
 
         expect(binder.for(binder.model.fieldArrayModel).value).to.deep.equal([{ idString: 'id0' }, { idString: '' }]);
       });
@@ -286,9 +285,6 @@ describe('@vaadin/hilla-lit-form', () => {
         }).to.throw('array');
 
         Object.values(binder.model).forEach((model) => {
-          if (!(model instanceof Model)) {
-            return;
-          }
           const binderNode = binder.for(model);
           expect(() => {
             binderNode.removeSelf();
@@ -334,7 +330,7 @@ describe('@vaadin/hilla-lit-form', () => {
         [0, 1].forEach((i) => expect(nodes1[i].value).to.be.equal(idEntities[i]));
 
         for (let i = 0; i < nodes1.length; i++) {
-          expect(nodes1[i].model[$key]).to.be.equal(i);
+          expect(nodes1[i].model[_key]).to.be.equal(i);
         }
 
         binder.for(nodes1[0].model.idString).value = 'foo';
@@ -346,7 +342,7 @@ describe('@vaadin/hilla-lit-form', () => {
         const nodes2 = [...toBinderNode(m.items(binder.model.fieldArrayModel))];
         expect(nodes2.length).to.be.equal(3);
         for (let i = 0; i < nodes2.length; i++) {
-          expect(nodes2[i].model[$key]).to.be.equal(i);
+          expect(nodes2[i].model[_key]).to.be.equal(i);
         }
       });
 
@@ -357,12 +353,12 @@ describe('@vaadin/hilla-lit-form', () => {
         ];
         binder.for(binder.model.fieldMatrixNumber).value = matrix;
         let walkedCells = 0;
-        Array.from(m.items(binder.model.fieldMatrixNumber)).forEach((rowModel, i) => {
-          expect(rowModel).to.be.instanceOf(ArrayModel);
-          Array.from(m.items(rowModel)).forEach((cellModel, j) => {
-            expect(cellModel).to.be.instanceOf(NumberModel);
-            expect(m.value(cellModel)).to.be.equal(matrix[i][j]);
-            const [, lastValidator] = binder.for(cellModel).validators;
+        Array.from(binder.model.fieldMatrixNumber).forEach((rowBinder, i) => {
+          expect(rowBinder.model).to.be.instanceOf(ArrayModel);
+          Array.from(rowBinder.model).forEach((cellBinder, j) => {
+            expect(cellBinder.model).to.be.instanceOf(NumberModel);
+            expect(cellBinder.value).to.be.equal(matrix[i][j]);
+            const [, lastValidator] = cellBinder.validators;
             expect(lastValidator).to.be.instanceOf(Positive);
             walkedCells += 1;
           });
@@ -373,11 +369,11 @@ describe('@vaadin/hilla-lit-form', () => {
 
     describe('enum model', () => {
       it('should get default enum value', () => {
-        expect(RecordStatusModel[$defaultValue]).to.equal(RecordStatus.CREATED);
+        expect(RecordStatusModel.createEmptyValue()).to.equal(RecordStatus.CREATED);
       });
 
       it('should get the enum object from the model', () => {
-        expect(binder.model.fieldEnum[$enum]).to.equal(RecordStatus);
+        expect(binder.model.fieldEnum[_enum]).to.equal(RecordStatus);
       });
 
       it('should record and return the value', () => {
@@ -385,14 +381,13 @@ describe('@vaadin/hilla-lit-form', () => {
         expect(binder.for(binder.model.fieldEnum).value).to.equal(RecordStatus.REMOVED);
       });
 
-      it('should be undefined if the EnumModel defaultValue is used', () => {
-        expect(EnumModel[$defaultValue]).to.be.undefined;
+      it('should be undefined if the EnumModel.createEmptyValue() is used', () => {
+        expect(EnumModel.createEmptyValue()).to.be.undefined;
       });
 
       it('should extract value from string', () => {
-        const { fromString } = getStringConverter(binder.model.fieldEnum)!;
-        expect(fromString('UPDATED')).to.equal(RecordStatus.UPDATED);
-        expect(fromString('unknown')).to.be.undefined;
+        expect(binder.model.fieldEnum[_fromString]('UPDATED')).to.equal(RecordStatus.UPDATED);
+        expect(binder.model.fieldEnum[_fromString]('unknown')).to.be.undefined;
       });
     });
 
@@ -427,21 +422,18 @@ describe('@vaadin/hilla-lit-form', () => {
   });
 
   describe('metadata', () => {
-    it('should initialize with undefined metadata by default', () => {
-      const model = m.object('MetadataObject').build();
-      expect(model[$meta]).to.equal(undefined);
+    it('should initialize with empty metadata by default', () => {
+      const model = new ObjectModel(null as any, '', true);
+      expect(model[_meta]).to.eql({});
     });
 
     it('should initialize with metadata from options', () => {
       const meta: ModelMetadata = {
-        jvmType: 'java.lang.String',
-        annotations: [
-          { jvmType: 'jakarta.persistence.Id', attributes: {} },
-          { jvmType: 'jakarta.persistence.Version' },
-        ],
+        javaType: 'java.lang.String',
+        annotations: [{ name: 'jakarta.persistence.Id' }, { name: 'jakarta.persistence.Version' }],
       };
-      const model = m.object('MetadataObject').meta(meta).build();
-      expect(model[$meta]).to.equal(meta);
+      const model = new ObjectModel(null as any, '', true, { meta });
+      expect(model[_meta]).to.equal(meta);
     });
   });
 });

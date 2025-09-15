@@ -1,13 +1,11 @@
 /* eslint-disable sort-keys */
-import { $defaultValue } from '@vaadin/hilla-models';
-import m from '@vaadin/hilla-models';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, assert, beforeEach, chai, describe, expect, it } from 'vitest';
 // API to test
-import { Binder, type BinderConfiguration } from '../src/index.js';
+import { Binder, type BinderConfiguration, m } from '../../src/index.js';
 import {
   type Employee,
   EmployeeModel,
@@ -48,7 +46,7 @@ describe('@vaadin/hilla-lit-form', () => {
     it('should instantiate model', () => {
       const binder = new Binder(litOrderView, OrderModel);
 
-      expect(binder.model).to.be.instanceOf(OrderModel);
+      assert.instanceOf(binder.model, OrderModel);
     });
 
     it('should be able to create a binder with a default onchange listener', () => {
@@ -279,7 +277,7 @@ describe('@vaadin/hilla-lit-form', () => {
       }
 
       it('should not initialize optional in empty value', () => {
-        const emptyValue = EmployeeModel[$defaultValue];
+        const emptyValue = EmployeeModel.createEmptyValue();
         assert.isUndefined(emptyValue.supervisor);
       });
 
@@ -309,7 +307,7 @@ describe('@vaadin/hilla-lit-form', () => {
         assert.isUndefined(arrayBinderNode.value);
         assert.isUndefined(arrayBinderNode.defaultValue);
 
-        arrayBinderNode.value = [EmployeeModel[$defaultValue]];
+        arrayBinderNode.value = [EmployeeModel.createEmptyValue()];
         const [itemModel] = m.items(arrayBinderNode.model);
         assert.deepEqual(binder.for(itemModel).value, expectedEmptyEmployee);
         assert.deepEqual(arrayBinderNode.defaultValue, []);
@@ -406,8 +404,8 @@ describe('@vaadin/hilla-lit-form', () => {
         constructor() {
           super();
           this.binder = new Binder(this, Level1Model);
-          const level1 = Level1Model[$defaultValue];
-          const level2 = Level2Model[$defaultValue];
+          const level1 = Level1Model.createEmptyValue();
+          const level2 = Level2Model.createEmptyValue();
           level1.level2 = [level2];
           this.binder.read(level1);
         }
@@ -427,9 +425,9 @@ describe('@vaadin/hilla-lit-form', () => {
       it('should create binder in complex hierarchy', async () => {
         const { binder } = litHierarchyView;
         await litHierarchyView.updateComplete;
-        const level3Models = [...m.items(binder.model.level2)];
-        assert.lengthOf(level3Models, 1);
-        assert.isDefined(binder.for(level3Models[0].level3.level4.name4).parent?.defaultValue);
+        const level3Nodes = [...binder.model.level2];
+        assert.lengthOf(level3Nodes, 1);
+        assert.isDefined(binder.for(level3Nodes[0].model.level3.level4.name4).parent?.defaultValue);
         // Automatic node initialization should preserve pristine state
         assert.isFalse(binder.dirty);
       });
@@ -439,10 +437,10 @@ describe('@vaadin/hilla-lit-form', () => {
         await litHierarchyView.updateComplete;
         binder.for(binder.model.anotherLevel2).appendItem();
         await litHierarchyView.updateComplete;
-        const anotherLevel3Models = [...m.items(binder.model.anotherLevel2)];
-        assert.lengthOf(anotherLevel3Models, 1);
-        assert.equal(binder.for(anotherLevel3Models[0]).name, 'anotherLevel2.0');
-        assert.isFalse(binder.for(anotherLevel3Models[0]).required);
+        const anotherLevel3Nodes = [...binder.model.anotherLevel2];
+        assert.lengthOf(anotherLevel3Nodes, 1);
+        assert.equal(anotherLevel3Nodes[0].name, 'anotherLevel2.0');
+        assert.isFalse(anotherLevel3Nodes[0].required);
       });
 
       it('should clear with optional array', async () => {
