@@ -214,6 +214,7 @@
     "@vaadin/dashboard": "25.0.0-alpha19",
     "@vaadin/grid-pro": "25.0.0-alpha19",
     "@vaadin/map": "25.0.0-alpha19",
-    "@vaadin/rich-text-editor": "25.0.0-alpha19"
+    "@vaadin/rich-text-editor": "25.0.0-alpha19",
+    "@vaadin/aura": "25.0.0-alpha19"
   }
 }

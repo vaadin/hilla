@@ -7,6 +7,7 @@
     "@vaadin/a11y-base": "25.0.0-alpha19",
     "@vaadin/accordion": "25.0.0-alpha19",
     "@vaadin/app-layout": "25.0.0-alpha19",
+    "@vaadin/aura": "25.0.0-alpha19",
     "@vaadin/avatar": "25.0.0-alpha19",
     "@vaadin/avatar-group": "25.0.0-alpha19",
     "@vaadin/board": "25.0.0-alpha19",
@@ -119,6 +120,7 @@
       "@vaadin/a11y-base": "24.8.0-alpha4",
       "@vaadin/accordion": "24.8.0-alpha4",
       "@vaadin/app-layout": "24.8.0-alpha4",
+      "@vaadin/aura": "25.0.0-alpha19",
       "@vaadin/avatar": "24.8.0-alpha4",
       "@vaadin/avatar-group": "24.8.0-alpha4",
       "@vaadin/board": "24.8.0-alpha4",
@@ -225,7 +227,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "c75e7c88bbec9d1f57f40f39eae9da20873bf4fa5d658c8bfc7df5f55bc27f91"
+    "hash": "bd8af7079f1f5ae83d61d9b4410e8eb446302b6bb1a6633b077b7077828893f4"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -316,6 +318,7 @@
     "@vaadin/master-detail-layout": "$@vaadin/master-detail-layout",
     "@vaadin/markdown": "$@vaadin/markdown",
     "@vaadin/react-components": "25.0.0-alpha19",
-    "@vaadin/react-components-pro": "25.0.0-alpha19"
+    "@vaadin/react-components-pro": "25.0.0-alpha19",
+    "@vaadin/aura": "$@vaadin/aura"
   }
 }
