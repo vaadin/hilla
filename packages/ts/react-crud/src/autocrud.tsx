@@ -1,7 +1,7 @@
 import type { AbstractModel, DetachedModelConstructor, Value } from '@vaadin/hilla-lit-form';
 import { Button } from '@vaadin/react-components/Button.js';
 import { SplitLayout } from '@vaadin/react-components/SplitLayout.js';
-import { type JSX, useId, useRef, useState } from 'react';
+import { type JSX, type ReactNode, useId, useRef, useState } from 'react';
 import { AutoCrudDialog } from './autocrud-dialog.js';
 import css from './autocrud.obj.css';
 import { type AutoFormProps, emptyItem, AutoForm } from './autoform.js';
@@ -16,6 +16,8 @@ export type AutoCrudFormHeaderRenderer<TItem> = (
   editedItem: TItem | null,
   disabled: boolean,
 ) => JSX.Element | null | undefined;
+
+export type AutoCrudToolbarRenderer = (defaultContent: ReactNode) => ReactNode;
 
 export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
   Partial<AutoFormProps<TModel>>,
@@ -87,6 +89,12 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      */
     noNewButton?: boolean;
     /**
+     * A custom renderer function to create the toolbar content. The function
+     * receives the default toolbar content as a parameter, which can be used
+     * or not, depending on the implementation.
+     */
+    toolbarRenderer?: AutoCrudToolbarRenderer;
+    /**
      * Props to pass to the form. See the `AutoForm` component for details.
      */
     formProps?: AutoCrudFormProps<TModel>;
@@ -121,6 +129,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   model,
   itemIdProperty,
   noNewButton,
+  toolbarRenderer = (defaultContent): ReactNode => defaultContent,
   formProps,
   gridProps,
   style,
@@ -146,6 +155,14 @@ export function AutoCrud<TModel extends AbstractModel>({
 
   const formHeader = item && item !== emptyItem ? formHeaderRenderer(item, !item) : formHeaderRenderer(null, !item);
 
+  const toolbarContent = toolbarRenderer(
+    noNewButton ? null : (
+      <Button theme="primary" onClick={() => setItem(emptyItem)}>
+        + New
+      </Button>
+    ),
+  );
+
   const mainSection = (
     <div className="auto-crud-main">
       <AutoGrid
@@ -161,15 +178,7 @@ export function AutoCrud<TModel extends AbstractModel>({
         ref={autoGridRef}
         aria-controls={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
       ></AutoGrid>
-      {/* As the toolbar only contains the "New" button at the moment, and as an empty toolbar
-          renders as a half-height bar, let's hide it completely when the button is hidden */}
-      {!noNewButton && (
-        <div className="auto-crud-toolbar">
-          <Button theme="primary" onClick={() => setItem(emptyItem)}>
-            + New
-          </Button>
-        </div>
-      )}
+      {toolbarContent && <div className="auto-crud-toolbar">{toolbarContent}</div>}
     </div>
   );
 
