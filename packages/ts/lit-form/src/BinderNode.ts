@@ -305,7 +305,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
     let { model }: { model: ProvisionalModel } = this;
     let name = '';
 
-    while (model[$owner] instanceof AbstractModel) {
+    while (model[$owner] instanceof AbstractModel || model[$owner] === Model || model[$owner] instanceof Model) {
       name = `${String(model[$key])}${name ? `.${name}` : ''}`;
       model = model[$owner];
     }
@@ -549,7 +549,8 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
         yield childBinderNode;
       }
     } else if (this.model instanceof ObjectModel) {
-      for (const propName of Object.keys(this.model) as ReadonlyArray<string & keyof M>) {
+      // eslint-disable-next-line @typescript-eslint/no-for-in-array,no-restricted-syntax
+      for (const propName in this.model) {
         // We need to skip all non-initialised optional fields here in order
         // to prevent infinite recursion for circular references in the model.
         // Here we rely on presence of keys in `defaultValue` to detect all
@@ -558,7 +559,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
         // set from initial `binder.read()` or `binder.clear()` or by using a
         // binder node (e.g., form binding) for a nested field.
         if (propName in (this.defaultValue as Record<never, never>)) {
-          yield getBinderNode(this.model[propName]);
+          yield getBinderNode(this.model[propName as string & keyof M]);
         }
       }
     } else if (this.model instanceof ArrayModel) {
