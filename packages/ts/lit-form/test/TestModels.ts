@@ -7,6 +7,7 @@ import m, {
   NumberModel,
   ObjectModel,
   Pattern,
+  Positive,
   StringModel,
   Size,
 } from '@vaadin/hilla-models';
@@ -101,7 +102,7 @@ export const TestModel = m
   .property('fieldObject', ObjectModel)
   .property('fieldArrayString', m.array(StringModel))
   .property('fieldArrayModel', m.array(IdEntityModel))
-  .property('fieldMatrixNumber', m.array(m.array(NumberModel)))
+  .property('fieldMatrixNumber', m.array(m.array(m.constrained(NumberModel, Positive()))))
   .property('fieldEnum', RecordStatusModel)
   .property('fieldUnknown', Model)
   .property('fieldAny', Model)
