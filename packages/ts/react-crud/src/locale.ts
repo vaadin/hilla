@@ -1,5 +1,5 @@
-import { DatePickerElement, type DatePickerDate, type DatePickerI18n } from '@vaadin/react-components/DatePicker.js';
-import { DateTimePickerElement, type DateTimePickerI18n } from '@vaadin/react-components/DateTimePicker.js';
+import type { DatePickerDate, DatePickerI18n } from '@vaadin/react-components/DatePicker.js';
+import type { DateTimePickerI18n } from '@vaadin/react-components/DateTimePicker.js';
 import { createContext, useContext, useMemo } from 'react';
 import type { SetRequired } from 'type-fest';
 
@@ -114,14 +114,11 @@ export function useLocaleFormatter(): LocaleFormatter {
   return useMemo(() => new LocaleFormatter(locale), [locale]);
 }
 
-const defaultDatePickerI18n = new DatePickerElement().i18n;
-
 export function useDatePickerI18n(): SetRequired<DatePickerI18n, 'formatDate' | 'parseDate'> {
   const formatter = useLocaleFormatter();
 
   return useMemo(
     () => ({
-      ...defaultDatePickerI18n,
       formatDate(value) {
         return formatter.formatDate(value);
       },
@@ -133,16 +130,6 @@ export function useDatePickerI18n(): SetRequired<DatePickerI18n, 'formatDate' | 
   );
 }
 
-const defaultDateTimePickerI18n = new DateTimePickerElement().i18n;
-
 export function useDateTimePickerI18n(): DateTimePickerI18n {
-  const datePickerI18n = useDatePickerI18n();
-
-  return useMemo(
-    () => ({
-      ...defaultDateTimePickerI18n,
-      ...datePickerI18n,
-    }),
-    [datePickerI18n],
-  );
+  return useDatePickerI18n();
 }
