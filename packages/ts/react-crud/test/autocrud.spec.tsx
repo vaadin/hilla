@@ -126,6 +126,65 @@ describe('@vaadin/hilla-react-crud', () => {
       await waitFor(() => expect(within(container).queryByText('+ New')).to.be.null);
     });
 
+    it('can customize toolbar with toolbarRenderer', async () => {
+      const { container } = render(
+        <AutoCrud
+          service={personService()}
+          model={PersonModel}
+          toolbarRenderer={(defaultContent) => (
+            <>
+              {defaultContent}
+              <button>Custom Action</button>
+            </>
+          )}
+        />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.exist;
+        expect(within(container).queryByText('Custom Action')).to.exist;
+      });
+    });
+
+    it('can replace toolbar content with toolbarRenderer', async () => {
+      const { container } = render(
+        <AutoCrud service={personService()} model={PersonModel} toolbarRenderer={() => <button>Replace All</button>} />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.be.null;
+        expect(within(container).queryByText('Replace All')).to.exist;
+      });
+    });
+
+    it('respects noNewButton with toolbarRenderer', async () => {
+      const { container } = render(
+        <AutoCrud
+          service={personService()}
+          model={PersonModel}
+          noNewButton
+          toolbarRenderer={(defaultContent) => (
+            <>
+              {defaultContent}
+              <button>Custom Action</button>
+            </>
+          )}
+        />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.be.null;
+        expect(within(container).queryByText('Custom Action')).to.exist;
+      });
+    });
+
+    it('can hide toolbar with renderer even if noNewButton is not used', async () => {
+      const { container } = render(
+        <AutoCrud service={personService()} model={PersonModel} toolbarRenderer={() => null} />,
+      );
+      await waitFor(() => {
+        expect(within(container).queryByText('+ New')).to.be.null;
+        expect(container.querySelector('.auto-crud-toolbar')).to.be.null;
+      });
+    });
+
     it('can add a new item', async () => {
       const { grid, form, newButton } = await CrudController.init(
         render(<AutoCrud service={personService()} model={PersonModel} />),
@@ -326,6 +385,35 @@ describe('@vaadin/hilla-react-crud', () => {
       await grid.toggleRowSelected(1);
       const form = await FormController.init(user);
       expect(form.instance).to.exist;
+    });
+
+    it('maintains stable layout with SplitLayout when noNewButton is enabled', async () => {
+      const renderResult = render(<TestAutoCrud noNewButton />);
+      const { container } = renderResult;
+      const grid = await GridController.init(renderResult, user);
+
+      // No selection
+      const initialSplitLayout = container.querySelector('vaadin-split-layout');
+      expect(initialSplitLayout).to.exist;
+      expect(container.querySelector('.auto-crud-form')).to.not.exist;
+
+      // Select an item
+      await grid.toggleRowSelected(1);
+      await waitFor(() => expect(container.querySelector('.auto-crud-form')).to.exist);
+      const splitLayoutAfterSelect = container.querySelector('vaadin-split-layout');
+      expect(splitLayoutAfterSelect).to.equal(initialSplitLayout);
+
+      // Deselect the item
+      await grid.toggleRowSelected(1);
+      await waitFor(() => expect(container.querySelector('.auto-crud-form')).to.not.exist);
+      const splitLayoutAfterDeselect = container.querySelector('vaadin-split-layout');
+      expect(splitLayoutAfterDeselect).to.equal(initialSplitLayout);
+
+      // Select another item
+      await grid.toggleRowSelected(0);
+      await waitFor(() => expect(container.querySelector('.auto-crud-form')).to.exist);
+      const splitLayoutAfterReselect = container.querySelector('vaadin-split-layout');
+      expect(splitLayoutAfterReselect).to.equal(initialSplitLayout);
     });
 
     describe('mobile layout', () => {

@@ -45,7 +45,7 @@
   "devDependencies": {
     "@nx/js": "20.4.5",
     "@open-wc/testing": "4.0.0",
-    "@preact/signals-react-transform": "0.5.2",
+    "@preact/signals-react-transform": "0.6.0",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.2.0",
     "@testing-library/user-event": "14.6.1",
@@ -62,10 +62,10 @@
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "4.0.0",
     "@types/validator": "13.12.2",
-    "@vaadin/bundles": "25.0.0-alpha17",
-    "@vaadin/react-components": "25.0.0-alpha17",
-    "@vaadin/react-components-pro": "25.0.0-alpha17",
-    "@vitejs/plugin-react": "4.7.0",
+    "@vaadin/bundles": "25.0.0-alpha19",
+    "@vaadin/react-components": "25.0.0-alpha19",
+    "@vaadin/react-components-pro": "25.0.0-alpha19",
+    "@vitejs/plugin-react": "5.0.2",
     "@vitest/browser": "3.1.1",
     "@vitest/coverage-v8": "3.1.1",
     "@vitest/ui": "3.1.1",
@@ -101,7 +101,7 @@
     "prettier": "3.5.1",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "react-router": "7.7.1",
+    "react-router": "7.8.2",
     "simple-git-hooks": "2.11.1",
     "sinon": "19.0.2",
     "sinon-chai": "4.0.0",
@@ -109,7 +109,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.35.0",
     "typescript": "5.9.2",
-    "vite": "7.1.4",
+    "vite": "7.1.5",
     "vitest": "3.1.1"
   }
 }

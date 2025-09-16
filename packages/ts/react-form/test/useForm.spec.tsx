@@ -81,7 +81,7 @@ describe('@vaadin/hilla-react-form', () => {
         </section>
         <output data-testid="output.user.name">{value.user.name}</output>
         <output data-testid="output.rememberMe">{String(value.rememberMe)}</output>
-        <button data-testid="submit" onClick={handleSubmit}>
+        <button data-testid="submit" onClick={handleSubmit} type="submit">
           Submit
         </button>
         {submitting ? <span data-testid="submitting">Submitting...</span> : null}
