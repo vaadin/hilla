@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-expressions, no-shadow, @typescript-eslint/unbound-method */
-import { $defaultValue, type Model } from '@vaadin/hilla-models';
+import { $defaultValue, $name, type Model } from '@vaadin/hilla-models';
 import chaiDom from 'chai-dom';
 import { LitElement, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -823,7 +823,7 @@ describe('@vaadin/hilla-lit-form', () => {
         { model: binder.model.fieldArrayString as Model, value: ['a', 'b'] },
         { model: binder.model.fieldArrayModel as Model, value: [{ idString: 'id' }] },
       ].forEach(({ model, value }, idx) => {
-        it(`VaadinFieldStrategy ${model.constructor.name} ${idx}`, async () => {
+        it(`VaadinFieldStrategy ${model[$name]} ${idx}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <any-vaadin-element-tag ${field(model)}></any-vaadin-element-tag>`, div);
@@ -872,7 +872,7 @@ describe('@vaadin/hilla-lit-form', () => {
         { model: binder.model.fieldBoolean as Model, value: true },
         { model: binder.model.fieldNumber as Model, value: 10 },
       ].forEach(({ model, value }) => {
-        it(`ComboBoxFieldStrategy value for ${model.constructor.name}`, async () => {
+        it(`ComboBoxFieldStrategy value for ${model[$name]}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <vaadin-combo-box ${field(model)}></vaadin-combo-box>`, div);
@@ -921,7 +921,7 @@ describe('@vaadin/hilla-lit-form', () => {
         { model: binder.model.fieldObject as Model, value: { foo: true } },
         { model: binder.model.fieldArrayString as Model, value: ['a', 'b'] },
       ].forEach(({ model, value }) => {
-        it(`ComboBoxFieldStrategy selectedItem for ${model.constructor.name}`, async () => {
+        it(`ComboBoxFieldStrategy selectedItem for ${model[$name]}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <vaadin-combo-box ${field(model)}></vaadin-combo-box>`, div);
@@ -970,7 +970,7 @@ describe('@vaadin/hilla-lit-form', () => {
         { model: binder.model.fieldArrayString as Model, value: ['a', 'b'] },
         { model: binder.model.fieldArrayModel as Model, value: [{ idString: 'id' }] },
       ].forEach(({ model, value }) => {
-        it(`MultiSelectComboBoxFieldStrategy selectedItems for ${model.constructor.name}`, async () => {
+        it(`MultiSelectComboBoxFieldStrategy selectedItems for ${model[$name]}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <vaadin-multi-select-combo-box ${field(model)}></vaadin-multi-select-combo-box>`, div);
