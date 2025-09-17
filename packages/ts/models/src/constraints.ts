@@ -189,7 +189,7 @@ export const FutureOrPresent = new ConstraintBuilder().model(StringModel).name('
 export const Pattern = new ConstraintBuilder()
   .model(StringModel)
   .name('Pattern')
-  .attribute('value', StringModel)
+  .attribute('regexp', StringModel)
   .build();
 
 /**

@@ -18,7 +18,7 @@ export type ConstrainedModel<M extends Model> = M & {
 
 export const $assertSupportedModel = Symbol('assertSupportedModel');
 
-export type ConstraintFn<V = unknown, A extends AnyObject = EmptyObject> = EmptyObject extends A
+export type ConstraintFn<V = unknown, A extends AnyObject = AnyObject> = EmptyObject extends A
   ? (attributes?: A) => Constraint<V>
   : { readonly value: never } extends A
     ? (valueOrAttributes: (A & { readonly value: unknown })['value'] | A) => Constraint<V>
@@ -27,7 +27,7 @@ export type ConstraintFn<V = unknown, A extends AnyObject = EmptyObject> = Empty
 export type NonAttributedConstraint<
   V = unknown,
   N extends string = string,
-  A extends AnyObject = EmptyObject,
+  A extends AnyObject = AnyObject,
 > = ConstraintFn<V, A> &
   Readonly<{
     attributes: A;
@@ -35,12 +35,8 @@ export type NonAttributedConstraint<
     [$assertSupportedModel](model: Model<V>): void;
   }>;
 
-export type Constraint<
-  V = unknown,
-  N extends string = string,
-  A extends AnyObject = EmptyObject,
-> = EmptyObject extends A
-  ? NonAttributedConstraint<V, N, A>
-  : NonAttributedConstraint<V, N, A> & {
-      attributes: Required<A>;
-    };
+export type Constraint<V = unknown, N extends string = string, A extends AnyObject = AnyObject> = Readonly<{
+  attributes: A extends EmptyObject ? A : Required<A>;
+  name: N;
+  [$assertSupportedModel](model: Model<V>): void;
+}>;

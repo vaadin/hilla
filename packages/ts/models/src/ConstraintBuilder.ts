@@ -59,7 +59,11 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
   attribute<AN extends string, AV>(
     name: AN,
     model: Model<AV>,
-  ): ConstraintBuilder<V, N, A & Readonly<undefined extends AV ? Partial<Record<AN, AV>> : Record<AN, AV>>> {
+  ): ConstraintBuilder<
+    V,
+    N,
+    (A extends EmptyObject ? AnyObject : A) & Readonly<undefined extends AV ? Partial<Record<AN, AV>> : Record<AN, AV>>
+  > {
     (this.attributeDefaults as Record<string, unknown>)[name] = model[$defaultValue];
     return this as any;
   }

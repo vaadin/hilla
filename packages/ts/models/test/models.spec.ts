@@ -373,8 +373,8 @@ describe('@vaadin/hilla-models', () => {
     it('should support defining validators on properties', () => {
       // Verify the type of the constraints, correct cases:
       m.constrained(StringModel, NotNull({}));
+      m.constrained(StringModel, NotNull({ message: 'message' }));
       m.constrained(StringModel, NotNull());
-      m.constrained(StringModel, NotNull);
       m.constrained(NumberModel, NotNull());
       m.constrained(BooleanModel, NotNull());
       m.constrained(m.array(StringModel), NotNull, NotEmpty, Size({ min: 1 }));

@@ -233,14 +233,13 @@ const m = {
     arg: unknown,
     constraintType: NonAttributedConstraint<V, N, A>,
   ): arg is Constraint<V, N, A> {
-    if (typeof arg !== 'object') {
-      return false;
-    }
-
     let p: unknown = arg;
     do {
       if (p === constraintType) {
         return true;
+      }
+      if (typeof p !== 'object') {
+        return false;
       }
       p = Object.getPrototypeOf(p);
     } while (p !== undefined && p !== null);
