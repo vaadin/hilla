@@ -1,6 +1,7 @@
 package com.vaadin.hilla.engine.commandrunner;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 import java.io.*;
@@ -178,12 +179,18 @@ public interface CommandRunner {
                     .of(new Pipe<>(stdOut, process.getInputStream()),
                             new Pipe<>(stdErr, process.getErrorStream()),
                             new Pipe<>(stdIn, process.getOutputStream()))
-                    .filter(handler -> handler.consumer() != null)
                     .map(handler -> {
                         var t = new Thread(() -> {
-                            try (var stream = handler.stream()) {
-                                ((Consumer<Closeable>) handler.consumer())
-                                        .accept(stream);
+                            var stream = handler.stream();
+                            try {
+                                if (handler.consumer() != null) {
+                                    ((Consumer<Closeable>) handler.consumer())
+                                            .accept(stream);
+                                } else if (stream instanceof InputStream inputStream) {
+                                    // make sure the stream is consumed
+                                    // to avoid deadlock
+                                    IOUtils.consume(inputStream);
+                                }
                             } catch (IOException e) {
                                 getLogger().error("Error while handling stream",
                                         e);
