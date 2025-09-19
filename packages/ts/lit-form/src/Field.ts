@@ -1,8 +1,16 @@
 /* eslint-disable accessor-pairs,no-void,sort-keys */
+import { ArrayModel, BooleanModel, type Model, NumberModel, ObjectModel } from '@vaadin/hilla-models';
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
-import { _fromString, ArrayModel, BooleanModel, hasFromString, NumberModel, ObjectModel } from './Models.js';
+import {
+  _fromString,
+  ArrayModel as BinderArrayModel,
+  BooleanModel as BinderBooleanModel,
+  hasFromString,
+  NumberModel as BinderNumberModel,
+  ObjectModel as BinderObjectModel,
+} from './Models.js';
 import { StringModel } from './Models.js';
 import type { ProvisionalModel } from './ProvisionalModel.js';
 import { getStringConverter } from './stringConverters.js';
@@ -102,7 +110,12 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
   }
 
   set value(value: T | undefined) {
-    if (this.model instanceof StringModel || this.model instanceof NumberModel) {
+    if (
+      this.model instanceof StringModel ||
+      this.model instanceof BinderNumberModel ||
+      this.model === NumberModel ||
+      this.model instanceof NumberModel
+    ) {
       this.#element.value = value ?? ('' as T);
       return;
     }
@@ -287,7 +300,7 @@ export class CheckedFieldStrategy<
   E extends CheckedFieldElement<T> = CheckedFieldElement<T>,
 > extends GenericFieldStrategy<T, E> {
   override get value(): T | undefined {
-    if (this.model instanceof BooleanModel) {
+    if (this.model instanceof BinderBooleanModel || this.model === BooleanModel || this.model instanceof BooleanModel) {
       return this.element.checked as T;
     }
 
@@ -322,7 +335,15 @@ export class ComboBoxFieldStrategy<
   E extends ComboBoxFieldElement<T> = ComboBoxFieldElement<T>,
 > extends VaadinFieldStrategy<T, E> {
   override get value(): T | undefined {
-    if (this.model && (this.model instanceof ObjectModel || this.model instanceof ArrayModel)) {
+    if (
+      this.model &&
+      (this.model instanceof BinderObjectModel ||
+        this.model === ObjectModel ||
+        this.model instanceof ObjectModel ||
+        this.model instanceof BinderArrayModel ||
+        (this.model as Model) === ArrayModel ||
+        this.model instanceof ArrayModel)
+    ) {
       const { selectedItem } = this.element;
       return selectedItem ?? undefined;
     }
@@ -331,7 +352,12 @@ export class ComboBoxFieldStrategy<
   }
 
   override set value(val: T | undefined) {
-    if (this.model instanceof ObjectModel || this.model instanceof ArrayModel) {
+    if (
+      this.model instanceof BinderObjectModel ||
+      this.model === ObjectModel ||
+      this.model instanceof ObjectModel ||
+      this.model instanceof BinderArrayModel
+    ) {
       this.element.selectedItem = val ?? null;
     } else {
       super.value = val;
