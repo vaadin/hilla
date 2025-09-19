@@ -358,7 +358,9 @@ export class ComboBoxFieldStrategy<
       this.model instanceof BinderObjectModel ||
       this.model === ObjectModel ||
       this.model instanceof ObjectModel ||
-      this.model instanceof BinderArrayModel
+      this.model instanceof BinderArrayModel ||
+      (this.model as Model) === ArrayModel ||
+      this.model instanceof ArrayModel
     ) {
       this.element.selectedItem = val ?? null;
     } else {
