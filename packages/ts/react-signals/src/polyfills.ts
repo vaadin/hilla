@@ -2,7 +2,7 @@
 declare global {
   interface PromiseConstructor {
     withResolvers<T>(): {
-      resolve(value: T): void;
+      resolve(value: T | PromiseLike<T>): void;
       reject(reason?: unknown): void;
       promise: Promise<T>;
     };

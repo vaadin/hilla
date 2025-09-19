@@ -116,5 +116,11 @@ describe('@vaadin/hilla-react-signals', () => {
       } as SetCommand<string>);
       await expect(result).to.be.fulfilled;
     });
+
+    describe('latency compensation', () => {
+      it('should update the value when the server acknowledges the change', async () => {
+        
+      });
+    });
   });
 });
