@@ -1,5 +1,5 @@
 /* eslint-disable accessor-pairs,no-void,sort-keys */
-import { ArrayModel, BooleanModel, type Model, NumberModel, ObjectModel } from '@vaadin/hilla-models';
+import { ArrayModel, BooleanModel, type Model, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-models';
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
@@ -10,8 +10,8 @@ import {
   hasFromString,
   NumberModel as BinderNumberModel,
   ObjectModel as BinderObjectModel,
+  StringModel as BinderStringModel,
 } from './Models.js';
-import { StringModel } from './Models.js';
 import type { ProvisionalModel } from './ProvisionalModel.js';
 import { getStringConverter } from './stringConverters.js';
 import type { ValueError } from './Validation.js';
@@ -111,6 +111,8 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
 
   set value(value: T | undefined) {
     if (
+      this.model instanceof BinderStringModel ||
+      this.model === StringModel ||
       this.model instanceof StringModel ||
       this.model instanceof BinderNumberModel ||
       this.model === NumberModel ||
