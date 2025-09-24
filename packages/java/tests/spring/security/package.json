@@ -3,7 +3,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@adobe/lit-mobx": "2.0.0-rc.4",
+    "@adobe/lit-mobx": "2.2.2",
     "@vaadin/a11y-base": "25.0.0-alpha19",
     "@vaadin/accordion": "25.0.0-alpha19",
     "@vaadin/app-layout": "25.0.0-alpha19",
@@ -81,7 +81,7 @@
     "@vaadin/virtual-list": "25.0.0-alpha19",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.3.1",
-    "mobx": "6.3.3"
+    "mobx": "6.13.7"
   },
   "devDependencies": {
     "@babel/preset-react": "7.27.1",
@@ -116,7 +116,7 @@
   },
   "vaadin": {
     "dependencies": {
-      "@adobe/lit-mobx": "2.0.0-rc.4",
+      "@adobe/lit-mobx": "2.2.2",
       "@vaadin/a11y-base": "24.8.0-alpha4",
       "@vaadin/accordion": "24.8.0-alpha4",
       "@vaadin/app-layout": "24.8.0-alpha4",
@@ -194,7 +194,7 @@
       "@vaadin/virtual-list": "24.8.0-alpha4",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.3.1",
-      "mobx": "6.3.3"
+      "mobx": "6.13.7"
     },
     "devDependencies": {
       "@babel/preset-react": "7.27.1",
