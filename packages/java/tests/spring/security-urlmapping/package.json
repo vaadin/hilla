@@ -160,8 +160,8 @@
       "@vaadin/hilla-frontend": "24.8.8",
       "@vaadin/hilla-lit-form": "24.8.8",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "24.8.7",
-      "@vaadin/icons": "24.8.7",
+      "@vaadin/icon": "24.8.8",
+      "@vaadin/icons": "24.8.8",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -179,7 +179,7 @@
       "@vaadin/number-field": "24.8.0-alpha4",
       "@vaadin/overlay": "24.8.0-alpha4",
       "@vaadin/password-field": "24.8.0-alpha4",
-      "@vaadin/polymer-legacy-adapter": "24.8.7",
+      "@vaadin/polymer-legacy-adapter": "24.8.8",
       "@vaadin/popover": "24.8.0-alpha4",
       "@vaadin/progress-bar": "24.8.0-alpha4",
       "@vaadin/radio-group": "24.8.0-alpha4",
@@ -194,22 +194,22 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "24.8.7",
+      "@vaadin/tooltip": "24.8.8",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "24.8.7",
+      "@vaadin/vaadin-lumo-styles": "24.8.8",
       "@vaadin/vaadin-material-styles": "24.8.0-alpha4",
-      "@vaadin/vaadin-themable-mixin": "24.8.7",
+      "@vaadin/vaadin-themable-mixin": "24.8.8",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "@vaadin/vertical-layout": "24.8.0-alpha4",
       "@vaadin/virtual-list": "24.8.0-alpha4",
       "construct-style-sheets-polyfill": "3.1.0",
-      "lit": "3.3.0",
+      "lit": "3.3.1",
       "mobx": "6.13.7"
     },
     "devDependencies": {
       "@babel/preset-react": "7.27.1",
-      "@preact/signals-react-transform": "0.5.1",
+      "@preact/signals-react-transform": "0.5.2",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.1.4",
       "@vaadin/hilla-generator-cli": "24.8.8",
@@ -223,10 +223,10 @@
       "@vaadin/hilla-generator-plugin-subtypes": "24.8.8",
       "@vaadin/hilla-generator-plugin-transfertypes": "24.8.8",
       "@vaadin/hilla-generator-utils": "24.8.8",
-      "@vitejs/plugin-react": "4.5.0",
+      "@vitejs/plugin-react": "4.5.2",
       "async": "3.2.6",
-      "glob": "11.0.2",
-      "magic-string": "0.30.17",
+      "glob": "11.0.3",
+      "magic-string": "0.30.19",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "5.14.0",
       "strip-css-comments": "5.0.0",
@@ -238,7 +238,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "19b6f1ecd281f21f59d53574245af104e80368779bf868f2135c4881ce5f6b52"
+    "hash": "211bb372e6bd38ec943ca6391175b6a05c817923a3eeb768638311c4bc4434da"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
@@ -337,7 +337,7 @@
     "@vaadin/card": "$@vaadin/card",
     "@vaadin/master-detail-layout": "$@vaadin/master-detail-layout",
     "@vaadin/markdown": "$@vaadin/markdown",
-    "@vaadin/react-components": "24.8.7",
-    "@vaadin/react-components-pro": "24.8.7"
+    "@vaadin/react-components": "24.8.8",
+    "@vaadin/react-components-pro": "24.8.8"
   }
 }
