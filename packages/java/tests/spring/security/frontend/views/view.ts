@@ -11,8 +11,8 @@ export class MobxElement extends MobxLitElement {
    */
   protected reaction<T>(
     expression: (r: IReactionPublic) => T,
-    effect: (arg: T, prev: T, r: IReactionPublic) => void,
-    opts?: IReactionOptions<T>,
+    effect: (arg: T, prev: T | undefined, r: IReactionPublic) => void,
+    opts?: IReactionOptions<T, boolean>,
   ): void {
     this.disposers.push(reaction(expression, effect, opts));
   }
