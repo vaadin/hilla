@@ -17,8 +17,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
                 @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com.vaadin.flow.spring.fusionsecurity.Application") })
 @EntityScan(basePackages = { "com.vaadin.flow.spring.fusionsecurity.data" })
 @Import(JwtSecurityUtils.class)
-@NpmPackage(value = "@adobe/lit-mobx", version = "2.0.0-rc.4")
-@NpmPackage(value = "mobx", version = "6.3.3")
+@NpmPackage(value = "@adobe/lit-mobx", version = "2.2.2")
+@NpmPackage(value = "mobx", version = "6.13.7")
 @EnableJpaRepositories(basePackages = {
         "com.vaadin.flow.spring.fusionsecurity.data" })
 public class Application {
