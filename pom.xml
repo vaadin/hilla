@@ -84,7 +84,9 @@
     <swagger.core.version>2.2.36</swagger.core.version>
     <swagger.models.version>2.2.36</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson.version>2.20.0</jackson.version>
+    <jackson.version>3.0.0-rc9</jackson.version>
+    <jackson.annotations.v2.version>2.19.2</jackson.annotations.v2.version>
+    <jackson.databind.v2.version>2.20.0</jackson.databind.v2.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.0.0-alpha14</flow.version>
@@ -214,32 +216,40 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>2.20</version> <!-- not 2.20.0 -->
+        <version>${jackson.annotations.v2.version}</version>
       </dependency>
-      <!-- Added since Spring Boot 4.0.0-M2 wants 2.20.0-rc1 -->
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson.databind.v2.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson.databind.v2.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jdk8</artifactId>
+        <version>${jackson.databind.v2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-      <!-- End of added group -->
       <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-yaml</artifactId>
         <version>${jackson.version}</version>
       </dependency>

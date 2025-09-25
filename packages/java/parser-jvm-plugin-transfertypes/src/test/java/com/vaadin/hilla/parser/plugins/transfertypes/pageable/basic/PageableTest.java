@@ -18,8 +18,7 @@ public class PageableTest {
     private final List<Class<?>> endpoints = List.of(PageableEndpoint.class);
 
     @Test
-    public void should_CorrectlyResolveReplacedDependencies()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyResolveReplacedDependencies() throws Exception {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var openAPI = new Parser()
@@ -33,8 +32,7 @@ public class PageableTest {
     }
 
     @Test
-    public void should_ReplaceSpringClassesWithSubstitutes()
-            throws IOException, URISyntaxException {
+    public void should_ReplaceSpringClassesWithSubstitutes() throws Exception {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var openAPI = new Parser()

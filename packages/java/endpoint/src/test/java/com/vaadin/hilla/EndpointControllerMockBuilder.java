@@ -2,17 +2,18 @@ package com.vaadin.hilla;
 
 import static org.mockito.Mockito.mock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
+import com.vaadin.hilla.parser.jackson.ByteArrayModule;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 import jakarta.servlet.ServletContext;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * A helper class to build a mocked EndpointController.
@@ -49,20 +50,16 @@ public class EndpointControllerMockBuilder {
             ApplicationContext applicationContext,
             JacksonObjectMapperFactory factory) {
         ObjectMapper endpointObjectMapper = factory != null ? factory.build()
-                : createDefaultEndpointMapper(applicationContext);
-        if (endpointObjectMapper != null) {
-            endpointObjectMapper.registerModule(
-                    ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
+                : createDefaultEndpointMapper();
+        if (endpointObjectMapper == null) {
+            return null;
         }
-        return endpointObjectMapper;
+        return endpointObjectMapper.rebuild()
+                .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule()).build();
     }
 
-    private static ObjectMapper createDefaultEndpointMapper(
-            ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-        return endpointMapper;
+    private static ObjectMapper createDefaultEndpointMapper() {
+        return JsonMapper.builder().addModule(new ByteArrayModule()).build();
     }
 
     public EndpointControllerMockBuilder withApplicationContext(

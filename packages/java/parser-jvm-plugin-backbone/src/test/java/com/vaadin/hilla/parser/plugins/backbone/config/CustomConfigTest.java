@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.config;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -16,8 +14,7 @@ public class CustomConfigTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyHandleComplexTypes()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyHandleComplexTypes() throws Exception {
         var pluginConfig = new BackbonePluginConfiguration();
         pluginConfig
                 .setObjectMapperFactoryClassName(CustomFactory.class.getName());

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +31,8 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.PageTitle;
@@ -217,17 +217,15 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass().getResource(
-                "/META-INF/VAADIN/available-views-anonymous.json"));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/available-views-anonymous.json");
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
+        for (String field : expected.propertyNames()) {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     @Test
@@ -270,17 +268,15 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-user.json"));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/available-views-user.json");
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
+        for (String field : expected.propertyNames()) {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     @Test
@@ -322,20 +318,18 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-admin.json"));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/available-views-admin.json");
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
+        for (String field : expected.propertyNames()) {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
 
     }
 
@@ -367,20 +361,18 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-admin.json"));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/available-views-admin.json");
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
+        for (String field : expected.propertyNames()) {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     @Test
@@ -500,20 +492,18 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/only-client-views.json"));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/only-client-views.json");
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
+        for (String field : expected.propertyNames()) {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     @Test
@@ -567,8 +557,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/only-client-views.json"));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/only-client-views.json");
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
@@ -640,20 +630,18 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(views);
-        var expected = mapper.readTree(
-                getClass().getResource("/META-INF/VAADIN/" + expectedJsonFile));
+        var expected = readJsonResource(mapper,
+                "/META-INF/VAADIN/" + expectedJsonFile);
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
+        for (String field : expected.propertyNames()) {
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     private void mockDevelopmentMode() throws IOException {
@@ -673,6 +661,17 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         try (InputStream routes = RouteUnifyingIndexHtmlRequestListenerTest.class
                 .getResourceAsStream(jsonFile)) {
             FileUtils.copyInputStreamToFile(routes, clientFiles);
+        }
+    }
+
+    private JsonNode readJsonResource(ObjectMapper mapper, String resourcePath)
+            throws IOException {
+        try (InputStream stream = getClass()
+                .getResourceAsStream(resourcePath)) {
+            if (stream == null) {
+                throw new IOException("Resource not found: " + resourcePath);
+            }
+            return mapper.readTree(stream);
         }
     }
 

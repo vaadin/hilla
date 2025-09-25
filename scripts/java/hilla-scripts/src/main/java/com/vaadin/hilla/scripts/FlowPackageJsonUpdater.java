@@ -94,14 +94,18 @@ public class FlowPackageJsonUpdater {
         }
 
         if (value instanceof ObjectNode valueObject) {
-            valueObject.fields().forEachRemaining((field) -> {
-                updateTreeAt(pointer.appendProperty(field.getKey()),
-                        field.getValue());
+            valueObject.fieldNames().forEachRemaining(key -> {
+                var child = valueObject.get(key);
+                // build new pointer path manually (JsonPointer has no
+                // appendProperty helper)
+                var childPointer = JsonPointer
+                        .compile(pointer.toString() + "/" + key);
+                updateTreeAt(childPointer, child);
             });
             return;
         }
 
-        if (value.equals(current)) {
+        if (value != null && value.equals(current)) {
             if (logger().isDebugEnabled()) {
                 logger().debug("Skipping update for {}, same value of {}.",
                         pointer, value);
@@ -123,10 +127,10 @@ public class FlowPackageJsonUpdater {
         var objectMapper = JacksonUtils.getMapper();
         var filePrinter = new DefaultPrettyPrinter()
                 .withSeparators(Separators.createDefaultInstance()
-                        .withObjectFieldValueSpacing(Separators.Spacing.AFTER))
+                        .withObjectEntrySpacing(Separators.Spacing.AFTER))
                 .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-        var contents = objectMapper.writer().with(filePrinter)
-                .writeValueAsString(tree) + DefaultIndenter.SYS_LF;
+        var contents = objectMapper.writer(filePrinter).writeValueAsString(tree)
+                + DefaultIndenter.SYS_LF;
         FileIOUtils.writeIfChanged(packageJsonFile.toFile(), contents);
     }
 

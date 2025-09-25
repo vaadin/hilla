@@ -27,12 +27,14 @@ public final class TestHelper {
         }
     }
 
-    public void executeParserWithConfig(OpenAPI openAPI)
-            throws IOException, URISyntaxException {
+    public void executeParserWithConfig(OpenAPI openAPI) throws Exception {
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
                 OpenAPI.class);
-
-        assertEquals(expected, openAPI);
+        try {
+            assertEquals(expected, openAPI);
+        } catch (Exception e) { // assertEquals throws generic Exception
+            throw new RuntimeException("OpenAPI comparison failed", e);
+        }
     }
 
     public Path getTargetDir() {

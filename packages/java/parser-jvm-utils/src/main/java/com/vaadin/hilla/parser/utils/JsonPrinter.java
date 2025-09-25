@@ -1,19 +1,16 @@
 package com.vaadin.hilla.parser.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
-import io.swagger.v3.core.util.Json;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
 
 public final class JsonPrinter {
-    private final ObjectMapper mapper = Json.mapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     private final Pretty pretty;
 
     public JsonPrinter() {
-        mapper.findAndRegisterModules();
+        // Jackson 3.x modules are automatically registered
         // Putting the `pretty` initialization here allows preserving correct
         // class initialization sequence.
         pretty = new Pretty();
@@ -23,7 +20,7 @@ public final class JsonPrinter {
         return pretty;
     }
 
-    public String writeAsString(Object value) throws JsonProcessingException {
+    public String writeAsString(Object value) {
         return mapper.writeValueAsString(value);
     }
 
@@ -35,11 +32,10 @@ public final class JsonPrinter {
             var indenter = new DefaultIndenter("  ", "\n");
             printer.indentArraysWith(indenter);
             printer.indentObjectsWith(indenter);
-            writer = mapper.writer(printer);
+            writer = mapper.writerWithDefaultPrettyPrinter().with(printer);
         }
 
-        public String writeAsString(Object value)
-                throws JsonProcessingException {
+        public String writeAsString(Object value) {
             return writer.writeValueAsString(value);
         }
     }

@@ -15,8 +15,7 @@ public class SuperClassMethodsTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyHandleSuperClassMethods()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyHandleSuperClassMethods() throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

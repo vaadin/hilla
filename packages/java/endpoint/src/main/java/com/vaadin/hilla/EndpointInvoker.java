@@ -15,10 +15,9 @@
  */
 package com.vaadin.hilla;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.hilla.EndpointInvocationException.EndpointBadRequestException;
@@ -201,8 +200,7 @@ public class EndpointInvoker {
         return objectNode.toString();
     }
 
-    String createResponseErrorObject(Map<String, Object> serializationData)
-            throws JsonProcessingException {
+    String createResponseErrorObject(Map<String, Object> serializationData) {
         return endpointObjectMapper.writeValueAsString(serializationData);
     }
 
@@ -218,8 +216,7 @@ public class EndpointInvoker {
         return wrapper.accessChecker;
     }
 
-    String writeValueAsString(Object returnValue)
-            throws JsonProcessingException {
+    String writeValueAsString(Object returnValue) {
         return endpointObjectMapper.writeValueAsString(returnValue);
     }
 
@@ -304,8 +301,7 @@ public class EndpointInvoker {
         // Respect the order of parameters in the request body
         Map<String, JsonNode> parametersData = new LinkedHashMap<>();
         if (body != null) {
-            body.fields().forEachRemaining(entry -> parametersData
-                    .put(entry.getKey(), entry.getValue()));
+            body.forEachEntry(parametersData::put);
         }
 
         // Try to adapt to the order of parameters in the method
@@ -353,7 +349,7 @@ public class EndpointInvoker {
                 if (parameter != null) {
                     constraintViolations.addAll(validator.validate(parameter));
                 }
-            } catch (IOException e) {
+            } catch (RuntimeException e) {
                 String typeName = parameterType.getTypeName();
                 getLogger().error(
                         "Unable to deserialize an endpoint '{}' method '{}' "

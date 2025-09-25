@@ -15,8 +15,7 @@ public class TransientTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyHandleTransients()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyHandleTransients() throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

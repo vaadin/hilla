@@ -4,14 +4,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.util.IgnorePropertiesUtil;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.introspect.AnnotatedClass;
+import tools.jackson.databind.introspect.ClassIntrospector;
+import tools.jackson.databind.introspect.VisibilityChecker;
+import tools.jackson.databind.util.IgnorePropertiesUtil;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -28,13 +32,8 @@ import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
-            .build()
-            .setVisibility(PropertyAccessor.SETTER,
-                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
-            .setVisibility(PropertyAccessor.GETTER,
-                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
-            .getSerializationConfig();
+    private SerializationConfig serializationConfig = createSerializationConfig(
+            new JacksonObjectMapperFactory.Json());
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -74,7 +73,7 @@ public final class PropertyPlugin
         var factory = loadJacksonObjectMapperFactory();
 
         if (factory != null) {
-            this.serializationConfig = factory.build().getSerializationConfig();
+            this.serializationConfig = createSerializationConfig(factory);
         }
     }
 
@@ -87,11 +86,37 @@ public final class PropertyPlugin
                     "Jackson: Only reflection models are supported");
         }
 
-        var description = serializationConfig
-                .introspect(serializationConfig.constructType((Class<?>) cls));
+        var javaType = serializationConfig.constructType((Class<?>) cls);
+        ClassIntrospector introspector = serializationConfig
+                .classIntrospectorInstance();
+        AnnotatedClass annotatedClass = introspector
+                .introspectClassAnnotations(javaType);
+        var description = introspector.introspectForSerialization(javaType,
+                annotatedClass);
 
         var processor = new PropertyProcessor(description);
         return processor.stream();
+    }
+
+    private SerializationConfig createSerializationConfig(
+            JacksonObjectMapperFactory factory) {
+        var mapper = factory.build();
+        try {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            MapperBuilder builder = mapper.rebuild();
+            UnaryOperator<VisibilityChecker> tweakVisibility = vc -> vc
+                    .withSetterVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY)
+                    .withGetterVisibility(
+                            JsonAutoDetect.Visibility.PUBLIC_ONLY);
+            builder = builder.changeDefaultVisibility(tweakVisibility);
+            @SuppressWarnings("unchecked")
+            var configuredMapper = (tools.jackson.databind.ObjectMapper) builder
+                    .build();
+            return configuredMapper.serializationConfig();
+        } catch (IllegalStateException ex) {
+            // Mapper does not support rebuild(); use default configuration.
+            return mapper.serializationConfig();
+        }
     }
 
     private JacksonObjectMapperFactory loadJacksonObjectMapperFactory() {
@@ -178,7 +203,10 @@ public final class PropertyPlugin
         private Stream<JacksonPropertyModel> filterPropertiesWithIgnoredTypes(
                 Stream<JacksonPropertyModel> properties) {
             var ignores = new HashMap<Class<?>, Boolean>();
-            var introspector = serializationConfig.getAnnotationIntrospector();
+            var annotationIntrospector = serializationConfig
+                    .getAnnotationIntrospector();
+            ClassIntrospector classIntrospector = serializationConfig
+                    .classIntrospectorInstance();
 
             return properties.filter(property -> {
                 var type = property.get().getRawPrimaryType();
@@ -189,10 +217,11 @@ public final class PropertyPlugin
                             .getIsIgnoredType();
 
                     if (result == null) {
-                        var classInfo = serializationConfig
-                                .introspectClassAnnotations(type)
-                                .getClassInfo();
-                        result = introspector.isIgnorableType(classInfo);
+                        var javaType = serializationConfig.constructType(type);
+                        var annotatedClass = classIntrospector
+                                .introspectClassAnnotations(javaType);
+                        result = annotationIntrospector.isIgnorableType(
+                                serializationConfig, annotatedClass);
 
                         if (result == null) {
                             result = Boolean.FALSE;

@@ -18,8 +18,7 @@ public class PushTypeTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_ReplacePushTypes()
-            throws IOException, URISyntaxException {
+    public void should_ReplacePushTypes() throws Exception {
         var classpath = helper.getExtendedClassPath(Flux.class,
                 EndpointSubscription.class);
 

@@ -16,7 +16,7 @@ public class SimpleTypeTest {
 
     @Test
     public void should_UseAppropriateSchema_When_SimpleTypesAreUsed()
-            throws IOException, URISyntaxException {
+            throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

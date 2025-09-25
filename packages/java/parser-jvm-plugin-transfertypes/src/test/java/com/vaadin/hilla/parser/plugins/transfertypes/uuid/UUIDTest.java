@@ -16,8 +16,7 @@ public class UUIDTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_ReplaceUUIDClassWithString()
-            throws IOException, URISyntaxException {
+    public void should_ReplaceUUIDClassWithString() throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

@@ -18,8 +18,7 @@ public class ValidationTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_GenerateValidations()
-            throws IOException, URISyntaxException {
+    public void should_GenerateValidations() throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

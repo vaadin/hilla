@@ -18,8 +18,7 @@ public class SuperClassMethodsTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyHandleSuperClassMethods()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyHandleSuperClassMethods() throws Exception {
         var plugin = new NonnullPlugin();
         plugin.setConfiguration(new NonnullPluginConfig(Set
                 .of(new AnnotationMatcher(Nonnull.class.getName(), false, 0)),

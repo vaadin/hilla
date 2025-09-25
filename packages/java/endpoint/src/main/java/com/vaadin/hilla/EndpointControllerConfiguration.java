@@ -18,7 +18,8 @@ package com.vaadin.hilla;
 
 import java.lang.reflect.Method;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,7 +28,7 @@ import org.springframework.boot.webmvc.autoconfigure.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+// Removed Jackson2ObjectMapperBuilder usage (Jackson 2 only)
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -38,6 +39,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.parser.jackson.ByteArrayModule;
 
 import jakarta.servlet.ServletContext;
 
@@ -116,23 +118,16 @@ public class EndpointControllerConfiguration {
             ApplicationContext applicationContext,
             @Autowired(required = false) @Qualifier(EndpointController.ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER) JacksonObjectMapperFactory endpointMapperFactory) {
         if (this.endpointMapper == null) {
-            this.endpointMapper = endpointMapperFactory != null
+            this.endpointMapper = (endpointMapperFactory != null
                     ? endpointMapperFactory.build()
-                    : createDefaultEndpointMapper(applicationContext);
-            if (this.endpointMapper != null) {
-                this.endpointMapper.registerModule(
-                        ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
-            }
+                    : createDefaultEndpointMapper());
         }
         return this.endpointMapper;
     }
 
-    private static ObjectMapper createDefaultEndpointMapper(
-            ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-        return endpointMapper;
+    private static ObjectMapper createDefaultEndpointMapper() {
+        return JsonMapper.builder().addModule(new ByteArrayModule())
+                .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule()).build();
     }
 
     /**

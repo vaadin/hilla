@@ -19,7 +19,7 @@ public class JacksonTest {
 
     @Test
     public void should_CorrectlyIgnoreFieldsBasedOnJSONAnnotations()
-            throws IOException, URISyntaxException {
+            throws Exception {
         // This test is only run on JDKs that return fields and methods in the
         // order they are defined. Some JDKs like JetBrains Runtime does not
         Assumptions.assumeTrue(fieldsReturnedInDefinedOrder(),

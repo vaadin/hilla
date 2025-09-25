@@ -20,7 +20,7 @@ public class BarePageableTest {
 
     @Test
     public void should_ConsiderInternalDependenciesForReplacedEntities()
-            throws IOException, URISyntaxException {
+            throws Exception {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var openAPI = new Parser()
@@ -34,8 +34,7 @@ public class BarePageableTest {
     }
 
     @Test
-    public void should_CorrectlyResolveReplacedDependencies()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyResolveReplacedDependencies() throws Exception {
         var classpath = helper.getExtendedClassPath(Pageable.class);
 
         var openAPI = new Parser()

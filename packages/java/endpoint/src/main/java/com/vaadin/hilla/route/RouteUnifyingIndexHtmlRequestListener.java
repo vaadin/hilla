@@ -15,14 +15,13 @@
  */
 package com.vaadin.hilla.route;
 
-import java.io.IOException;
-
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.server.communication.IndexHtmlRequestListener;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
+import tools.jackson.core.JacksonException;
 
 /**
  * Index HTML request listener for collecting the client side and the server
@@ -52,7 +51,7 @@ public class RouteUnifyingIndexHtmlRequestListener
                             .createFileRoutesJson(response.getVaadinRequest()));
             response.getDocument().head().appendElement("script")
                     .appendChild(new DataNode(script));
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error(
                     "Failure while to write client and server routes to index html response",
                     e);

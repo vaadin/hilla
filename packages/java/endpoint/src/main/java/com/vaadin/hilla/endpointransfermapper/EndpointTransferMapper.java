@@ -15,23 +15,20 @@
  */
 package com.vaadin.hilla.endpointransfermapper;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.deser.std.StdDelegatingDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.databind.util.StdConverter;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.node.POJONode;
+import tools.jackson.databind.ser.std.StdDelegatingSerializer;
+import tools.jackson.databind.type.TypeFactory;
+import tools.jackson.databind.util.StdConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -162,23 +159,14 @@ public class EndpointTransferMapper {
                 });
         jacksonModule.addSerializer(endpointType, serializer);
 
-        var deserializer = new StdDelegatingDeserializer<>(
-                new StdConverter<TRANSFERTYPE, ENDPOINTTYPE>() {
-                    @Override
-                    public ENDPOINTTYPE convert(TRANSFERTYPE value) {
-                        return mapper.toEndpointType(value);
-                    }
-
-                    @Override
-                    public JavaType getInputType(TypeFactory typeFactory) {
-                        return typeFactory.constructType(transferType);
-                    }
-
-                    @Override
-                    public JavaType getOutputType(TypeFactory typeFactory) {
-                        return typeFactory.constructType(endpointType);
-                    }
-                });
+        var deserializer = new ValueDeserializer<ENDPOINTTYPE>() {
+            @Override
+            public ENDPOINTTYPE deserialize(JsonParser p,
+                    DeserializationContext ctxt) {
+                TRANSFERTYPE value = p.readValueAs(transferType);
+                return mapper.toEndpointType(value);
+            }
+        };
 
         jacksonModule.addDeserializer(endpointType, deserializer);
         jacksonModule.addDeserializer(MultipartFile.class,
@@ -186,15 +174,15 @@ public class EndpointTransferMapper {
     }
 
     /**
-     * Gets the Jackson 2 module configured with the mapping serializers and
+     * Gets the Jackson 3 module configured with the mapping serializers and
      * deserializers.
      *
      * <p>
      * For internal use only. May be changed or removed in a future release.
      *
-     * @return Jackson 2 module.
+     * @return Jackson 3 module.
      */
-    public Module getJacksonModule() {
+    public SimpleModule getJacksonModule() {
         return jacksonModule;
     }
 
@@ -332,22 +320,22 @@ public class EndpointTransferMapper {
      * tries to deserialize the object which is already a POJO.
      */
     public static class MultipartFileDeserializer
-            extends JsonDeserializer<MultipartFile> {
+            extends ValueDeserializer<MultipartFile> {
 
         @Override
         public MultipartFile deserialize(JsonParser p,
-                DeserializationContext ctxt) throws IOException {
-            JsonNode node = p.getCodec().readTree(p);
+                DeserializationContext ctxt) {
+            JsonNode node = p.readValueAsTree();
 
-            if (node instanceof POJONode) {
-                Object pojo = ((POJONode) node).getPojo();
+            if (node instanceof POJONode pojoNode) {
+                Object pojo = pojoNode.getPojo();
 
-                if (pojo instanceof MultipartFile) {
-                    return (MultipartFile) pojo;
+                if (pojo instanceof MultipartFile multipartFile) {
+                    return multipartFile;
                 }
             }
 
-            throw new IOException(
+            throw new RuntimeException(
                     "Expected a POJONode wrapping a MultipartFile");
         }
     }

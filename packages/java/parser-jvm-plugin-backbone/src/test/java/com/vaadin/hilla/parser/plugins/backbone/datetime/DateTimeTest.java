@@ -16,7 +16,7 @@ public class DateTimeTest {
 
     @Test
     public void should_GenerateStringType_When_ReferringToDateTimeTypes()
-            throws IOException, URISyntaxException {
+            throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

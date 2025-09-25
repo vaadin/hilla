@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.genericsuperclassmethods;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -14,8 +12,7 @@ public class GenericSuperClassMethodsTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_CorrectlyHandleSuperClassMethods()
-            throws IOException, URISyntaxException {
+    public void should_CorrectlyHandleSuperClassMethods() throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

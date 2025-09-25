@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -49,9 +50,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.CurrentInstance;
@@ -1098,8 +1099,14 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         assertEquals(expectedErrorMessage, jsonNodes.get("message").asText());
         assertEquals(2, jsonNodes.get("validationErrorData").size());
 
-        List<String> parameterNames = jsonNodes.get("validationErrorData")
-                .findValuesAsText("parameterName");
+        List<String> parameterNames = new ArrayList<>();
+        jsonNodes.get("validationErrorData").forEach(node -> {
+            JsonNode parameterNameNode = node.get("parameterName");
+            if (parameterNameNode != null
+                    && !parameterNameNode.isMissingNode()) {
+                parameterNames.add(parameterNameNode.asText());
+            }
+        });
         assertEquals(2, parameterNames.size());
         assertTrue(parameterNames.contains("date"));
         assertTrue(parameterNames.contains("number"));
@@ -1435,12 +1442,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
     }
 
     private ObjectNode createRequestParameters(String jsonBody) {
-        try {
-            return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
-        } catch (IOException e) {
-            throw new AssertionError(String
-                    .format("Failed to deserialize the json: %s", jsonBody), e);
-        }
+        return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
     }
 
     private <T> EndpointController createVaadinController(T endpoint) {

@@ -1,7 +1,5 @@
 package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +14,7 @@ public class EnumTypeTest {
 
     @Test
     public void should_GenerateStringType_When_ReferringToEnumTypes()
-            throws IOException, URISyntaxException {
+            throws Exception {
         var openAPI = new Parser()
                 .classPath(Set.of(helper.getTargetDir().toString()))
                 .endpointAnnotations(List.of(Endpoint.class))

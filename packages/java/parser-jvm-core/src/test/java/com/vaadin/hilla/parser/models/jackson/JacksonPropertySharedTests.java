@@ -9,9 +9,16 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.fasterxml.jackson.annotation.OptBoolean;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.introspect.AnnotatedMember;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.databind.json.JsonMapper;
 
 final class JacksonPropertySharedTests {
 
@@ -67,10 +74,56 @@ final class JacksonPropertySharedTests {
         private static final Map<String, BeanPropertyDefinition> reflectionOrigins;
 
         static {
-            var mapper = new ObjectMapper();
-            reflectionOrigins = mapper.getSerializationConfig()
-                    .introspect(mapper.constructType(Sample.class))
-                    .findProperties().stream()
+            var introspector = new JacksonAnnotationIntrospector() {
+                @Override
+                public Boolean hasRequiredMarker(MapperConfig<?> config,
+                        AnnotatedMember member) {
+                    var jsonProperty = _findAnnotation(member,
+                            JsonProperty.class);
+                    if (jsonProperty != null) {
+                        var requirement = extractRequirement(jsonProperty);
+                        if (requirement != null) {
+                            return requirement;
+                        }
+                        if (jsonProperty.required()) {
+                            return Boolean.TRUE;
+                        }
+                        return null;
+                    }
+                    return super.hasRequiredMarker(config, member);
+                }
+
+                private Boolean extractRequirement(JsonProperty jsonProperty) {
+                    try {
+                        var method = jsonProperty.getClass()
+                                .getMethod("isRequired");
+                        var result = method.invoke(jsonProperty);
+                        if (result instanceof Boolean bool) {
+                            return Boolean.valueOf(bool);
+                        }
+                        if (result instanceof OptBoolean opt) {
+                            return opt == OptBoolean.DEFAULT ? null
+                                    : opt.asBoolean();
+                        }
+                    } catch (NoSuchMethodException | IllegalAccessException
+                            | InvocationTargetException ignored) {
+                        // Older Jackson annotations (2.x) only expose
+                        // required()
+                    }
+                    return null;
+                }
+            };
+            var mapper = JsonMapper.builder()
+                    .annotationIntrospector(introspector).build();
+            var serializationConfig = mapper.serializationConfig();
+            var javaType = mapper.constructType(Sample.class);
+            var classIntrospector = serializationConfig
+                    .classIntrospectorInstance();
+            var annotatedClass = classIntrospector
+                    .introspectClassAnnotations(javaType);
+            var beanDescription = classIntrospector
+                    .introspectForSerialization(javaType, annotatedClass);
+            reflectionOrigins = beanDescription.findProperties().stream()
                     .collect(Collectors.toMap(
                             BeanPropertyDefinition::getInternalName,
                             Function.identity()));

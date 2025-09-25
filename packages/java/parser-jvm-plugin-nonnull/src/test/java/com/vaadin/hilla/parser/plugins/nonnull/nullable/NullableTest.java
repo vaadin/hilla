@@ -19,8 +19,7 @@ public class NullableTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_ApplyNullableAnnotation()
-            throws IOException, URISyntaxException {
+    public void should_ApplyNullableAnnotation() throws Exception {
         var plugin = new NonnullPlugin();
         plugin.setConfiguration(new NonnullPluginConfig());
 

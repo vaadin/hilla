@@ -1,10 +1,7 @@
 package com.vaadin.hilla.parser.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * A factory to build a custom ObjectMapper for serializing and deserializing
@@ -30,9 +27,11 @@ public interface JacksonObjectMapperFactory {
     class Json implements JacksonObjectMapperFactory {
         @Override
         public ObjectMapper build() {
+            // In Jackson 3.x, Jdk8Module, JavaTimeModule, and
+            // ParameterNamesModule
+            // are built into jackson-databind and no longer separate modules
             return JsonMapper.builder().addModule(new ByteArrayModule())
-                    .addModule(new Jdk8Module()).addModule(new JavaTimeModule())
-                    .addModule(new ParameterNamesModule()).build();
+                    .build();
         }
     }
 }

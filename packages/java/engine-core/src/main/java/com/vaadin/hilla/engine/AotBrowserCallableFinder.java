@@ -1,6 +1,6 @@
 package com.vaadin.hilla.engine;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

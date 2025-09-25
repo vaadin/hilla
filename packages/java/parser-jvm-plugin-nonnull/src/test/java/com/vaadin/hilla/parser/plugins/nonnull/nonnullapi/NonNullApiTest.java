@@ -18,8 +18,7 @@ public class NonNullApiTest {
     private final TestHelper helper = new TestHelper(getClass());
 
     @Test
-    public void should_ApplyNonNullApiAnnotation()
-            throws IOException, URISyntaxException {
+    public void should_ApplyNonNullApiAnnotation() throws Exception {
         var plugin = new NonnullPlugin();
         plugin.setConfiguration(new NonnullPluginConfig(Set.of(
                 new AnnotationMatcher(NonNullApi.class.getName(), false, 10),
