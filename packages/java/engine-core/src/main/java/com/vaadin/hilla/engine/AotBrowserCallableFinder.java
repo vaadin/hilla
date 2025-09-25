@@ -180,8 +180,14 @@ public class AotBrowserCallableFinder {
         // Extract candidate class names
         var candidates = new ArrayList<String>();
         for (var node : reflectionsNode) {
-            String type = node.get("type").asText();
-            candidates.add(type);
+            var typeNode = node.get("type");
+            if (typeNode.isTextual()) {
+                String type = node.get("type").asText();
+                candidates.add(type);
+            } else {
+                LOGGER.trace("Ignoring non-string type for property {}",
+                        typeNode);
+            }
         }
 
         var annotationNames = engineConfiguration.getEndpointAnnotations()
