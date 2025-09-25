@@ -26,7 +26,7 @@ import org.junit.Before
 abstract class AbstractGradleTest {
 
     val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "25.0-SNAPSHOT"
-    val flowVersion = System.getenv("flow.version").takeUnless { it.isNullOrEmpty() } ?: "25.0-SNAPSHOT"
+    val flowVersion = System.getenv("flow.version").takeUnless { it.isNullOrEmpty() } ?: "25.0.0-alpha14"
     val springBootVersion = System.getenv("spring.boot.version").takeUnless { it.isNullOrEmpty() } ?: "4.0.0-M2"
 
     /**
