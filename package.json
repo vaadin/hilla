@@ -9,12 +9,7 @@
     "npm": ">=10.5"
   },
   "workspaces": [
-    "packages/ts/*",
-    "packages/java/tests/*",
-    "packages/java/tests/gradle/*",
-    "packages/java/tests/spring/*",
-    "!packages/java/tests/spring/native",
-    "!packages/java/tests/spring/endpoints-maven-engine"
+    "packages/ts/*"
   ],
   "scripts": {
     "clean:build": "nx run-many -p packages/ts/* -t clean:build --all --output-style stream",
