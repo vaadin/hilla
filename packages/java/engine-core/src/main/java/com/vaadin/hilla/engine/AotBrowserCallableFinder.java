@@ -185,7 +185,8 @@ public class AotBrowserCallableFinder {
                 String type = node.get("type").asText();
                 candidates.add(type);
             } else {
-                LOGGER.trace("Ignoring non-string type for property {}",  typeNode);
+                LOGGER.trace("Ignoring non-string type for property {}",
+                        typeNode);
             }
         }
 
