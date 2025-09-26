@@ -13,10 +13,9 @@ public final class JsonAssertions {
 
     public static void assertEquals(Object expected, Object actual)
             throws JsonProcessingException {
+        String expectedJson = printer.writeAsString(expected);
+        String actualJson = printer.writeAsString(actual);
         try {
-            String expectedJson = printer.writeAsString(expected);
-            String actualJson = printer.writeAsString(actual);
-
             // Use JSONAssert for comparison - ignores whitespace and provides
             // precise diffs
             JSONAssert.assertEquals(expectedJson, actualJson,
@@ -26,22 +25,23 @@ public final class JsonAssertions {
             // field
             String originalMessage = e.getMessage();
             String enhancedMessage = enhanceErrorMessage(originalMessage,
-                    expected, actual);
+                    expectedJson, actualJson);
             throw new AssertionError(enhancedMessage, e);
         }
     }
 
     private static String enhanceErrorMessage(String originalMessage,
-            Object expected, Object actual) throws JsonProcessingException {
+            String expectedJson, String actualJson)
+            throws JsonProcessingException {
         StringBuilder enhanced = new StringBuilder();
         enhanced.append("JSON comparison failed:\n");
         enhanced.append(originalMessage);
         enhanced.append(
                 "\n\nFor better context, here are the complete JSON structures:\n\n");
         enhanced.append("Expected:\n");
-        enhanced.append(printer.pretty().writeAsString(expected));
+        enhanced.append(expectedJson);
         enhanced.append("\n\nActual:\n");
-        enhanced.append(printer.pretty().writeAsString(actual));
+        enhanced.append(actualJson);
         return enhanced.toString();
     }
 }
