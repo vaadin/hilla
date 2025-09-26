@@ -440,6 +440,12 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     private void verifyAndAssertViews(String expectedJsonPath,
             boolean checkSize) throws IOException {
         Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
+        verifyAndAssertViewsWithoutDocumentVerification(expectedJsonPath,
+                checkSize);
+    }
+
+    private void verifyAndAssertViewsWithoutDocumentVerification(
+            String expectedJsonPath, boolean checkSize) throws IOException {
         MatcherAssert.assertThat(
                 indexHtmlResponse.getDocument().head().select("script"),
                 Matchers.notNullValue());
@@ -515,6 +521,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
 
+        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
         MatcherAssert.assertThat(
                 indexHtmlResponse.getDocument().head().select("script"),
                 Matchers.notNullValue());
@@ -524,7 +531,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 Matchers.is(false));
 
         if (checkFields) {
-            verifyAndAssertViews(expectedJsonPath, checkSize);
+            verifyAndAssertViewsWithoutDocumentVerification(expectedJsonPath,
+                    checkSize);
         } else {
             DataNode script = indexHtmlResponse.getDocument().head()
                     .select("script").dataNodes().get(0);
