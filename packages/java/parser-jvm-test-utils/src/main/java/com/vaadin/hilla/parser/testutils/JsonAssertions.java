@@ -30,8 +30,7 @@ public final class JsonAssertions {
     }
 
     private static String enhanceErrorMessage(String originalMessage,
-            String expectedJson, String actualJson)
-            throws JacksonException {
+            String expectedJson, String actualJson) throws JacksonException {
         StringBuilder enhanced = new StringBuilder();
         enhanced.append("JSON comparison failed:\n");
         enhanced.append(originalMessage);
