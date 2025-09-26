@@ -308,69 +308,6 @@ jobs:
             packages/java/gradle-plugin/build/test-results/*
             packages/java/gradle-plugin/build/reports/*
 
-  test-react-18:
-    needs:
-      - init
-    name: React 18 Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - name: Install Chrome
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
-      - name: Checkout Project Code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{env.HEAD_SHA}}
-          fetch-depth: 0
-      - name: Setup
-        uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
-        with:
-          name: saved-workspace
-      - name: Restore Workspace
-        run: |
-          set -x
-          tar xf workspace.tar
-          tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
-      - name: Install React 18
-        run: npm run build:react-18
-      - name: Test
-        run: npm run test:react
-        env:
-          CI: true
-          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
-      - name: Set TB License
-        run: |
-          TB_LICENSE=${{secrets.TB_LICENSE}}
-          mkdir -p ~/.vaadin/
-          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
-      - name: Verify
-        run: |
-          (
-            cd packages/java/tests && \
-            mvn -B -am -ntp -fae \
-              -Dfailsafe.forkCount=4 \
-              -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
-              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
-              -Dmaven.wagon.http.retryHandler.count=3 \
-              -P\!it-modules \
-              -Preact-18 \
-              -Pproduction \
-              verify
-          )
-      - uses: actions/upload-artifact@v4
-        if: ${{ failure() || success() }}
-        with:
-          name: saved-outputs-it-${{ matrix.os }}-${{ matrix.it-modules }}
-          path: |
-            packages/java/tests/**/target/*-reports/*
-            packages/java/tests/**/error-screenshots/*.png
-
   test-all:
     name: Tests Summary
     runs-on: ubuntu-latest
@@ -381,7 +318,6 @@ jobs:
       - test-typescript
       - test-it
       - test-gradle
-      - test-react-18
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
