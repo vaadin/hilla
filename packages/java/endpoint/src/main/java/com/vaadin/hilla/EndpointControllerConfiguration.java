@@ -120,9 +120,11 @@ public class EndpointControllerConfiguration {
                     ? endpointMapperFactory.build()
                     : createDefaultEndpointMapper(applicationContext);
 
-            this.endpointMapper = this.endpointMapper.rebuild()
-                    .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
-                    .build();
+            if (this.endpointMapper != null) {
+                this.endpointMapper = this.endpointMapper.rebuild()
+                        .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
+                        .build();
+            }
         }
         return this.endpointMapper;
     }
