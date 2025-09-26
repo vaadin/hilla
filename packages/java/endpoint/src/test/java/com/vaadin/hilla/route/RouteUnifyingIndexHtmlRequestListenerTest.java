@@ -366,8 +366,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(cleanViews);
-        var expected = mapper.readTree(
-                getClass().getResourceAsStream("/META-INF/VAADIN/" + expectedJsonFile));
+        var expected = mapper.readTree(getClass()
+                .getResourceAsStream("/META-INF/VAADIN/" + expectedJsonFile));
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
