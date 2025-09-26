@@ -207,8 +207,7 @@ public class AotBrowserCallableFinder {
             var annotations = Arrays.stream(cls.getAnnotations())
                     .map(Annotation::annotationType).map(Class::getName)
                     .toList();
-            return annotations.stream()
-                    .anyMatch(annotationNames::contains);
+            return annotations.stream().anyMatch(annotationNames::contains);
         }).collect(Collectors.toList());
 
         return (List<Class<?>>) (List<?>) result;
