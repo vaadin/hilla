@@ -17,8 +17,7 @@ public class CustomFactory extends JacksonObjectMapperFactory.Json {
 
     @Override
     public ObjectMapper build() {
-        return JsonMapper.builder()
-                .addModule(new ByteArrayModule())
+        return JsonMapper.builder().addModule(new ByteArrayModule())
                 .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .addMixIn(CustomConfigEndpoint.CustomConfigEntity.class,
                         VisibilityMixIn.class)
