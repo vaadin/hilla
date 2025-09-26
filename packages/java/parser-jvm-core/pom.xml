@@ -46,7 +46,7 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
-    <!-- Jackson 2 for OpenAPI model compatibility -->
+    <!-- Swagger for OpenAPI model compatibility -->
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core-jakarta</artifactId>
