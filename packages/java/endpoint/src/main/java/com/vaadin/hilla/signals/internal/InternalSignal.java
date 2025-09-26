@@ -1,6 +1,6 @@
 package com.vaadin.hilla.signals.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -151,7 +151,7 @@ public class InternalSignal {
             inProgressCommands.put(command.commandId(), commandJson);
             commandsOfSubscribers.put(command.commandId(), clientSignalId);
             tree.commitSingleCommand(command);
-        } catch (IllegalArgumentException | JsonProcessingException ex) {
+        } catch (IllegalArgumentException | JacksonException ex) {
             getLogger().error("Failed to process command for signal {}: {}",
                     signal.getClass().getName(), ex.getMessage(), ex);
         } finally {
