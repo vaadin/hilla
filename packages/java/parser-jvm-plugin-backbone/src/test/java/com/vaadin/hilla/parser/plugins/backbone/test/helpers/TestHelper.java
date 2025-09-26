@@ -27,16 +27,11 @@ public final class TestHelper {
         }
     }
 
-    public void executeParserWithConfig(OpenAPI openAPI) {
-        try {
-            var expected = mapper.readValue(resourceLoader.find("openapi.json"),
-                    OpenAPI.class);
-            assertEquals(expected, openAPI);
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException("Failed to load expected OpenAPI", e);
-        } catch (Exception e) {
-            throw new RuntimeException("OpenAPI comparison failed", e);
-        }
+    public void executeParserWithConfig(OpenAPI openAPI) throws Exception {
+        var expected = mapper.readValue(resourceLoader.find("openapi.json"),
+                OpenAPI.class);
+
+        assertEquals(expected, openAPI);
     }
 
     public Path getTargetDir() {
