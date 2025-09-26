@@ -46,8 +46,20 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
+    <!-- Swagger for OpenAPI model compatibility -->
     <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-core-jakarta</artifactId>
+      <version>${swagger.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-models-jakarta</artifactId>
+      <version>${swagger.models.version}</version>
+    </dependency>
+    <!-- Keep Jackson 3 for YAML processing in other parts -->
+    <dependency>
+      <groupId>tools.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
     <dependency>

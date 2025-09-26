@@ -2,7 +2,8 @@ package com.vaadin.hilla;
 
 import static org.mockito.Mockito.mock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
@@ -12,7 +13,6 @@ import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 import jakarta.servlet.ServletContext;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * A helper class to build a mocked EndpointController.
@@ -51,18 +51,18 @@ public class EndpointControllerMockBuilder {
         ObjectMapper endpointObjectMapper = factory != null ? factory.build()
                 : createDefaultEndpointMapper(applicationContext);
         if (endpointObjectMapper != null) {
-            endpointObjectMapper.registerModule(
-                    ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
+            // In Jackson 3, we need to rebuild to add modules
+            // rebuild() preserves the configuration from the original mapper
+            endpointObjectMapper = endpointObjectMapper.rebuild()
+                    .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
+                    .build();
         }
         return endpointObjectMapper;
     }
 
     private static ObjectMapper createDefaultEndpointMapper(
             ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-        return endpointMapper;
+        return new JacksonObjectMapperFactory.Json().build();
     }
 
     public EndpointControllerMockBuilder withApplicationContext(

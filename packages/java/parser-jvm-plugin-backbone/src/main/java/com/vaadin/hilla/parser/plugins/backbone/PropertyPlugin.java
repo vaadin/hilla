@@ -8,10 +8,13 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.util.IgnorePropertiesUtil;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.util.IgnorePropertiesUtil;
+import tools.jackson.databind.json.JsonMapper;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -28,13 +31,19 @@ import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {
-    private SerializationConfig serializationConfig = new JacksonObjectMapperFactory.Json()
-            .build()
-            .setVisibility(PropertyAccessor.SETTER,
-                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
-            .setVisibility(PropertyAccessor.GETTER,
-                    JsonAutoDetect.Visibility.PUBLIC_ONLY)
-            .getSerializationConfig();
+    // Create a mapper with visibility configuration and get its serialization
+    // config
+    // Disable alphabetical sorting to preserve declaration order
+    private static final JsonMapper MAPPER = JsonMapper.builder()
+            .changeDefaultVisibility(vc -> vc
+                    .withVisibility(PropertyAccessor.SETTER,
+                            JsonAutoDetect.Visibility.PUBLIC_ONLY)
+                    .withVisibility(PropertyAccessor.GETTER,
+                            JsonAutoDetect.Visibility.PUBLIC_ONLY))
+            .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
+
+    private SerializationConfig serializationConfig = MAPPER
+            .serializationConfig();
 
     @Override
     public void enter(NodePath<?> nodePath) {
@@ -74,7 +83,12 @@ public final class PropertyPlugin
         var factory = loadJacksonObjectMapperFactory();
 
         if (factory != null) {
-            this.serializationConfig = factory.build().getSerializationConfig();
+            var mapper = factory.build();
+            // Disable alphabetical sorting to preserve declaration order
+            ObjectMapper jsonMapper = mapper.rebuild()
+                    .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+                    .build();
+            this.serializationConfig = jsonMapper.serializationConfig();
         }
     }
 
@@ -87,8 +101,12 @@ public final class PropertyPlugin
                     "Jackson: Only reflection models are supported");
         }
 
-        var description = serializationConfig
-                .introspect(serializationConfig.constructType((Class<?>) cls));
+        // In Jackson 3, use classIntrospectorInstance to get introspector
+        var javaType = serializationConfig.constructType((Class<?>) cls);
+        var introspector = serializationConfig.classIntrospectorInstance();
+        var annotatedClass = introspector.introspectClassAnnotations(javaType);
+        var description = introspector.introspectForSerialization(javaType,
+                annotatedClass);
 
         var processor = new PropertyProcessor(description);
         return processor.stream();
@@ -140,7 +158,8 @@ public final class PropertyPlugin
 
         public Stream<JacksonPropertyModel> stream() {
             var properties = description.findProperties().stream()
-                    .map(JacksonPropertyModel::of);
+                    .map((BeanPropertyDefinition prop) -> JacksonPropertyModel
+                            .of(prop));
             properties = filterPrivateProperties(properties);
             properties = filterSuperClassProperties(properties);
             properties = filterPropertiesWithIgnoredTypes(properties);
@@ -181,7 +200,7 @@ public final class PropertyPlugin
             var introspector = serializationConfig.getAnnotationIntrospector();
 
             return properties.filter(property -> {
-                var type = property.get().getRawPrimaryType();
+                var type = property.get().getPrimaryType().getRawClass();
                 var result = ignores.get(type);
 
                 if (result == null) {
@@ -189,10 +208,19 @@ public final class PropertyPlugin
                             .getIsIgnoredType();
 
                     if (result == null) {
-                        var classInfo = serializationConfig
-                                .introspectClassAnnotations(type)
-                                .getClassInfo();
-                        result = introspector.isIgnorableType(classInfo);
+                        // In Jackson 3, use classIntrospectorInstance to get
+                        // introspector
+                        var javaType = serializationConfig.constructType(type);
+                        var classIntrospector = serializationConfig
+                                .classIntrospectorInstance();
+                        var annotatedClass = classIntrospector
+                                .introspectClassAnnotations(javaType);
+                        var classDesc = classIntrospector
+                                .introspectForSerialization(javaType,
+                                        annotatedClass);
+                        var classInfo = classDesc.getClassInfo();
+                        result = introspector.isIgnorableType(
+                                serializationConfig, classInfo);
 
                         if (result == null) {
                             result = Boolean.FALSE;

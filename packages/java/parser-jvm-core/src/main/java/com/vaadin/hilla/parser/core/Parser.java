@@ -66,12 +66,13 @@ public final class Parser {
             @NonNull OpenAPIFileType type, OpenAPI origin) {
         try {
             var mapper = type.getMapper();
-            var reader = origin != null ? mapper.readerForUpdating(origin)
-                    : mapper.reader();
-            return reader.readValue(source, OpenAPI.class);
-        } catch (IOException e) {
-            throw new ParserException("Failed to parse openAPI specification",
-                    e);
+            if (origin != null) {
+                return mapper.readerForUpdating(origin).readValue(source);
+            } else {
+                return mapper.readValue(source, OpenAPI.class);
+            }
+        } catch (Exception e) {
+            throw new ParserException("Failed to parse OpenAPI file", e);
         }
     }
 

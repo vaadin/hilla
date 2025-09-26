@@ -25,6 +25,7 @@ import java.net.URL;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,14 +45,13 @@ import org.springframework.cglib.proxy.NoOp;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.CurrentInstance;
@@ -1014,18 +1014,11 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         var contextMock = mock(ApplicationContext.class);
         ObjectMapper mockSpringObjectMapper = mock(ObjectMapper.class);
         ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
-        Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
-                Jackson2ObjectMapperBuilder.class);
         JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
         when(contextMock.getBean(ObjectMapper.class))
                 .thenReturn(mockSpringObjectMapper);
         when(contextMock.getBean(JacksonProperties.class))
                 .thenReturn(mockJacksonProperties);
-        when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.createXmlMapper(false))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
         when(mockJacksonProperties.getVisibility())
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
@@ -1040,8 +1033,6 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
                 mockOwnObjectMapper).registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
-        verify(contextMock, times(1))
-                .getBean(Jackson2ObjectMapperBuilder.class);
     }
 
     @Test
@@ -1098,8 +1089,12 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         assertEquals(expectedErrorMessage, jsonNodes.get("message").asText());
         assertEquals(2, jsonNodes.get("validationErrorData").size());
 
-        List<String> parameterNames = jsonNodes.get("validationErrorData")
-                .findValuesAsText("parameterName");
+        List<String> parameterNames = new ArrayList<>();
+        jsonNodes.get("validationErrorData").forEach(node -> {
+            if (node.has("parameterName")) {
+                parameterNames.add(node.get("parameterName").asText());
+            }
+        });
         assertEquals(2, parameterNames.size());
         assertTrue(parameterNames.contains("date"));
         assertTrue(parameterNames.contains("number"));
@@ -1435,12 +1430,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
     }
 
     private ObjectNode createRequestParameters(String jsonBody) {
-        try {
-            return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
-        } catch (IOException e) {
-            throw new AssertionError(String
-                    .format("Failed to deserialize the json: %s", jsonBody), e);
-        }
+        return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
     }
 
     private <T> EndpointController createVaadinController(T endpoint) {

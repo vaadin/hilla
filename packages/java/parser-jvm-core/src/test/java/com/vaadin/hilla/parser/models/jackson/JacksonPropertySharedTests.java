@@ -10,8 +10,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 final class JacksonPropertySharedTests {
 
@@ -67,10 +67,15 @@ final class JacksonPropertySharedTests {
         private static final Map<String, BeanPropertyDefinition> reflectionOrigins;
 
         static {
-            var mapper = new ObjectMapper();
-            reflectionOrigins = mapper.getSerializationConfig()
-                    .introspect(mapper.constructType(Sample.class))
-                    .findProperties().stream()
+            var mapper = JsonMapper.builder().build();
+            var config = mapper.serializationConfig();
+            var javaType = config.constructType(Sample.class);
+            var introspector = config.classIntrospectorInstance();
+            var annotatedClass = introspector
+                    .introspectClassAnnotations(javaType);
+            var description = introspector.introspectForSerialization(javaType,
+                    annotatedClass);
+            reflectionOrigins = description.findProperties().stream()
                     .collect(Collectors.toMap(
                             BeanPropertyDefinition::getInternalName,
                             Function.identity()));

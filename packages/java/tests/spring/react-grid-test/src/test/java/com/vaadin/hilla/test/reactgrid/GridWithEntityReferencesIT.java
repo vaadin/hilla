@@ -9,7 +9,7 @@ public class GridWithEntityReferencesIT extends AbstractGridTest {
         assertColumns("Name", "Street address", "City", "Country",
                 "Department");
         assertRow(0, "Alice", "12 Baker St", "London", "UK",
-                "{\"id\":1,\"version\":1,\"name\":\"IT\"}");
+                "{\"id\":1,\"name\":\"IT\",\"version\":1}");
     }
 
 }

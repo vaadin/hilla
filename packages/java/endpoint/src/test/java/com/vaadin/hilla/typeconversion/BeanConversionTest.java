@@ -24,10 +24,12 @@ public class BeanConversionTest extends BaseTypeConversionTest {
         String inputValue = "{\"name\":\"mybean\",\"address\":\"myaddress\","
                 + "\"age\":10,\"isAdmin\":true,\"testEnum\":\"FIRST\","
                 + "\"roles\":[\"Admin\"], \"customProperty\": \"customValue\"}";
-        String expectedValue = "{\"name\":\"mybean-foo\","
-                + "\"address\":\"myaddress-foo\","
-                + "\"age\":11,\"isAdmin\":false," + "\"testEnum\":\"SECOND\","
-                + "\"roles\":[\"Admin\",\"User\"],\"customProperty\":\"customValue-foo\"}";
+        // Jackson 3 uses alphabetical property ordering by default
+        String expectedValue = "{\"address\":\"myaddress-foo\"," + "\"age\":11,"
+                + "\"customProperty\":\"customValue-foo\","
+                + "\"isAdmin\":false," + "\"name\":\"mybean-foo\","
+                + "\"roles\":[\"Admin\",\"User\"],"
+                + "\"testEnum\":\"SECOND\"}";
         assertEqualExpectedValueWhenCallingMethod("getFooBean", inputValue,
                 expectedValue);
     }

@@ -1,9 +1,9 @@
 package com.vaadin.hilla.signals.internal;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.signals.AbstractSignal;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.SignalCommand;
