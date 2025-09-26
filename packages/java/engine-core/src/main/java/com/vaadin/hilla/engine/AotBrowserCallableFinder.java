@@ -195,10 +195,6 @@ public class AotBrowserCallableFinder {
                 .stream().map(Class::getName).toList();
         var classLoader = engineConfiguration.getClassLoader();
 
-        LOGGER.debug("Looking for endpoints with annotations: {}",
-                annotationNames);
-        LOGGER.debug("Found {} candidates to check", candidates.size());
-
         var result = candidates.stream().map(type -> {
             try {
                 return Class.forName(type, false, classLoader);
@@ -211,16 +207,10 @@ public class AotBrowserCallableFinder {
             var annotations = Arrays.stream(cls.getAnnotations())
                     .map(Annotation::annotationType).map(Class::getName)
                     .toList();
-            boolean isEndpoint = annotations.stream()
+            return annotations.stream()
                     .anyMatch(annotationNames::contains);
-            if (cls.getName().contains("Endpoint")) {
-                LOGGER.debug("Class {} has annotations: {}, is endpoint: {}",
-                        cls.getName(), annotations, isEndpoint);
-            }
-            return isEndpoint;
         }).collect(Collectors.toList());
 
-        LOGGER.debug("Found {} browser-callable classes", result.size());
         return (List<Class<?>>) (List<?>) result;
     }
 
