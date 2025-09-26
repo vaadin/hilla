@@ -127,6 +127,12 @@ artifacts {
  * Testing & Quality
  *
  ***********************************************************************************************************************/
+test {
+    systemProperty 'hilla.version', version.toString()
+    systemProperty 'flow.version', flowVersion.toString()
+    systemProperty 'spring.boot.version', springBootVersion.toString()
+}
+
 task functionalTest(type: Test) {
     dependsOn test, jar
     group = 'Verification'
@@ -139,6 +145,9 @@ task functionalTest(type: Test) {
         exceptionFormat = 'full'
         showStandardStreams = true
     }
+    systemProperty 'hilla.version', version.toString()
+    systemProperty 'flow.version', flowVersion.toString()
+    systemProperty 'spring.boot.version', springBootVersion.toString()
 }
 check.dependsOn functionalTest
 /***********************************************************************************************************************

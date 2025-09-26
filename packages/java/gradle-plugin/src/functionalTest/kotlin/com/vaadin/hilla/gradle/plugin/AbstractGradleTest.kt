@@ -25,9 +25,12 @@ import org.junit.Before
  */
 abstract class AbstractGradleTest {
 
-    val hillaVersion = System.getenv("hilla.version").takeUnless { it.isNullOrEmpty() } ?: "25.0-SNAPSHOT"
-    val flowVersion = System.getenv("flow.version").takeUnless { it.isNullOrEmpty() } ?: "25.0.0-alpha14"
-    val springBootVersion = System.getenv("spring.boot.version").takeUnless { it.isNullOrEmpty() } ?: "4.0.0-M2"
+    val hillaVersion = System.getProperty("hilla.version") 
+        ?: throw IllegalStateException("hilla.version system property is required but not set")
+    val flowVersion = System.getProperty("flow.version") 
+        ?: throw IllegalStateException("flow.version system property is required but not set")
+    val springBootVersion = System.getProperty("spring.boot.version") 
+        ?: throw IllegalStateException("spring.boot.version system property is required but not set")
 
     /**
      * The testing Gradle project. Automatically deleted after every test.
