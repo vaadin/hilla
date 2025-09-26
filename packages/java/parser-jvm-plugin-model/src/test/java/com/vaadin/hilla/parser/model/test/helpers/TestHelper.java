@@ -13,7 +13,6 @@ import com.vaadin.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class TestHelper {
-    private final ObjectMapper mapper = Json.mapper();
     private final ResourceLoader resourceLoader;
     private final Path targetDir;
 
@@ -28,6 +27,7 @@ public final class TestHelper {
 
     public void executeParserWithConfig(OpenAPI openAPI)
             throws IOException, URISyntaxException {
+        var mapper = Json.mapper();
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
                 OpenAPI.class);
 

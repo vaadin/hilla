@@ -35,7 +35,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -44,8 +43,7 @@ import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,
-        Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
-        PushMessageHandler.class, ObjectMapper.class,
+        JacksonProperties.class, PushMessageHandler.class, ObjectMapper.class,
         EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)

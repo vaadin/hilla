@@ -29,9 +29,16 @@ public interface JacksonObjectMapperFactory {
     class Json implements JacksonObjectMapperFactory {
         @Override
         public ObjectMapper build() {
+            // In Jackson 3, Jdk8Module, JavaTimeModule, and
+            // ParameterNamesModule are built into jackson-databind
             return JsonMapper.builder().addModule(new ByteArrayModule())
-                    .addModule(new Jdk8Module()).addModule(new JavaTimeModule())
-                    .addModule(new ParameterNamesModule()).build();
+                    .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    // Configure Jackson 3 to be compatible with Jackson 2 type
+                    // conversion behavior
+                    .configure(
+                            DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES,
+                            false)
+                    .enable(DeserializationFeature.ACCEPT_FLOAT_AS_INT).build();
         }
     }
 }

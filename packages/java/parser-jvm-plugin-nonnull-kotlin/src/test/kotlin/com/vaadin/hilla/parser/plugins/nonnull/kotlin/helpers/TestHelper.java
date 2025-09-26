@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import static com.vaadin.hilla.parser.testutils.JsonAssertions.assertEquals;
 
 public final class TestHelper {
-    private final ObjectMapper mapper = Json.mapper();
     private final ResourceLoader resourceLoader;
     private final Path targetDir;
 
@@ -27,6 +26,8 @@ public final class TestHelper {
 
     public void executeParserWithConfig(OpenAPI openAPI)
             throws IOException, URISyntaxException {
+        var mapper = Json.mapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         var expected = mapper.readValue(resourceLoader.find("openapi.json"),
                 OpenAPI.class);
 

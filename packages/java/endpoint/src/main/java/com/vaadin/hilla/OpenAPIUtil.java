@@ -93,12 +93,14 @@ public class OpenAPIUtil {
 
         // Parameters and return types
         if (openApi.has("components")) {
-            ObjectNode schemas = (ObjectNode) openApi.get("components")
-                    .get("schemas");
-            if (schemas != null) {
-                schemas.fieldNames().forEachRemaining(type -> {
-                    types.add(type);
-                });
+            var components = openApi.get("components");
+            if (components != null && components.has("schemas")) {
+                var schemasNode = components.get("schemas");
+                if (schemasNode instanceof ObjectNode schemas) {
+                    for (String type : schemas.propertyNames()) {
+                        types.add(type);
+                    }
+                }
             }
         }
         return types;

@@ -182,8 +182,8 @@ public class AotBrowserCallableFinder {
         var candidates = new ArrayList<String>();
         for (var node : reflectionsNode) {
             var typeNode = node.get("type");
-            if (typeNode.isTextual()) {
-                String type = node.get("type").asText();
+            if (typeNode.isString()) {
+                String type = node.get("type").asString();
                 candidates.add(type);
             } else {
                 LOGGER.trace("Ignoring non-string type for property {}",
@@ -194,17 +194,34 @@ public class AotBrowserCallableFinder {
         var annotationNames = engineConfiguration.getEndpointAnnotations()
                 .stream().map(Class::getName).toList();
         var classLoader = engineConfiguration.getClassLoader();
-        return candidates.stream().map(type -> {
+
+        LOGGER.debug("Looking for endpoints with annotations: {}",
+                annotationNames);
+        LOGGER.debug("Found {} candidates to check", candidates.size());
+
+        var result = candidates.stream().map(type -> {
             try {
                 return Class.forName(type, false, classLoader);
             } catch (Throwable t) {
+                LOGGER.debug("Failed to load class {}: {}", type,
+                        t.getMessage());
                 return null;
             }
-        }).filter(Objects::nonNull)
-                .filter(cls -> Arrays.stream(cls.getAnnotations())
-                        .map(Annotation::annotationType).map(Class::getName)
-                        .anyMatch(annotationNames::contains))
-                .collect(Collectors.toList());
+        }).filter(Objects::nonNull).filter(cls -> {
+            var annotations = Arrays.stream(cls.getAnnotations())
+                    .map(Annotation::annotationType).map(Class::getName)
+                    .toList();
+            boolean isEndpoint = annotations.stream()
+                    .anyMatch(annotationNames::contains);
+            if (cls.getName().contains("Endpoint")) {
+                LOGGER.debug("Class {} has annotations: {}, is endpoint: {}",
+                        cls.getName(), annotations, isEndpoint);
+            }
+            return isEndpoint;
+        }).collect(Collectors.toList());
+
+        LOGGER.debug("Found {} browser-callable classes", result.size());
+        return (List<Class<?>>) (List<?>) result;
     }
 
     private static String quotePath(Path path) {

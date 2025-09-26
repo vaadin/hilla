@@ -119,20 +119,22 @@ public class EndpointControllerConfiguration {
             this.endpointMapper = endpointMapperFactory != null
                     ? endpointMapperFactory.build()
                     : createDefaultEndpointMapper(applicationContext);
-            if (this.endpointMapper != null) {
-                this.endpointMapper.registerModule(
-                        ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
-            }
+
+            // In Jackson 3, we need to use rebuild() to add modules after
+            // creation - rebuild() preserves existing configuration
+            this.endpointMapper = this.endpointMapper.rebuild()
+                    .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
+                    .build();
         }
         return this.endpointMapper;
     }
 
     private static ObjectMapper createDefaultEndpointMapper(
             ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-        return endpointMapper;
+        // JacksonObjectMapperFactory.Json already configures the mapper
+        // properly for Jackson 3
+        // including disabling WRITE_DATES_AS_TIMESTAMPS
+        return new JacksonObjectMapperFactory.Json().build();
     }
 
     /**

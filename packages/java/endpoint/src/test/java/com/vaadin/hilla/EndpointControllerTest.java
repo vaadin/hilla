@@ -1014,18 +1014,11 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         var contextMock = mock(ApplicationContext.class);
         ObjectMapper mockSpringObjectMapper = mock(ObjectMapper.class);
         ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
-        Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
-                Jackson2ObjectMapperBuilder.class);
         JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
         when(contextMock.getBean(ObjectMapper.class))
                 .thenReturn(mockSpringObjectMapper);
         when(contextMock.getBean(JacksonProperties.class))
                 .thenReturn(mockJacksonProperties);
-        when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.createXmlMapper(false))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
         when(mockJacksonProperties.getVisibility())
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
@@ -1040,8 +1033,6 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
                 mockOwnObjectMapper).registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
-        verify(contextMock, times(1))
-                .getBean(Jackson2ObjectMapperBuilder.class);
     }
 
     @Test
@@ -1098,8 +1089,12 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         assertEquals(expectedErrorMessage, jsonNodes.get("message").asText());
         assertEquals(2, jsonNodes.get("validationErrorData").size());
 
-        List<String> parameterNames = jsonNodes.get("validationErrorData")
-                .findValuesAsText("parameterName");
+        List<String> parameterNames = new ArrayList<>();
+        jsonNodes.get("validationErrorData").forEach(node -> {
+            if (node.has("parameterName")) {
+                parameterNames.add(node.get("parameterName").asText());
+            }
+        });
         assertEquals(2, parameterNames.size());
         assertTrue(parameterNames.contains("date"));
         assertTrue(parameterNames.contains("number"));
@@ -1435,12 +1430,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
     }
 
     private ObjectNode createRequestParameters(String jsonBody) {
-        try {
-            return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
-        } catch (IOException e) {
-            throw new AssertionError(String
-                    .format("Failed to deserialize the json: %s", jsonBody), e);
-        }
+        return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
     }
 
     private <T> EndpointController createVaadinController(T endpoint) {

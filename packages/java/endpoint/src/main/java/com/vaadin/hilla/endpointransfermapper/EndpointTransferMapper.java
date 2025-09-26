@@ -161,23 +161,24 @@ public class EndpointTransferMapper {
                 });
         jacksonModule.addSerializer(endpointType, serializer);
 
-        var deserializer = new StdDelegatingDeserializer<>(
-                new StdConverter<TRANSFERTYPE, ENDPOINTTYPE>() {
-                    @Override
-                    public ENDPOINTTYPE convert(TRANSFERTYPE value) {
-                        return mapper.toEndpointType(value);
-                    }
+        var converter = new StdConverter<TRANSFERTYPE, ENDPOINTTYPE>() {
+            @Override
+            public ENDPOINTTYPE convert(TRANSFERTYPE value) {
+                return mapper.toEndpointType(value);
+            }
 
-                    @Override
-                    public JavaType getInputType(TypeFactory typeFactory) {
-                        return typeFactory.constructType(transferType);
-                    }
+            @Override
+            public JavaType getInputType(TypeFactory typeFactory) {
+                return typeFactory.constructType(transferType);
+            }
 
-                    @Override
-                    public JavaType getOutputType(TypeFactory typeFactory) {
-                        return typeFactory.constructType(endpointType);
-                    }
-                });
+            @Override
+            public JavaType getOutputType(TypeFactory typeFactory) {
+                return typeFactory.constructType(endpointType);
+            }
+        };
+
+        var deserializer = new StdConvertingDeserializer<>(converter);
 
         jacksonModule.addDeserializer(endpointType, deserializer);
         jacksonModule.addDeserializer(MultipartFile.class,
@@ -193,7 +194,7 @@ public class EndpointTransferMapper {
      *
      * @return Jackson 2 module.
      */
-    public Module getJacksonModule() {
+    public JacksonModule getJacksonModule() {
         return jacksonModule;
     }
 
@@ -331,12 +332,12 @@ public class EndpointTransferMapper {
      * tries to deserialize the object which is already a POJO.
      */
     public static class MultipartFileDeserializer
-            extends JsonDeserializer<MultipartFile> {
+            extends ValueDeserializer<MultipartFile> {
 
         @Override
         public MultipartFile deserialize(JsonParser p,
-                DeserializationContext ctxt) throws IOException {
-            JsonNode node = p.getCodec().readTree(p);
+                DeserializationContext ctxt) {
+            JsonNode node = p.readValueAsTree();
 
             if (node instanceof POJONode) {
                 Object pojo = ((POJONode) node).getPojo();

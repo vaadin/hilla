@@ -51,18 +51,19 @@ public class EndpointControllerMockBuilder {
         ObjectMapper endpointObjectMapper = factory != null ? factory.build()
                 : createDefaultEndpointMapper(applicationContext);
         if (endpointObjectMapper != null) {
-            endpointObjectMapper.registerModule(
-                    ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
+            // In Jackson 3, we need to rebuild to add modules
+            // rebuild() preserves the configuration from the original mapper
+            endpointObjectMapper = endpointObjectMapper.rebuild()
+                    .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
+                    .build();
         }
         return endpointObjectMapper;
     }
 
     private static ObjectMapper createDefaultEndpointMapper(
             ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-        return endpointMapper;
+        // JacksonObjectMapperFactory.Json already configures date/time properly
+        return new JacksonObjectMapperFactory.Json().build();
     }
 
     public EndpointControllerMockBuilder withApplicationContext(

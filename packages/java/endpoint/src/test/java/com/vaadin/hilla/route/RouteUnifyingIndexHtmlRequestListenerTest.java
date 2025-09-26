@@ -7,7 +7,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -362,24 +361,25 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 Matchers.startsWith(SCRIPT_STRING));
 
         final String views = scriptText.substring(SCRIPT_STRING.length());
+        final String cleanViews = removeTrailingSemicolon(views);
 
         final var mapper = new ObjectMapper();
 
-        var actual = mapper.readTree(views);
+        var actual = mapper.readTree(cleanViews);
         var expected = mapper.readTree(
                 getClass().getResource("/META-INF/VAADIN/" + expectedJsonFile));
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
+        Iterator<String> elementsFields = expected.propertyNames();
+        while (elementsFields.hasNext()) {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     private void mockDevelopmentMode() throws IOException {
@@ -459,10 +459,11 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 Matchers.startsWith(SCRIPT_STRING));
 
         final String views = scriptText.substring(SCRIPT_STRING.length());
+        final String cleanViews = removeTrailingSemicolon(views);
 
         final var mapper = new ObjectMapper();
 
-        var actual = mapper.readTree(views);
+        var actual = mapper.readTree(cleanViews);
         var expected = mapper
                 .readTree(getClass().getResource(expectedJsonPath));
 
@@ -471,14 +472,14 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     Matchers.is(expected.size()));
         }
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
+        Iterator<String> elementsFields = expected.propertyNames();
+        while (elementsFields.hasNext()) {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     private void testWithCustomViewsProvider(boolean exposeServerRoutes,
@@ -543,16 +544,26 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                     Matchers.startsWith(SCRIPT_STRING));
 
             final String views = scriptText.substring(SCRIPT_STRING.length());
+            // Remove trailing semicolon if present - Jackson 3 is stricter
+            final String cleanViews = views.endsWith(";")
+                    ? views.substring(0, views.length() - 1)
+                    : views;
 
             final var mapper = new ObjectMapper();
 
-            var actual = mapper.readTree(views);
+            var actual = mapper.readTree(cleanViews);
             var expected = mapper
                     .readTree(getClass().getResource(expectedJsonPath));
 
             MatcherAssert.assertThat("Different amount of items", actual.size(),
                     Matchers.is(expected.size()));
         }
+    }
+
+    private String removeTrailingSemicolon(String views) {
+        // Jackson 3 is stricter about trailing content
+        return views.endsWith(";") ? views.substring(0, views.length() - 1)
+                : views;
     }
 
     @PageTitle("RouteTarget")

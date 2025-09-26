@@ -126,6 +126,81 @@ public class EndpointInvoker {
         return LoggerFactory.getLogger(EndpointInvoker.class);
     }
 
+    private boolean needsFloatToIntCoercion(JsonNode node, Type targetType) {
+        if (node == null) {
+            return false;
+        }
+
+        // Direct number node
+        if (node.isNumber() && isIntegralType(targetType)
+                && !node.canConvertToExactIntegral()) {
+            return true;
+        }
+
+        // Array node containing floats to be converted to integral types
+        if (node.isArray() && isIntegralType(targetType)) {
+            for (JsonNode element : node) {
+                if (element.isNumber()
+                        && !element.canConvertToExactIntegral()) {
+                    return true;
+                }
+            }
+        }
+
+        // Object node (for Maps and complex objects)
+        if (node.isObject() && targetType instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) targetType).getRawType();
+            if (rawType instanceof Class<?>
+                    && Map.class.isAssignableFrom((Class<?>) rawType)) {
+                Type[] args = ((ParameterizedType) targetType)
+                        .getActualTypeArguments();
+                if (args.length > 1 && isIntegralType(args[1])) {
+                    // Check if any map values need conversion
+                    for (JsonNode value : node) {
+                        if (value.isNumber()
+                                && !value.canConvertToExactIntegral()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isIntegralType(Type type) {
+        if (type instanceof Class<?>) {
+            Class<?> cls = (Class<?>) type;
+            if (cls.isArray()) {
+                // Handle array types
+                return isIntegralType(cls.getComponentType());
+            }
+            return cls == int.class || cls == Integer.class || cls == long.class
+                    || cls == Long.class || cls == short.class
+                    || cls == Short.class || cls == byte.class
+                    || cls == Byte.class || cls == java.math.BigInteger.class;
+        } else if (type instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) type).getRawType();
+            if (rawType instanceof Class<?>) {
+                Class<?> cls = (Class<?>) rawType;
+                // Check for collections of integral types
+                if (Collection.class.isAssignableFrom(cls)
+                        || Map.class.isAssignableFrom(cls)) {
+                    Type[] args = ((ParameterizedType) type)
+                            .getActualTypeArguments();
+                    if (args.length > 0) {
+                        // For Map, check the value type (args[1])
+                        int checkIndex = Map.class.isAssignableFrom(cls)
+                                && args.length > 1 ? 1 : 0;
+                        return isIntegralType(args[checkIndex]);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Gets the return type of the given method.
      *
@@ -303,8 +378,9 @@ public class EndpointInvoker {
         // Respect the order of parameters in the request body
         Map<String, JsonNode> parametersData = new LinkedHashMap<>();
         if (body != null) {
-            body.fields().forEachRemaining(entry -> parametersData
-                    .put(entry.getKey(), entry.getValue()));
+            for (Map.Entry<String, JsonNode> entry : body.properties()) {
+                parametersData.put(entry.getKey(), entry.getValue());
+            }
         }
 
         // Try to adapt to the order of parameters in the method
@@ -343,10 +419,26 @@ public class EndpointInvoker {
             Type parameterType = javaParameters[i];
             Type incomingType = parameterType;
             try {
-                Object parameter = endpointObjectMapper
-                        .readerFor(endpointObjectMapper.getTypeFactory()
-                                .constructType(incomingType))
-                        .readValue(requestParameters.get(parameterNames[i]));
+                JsonNode parameterNode = requestParameters
+                        .get(parameterNames[i]);
+                Object parameter;
+
+                // Jackson 3 limitation: TreeTraversingParser doesn't respect
+                // ACCEPT_FLOAT_AS_INT
+                // when deserializing from JsonNode. Convert to string for
+                // numeric coercion.
+                if (needsFloatToIntCoercion(parameterNode, parameterType)) {
+                    // Convert JsonNode to string to allow float-to-int coercion
+                    parameter = endpointObjectMapper
+                            .readerFor(endpointObjectMapper.getTypeFactory()
+                                    .constructType(incomingType))
+                            .readValue(parameterNode.toString());
+                } else {
+                    parameter = endpointObjectMapper
+                            .readerFor(endpointObjectMapper.getTypeFactory()
+                                    .constructType(incomingType))
+                            .readValue(parameterNode);
+                }
                 endpointParameters[i] = parameter;
 
                 if (parameter != null) {

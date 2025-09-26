@@ -37,7 +37,7 @@ public class ServerAndClientViewsProvider {
     private final NavigationAccessControl accessControl;
     private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ServerAndClientViewsProvider.class);
