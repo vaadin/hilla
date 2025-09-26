@@ -19,6 +19,33 @@
     <formatter.basedir>${project.parent.basedir}</formatter.basedir>
   </properties>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <!-- Allow reading all unnamed modules for JSONAssert -->
+            <arg>--add-reads</arg>
+            <arg>com.vaadin.hilla.parser.testutils=ALL-UNNAMED</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <additionalJOptions>
+            <!-- Allow reading all unnamed modules for JSONAssert -->
+            <additionalJOption>--add-reads</additionalJOption>
+            <additionalJOption>com.vaadin.hilla.parser.testutils=ALL-UNNAMED</additionalJOption>
+          </additionalJOptions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -27,6 +54,11 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
+      <version>1.5.1</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
