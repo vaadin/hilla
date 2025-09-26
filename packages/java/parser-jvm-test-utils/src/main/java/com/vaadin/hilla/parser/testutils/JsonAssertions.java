@@ -1,10 +1,9 @@
 package com.vaadin.hilla.parser.testutils;
 
+import com.fasterxml.jackson.core.JacksonException;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.vaadin.hilla.parser.utils.JsonPrinter;
 
@@ -12,7 +11,7 @@ public final class JsonAssertions {
     private final static JsonPrinter printer = new JsonPrinter();
 
     public static void assertEquals(Object expected, Object actual)
-            throws JsonProcessingException {
+            throws JacksonException {
         String expectedJson = printer.writeAsString(expected);
         String actualJson = printer.writeAsString(actual);
         try {
@@ -32,7 +31,7 @@ public final class JsonAssertions {
 
     private static String enhanceErrorMessage(String originalMessage,
             String expectedJson, String actualJson)
-            throws JsonProcessingException {
+            throws JacksonException {
         StringBuilder enhanced = new StringBuilder();
         enhanced.append("JSON comparison failed:\n");
         enhanced.append(originalMessage);
