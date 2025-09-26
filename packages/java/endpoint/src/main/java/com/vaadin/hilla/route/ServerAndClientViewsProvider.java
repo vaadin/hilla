@@ -37,7 +37,9 @@ public class ServerAndClientViewsProvider {
     private final NavigationAccessControl accessControl;
     private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
-    private final ObjectMapper mapper;
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .addMixIn(AvailableViewInfo.class, IgnoreMixin.class)
+            .build();
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ServerAndClientViewsProvider.class);
@@ -57,11 +59,6 @@ public class ServerAndClientViewsProvider {
         this.deploymentConfiguration = deploymentConfiguration;
         this.accessControl = accessControl;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
-
-        // In Jackson 3, configure mapper using builder
-        this.mapper = JsonMapper.builder()
-                .addMixIn((Class) AvailableViewInfo.class, IgnoreMixin.class)
-                .build();
     }
 
     public String createFileRoutesJson(VaadinRequest request)

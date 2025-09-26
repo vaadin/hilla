@@ -62,7 +62,6 @@ public class EndpointControllerMockBuilder {
 
     private static ObjectMapper createDefaultEndpointMapper(
             ApplicationContext applicationContext) {
-        // JacksonObjectMapperFactory.Json already configures date/time properly
         return new JacksonObjectMapperFactory.Json().build();
     }
 

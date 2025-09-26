@@ -378,9 +378,8 @@ public class EndpointInvoker {
         // Respect the order of parameters in the request body
         Map<String, JsonNode> parametersData = new LinkedHashMap<>();
         if (body != null) {
-            for (Map.Entry<String, JsonNode> entry : body.properties()) {
-                parametersData.put(entry.getKey(), entry.getValue());
-            }
+            body.properties().forEach(entry -> parametersData
+                    .put(entry.getKey(), entry.getValue()));
         }
 
         // Try to adapt to the order of parameters in the method
