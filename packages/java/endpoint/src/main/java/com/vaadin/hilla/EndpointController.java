@@ -283,7 +283,7 @@ public class EndpointController {
 
                 try {
                     body = objectMapper.readValue(bodyPart, ObjectNode.class);
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     LOGGER.error("Request body does not contain valid JSON", e);
                     return ResponseEntity
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)

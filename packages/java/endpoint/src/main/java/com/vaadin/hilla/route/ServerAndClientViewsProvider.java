@@ -58,7 +58,10 @@ public class ServerAndClientViewsProvider {
         this.accessControl = accessControl;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
 
-        mapper.addMixIn(AvailableViewInfo.class, IgnoreMixin.class);
+        // In Jackson 3, configure mapper using builder
+        this.mapper = JsonMapper.builder()
+                .addMixIn((Class) AvailableViewInfo.class, IgnoreMixin.class)
+                .build();
     }
 
     public String createFileRoutesJson(VaadinRequest request)

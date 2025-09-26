@@ -352,7 +352,7 @@ public class EndpointInvoker {
                 if (parameter != null) {
                     constraintViolations.addAll(validator.validate(parameter));
                 }
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 String typeName = parameterType.getTypeName();
                 getLogger().error(
                         "Unable to deserialize an endpoint '{}' method '{}' "

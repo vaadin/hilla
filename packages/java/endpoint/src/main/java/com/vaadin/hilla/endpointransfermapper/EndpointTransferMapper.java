@@ -346,7 +346,7 @@ public class EndpointTransferMapper {
                 }
             }
 
-            throw new IOException(
+            throw new RuntimeException(
                     "Expected a POJONode wrapping a MultipartFile");
         }
     }
