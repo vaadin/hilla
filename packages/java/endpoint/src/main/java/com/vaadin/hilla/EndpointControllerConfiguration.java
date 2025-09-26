@@ -120,8 +120,7 @@ public class EndpointControllerConfiguration {
                     ? endpointMapperFactory.build()
                     : createDefaultEndpointMapper(applicationContext);
 
-            // In Jackson 3, we need to use rebuild() to add modules after creation
-            this.endpointMapper = ((JsonMapper) this.endpointMapper).rebuild()
+            this.endpointMapper = this.endpointMapper.rebuild()
                     .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
                     .build();
         }

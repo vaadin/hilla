@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationConfig;
 import tools.jackson.databind.util.IgnorePropertiesUtil;
 import tools.jackson.databind.json.JsonMapper;
@@ -83,18 +84,11 @@ public final class PropertyPlugin
 
         if (factory != null) {
             var mapper = factory.build();
-            // In Jackson 3, we get the serialization config differently
-            if (mapper instanceof JsonMapper) {
-                // Disable alphabetical sorting to preserve declaration order
-                JsonMapper jsonMapper = ((JsonMapper) mapper);
-                if (jsonMapper.isEnabled(
-                        MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)) {
-                    jsonMapper = jsonMapper.rebuild().disable(
-                            MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
-                            .build();
-                }
-                this.serializationConfig = jsonMapper.serializationConfig();
-            }
+            // Disable alphabetical sorting to preserve declaration order
+            ObjectMapper jsonMapper = mapper.rebuild()
+                    .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+                    .build();
+            this.serializationConfig = jsonMapper.serializationConfig();
         }
     }
 
