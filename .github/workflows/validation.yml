@@ -318,7 +318,6 @@ jobs:
       - test-typescript
       - test-it
       - test-gradle
-      - test-react-18
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
