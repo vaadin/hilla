@@ -1,9 +1,8 @@
 package com.vaadin.hilla.parser.core;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.core.util.Yaml;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public enum OpenAPIFileType {
     JSON(Json.mapper()), YAML(Yaml.mapper());

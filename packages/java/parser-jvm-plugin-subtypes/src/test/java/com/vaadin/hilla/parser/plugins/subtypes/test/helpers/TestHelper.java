@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.core.util.Json;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
 
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
 public final class TestHelper {

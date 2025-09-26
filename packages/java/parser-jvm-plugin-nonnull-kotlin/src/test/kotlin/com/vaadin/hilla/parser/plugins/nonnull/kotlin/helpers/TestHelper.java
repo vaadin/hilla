@@ -1,8 +1,8 @@
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin.helpers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.parser.testutils.ResourceLoader;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.core.util.Json;
+import com.vaadin.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 
 import java.io.IOException;

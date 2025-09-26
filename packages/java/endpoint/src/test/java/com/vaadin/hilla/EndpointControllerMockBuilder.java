@@ -2,7 +2,8 @@ package com.vaadin.hilla;
 
 import static org.mockito.Mockito.mock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
@@ -12,7 +13,6 @@ import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 import jakarta.servlet.ServletContext;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * A helper class to build a mocked EndpointController.

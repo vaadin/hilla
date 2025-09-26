@@ -8,10 +8,12 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.util.IgnorePropertiesUtil;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.util.IgnorePropertiesUtil;
+import tools.jackson.databind.json.JsonMapper;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;

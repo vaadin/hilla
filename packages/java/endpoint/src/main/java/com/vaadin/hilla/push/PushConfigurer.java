@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.hilla.EndpointProperties;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
