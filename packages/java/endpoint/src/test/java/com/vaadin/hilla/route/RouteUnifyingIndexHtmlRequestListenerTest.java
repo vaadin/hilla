@@ -366,13 +366,13 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         final var mapper = new ObjectMapper();
 
         var actual = mapper.readTree(cleanViews);
-        var expected = mapper.readTree(
-                getClass().getResource("/META-INF/VAADIN/" + expectedJsonFile));
+        var expected = mapper.readTree(getClass()
+                .getResourceAsStream("/META-INF/VAADIN/" + expectedJsonFile));
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.propertyNames();
+        Iterator<String> elementsFields = expected.propertyNames().iterator();
         while (elementsFields.hasNext()) {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
@@ -465,14 +465,14 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
         var actual = mapper.readTree(cleanViews);
         var expected = mapper
-                .readTree(getClass().getResource(expectedJsonPath));
+                .readTree(getClass().getResourceAsStream(expectedJsonPath));
 
         if (checkSize) {
             MatcherAssert.assertThat("Different amount of items", actual.size(),
                     Matchers.is(expected.size()));
         }
 
-        Iterator<String> elementsFields = expected.propertyNames();
+        Iterator<String> elementsFields = expected.propertyNames().iterator();
         while (elementsFields.hasNext()) {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
@@ -553,7 +553,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
 
             var actual = mapper.readTree(cleanViews);
             var expected = mapper
-                    .readTree(getClass().getResource(expectedJsonPath));
+                    .readTree(getClass().getResourceAsStream(expectedJsonPath));
 
             MatcherAssert.assertThat("Different amount of items", actual.size(),
                     Matchers.is(expected.size()));
