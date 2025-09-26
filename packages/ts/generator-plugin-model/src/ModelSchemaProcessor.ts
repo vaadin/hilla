@@ -1,6 +1,7 @@
 import {
   type ArraySchema,
   type BooleanSchema,
+  convertReferenceSchemaToFullyQualifiedName,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
@@ -20,6 +21,7 @@ import {
   type Schema,
   type StringSchema,
 } from '@vaadin/hilla-generator-core/Schema.js';
+import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import ts, {
   type Expression,
@@ -42,16 +44,19 @@ const $processBoolean = Symbol();
 const $processUnknown = Symbol();
 const $originalSchema = Symbol();
 const $schema = Symbol();
+const $transferTypes = Symbol();
 
 export abstract class ModelSchemaPartProcessor<T> {
   protected readonly [$dependencies]: DependencyManager;
   protected readonly [$originalSchema]: Schema;
   protected readonly [$schema]: Schema;
+  protected readonly [$transferTypes]: TransferTypes;
 
-  constructor(schema: Schema, dependencies: DependencyManager) {
+  constructor(schema: Schema, dependencies: DependencyManager, transferTypes: TransferTypes) {
     this[$dependencies] = dependencies;
     this[$originalSchema] = schema;
     this[$schema] = isComposedSchema(schema) ? decomposeSchema(schema)[0] : schema;
+    this[$transferTypes] = transferTypes;
   }
 
   process(): T {
@@ -104,7 +109,7 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('ReadonlyArray'), [
       handleNullableInternalType(
         schema.items,
-        new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies]).process(),
+        new ModelSchemaInternalTypeProcessor(schema.items, this[$dependencies], this[$transferTypes]).process(),
       ),
     ]);
   }
@@ -121,7 +126,10 @@ class ModelSchemaInternalTypeProcessor extends ModelSchemaPartProcessor<TypeNode
     const valueType =
       typeof props === 'boolean'
         ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
-        : handleNullableInternalType(props, new ModelSchemaInternalTypeProcessor(props, this[$dependencies]).process());
+        : handleNullableInternalType(
+            props,
+            new ModelSchemaInternalTypeProcessor(props, this[$dependencies], this[$transferTypes]).process(),
+          );
 
     return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Record'), [
       ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
@@ -166,6 +174,17 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
 
   override [$processReference](schema: ReferenceSchema): Identifier {
     const { imports, paths } = this[$dependencies];
+    const fullyQualifiedName = convertReferenceSchemaToFullyQualifiedName(schema);
+    const modelTypeName = `${fullyQualifiedName}Model`;
+    const transferTypeMaker = this[$transferTypes].get(modelTypeName);
+
+    if (transferTypeMaker) {
+      const typeNode = transferTypeMaker({ dependencies: this[$dependencies] });
+
+      if (ts.isTypeReferenceNode(typeNode) && ts.isIdentifier(typeNode.typeName)) {
+        return typeNode.typeName;
+      }
+    }
 
     const name = `${convertReferenceSchemaToSpecifier(schema)}Model`;
     const path = paths.createRelativePath(`${convertReferenceSchemaToPath(schema)}Model`);
@@ -185,14 +204,14 @@ class ModelSchemaIdentifierProcessor extends ModelSchemaPartProcessor<Identifier
 export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeReferenceNode> {
   readonly #id: ModelSchemaIdentifierProcessor;
 
-  constructor(schema: Schema, dependencies: DependencyManager) {
-    super(schema, dependencies);
-    this.#id = new ModelSchemaIdentifierProcessor(schema, dependencies);
+  constructor(schema: Schema, dependencies: DependencyManager, transferTypes: TransferTypes) {
+    super(schema, dependencies, transferTypes);
+    this.#id = new ModelSchemaIdentifierProcessor(schema, dependencies, transferTypes);
   }
 
   protected override [$processArray](schema: ArraySchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processArray](schema), [
-      new ModelSchemaTypeProcessor(schema.items, this[$dependencies]).process(),
+      new ModelSchemaTypeProcessor(schema.items, this[$dependencies], this[$transferTypes]).process(),
     ]);
   }
 
@@ -206,7 +225,7 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 
   protected override [$processRecord](schema: MapSchema): TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(this.#id[$processRecord](schema), [
-      new ModelSchemaInternalTypeProcessor(schema, this[$dependencies]).process(),
+      new ModelSchemaInternalTypeProcessor(schema, this[$dependencies], this[$transferTypes]).process(),
     ]);
   }
 
@@ -226,8 +245,8 @@ export class ModelSchemaTypeProcessor extends ModelSchemaPartProcessor<TypeRefer
 export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<readonly Expression[]> {
   readonly #validationConstraintProcessor: ValidationConstraintProcessor;
 
-  constructor(schema: Schema, dependencies: DependencyManager) {
-    super(schema, dependencies);
+  constructor(schema: Schema, dependencies: DependencyManager, transferTypes: TransferTypes) {
+    super(schema, dependencies, transferTypes);
     this.#validationConstraintProcessor = new ValidationConstraintProcessor((name) =>
       importBuiltInFormModel(name, dependencies),
     );
@@ -253,12 +272,12 @@ export class ModelSchemaExpressionProcessor extends ModelSchemaPartProcessor<rea
   }
 
   protected override [$processArray](schema: ArraySchema): readonly Expression[] {
-    const model = new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies]).process();
+    const model = new ModelSchemaIdentifierProcessor(schema.items, this[$dependencies], this[$transferTypes]).process();
 
     return [
       createModelBuildingCallback(
         model,
-        new ModelSchemaExpressionProcessor(schema.items, this[$dependencies]).process(),
+        new ModelSchemaExpressionProcessor(schema.items, this[$dependencies], this[$transferTypes]).process(),
       ),
     ];
   }
