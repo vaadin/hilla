@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterListener;
@@ -61,7 +61,7 @@ public class ServerAndClientViewsProvider {
     }
 
     public String createFileRoutesJson(VaadinRequest request)
-            throws JsonProcessingException {
+            throws JacksonException {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
                 collectClientViews(request));
         final boolean hasAutoLayout = MenuRegistry.hasHillaMainLayout(

@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -202,7 +202,7 @@ public class EndpointInvoker {
     }
 
     String createResponseErrorObject(Map<String, Object> serializationData)
-            throws JsonProcessingException {
+            throws JacksonException {
         return endpointObjectMapper.writeValueAsString(serializationData);
     }
 
@@ -218,8 +218,7 @@ public class EndpointInvoker {
         return wrapper.accessChecker;
     }
 
-    String writeValueAsString(Object returnValue)
-            throws JsonProcessingException {
+    String writeValueAsString(Object returnValue) throws JacksonException {
         return endpointObjectMapper.writeValueAsString(returnValue);
     }
 

@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ public final class JsonPrinter {
         return pretty;
     }
 
-    public String writeAsString(Object value) throws JsonProcessingException {
+    public String writeAsString(Object value) throws JacksonException {
         return mapper.writeValueAsString(value);
     }
 
@@ -38,8 +38,7 @@ public final class JsonPrinter {
             writer = mapper.writer(printer);
         }
 
-        public String writeAsString(Object value)
-                throws JsonProcessingException {
+        public String writeAsString(Object value) throws JacksonException {
             return writer.writeValueAsString(value);
         }
     }
