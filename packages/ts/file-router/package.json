@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.8.8",
+  "version": "24.8.9",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -62,9 +62,9 @@
   },
   "dependencies": {
     "@ungap/with-resolvers": "0.1.0",
-    "@vaadin/hilla-generator-utils": "24.8.8",
-    "@vaadin/hilla-react-auth": "24.8.8",
-    "@vaadin/hilla-react-signals": "24.8.8",
+    "@vaadin/hilla-generator-utils": "24.8.9",
+    "@vaadin/hilla-react-auth": "24.8.9",
+    "@vaadin/hilla-react-signals": "24.8.9",
     "tsc-template": "0.2.3",
     "typescript": "5.8.3"
   }
