@@ -1,9 +1,9 @@
 package com.vaadin.hilla.parser.testutils;
 
-import com.fasterxml.jackson.core.JacksonException;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.core.JacksonException;
 
 import com.vaadin.hilla.parser.utils.JsonPrinter;
 
