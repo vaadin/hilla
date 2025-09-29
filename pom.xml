@@ -235,12 +235,12 @@
       <dependency>
         <groupId>one.util</groupId>
         <artifactId>streamex</artifactId>
-        <version>0.8.2</version>
+        <version>0.8.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.17.0</version>
+        <version>3.19.0</version>
       </dependency>
       <dependency>
         <groupId>jakarta.servlet</groupId>
@@ -268,7 +268,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.18.0</version>
+        <version>2.20.0</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -291,7 +291,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.14.8</version>
+        <version>1.17.7</version>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
