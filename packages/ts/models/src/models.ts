@@ -1,12 +1,13 @@
 import type { EmptyObject } from 'type-fest';
 import {
-  type $defaultValue,
   $enum,
   type $members,
   type $optional,
   type AnyObject,
   type Enum,
+  type Extensions,
   Model,
+  type References,
   type Value,
 } from './Model.js';
 import { CoreModelBuilder } from './modelBuilders.js';
@@ -95,8 +96,11 @@ export type UnionModel<MM extends Model[]> = Model<Value<MM[number]>, Readonly<{
 /**
  * The model of an optional type.
  */
-export type OptionalModel<M extends Model> = Omit<M, typeof $defaultValue | typeof $optional> &
-  Readonly<{
-    [$defaultValue]: Value<M> | undefined;
-    [$optional]: true;
-  }>;
+export type OptionalModel<M extends Model> = Model<
+  Value<M> | undefined,
+  Extensions<M> &
+    Readonly<{
+      [$optional]: true;
+    }>,
+  References<M>
+>;

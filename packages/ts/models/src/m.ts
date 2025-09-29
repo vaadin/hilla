@@ -23,6 +23,7 @@ import {
   $defaultValue,
   $members,
   type ModelMetadata,
+  type ModelConverter,
 } from './Model.js';
 import { CoreModelBuilder, ObjectModelBuilder } from './modelBuilders.js';
 import { ArrayModel, EnumModel, ObjectModel, type UnionModel, $itemModel, type OptionalModel } from './models.js';
@@ -42,6 +43,39 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
 
   // Otherwise, the owner is a Target, so we can return the full value.
   return (model[$owner] as Target<T>).value;
+}
+
+function identityModelConverter<M extends Model>(model: M): M {
+  return model;
+}
+
+/**
+ * Creates a new model that represents an optional value.
+ *
+ * @param base - The base model to extend.
+ */
+function optional<M extends Model>(this: void, base: M): OptionalModel<M>;
+function optional<M extends Model, IM extends Model = Model>(
+  this: void,
+  base: ModelConverter<M, IM>,
+): ModelConverter<OptionalModel<M>, IM>;
+function optional<M extends Model, IM extends Model = Model>(
+  this: void,
+  base: M | ModelConverter<M, IM>,
+): OptionalModel<M> | ModelConverter<OptionalModel<M>, IM> {
+  function optionalConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): OptionalModel<M> {
+    const convertedModel = converter(model);
+    return new CoreModelBuilder<Value<M> | undefined>(convertedModel)
+      .name(convertedModel[$name])
+      .defaultValueProvider(() => undefined)
+      .define($optional, { value: true })
+      .build() as OptionalModel<M>;
+  }
+  if (typeof base === 'function') {
+    return (model: IM) => optionalConverter(model, base);
+  }
+
+  return optionalConverter(base, identityModelConverter);
 }
 
 /**
@@ -78,17 +112,7 @@ const m = {
     return new ObjectModelBuilder(base);
   },
 
-  /**
-   * Creates a new model that represents an optional value.
-   *
-   * @param base - The base model to extend.
-   */
-  optional<M extends Model>(this: void, base: M): OptionalModel<M> {
-    return new CoreModelBuilder<Value<M> | undefined>(base)
-      .name(base[$name])
-      .define($optional, { value: true })
-      .build() as OptionalModel<M>;
-  },
+  optional,
 
   /**
    * Creates a new model that represents an array of items.

@@ -9,6 +9,7 @@ import {
   type AnyObject,
   type DefaultValueProvider,
   type Model,
+  type ModelConverter,
   type ModelMetadata,
 } from './Model.js';
 import type { ObjectModel } from './models.js';
@@ -231,7 +232,7 @@ export class ObjectModelBuilder<
   ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
   property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
-    model: (model: Model<V, EX>) => M,
+    model: ModelConverter<M, Model<V, EX>>,
   ): // Workaround for the self-referencing models.
   // If the type of the model property is the model itself,
   V extends V[PK]

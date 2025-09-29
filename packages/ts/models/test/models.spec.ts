@@ -149,6 +149,17 @@ describe('@vaadin/hilla-models', () => {
     expect(items).to.be.an('array').with.lengthOf(0);
   });
 
+  it('should allow self-reference with optional array', () => {
+    interface Employee {
+      colleagues?: Employee[];
+    }
+
+    const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.optional(m.array)).build();
+    expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel.colleagues).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
+  });
+
   it('should allow array types', () => {
     expect(PersonModel).to.have.property('comments').which.is.instanceof(ArrayModel);
     expect(PersonModel.comments).to.have.property($itemModel).which.is.instanceof(CommentModel);
