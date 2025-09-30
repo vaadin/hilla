@@ -165,8 +165,8 @@ public final class GeneratorProcessor {
     private OpenAPI getOpenAPI() throws IOException {
         String source = Files.readString(openAPIFile);
         var mapper = OpenAPIFileType.JSON.getMapper();
-        var reader = mapper.reader();
-        return reader.readValue(source, OpenAPI.class);
+        var reader = mapper.readerFor(OpenAPI.class);
+        return reader.readValue(source);
     }
 
     private boolean isOpenAPIEmpty() {

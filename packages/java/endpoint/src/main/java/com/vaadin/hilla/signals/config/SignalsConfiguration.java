@@ -16,7 +16,7 @@
 
 package com.vaadin.hilla.signals.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.ConditionalOnFeatureFlag;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;

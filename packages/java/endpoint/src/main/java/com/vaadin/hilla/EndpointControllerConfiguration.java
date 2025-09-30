@@ -18,7 +18,8 @@ package com.vaadin.hilla;
 
 import java.lang.reflect.Method;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,7 +28,6 @@ import org.springframework.boot.webmvc.autoconfigure.WebMvcRegistrations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -119,9 +119,11 @@ public class EndpointControllerConfiguration {
             this.endpointMapper = endpointMapperFactory != null
                     ? endpointMapperFactory.build()
                     : createDefaultEndpointMapper(applicationContext);
+
             if (this.endpointMapper != null) {
-                this.endpointMapper.registerModule(
-                        ENDPOINT_TRANSFER_MAPPER.getJacksonModule());
+                this.endpointMapper = this.endpointMapper.rebuild()
+                        .addModule(ENDPOINT_TRANSFER_MAPPER.getJacksonModule())
+                        .build();
             }
         }
         return this.endpointMapper;
@@ -129,10 +131,7 @@ public class EndpointControllerConfiguration {
 
     private static ObjectMapper createDefaultEndpointMapper(
             ApplicationContext applicationContext) {
-        var endpointMapper = new JacksonObjectMapperFactory.Json().build();
-        applicationContext.getBean(Jackson2ObjectMapperBuilder.class)
-                .configure(endpointMapper);
-        return endpointMapper;
+        return new JacksonObjectMapperFactory.Json().build();
     }
 
     /**
