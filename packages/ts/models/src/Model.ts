@@ -204,4 +204,4 @@ export const Model: Model = Object.create(null, {
   },
 });
 
-export type ModelConverter<M extends Model, IM extends Model> = (model: IM) => M;
+export type ModelConverter<M extends Model = Model, IM extends Model = Model> = (model: IM) => M;

@@ -55,27 +55,56 @@ function identityModelConverter<M extends Model>(model: M): M {
  * @param base - The base model to extend.
  */
 function optional<M extends Model>(this: void, base: M): OptionalModel<M>;
-function optional<M extends Model, IM extends Model = Model>(
+function optional<M extends Model, IM extends Model>(
   this: void,
   base: ModelConverter<M, IM>,
 ): ModelConverter<OptionalModel<M>, IM>;
-function optional<M extends Model, IM extends Model = Model>(
+function optional<M extends Model, IM extends Model>(
   this: void,
   base: M | ModelConverter<M, IM>,
 ): OptionalModel<M> | ModelConverter<OptionalModel<M>, IM> {
   function optionalConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): OptionalModel<M> {
     const convertedModel = converter(model);
-    return new CoreModelBuilder<Value<M> | undefined>(convertedModel)
+    return new CoreModelBuilder<Value<M> | undefined>(convertedModel, () => undefined)
       .name(convertedModel[$name])
-      .defaultValueProvider(() => undefined)
       .define($optional, { value: true })
       .build() as OptionalModel<M>;
   }
+
   if (typeof base === 'function') {
     return (model: IM) => optionalConverter(model, base);
   }
 
   return optionalConverter(base, identityModelConverter);
+}
+
+/**
+ * Creates a new model that represents an array of items.
+ *
+ * @param itemModel - The model of the items in the array.
+ */
+function array<const M extends Model>(this: void, itemModel: M): ArrayModel<M>;
+// function array<const M extends Model, const IM extends Model>(
+//   this: void,
+//   itemModel: ModelConverter<M, IM>,
+// ): ModelConverter<ArrayModel<M>, IM>;
+function array<const M extends Model, const IM extends Model>(
+  this: void,
+  itemModel: M | ModelConverter<M, IM>,
+): ArrayModel<M> | ModelConverter<ArrayModel<M>, IM> {
+  function arrayConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): ArrayModel<M> {
+    const convertedModel = converter(model);
+    return new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
+      .name(`Array<${convertedModel[$name]}>`)
+      .define($itemModel, { value: convertedModel })
+      .build();
+  }
+
+  if (typeof itemModel === 'function') {
+    return (model: IM) => arrayConverter(model, itemModel);
+  }
+
+  return arrayConverter(itemModel, identityModelConverter);
 }
 
 /**
@@ -113,18 +142,7 @@ const m = {
   },
 
   optional,
-
-  /**
-   * Creates a new model that represents an array of items.
-   *
-   * @param itemModel - The model of the items in the array.
-   */
-  array<const M extends Model>(this: void, itemModel: M): ArrayModel<M> {
-    return new CoreModelBuilder<Array<Value<M>>>(ArrayModel)
-      .name(`Array<${itemModel[$name]}>`)
-      .define($itemModel, { value: itemModel })
-      .build();
-  },
+  array,
 
   /**
    * Creates a new model that represents an object.

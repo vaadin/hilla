@@ -226,11 +226,11 @@ export class ObjectModelBuilder<
    * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
    * flag for the specific property is set.
    */
-  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
     model: M,
   ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
     model: ModelConverter<M, Model<V, EX>>,
   ): // Workaround for the self-referencing models.
@@ -253,7 +253,7 @@ export class ObjectModelBuilder<
     : // Otherwise we simply extend the model with the property, and update the
       // current value type of the model.
       ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
     model: M | ((model: Model<V, EX>) => M),
   ): unknown {
