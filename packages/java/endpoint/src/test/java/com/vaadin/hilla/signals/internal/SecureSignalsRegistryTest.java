@@ -1,6 +1,6 @@
 package com.vaadin.hilla.signals.internal;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;

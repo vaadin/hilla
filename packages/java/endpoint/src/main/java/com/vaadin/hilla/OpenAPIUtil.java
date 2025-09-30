@@ -7,10 +7,10 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,12 +93,14 @@ public class OpenAPIUtil {
 
         // Parameters and return types
         if (openApi.has("components")) {
-            ObjectNode schemas = (ObjectNode) openApi.get("components")
-                    .get("schemas");
-            if (schemas != null) {
-                schemas.fieldNames().forEachRemaining(type -> {
-                    types.add(type);
-                });
+            var components = openApi.get("components");
+            if (components != null && components.has("schemas")) {
+                var schemasNode = components.get("schemas");
+                if (schemasNode instanceof ObjectNode schemas) {
+                    for (String type : schemas.propertyNames()) {
+                        types.add(type);
+                    }
+                }
             }
         }
         return types;

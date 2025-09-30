@@ -1,5 +1,5 @@
 module com.vaadin.hilla.parser.plugins.nonnull {
-    requires com.fasterxml.jackson.databind;
+    requires tools.jackson.databind;
     requires com.vaadin.hilla.parser.plugins.backbone;
     requires com.vaadin.hilla.parser.utils;
     requires org.jspecify;

@@ -7,15 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
-        EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class })
+        EndpointProperties.class, JacksonProperties.class,
+        EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointControllerConfigurationTest {

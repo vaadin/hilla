@@ -16,8 +16,8 @@
 
 package com.vaadin.hilla.signals.handler;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;

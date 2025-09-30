@@ -266,8 +266,9 @@ public class AppViewIT extends ChromeBrowserTest {
         button.click();
 
         // Wait for the server connect response
+        // Jackson 3 uses alphabetical property ordering
         verifyContent(
-                "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"property\":\"qty\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\"}]}}}");
+                "{\"page\":[{\"name\":\"Foo\",\"qty\":30},{\"name\":\"Bar\",\"qty\":20}],\"pageable\":{\"pageNumber\":0,\"pageSize\":2,\"sort\":{\"orders\":[{\"direction\":\"DESC\",\"ignoreCase\":false,\"nullHandling\":\"NATIVE\",\"property\":\"qty\"}]}}}");
     }
 
     private void load() {
