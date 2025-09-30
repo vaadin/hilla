@@ -89,7 +89,7 @@
     <jackson.version>3.0.0-rc9</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>25.0.0-alpha15</flow.version>
+    <flow.version>25.0.0-alpha16</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>4.0.0-M3</spring.boot.version>
     <testbench.version>10.0.0-alpha4</testbench.version>
