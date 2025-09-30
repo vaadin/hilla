@@ -74,8 +74,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.scm.id>github</project.scm.id>
     <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
+    <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.180</classgraph.version>
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
@@ -89,7 +90,7 @@
     <jackson.version>3.0.0-rc11</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
-    <flow.version>25.0.0-alpha15</flow.version>
+    <flow.version>25.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>4.0.0-M3</spring.boot.version>
     <testbench.version>10.0.0-alpha4</testbench.version>

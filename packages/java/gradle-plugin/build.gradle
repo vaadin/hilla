@@ -25,8 +25,8 @@ defaultTasks('jar', 'test')
 group pom.parent.groupId
 version = project.hasProperty('hilla.version') ? project.getProperty('hilla.version') : pom.parent.version
 archivesBaseName = pom.artifactId
-sourceCompatibility = 17
-targetCompatibility = 17
+sourceCompatibility = 21
+targetCompatibility = 21
 def rootPom = new XmlSlurper().parse(rootProject.file('../../../pom.xml'))
 def springBootVersion = rootPom.properties['spring.boot.version']
 def flowVersion = rootPom.properties['flow.version']
@@ -200,7 +200,7 @@ publishing {
  *
  **********************************************************************************************************************/
 wrapper {
-    gradleVersion = '8.7'
+    gradleVersion = '8.14'
     distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -219,7 +219,7 @@ kotlin {
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_17
+        jvmTarget = JvmTarget.JVM_21
     }
     explicitApi()
 }
