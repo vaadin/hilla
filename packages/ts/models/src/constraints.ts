@@ -1,5 +1,5 @@
 import { ConstraintBuilder } from './ConstraintBuilder.js';
-import m from './m.js';
+import * as m from './m.js';
 import { Model } from './Model.js';
 import { ArrayModel, BooleanModel, NumberModel, RecordModel, StringModel } from './models.js';
 

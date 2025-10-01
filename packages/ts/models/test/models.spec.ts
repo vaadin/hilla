@@ -126,7 +126,7 @@ describe('@vaadin/hilla-models', () => {
       supervisor?: Employee;
     }
 
-    const EmployeeModel = m.object<Employee>('Employee').property('supervisor', m.optional).build();
+    const EmployeeModel = m.object<Employee>('Employee').property('supervisor', m.optional(m.self)).build();
 
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
@@ -141,7 +141,7 @@ describe('@vaadin/hilla-models', () => {
       colleagues: Employee[];
     }
 
-    const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.array).build();
+    const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.array(m.self)).build();
 
     expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: [] });
@@ -154,10 +154,27 @@ describe('@vaadin/hilla-models', () => {
       colleagues?: Employee[];
     }
 
-    const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.optional(m.array)).build();
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('colleagues', m.optional(m.array(m.self)))
+      .build();
     expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
     expect(EmployeeModel.colleagues).to.have.property($optional).which.equals(true);
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
+  });
+
+  it('should allow self-reference with array of optional', () => {
+    interface Employee {
+      colleagues: Array<Employee | undefined>;
+    }
+
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('colleagues', m.array(m.optional(m.self)))
+      .build();
+    expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel.colleagues[$itemModel]).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: [] });
   });
 
   it('should allow array types', () => {

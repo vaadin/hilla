@@ -1,4 +1,4 @@
-import m from './m.js';
+import * as m from './m.js';
 
 export * from './Model.js';
 export * from './models.js';

@@ -226,33 +226,50 @@ export class ObjectModelBuilder<
    * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
    * flag for the specific property is set.
    */
-  property<PK extends string & keyof V, M extends Model<V[PK]>>(
+  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
     model: M,
   ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  property<PK extends string & keyof V, M extends Model<V[PK]>>(
+  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
+    // eslint-disable-next-line @typescript-eslint/unified-signatures
     model: ModelConverter<M, Model<V, EX>>,
-  ): // Workaround for the self-referencing models.
-  // If the type of the model property is the model itself,
-  V extends V[PK]
-    ? // Then we set a flag of the model that it contains a self-reference
-      // property.
-      ObjectModelBuilder<
-        V,
-        CV & Readonly<Record<PK, V[PK]>>,
-        EX,
-        {
-          // Just inheriting the current flag.
-          named: F['named'];
-          // Adding the property name to all existing self-referencing
-          // properties.
-          selfRefKeys: F['selfRefKeys'] | PK;
-        }
-      >
-    : // Otherwise we simply extend the model with the property, and update the
-      // current value type of the model.
-      ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  //   key: PK,
+  //   model: M,
+  // ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  //   key: PK,
+  //   model: ModelConverter<M, Model<V, EX>>,
+  // ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  //   key: PK,
+  //   model: M,
+  // ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  //   key: PK,
+  //   model: ModelConverter<M, Model<V, EX>>,
+  // ): // Workaround for the self-referencing models.
+  // // If the type of the model property is the model itself,
+  // V extends V[PK]
+  //   ? // Then we set a flag of the model that it contains a self-reference
+  //     // property.
+  //     ObjectModelBuilder<
+  //       V,
+  //       CV & Readonly<Record<PK, V[PK]>>,
+  //       EX,
+  //       {
+  //         // Just inheriting the current flag.
+  //         named: F['named'];
+  //         // Adding the property name to all existing self-referencing
+  //         // properties.
+  //         selfRefKeys: F['selfRefKeys'] | PK;
+  //       }
+  //     >
+  //   : // Otherwise we simply extend the model with the property, and update the
+  //     // current value type of the model.
+  //     ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
   property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
     model: M | ((model: Model<V, EX>) => M),
