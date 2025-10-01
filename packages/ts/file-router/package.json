@@ -66,6 +66,6 @@
     "@vaadin/hilla-react-auth": "25.0.0-alpha9",
     "@vaadin/hilla-react-signals": "25.0.0-alpha9",
     "tsc-template": "0.2.3",
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   }
 }
