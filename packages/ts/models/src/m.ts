@@ -65,7 +65,7 @@ export function optional<M extends Model, IM extends Model>(
 ): OptionalModel<M> | ModelConverter<OptionalModel<M>, IM> {
   function optionalConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): OptionalModel<M> {
     const convertedModel = converter(model);
-    return new CoreModelBuilder<Value<M> | undefined>(convertedModel, () => undefined)
+    return new CoreModelBuilder(convertedModel)
       .name(convertedModel[$name])
       .define($optional, { value: true })
       .build() as OptionalModel<M>;
