@@ -7,6 +7,7 @@ export type * from './ProvisionalModel.js';
 export * from './Validation.js';
 export * from './Validators.js';
 export * from './Validity.js';
+export * from './stringConverters.js';
 
 // @ts-expect-error: esbuild injection
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
