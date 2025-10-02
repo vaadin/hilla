@@ -24,10 +24,10 @@ export interface ModelMetadata {
  * The target to which a model is attached. It could be a Binder instance, a
  * Signal or another object. However, it could never be another model.
  */
-export type Target<T = unknown> = Readonly<{
-  model?: Model<T>;
-  value: T;
-}>;
+export type Target<T = unknown> = {
+  readonly model?: Model<T>;
+  readonly value: T;
+};
 
 export const nothing = Symbol('nothing');
 
@@ -77,11 +77,6 @@ export const $optional: unique symbol = Symbol('optional');
 export const $defaultValue = Symbol('defaultValue');
 
 /**
- * The symbol that represents the {@link EnumModel[$enumerate]} property.
- */
-export const $enum = Symbol('enumerate');
-
-/**
  * The symbol that represents the {@link UnionModel[$members]} property.
  */
 export const $members = Symbol('members');
@@ -96,12 +91,7 @@ export type Value<M extends Model> = M extends Model<infer T> ? T : never;
 /**
  * Extracts the list of extra properties of the model.
  */
-export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : EmptyObject;
-
-/**
- * Extracts the list of self-referencing properties of the model.
- */
-export type References<M extends Model> = M extends Model<unknown, AnyObject, infer R> ? R : never;
+export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : AnyObject;
 
 /**
  * A model that represents a specific type of data.
@@ -112,53 +102,48 @@ export type References<M extends Model> = M extends Model<unknown, AnyObject, in
  * model-specific metadata. It's recommended to use a symbol as a key for the
  * metadata property to avoid the potential naming conflicts with the described
  * object properties.
- * @typeParam R - The keys of the self-referencing properties of the model.
  *
  * @remarks
  * Since we know the full model definition only on this step, the `R` type
  * parameter is essential to describe a model with self-reference properties.
  */
-export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends keyof any = never> = EX &
-  Readonly<{
-    [P in R]: Model<V | undefined, EX, R>;
-  }> &
-  Readonly<{
-    /**
-     * The key of the model in the owner model.
-     */
-    [$key]: keyof any;
+export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
+  /**
+   * The key of the model in the owner model.
+   */
+  readonly [$key]: keyof any;
 
-    /**
-     * The name of the model. For attached models, the name will be prefixed
-     * with the `@` symbol.
-     */
-    [$name]: string;
+  /**
+   * The name of the model. For attached models, the name will be prefixed
+   * with the `@` symbol.
+   */
+  readonly [$name]: string;
 
-    /**
-     * The owner model of the model. For detached models, the owner will always
-     * be a specific global object `detachedTarget`.
-     */
-    [$owner]: Model | Target;
+  /**
+   * The owner model of the model. For detached models, the owner will always
+   * be a specific global object `detachedTarget`.
+   */
+  readonly [$owner]: Model | Target;
 
-    /**
-     * The metadata of the model.
-     */
-    [$meta]?: ModelMetadata;
+  /**
+   * The metadata of the model.
+   */
+  readonly [$meta]?: ModelMetadata;
 
-    /**
-     * Whether the model is optional. It describes if the data described by
-     * this model is nullable.
-     */
-    [$optional]: boolean;
+  /**
+   * Whether the model is optional. It describes if the data described by
+   * this model is nullable.
+   */
+  readonly [$optional]: boolean;
 
-    /**
-     * The default value of the model.
-     */
-    [$defaultValue]: V;
-    [Symbol.toStringTag]: string;
-    [Symbol.hasInstance](value: any): value is Model<V, EX, R>;
-    toString(): string;
-  }>;
+  /**
+   * The default value of the model.
+   */
+  readonly [$defaultValue]: V;
+  readonly [Symbol.toStringTag]: string;
+  [Symbol.hasInstance](value: any): value is Model<V, EX>;
+  toString(): string;
+};
 
 /**
  * A function that provides a default value for a model.
@@ -167,9 +152,7 @@ export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends key
  * @typeParam EX - The extra properties of the model.
  * @typeParam R - The keys of the self-referencing properties of the model.
  */
-export type DefaultValueProvider<V, EX extends AnyObject = EmptyObject, R extends keyof any = never> = (
-  model: Model<V, EX, R>,
-) => V;
+export type DefaultValueProvider<V, EX extends AnyObject = EmptyObject> = (model: Model<V, EX>) => V;
 
 export const Model: Model = Object.create(null, {
   [$key]: {

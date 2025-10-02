@@ -36,7 +36,7 @@ export type NonAttributedConstraint<
   }>;
 
 export type Constraint<V = unknown, N extends string = string, A extends AnyObject = AnyObject> = Readonly<{
-  attributes: A extends EmptyObject ? A : Required<A>;
+  attributes: EmptyObject extends A ? A : Required<A>;
   name: N;
   [$assertSupportedModel](model: Model<V>): void;
 }>;

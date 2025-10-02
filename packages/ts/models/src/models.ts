@@ -1,21 +1,14 @@
 import type { EmptyObject } from 'type-fest';
 import {
-  $enum,
+  type $defaultValue,
   type $members,
-  type $optional,
   type AnyObject,
   type Enum,
   type Extensions,
   Model,
-  type References,
   type Value,
 } from './Model.js';
 import { CoreModelBuilder } from './modelBuilders.js';
-
-/**
- * The symbol that represents the ArrayModel item property.
- */
-export const $itemModel = Symbol('itemModel');
 
 /**
  * The model of a primitive value, like `string`, `number` or `boolean`.
@@ -42,15 +35,20 @@ export type BooleanModel = PrimitiveModel<boolean>;
 export const BooleanModel = new CoreModelBuilder(PrimitiveModel, () => false).name('boolean').build();
 
 /**
+ * The symbol that represents the ArrayModel item property.
+ */
+export const $itemModel = Symbol('itemModel');
+
+/**
  * The model of array data.
  */
 export type ArrayModel<M extends Model = Model> = Model<
   Array<Value<M>>,
-  Readonly<{
-    [$itemModel]: M;
-  }>
+  {
+    readonly [$itemModel]: M;
+  }
 >;
-export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
+export const ArrayModel: ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
   .name('Array')
   .define($itemModel, { value: Model })
   .build();
@@ -58,7 +56,7 @@ export const ArrayModel = new CoreModelBuilder(Model, (): unknown[] => [])
 /**
  * The model of object data.
  */
-export type ObjectModel<V, EX extends AnyObject = EmptyObject, R extends keyof any = never> = Model<V, EX, R>;
+export type ObjectModel<V, EX extends AnyObject = EmptyObject> = Model<V, EX>;
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();
 
 /**
@@ -72,16 +70,21 @@ export const RecordModel = new CoreModelBuilder(ObjectModel, (): Record<string, 
   .build();
 
 /**
+ * The symbol that represents the `EnumModel[$enumerate]` property.
+ */
+export const $enum = Symbol('enumerate');
+
+/**
  * The model of enum data.
  */
 export type EnumModel<T extends typeof Enum> = Model<
   T[keyof T],
-  Readonly<{
-    [$enum]: T;
-  }>
+  {
+    readonly [$enum]: T;
+  }
 >;
 
-export const EnumModel = new CoreModelBuilder<(typeof Enum)[keyof typeof Enum]>(Model)
+export const EnumModel: EnumModel<typeof Enum> = new CoreModelBuilder<(typeof Enum)[keyof typeof Enum]>(Model)
   .name('Enum')
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   .define($enum, { value: {} as typeof Enum })
@@ -91,16 +94,14 @@ export const EnumModel = new CoreModelBuilder<(typeof Enum)[keyof typeof Enum]>(
 /**
  * The model of a union data.
  */
-export type UnionModel<MM extends Model[]> = Model<Value<MM[number]>, Readonly<{ [$members]: MM }>>;
+export type UnionModel<MM extends Model[]> = Model<Value<MM[number]>, { readonly [$members]: MM }>;
 
 /**
  * The model of an optional type.
  */
 export type OptionalModel<M extends Model> = Model<
-  Value<M> | undefined,
-  Extensions<M> &
-    Readonly<{
-      [$optional]: true;
-    }>,
-  References<M>
+  M[typeof $defaultValue] | undefined,
+  Extensions<M> & {
+    readonly $optional: true;
+  }
 >;

@@ -14,19 +14,25 @@ import {
   type Target,
   type Value,
   type Extensions,
-  type References,
   $name,
   type AnyObject,
   $optional,
   type Enum,
-  $enum,
   $defaultValue,
   $members,
   type ModelMetadata,
   type ModelConverter,
 } from './Model.js';
 import { CoreModelBuilder, ObjectModelBuilder } from './modelBuilders.js';
-import { ArrayModel, EnumModel, ObjectModel, type UnionModel, $itemModel, type OptionalModel } from './models.js';
+import {
+  ArrayModel,
+  EnumModel,
+  ObjectModel,
+  type UnionModel,
+  $itemModel,
+  type OptionalModel,
+  $enum,
+} from './models.js';
 
 const { defineProperty } = Object;
 
@@ -116,7 +122,7 @@ export function array<M extends Model, IM extends Model>(
  * model.
  */
 export function attach<M extends Model>(this: void, model: M, targetProvider: () => Target<Value<M>>): M {
-  const _model = new CoreModelBuilder<Value<M>, Extensions<M>, { named: false; selfRefKeys: References<M> }>(model)
+  const _model = new CoreModelBuilder<Value<M>, Extensions<M>, { named: false }>(model)
     .name(`@${model[$name]}`)
     .build();
   defineProperty(_model, $owner, { get: targetProvider });
@@ -133,7 +139,7 @@ export function attach<M extends Model>(this: void, model: M, targetProvider: ()
 export function extend<M extends Model<AnyObject>>(
   this: void,
   base: M,
-): ObjectModelBuilder<Value<M>, Value<M>, Extensions<M>, { named: false; selfRefKeys: References<M> }> {
+): ObjectModelBuilder<Value<M>, Value<M>, Extensions<M>> {
   return new ObjectModelBuilder(base);
 }
 
@@ -145,7 +151,7 @@ export function extend<M extends Model<AnyObject>>(
 export function object<T extends AnyObject>(
   this: void,
   name: string,
-): ObjectModelBuilder<T, EmptyObject, EmptyObject, { named: true; selfRefKeys: never }> {
+): ObjectModelBuilder<T, EmptyObject, EmptyObject, { named: true }> {
   return new ObjectModelBuilder(ObjectModel).name(name) as any;
 }
 

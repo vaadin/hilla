@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 import type { EmptyObject } from 'type-fest';
 import {
   $defaultValue,
@@ -26,18 +27,6 @@ export type Flags = {
    * Defines if the model is named.
    */
   named: boolean;
-
-  /**
-   * The keys of the self-referencing properties.
-   *
-   * @remarks
-   * The problem of self-reference models is that they cannot have intermediate
-   * type because during the property definition, the model itself is in the
-   * middle of construction. That's why we define the specific type-only flag
-   * that allows us to know which model properties are self-referenced. We can
-   * safely set it in the end of building using this flag.
-   */
-  selfRefKeys: keyof any;
 };
 
 /**
@@ -49,12 +38,8 @@ export type Flags = {
  * @typeParam F - The flags for the model constructor that allow to determine
  * specific characteristics of the model.
  */
-export class CoreModelBuilder<
-  V,
-  EX extends AnyObject = EmptyObject,
-  F extends Flags = { named: false; selfRefKeys: never },
-> {
-  protected readonly [$model]: Model<V, EX, F['selfRefKeys']>;
+export class CoreModelBuilder<V, EX extends AnyObject = EmptyObject, F extends Flags = { named: false }> {
+  protected readonly [$model]: Model<V, EX>;
 
   /**
    * @param base - The base model to extend.
@@ -96,7 +81,7 @@ export class CoreModelBuilder<
   define<const DK extends symbol, const DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
-  ): CoreModelBuilder<V, EX & Readonly<Record<DK, DV>>, F> {
+  ): CoreModelBuilder<V, EX & { readonly [key in DK]: DV }, F> {
     defineProperty(this[$model], key, value);
     return this as any;
   }
@@ -127,7 +112,7 @@ export class CoreModelBuilder<
    * @param name - The name of the model.
    * @returns The current builder instance.
    */
-  name(name: string): CoreModelBuilder<V, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
+  name(name: string): CoreModelBuilder<V, EX, { named: true }> {
     return this.define($name, { value: name }) as any;
   }
 
@@ -137,7 +122,7 @@ export class CoreModelBuilder<
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): Model<V, EX, F['selfRefKeys']> {
+  build(this: F['named'] extends true ? this : never): Model<V, EX> {
     return this[$model];
   }
 }
@@ -167,7 +152,7 @@ export class ObjectModelBuilder<
   V extends AnyObject,
   CV extends AnyObject = EmptyObject,
   EX extends AnyObject = EmptyObject,
-  F extends Flags = { named: false; selfRefKeys: never },
+  F extends Flags = { named: false },
 > extends CoreModelBuilder<V, EX, F> {
   constructor(base: Model) {
     super(base, (m) => {
@@ -196,7 +181,7 @@ export class ObjectModelBuilder<
   object<NV extends AnyObject>(
     this: F['named'] extends false ? this : never,
     name: string,
-  ): ObjectModelBuilder<NV & V, CV, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
+  ): ObjectModelBuilder<NV & V, CV, EX, { named: true }> {
     return this.name(name) as any;
   }
 
@@ -206,7 +191,7 @@ export class ObjectModelBuilder<
   declare ['define']: <const DK extends symbol, DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
-  ) => ObjectModelBuilder<V, CV, EX & Readonly<Record<DK, DV>>, F>;
+  ) => ObjectModelBuilder<V, CV, EX & { readonly [key in DK]: DV }, F>;
 
   /**
    * {@inheritDoc CoreModelBuilder.meta}
@@ -224,67 +209,56 @@ export class ObjectModelBuilder<
    * function that produces the model based on the current model.
    *
    * @returns The current builder instance updated with the new property type.
-   * In case there is a self-referencing property, the {@link Flags.selfRefKeys}
-   * flag for the specific property is set.
    */
   property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
     model: M,
-  ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  ): ObjectModelBuilder<
+    V,
+    EmptyObject extends CV
+      ? { readonly [key in PK]: V[PK] }
+      : {
+          readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
+        },
+    EmptyObject extends EX
+      ? { readonly [key in PK]: M }
+      : {
+          readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
+        },
+    F
+  >;
   property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
     key: PK,
     // eslint-disable-next-line @typescript-eslint/unified-signatures
     model: ModelConverter<M, Model<V, EX>>,
-  ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
-  //   key: PK,
-  //   model: M,
-  // ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
-  //   key: PK,
-  //   model: ModelConverter<M, Model<V, EX>>,
-  // ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
-  //   key: PK,
-  //   model: M,
-  // ): ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
-  // property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
-  //   key: PK,
-  //   model: ModelConverter<M, Model<V, EX>>,
-  // ): // Workaround for the self-referencing models.
-  // // If the type of the model property is the model itself,
-  // V extends V[PK]
-  //   ? // Then we set a flag of the model that it contains a self-reference
-  //     // property.
-  //     ObjectModelBuilder<
-  //       V,
-  //       CV & Readonly<Record<PK, V[PK]>>,
-  //       EX,
-  //       {
-  //         // Just inheriting the current flag.
-  //         named: F['named'];
-  //         // Adding the property name to all existing self-referencing
-  //         // properties.
-  //         selfRefKeys: F['selfRefKeys'] | PK;
-  //       }
-  //     >
-  //   : // Otherwise we simply extend the model with the property, and update the
-  //     // current value type of the model.
-  //     ObjectModelBuilder<V, CV & Readonly<Record<PK, V[PK]>>, EX & Readonly<Record<PK, M>>, F>;
+  ): ObjectModelBuilder<
+    V,
+    EmptyObject extends CV
+      ? { readonly [key in PK]: V[PK] }
+      : {
+          readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
+        },
+    EmptyObject extends EX
+      ? { readonly [key in PK]: M }
+      : {
+          readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
+        },
+    F
+  >;
   property<PK extends string & keyof V, M extends Model<V[PK]>>(
     key: PK,
     model: M | ((model: Model<V, EX>) => M),
   ): unknown {
     defineProperty(this[$model], key, {
       enumerable: true,
-      get(this: Model<V, EX & Readonly<Record<PK, M>>>) {
+      get(this: Model<V, EX & { readonly [key in PK]: M }>) {
         if (!propertyRegistry.has(this)) {
           propertyRegistry.set(this, {});
         }
 
         const props = propertyRegistry.get(this)!;
 
-        props[key] ??= new CoreModelBuilder<V[PK], EmptyObject, { named: true; selfRefKeys: never }>(
+        props[key] ??= new CoreModelBuilder<V[PK], EmptyObject, { named: true }>(
           typeof model === 'function' ? model(this) : model,
         )
           .define($key, { value: key })
@@ -301,7 +275,5 @@ export class ObjectModelBuilder<
   /**
    * {@inheritDoc CoreModelBuilder.build}
    */
-  declare build: (
-    this: F['named'] extends true ? (CV extends V ? this : never) : never,
-  ) => ObjectModel<V, EX, F['selfRefKeys']>;
+  declare build: (this: F['named'] extends true ? (CV extends V ? this : never) : never) => ObjectModel<V, EX>;
 }
