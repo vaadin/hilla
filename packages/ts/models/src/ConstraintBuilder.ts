@@ -4,8 +4,12 @@ import {
   type Constraint,
   type ConstraintFn,
   type NonAttributedConstraint,
-} from './Constraint.js';
-import { $defaultValue, $name, type AnyObject, Model, type Value } from './Model.js';
+  $defaultValue,
+  $name,
+  type AnyObject,
+  Model,
+  type Value,
+} from './Model.js';
 
 /**
  * A builder class for declaring constraints.

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/consistent-indexed-object-style */
-import type { EmptyObject } from 'type-fest';
 import {
   $defaultValue,
   $key,
@@ -38,7 +37,7 @@ export type Flags = {
  * @typeParam F - The flags for the model constructor that allow to determine
  * specific characteristics of the model.
  */
-export class CoreModelBuilder<V, EX extends AnyObject = EmptyObject, F extends Flags = { named: false }> {
+export class CoreModelBuilder<V, EX extends AnyObject = object, F extends Flags = { named: false }> {
   protected readonly [$model]: Model<V, EX>;
 
   /**
@@ -81,7 +80,13 @@ export class CoreModelBuilder<V, EX extends AnyObject = EmptyObject, F extends F
   define<const DK extends symbol, const DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
-  ): CoreModelBuilder<V, EX & { readonly [key in DK]: DV }, F> {
+  ): CoreModelBuilder<
+    V,
+    {
+      readonly [key in keyof EX | DK]: key extends DK ? DV : key extends keyof EX ? EX[key] : never;
+    },
+    F
+  > {
     defineProperty(this[$model], key, value);
     return this as any;
   }
@@ -122,7 +127,7 @@ export class CoreModelBuilder<V, EX extends AnyObject = EmptyObject, F extends F
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): Model<V, EX> {
+  build(this: F['named'] extends true ? this : never): object extends EX ? Model<V> : Model<V, EX> {
     return this[$model];
   }
 }
@@ -150,8 +155,8 @@ const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
  */
 export class ObjectModelBuilder<
   V extends AnyObject,
-  CV extends AnyObject = EmptyObject,
-  EX extends AnyObject = EmptyObject,
+  CV extends AnyObject = object,
+  EX extends AnyObject = object,
   F extends Flags = { named: false },
 > extends CoreModelBuilder<V, EX, F> {
   constructor(base: Model) {
@@ -178,10 +183,10 @@ export class ObjectModelBuilder<
    *
    * @param name - The name of the model.
    */
-  object<NV extends AnyObject>(
+  object<NV extends V>(
     this: F['named'] extends false ? this : never,
     name: string,
-  ): ObjectModelBuilder<NV & V, CV, EX, { named: true }> {
+  ): ObjectModelBuilder<NV, CV, EX, { named: true }> {
     return this.name(name) as any;
   }
 
@@ -191,7 +196,14 @@ export class ObjectModelBuilder<
   declare ['define']: <const DK extends symbol, DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
-  ) => ObjectModelBuilder<V, CV, EX & { readonly [key in DK]: DV }, F>;
+  ) => ObjectModelBuilder<
+    V,
+    CV,
+    {
+      readonly [key in keyof EX | DK]: key extends DK ? DV : key extends keyof EX ? EX[key] : never;
+    },
+    F
+  >;
 
   /**
    * {@inheritDoc CoreModelBuilder.meta}
@@ -215,16 +227,12 @@ export class ObjectModelBuilder<
     model: M,
   ): ObjectModelBuilder<
     V,
-    EmptyObject extends CV
-      ? { readonly [key in PK]: V[PK] }
-      : {
-          readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
-        },
-    EmptyObject extends EX
-      ? { readonly [key in PK]: M }
-      : {
-          readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
-        },
+    {
+      readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
+    },
+    {
+      readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
+    },
     F
   >;
   property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
@@ -233,16 +241,12 @@ export class ObjectModelBuilder<
     model: ModelConverter<M, Model<V, EX>>,
   ): ObjectModelBuilder<
     V,
-    EmptyObject extends CV
-      ? { readonly [key in PK]: V[PK] }
-      : {
-          readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
-        },
-    EmptyObject extends EX
-      ? { readonly [key in PK]: M }
-      : {
-          readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
-        },
+    {
+      readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
+    },
+    {
+      readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
+    },
     F
   >;
   property<PK extends string & keyof V, M extends Model<V[PK]>>(
@@ -258,7 +262,7 @@ export class ObjectModelBuilder<
 
         const props = propertyRegistry.get(this)!;
 
-        props[key] ??= new CoreModelBuilder<V[PK], EmptyObject, { named: true }>(
+        props[key] ??= new CoreModelBuilder<V[PK], object, { named: true }>(
           typeof model === 'function' ? model(this) : model,
         )
           .define($key, { value: key })

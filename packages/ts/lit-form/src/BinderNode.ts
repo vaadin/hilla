@@ -134,11 +134,9 @@ function getModelValidators<M extends ProvisionalModel>(model: M): ReadonlyArray
   const validators: Array<Validator<Value<M>>> =
     model instanceof NumberModel ? [new Validators.IsNumber(model[$optional]) as Validator<Value<M>>] : [];
 
-  if (m.hasConstraints(model)) {
-    for (const constraint of model[$constraints]) {
-      const validator = getConstraintValidator<Value<M>>(constraint);
-      validators.push(validator);
-    }
+  for (const constraint of model[$constraints]) {
+    const validator = getConstraintValidator<Value<M>>(constraint);
+    validators.push(validator);
   }
 
   return validators;
@@ -559,7 +557,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
         // set from initial `binder.read()` or `binder.clear()` or by using a
         // binder node (e.g., form binding) for a nested field.
         if (propName in (this.defaultValue as Record<never, never>)) {
-          yield getBinderNode(this.model[propName as string & keyof M]);
+          yield getBinderNode((this.model as Record<string, Model>)[propName]);
         }
       }
     } else if (this.model instanceof ArrayModel) {

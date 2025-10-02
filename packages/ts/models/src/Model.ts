@@ -77,6 +77,11 @@ export const $optional: unique symbol = Symbol('optional');
 export const $defaultValue = Symbol('defaultValue');
 
 /**
+ * The symbol that represents the constraints property of the {@link Model} type.
+ */
+export const $constraints = Symbol('constraints');
+
+/**
  * The symbol that represents the {@link UnionModel[$members]} property.
  */
 export const $members = Symbol('members');
@@ -91,7 +96,52 @@ export type Value<M extends Model> = M extends Model<infer T> ? T : never;
 /**
  * Extracts the list of extra properties of the model.
  */
-export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : AnyObject;
+export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : object;
+
+/**
+ * The symbol that represents the {@link Constraint} method asserting supported model.
+ */
+export const $assertSupportedModel = Symbol('assertSupportedModel');
+
+/**
+ * The constraint function type.
+ */
+export type ConstraintFn<V = unknown, A extends AnyObject = AnyObject> = EmptyObject extends A
+  ? (attributes?: A) => Constraint<V>
+  : { readonly value: never } extends A
+    ? (valueOrAttributes: (A & { readonly value: unknown })['value'] | A) => Constraint<V>
+    : (attributes: A) => Constraint<V>;
+
+/**
+ * The constraint type that doesn't necessarily have attributes specified.
+ *
+ * @typeParam V - The type of the data described by the model.
+ * @typeParam N - The name of the constraint.
+ * @typeParam A - The attributes of the constraint.
+ */
+export type NonAttributedConstraint<
+  V = unknown,
+  N extends string = string,
+  A extends AnyObject = AnyObject,
+> = ConstraintFn<V, A> &
+  Readonly<{
+    attributes: A;
+    name: N;
+    [$assertSupportedModel](model: Model<V>): void;
+  }>;
+
+/**
+ * The constraint type with specified attributes.
+ *
+ * @typeParam V - The type of the data described by the model.
+ * @typeParam N - The name of the constraint.
+ * @typeParam A - The attributes of the constraint.
+ */
+export type Constraint<V = unknown, N extends string = string, A extends AnyObject = AnyObject> = Readonly<{
+  attributes: EmptyObject extends A ? A : Required<A>;
+  name: N;
+  [$assertSupportedModel](model: Model<V>): void;
+}>;
 
 /**
  * A model that represents a specific type of data.
@@ -107,7 +157,7 @@ export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? E
  * Since we know the full model definition only on this step, the `R` type
  * parameter is essential to describe a model with self-reference properties.
  */
-export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
+export type Model<V = unknown, EX extends AnyObject = object> = EX & {
   /**
    * The key of the model in the owner model.
    */
@@ -137,6 +187,11 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
   readonly [$optional]: boolean;
 
   /**
+   * The list of validation constraints for the model.
+   */
+  readonly [$constraints]: readonly Constraint[];
+
+  /**
    * The default value of the model.
    */
   readonly [$defaultValue]: V;
@@ -152,7 +207,7 @@ export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
  * @typeParam EX - The extra properties of the model.
  * @typeParam R - The keys of the self-referencing properties of the model.
  */
-export type DefaultValueProvider<V, EX extends AnyObject = EmptyObject> = (model: Model<V, EX>) => V;
+export type DefaultValueProvider<V, EX extends AnyObject = object> = (model: Model<V, EX>) => V;
 
 export const Model: Model = Object.create(null, {
   [$key]: {
@@ -169,6 +224,9 @@ export const Model: Model = Object.create(null, {
     value: false,
   },
   [$defaultValue]: {},
+  [$constraints]: {
+    value: [],
+  },
   [Symbol.toStringTag]: {
     get(this: Model) {
       return this[$name];

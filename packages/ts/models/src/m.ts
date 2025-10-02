@@ -1,12 +1,8 @@
 import type { EmptyObject } from 'type-fest';
 import {
   $assertSupportedModel,
-  $constraints,
-  type ConstrainedModel,
   type Constraint,
   type NonAttributedConstraint,
-} from './Constraint.js';
-import {
   Model,
   $owner,
   nothing,
@@ -19,6 +15,7 @@ import {
   $optional,
   type Enum,
   $defaultValue,
+  $constraints,
   $members,
   type ModelMetadata,
   type ModelConverter,
@@ -151,7 +148,7 @@ export function extend<M extends Model<AnyObject>>(
 export function object<T extends AnyObject>(
   this: void,
   name: string,
-): ObjectModelBuilder<T, EmptyObject, EmptyObject, { named: true }> {
+): ObjectModelBuilder<T, object, object, { named: true }> {
   return new ObjectModelBuilder(ObjectModel).name(name) as any;
 }
 
@@ -189,7 +186,7 @@ export function union<MM extends Model[]>(this: void, ...members: MM): UnionMode
  *
  * @param model - The model to get the value from.
  */
-export function value<T>(this: void, model: Model<T>): T {
+export function getValue<T>(this: void, model: Model<T>): T {
   const v = getRawValue(model);
 
   // If the value is `nothing`, we return the default value of the model.
@@ -208,7 +205,7 @@ export function* items<V extends Model>(
 ): Generator<V, undefined, void> {
   const list = arrayItemModels.get(model) ?? [];
   arrayItemModels.set(model, list);
-  const v = value(model) ?? [];
+  const v = getValue(model) ?? [];
 
   list.length = v.length;
 
@@ -236,15 +233,6 @@ export function meta<const M extends Model>(this: void, model: M, metadata: Mode
 }
 
 /**
- * Checks if the given model has constraints.
- *
- * @param model - The model to check.
- */
-export function hasConstraints<const M extends Model>(this: void, model: M): model is ConstrainedModel<M> {
-  return $constraints in model;
-}
-
-/**
  * Applies the constraints to the given model.
  *
  * @param model - The model to apply the constraints to.
@@ -256,8 +244,8 @@ export function constrained<const M extends Model>(
   model: M,
   constraint: Constraint<Value<M>>,
   ...moreConstraints: ReadonlyArray<Constraint<Value<M>>>
-): ConstrainedModel<M> {
-  const previousConstraints = hasConstraints(model) ? model[$constraints] : [];
+): M {
+  const previousConstraints = model[$constraints];
   const newConstraints = [constraint, ...moreConstraints];
   for (const newConstraint of newConstraints) {
     newConstraint[$assertSupportedModel](model as Model<Value<M>>);

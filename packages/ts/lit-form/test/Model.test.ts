@@ -361,7 +361,7 @@ describe('@vaadin/hilla-lit-form', () => {
           expect(rowModel).to.be.instanceOf(ArrayModel);
           Array.from(m.items(rowModel)).forEach((cellModel, j) => {
             expect(cellModel).to.be.instanceOf(NumberModel);
-            expect(m.value(cellModel)).to.be.equal(matrix[i][j]);
+            expect(m.getValue(cellModel)).to.be.equal(matrix[i][j]);
             const [, lastValidator] = binder.for(cellModel).validators;
             expect(lastValidator).to.be.instanceOf(Positive);
             walkedCells += 1;

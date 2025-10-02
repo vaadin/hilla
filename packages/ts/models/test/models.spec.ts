@@ -280,7 +280,7 @@ describe('@vaadin/hilla-models', () => {
     expect(anyKeyPropModel.toString()).to.be.equal('[[:detached: / model] AnyKey / key] unknown');
   });
 
-  describe('m.value', () => {
+  describe('m.getValue', () => {
     let target: Target<Person>;
 
     beforeEach(() => {
@@ -302,7 +302,7 @@ describe('@vaadin/hilla-models', () => {
     });
 
     it('gets the default value if the model is detached', () => {
-      const personValue = m.value(PersonModel);
+      const personValue = m.getValue(PersonModel);
       expect(personValue).to.be.like({
         name: '',
         address: {
@@ -312,28 +312,28 @@ describe('@vaadin/hilla-models', () => {
         },
       });
 
-      expect(m.value(PersonModel.name)).to.be.string('');
-      expect(m.value(PersonModel.address)).to.be.like({
+      expect(m.getValue(PersonModel.name)).to.be.string('');
+      expect(m.getValue(PersonModel.address)).to.be.like({
         street: {
           name: '',
         },
       });
 
-      expect(m.value(PersonModel.address.street)).to.be.like({
+      expect(m.getValue(PersonModel.address.street)).to.be.like({
         name: '',
       });
 
-      expect(m.value(PersonModel.address.street.name)).to.be.string('');
+      expect(m.getValue(PersonModel.address.street.name)).to.be.string('');
     });
 
     it('returns the value from the attached target', () => {
       const AttachedPersonModel = m.attach(PersonModel, () => target);
 
       expect(AttachedPersonModel).to.have.property($owner).which.is.equal(target);
-      expect(m.value(AttachedPersonModel)).to.be.equal(target.value);
-      expect(m.value(AttachedPersonModel.name)).to.be.equal(target.value.name);
-      expect(m.value(AttachedPersonModel.address)).to.be.equal(target.value.address);
-      expect(m.value(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
+      expect(m.getValue(AttachedPersonModel)).to.be.equal(target.value);
+      expect(m.getValue(AttachedPersonModel.name)).to.be.equal(target.value.name);
+      expect(m.getValue(AttachedPersonModel.address)).to.be.equal(target.value.address);
+      expect(m.getValue(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
     });
   });
 
@@ -385,7 +385,7 @@ describe('@vaadin/hilla-models', () => {
           expect(items[i]).to.be.instanceof(CommentModel);
           expect(items[i]).to.have.property($owner).which.is.equal(AttachedCommentsModel);
           expect(items[i]).to.have.property($key).which.is.equal(i);
-          expect(m.value(items[i])).to.be.equal(target.value[i]);
+          expect(m.getValue(items[i])).to.be.equal(target.value[i]);
         }
       });
     });
@@ -494,7 +494,6 @@ describe('@vaadin/hilla-models', () => {
       const hasTitleConstrainedModel = m.constrained(CommentModel, HasTitle);
       // Verify the type of the constrained model
       ((_commentModel: typeof CommentModel) => {})(hasTitleConstrainedModel);
-      expect(m.hasConstraints(hasTitleConstrainedModel)).to.be.true;
       expect(hasTitleConstrainedModel[$constraints]).to.be.like([HasTitle]);
     });
   });

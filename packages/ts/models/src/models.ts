@@ -1,4 +1,3 @@
-import type { EmptyObject } from 'type-fest';
 import {
   type $defaultValue,
   type $members,
@@ -56,7 +55,7 @@ export const ArrayModel: ArrayModel = new CoreModelBuilder(Model, (): unknown[] 
 /**
  * The model of object data.
  */
-export type ObjectModel<V, EX extends AnyObject = EmptyObject> = Model<V, EX>;
+export type ObjectModel<V, EX extends AnyObject = object> = Model<V, EX>;
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();
 
 /**
