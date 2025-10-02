@@ -12,11 +12,11 @@
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
-    "@vaadin/react-components": "25.0.0-alpha19",
-    "@vaadin/react-components-pro": "25.0.0-alpha19",
+    "@vaadin/react-components": "25.0.0-alpha20",
+    "@vaadin/react-components-pro": "25.0.0-alpha20",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
-    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha19",
-    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha19",
+    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
+    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "lit": "3.3.1",
     "react": "19.1.1",
@@ -28,7 +28,7 @@
     "@preact/signals-react-transform": "0.6.0",
     "@rollup/plugin-replace": "6.0.2",
     "@rollup/pluginutils": "5.3.0",
-    "@types/react": "19.1.15",
+    "@types/react": "19.1.16",
     "@types/react-dom": "19.1.9",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -80,7 +80,7 @@
       "@preact/signals-react-transform": "0.6.0",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.3.0",
-      "@types/react": "19.1.15",
+      "@types/react": "19.1.16",
       "@types/react-dom": "19.1.9",
       "@vaadin/hilla-generator-cli": "25.0.0-alpha9",
       "@vaadin/hilla-generator-core": "25.0.0-alpha9",
@@ -105,7 +105,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "0c338bf33ae28d31e600d3e4d388f02b69837e925ba930f1cafce5ffbb688e57"
+    "hash": "61938e56020f41b79c96cce45fcd8c57905d82b34ad0486953d59e24e20ee732"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
