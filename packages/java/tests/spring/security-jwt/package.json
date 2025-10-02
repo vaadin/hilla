@@ -110,7 +110,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.1.7",
+    "vite": "7.1.8",
     "vite-plugin-checker": "0.11.0",
     "workbox-build": "7.3.0"
   },
@@ -186,8 +186,8 @@
       "@vaadin/tooltip": "25.0.0-alpha20",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "25.0.0-alpha19",
-      "@vaadin/vaadin-themable-mixin": "25.0.0-alpha19",
+      "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
+      "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "@vaadin/vertical-layout": "24.8.0-alpha4",
       "@vaadin/virtual-list": "24.8.0-alpha4",
@@ -218,11 +218,11 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.1.7",
+      "vite": "7.1.8",
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "1a25d8fb6ac0c29ce6c2b6b63b9b7ab91c52ea360716ce61a63cf4aad612a61f"
+    "hash": "21a7c8022d39a431f48dd92fd99774c32ab4064fc4e1d6f2b9943d0968c4cc02"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
@@ -315,8 +315,8 @@
     "@vaadin/card": "$@vaadin/card",
     "@vaadin/master-detail-layout": "$@vaadin/master-detail-layout",
     "@vaadin/markdown": "$@vaadin/markdown",
-    "@vaadin/react-components": "25.0.0-alpha19",
-    "@vaadin/react-components-pro": "25.0.0-alpha19",
+    "@vaadin/react-components": "25.0.0-alpha20",
+    "@vaadin/react-components-pro": "25.0.0-alpha20",
     "@vaadin/aura": "$@vaadin/aura"
   }
 }
