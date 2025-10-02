@@ -74,8 +74,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.scm.id>github</project.scm.id>
     <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
+    <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
     <classgraph.version>4.8.180</classgraph.version>
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
