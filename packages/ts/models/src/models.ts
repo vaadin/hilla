@@ -26,7 +26,7 @@ export const StringModel = new CoreModelBuilder(PrimitiveModel, () => '').name('
  * The model of a number value.
  */
 export type NumberModel = PrimitiveModel<number>;
-export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => 0).name('number').build();
+export const NumberModel = new CoreModelBuilder(PrimitiveModel, () => NaN).name('number').build();
 
 /**
  * The model of a boolean value.
