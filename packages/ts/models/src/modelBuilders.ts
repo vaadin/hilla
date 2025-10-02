@@ -171,18 +171,19 @@ export class ObjectModelBuilder<
 > extends CoreModelBuilder<V, EX, F> {
   constructor(base: Model) {
     super(base, (m) => {
-      const result = create(null);
+      const result: Record<string, unknown> = {};
 
       // eslint-disable-next-line no-restricted-syntax
       for (const key in m) {
         const keyModel = m[key as keyof Model<V, EX>] as Model;
-        defineProperty(result, key, {
-          enumerable: true,
-          get: () => (keyModel[$optional] ? undefined : keyModel[$defaultValue]),
-        });
+        result[key] = keyModel[$optional] ? undefined : keyModel[$defaultValue];
+        // defineProperty(result, key, {
+        //   enumerable: true,
+        //   value: keyModel[$optional] ? undefined : keyModel[$defaultValue],
+        // });
       }
 
-      return result;
+      return result as V;
     });
   }
 
