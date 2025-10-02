@@ -29,7 +29,7 @@ export const ProductModel = m
   .extend(IdEntityModel)
   .object<Product>('Product')
   .property('description', m.constrained(StringModel, NotBlank()))
-  .property('price', NumberModel)
+  .property('price', m.constrained(NumberModel, Positive()))
   .property('isInStock', BooleanModel)
   .build();
 export type ProductModel = typeof ProductModel;
@@ -43,7 +43,7 @@ export const CustomerModel = m
   .extend(IdEntityModel)
   .object<Customer>('Customer')
   .property('fullName', m.constrained(StringModel, NotBlank(), Size({ min: 4 })))
-  .property('nickName', m.constrained(StringModel, Pattern('....*')))
+  .property('nickName', m.constrained(StringModel, Pattern({ regexp: '....*' })))
   .build();
 export type CustomerModel = typeof CustomerModel;
 
@@ -112,15 +112,15 @@ export type TestModel = typeof TestModel;
 export interface Employee extends IdEntity {
   fullName: string;
   supervisor?: Employee;
-  colleagues?: Employee[];
+  colleagues?: Array<Employee | undefined>;
 }
 
 export const EmployeeModel = m
   .extend(IdEntityModel)
   .object<Employee>('Employee')
   .property('fullName', StringModel)
-  .property('supervisor', m.optional)
-  .property('colleagues', m.array)
+  .property('supervisor', m.optional(m.self))
+  .property('colleagues', m.optional(m.array(m.optional(m.self))))
   .build();
 export type EmployeeModel = typeof EmployeeModel;
 
@@ -186,7 +186,7 @@ export interface Level1 {
 export const Level1Model = m
   .object<Level1>('Level1')
   .property('anotherLevel2', m.optional(m.array(m.optional(StringModel))))
-  .property('level2', m.optional(m.array(Level2Model)))
+  .property('level2', m.optional(m.array(m.optional(Level2Model))))
   .property('name1', m.optional(StringModel))
   .build();
 export type Level1Model = typeof Level1Model;

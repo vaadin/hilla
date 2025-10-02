@@ -168,7 +168,7 @@ describe('@vaadin/hilla-lit-form', () => {
         .validate()
         .then((errors) => {
           // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
-          expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['Required', 'Size']);
+          expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['NotBlank', 'Size']);
         }));
 
     it('should run all nested validations per model', async () => {
