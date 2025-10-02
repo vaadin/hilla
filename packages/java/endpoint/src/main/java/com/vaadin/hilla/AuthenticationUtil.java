@@ -22,7 +22,7 @@ public class AuthenticationUtil {
      * @return the authenticated user or {@code null}
      */
     public static Authentication getSecurityHolderAuthentication() {
-        Authentication authentication = SecurityContextHolder.getContext()
+        var authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         if (authentication instanceof AnonymousAuthenticationToken) {
             return null;
@@ -41,7 +41,7 @@ public class AuthenticationUtil {
      * @return a function for checking if the given user has the given role
      */
     public static Function<String, Boolean> getSecurityHolderRoleChecker() {
-        String rolePrefix = Optional.ofNullable(VaadinService.getCurrent())
+        var rolePrefix = Optional.ofNullable(VaadinService.getCurrent())
                 .map(service -> service.getContext().getAttribute(Lookup.class))
                 .map(lookup -> lookup.lookup(VaadinRolePrefixHolder.class))
                 .map(VaadinRolePrefixHolder::getRolePrefix).orElse("ROLE_");
@@ -58,19 +58,14 @@ public class AuthenticationUtil {
      */
     public static Function<String, Boolean> getSecurityHolderRoleChecker(
             String rolePrefix) {
-        Authentication authentication = getSecurityHolderAuthentication();
+        var authentication = getSecurityHolderAuthentication();
         if (authentication == null) {
             return role -> false;
         }
 
         return role -> {
-            String roleWithPrefix;
-            if (rolePrefix != null && role != null
-                    && !role.startsWith(rolePrefix)) {
-                roleWithPrefix = rolePrefix + role;
-            } else {
-                roleWithPrefix = role;
-            }
+            var roleWithPrefix = (rolePrefix != null && role != null
+                    && !role.startsWith(rolePrefix)) ? rolePrefix + role : role;
             return authentication.getAuthorities().stream()
                     .anyMatch(grantedAuthority -> grantedAuthority
                             .getAuthority().equals(roleWithPrefix));

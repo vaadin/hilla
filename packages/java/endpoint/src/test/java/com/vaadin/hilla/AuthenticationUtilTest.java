@@ -1,8 +1,10 @@
 package com.vaadin.hilla;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,8 +53,8 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderAuthentication_anonymousAuthentication_returnsNull() {
-        AnonymousAuthenticationToken anonymousAuth = new AnonymousAuthenticationToken(
-                "key", "anonymous", Collections.singletonList(
+        var anonymousAuth = new AnonymousAuthenticationToken("key", "anonymous",
+                Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
         securityContext.setAuthentication(anonymousAuth);
 
@@ -61,19 +63,17 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderAuthentication_validAuthentication_returnsAuthentication() {
-        Authentication auth = createAuthentication("user", "ROLE_USER");
+        var auth = createAuthentication("user", "ROLE_USER");
         securityContext.setAuthentication(auth);
 
-        Authentication result = AuthenticationUtil
-                .getSecurityHolderAuthentication();
+        var result = AuthenticationUtil.getSecurityHolderAuthentication();
         assertNotNull(result);
         assertTrue(result instanceof UsernamePasswordAuthenticationToken);
     }
 
     @Test
     public void getSecurityHolderRoleChecker_noAuthentication_returnsFalse() {
-        Function<String, Boolean> roleChecker = AuthenticationUtil
-                .getSecurityHolderRoleChecker();
+        var roleChecker = AuthenticationUtil.getSecurityHolderRoleChecker();
 
         assertFalse(roleChecker.apply("USER"));
         assertFalse(roleChecker.apply("ADMIN"));
@@ -81,12 +81,10 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_withDefaultPrefix_checksRoleCorrectly() {
-        Authentication auth = createAuthentication("user", "ROLE_USER",
-                "ROLE_ADMIN");
+        var auth = createAuthentication("user", "ROLE_USER", "ROLE_ADMIN");
         securityContext.setAuthentication(auth);
 
-        Function<String, Boolean> roleChecker = AuthenticationUtil
-                .getSecurityHolderRoleChecker();
+        var roleChecker = AuthenticationUtil.getSecurityHolderRoleChecker();
 
         assertTrue(roleChecker.apply("USER"));
         assertTrue(roleChecker.apply("ADMIN"));
@@ -95,11 +93,10 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_withCustomPrefix_checksRoleCorrectly() {
-        Authentication auth = createAuthentication("user", "CUSTOM_USER",
-                "CUSTOM_ADMIN");
+        var auth = createAuthentication("user", "CUSTOM_USER", "CUSTOM_ADMIN");
         securityContext.setAuthentication(auth);
 
-        Function<String, Boolean> roleChecker = AuthenticationUtil
+        var roleChecker = AuthenticationUtil
                 .getSecurityHolderRoleChecker("CUSTOM_");
 
         assertTrue(roleChecker.apply("USER"));
@@ -109,11 +106,10 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_withNullPrefix_checksRoleCorrectly() {
-        Authentication auth = createAuthentication("user", "USER", "ADMIN");
+        var auth = createAuthentication("user", "USER", "ADMIN");
         securityContext.setAuthentication(auth);
 
-        Function<String, Boolean> roleChecker = AuthenticationUtil
-                .getSecurityHolderRoleChecker(null);
+        var roleChecker = AuthenticationUtil.getSecurityHolderRoleChecker(null);
 
         assertTrue(roleChecker.apply("USER"));
         assertTrue(roleChecker.apply("ADMIN"));
@@ -122,10 +118,10 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_roleAlreadyHasPrefix_doesNotAddPrefix() {
-        Authentication auth = createAuthentication("user", "ROLE_USER");
+        var auth = createAuthentication("user", "ROLE_USER");
         securityContext.setAuthentication(auth);
 
-        Function<String, Boolean> roleChecker = AuthenticationUtil
+        var roleChecker = AuthenticationUtil
                 .getSecurityHolderRoleChecker("ROLE_");
 
         assertTrue(roleChecker.apply("ROLE_USER"));
@@ -134,16 +130,14 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_usesVaadinRolePrefixHolder_whenAvailable() {
-        Authentication auth = createAuthentication("user", "APP_USER",
-                "APP_ADMIN");
+        var auth = createAuthentication("user", "APP_USER", "APP_ADMIN");
         securityContext.setAuthentication(auth);
 
         // Setup VaadinService with VaadinRolePrefixHolder
-        VaadinService service = mock(VaadinService.class);
-        VaadinContext context = mock(VaadinContext.class);
-        Lookup lookup = mock(Lookup.class);
-        VaadinRolePrefixHolder rolePrefixHolder = new VaadinRolePrefixHolder(
-                "APP_");
+        var service = mock(VaadinService.class);
+        var context = mock(VaadinContext.class);
+        var lookup = mock(Lookup.class);
+        var rolePrefixHolder = new VaadinRolePrefixHolder("APP_");
 
         when(service.getContext()).thenReturn(context);
         when(context.getAttribute(Lookup.class)).thenReturn(lookup);
@@ -152,8 +146,7 @@ public class AuthenticationUtilTest {
 
         CurrentInstance.set(VaadinService.class, service);
 
-        Function<String, Boolean> roleChecker = AuthenticationUtil
-                .getSecurityHolderRoleChecker();
+        var roleChecker = AuthenticationUtil.getSecurityHolderRoleChecker();
 
         assertTrue(roleChecker.apply("USER"));
         assertTrue(roleChecker.apply("ADMIN"));
@@ -162,12 +155,11 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_fallsBackToDefaultPrefix_whenVaadinRolePrefixHolderNotAvailable() {
-        Authentication auth = createAuthentication("user", "ROLE_USER");
+        var auth = createAuthentication("user", "ROLE_USER");
         securityContext.setAuthentication(auth);
 
         // No VaadinService setup, should use default "ROLE_" prefix
-        Function<String, Boolean> roleChecker = AuthenticationUtil
-                .getSecurityHolderRoleChecker();
+        var roleChecker = AuthenticationUtil.getSecurityHolderRoleChecker();
 
         assertTrue(roleChecker.apply("USER"));
         assertFalse(roleChecker.apply("ADMIN"));
@@ -175,11 +167,10 @@ public class AuthenticationUtilTest {
 
     @Test
     public void getSecurityHolderRoleChecker_withEmptyPrefix_checksRoleCorrectly() {
-        Authentication auth = createAuthentication("user", "USER", "ADMIN");
+        var auth = createAuthentication("user", "USER", "ADMIN");
         securityContext.setAuthentication(auth);
 
-        Function<String, Boolean> roleChecker = AuthenticationUtil
-                .getSecurityHolderRoleChecker("");
+        var roleChecker = AuthenticationUtil.getSecurityHolderRoleChecker("");
 
         assertTrue(roleChecker.apply("USER"));
         assertTrue(roleChecker.apply("ADMIN"));
@@ -188,9 +179,8 @@ public class AuthenticationUtilTest {
 
     private Authentication createAuthentication(String username,
             String... roles) {
-        Collection<GrantedAuthority> authorities = java.util.Arrays
-                .stream(roles).map(SimpleGrantedAuthority::new)
-                .collect(java.util.stream.Collectors.toList());
+        var authorities = Arrays.stream(roles).map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
         return new UsernamePasswordAuthenticationToken(username, "password",
                 authorities);
     }
