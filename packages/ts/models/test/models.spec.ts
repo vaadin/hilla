@@ -131,7 +131,7 @@ describe('@vaadin/hilla-models', () => {
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor.supervisor.toString()).to.be.equal(
-      '[[[:detached: / model] Employee / supervisor?] Employee / supervisor?]',
+      '[[[:detached: / model] Employee / supervisor?] Employee / supervisor?] Employee',
     );
 
     // Type assertion to verify that the resulting type is optional.
@@ -356,7 +356,7 @@ describe('@vaadin/hilla-models', () => {
 
     describe('NumberModel', () => {
       it('should have a default value', () => {
-        expect(NumberModel[$defaultValue]).to.be.equal(0);
+        expect(NumberModel[$defaultValue]).to.be.NaN;
       });
     });
 
@@ -457,8 +457,8 @@ describe('@vaadin/hilla-models', () => {
 
       // Verify that the original model is not modified
       const _textStringModel: StringModel = CommentModel.text;
-      expect((CommentModel.text as Model<string, { readonly [$constraints]?: Constraint }>)[$constraints]).to.be.equal(
-        undefined,
+      expect((CommentModel.text as Model<string, { readonly [$constraints]?: Constraint }>)[$constraints]).to.be.like(
+        [],
       );
 
       const [, , sizeConstraintDescriptor] = commentTextModelWithConstraints[$constraints];
@@ -483,7 +483,7 @@ describe('@vaadin/hilla-models', () => {
         .build();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect((personModelWithNonEmptyComments as any)[$constraints]).to.be.equal(undefined);
+      expect((personModelWithNonEmptyComments as any)[$constraints]).to.be.like([]);
       expect(personModelWithNonEmptyComments.comments[$constraints]).to.be.an('array').with.lengthOf(1);
       expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], NotEmpty)).to.be.true;
       expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;

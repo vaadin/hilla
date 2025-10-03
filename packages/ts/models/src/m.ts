@@ -52,96 +52,69 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
   return (model[$owner] as Target<T>).value;
 }
 
-export type ModelConverterFn<FM extends Model = Model, TM extends Model = Model> = (model: FM) => TM;
+export type ModelConverterFn<FM extends Model = Model, TM extends Model = Model> = (
+  model: FM,
+  ...extraArgs: any[]
+) => TM;
 
-export interface ModelConverterCallable<MC extends ModelConverter> {
-  <const FM extends MCFrom<MC>, const TM extends MCTo<MC, FM>>(model: FM): TM;
-  <const IMC extends ModelConverter>(modelConverter: IMC): MCCompose<MC, IMC>;
-}
+export type ModelConverterCallable<
+  MC extends ModelConverter,
+  F extends ModelConverterFn<MCFrom<MC>, MCTo<MC, MCFrom<MC>>>,
+> = F extends (model: Model, ...extraArgs: infer E) => Model
+  ? <const IMC extends ModelConverter>(modelConverter: IMC, ...extraArgs: E) => MCCompose<MC, IMC>
+  : never;
 
-function createModelConverter<const MC extends ModelConverter>(
-  modelConverterFn: ModelConverterFn<MCFrom<MC>, MCTo<MC, MCFrom<MC>>>,
-): MC & ModelConverterCallable<MC> {
-  return modelConverterFn as any;
+function createModelConverter<
+  const MC extends ModelConverter,
+  const F extends ModelConverterFn<MCFrom<MC>, MCTo<MC, MCFrom<MC>>>,
+>(modelConverterFn: F): MC & F & ModelConverterCallable<MC, F> {
+  return ((modelOrConverter: Model | ModelConverterFn, ...extraArgs: any[]) => {
+    if (typeof modelOrConverter === 'function') {
+      return (model: Model) => modelConverterFn(modelOrConverter(model), ...extraArgs);
+    }
+
+    return modelConverterFn(modelOrConverter, ...extraArgs);
+  }) as any;
 }
 
 export interface IdentityModelConverter extends ModelConverter {
   readonly [$to]: MCFrom<this>;
 }
-const _self = createModelConverter<IdentityModelConverter>((model) => model);
+function selfImpl<const M extends Model>(model: M): M {
+  return model;
+}
+const _self = createModelConverter<IdentityModelConverter, typeof selfImpl>(selfImpl);
 export { _self as self };
 
 export interface OptionalModelConverter extends ModelConverter {
   readonly [$to]: OptionalModel<MCFrom<this>>;
+}
+function optionalImpl<const M extends Model>(model: M) {
+  return new CoreModelBuilder(model).name(model[$name]).define($optional, { value: true }).build() as OptionalModel<M>;
 }
 /**
  * Creates a new model that represents an optional value.
  *
  * @param base - The base model to extend.
  */
-export const optional = createModelConverter<OptionalModelConverter>(
-  <const M extends Model>(model: M) =>
-    new CoreModelBuilder(model).name(model[$name]).define($optional, { value: true }).build() as OptionalModel<M>,
-);
-// export function optional<M extends Model>(this: void, base: M): OptionalModel<M>;
-// export function optional<M extends Model, IM extends Model>(
-//   this: void,
-//   base: ModelConverterFn<M, IM>,
-// ): ModelConverterFn<OptionalModel<M>, IM>;
-// export function optional<M extends Model, IM extends Model>(
-//   this: void,
-//   base: M | ModelConverter<M, IM>,
-// ): OptionalModel<M> | ModelConverter<OptionalModel<M>, IM> {
-//   function optionalConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): OptionalModel<M> {
-//     const convertedModel = converter(model);
-//   }
-//
-//   if (typeof base === 'function') {
-//     return (model: IM) => optionalConverter(model, base);
-//   }
-//
-//   return optionalConverter(base, self);
-// }
+export const optional = createModelConverter<OptionalModelConverter, typeof optionalImpl>(optionalImpl);
 
 export interface ArrayModelConverter extends ModelConverter {
   readonly [$to]: ArrayModel<MCFrom<this>>;
+}
+function arrayImpl<const M extends Model>(model: M) {
+  return new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
+    .name(`Array<${model[$name]}>`)
+    .define($itemModel, { value: model })
+    .build() as ArrayModel<M>;
 }
 /**
  * Creates a new model that represents an array of items.
  *
  * @param itemModel - The model of the items in the array.
  */
-export const array = createModelConverter<ArrayModelConverter>(
-  <const M extends Model>(model: M) =>
-    new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
-      .name(`Array<${model[$name]}>`)
-      .define($itemModel, { value: model })
-      .build() as ArrayModel<M>,
-);
-// export function array<M extends Model>(this: void, itemModel: M): ArrayModel<M>;
-// export function array<M extends Model, IM extends Model>(
-//   this: void,
-//   itemModel: ModelConverter<M, IM>,
-// ): ModelConverter<ArrayModel<M>, IM>;
-// export function array<M extends Model, IM extends Model>(
-//   this: void,
-//   itemModel: M | ModelConverter<M, IM>,
-// ): ArrayModel<M> | ModelConverter<ArrayModel<M>, IM> {
-//   function arrayConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): ArrayModel<M> {
-//     const convertedModel = converter(model);
-//     return new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
-//       .name(`Array<${convertedModel[$name]}>`)
-//       .define($itemModel, { value: convertedModel })
-//       .build();
-//   }
-//
-//   if (typeof itemModel === 'function') {
-//     return (model: IM) => arrayConverter(model, itemModel);
-//   }
-//
-//   return arrayConverter(itemModel, self);
-// }
-//
+export const array = createModelConverter<ArrayModelConverter, typeof arrayImpl>(arrayImpl);
+
 /**
  * Attaches the given model to the target.
  *
@@ -254,24 +227,18 @@ export function* items<V extends Model>(
   }
 }
 
+function metaImpl<const M extends Model>(this: void, model: M, metadata: ModelMetadata): M {
+  return new CoreModelBuilder(model).name(model[$name]).meta(metadata).build() as M;
+}
 /**
  * Defines the metadata for the given model.
  *
  * @param model - The model to define metadata for.
  * @param metadata - The metadata to define.
  */
-export function meta<const M extends Model>(this: void, model: M, metadata: ModelMetadata): M {
-  return new CoreModelBuilder(model).name(model[$name]).meta(metadata).build() as M;
-}
+export const meta = createModelConverter<IdentityModelConverter, typeof metaImpl>(metaImpl);
 
-/**
- * Applies the constraints to the given model.
- *
- * @param model - The model to apply the constraints to.
- * @param constraint - The constraint to apply.
- * @param moreConstraints - Additional constraints to apply.
- */
-export function constrained<const M extends Model>(
+function constrainedImpl<const M extends Model>(
   this: void,
   model: M,
   constraint: Constraint<Value<M>>,
@@ -287,6 +254,14 @@ export function constrained<const M extends Model>(
     .define($constraints, { value: [...previousConstraints, ...newConstraints] })
     .build() as any;
 }
+/**
+ * Applies the constraints to the given model.
+ *
+ * @param model - The model to apply the constraints to.
+ * @param constraint - The constraint to apply.
+ * @param moreConstraints - Additional constraints to apply.
+ */
+export const constrained = createModelConverter<IdentityModelConverter, typeof constrainedImpl>(constrainedImpl);
 
 /**
  * Replaces the default value of the given model with the given value.
