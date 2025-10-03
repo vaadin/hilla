@@ -11,8 +11,8 @@
     "@vaadin/icons": "25.0.0-alpha20",
     "@vaadin/router": "2.0.0",
     "@vaadin/tooltip": "25.0.0-alpha20",
-    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha19",
-    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha19",
+    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
+    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
     "lit": "3.3.1"
   },
   "devDependencies": {
@@ -39,7 +39,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.1.7",
+    "vite": "7.1.8",
     "vite-plugin-checker": "0.11.0",
     "workbox-build": "7.3.0"
   },
@@ -52,8 +52,8 @@
       "@vaadin/icons": "25.0.0-alpha20",
       "@vaadin/router": "2.0.0",
       "@vaadin/tooltip": "25.0.0-alpha20",
-      "@vaadin/vaadin-lumo-styles": "25.0.0-alpha19",
-      "@vaadin/vaadin-themable-mixin": "25.0.0-alpha19",
+      "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
+      "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
       "lit": "3.3.1"
     },
     "devDependencies": {
@@ -80,11 +80,11 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.1.7",
+      "vite": "7.1.8",
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "7bbbb68fa41d3b7972a9e31d3a586c0aa9cf1aab8e2284ae8a88c68ec21a8de2"
+    "hash": "3eb96007f58c419443b8b3f6ab46446bb7a6312e86a30c8bff84c392b321a355"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
