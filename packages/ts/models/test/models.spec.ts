@@ -130,6 +130,9 @@ describe('@vaadin/hilla-models', () => {
 
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
+    expect(EmployeeModel.supervisor.supervisor.toString()).to.be.equal(
+      '[[[:detached: / model] Employee / supervisor?] Employee / supervisor?]',
+    );
 
     // Type assertion to verify that the resulting type is optional.
     const optionalEmployee: Value<typeof EmployeeModel.supervisor> = undefined;
@@ -160,6 +163,7 @@ describe('@vaadin/hilla-models', () => {
       .build();
     expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
     expect(EmployeeModel.colleagues).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel.colleagues).to.have.property($itemModel).which.equals(EmployeeModel);
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
   });
 

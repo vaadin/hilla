@@ -37,7 +37,7 @@ export type Flags = {
  * @typeParam F - The flags for the model constructor that allow to determine
  * specific characteristics of the model.
  */
-export class CoreModelBuilder<V, EX extends AnyObject = object, F extends Flags = { named: false }> {
+export class CoreModelBuilder<V, EX extends AnyObject = AnyObject, F extends Flags = { named: false }> {
   protected readonly [$model]: Model<V, EX>;
 
   /**
@@ -127,7 +127,7 @@ export class CoreModelBuilder<V, EX extends AnyObject = object, F extends Flags 
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): object extends EX ? Model<V> : Model<V, EX> {
+  build(this: F['named'] extends true ? this : never): AnyObject extends EX ? Model<V> : Model<V, EX> {
     return this[$model];
   }
 }
@@ -155,8 +155,9 @@ const propertyRegistry = new WeakMap<Model, Record<string, Model>>();
  */
 export class ObjectModelBuilder<
   V extends AnyObject,
-  CV extends AnyObject = object,
-  EX extends AnyObject = object,
+  CV extends AnyObject = AnyObject,
+  EX extends AnyObject = AnyObject,
+  RX extends AnyObject = AnyObject,
   F extends Flags = { named: false },
 > extends CoreModelBuilder<V, EX, F> {
   constructor(base: Model) {
@@ -186,7 +187,7 @@ export class ObjectModelBuilder<
   object<NV extends V>(
     this: F['named'] extends false ? this : never,
     name: string,
-  ): ObjectModelBuilder<NV, CV, EX, { named: true }> {
+  ): ObjectModelBuilder<NV, CV, EX, RX, { named: true }> {
     return this.name(name) as any;
   }
 
@@ -202,6 +203,7 @@ export class ObjectModelBuilder<
     {
       readonly [key in keyof EX | DK]: key extends DK ? DV : key extends keyof EX ? EX[key] : never;
     },
+    RX,
     F
   >;
 
@@ -233,19 +235,20 @@ export class ObjectModelBuilder<
     {
       readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
     },
+    RX,
     F
   >;
-  property<const PK extends string & keyof V, const M extends Model<V[PK]>>(
+  property<const PK extends string & keyof V, const MC extends ModelConverter>(
     key: PK,
-    // eslint-disable-next-line @typescript-eslint/unified-signatures
-    model: ModelConverter<M, Model<V, EX>>,
+    model: MC,
   ): ObjectModelBuilder<
     V,
     {
       readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
     },
+    EX,
     {
-      readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
+      readonly [key in keyof RX | PK]: key extends PK ? MC : key extends keyof RX ? RX[key] : never;
     },
     F
   >;
@@ -279,5 +282,5 @@ export class ObjectModelBuilder<
   /**
    * {@inheritDoc CoreModelBuilder.build}
    */
-  declare build: (this: F['named'] extends true ? (CV extends V ? this : never) : never) => ObjectModel<V, EX>;
+  declare build: (this: F['named'] extends true ? (CV extends V ? this : never) : never) => ObjectModel<V, EX, RX>;
 }

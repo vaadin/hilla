@@ -19,6 +19,10 @@ import {
   $members,
   type ModelMetadata,
   type ModelConverter,
+  type $to,
+  type MCFrom,
+  type MCTo,
+  type MCCompose,
 } from './Model.js';
 import { CoreModelBuilder, ObjectModelBuilder } from './modelBuilders.js';
 import {
@@ -48,68 +52,96 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
   return (model[$owner] as Target<T>).value;
 }
 
-export function self<const M extends Model>(this: void, model: M): M {
-  return model;
+export type ModelConverterFn<FM extends Model = Model, TM extends Model = Model> = (model: FM) => TM;
+
+export interface ModelConverterCallable<MC extends ModelConverter> {
+  <const FM extends MCFrom<MC>, const TM extends MCTo<MC, FM>>(model: FM): TM;
+  <const IMC extends ModelConverter>(modelConverter: IMC): MCCompose<MC, IMC>;
 }
 
+function createModelConverter<const MC extends ModelConverter>(
+  modelConverterFn: ModelConverterFn<MCFrom<MC>, MCTo<MC, MCFrom<MC>>>,
+): MC & ModelConverterCallable<MC> {
+  return modelConverterFn as any;
+}
+
+export interface IdentityModelConverter extends ModelConverter {
+  readonly [$to]: MCFrom<this>;
+}
+const _self = createModelConverter<IdentityModelConverter>((model) => model);
+export { _self as self };
+
+export interface OptionalModelConverter extends ModelConverter {
+  readonly [$to]: OptionalModel<MCFrom<this>>;
+}
 /**
  * Creates a new model that represents an optional value.
  *
  * @param base - The base model to extend.
  */
-export function optional<M extends Model>(this: void, base: M): OptionalModel<M>;
-export function optional<M extends Model, IM extends Model>(
-  this: void,
-  base: ModelConverter<M, IM>,
-): ModelConverter<OptionalModel<M>, IM>;
-export function optional<M extends Model, IM extends Model>(
-  this: void,
-  base: M | ModelConverter<M, IM>,
-): OptionalModel<M> | ModelConverter<OptionalModel<M>, IM> {
-  function optionalConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): OptionalModel<M> {
-    const convertedModel = converter(model);
-    return new CoreModelBuilder(convertedModel)
-      .name(convertedModel[$name])
-      .define($optional, { value: true })
-      .build() as OptionalModel<M>;
-  }
+export const optional = createModelConverter<OptionalModelConverter>(
+  <const M extends Model>(model: M) =>
+    new CoreModelBuilder(model).name(model[$name]).define($optional, { value: true }).build() as OptionalModel<M>,
+);
+// export function optional<M extends Model>(this: void, base: M): OptionalModel<M>;
+// export function optional<M extends Model, IM extends Model>(
+//   this: void,
+//   base: ModelConverterFn<M, IM>,
+// ): ModelConverterFn<OptionalModel<M>, IM>;
+// export function optional<M extends Model, IM extends Model>(
+//   this: void,
+//   base: M | ModelConverter<M, IM>,
+// ): OptionalModel<M> | ModelConverter<OptionalModel<M>, IM> {
+//   function optionalConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): OptionalModel<M> {
+//     const convertedModel = converter(model);
+//   }
+//
+//   if (typeof base === 'function') {
+//     return (model: IM) => optionalConverter(model, base);
+//   }
+//
+//   return optionalConverter(base, self);
+// }
 
-  if (typeof base === 'function') {
-    return (model: IM) => optionalConverter(model, base);
-  }
-
-  return optionalConverter(base, self);
+export interface ArrayModelConverter extends ModelConverter {
+  readonly [$to]: ArrayModel<MCFrom<this>>;
 }
-
 /**
  * Creates a new model that represents an array of items.
  *
  * @param itemModel - The model of the items in the array.
  */
-export function array<M extends Model>(this: void, itemModel: M): ArrayModel<M>;
-export function array<M extends Model, IM extends Model>(
-  this: void,
-  itemModel: ModelConverter<M, IM>,
-): ModelConverter<ArrayModel<M>, IM>;
-export function array<M extends Model, IM extends Model>(
-  this: void,
-  itemModel: M | ModelConverter<M, IM>,
-): ArrayModel<M> | ModelConverter<ArrayModel<M>, IM> {
-  function arrayConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): ArrayModel<M> {
-    const convertedModel = converter(model);
-    return new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
-      .name(`Array<${convertedModel[$name]}>`)
-      .define($itemModel, { value: convertedModel })
-      .build();
-  }
-
-  if (typeof itemModel === 'function') {
-    return (model: IM) => arrayConverter(model, itemModel);
-  }
-
-  return arrayConverter(itemModel, self);
-}
-
+export const array = createModelConverter<ArrayModelConverter>(
+  <const M extends Model>(model: M) =>
+    new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
+      .name(`Array<${model[$name]}>`)
+      .define($itemModel, { value: model })
+      .build() as ArrayModel<M>,
+);
+// export function array<M extends Model>(this: void, itemModel: M): ArrayModel<M>;
+// export function array<M extends Model, IM extends Model>(
+//   this: void,
+//   itemModel: ModelConverter<M, IM>,
+// ): ModelConverter<ArrayModel<M>, IM>;
+// export function array<M extends Model, IM extends Model>(
+//   this: void,
+//   itemModel: M | ModelConverter<M, IM>,
+// ): ArrayModel<M> | ModelConverter<ArrayModel<M>, IM> {
+//   function arrayConverter<ICM extends Model>(model: ICM, converter: ModelConverter<M, ICM>): ArrayModel<M> {
+//     const convertedModel = converter(model);
+//     return new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
+//       .name(`Array<${convertedModel[$name]}>`)
+//       .define($itemModel, { value: convertedModel })
+//       .build();
+//   }
+//
+//   if (typeof itemModel === 'function') {
+//     return (model: IM) => arrayConverter(model, itemModel);
+//   }
+//
+//   return arrayConverter(itemModel, self);
+// }
+//
 /**
  * Attaches the given model to the target.
  *
@@ -148,7 +180,7 @@ export function extend<M extends Model<AnyObject>>(
 export function object<T extends AnyObject>(
   this: void,
   name: string,
-): ObjectModelBuilder<T, object, object, { named: true }> {
+): ObjectModelBuilder<T, AnyObject, AnyObject, AnyObject, { named: true }> {
   return new ObjectModelBuilder(ObjectModel).name(name) as any;
 }
 

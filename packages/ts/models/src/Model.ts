@@ -96,7 +96,7 @@ export type Value<M extends Model> = M extends Model<infer T> ? T : never;
 /**
  * Extracts the list of extra properties of the model.
  */
-export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : object;
+export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : AnyObject;
 
 /**
  * The symbol that represents the {@link Constraint} method asserting supported model.
@@ -157,7 +157,7 @@ export type Constraint<V = unknown, N extends string = string, A extends AnyObje
  * Since we know the full model definition only on this step, the `R` type
  * parameter is essential to describe a model with self-reference properties.
  */
-export type Model<V = unknown, EX extends AnyObject = object> = EX & {
+export type Model<V = unknown, EX extends AnyObject = AnyObject> = EX & {
   /**
    * The key of the model in the owner model.
    */
@@ -207,7 +207,7 @@ export type Model<V = unknown, EX extends AnyObject = object> = EX & {
  * @typeParam EX - The extra properties of the model.
  * @typeParam R - The keys of the self-referencing properties of the model.
  */
-export type DefaultValueProvider<V, EX extends AnyObject = object> = (model: Model<V, EX>) => V;
+export type DefaultValueProvider<V, EX extends AnyObject = AnyObject> = (model: Model<V, EX>) => V;
 
 export const Model: Model = Object.create(null, {
   [$key]: {
@@ -245,4 +245,21 @@ export const Model: Model = Object.create(null, {
   },
 });
 
-export type ModelConverter<M extends Model = Model, IM extends Model = Model> = (model: IM) => M;
+export const $from = Symbol('from');
+export const $to = Symbol('to');
+
+export type ModelConverter<FM extends Model = Model, TM extends Model = Model> = {
+  readonly [$from]: FM;
+  readonly [$to]: TM;
+};
+
+export type MCFrom<MC extends ModelConverter> = MC[typeof $from];
+
+export type MCTo<MC extends ModelConverter, MCF extends MCFrom<MC>> = (MC & {
+  readonly [$from]: MCF;
+})[typeof $to];
+
+export interface MCCompose<A extends ModelConverter, B extends ModelConverter<Model, MCFrom<A>>>
+  extends ModelConverter<MCFrom<B>> {
+  readonly [$to]: MCTo<A, MCTo<B, MCFrom<this>>>;
+}
