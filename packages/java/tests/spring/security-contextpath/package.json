@@ -106,11 +106,11 @@
     "glob": "11.0.3",
     "magic-string": "0.30.19",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "6.0.3",
+    "rollup-plugin-visualizer": "6.0.4",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.1.8",
+    "vite": "7.1.9",
     "vite-plugin-checker": "0.11.0",
     "workbox-build": "7.3.0"
   },
@@ -214,15 +214,15 @@
       "glob": "11.0.3",
       "magic-string": "0.30.19",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "6.0.3",
+      "rollup-plugin-visualizer": "6.0.4",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.1.8",
+      "vite": "7.1.9",
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "21a7c8022d39a431f48dd92fd99774c32ab4064fc4e1d6f2b9943d0968c4cc02"
+    "hash": "f20bacb6f60073cc01cda92880e2f643bfa2de8e5c8dd4b2f2e25f452f7957f4"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
