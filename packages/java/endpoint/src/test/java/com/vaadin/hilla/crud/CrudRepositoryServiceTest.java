@@ -35,7 +35,10 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomCrudRepositoryService.class,
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
-@EnableAutoConfiguration
+// Exclude SpringBootAutoConfiguration to avoid loading websocket-related beans
+// that require jakarta.websocket dependencies not available in test scope
+@EnableAutoConfiguration(exclude = {
+        com.vaadin.flow.spring.SpringBootAutoConfiguration.class })
 public class CrudRepositoryServiceTest {
 
     @Repository
