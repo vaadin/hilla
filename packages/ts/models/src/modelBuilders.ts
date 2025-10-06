@@ -128,7 +128,7 @@ export class CoreModelBuilder<V, EX extends AnyObject = AnyObject, F extends Fla
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): Model<V, EX> {
+  build(this: F['named'] extends true ? this : never): AnyObject extends EX ? Model<V> : Model<V, EX> {
     return this[$model];
   }
 }
