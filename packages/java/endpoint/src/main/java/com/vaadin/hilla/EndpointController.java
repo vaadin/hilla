@@ -23,10 +23,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -283,7 +283,7 @@ public class EndpointController {
 
                 try {
                     body = objectMapper.readValue(bodyPart, ObjectNode.class);
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     LOGGER.error("Request body does not contain valid JSON", e);
                     return ResponseEntity
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -314,7 +314,7 @@ public class EndpointController {
             try {
                 return ResponseEntity
                         .ok(endpointInvoker.writeValueAsString(returnValue));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 String errorMessage = String.format(
                         "Failed to serialize endpoint '%s' method '%s' response. "
                                 + "Double check method's return type or specify a custom mapper bean with qualifier '%s'",
@@ -327,7 +327,7 @@ public class EndpointController {
             try {
                 return ResponseEntity.badRequest().body(endpointInvoker
                         .createResponseErrorObject(e.getSerializationData()));
-            } catch (JsonProcessingException ee) {
+            } catch (JacksonException ee) {
                 String errorMessage = "Failed to serialize error object for endpoint exception. ";
                 LOGGER.error(errorMessage, e);
                 return ResponseEntity.internalServerError().body(errorMessage);
@@ -365,7 +365,7 @@ public class EndpointController {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(endpointInvoker.createResponseErrorObject(
                             endpointException.getSerializationData()));
-        } catch (JsonProcessingException ee) {
+        } catch (JacksonException ee) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(endpointInvoker.createResponseErrorObject(
                             messages.caption() + ". " + messages.message()));

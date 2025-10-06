@@ -26,7 +26,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
@@ -63,7 +63,6 @@
                     <arguments>
                         <argument>default</argument>
                         <argument>react-router</argument>
-                        <argument>react19</argument>
                         <argument>vite</argument>
                     </arguments>
                 </configuration>

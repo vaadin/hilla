@@ -67,6 +67,13 @@ describe('@vaadin/hilla-react-form', () => {
   function LoginForm() {
     const { field, model, submit, value, submitting } = useForm(LoginModel, { onChange, onSubmit });
 
+    const handleSubmit = () => {
+      submit().catch((_error: unknown) => {
+        // Handle validation errors silently, otherwise tests that deal with invalid state will
+        // fail in Vitest.
+      });
+    };
+
     return (
       <>
         <section>
@@ -75,8 +82,7 @@ describe('@vaadin/hilla-react-form', () => {
         </section>
         <output data-testid="output.user.name">{value.user.name}</output>
         <output data-testid="output.rememberMe">{String(value.rememberMe)}</output>
-        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-        <button data-testid="submit" onClick={submit}>
+        <button data-testid="submit" onClick={handleSubmit} type="submit">
           Submit
         </button>
         {submitting ? <span data-testid="submitting">Submitting...</span> : null}

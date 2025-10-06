@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.security.Principal;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import org.junit.Before;
@@ -21,7 +21,6 @@ import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -32,8 +31,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
-        EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class })
+        EndpointProperties.class, JacksonProperties.class,
+        EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointInvokerTest {

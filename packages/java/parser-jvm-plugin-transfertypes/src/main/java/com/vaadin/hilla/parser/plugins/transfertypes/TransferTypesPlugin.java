@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.mappedtypes.Order;
@@ -53,11 +53,10 @@ public final class TransferTypesPlugin
         classMap.put(ArrayNode.class.getName(), List.class);
         classMap.put("org.springframework.web.multipart.MultipartFile",
                 File.class);
-        classMap.put("com.vaadin.hilla.signals.Signal", Signal.class);
-        classMap.put("com.vaadin.hilla.signals.ValueSignal", ValueSignal.class);
-        classMap.put("com.vaadin.hilla.signals.NumberSignal",
-                NumberSignal.class);
-        classMap.put("com.vaadin.hilla.signals.ListSignal", ListSignal.class);
+        classMap.put("com.vaadin.signals.Signal", Signal.class);
+        classMap.put("com.vaadin.signals.ValueSignal", ValueSignal.class);
+        classMap.put("com.vaadin.signals.NumberSignal", NumberSignal.class);
+        classMap.put("com.vaadin.signals.ListSignal", ListSignal.class);
     }
 
     @Override

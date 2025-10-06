@@ -1,9 +1,9 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.signals;
 
-import com.vaadin.hilla.signals.ListSignal;
-import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.Signal;
-import com.vaadin.hilla.signals.ValueSignal;
+import com.vaadin.signals.ListSignal;
+import com.vaadin.signals.NumberSignal;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.ValueSignal;
 
 @Endpoint
 public class SignalEndpoint {

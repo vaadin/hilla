@@ -14,14 +14,14 @@ describe('cli', () => {
   it('should print help', async () => {
     const { stdout } = await execAsync(`npx tsx src/index.ts --help`);
     await expect(stdout).toMatchFileSnapshot('fixtures/help.snap');
-  });
+  }, 10000); // slow on CI
 
   it('should print version', async () => {
     const { stdout } = await execAsync(`npx tsx src/index.ts --version`);
     expect(stdout.trim()).to.be.equal(version);
-  });
+  }, 10000); // slow on CI
 
   it('should throw an error if input file is not provided', async () => {
     await expect(execAsync(`npx tsx src/index.ts`)).rejects.and.throws(Error, 'OpenAPI file is required');
-  });
+  }, 10000); // slow on CI
 });

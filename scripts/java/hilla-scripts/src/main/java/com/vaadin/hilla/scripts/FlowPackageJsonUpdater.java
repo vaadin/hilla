@@ -15,19 +15,18 @@
  */
 package com.vaadin.hilla.scripts;
 
-import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.core.util.Separators;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.core.util.DefaultIndenter;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.core.util.Separators;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.frontend.FileIOUtils;
 import com.vaadin.flow.server.frontend.NodeUpdater;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -95,10 +94,10 @@ public class FlowPackageJsonUpdater {
         }
 
         if (value instanceof ObjectNode valueObject) {
-            valueObject.fields().forEachRemaining((field) -> {
+            for (var field : valueObject.properties()) {
                 updateTreeAt(pointer.appendProperty(field.getKey()),
                         field.getValue());
-            });
+            }
             return;
         }
 
@@ -124,7 +123,7 @@ public class FlowPackageJsonUpdater {
         var objectMapper = JacksonUtils.getMapper();
         var filePrinter = new DefaultPrettyPrinter()
                 .withSeparators(Separators.createDefaultInstance()
-                        .withObjectFieldValueSpacing(Separators.Spacing.AFTER))
+                        .withObjectNameValueSpacing(Separators.Spacing.AFTER))
                 .withArrayIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
         var contents = objectMapper.writer().with(filePrinter)
                 .writeValueAsString(tree) + DefaultIndenter.SYS_LF;

@@ -20,6 +20,9 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
         super.setup();
         getDriver().get(getTestPath());
         grid = $(GridElement.class).first();
+        // reset default sort order
+        sortByColumn(0);
+        sortByColumn(0);
         waitUntil(driver -> {
             Object prop = grid.getProperty("_lastVisibleIndex");
             return prop != null;

@@ -15,6 +15,7 @@
  */
 package com.vaadin.hilla.gradle.plugin
 
+import com.vaadin.flow.gradle.FlowPlugin
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.BuildTask
 import org.gradle.testkit.runner.GradleRunner
@@ -209,7 +210,6 @@ fun addConfigurationsToSettingsForUsingPluginFromLocalRepo(testProject: TestProj
            pluginManagement {
               repositories {
                   mavenLocal()
-                  maven { url = 'https://repo.spring.io/milestone' }
                   maven { url = 'https://maven.vaadin.com/vaadin-prereleases' }
                   gradlePluginPortal()
               }
@@ -226,7 +226,8 @@ fun addConfigurationsToSettingsForUsingPluginFromLocalRepo(testProject: TestProj
  * Used to test the plugin. Contains helpful utility methods to manipulate folders
  * and files in the project.
  */
-class TestProject {
+// Flow minimum support is 8.10, but SB requires 8.14
+class TestProject(val gradleVersion: String = "8.14") {
     /**
      * The project root dir.
      */
@@ -247,7 +248,7 @@ class TestProject {
         .withPluginClasspath()
         .withDebug(debug) // use --debug to catch ReflectionsException: https://github.com/vaadin/vaadin-gradle-plugin/issues/99
         .forwardOutput()   // a must, otherwise ./gradlew check freezes on windows!
-        .withGradleVersion("8.7")
+        .withGradleVersion(gradleVersion)
 
     override fun toString(): String = "TestProject(dir=$dir)"
 
