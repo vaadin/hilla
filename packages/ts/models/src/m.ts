@@ -54,7 +54,7 @@ function getRawValue<T>(model: Model<T>): T | typeof nothing {
 
 export type ModelConverterFn<FM extends Model = Model, TM extends Model = Model> = (
   model: FM,
-  ...extraArgs: any[]
+  ...extraArgs: readonly any[]
 ) => TM;
 
 export type ModelConverterCallable<
@@ -68,7 +68,7 @@ function createModelConverter<
   const MC extends ModelConverter,
   const F extends ModelConverterFn<MCFrom<MC>, MCTo<MC, MCFrom<MC>>>,
 >(modelConverterFn: F): MC & F & ModelConverterCallable<MC, F> {
-  return ((modelOrConverter: Model | ModelConverterFn, ...extraArgs: any[]) => {
+  return ((modelOrConverter: Model | ModelConverterFn, ...extraArgs: readonly any[]) => {
     if (typeof modelOrConverter === 'function') {
       return (model: Model) => modelConverterFn(modelOrConverter(model), ...extraArgs);
     }
@@ -153,7 +153,7 @@ export function extend<M extends Model<AnyObject>>(
 export function object<T extends AnyObject>(
   this: void,
   name: string,
-): ObjectModelBuilder<T, AnyObject, AnyObject, AnyObject, { named: true }> {
+): ObjectModelBuilder<T, AnyObject, AnyObject, { named: true }> {
   return new ObjectModelBuilder(ObjectModel).name(name) as any;
 }
 

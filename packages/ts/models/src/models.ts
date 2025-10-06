@@ -57,10 +57,10 @@ export const ArrayModel: ArrayModel = new CoreModelBuilder(Model, (): unknown[] 
 /**
  * The model of object data.
  */
-export type ObjectModel<V, EX extends AnyObject = AnyObject, RX extends AnyObject = AnyObject> = Model<
+export type ObjectModel<V, EX extends AnyObject = AnyObject> = Model<
   V,
-  EX & {
-    readonly [K in keyof RX]: RX[K] extends ModelConverter ? MCTo<RX[K], ObjectModel<V, EX, RX>> : never;
+  {
+    readonly [K in keyof EX]: EX[K] extends ModelConverter ? MCTo<EX[K], ObjectModel<V, EX>> : EX[K];
   }
 >;
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();

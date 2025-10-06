@@ -8,6 +8,7 @@ import {
   $owner,
   type AnyObject,
   type DefaultValueProvider,
+  type MCTo,
   type Model,
   type ModelConverter,
   type ModelMetadata,
@@ -127,7 +128,7 @@ export class CoreModelBuilder<V, EX extends AnyObject = AnyObject, F extends Fla
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): AnyObject extends EX ? Model<V> : Model<V, EX> {
+  build(this: F['named'] extends true ? this : never): Model<V, EX> {
     return this[$model];
   }
 }
@@ -157,9 +158,14 @@ export class ObjectModelBuilder<
   V extends AnyObject,
   CV extends AnyObject = AnyObject,
   EX extends AnyObject = AnyObject,
-  RX extends AnyObject = AnyObject,
   F extends Flags = { named: false },
-> extends CoreModelBuilder<V, EX, F> {
+> extends CoreModelBuilder<
+  V,
+  {
+    readonly [K in keyof EX]: EX[K] extends ModelConverter ? MCTo<EX[K], ObjectModel<V, EX>> : EX[K];
+  },
+  F
+> {
   constructor(base: Model) {
     super(base, (m) => {
       const result: Record<string, unknown> = {};
@@ -187,13 +193,14 @@ export class ObjectModelBuilder<
   object<NV extends V>(
     this: F['named'] extends false ? this : never,
     name: string,
-  ): ObjectModelBuilder<NV, CV, EX, RX, { named: true }> {
+  ): ObjectModelBuilder<NV, CV, EX, { named: true }> {
     return this.name(name) as any;
   }
 
   /**
    * {@inheritDoc CoreModelBuilder.define}
    */
+  // @ts-ignore: TypeScript has difficulties with the override type here
   declare ['define']: <const DK extends symbol, DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
@@ -203,9 +210,9 @@ export class ObjectModelBuilder<
     {
       readonly [key in keyof EX | DK]: key extends DK ? DV : key extends keyof EX ? EX[key] : never;
     },
-    RX,
     F
   >;
+  // { readonly [key in keyof EX | DK]: key extends DK ? DV : key extends keyof EX ? { readonly [K in keyof EX]: EX[K] extends ModelConverter ? MCTo<...> : EX[K]; }[key] : never; }
 
   /**
    * {@inheritDoc CoreModelBuilder.meta}
@@ -235,7 +242,6 @@ export class ObjectModelBuilder<
     {
       readonly [key in keyof EX | PK]: key extends PK ? M : key extends keyof EX ? EX[key] : never;
     },
-    RX,
     F
   >;
   property<const PK extends string & keyof V, const MC extends ModelConverter>(
@@ -246,9 +252,8 @@ export class ObjectModelBuilder<
     {
       readonly [key in keyof CV | PK]: key extends PK ? V[PK] : key extends keyof CV ? CV[key] : never;
     },
-    EX,
     {
-      readonly [key in keyof RX | PK]: key extends PK ? MC : key extends keyof RX ? RX[key] : never;
+      readonly [key in keyof EX | PK]: key extends PK ? MC : key extends keyof EX ? EX[key] : never;
     },
     F
   >;
@@ -282,5 +287,5 @@ export class ObjectModelBuilder<
   /**
    * {@inheritDoc CoreModelBuilder.build}
    */
-  declare build: (this: F['named'] extends true ? (CV extends V ? this : never) : never) => ObjectModel<V, EX, RX>;
+  declare build: (this: F['named'] extends true ? (CV extends V ? this : never) : never) => ObjectModel<V, EX>;
 }

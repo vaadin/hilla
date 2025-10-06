@@ -176,7 +176,11 @@ describe('@vaadin/hilla-models', () => {
       .object<Employee>('Employee')
       .property('colleagues', m.array(m.optional(m.self)))
       .build();
+
     expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel.colleagues[$itemModel].colleagues[$itemModel])
+      .to.have.property('colleagues')
+      .which.is.instanceof(ArrayModel);
     expect(EmployeeModel.colleagues[$itemModel]).to.have.property($optional).which.equals(true);
     expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: [] });
   });
