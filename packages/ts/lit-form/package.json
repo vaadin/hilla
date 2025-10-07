@@ -70,6 +70,7 @@
   },
   "dependencies": {
     "@vaadin/hilla-frontend": "25.0.0-alpha9",
+    "@vaadin/hilla-models": "25.0.0-alpha9",
     "validator": "13.12.0"
   },
   "peerDependencies": {
