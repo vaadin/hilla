@@ -42,8 +42,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.0.0-alpha20",
-    "@vaadin/icon": "25.0.0-alpha20",
-    "@vaadin/icons": "25.0.0-alpha20",
+    "@vaadin/icon": "25.0.0-alpha21",
+    "@vaadin/icons": "25.0.0-alpha21",
     "@vaadin/input-container": "25.0.0-alpha20",
     "@vaadin/integer-field": "25.0.0-alpha20",
     "@vaadin/item": "25.0.0-alpha20",
@@ -75,7 +75,7 @@
     "@vaadin/text-area": "25.0.0-alpha20",
     "@vaadin/text-field": "25.0.0-alpha20",
     "@vaadin/time-picker": "25.0.0-alpha20",
-    "@vaadin/tooltip": "25.0.0-alpha20",
+    "@vaadin/tooltip": "25.0.0-alpha21",
     "@vaadin/upload": "25.0.0-alpha20",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
@@ -150,8 +150,8 @@
       "@vaadin/hilla-frontend": "25.0.0-alpha9",
       "@vaadin/hilla-lit-form": "25.0.0-alpha9",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.0.0-alpha20",
-      "@vaadin/icons": "25.0.0-alpha20",
+      "@vaadin/icon": "25.0.0-alpha21",
+      "@vaadin/icons": "25.0.0-alpha21",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -183,7 +183,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.0.0-alpha20",
+      "@vaadin/tooltip": "25.0.0-alpha21",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
@@ -222,7 +222,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "f20bacb6f60073cc01cda92880e2f643bfa2de8e5c8dd4b2f2e25f452f7957f4"
+    "hash": "3f78c026010ad165e1cc9d964ddc348a7b784cca8c3d1ebfc37379c401b36610"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
