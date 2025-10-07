@@ -35,7 +35,7 @@ chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
-  const useForm = sinon.spy(_useForm) as typeof _useForm;
+  const useForm = sinon.spy(_useForm) as unknown as typeof _useForm;
 
   let onSubmit: (value: Login) => Promise<Login>;
   let onChange: (value: Login) => void;
@@ -103,7 +103,7 @@ describe('@vaadin/hilla-react-form', () => {
   beforeEach(() => {
     onSubmit = sinon.stub();
     onChange = sinon.stub();
-    (useForm as UseFormSpy).resetHistory();
+    (useForm as unknown as UseFormSpy).resetHistory();
   });
 
   afterEach(() => {
@@ -207,7 +207,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
-        const [{ read }] = (useForm as UseFormSpy).returnValues;
+        const [{ read }] = (useForm as unknown as UseFormSpy).returnValues;
         read({
           rememberMe: true,
           user: {
@@ -271,7 +271,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
-        const [{ read }] = (useForm as UseFormSpy).returnValues;
+        const [{ read }] = (useForm as unknown as UseFormSpy).returnValues;
         read({
           user: {
             id: 1,

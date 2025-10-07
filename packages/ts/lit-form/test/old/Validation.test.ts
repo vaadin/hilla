@@ -58,8 +58,8 @@ class MockDatePickerElement extends HTMLElement {
 
 customElements.define('mock-date-picker', MockDatePickerElement);
 
-@customElement('order-view')
-class OrderView extends LitElement {
+@customElement('old-order-view')
+class OldOrderView extends LitElement {
   static override readonly styles = css`
     input[invalid] {
       border: 2px solid red;
@@ -138,7 +138,7 @@ class OrderView extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'order-view': OrderView;
+    'old-order-view': OldOrderView;
   }
 }
 
@@ -563,10 +563,10 @@ describe('@vaadin/hilla-lit-form', () => {
     });
 
     describe('field element', () => {
-      let orderView: OrderView;
+      let orderView: OldOrderView;
 
       beforeEach(async () => {
-        orderView = new OrderView();
+        orderView = new OldOrderView();
         // eslint-disable-next-line @typescript-eslint/prefer-destructuring
         binder = orderView.binder;
         document.body.append(orderView);
