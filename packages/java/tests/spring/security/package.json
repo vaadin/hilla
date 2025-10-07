@@ -37,8 +37,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.0.0-alpha20",
-    "@vaadin/icon": "25.0.0-alpha20",
-    "@vaadin/icons": "25.0.0-alpha20",
+    "@vaadin/icon": "25.0.0-alpha21",
+    "@vaadin/icons": "25.0.0-alpha21",
     "@vaadin/input-container": "25.0.0-alpha20",
     "@vaadin/integer-field": "25.0.0-alpha20",
     "@vaadin/item": "25.0.0-alpha20",
@@ -70,7 +70,7 @@
     "@vaadin/text-area": "25.0.0-alpha20",
     "@vaadin/text-field": "25.0.0-alpha20",
     "@vaadin/time-picker": "25.0.0-alpha20",
-    "@vaadin/tooltip": "25.0.0-alpha20",
+    "@vaadin/tooltip": "25.0.0-alpha21",
     "@vaadin/upload": "25.0.0-alpha20",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
@@ -145,8 +145,8 @@
       "@vaadin/hilla-frontend": "25.0.0-alpha9",
       "@vaadin/hilla-lit-form": "25.0.0-alpha9",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.0.0-alpha20",
-      "@vaadin/icons": "25.0.0-alpha20",
+      "@vaadin/icon": "25.0.0-alpha21",
+      "@vaadin/icons": "25.0.0-alpha21",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -178,7 +178,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.0.0-alpha20",
+      "@vaadin/tooltip": "25.0.0-alpha21",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
@@ -217,7 +217,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "80adbcd5bbc25ada450448d57f7f90c4755d72b8de8948e7e9e63f0740f70809"
+    "hash": "a9082b70ab58634b5cb755ad49ad01252896dab7f3afd8ccc454b1ce671ae5c2"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
