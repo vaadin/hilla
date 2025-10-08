@@ -10,8 +10,8 @@
     "@vaadin/icons": "25.0.0-alpha21",
     "@vaadin/router": "2.0.0",
     "@vaadin/tooltip": "25.0.0-alpha21",
-    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
-    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
+    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha21",
+    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha21",
     "lit": "3.3.1"
   },
   "devDependencies": {
