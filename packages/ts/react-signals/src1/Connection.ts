@@ -1,4 +1,5 @@
 import type { ConnectClient, EndpointRequestInit, Subscription } from '@vaadin/hilla-frontend';
+import type { CommandResult } from './CommandResult.js';
 import type { SignalCommand } from './commands.js';
 
 /**
@@ -54,14 +55,14 @@ const ENDPOINT = 'SignalsHandler';
 export class Connection {
   readonly #id: number;
   readonly config: ConnectionConfig;
-  #subscription?: Subscription<SignalCommand>;
+  #subscription?: Subscription<CommandResult>;
 
   constructor(id: number, config: ConnectionConfig) {
     this.config = config;
     this.#id = id;
   }
 
-  get subscription(): Subscription<SignalCommand> | undefined {
+  get subscription(): Subscription<CommandResult> | undefined {
     return this.#subscription;
   }
 
@@ -71,7 +72,7 @@ export class Connection {
    *
    * @returns A subscription object for handling signal commands.
    */
-  establish(): Subscription<SignalCommand> {
+  establish(): Subscription<CommandResult> {
     const { client, endpoint, method, params } = this.config;
 
     this.#subscription ??= client.subscribe(ENDPOINT, 'subscribe', {
@@ -94,7 +95,7 @@ export class Connection {
    * `{ mute: true }` if not provided.
    * @returns A promise that resolves when the update is complete.
    */
-  async send(command: SignalCommand, init?: EndpointRequestInit): Promise<SignalCommand> {
+  async send(command: SignalCommand, init?: EndpointRequestInit): Promise<CommandResult> {
     const temporary = !this.#subscription;
 
     if (temporary) {
@@ -115,17 +116,25 @@ export class Connection {
       promise = promise.finally(() => this.terminate());
     }
 
-    const result = new Promise<SignalCommand>((resolve) => {
+    const success = new Promise<CommandResult>((resolve) => {
       this.#subscription?.onNext((received) => {
-        if (received.id === command.id) {
+        if (this.#id in received.updates && command.id === received.updates[this.#id]?.newNode?.lastUpdate) {
           resolve(received);
         }
       });
     });
 
-    const [, resultCommand] = await Promise.all([promise, result]);
+    const failure = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout waiting for server response')), 10000);
+    });
 
-    return resultCommand;
+    try {
+      const [, resultCommand] = await Promise.all([promise, Promise.race([success, failure])]);
+
+      return resultCommand;
+    } catch (error) {
+      
+    }
   }
 
   /**

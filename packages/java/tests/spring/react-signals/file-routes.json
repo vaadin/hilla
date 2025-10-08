@@ -1,0 +1,35 @@
+[
+  {
+    "route": "BasicSignalView",
+    "flowLayout": false,
+    "params": {},
+    "title": "Basic Signal"
+  },
+  {
+    "route": "login",
+    "menu": {
+      "exclude": true
+    },
+    "flowLayout": false,
+    "params": {},
+    "title": "Login"
+  },
+  {
+    "route": "ServiceMethodParams",
+    "flowLayout": false,
+    "params": {},
+    "title": "Service Method Params"
+  },
+  {
+    "route": "SharedNumberSignal",
+    "flowLayout": false,
+    "params": {},
+    "title": "Shared Number Signal"
+  },
+  {
+    "route": "SharedSignalSecurity",
+    "flowLayout": false,
+    "params": {},
+    "title": "Shared Number Signal"
+  }
+]
