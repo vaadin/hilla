@@ -190,8 +190,10 @@ public final class GeneratorProcessor {
             var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
                     arguments);
             runner.run(null, (stdOutStream) -> {
-                new BufferedReader(new InputStreamReader(stdOutStream)).lines()
-                        .limit(1).forEach(pathLine::set);
+                // Consume all output from Node
+                var lines = new BufferedReader(
+                        new InputStreamReader(stdOutStream)).lines().toList();
+                lines.stream().limit(1).forEach(pathLine::set);
             }, null);
             if (pathLine.get() == null) {
                 throw new CommandRunnerException("No output from Node");
