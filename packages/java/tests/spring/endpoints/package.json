@@ -10,8 +10,8 @@
     "@vaadin/icons": "25.0.0-alpha21",
     "@vaadin/router": "2.0.0",
     "@vaadin/tooltip": "25.0.0-alpha21",
-    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
-    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
+    "@vaadin/vaadin-lumo-styles": "25.0.0-alpha21",
+    "@vaadin/vaadin-themable-mixin": "25.0.0-alpha21",
     "lit": "3.3.1"
   },
   "devDependencies": {
@@ -47,14 +47,14 @@
   "vaadin": {
     "dependencies": {
       "@vaadin/common-frontend": "0.0.19",
-      "@vaadin/hilla-frontend": "25.0.0-alpha9",
-      "@vaadin/hilla-lit-form": "25.0.0-alpha9",
+      "@vaadin/hilla-frontend": "25.0.0-alpha10",
+      "@vaadin/hilla-lit-form": "25.0.0-alpha10",
       "@vaadin/icon": "25.0.0-alpha21",
       "@vaadin/icons": "25.0.0-alpha21",
       "@vaadin/router": "2.0.0",
       "@vaadin/tooltip": "25.0.0-alpha21",
-      "@vaadin/vaadin-lumo-styles": "25.0.0-alpha20",
-      "@vaadin/vaadin-themable-mixin": "25.0.0-alpha20",
+      "@vaadin/vaadin-lumo-styles": "25.0.0-alpha21",
+      "@vaadin/vaadin-themable-mixin": "25.0.0-alpha21",
       "lit": "3.3.1"
     },
     "devDependencies": {
@@ -62,17 +62,17 @@
       "@preact/signals-react-transform": "0.6.0",
       "@rollup/plugin-replace": "6.0.2",
       "@rollup/pluginutils": "5.3.0",
-      "@vaadin/hilla-generator-cli": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-core": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-backbone": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-barrel": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-client": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-model": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-push": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-signals": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-subtypes": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-plugin-transfertypes": "25.0.0-alpha9",
-      "@vaadin/hilla-generator-utils": "25.0.0-alpha9",
+      "@vaadin/hilla-generator-cli": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-core": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-backbone": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-barrel": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-client": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-model": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-push": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-signals": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-subtypes": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-plugin-transfertypes": "25.0.0-alpha10",
+      "@vaadin/hilla-generator-utils": "25.0.0-alpha10",
       "@vitejs/plugin-react": "5.0.4",
       "glob": "11.0.3",
       "magic-string": "0.30.19",
@@ -87,7 +87,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "c1154081ec82be66991eef82e8ee6c84c5ff1b46998a3cc280fc95cc866a0d5f"
+    "hash": "63426c273a60f23e6a49e0114e1c902dad8472bd27a263400e168ab0b47f2ac6"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
