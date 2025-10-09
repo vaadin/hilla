@@ -125,7 +125,6 @@ public class EndpointInvoker {
         return LoggerFactory.getLogger(EndpointInvoker.class);
     }
 
-
     /**
      * Gets the return type of the given method.
      *
