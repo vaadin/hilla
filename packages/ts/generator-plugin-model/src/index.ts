@@ -20,13 +20,16 @@ export default class ModelPlugin extends Plugin {
 
   // eslint-disable-next-line @typescript-eslint/require-await
   override async execute(storage: SharedStorage): Promise<void> {
-    const files = this.#processEntities(storage.api.components?.schemas);
+    const files = this.#processEntities(storage.api.components?.schemas, storage);
     files.forEach((file) => this.#tags.set(file, ModelPluginSourceType.Model));
     storage.sources.push(...files);
     storage.pluginStorage.set(this.constructor.MODEL_PLUGIN_FILE_TAGS, this.#tags);
   }
 
-  #processEntities(schemas: OpenAPIV3.ComponentsObject['schemas'] | undefined): readonly SourceFile[] {
+  #processEntities(
+    schemas: OpenAPIV3.ComponentsObject['schemas'] | undefined,
+    storage: SharedStorage,
+  ): readonly SourceFile[] {
     this.logger.debug('Processing entities');
 
     if (!schemas) {
@@ -35,6 +38,7 @@ export default class ModelPlugin extends Plugin {
 
     const ctx: Context = {
       owner: this,
+      transferTypes: storage.transferTypes,
     };
 
     return Object.entries(schemas).map(([name, component]) => EntityModelProcessor.process(name, component, ctx));
