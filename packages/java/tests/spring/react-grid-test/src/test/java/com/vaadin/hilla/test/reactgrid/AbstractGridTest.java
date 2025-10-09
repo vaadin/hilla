@@ -1,6 +1,7 @@
 package com.vaadin.hilla.test.reactgrid;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -9,6 +10,7 @@ import org.junit.Before;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import org.openqa.selenium.JavascriptExecutor;
 
 public abstract class AbstractGridTest extends ChromeBrowserTest {
 
@@ -84,13 +86,33 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
     protected void assertRowCount(int i) {
         // Workaround to prevent scrollToRow from stalling, likely because
         // this waits until the grid has finished loading
+        grid.scrollToRow(0);
+        this.waitForLoading();
         grid.getRowCount();
+
         // The infinite data provider in auto grid will always add a 1 to
         // the total count until the last page is reached.
         // So we scroll down until we reach the last page and then check the
         // total count.
         grid.scrollToRow(3403034);
+        this.waitForLoading();
         Assert.assertEquals(i, grid.getRowCount());
     }
 
+    private void waitForLoading() {
+        // Give some time for React to render changes and make sure Hilla
+        // endpoints finish loading
+        this.waitUntil((driver) -> {
+            int loadingCount = ((Number) ((JavascriptExecutor) driver)
+                    .executeAsyncScript(
+                            "const resolve = arguments[arguments.length - 1];\n"
+                                    + "globalThis.setTimeout(() => { resolve(globalThis.Vaadin.connectionState.loadingCount); }, 100)"))
+                    .intValue();
+            return loadingCount == 0;
+        });
+    }
+
+    static Logger getLogger() {
+        return Logger.getLogger(AbstractGridTest.class.getName());
+    }
 }

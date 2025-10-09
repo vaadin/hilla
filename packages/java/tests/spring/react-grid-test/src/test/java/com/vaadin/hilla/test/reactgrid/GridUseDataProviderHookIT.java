@@ -9,7 +9,7 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 public class GridUseDataProviderHookIT extends AbstractGridTest {
 
     @Test
-    public void filteringWorks_and_refreshingDataProvider_keepsTheAppliedFilter() {
+    public synchronized void filteringWorks_and_refreshingDataProvider_keepsTheAppliedFilter() {
         setFilterLastName("car");
         assertRowCount(1);
         assertName(0, "Abigail", "Carter");
@@ -30,7 +30,7 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
     }
 
     @Test
-    public void sortingWorks_and_refreshingDataProvider_keepsTheAppliedSort() {
+    public synchronized void sortingWorks_and_refreshingDataProvider_keepsTheAppliedSort() {
         assertFirstName(0, "Alice");
         assertFirstName(1, "Bob");
         assertFirstName(2, "Charlie");
@@ -57,11 +57,12 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
     }
 
     @Test
-    public void afterAddingNewItem_refreshingDataProvider_loadsNewItem() {
-        try {
-            assertRowCount(50);
+    public synchronized void afterAddingNewItem_refreshingDataProvider_loadsNewItem() {
+        assertRowCount(50);
 
-            addPerson();
+        addPerson();
+
+        try {
             refresh();
 
             setFilterLastName("Person");
@@ -74,6 +75,9 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
         } finally {
             removePerson();
         }
+
+        refresh();
+        assertRowCount(50);
     }
 
     private void setFilterLastName(String filter) {
