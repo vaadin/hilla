@@ -1,7 +1,6 @@
 package com.vaadin.hilla.test.reactgrid;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -110,9 +109,5 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
                     .intValue();
             return loadingCount == 0;
         });
-    }
-
-    static Logger getLogger() {
-        return Logger.getLogger(AbstractGridTest.class.getName());
     }
 }
