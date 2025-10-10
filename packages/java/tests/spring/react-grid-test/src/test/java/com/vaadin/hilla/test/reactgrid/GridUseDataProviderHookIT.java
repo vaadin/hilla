@@ -1,15 +1,27 @@
 package com.vaadin.hilla.test.reactgrid;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 
+// Some tests modify the number of items, so they need to not run in parallel.
+@RunWith(BlockJUnit4ClassRunner.class)
 public class GridUseDataProviderHookIT extends AbstractGridTest {
 
+    @Before
+    public void setup() throws Exception {
+        setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
+        super.setup();
+    }
+
     @Test
-    public synchronized void filteringWorks_and_refreshingDataProvider_keepsTheAppliedFilter() {
+    public void filteringWorks_and_refreshingDataProvider_keepsTheAppliedFilter() {
         setFilterLastName("car");
         assertRowCount(1);
         assertName(0, "Abigail", "Carter");
@@ -30,7 +42,7 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
     }
 
     @Test
-    public synchronized void sortingWorks_and_refreshingDataProvider_keepsTheAppliedSort() {
+    public void sortingWorks_and_refreshingDataProvider_keepsTheAppliedSort() {
         assertFirstName(0, "Alice");
         assertFirstName(1, "Bob");
         assertFirstName(2, "Charlie");
@@ -57,7 +69,7 @@ public class GridUseDataProviderHookIT extends AbstractGridTest {
     }
 
     @Test
-    public synchronized void afterAddingNewItem_refreshingDataProvider_loadsNewItem() {
+    public void afterAddingNewItem_refreshingDataProvider_loadsNewItem() {
         assertRowCount(50);
 
         addPerson();
