@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerConfiguration;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
@@ -35,7 +35,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -44,8 +43,7 @@ import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,
-        Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
-        PushMessageHandler.class, ObjectMapper.class,
+        JacksonProperties.class, PushMessageHandler.class, ObjectMapper.class,
         EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)

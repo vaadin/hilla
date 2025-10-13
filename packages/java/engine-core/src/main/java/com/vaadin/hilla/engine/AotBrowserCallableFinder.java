@@ -1,10 +1,11 @@
 package com.vaadin.hilla.engine;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.boot.loader.tools.MainClassFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import tools.jackson.databind.exc.JsonNodeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -180,24 +181,36 @@ public class AotBrowserCallableFinder {
         // Extract candidate class names
         var candidates = new ArrayList<String>();
         for (var node : reflectionsNode) {
-            String type = node.get("type").asText();
-            candidates.add(type);
+            var typeNode = node.get("type");
+            if (typeNode.isString()) {
+                String type = node.get("type").asString();
+                candidates.add(type);
+            } else {
+                LOGGER.trace("Ignoring non-string type for property {}",
+                        typeNode);
+            }
         }
 
         var annotationNames = engineConfiguration.getEndpointAnnotations()
                 .stream().map(Class::getName).toList();
         var classLoader = engineConfiguration.getClassLoader();
-        return candidates.stream().map(type -> {
+
+        var result = candidates.stream().map(type -> {
             try {
                 return Class.forName(type, false, classLoader);
             } catch (Throwable t) {
+                LOGGER.debug("Failed to load class {}: {}", type,
+                        t.getMessage());
                 return null;
             }
-        }).filter(Objects::nonNull)
-                .filter(cls -> Arrays.stream(cls.getAnnotations())
-                        .map(Annotation::annotationType).map(Class::getName)
-                        .anyMatch(annotationNames::contains))
-                .collect(Collectors.toList());
+        }).filter(Objects::nonNull).filter(cls -> {
+            var annotations = Arrays.stream(cls.getAnnotations())
+                    .map(Annotation::annotationType).map(Class::getName)
+                    .toList();
+            return annotations.stream().anyMatch(annotationNames::contains);
+        }).collect(Collectors.toList());
+
+        return (List<Class<?>>) (List<?>) result;
     }
 
     private static String quotePath(Path path) {

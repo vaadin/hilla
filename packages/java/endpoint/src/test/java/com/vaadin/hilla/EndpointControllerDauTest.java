@@ -7,9 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,7 +89,7 @@ public class EndpointControllerDauTest {
 
     @Test
     public void serveEndpoint_dauEnforcement_serviceUnavailableResponse()
-            throws JsonProcessingException {
+            throws JacksonException {
         MockVaadinService vaadinService = new MockVaadinService();
         when(vaadinService.getDeploymentConfiguration().isProductionMode())
                 .thenReturn(true);

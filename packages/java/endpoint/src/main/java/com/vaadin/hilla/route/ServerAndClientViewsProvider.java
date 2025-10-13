@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterListener;
 import org.slf4j.Logger;
@@ -36,7 +37,8 @@ public class ServerAndClientViewsProvider {
     private final NavigationAccessControl accessControl;
     private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .addMixIn(AvailableViewInfo.class, IgnoreMixin.class).build();
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ServerAndClientViewsProvider.class);
@@ -56,12 +58,10 @@ public class ServerAndClientViewsProvider {
         this.deploymentConfiguration = deploymentConfiguration;
         this.accessControl = accessControl;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
-
-        mapper.addMixIn(AvailableViewInfo.class, IgnoreMixin.class);
     }
 
     public String createFileRoutesJson(VaadinRequest request)
-            throws JsonProcessingException {
+            throws JacksonException {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
                 collectClientViews(request));
         final boolean hasAutoLayout = MenuRegistry.hasHillaMainLayout(

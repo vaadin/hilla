@@ -130,7 +130,8 @@ public class EndpointWithRestControllerTest {
     public void should_RepsectJacksonAnnotation_when_serializeBean()
             throws Exception {
         String result = callEndpointMethod("getBeanWithJacksonAnnotation");
-        assertEquals("{\"rating\":2,\"bookId\":null,\"name\":null}", result);
+        // Jackson 3 uses alphabetical property ordering by default
+        assertEquals("{\"bookId\":null,\"name\":null,\"rating\":2}", result);
     }
 
     @Test

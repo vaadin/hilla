@@ -1,6 +1,6 @@
 package com.vaadin.hilla.push.messages.fromclient;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ArrayNode;
 
 public class SubscribeMessage extends AbstractServerMessage {
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
