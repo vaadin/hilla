@@ -20,17 +20,19 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
-
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jspecify.annotations.NonNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * This plugin adds support for {@code @JsonTypeInfo} and {@code @JsonSubTypes}.
+ * This plugin adds support for {@code @JsonTypeInfo} and
+ * {@code @JsonSubTypes}.
  */
 public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     @Override
@@ -50,20 +52,19 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             if (cls.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
                 var schema = (Schema<?>) unionNode.getTarget();
                 getJsonSubTypes(cls).map(JsonSubTypes.Type::value)
-                        .forEach(c -> {
-                            schema.addOneOfItem(new Schema<Object>() {
-                                {
-                                    set$ref("#/components/schemas/"
-                                            + c.getName());
-                                }
-                            });
+                    .forEach(c -> {
+                        schema.addOneOfItem(new Schema<>() {
+                            {
+                                set$ref("#/components/schemas/" + c.getName());
+                            }
                         });
+                    });
             }
 
             // attach the schema to the openapi
             EntityPlugin.attachSchemaWithNameToOpenApi(unionNode.getTarget(),
-                    cls.getName() + "Union",
-                    (OpenAPI) nodePath.getParentPath().getNode().getTarget());
+                cls.getName() + "Union",
+                (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
         // entity nodes whose superclass has a @JsonSubTypes annotation must
@@ -72,23 +73,35 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = (Class<?>) entityNode.getSource().get();
 
-            Optional.ofNullable(cls.getSuperclass())
-                    .map(SubTypesPlugin::getJsonSubTypes).stream()
-                    .flatMap(Function.identity())
-                    .filter(t -> cls.equals(t.value())).findAny()
-                    .ifPresent(t -> {
-                        var schema = (ComposedSchema) entityNode.getTarget();
-                        schema.getAnyOf().stream()
+            getJsonSubTypeInHierarchy(cls).ifPresent(foundSubTypeInfo -> {
+                JsonTypeInfo info = foundSubTypeInfo.getLeft();
+                JsonSubTypes.Type[] types = foundSubTypeInfo.getRight();
+
+                String property = StringUtils.isNotBlank(info.property()) ?
+                    info.property() :
+                    info.use().getDefaultPropertyName();
+
+                Arrays.stream(types).filter(e -> e.value().equals(cls))
+                    .findAny().ifPresent(t -> {
+                        var schema = entityNode.getTarget();
+                        if (schema instanceof ComposedSchema composedSchema) {
+                            composedSchema.getAnyOf().stream()
                                 .filter(s -> s instanceof ObjectSchema)
-                                .map(ObjectSchema.class::cast)
-                                .forEach(s -> s.addProperty("@type",
-                                        new StringSchema() {
-                                            {
-                                                setType("string");
-                                                setExample(t.name());
-                                            }
-                                        }));
+                                .map(ObjectSchema.class::cast).forEach(s -> {
+                                    StringSchema newProperty = new StringSchema();
+                                    newProperty.setType("string");
+                                    newProperty.setExample(t.name());
+                                    s.addProperty(property, newProperty);
+                                });
+                        } else if (schema instanceof ObjectSchema objectSchema) {
+                            StringSchema newProperty = new StringSchema();
+                            newProperty.setType("string");
+                            newProperty.setExample(t.name());
+                            objectSchema.addProperty(property, newProperty);
+                        }
+
                     });
+            });
         }
     }
 
@@ -100,16 +113,14 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     @NonNull
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
-        if (!(nodeDependencies.getNode() instanceof TypedNode)) {
+        if (!(nodeDependencies.getNode() instanceof TypedNode typedNode)) {
             return nodeDependencies;
         }
 
-        var typedNode = (TypedNode) nodeDependencies.getNode();
-        if (!(typedNode.getType() instanceof ClassRefSignatureModel)) {
+        if (!(typedNode.getType() instanceof ClassRefSignatureModel ref)) {
             return nodeDependencies;
         }
 
-        var ref = (ClassRefSignatureModel) typedNode.getType();
         if (ref.isJDKClass() || ref.isDate() || ref.isIterable()) {
             return nodeDependencies;
         }
@@ -118,7 +129,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         // not used directly
         Class<?> refClass = (Class<?>) ref.getClassInfo().get();
         var subTypes = getJsonSubTypes(refClass).map(JsonSubTypes.Type::value)
-                .map(ClassInfoModel::of).<Node<?, ?>> map(EntityNode::of);
+            .map(ClassInfoModel::of).<Node<?, ?>> map(EntityNode::of);
 
         // create a union node for classes annotated with @JsonTypeInfo
         if (refClass.getAnnotationsByType(JsonTypeInfo.class).length > 0) {
@@ -131,9 +142,24 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
     private static Stream<JsonSubTypes.Type> getJsonSubTypes(Class<?> cls) {
         return Optional.of(cls)
-                .map(c -> c.getAnnotationsByType(JsonSubTypes.class))
-                .filter(a -> a.length > 0).map(a -> a[0])
-                .map(JsonSubTypes::value).stream().flatMap(Arrays::stream);
+            .map(c -> c.getAnnotationsByType(JsonSubTypes.class))
+            .filter(a -> a.length > 0).map(a -> a[0]).map(JsonSubTypes::value)
+            .stream().flatMap(Arrays::stream);
+    }
+
+    private static Optional<Pair<JsonTypeInfo, JsonSubTypes.Type[]>> getJsonSubTypeInHierarchy(
+        Class<?> cls) {
+        Class<?> current = cls;
+        while (current != null) {
+            JsonTypeInfo typeInfo = current.getAnnotation(JsonTypeInfo.class);
+            JsonSubTypes types = current.getAnnotation(JsonSubTypes.class);
+            if (typeInfo != null && types != null) {
+                return Optional.of(Pair.of(typeInfo, types.value()));
+            }
+            current = current.getSuperclass();
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -141,9 +167,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * class annotated with {@code @JsonSubTypes}.
      */
     public static class UnionNode
-            extends AbstractNode<ClassInfoModel, Schema<?>> {
+        extends AbstractNode<ClassInfoModel, Schema<?>> {
         private UnionNode(@NonNull ClassInfoModel source,
-                @NonNull ObjectSchema target) {
+            @NonNull ObjectSchema target) {
             super(source, target);
         }
 
