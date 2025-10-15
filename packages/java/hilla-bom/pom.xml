@@ -15,7 +15,7 @@
     <name>Hilla Platform (Bill of Materials)</name>
     <version>25.0-SNAPSHOT</version>
     <description>Hilla Platform (Bill of Materials)</description>
-    <url>https://hilla.dev</url>
+    <url>https://vaadin.com/hilla</url>
 
     <properties>
         <enforcer.skip>true</enforcer.skip>
