@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
     <name>Hilla Platform</name>
     <description>Hilla Platform</description>
-    <url>https://hilla.dev</url>
+    <url>https://vaadin.com/hilla</url>
 
     <properties>
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>

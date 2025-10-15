@@ -119,11 +119,21 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:https:https://github.com/vaadin/hilla.git</connection>
-    <developerConnection>scm:git:https://github.com/vaadin/hilla.git</developerConnection>
+    <connection>scm:git:https://github.com/vaadin/hilla.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/vaadin/hilla.git</developerConnection>
     <url>https://github.com/vaadin/hilla</url>
     <tag>HEAD</tag>
   </scm>
+
+  <developers>
+    <developer>
+      <id>vaadin</id>
+      <name>Vaadin Team</name>
+      <email>info@vaadin.com</email>
+      <organization>Vaadin Ltd</organization>
+      <organizationUrl>https://vaadin.com</organizationUrl>
+    </developer>
+  </developers>
 
   <repositories>
     <!-- The order of definitions matters. Explicitly defining central
