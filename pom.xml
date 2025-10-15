@@ -50,7 +50,7 @@
     <profile>
       <id>gradle</id>
       <activation>
-        <jdk>(,18]</jdk>
+        <jdk>(,21]</jdk>
       </activation>
       <modules>
         <module>packages/java/gradle-plugin</module>
