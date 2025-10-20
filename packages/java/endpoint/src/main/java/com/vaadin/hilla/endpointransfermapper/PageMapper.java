@@ -15,34 +15,56 @@
  */
 package com.vaadin.hilla.endpointransfermapper;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper.Mapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import com.vaadin.hilla.mappedtypes.Page;
 
 /**
- * A mapper between {@link Page} and {@link List}.
+ * A mapper between {@link org.springframework.data.domain.Page} and
+ * {@link Page}.
  */
-public class PageMapper implements Mapper<Page<?>, List<?>> {
+public class PageMapper
+        implements Mapper<org.springframework.data.domain.Page<?>, Page<?>> {
+
+    private SortMapper sortMapper = new SortMapper();
 
     @Override
-    public Class<? extends Page<?>> getEndpointType() {
-        return (Class) Page.class;
+    @SuppressWarnings("unchecked")
+    public Class<? extends org.springframework.data.domain.Page<?>> getEndpointType() {
+        return (Class<? extends org.springframework.data.domain.Page<?>>) (Class<?>) org.springframework.data.domain.Page.class;
     }
 
     @Override
-    public Class<? extends List<?>> getTransferType() {
-        return (Class) List.class;
+    @SuppressWarnings("unchecked")
+    public Class<? extends Page<?>> getTransferType() {
+        return (Class<? extends Page<?>>) (Class<?>) Page.class;
     }
 
     @Override
-    public List<?> toTransferType(Page<?> page) {
-        return page.getContent();
+    public Page<?> toTransferType(
+            org.springframework.data.domain.Page<?> page) {
+        Page<Object> transferPage = new Page<>();
+        transferPage.setContent(new ArrayList<>(page.getContent()));
+        transferPage.setSort(sortMapper.toTransferType(page.getSort()));
+        transferPage.setLast(page.isLast());
+        transferPage.setTotalPages(page.getTotalPages());
+        transferPage.setTotalElements(page.getTotalElements());
+        transferPage.setFirst(page.isFirst());
+        transferPage.setNumberOfElements(page.getNumberOfElements());
+        transferPage.setSize(page.getSize());
+        transferPage.setNumber(page.getNumber());
+        transferPage.setHasContent(page.hasContent());
+        transferPage.setHasNext(page.hasNext());
+        transferPage.setHasPrevious(page.hasPrevious());
+        transferPage.setEmpty(page.isEmpty());
+        return transferPage;
     }
 
     @Override
-    public Page<?> toEndpointType(List<?> list) {
-        return new PageImpl<>(list);
+    public org.springframework.data.domain.Page<?> toEndpointType(
+            Page<?> transferPage) {
+        throw new UnsupportedOperationException(
+                "Cannot create a Page from a transfer Page. Please create endpoints that accept Pageable as a parameter instead of returning a Page");
     }
 }

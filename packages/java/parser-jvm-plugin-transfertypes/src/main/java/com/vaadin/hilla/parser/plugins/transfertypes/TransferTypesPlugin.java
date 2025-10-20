@@ -12,6 +12,7 @@ import tools.jackson.databind.node.ObjectNode;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.mappedtypes.Order;
+import com.vaadin.hilla.mappedtypes.Page;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -33,13 +34,14 @@ import com.vaadin.hilla.runtime.transfertypes.NumberSignal;
 import com.vaadin.hilla.runtime.transfertypes.Signal;
 import com.vaadin.hilla.runtime.transfertypes.ValueSignal;
 import com.vaadin.hilla.transfertypes.annotations.FromModule;
+import com.vaadin.hilla.transfertypes.annotations.ModelFromModule;
 
 public final class TransferTypesPlugin
         extends AbstractPlugin<PluginConfiguration> {
     private static final Map<String, Class<?>> classMap = new HashMap<>();
 
     static {
-        classMap.put("org.springframework.data.domain.Page", List.class);
+        classMap.put("org.springframework.data.domain.Page", Page.class);
         classMap.put("org.springframework.data.domain.Pageable",
                 Pageable.class);
         classMap.put("org.springframework.data.domain.Sort$Order", Order.class);
@@ -99,6 +101,31 @@ public final class TransferTypesPlugin
                             }
 
                             schema.addExtension("x-from-module", fromModule);
+                        });
+
+                cls.getAnnotations().stream()
+                        .filter((model) -> model.getName()
+                                .equals(ModelFromModule.class.getName()))
+                        .findFirst().ifPresent((annotationModel) -> {
+                            var annotation = (ModelFromModule) annotationModel
+                                    .get();
+                            var namedSpecifier = annotation.namedSpecifier();
+                            var defaultSpecifier = annotation
+                                    .defaultSpecifier();
+
+                            var modelMap = new HashMap<String, Object>();
+                            modelMap.put("module", annotation.module());
+
+                            if (!namedSpecifier.isBlank()) {
+                                modelMap.put("named", namedSpecifier);
+                            }
+
+                            if (!defaultSpecifier.isBlank()) {
+                                modelMap.put("default", defaultSpecifier);
+                            }
+
+                            schema.addExtension("x-model-from-module",
+                                    modelMap);
                         });
             }
         }
