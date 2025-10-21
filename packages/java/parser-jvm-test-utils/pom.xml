@@ -38,5 +38,41 @@
       <artifactId>hilla-parser-jvm-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- Dependencies for EndToEndTestHelper -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-backbone</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-nonnull</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-subtypes</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>hilla-parser-jvm-plugin-transfertypes</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-core-jakarta</artifactId>
+      <version>${swagger.core.version}</version>
+    </dependency>
   </dependencies>
 </project>
