@@ -43,12 +43,25 @@ public class JsonValueNoJsonCreatorTest {
 
             var jsonValueEndpointTs = generated.get("JsonValueNoJsonCreatorEndpoint.ts");
             assertNotNull(jsonValueEndpointTs, "JsonValueNoJsonCreatorEndpoint.ts should be generated");
-            var expectedJsonValue = testHelper.loadExpected("expected/JsonValueNoJsonCreatorEndpoint.ts");
+            var expectedJsonValue = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import client_1 from "./connect-client.default.js";
+                async function getEmail_1(init?: EndpointRequestInit_1): Promise<string | undefined> { return client_1.call("JsonValueNoJsonCreatorEndpoint", "getEmail", {}, init); }
+                async function setEmail_1(email: string | undefined, init?: EndpointRequestInit_1): Promise<void> { return client_1.call("JsonValueNoJsonCreatorEndpoint", "setEmail", { email }, init); }
+                export { getEmail_1 as getEmail, setEmail_1 as setEmail };
+                """;
             assertTypeScriptEquals("JsonValueNoJsonCreatorEndpoint.ts", jsonValueEndpointTs, expectedJsonValue);
 
             var jsonCreatorEndpointTs = generated.get("JsonCreatorNoJsonValueEndpoint.ts");
             assertNotNull(jsonCreatorEndpointTs, "JsonCreatorNoJsonValueEndpoint.ts should be generated");
-            var expectedJsonCreator = testHelper.loadExpected("expected/JsonCreatorNoJsonValueEndpoint.ts");
+            var expectedJsonCreator = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import type User_1 from "./com/vaadin/hilla/parser/plugins/backbone/jsonvaluenojsoncreator/JsonCreatorNoJsonValueEndpoint/User.js";
+                import client_1 from "./connect-client.default.js";
+                async function getUser_1(init?: EndpointRequestInit_1): Promise<User_1 | undefined> { return client_1.call("JsonCreatorNoJsonValueEndpoint", "getUser", {}, init); }
+                async function setUser_1(user: User_1 | undefined, init?: EndpointRequestInit_1): Promise<void> { return client_1.call("JsonCreatorNoJsonValueEndpoint", "setUser", { user }, init); }
+                export { getUser_1 as getUser, setUser_1 as setUser };
+                """;
             assertTypeScriptEquals("JsonCreatorNoJsonValueEndpoint.ts", jsonCreatorEndpointTs, expectedJsonCreator);
         } finally {
             testHelper.cleanup();

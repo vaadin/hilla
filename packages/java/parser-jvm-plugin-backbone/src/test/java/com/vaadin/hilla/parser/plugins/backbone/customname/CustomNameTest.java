@@ -43,12 +43,22 @@ public class CustomNameTest {
 
             var customExplicitTs = generated.get("NameFromAnnotationExplicitValueEndpoint.ts");
             assertNotNull(customExplicitTs, "NameFromAnnotationExplicitValueEndpoint.ts should be generated");
-            var expectedCustomExplicit = testHelper.loadExpected("expected/NameFromAnnotationExplicitValueEndpoint.ts");
+            var expectedCustomExplicit = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import client_1 from "./connect-client.default.js";
+                async function doSomething_1(init?: EndpointRequestInit_1): Promise<void> { return client_1.call("NameFromAnnotationExplicitValueEndpoint", "doSomething", {}, init); }
+                export { doSomething_1 as doSomething };
+                """;
             assertTypeScriptEquals("NameFromAnnotationExplicitValueEndpoint.ts", customExplicitTs, expectedCustomExplicit);
 
             var customNameTs = generated.get("NameFromAnnotationEndpoint.ts");
             assertNotNull(customNameTs, "NameFromAnnotationEndpoint.ts should be generated");
-            var expectedCustomName = testHelper.loadExpected("expected/NameFromAnnotationEndpoint.ts");
+            var expectedCustomName = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import client_1 from "./connect-client.default.js";
+                async function doSomething_1(init?: EndpointRequestInit_1): Promise<void> { return client_1.call("NameFromAnnotationEndpoint", "doSomething", {}, init); }
+                export { doSomething_1 as doSomething };
+                """;
             assertTypeScriptEquals("NameFromAnnotationEndpoint.ts", customNameTs, expectedCustomName);
         } finally {
             testHelper.cleanup();
