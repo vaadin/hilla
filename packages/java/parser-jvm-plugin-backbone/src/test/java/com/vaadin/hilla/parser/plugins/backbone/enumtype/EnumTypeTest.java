@@ -1,5 +1,8 @@
 package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
+import static com.vaadin.hilla.parser.testutils.TypeScriptAssertions.assertTypeScriptEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.EndToEndTestHelper;
 
 public class EnumTypeTest {
     private final TestHelper helper = new TestHelper(getClass());
@@ -24,5 +28,25 @@ public class EnumTypeTest {
                 .execute(List.of(EnumTypeEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
+    }
+
+    @Test
+    public void should_GenerateCorrectTypeScript_When_ReferringToEnumTypes() throws Exception {
+        var testHelper = new EndToEndTestHelper(getClass());
+
+        try {
+            var generated = testHelper
+                    .withEndpoints(EnumTypeEndpoint.class)
+                    .withEndpointAnnotations(Endpoint.class)
+                    .generate();
+
+            var endpointTs = generated.get("EnumTypeEndpoint.ts");
+            assertNotNull(endpointTs, "EnumTypeEndpoint.ts should be generated");
+
+            var expectedEndpoint = testHelper.loadExpected("expected/EnumTypeEndpoint.ts");
+            assertTypeScriptEquals("EnumTypeEndpoint.ts", endpointTs, expectedEndpoint);
+        } finally {
+            testHelper.cleanup();
+        }
     }
 }
