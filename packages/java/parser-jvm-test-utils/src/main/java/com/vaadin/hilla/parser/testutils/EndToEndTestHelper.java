@@ -96,15 +96,6 @@ public class EndToEndTestHelper {
     }
 
     /**
-     * Load expected TypeScript file from test resources.
-     *
-     * @param fileName relative path to expected file (e.g., "expected/UserEndpoint.ts")
-     */
-    public String loadExpected(String fileName) throws IOException, URISyntaxException {
-        return resourceLoader.readToString(fileName);
-    }
-
-    /**
      * Clean up temporary files.
      */
     public void cleanup() throws IOException {
