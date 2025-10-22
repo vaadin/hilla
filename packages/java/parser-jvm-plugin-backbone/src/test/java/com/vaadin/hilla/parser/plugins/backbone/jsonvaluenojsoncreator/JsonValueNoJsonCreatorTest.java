@@ -1,8 +1,12 @@
 package com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator;
 
+import static com.vaadin.hilla.parser.testutils.TypeScriptAssertions.assertTypeScriptEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.EndToEndTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -24,5 +28,30 @@ public class JsonValueNoJsonCreatorTest {
                         JsonCreatorNoJsonValueEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
+    }
+
+    @Test
+    public void should_GenerateCorrectTypeScript_For_JsonValueNoJsonCreator() throws Exception {
+        var testHelper = new EndToEndTestHelper(getClass());
+
+        try {
+            var generated = testHelper
+                    .withEndpoints(JsonValueNoJsonCreatorEndpoint.class,
+                            JsonCreatorNoJsonValueEndpoint.class)
+                    .withEndpointAnnotations(Endpoint.class)
+                    .generate();
+
+            var jsonValueEndpointTs = generated.get("JsonValueNoJsonCreatorEndpoint.ts");
+            assertNotNull(jsonValueEndpointTs, "JsonValueNoJsonCreatorEndpoint.ts should be generated");
+            var expectedJsonValue = testHelper.loadExpected("expected/JsonValueNoJsonCreatorEndpoint.ts");
+            assertTypeScriptEquals("JsonValueNoJsonCreatorEndpoint.ts", jsonValueEndpointTs, expectedJsonValue);
+
+            var jsonCreatorEndpointTs = generated.get("JsonCreatorNoJsonValueEndpoint.ts");
+            assertNotNull(jsonCreatorEndpointTs, "JsonCreatorNoJsonValueEndpoint.ts should be generated");
+            var expectedJsonCreator = testHelper.loadExpected("expected/JsonCreatorNoJsonValueEndpoint.ts");
+            assertTypeScriptEquals("JsonCreatorNoJsonValueEndpoint.ts", jsonCreatorEndpointTs, expectedJsonCreator);
+        } finally {
+            testHelper.cleanup();
+        }
     }
 }
