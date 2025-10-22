@@ -1,5 +1,8 @@
 package com.vaadin.hilla.parser.plugins.backbone.jackson;
 
+import static com.vaadin.hilla.parser.testutils.TypeScriptAssertions.assertTypeScriptEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -11,6 +14,7 @@ import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.jackson.JacksonEndpoint.Sample;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.EndToEndTestHelper;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
@@ -52,5 +56,30 @@ public class JacksonTest {
                     + " you need to update this method");
         }
         return declaredMethods.equals(methodsInClass);
+    }
+
+    @Test
+    public void should_GenerateCorrectTypeScript_WithJacksonAnnotations() throws Exception {
+        // This test is only run on JDKs that return fields and methods in the
+        // order they are defined. Some JDKs like JetBrains Runtime does not
+        Assumptions.assumeTrue(fieldsReturnedInDefinedOrder(),
+                "This test is skipped on JDKs that do not return declared methods in the file order");
+
+        var testHelper = new EndToEndTestHelper(getClass());
+
+        try {
+            var generated = testHelper
+                    .withEndpoints(JacksonEndpoint.class)
+                    .withEndpointAnnotations(Endpoint.class)
+                    .generate();
+
+            var endpointTs = generated.get("JacksonEndpoint.ts");
+            assertNotNull(endpointTs, "JacksonEndpoint.ts should be generated");
+
+            var expectedEndpoint = testHelper.loadExpected("expected/JacksonEndpoint.ts");
+            assertTypeScriptEquals("JacksonEndpoint.ts", endpointTs, expectedEndpoint);
+        } finally {
+            testHelper.cleanup();
+        }
     }
 }
