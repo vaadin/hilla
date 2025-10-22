@@ -1,5 +1,8 @@
 package com.vaadin.hilla.parser.plugins.backbone.customname;
 
+import static com.vaadin.hilla.parser.testutils.TypeScriptAssertions.assertTypeScriptEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -8,6 +11,7 @@ import java.util.Set;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.EndToEndTestHelper;
 import org.junit.jupiter.api.Test;
 
 public class CustomNameTest {
@@ -24,5 +28,30 @@ public class CustomNameTest {
                         CustomNameEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
+    }
+
+    @Test
+    public void should_GenerateCorrectTypeScript_WithCustomEndpointNames() throws Exception {
+        var testHelper = new EndToEndTestHelper(getClass());
+
+        try {
+            var generated = testHelper
+                    .withEndpoints(CustomExplicitValueEndpoint.class,
+                            CustomNameEndpoint.class)
+                    .withEndpointAnnotations(Endpoint.class)
+                    .generate();
+
+            var customExplicitTs = generated.get("NameFromAnnotationExplicitValueEndpoint.ts");
+            assertNotNull(customExplicitTs, "NameFromAnnotationExplicitValueEndpoint.ts should be generated");
+            var expectedCustomExplicit = testHelper.loadExpected("expected/NameFromAnnotationExplicitValueEndpoint.ts");
+            assertTypeScriptEquals("NameFromAnnotationExplicitValueEndpoint.ts", customExplicitTs, expectedCustomExplicit);
+
+            var customNameTs = generated.get("NameFromAnnotationEndpoint.ts");
+            assertNotNull(customNameTs, "NameFromAnnotationEndpoint.ts should be generated");
+            var expectedCustomName = testHelper.loadExpected("expected/NameFromAnnotationEndpoint.ts");
+            assertTypeScriptEquals("NameFromAnnotationEndpoint.ts", customNameTs, expectedCustomName);
+        } finally {
+            testHelper.cleanup();
+        }
     }
 }

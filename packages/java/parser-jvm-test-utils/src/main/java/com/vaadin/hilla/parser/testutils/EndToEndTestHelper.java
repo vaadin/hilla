@@ -35,6 +35,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 public class EndToEndTestHelper {
     private final List<Class<?>> endpoints = new ArrayList<>();
     private final List<Class<? extends Annotation>> endpointAnnotations = new ArrayList<>();
+    private final List<Class<? extends Annotation>> endpointExposedAnnotations = new ArrayList<>();
     private final Path tempDir;
     private final ResourceLoader resourceLoader;
     private final Class<?> testClass;
@@ -59,6 +60,15 @@ public class EndToEndTestHelper {
     @SafeVarargs
     public final EndToEndTestHelper withEndpointAnnotations(Class<? extends Annotation>... annotations) {
         this.endpointAnnotations.addAll(Arrays.asList(annotations));
+        return this;
+    }
+
+    /**
+     * Specify annotations that mark endpoint members as exposed.
+     */
+    @SafeVarargs
+    public final EndToEndTestHelper withEndpointExposedAnnotations(Class<? extends Annotation>... annotations) {
+        this.endpointExposedAnnotations.addAll(Arrays.asList(annotations));
         return this;
     }
 
@@ -115,7 +125,8 @@ public class EndToEndTestHelper {
     private OpenAPI parseJavaToOpenAPI() throws URISyntaxException {
         var parser = new Parser()
                 .classPath(Set.of(resourceLoader.findTargetDirPath().toString()))
-                .endpointAnnotations(endpointAnnotations);
+                .endpointAnnotations(endpointAnnotations)
+                .endpointExposedAnnotations(endpointExposedAnnotations);
 
         // Add all standard parser plugins
         addParserPlugins(parser);
