@@ -9,14 +9,14 @@ import java.util.Optional;
 
 import org.jspecify.annotations.NonNull;
 
-import com.vaadin.hilla.parser.core.PluginConfiguration;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
-import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
-import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
-import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
-import com.vaadin.hilla.parser.utils.ConfigList;
+import com.vaadin.hilla.typescript.parser.core.PluginConfiguration;
+import com.vaadin.hilla.typescript.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.typescript.parser.plugins.model.ModelPlugin;
+import com.vaadin.hilla.typescript.parser.plugins.nonnull.NonnullPlugin;
+import com.vaadin.hilla.typescript.parser.plugins.subtypes.SubTypesPlugin;
+import com.vaadin.hilla.typescript.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
+import com.vaadin.hilla.typescript.parser.plugins.transfertypes.TransferTypesPlugin;
+import com.vaadin.hilla.typescript.parser.utils.ConfigList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,7 +174,7 @@ public final class ParserConfiguration {
             // Conditionally add the Kotlin nullability plugin if available.
             try {
                 Class<?> kotlinNullabilityClass = Class.forName(
-                        "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
+                        "com.vaadin.hilla.typescript.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin");
 
                 // Check that a class from kotlin-reflect is available:
                 Class.forName("kotlin.reflect.KClass");

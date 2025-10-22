@@ -16,10 +16,10 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.hilla.parser.core.OpenAPIFileType;
-import com.vaadin.hilla.parser.core.Parser;
-import com.vaadin.hilla.parser.core.PluginManager;
-import com.vaadin.hilla.parser.utils.JsonPrinter;
+import com.vaadin.hilla.typescript.parser.core.OpenAPIFileType;
+import com.vaadin.hilla.typescript.parser.core.Parser;
+import com.vaadin.hilla.typescript.parser.core.PluginManager;
+import com.vaadin.hilla.typescript.parser.utils.JsonPrinter;
 
 public final class ParserProcessor {
     private static final Logger logger = LoggerFactory
