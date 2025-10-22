@@ -46,17 +46,38 @@ public class MultiEndpointsTest {
 
             var barEndpointTs = generated.get("MultiEndpointsBarEndpoint.ts");
             assertNotNull(barEndpointTs, "MultiEndpointsBarEndpoint.ts should be generated");
-            var expectedBar = testHelper.loadExpected("expected/MultiEndpointsBarEndpoint.ts");
+            var expectedBar = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import type MultiEndpointsSharedModel_1 from "./com/vaadin/hilla/parser/plugins/backbone/multiendpoints/MultiEndpointsSharedModel.js";
+                import client_1 from "./connect-client.default.js";
+                async function getBar_1(init?: EndpointRequestInit_1): Promise<string | undefined> { return client_1.call("MultiEndpointsBarEndpoint", "getBar", {}, init); }
+                async function getShared_1(init?: EndpointRequestInit_1): Promise<MultiEndpointsSharedModel_1 | undefined> { return client_1.call("MultiEndpointsBarEndpoint", "getShared", {}, init); }
+                export { getBar_1 as getBar, getShared_1 as getShared };
+                """;
             assertTypeScriptEquals("MultiEndpointsBarEndpoint.ts", barEndpointTs, expectedBar);
 
             var bazEndpointTs = generated.get("MultiEndpointsBazEndpoint.ts");
             assertNotNull(bazEndpointTs, "MultiEndpointsBazEndpoint.ts should be generated");
-            var expectedBaz = testHelper.loadExpected("expected/MultiEndpointsBazEndpoint.ts");
+            var expectedBaz = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import type MultiEndpointsSharedModel_1 from "./com/vaadin/hilla/parser/plugins/backbone/multiendpoints/MultiEndpointsSharedModel.js";
+                import client_1 from "./connect-client.default.js";
+                async function getBaz_1(init?: EndpointRequestInit_1): Promise<string | undefined> { return client_1.call("MultiEndpointsBazEndpoint", "getBaz", {}, init); }
+                async function getShared_1(init?: EndpointRequestInit_1): Promise<MultiEndpointsSharedModel_1 | undefined> { return client_1.call("MultiEndpointsBazEndpoint", "getShared", {}, init); }
+                export { getBaz_1 as getBaz, getShared_1 as getShared };
+                """;
             assertTypeScriptEquals("MultiEndpointsBazEndpoint.ts", bazEndpointTs, expectedBaz);
 
             var fooEndpointTs = generated.get("MultiEndpointsFooEndpoint.ts");
             assertNotNull(fooEndpointTs, "MultiEndpointsFooEndpoint.ts should be generated");
-            var expectedFoo = testHelper.loadExpected("expected/MultiEndpointsFooEndpoint.ts");
+            var expectedFoo = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import type MultiEndpointsSharedModel_1 from "./com/vaadin/hilla/parser/plugins/backbone/multiendpoints/MultiEndpointsSharedModel.js";
+                import client_1 from "./connect-client.default.js";
+                async function getFoo_1(init?: EndpointRequestInit_1): Promise<string | undefined> { return client_1.call("MultiEndpointsFooEndpoint", "getFoo", {}, init); }
+                async function getShared_1(init?: EndpointRequestInit_1): Promise<MultiEndpointsSharedModel_1 | undefined> { return client_1.call("MultiEndpointsFooEndpoint", "getShared", {}, init); }
+                export { getFoo_1 as getFoo, getShared_1 as getShared };
+                """;
             assertTypeScriptEquals("MultiEndpointsFooEndpoint.ts", fooEndpointTs, expectedFoo);
         } finally {
             testHelper.cleanup();

@@ -47,12 +47,23 @@ public class ComplexHierarchyTest {
 
             var complexEndpointTs = generated.get("ComplexHierarchyEndpoint.ts");
             assertNotNull(complexEndpointTs, "ComplexHierarchyEndpoint.ts should be generated");
-            var expectedComplex = testHelper.loadExpected("expected/ComplexHierarchyEndpoint.ts");
+            var expectedComplex = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import type ComplexHierarchyModel_1 from "./com/vaadin/hilla/parser/plugins/backbone/complexhierarchy/models/ComplexHierarchyModel.js";
+                import client_1 from "./connect-client.default.js";
+                async function getModel_1(init?: EndpointRequestInit_1): Promise<ComplexHierarchyModel_1 | undefined> { return client_1.call("ComplexHierarchyEndpoint", "getModel", {}, init); }
+                export { getModel_1 as getModel };
+                """;
             assertTypeScriptEquals("ComplexHierarchyEndpoint.ts", complexEndpointTs, expectedComplex);
 
             var grandParentEndpointTs = generated.get("ComplexHierarchyGrandParentEndpoint.ts");
             assertNotNull(grandParentEndpointTs, "ComplexHierarchyGrandParentEndpoint.ts should be generated");
-            var expectedGrandParent = testHelper.loadExpected("expected/ComplexHierarchyGrandParentEndpoint.ts");
+            var expectedGrandParent = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import client_1 from "./connect-client.default.js";
+                async function executeGrandParentEndpointMethod_1(init?: EndpointRequestInit_1): Promise<string | undefined> { return client_1.call("ComplexHierarchyGrandParentEndpoint", "executeGrandParentEndpointMethod", {}, init); }
+                export { executeGrandParentEndpointMethod_1 as executeGrandParentEndpointMethod };
+                """;
             assertTypeScriptEquals("ComplexHierarchyGrandParentEndpoint.ts", grandParentEndpointTs, expectedGrandParent);
         } finally {
             testHelper.cleanup();

@@ -45,12 +45,22 @@ public class GenericSuperClassMethodsTest {
 
             var longEndpointTs = generated.get("GenericSuperClassLong.ts");
             assertNotNull(longEndpointTs, "GenericSuperClassLong.ts should be generated");
-            var expectedLong = testHelper.loadExpected("expected/GenericSuperClassLong.ts");
+            var expectedLong = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import client_1 from "./connect-client.default.js";
+                async function genericMethod_1(param: number | undefined, init?: EndpointRequestInit_1): Promise<number | undefined> { return client_1.call("GenericSuperClassLong", "genericMethod", { param }, init); }
+                export { genericMethod_1 as genericMethod };
+                """;
             assertTypeScriptEquals("GenericSuperClassLong.ts", longEndpointTs, expectedLong);
 
             var stringEndpointTs = generated.get("GenericSuperClassString.ts");
             assertNotNull(stringEndpointTs, "GenericSuperClassString.ts should be generated");
-            var expectedString = testHelper.loadExpected("expected/GenericSuperClassString.ts");
+            var expectedString = """
+                import { EndpointRequestInit as EndpointRequestInit_1 } from "@vaadin/hilla-frontend";
+                import client_1 from "./connect-client.default.js";
+                async function genericMethod_1(param: string | undefined, init?: EndpointRequestInit_1): Promise<string | undefined> { return client_1.call("GenericSuperClassString", "genericMethod", { param }, init); }
+                export { genericMethod_1 as genericMethod };
+                """;
             assertTypeScriptEquals("GenericSuperClassString.ts", stringEndpointTs, expectedString);
         } finally {
             testHelper.cleanup();
