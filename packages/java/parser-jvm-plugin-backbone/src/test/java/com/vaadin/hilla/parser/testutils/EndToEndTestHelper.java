@@ -16,11 +16,8 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.hilla.parser.core.Parser;
+import com.vaadin.hilla.parser.core.Plugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
-import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
-import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -36,6 +33,7 @@ public class EndToEndTestHelper {
     private final List<Class<?>> endpoints = new ArrayList<>();
     private final List<Class<? extends Annotation>> endpointAnnotations = new ArrayList<>();
     private final List<Class<? extends Annotation>> endpointExposedAnnotations = new ArrayList<>();
+    private final List<Plugin> additionalPlugins = new ArrayList<>();
     private final Path tempDir;
     private final ResourceLoader resourceLoader;
     private final Class<?> testClass;
@@ -69,6 +67,14 @@ public class EndToEndTestHelper {
     @SafeVarargs
     public final EndToEndTestHelper withEndpointExposedAnnotations(Class<? extends Annotation>... annotations) {
         this.endpointExposedAnnotations.addAll(Arrays.asList(annotations));
+        return this;
+    }
+
+    /**
+     * Add additional parser plugins to run after BackbonePlugin.
+     */
+    public EndToEndTestHelper withPlugins(Plugin... plugins) {
+        this.additionalPlugins.addAll(Arrays.asList(plugins));
         return this;
     }
 
@@ -126,12 +132,13 @@ public class EndToEndTestHelper {
     }
 
     private void addParserPlugins(Parser parser) {
-        // Add plugins in the order they would normally run
+        // Always add BackbonePlugin first
         parser.addPlugin(new BackbonePlugin());
-        parser.addPlugin(new ModelPlugin());
-        parser.addPlugin(new NonnullPlugin());
-        parser.addPlugin(new SubTypesPlugin());
-        parser.addPlugin(new TransferTypesPlugin());
+
+        // Add any additional plugins specified by the test
+        for (var plugin : additionalPlugins) {
+            parser.addPlugin(plugin);
+        }
     }
 
     private void writeOpenAPI(OpenAPI openAPI, Path file) throws IOException {
