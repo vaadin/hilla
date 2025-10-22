@@ -29,7 +29,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.dau.DauEnforcementException;
 import com.vaadin.flow.server.dau.EnforcementNotificationMessages;
 import com.vaadin.hilla.auth.CsrfChecker;
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.typescript.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.pro.licensechecker.dau.EnforcementException;
 
 import static com.vaadin.flow.server.dau.DAUUtils.ENFORCEMENT_EXCEPTION_KEY;

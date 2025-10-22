@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.vaadin.hilla.parser.core.OpenAPIFileType;
+import com.vaadin.hilla.typescript.parser.core.OpenAPIFileType;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
 

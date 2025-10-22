@@ -71,7 +71,7 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>hilla-parser-jvm-test-utils</artifactId>
+      <artifactId>hilla-typescript-generator</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

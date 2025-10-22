@@ -71,7 +71,7 @@ import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
 import com.vaadin.hilla.packages.application.ApplicationEndpoint;
 import com.vaadin.hilla.packages.library.LibraryEndpoint;
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.typescript.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.testendpoint.BridgeMethodTestEndpoint;
 
 import jakarta.annotation.security.DenyAll;
