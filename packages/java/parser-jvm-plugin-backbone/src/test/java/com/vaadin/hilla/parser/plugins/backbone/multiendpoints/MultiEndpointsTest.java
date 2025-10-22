@@ -79,6 +79,17 @@ public class MultiEndpointsTest {
                 export { getFoo_1 as getFoo, getShared_1 as getShared };
                 """;
             assertTypeScriptEquals("MultiEndpointsFooEndpoint.ts", fooEndpointTs, expectedFoo);
+
+            // Validate the barrel file (endpoints.ts)
+            var endpointsTs = generated.get("endpoints.ts");
+            assertNotNull(endpointsTs, "endpoints.ts barrel file should be generated");
+            var expectedBarrel = """
+                import * as MultiEndpointsBarEndpoint_1 from "./MultiEndpointsBarEndpoint.js";
+                import * as MultiEndpointsBazEndpoint_1 from "./MultiEndpointsBazEndpoint.js";
+                import * as MultiEndpointsFooEndpoint_1 from "./MultiEndpointsFooEndpoint.js";
+                export { MultiEndpointsBarEndpoint_1 as MultiEndpointsBarEndpoint, MultiEndpointsBazEndpoint_1 as MultiEndpointsBazEndpoint, MultiEndpointsFooEndpoint_1 as MultiEndpointsFooEndpoint };
+                """;
+            assertTypeScriptEquals("endpoints.ts", endpointsTs, expectedBarrel);
         } finally {
             testHelper.cleanup();
         }
