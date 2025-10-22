@@ -1,5 +1,8 @@
 package com.vaadin.hilla.parser.plugins.backbone.exposed;
 
+import static com.vaadin.hilla.parser.testutils.TypeScriptAssertions.assertTypeScriptEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.EndToEndTestHelper;
 
 public class ExposedTest {
     private final TestHelper helper = new TestHelper(getClass());
@@ -25,5 +29,26 @@ public class ExposedTest {
                 .execute(List.of(ExposedEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
+    }
+
+    @Test
+    public void should_GenerateCorrectTypeScript_With_EndpointExposedAnnotation() throws Exception {
+        var testHelper = new EndToEndTestHelper(getClass());
+
+        try {
+            var generated = testHelper
+                    .withEndpoints(ExposedEndpoint.class)
+                    .withEndpointAnnotations(Endpoint.class)
+                    .withEndpointExposedAnnotations(EndpointExposed.class)
+                    .generate();
+
+            var endpointTs = generated.get("ExposedEndpoint.ts");
+            assertNotNull(endpointTs, "ExposedEndpoint.ts should be generated");
+
+            var expectedEndpoint = testHelper.loadExpected("expected/ExposedEndpoint.ts");
+            assertTypeScriptEquals("ExposedEndpoint.ts", endpointTs, expectedEndpoint);
+        } finally {
+            testHelper.cleanup();
+        }
     }
 }

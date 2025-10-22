@@ -1,8 +1,12 @@
 package com.vaadin.hilla.parser.plugins.backbone.jsonvalue;
 
+import static com.vaadin.hilla.parser.testutils.TypeScriptAssertions.assertTypeScriptEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.EndToEndTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -23,5 +27,25 @@ public class JsonValueTest {
                 .execute(List.of(JsonValueEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
+    }
+
+    @Test
+    public void should_GenerateCorrectTypeScript_For_JsonValue() throws Exception {
+        var testHelper = new EndToEndTestHelper(getClass());
+
+        try {
+            var generated = testHelper
+                    .withEndpoints(JsonValueEndpoint.class)
+                    .withEndpointAnnotations(Endpoint.class)
+                    .generate();
+
+            var endpointTs = generated.get("JsonValueEndpoint.ts");
+            assertNotNull(endpointTs, "JsonValueEndpoint.ts should be generated");
+
+            var expectedEndpoint = testHelper.loadExpected("expected/JsonValueEndpoint.ts");
+            assertTypeScriptEquals("JsonValueEndpoint.ts", endpointTs, expectedEndpoint);
+        } finally {
+            testHelper.cleanup();
+        }
     }
 }
