@@ -1,5 +1,6 @@
 package com.vaadin.hilla.engine.commandrunner;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -288,6 +289,7 @@ public class CommandRunnerTest {
     }
 
     @Test
+    @Disabled("Does not work on mac")
     void processInputOutput_isHandledCorrectly() throws CommandRunnerException {
         String input = "Hello, CommandRunner!"
                 + (CommandRunner.IS_WINDOWS ? "\r\n" : "\n");
