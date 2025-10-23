@@ -1,11 +1,16 @@
-# Plan: Eliminate TypeScript Generator - Move Generation to Java
+# Plan: Eliminate TypeScript Generator & OpenAPI - Pure Java Generation
 
 ## Overview
 Currently, Hilla has a two-step code generation process:
 1. **Java → OpenAPI**: Parser (now `typescript-generator` module) analyzes Java and generates OpenAPI JSON
 2. **OpenAPI → TypeScript**: Node.js TypeScript generator (`@vaadin/hilla-generator-cli`) processes OpenAPI and generates TypeScript files
 
-**Goal**: Eliminate step 2 by implementing TypeScript generation directly in Java within the `typescript-generator` module.
+**Goal**:
+- **Eliminate OpenAPI completely** - it's an unnecessary intermediate format
+- **Direct Java → TypeScript generation** using parser's internal model
+- **Pure Java toolchain** - no Node.js dependency
+
+**New Architecture**: Java source → Parser internal model → TypeScript files (no OpenAPI step)
 
 ## Current Architecture Analysis
 
@@ -64,126 +69,163 @@ This approach uses a complete, valid TypeScript example as the template, making 
 - Add `TypeScriptGenerator` interface (similar to existing `Plugin`)
 - Plugin manager to orchestrate multiple generators
 - Context object to share state between plugins
-- Output: Map<String, String> (filename → content)
+- **Input**: Parser's internal model (ClassInfoModel, MethodInfoModel, etc.)
+- **Output**: Map<String, String> (filename → content)
+- **NO OpenAPI** - work directly with parser models
 
 **1.3 Implement Core Generator Plugins Using Templates**
 
-**BackbonePlugin** - Base structure:
-- Generate endpoint client files using text block templates
-- Template for imports: `import { EndpointRequestInit } from '@vaadin/hilla-frontend';`
-- Template for class structure with method stubs
-- Simple string concatenation for building files
-
 **ModelPlugin** - Type definitions:
+- **Input**: ClassInfoModel from parser
+- Read properties from ClassInfoModel.getFields(), ClassInfoModel.getMethods()
 - Templates for TypeScript interfaces
 - Handle nullability: `property?: Type` vs `property: Type`
 - Template for type references and imports
-- Property list generation from schemas
+- Property list generation from parser model (not OpenAPI schemas)
 
 **ClientPlugin** - Client method implementations:
+- **Input**: Endpoint classes and methods from parser model
+- Read method signatures from MethodInfoModel
 - Template for Connect client method calls
 - Format: `call('EndpointName', 'methodName', params, options)`
 - Template includes type annotations
 - Parameter serialization in template
+- Extract return types from MethodInfoModel.getResultType()
 
 **BarrelPlugin** - Index files:
+- **Input**: List of endpoint ClassInfoModel objects
 - Simple template for `endpoints.ts`
 - Template: `export * as Name from './NameEndpoint.js';`
 - Loop through endpoints and accumulate exports
 - Straightforward string building
 
 **PushPlugin** - Flux support:
+- **Input**: Methods returning Flux<T> from parser model
 - Template for Flux/subscription methods
 - Different template for streaming endpoints
 - EventSource wrapper template
+- Detect Flux return types from MethodInfoModel
 
 **SignalsPlugin** - Signals integration:
+- **Input**: Endpoint methods from parser model
 - Template for Signal hook generation
 - React Signals specific imports template
 - Hook pattern template with type safety
 
 **SubtypesPlugin** - Polymorphic support:
+- **Input**: ClassInfoModel with inheritance hierarchies
 - Template for type guard functions
 - Format: `export function isType(obj: any): obj is Type { ... }`
 - Discriminated union helper templates
+- Use parser's type system to detect polymorphic types
 
 **TransferTypesPlugin** - Special types:
+- **Input**: Special Java types (Instant, LocalDate, etc.) from parser
 - Template for special type imports
 - Map Java types to TS imports using templates
 - Simple type alias templates
 
-### Phase 2: Refactor Engine to Use Java Generator (1 week)
+### Phase 2: Refactor Parser to Generate TypeScript Directly (1-2 weeks)
 
-**2.1 Update GeneratorProcessor**
-- Remove Node.js invocation code (lines 43-68, 184-208)
-- Replace with direct Java generator invocation
-- Keep cleanup logic (lines 70-115)
+**2.1 Create TypeScript Generator Plugins That Work with Parser Model**
+- Refactor existing plugins to accept parser's internal model instead of OpenAPI
+- Change signature: `generate(OpenAPI openAPI, ...)` → `generate(ParserOutput parserOutput, ...)`
+- ParserOutput contains: List<ClassInfoModel> for endpoints, List<ClassInfoModel> for entities
+- Extract all information from ClassInfoModel, MethodInfoModel, FieldInfoModel
+- Map Java types to TypeScript types using parser's type system
+
+**2.2 Integrate TypeScript Generation into Parser**
+- Add new method to Parser: `generateTypeScript(List<Class<?>> endpoints, Path outputDir)`
+- After building internal model, invoke TypeScript generator plugins
+- Chain: Java source → Parser model → TypeScript files
+- Remove OpenAPI generation from Parser (or make it optional for debugging)
+
+**2.3 Update GeneratorProcessor in Engine**
+- Remove Node.js invocation code completely
+- Replace with direct Parser.generateTypeScript() call
 - Remove `getTsgenPath()`, `GeneratorShellRunner` usage
+- Remove OpenAPI JSON file generation
+- Keep cleanup logic for old generated files
 
-**2.2 Update ParserProcessor**
-- Currently generates OpenAPI JSON → modify to generate TypeScript directly
-- Chain: Java source → internal model → TypeScript (skip OpenAPI serialization)
-- OpenAPI can still be generated optionally for debugging
-
-**2.3 Configuration Updates**
+**2.4 Configuration Updates**
 - Remove `nodeCommand` from `EngineAutoConfiguration`
 - Update Maven/Gradle plugin configuration
 - Remove TypeScript package dependencies from build
+- Remove OpenAPI-related configuration options
 
-### Phase 3: Update Tests (1 week)
+### Phase 3: Update Tests & Remove OpenAPI (1 week)
 
-**3.1 Enhance Existing Tests**
-- Current tests only validate OpenAPI JSON output
-- Add TypeScript output validation
+**3.1 Migrate Tests from OpenAPI Validation to TypeScript Validation**
+- Current tests validate OpenAPI JSON output - replace with TypeScript validation
 - Create `TypeScriptAssertions` utility class
 - Compare generated TS against expected TS (structure, not formatting)
+- Remove all OpenAPI assertion code
 
 **3.2 End-to-End Tests**
-- Generate TypeScript from sample Java endpoints
+- Generate TypeScript from sample Java endpoints using parser model
 - Validate all plugin outputs (models, clients, barrels, etc.)
 - Test edge cases: generics, nullability, inheritance, etc.
+- Ensure no OpenAPI artifacts remain
 
 **3.3 Integration Tests**
 - Test with actual Hilla applications
 - Verify generated TypeScript compiles with tsc
 - Ensure runtime behavior unchanged
+- Confirm OpenAPI.json is no longer generated
 
-### Phase 4: Migration & Cleanup (1 week)
+**3.4 Remove OpenAPI Dependencies**
+- Remove swagger-parser, swagger-core dependencies from POM
+- Remove OpenAPI model classes if no longer needed
+- Update parser to not generate OpenAPI at all
 
-**4.1 Update Documentation**
-- Update CLAUDE.md architecture section
-- Remove Node.js from dependency requirements
-- Update build instructions
+### Phase 4: Cleanup & Documentation (1 week)
 
-**4.2 Remove TypeScript Generator Packages**
-- Delete `packages/ts/generator-*` directories
+**4.1 Remove TypeScript Generator Packages**
+- Delete `packages/ts/generator-*` directories (generator-cli, generator-core, all plugins)
 - Update `package.json` workspaces
 - Remove from Nx configuration
 - Update CI/CD pipelines
 
-**4.3 Update Maven/Gradle Plugins**
+**4.2 Remove OpenAPI Artifacts**
+- Remove OpenAPI.json generation from all code paths
+- Remove OpenAPI file cleanup code (no longer needed)
+- Remove OpenAPI-related configuration options from Maven/Gradle plugins
+- Search codebase for any remaining OpenAPI references
+
+**4.3 Update Documentation**
+- Update CLAUDE.md architecture section to reflect new flow
+- Document: Java → Parser Model → TypeScript (no OpenAPI, no Node.js)
+- Remove Node.js from dependency requirements
+- Update build instructions
+- Add migration notes for anyone who relied on OpenAPI.json
+
+**4.4 Update Maven/Gradle Plugins**
 - Remove `nodeExecutable` configuration option
-- Simplify plugin execution (no Node.js process spawning)
+- Remove OpenAPI file path configuration
+- Simplify plugin execution (no Node.js process spawning, no OpenAPI generation)
 - Update plugin documentation
 
-**4.4 Version Bump & Breaking Change Notice**
+**4.5 Version Bump & Breaking Change Notice**
 - This is a major internal change
-- Users shouldn't notice (generated output identical)
-- But breaking for anyone extending the generator
+- Generated TypeScript output should be identical
+- Breaking for anyone extending the generator
+- Breaking for anyone relying on OpenAPI.json output (document workarounds)
 
 ## Benefits
 
 ✅ **No Node.js dependency** - Pure Java toolchain
-✅ **Faster builds** - No process spawning, IPC overhead
-✅ **Simpler architecture** - One language, one runtime
-✅ **Better debugging** - Java stack traces end-to-end
-✅ **Easier maintenance** - TypeScript + Java → just Java
+✅ **No OpenAPI intermediate format** - Direct Java → TypeScript
+✅ **Faster builds** - No process spawning, no IPC, no JSON serialization overhead
+✅ **Simpler architecture** - One language, one runtime, fewer moving parts
+✅ **Better debugging** - Java stack traces end-to-end, no cross-process debugging
+✅ **Easier maintenance** - TypeScript + Java + OpenAPI → just Java
 ✅ **Better IDE support** - Java refactoring works across entire pipeline
+✅ **More type safety** - Work with typed parser models instead of OpenAPI maps
 
 ## Risks & Mitigation
 
 ⚠️ **Risk**: TypeScript generation logic is complex
-✅ **Mitigation**: Start with simple cases, iterate. Existing TS generator is reference
+✅ **Mitigation**: Start with simple cases, iterate. Existing TS generator is reference. Template-based approach is simpler than AST.
 
 ⚠️ **Risk**: Subtle differences in generated code
 ✅ **Mitigation**: Extensive test coverage comparing outputs. Golden file tests.
@@ -191,10 +233,31 @@ This approach uses a complete, valid TypeScript example as the template, making 
 ⚠️ **Risk**: Breaking changes for users extending generator
 ✅ **Mitigation**: Clear migration guide. Most users don't extend generator.
 
-## Timeline Estimate
-- **Total**: 4-5 weeks for complete implementation
-- **MVP** (basic generation working): 2-3 weeks
-- **Production ready**: 4-5 weeks
+⚠️ **Risk**: Losing OpenAPI.json breaks external tools
+✅ **Mitigation**: Survey usage, provide optional OpenAPI export if needed. Document alternatives.
 
-## First Step
-Start with Phase 1.1: Create TypeScript code model infrastructure (classes for representing TypeScript code structures like interfaces, types, methods, etc.)
+⚠️ **Risk**: Parser model may be missing information that OpenAPI had
+✅ **Mitigation**: Parser model is the source of truth for OpenAPI, so it has all information. May need to extract it differently.
+
+## Timeline Estimate
+- **Total**: 5-6 weeks for complete implementation
+- **Phase 1** (Java TS generator infrastructure): 1-2 weeks ✅ DONE (basic plugins)
+- **Phase 2** (Refactor to use parser model): 1-2 weeks
+- **Phase 3** (Tests + remove OpenAPI): 1 week
+- **Phase 4** (Cleanup): 1 week
+- **Production ready**: 5-6 weeks
+
+## Progress
+
+**✅ Phase 1.1-1.3 Complete** (Partial):
+- Created TypeScript generation infrastructure in Java
+- Implemented 3 core plugins: ModelPlugin, ClientPlugin, BarrelPlugin
+- All plugins currently use OpenAPI as input (temporary)
+- Template-based generation with Java text blocks working
+- 5 tests passing, no regressions
+
+**🔄 Next Steps**:
+- Implement remaining plugins (Push, Signals, Subtypes, TransferTypes)
+- Refactor all plugins to use Parser model instead of OpenAPI
+- Integrate into Parser class
+- Remove OpenAPI completely
