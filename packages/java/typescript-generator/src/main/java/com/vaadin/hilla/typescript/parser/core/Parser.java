@@ -345,11 +345,15 @@ public final class Parser {
         // Create ParserOutput
         ParserOutput parserOutput = new ParserOutput(endpoints, entities);
 
-        // Create TypeScript generator with plugins
+        // Create TypeScript generator with plugins (in order of execution)
         TypeScriptGenerator generator = new TypeScriptGenerator(
                 outputDir.toString());
+        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.TransferTypesPlugin());
         generator.addPlugin(new ModelPlugin());
+        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.SubtypesPlugin());
         generator.addPlugin(new ClientPlugin());
+        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.PushPlugin());
+        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.SignalsPlugin());
         generator.addPlugin(new BarrelPlugin());
 
         // Generate and write TypeScript files
