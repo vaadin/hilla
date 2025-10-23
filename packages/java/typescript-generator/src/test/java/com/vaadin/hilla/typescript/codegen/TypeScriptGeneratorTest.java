@@ -1,0 +1,123 @@
+package com.vaadin.hilla.typescript.codegen;
+
+import com.vaadin.hilla.typescript.codegen.plugins.BarrelPlugin;
+import com.vaadin.hilla.typescript.codegen.plugins.ClientPlugin;
+import com.vaadin.hilla.typescript.codegen.plugins.ModelPlugin;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
+import io.swagger.v3.oas.models.Components;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class TypeScriptGeneratorTest {
+
+    @Test
+    public void testBasicGeneration(@TempDir Path tempDir) {
+        // Create a simple OpenAPI spec
+        OpenAPI openAPI = new OpenAPI();
+        Components components = new Components();
+
+        // Create a Person schema
+        Schema personSchema = new Schema();
+        personSchema.setType("object");
+        Map<String, Schema> properties = new HashMap<>();
+        properties.put("name", new StringSchema());
+        properties.put("age", new IntegerSchema());
+        personSchema.setProperties(properties);
+        personSchema.setRequired(List.of("name"));
+
+        Map<String, Schema> schemas = new HashMap<>();
+        schemas.put("Person", personSchema);
+        components.setSchemas(schemas);
+        openAPI.setComponents(components);
+
+        // Create generator with plugins
+        TypeScriptGenerator generator = new TypeScriptGenerator(
+                tempDir.toString());
+        generator.addPlugin(new ModelPlugin());
+
+        // Generate code
+        Map<String, String> generatedFiles = generator.generate(openAPI);
+
+        // Verify Person.ts was generated
+        assertTrue(generatedFiles.containsKey("Person.ts"));
+        String personTs = generatedFiles.get("Person.ts");
+
+        // Verify the interface contains expected elements
+        assertTrue(personTs.contains("export interface Person"));
+        assertTrue(personTs.contains("name: string;"));
+        assertTrue(personTs.contains("age?: number;"));
+    }
+
+    @Test
+    public void testTypeScriptWriter() {
+        TypeScriptWriter writer = new TypeScriptWriter();
+
+        writer.addNamedImport(List.of("Component"), "@angular/core");
+        writer.addTypeImport(List.of("User"), "./models");
+        writer.appendLine("export class MyClass {");
+        writer.appendLine("}");
+
+        String result = writer.build();
+
+        assertTrue(result.contains("import { Component } from '@angular/core';"));
+        assertTrue(result.contains("import type { User } from './models';"));
+        assertTrue(result.contains("export class MyClass"));
+    }
+
+    @Test
+    public void testIndentationHelper() {
+        String code = "function foo() {\n  return 42;\n}";
+        String indented = IndentationHelper.indent(code, 1);
+
+        assertTrue(indented.startsWith("  function"));
+        assertTrue(indented.contains("    return 42;"));
+    }
+
+    @Test
+    public void testGenerationContext() {
+        GenerationContext context = new GenerationContext("/output");
+
+        assertEquals("/output", context.getOutputDirectory());
+
+        context.setAttribute("test", "value");
+        assertTrue(context.hasAttribute("test"));
+        assertEquals("value", context.getAttribute("test").orElse(null));
+
+        context.setAttribute("number", 42);
+        assertEquals(42, context.getAttribute("number", Integer.class).orElse(null));
+
+        context.removeAttribute("test");
+        assertFalse(context.hasAttribute("test"));
+    }
+
+    @Test
+    public void testPluginOrdering() {
+        TypeScriptGenerator generator = new TypeScriptGenerator("/output");
+
+        ModelPlugin modelPlugin = new ModelPlugin();
+        ClientPlugin clientPlugin = new ClientPlugin();
+        BarrelPlugin barrelPlugin = new BarrelPlugin();
+
+        generator.addPlugin(barrelPlugin);
+        generator.addPlugin(modelPlugin);
+        generator.addPlugin(clientPlugin);
+
+        List<TypeScriptGeneratorPlugin> plugins = generator.getPlugins();
+        assertEquals(3, plugins.size());
+
+        // Plugins should be ordered by their order value when executed
+        // ModelPlugin: order 10
+        // ClientPlugin: order 20
+        // BarrelPlugin: order 50
+    }
+}
