@@ -3,6 +3,7 @@ package com.vaadin.hilla.typescript.parser.core;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.models.OpenAPI;
+
+import com.vaadin.hilla.typescript.codegen.ParserOutput;
+import com.vaadin.hilla.typescript.codegen.TypeScriptGenerator;
+import com.vaadin.hilla.typescript.codegen.plugins.BarrelPlugin;
+import com.vaadin.hilla.typescript.codegen.plugins.ClientPlugin;
+import com.vaadin.hilla.typescript.codegen.plugins.ModelPlugin;
+import com.vaadin.hilla.typescript.parser.models.ClassInfoModel;
 
 /**
  * The entrypoint class. It searches for the endpoint classes in the classpath
@@ -295,6 +303,59 @@ public final class Parser {
         logger.debug("JVM Parser finished successfully");
 
         return storage.getOpenAPI();
+    }
+
+    /**
+     * Generates TypeScript files directly from Java endpoint classes, bypassing
+     * OpenAPI generation.
+     *
+     * @param browserCallables the browser callable endpoint classes
+     * @param outputDir        the output directory for generated TypeScript
+     *                         files
+     * @throws IOException if an error occurs while writing files
+     */
+    public void generateTypeScript(@NonNull List<Class<?>> browserCallables,
+            @NonNull Path outputDir) throws IOException {
+        Objects.requireNonNull(config.classPathElements,
+                "[JVM Parser] classPath is not provided.");
+        if (config.endpointAnnotations == null
+                || config.endpointAnnotations.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "[JVM Parser] endpoint annotations are not provided.");
+        }
+
+        logger.debug("Generating TypeScript directly from Java classes");
+
+        // Filter out internal browser callables
+        browserCallables = browserCallables.stream().filter(
+                cls -> !INTERNAL_BROWSER_CALLABLES.contains(cls.getName()))
+                .toList();
+
+        // Validate annotations
+        validateEndpointExposedClassesForAclAnnotations(browserCallables);
+
+        // Convert Class<?> to ClassInfoModel for endpoints
+        List<ClassInfoModel> endpoints = browserCallables.stream()
+                .map(ClassInfoModel::of).toList();
+
+        // For now, use empty list for entities
+        // TODO: Collect all classes referenced by endpoints
+        List<ClassInfoModel> entities = List.of();
+
+        // Create ParserOutput
+        ParserOutput parserOutput = new ParserOutput(endpoints, entities);
+
+        // Create TypeScript generator with plugins
+        TypeScriptGenerator generator = new TypeScriptGenerator(
+                outputDir.toString());
+        generator.addPlugin(new ModelPlugin());
+        generator.addPlugin(new ClientPlugin());
+        generator.addPlugin(new BarrelPlugin());
+
+        // Generate and write TypeScript files
+        generator.generateAndWrite(parserOutput);
+
+        logger.debug("TypeScript generation finished successfully");
     }
 
     private void validateEndpointExposedClassesForAclAnnotations(
