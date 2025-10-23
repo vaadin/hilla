@@ -62,7 +62,7 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
             var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
             inOrder.verify(parserProcessor).process(List.of());
-            inOrder.verify(generatorProcessor).process();
+            inOrder.verify(generatorProcessor).process(List.of());
         }
     }
 

@@ -97,7 +97,6 @@ public class EndpointGeneratorTaskFactoryImpl
                 .baseDir(options.getNpmFolder().toPath())
                 .buildDir(options.getBuildDirectoryName())
                 .outputDir(options.getFrontendGeneratedFolder().toPath())
-                .nodeCommand(buildTools(options).getNodeExecutable())
                 .classFinder(options.getClassFinder())
                 .productionMode(options.isProductionMode())
                 .withDefaultAnnotations().build();
