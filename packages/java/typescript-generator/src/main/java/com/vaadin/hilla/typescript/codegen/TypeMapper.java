@@ -2,6 +2,7 @@ package com.vaadin.hilla.typescript.codegen;
 
 import com.vaadin.hilla.typescript.parser.models.SignatureModel;
 import com.vaadin.hilla.typescript.parser.models.ArraySignatureModel;
+import com.vaadin.hilla.typescript.parser.models.BaseSignatureModel;
 import com.vaadin.hilla.typescript.parser.models.ClassRefSignatureModel;
 import org.jspecify.annotations.NonNull;
 
@@ -28,6 +29,12 @@ public final class TypeMapper {
             return toTypeScript(arraySignature.getNestedType()) + "[]";
         }
 
+        // Handle primitives
+        if (signature instanceof BaseSignatureModel) {
+            BaseSignatureModel baseSignature = (BaseSignatureModel) signature;
+            return mapPrimitiveToTypeScript(baseSignature.getType());
+        }
+
         // Handle class references
         if (signature instanceof ClassRefSignatureModel) {
             ClassRefSignatureModel classRef = (ClassRefSignatureModel) signature;
@@ -36,6 +43,18 @@ public final class TypeMapper {
 
         // Default to any
         return "any";
+    }
+
+    private static String mapPrimitiveToTypeScript(Class<?> primitiveType) {
+        String typeName = primitiveType.getName();
+
+        return switch (typeName) {
+        case "boolean" -> "boolean";
+        case "byte", "short", "int", "long", "float", "double" -> "number";
+        case "char" -> "string";
+        case "void" -> "void";
+        default -> "any";
+        };
     }
 
     private static String mapClassToTypeScript(

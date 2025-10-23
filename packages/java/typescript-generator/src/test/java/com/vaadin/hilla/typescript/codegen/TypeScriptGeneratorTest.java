@@ -267,4 +267,87 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("obj['@type'] === 'and'"),
                 "Should check @type discriminator for AndFilterTest");
     }
+
+    // Test class for SignalsPlugin
+    static class NumberSignalTestEndpoint {
+        // Simulate NumberSignal return type (would be mapped by
+        // TransferTypesPlugin)
+        public NumberSignal counter() {
+            return null;
+        }
+
+        public NumberSignal sharedValue(boolean highOrLow) {
+            return null;
+        }
+
+        public String regularMethod() {
+            return "test";
+        }
+    }
+
+    // Placeholder NumberSignal class for test
+    static class NumberSignal {
+    }
+
+    @Test
+    public void testSignalsPluginGeneratesSignalConstructorsForNumberSignalMethods() {
+        ClassInfoModel endpoint = ClassInfoModel
+                .of(NumberSignalTestEndpoint.class);
+        List<ClassInfoModel> endpoints = List.of(endpoint);
+        ParserOutput parserOutput = new ParserOutput(endpoints, List.of());
+
+        TypeScriptGenerator generator = new TypeScriptGenerator("/output");
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.SignalsPlugin());
+
+        Map<String, String> generatedFiles = generator.generate(parserOutput);
+
+        // Should generate NumberSignalTestEndpoint.ts
+        assertTrue(
+                generatedFiles.containsKey("NumberSignalTestEndpoint.ts"),
+                "Should generate endpoint file with signals");
+        String generatedCode = generatedFiles
+                .get("NumberSignalTestEndpoint.ts");
+
+        // Should import NumberSignal from hilla-react-signals
+        assertTrue(generatedCode.contains("@vaadin/hilla-react-signals"),
+                "Should import from hilla-react-signals");
+        assertTrue(generatedCode.contains("NumberSignal"),
+                "Should import NumberSignal");
+
+        // Should NOT have async keyword for signal methods
+        assertFalse(generatedCode.contains("async function counter"),
+                "Signal methods should not be async");
+
+        // Should have synchronous signal constructor call
+        assertTrue(generatedCode.contains("function counter()"),
+                "Should have synchronous counter method");
+        assertTrue(generatedCode.contains("return new NumberSignal(0,"),
+                "Should construct NumberSignal with 0 as default");
+        assertTrue(
+                generatedCode.contains(
+                        "endpoint: 'NumberSignalTestEndpoint'"),
+                "Should pass endpoint name");
+        assertTrue(generatedCode.contains("method: 'counter'"),
+                "Should pass method name");
+
+        // Should have signal method with parameters
+        assertTrue(
+                generatedCode
+                        .contains("function sharedValue(highOrLow: boolean)"),
+                "Should have sharedValue method with parameter");
+        assertTrue(
+                generatedCode.contains("params: { highOrLow }"),
+                "Should pass parameters to signal constructor");
+
+        // Regular method should still be async with Promise
+        assertTrue(
+                generatedCode
+                        .contains("async function regularMethod"),
+                "Regular methods should still be async");
+        assertTrue(generatedCode.contains("Promise<string>"),
+                "Regular methods should return Promise");
+        assertTrue(generatedCode.contains("client.call("),
+                "Regular methods should use client.call");
+    }
 }
