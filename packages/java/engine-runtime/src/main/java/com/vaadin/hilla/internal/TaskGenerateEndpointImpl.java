@@ -15,9 +15,12 @@
  */
 package com.vaadin.hilla.internal;
 
+import java.util.List;
+
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 
@@ -28,7 +31,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateEndpoint {
 
     /**
-     * Create a task for generating OpenAPI spec.
+     * Create a task for generating TypeScript endpoint clients.
      *
      * @param engineConfiguration
      *            Hilla engine configuration instance
@@ -44,20 +47,28 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        if (getEngineConfiguration().isProductionMode()) {
-            runProcessor();
+        var engineConfiguration = getEngineConfiguration();
+        if (engineConfiguration.isProductionMode()) {
+            try {
+                var browserCallables = engineConfiguration
+                        .getBrowserCallableFinder().find(engineConfiguration);
+                runProcessor(browserCallables);
+            } catch (Exception e) {
+                throw new ExecutionFailedException(
+                        "Failed to generate TypeScript files", e);
+            }
         } else {
-            // Even if we don't need the application context here, we have to
-            // wait for the parser to complete its job, so we add this the
-            // context queue.
             ApplicationContextProvider.runOnContext(applicationContext -> {
-                runProcessor();
+                List<Class<?>> browserCallables = EndpointCodeGenerator
+                        .findBrowserCallables(engineConfiguration,
+                                applicationContext);
+                runProcessor(browserCallables);
             });
         }
     }
 
-    private void runProcessor() {
+    private void runProcessor(List<Class<?>> browserCallables) {
         var processor = new GeneratorProcessor(getEngineConfiguration());
-        processor.process();
+        processor.process(browserCallables);
     }
 }

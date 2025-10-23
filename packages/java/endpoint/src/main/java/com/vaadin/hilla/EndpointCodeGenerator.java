@@ -120,7 +120,7 @@ public class EndpointCodeGenerator {
 
             GeneratorProcessor generator = new GeneratorProcessor(
                     engineConfiguration);
-            generator.process();
+            generator.process(browserCallables);
             this.endpointController.registerEndpoints();
         });
     }
