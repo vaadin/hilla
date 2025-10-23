@@ -1,6 +1,5 @@
 package com.vaadin.hilla.typescript.codegen;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +49,13 @@ public class TypeScriptGenerator {
     }
 
     /**
-     * Generates TypeScript code from an OpenAPI specification.
+     * Generates TypeScript code from parser output.
      *
-     * @param openAPI the OpenAPI specification
+     * @param parserOutput the parser output containing endpoints and entities
      * @return a map of file paths to generated content
      */
     @NonNull
-    public Map<String, String> generate(@NonNull OpenAPI openAPI) {
+    public Map<String, String> generate(@NonNull ParserOutput parserOutput) {
         GenerationContext context = new GenerationContext(outputDirectory);
         Map<String, String> allGeneratedFiles = new HashMap<>();
 
@@ -70,8 +69,8 @@ public class TypeScriptGenerator {
         for (TypeScriptGeneratorPlugin plugin : sortedPlugins) {
             logger.debug("Executing plugin: {}", plugin.getName());
             try {
-                Map<String, String> generatedFiles = plugin.generate(openAPI,
-                        context);
+                Map<String, String> generatedFiles = plugin
+                        .generate(parserOutput, context);
                 allGeneratedFiles.putAll(generatedFiles);
                 logger.debug("Plugin {} generated {} files", plugin.getName(),
                         generatedFiles.size());
@@ -88,11 +87,12 @@ public class TypeScriptGenerator {
     /**
      * Generates TypeScript code and writes it to files.
      *
-     * @param openAPI the OpenAPI specification
+     * @param parserOutput the parser output containing endpoints and entities
      * @throws IOException if an I/O error occurs while writing files
      */
-    public void generateAndWrite(@NonNull OpenAPI openAPI) throws IOException {
-        Map<String, String> generatedFiles = generate(openAPI);
+    public void generateAndWrite(@NonNull ParserOutput parserOutput)
+            throws IOException {
+        Map<String, String> generatedFiles = generate(parserOutput);
 
         // Ensure output directory exists
         Path outputPath = Paths.get(outputDirectory);

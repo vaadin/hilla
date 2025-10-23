@@ -1,6 +1,5 @@
 package com.vaadin.hilla.typescript.codegen;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
@@ -15,12 +14,13 @@ public interface TypeScriptGeneratorPlugin {
     /**
      * Executes this plugin to generate TypeScript code.
      *
-     * @param openAPI the OpenAPI specification to generate code from
-     * @param context the generation context for sharing state between plugins
+     * @param parserOutput the parser output containing endpoints and entities
+     * @param context      the generation context for sharing state between
+     *                     plugins
      * @return a map of file paths to generated TypeScript content
      */
     @NonNull
-    Map<String, String> generate(@NonNull OpenAPI openAPI,
+    Map<String, String> generate(@NonNull ParserOutput parserOutput,
             @NonNull GenerationContext context);
 
     /**

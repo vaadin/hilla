@@ -1,18 +1,16 @@
 package com.vaadin.hilla.typescript.codegen.plugins;
 
 import com.vaadin.hilla.typescript.codegen.GenerationContext;
+import com.vaadin.hilla.typescript.codegen.ParserOutput;
 import com.vaadin.hilla.typescript.codegen.TypeScriptGeneratorPlugin;
 import com.vaadin.hilla.typescript.codegen.TypeScriptWriter;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.tags.Tag;
+import com.vaadin.hilla.typescript.parser.models.ClassInfoModel;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,46 +22,24 @@ public class BarrelPlugin implements TypeScriptGeneratorPlugin {
 
     @Override
     @NonNull
-    public Map<String, String> generate(@NonNull OpenAPI openAPI,
+    public Map<String, String> generate(@NonNull ParserOutput parserOutput,
             @NonNull GenerationContext context) {
         Map<String, String> generatedFiles = new HashMap<>();
 
-        // Extract all endpoint names from tags
-        Set<String> endpointNames = new HashSet<>();
-
-        if (openAPI.getTags() != null) {
-            endpointNames.addAll(openAPI.getTags().stream().map(Tag::getName)
-                    .collect(Collectors.toSet()));
-        }
-
-        // Also extract from paths
-        if (openAPI.getPaths() != null) {
-            openAPI.getPaths().values().forEach(pathItem -> {
-                if (pathItem.getPost() != null
-                        && pathItem.getPost().getTags() != null) {
-                    endpointNames.addAll(pathItem.getPost().getTags());
-                }
-                if (pathItem.getGet() != null
-                        && pathItem.getGet().getTags() != null) {
-                    endpointNames.addAll(pathItem.getGet().getTags());
-                }
-            });
-        }
-
-        if (endpointNames.isEmpty()) {
+        if (parserOutput.getEndpoints().isEmpty()) {
             logger.debug("No endpoints found for barrel file generation");
             return generatedFiles;
         }
 
-        String barrelContent = generateBarrelFile(endpointNames);
+        String barrelContent = generateBarrelFile(parserOutput);
         generatedFiles.put("endpoints.ts", barrelContent);
         logger.debug("Generated barrel file with {} endpoints",
-                endpointNames.size());
+                parserOutput.getEndpoints().size());
 
         return generatedFiles;
     }
 
-    private String generateBarrelFile(Set<String> endpointNames) {
+    private String generateBarrelFile(ParserOutput parserOutput) {
         TypeScriptWriter writer = new TypeScriptWriter();
 
         writer.appendLine("/**");
@@ -72,8 +48,9 @@ public class BarrelPlugin implements TypeScriptGeneratorPlugin {
         writer.appendLine(" */");
         writer.appendBlankLine();
 
-        // Generate exports for each endpoint
-        String exports = endpointNames.stream().sorted()
+        // Generate exports for each endpoint, sorted alphabetically
+        String exports = parserOutput.getEndpoints().stream()
+                .map(ClassInfoModel::getSimpleName).sorted()
                 .map(this::generateEndpointExport)
                 .collect(Collectors.joining("\n"));
 
