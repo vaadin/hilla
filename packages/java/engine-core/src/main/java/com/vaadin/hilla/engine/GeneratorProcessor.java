@@ -1,23 +1,19 @@
 package com.vaadin.hilla.engine;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.vaadin.hilla.typescript.parser.core.OpenAPIFileType;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
-
-import com.vaadin.hilla.engine.commandrunner.CommandNotFoundException;
-import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vaadin.hilla.typescript.parser.core.Parser;
 
 public final class GeneratorProcessor {
     public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";
@@ -25,45 +21,49 @@ public final class GeneratorProcessor {
     private static final Logger logger = LoggerFactory
             .getLogger(GeneratorProcessor.class);
 
-    private static String TSGEN_PACKAGE_NAME = "@vaadin/hilla-generator-cli";
     private final Path baseDir;
-    private final String nodeCommand;
-    private final Path openAPIFile;
+    private final Set<Path> classPath;
     private final Path outputDirectory;
-    private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
+    private List<Class<? extends Annotation>> endpointAnnotations;
+    private List<Class<? extends Annotation>> endpointExposedAnnotations;
 
     public GeneratorProcessor(EngineAutoConfiguration conf) {
         this.baseDir = conf.getBaseDir();
-        this.openAPIFile = conf.getOpenAPIFile();
+        this.classPath = conf.getClasspath();
         this.outputDirectory = conf.getOutputDir();
-        this.nodeCommand = conf.getNodeCommand();
-        applyConfiguration(conf.getGenerator());
+        this.endpointAnnotations = conf.getEndpointAnnotations();
+        this.endpointExposedAnnotations = conf.getEndpointExposedAnnotations();
     }
 
-    public void process() throws GeneratorException {
-        if (isOpenAPIEmpty()) {
+    public void process(@NonNull List<Class<?>> browserCallables)
+            throws GeneratorException {
+        if (browserCallables.isEmpty()) {
+            logger.debug("No browser callables found, cleaning up old files");
             cleanup();
             return;
         }
 
-        var arguments = new ArrayList<>();
-        arguments.add(getTsgenPath());
-        prepareOpenAPI(arguments);
-        prepareOutputDir(arguments);
-        preparePlugins(arguments);
-        prepareVerbose(arguments);
+        logger.debug("Generating TypeScript for {} browser callables",
+                browserCallables.size());
 
         try {
-            var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
-                    arguments.stream().map(Objects::toString)
-                            .toArray(String[]::new));
-            runner.run(null);
-        } catch (LambdaException e) {
-            throw new GeneratorException("Node execution failed", e.getCause());
-        } catch (CommandNotFoundException e) {
-            throw new GeneratorException("Node command not found", e);
-        } catch (CommandRunnerException e) {
-            throw new GeneratorException("Node execution failed", e);
+            var parser = new Parser()
+                    .classPath(classPath.stream().map(Path::toString)
+                            .collect(Collectors.toSet()))
+                    .endpointAnnotations(endpointAnnotations)
+                    .endpointExposedAnnotations(endpointExposedAnnotations);
+
+            var outputDir = outputDirectory.isAbsolute() ? outputDirectory
+                    : baseDir.resolve(outputDirectory);
+
+            Files.createDirectories(outputDir);
+
+            parser.generateTypeScript(browserCallables, outputDir);
+
+            logger.debug("TypeScript generation completed successfully");
+        } catch (IOException e) {
+            throw new GeneratorException(
+                    "Failed to generate TypeScript files", e);
         }
     }
 
@@ -114,96 +114,4 @@ public final class GeneratorProcessor {
         }
     }
 
-    // Used to catch a checked exception in a lambda and handle it after
-    private static class LambdaException extends RuntimeException {
-        public LambdaException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    private GeneratorProcessor applyConfiguration(
-            GeneratorConfiguration generatorConfiguration) {
-        if (generatorConfiguration == null) {
-            return this;
-        }
-
-        generatorConfiguration.getPlugins().ifPresent(this::applyPlugins);
-        return this;
-    }
-
-    private void applyPlugins(GeneratorConfiguration.@NonNull Plugins plugins) {
-        pluginsProcessor.setConfig(plugins);
-    }
-
-    private void prepareOpenAPI(ArrayList<Object> arguments) {
-        logger.debug("Using OpenAPI file: {}", openAPIFile);
-        arguments.add(openAPIFile);
-    }
-
-    private void prepareOutputDir(List<Object> arguments) {
-        var result = outputDirectory.isAbsolute() ? outputDirectory
-                : baseDir.resolve(outputDirectory);
-        arguments.add("-o");
-        arguments.add(result);
-    }
-
-    private void preparePlugins(List<Object> arguments) {
-        pluginsProcessor.process().stream()
-                .map(GeneratorConfiguration.Plugin::getPath).distinct()
-                .forEachOrdered(path -> {
-                    arguments.add("-p");
-                    arguments.add(path);
-                });
-    }
-
-    private void prepareVerbose(List<Object> arguments) {
-        if (logger.isDebugEnabled()) {
-            arguments.add("-v");
-        }
-    }
-
-    private OpenAPI getOpenAPI() throws IOException {
-        String source = Files.readString(openAPIFile);
-        var mapper = OpenAPIFileType.JSON.getMapper();
-        var reader = mapper.readerFor(OpenAPI.class);
-        return reader.readValue(source);
-    }
-
-    private boolean isOpenAPIEmpty() {
-        try {
-            var openApi = getOpenAPI();
-            return (openApi.getPaths() == null || openApi.getPaths().isEmpty())
-                    && (openApi.getComponents() == null
-                            || openApi.getComponents().getSchemas() == null
-                            || openApi.getComponents().getSchemas().isEmpty());
-        } catch (IOException e) {
-            throw new GeneratorException("Unable to read OpenAPI json file", e);
-        }
-    }
-
-    private Path getTsgenPath() {
-        var arguments = List.<String> of("--input-type", "commonjs", "--eval",
-                "console.log(require.resolve('" + TSGEN_PACKAGE_NAME + "'))")
-                .toArray(String[]::new);
-        AtomicReference<String> pathLine = new AtomicReference<>();
-        try {
-            var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
-                    arguments);
-            runner.run(null, (stdOutStream) -> {
-                new BufferedReader(new InputStreamReader(stdOutStream)).lines()
-                        .limit(1).forEach(pathLine::set);
-            }, null);
-            if (pathLine.get() == null) {
-                throw new CommandRunnerException("No output from Node");
-            }
-            return Path.of(pathLine.get());
-        } catch (LambdaException e) {
-            throw new GeneratorException("Node execution failed", e.getCause());
-        } catch (CommandNotFoundException e) {
-            throw new GeneratorException("Node command not found", e);
-        } catch (CommandRunnerException e) {
-            throw new GeneratorException("Unable to resolve npm package \""
-                    + TSGEN_PACKAGE_NAME + "\"", e);
-        }
-    }
 }
