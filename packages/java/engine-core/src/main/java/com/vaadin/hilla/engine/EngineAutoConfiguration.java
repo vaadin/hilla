@@ -49,7 +49,6 @@ public class EngineAutoConfiguration {
     private ParserConfiguration parser;
     private BrowserCallableFinder browserCallableFinder;
     private boolean productionMode = false;
-    private String nodeCommand = "node";
     private ClassFinder classFinder;
     private ClassLoader classLoader;
     private EngineConfiguration userEngineConfiguration;
@@ -112,10 +111,6 @@ public class EngineAutoConfiguration {
 
     public boolean isProductionMode() {
         return productionMode;
-    }
-
-    public String getNodeCommand() {
-        return nodeCommand;
     }
 
     public ClassFinder getClassFinder() {
@@ -262,7 +257,6 @@ public class EngineAutoConfiguration {
             this.configuration.mainClass = configuration.mainClass;
             this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
-            this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.classFinder = configuration.classFinder;
             this.configuration.classLoader = configuration.classLoader;
             this.configuration.parser.setEndpointAnnotations(
@@ -342,11 +336,6 @@ public class EngineAutoConfiguration {
 
         public Builder productionMode(boolean value) {
             configuration.productionMode = value;
-            return this;
-        }
-
-        public Builder nodeCommand(String value) {
-            configuration.nodeCommand = value;
             return this;
         }
 
