@@ -149,4 +149,66 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("'getEntity', {}, init"),
                 "Generated TypeScript should pass empty object for parameters");
     }
+
+    @Test
+    public void testPushPluginGeneratesSubscriptionMethodsForFluxEndpoints() {
+        // Skip test if Flux class is not available
+        try {
+            Class.forName("reactor.core.publisher.Flux");
+        } catch (ClassNotFoundException e) {
+            // Flux not available, skip test
+            return;
+        }
+
+        // Create an endpoint with a Flux method using reflection
+        // We need to use the actual Flux class from reactor
+        class FluxTestEndpoint {
+            public reactor.core.publisher.Flux<String> streamMessages() {
+                return null;
+            }
+
+            public reactor.core.publisher.Flux<Integer> countTo(int n) {
+                return null;
+            }
+        }
+
+        ClassInfoModel endpoint = ClassInfoModel.of(FluxTestEndpoint.class);
+        List<ClassInfoModel> endpoints = List.of(endpoint);
+        ParserOutput parserOutput = new ParserOutput(endpoints, List.of());
+
+        TypeScriptGenerator generator = new TypeScriptGenerator("/output");
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.PushPlugin());
+
+        Map<String, String> generatedFiles = generator.generate(parserOutput);
+
+        // Should generate FluxTestEndpointSubscriptions.ts
+        assertTrue(
+                generatedFiles
+                        .containsKey("FluxTestEndpointSubscriptions.ts"),
+                "Should generate subscriptions file for Flux endpoint");
+        String generatedCode = generatedFiles
+                .get("FluxTestEndpointSubscriptions.ts");
+
+        // Should have subscription method for streamMessages
+        assertTrue(
+                generatedCode.contains("subscribeToStreamMessages"),
+                "Should generate subscription method for streamMessages");
+
+        // Should have subscription method for countTo
+        assertTrue(generatedCode.contains("subscribeToCountTo"),
+                "Should generate subscription method for countTo");
+
+        // Should import Subscription from hilla-frontend
+        assertTrue(generatedCode.contains("import { Subscription }"),
+                "Should import Subscription type");
+
+        // Should have callback parameters
+        assertTrue(generatedCode.contains("onNext:"),
+                "Should have onNext callback parameter");
+        assertTrue(generatedCode.contains("onError?:"),
+                "Should have optional onError callback parameter");
+        assertTrue(generatedCode.contains("onComplete?:"),
+                "Should have optional onComplete callback parameter");
+    }
 }
