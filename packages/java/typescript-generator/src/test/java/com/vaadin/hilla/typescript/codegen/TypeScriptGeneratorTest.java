@@ -211,4 +211,60 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("onComplete?:"),
                 "Should have optional onComplete callback parameter");
     }
+
+    // Static inner classes for SubtypesPlugin test
+    @com.fasterxml.jackson.annotation.JsonSubTypes({
+            @com.fasterxml.jackson.annotation.JsonSubTypes.Type(value = OrFilterTest.class, name = "or"),
+            @com.fasterxml.jackson.annotation.JsonSubTypes.Type(value = AndFilterTest.class, name = "and") })
+    static class FilterTest {
+    }
+
+    static class OrFilterTest extends FilterTest {
+    }
+
+    static class AndFilterTest extends FilterTest {
+    }
+
+    @Test
+    public void testSubtypesPluginGeneratesUnionTypesAndTypeGuards() {
+        ClassInfoModel baseClass = ClassInfoModel.of(FilterTest.class);
+        ClassInfoModel orFilter = ClassInfoModel.of(OrFilterTest.class);
+        ClassInfoModel andFilter = ClassInfoModel.of(AndFilterTest.class);
+
+        List<ClassInfoModel> entities = List.of(baseClass, orFilter, andFilter);
+        ParserOutput parserOutput = new ParserOutput(List.of(), entities);
+
+        TypeScriptGenerator generator = new TypeScriptGenerator("/output");
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.SubtypesPlugin());
+
+        Map<String, String> generatedFiles = generator.generate(parserOutput);
+
+        // Should generate FilterTestSubtypes.ts
+        assertTrue(generatedFiles.containsKey("FilterTestSubtypes.ts"),
+                "Should generate subtypes file");
+        String generatedCode = generatedFiles.get("FilterTestSubtypes.ts");
+
+        // Should have union type definition
+        assertTrue(
+                generatedCode
+                        .contains("export type FilterTest = OrFilterTest | AndFilterTest"),
+                "Should generate union type");
+
+        // Should have type guard for OrFilterTest
+        assertTrue(generatedCode.contains("isOrFilterTest"),
+                "Should generate type guard for OrFilterTest");
+        assertTrue(generatedCode.contains("obj is OrFilterTest"),
+                "Should have proper type guard signature for OrFilterTest");
+        assertTrue(generatedCode.contains("obj['@type'] === 'or'"),
+                "Should check @type discriminator for OrFilterTest");
+
+        // Should have type guard for AndFilterTest
+        assertTrue(generatedCode.contains("isAndFilterTest"),
+                "Should generate type guard for AndFilterTest");
+        assertTrue(generatedCode.contains("obj is AndFilterTest"),
+                "Should have proper type guard signature for AndFilterTest");
+        assertTrue(generatedCode.contains("obj['@type'] === 'and'"),
+                "Should check @type discriminator for AndFilterTest");
+    }
 }
