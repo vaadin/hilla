@@ -112,4 +112,41 @@ public class TypeScriptGeneratorTest {
         assertEquals(0, output.getEntities().size());
         assertEquals(0, output.getAllClasses().size());
     }
+
+    @Test
+    public void testClientPluginGeneratesValidTypeScriptForMethodsWithNoParameters() {
+        // Create a simple endpoint with a method that has no parameters
+        class TestEndpoint {
+            public String getEntity() {
+                return "test";
+            }
+        }
+
+        ClassInfoModel endpoint = ClassInfoModel.of(TestEndpoint.class);
+        List<ClassInfoModel> endpoints = List.of(endpoint);
+        ParserOutput parserOutput = new ParserOutput(endpoints, List.of());
+
+        TypeScriptGenerator generator = new TypeScriptGenerator("/output");
+        generator.addPlugin(new ClientPlugin());
+
+        Map<String, String> generatedFiles = generator.generate(parserOutput);
+
+        // Should generate TestEndpoint.ts
+        assertTrue(generatedFiles.containsKey("TestEndpoint.ts"));
+        String generatedCode = generatedFiles.get("TestEndpoint.ts");
+
+        // Should not have a comma before init parameter
+        assertFalse(generatedCode.contains("(, init?:"),
+                "Generated TypeScript should not have comma before init parameter");
+
+        // Should have valid syntax for no-parameter method
+        assertTrue(
+                generatedCode.contains(
+                        "getEntity(init?: EndpointRequestInit)"),
+                "Generated TypeScript should have valid syntax for no-parameter method");
+
+        // Should have empty object for parameters in call
+        assertTrue(generatedCode.contains("'getEntity', {}, init"),
+                "Generated TypeScript should pass empty object for parameters");
+    }
 }

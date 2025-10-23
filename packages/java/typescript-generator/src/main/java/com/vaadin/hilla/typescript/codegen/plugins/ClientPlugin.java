@@ -91,27 +91,35 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
                 ? "init?: EndpointRequestInit"
                 : paramsList + ", init?: EndpointRequestInit";
 
-        // Build parameter names for call
-        String paramNames = method.getParameters().stream()
-                .map(MethodParameterInfoModel::getName)
-                .collect(Collectors.joining(", "));
-
-        // Use template
-        String template = """
-                export async function getUser(userId: string, init?: EndpointRequestInit): Promise<User> {
-                  return await client.call('UserEndpoint', 'getUser', { userId }, init);
-                }
-                """;
+        // Use different templates based on whether method has parameters
+        String template;
+        if (paramsList.isEmpty()) {
+            // Template for methods with no parameters
+            template = """
+                    export async function getUser(init?: EndpointRequestInit): Promise<User> {
+                      return await client.call('UserEndpoint', 'getUser', {}, init);
+                    }
+                    """;
+        } else {
+            // Template for methods with parameters
+            template = """
+                    export async function getUser(userId: string, init?: EndpointRequestInit): Promise<User> {
+                      return await client.call('UserEndpoint', 'getUser', { userId }, init);
+                    }
+                    """;
+        }
 
         String code = template.replace("getUser", methodName)
-                .replace("userId: string", paramsList)
-                .replace("getUser(userId: string, init?: EndpointRequestInit)",
-                        methodName + "(" + paramsWithOptions + ")")
                 .replace("Promise<User>", "Promise<" + returnType + ">")
                 .replace("'UserEndpoint'",
                         "'" + endpoint.getSimpleName() + "'")
-                .replace("'getUser'", "'" + methodName + "'")
-                .replace("{ userId }", buildParamsObject(method));
+                .replace("'getUser'", "'" + methodName + "'");
+
+        // Only replace parameter-specific parts if we have parameters
+        if (!paramsList.isEmpty()) {
+            code = code.replace("userId: string", paramsList)
+                    .replace("{ userId }", buildParamsObject(method));
+        }
 
         return code;
     }
