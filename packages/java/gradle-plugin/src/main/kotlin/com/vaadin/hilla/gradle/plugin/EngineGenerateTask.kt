@@ -114,7 +114,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
 
             val endpoints = conf.browserCallableFinder.find(conf);
             parserProcessor.process(endpoints)
-            generatorProcessor.process()
+            generatorProcessor.process(endpoints)
         } catch (e: IOException) {
             throw GradleException("Endpoint collection failed", e)
         } catch (e: InterruptedException) {
