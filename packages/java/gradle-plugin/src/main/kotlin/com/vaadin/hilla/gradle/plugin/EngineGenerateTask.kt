@@ -20,14 +20,11 @@ import com.vaadin.flow.gradle.PluginEffectiveConfiguration
 import com.vaadin.flow.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.GeneratorException
 import com.vaadin.hilla.engine.GeneratorProcessor
-import com.vaadin.hilla.engine.ParserException
-import com.vaadin.hilla.engine.ParserProcessor
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
@@ -71,7 +68,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
         effectiveConfig.set(PluginEffectiveConfiguration.get(project))
         classpath.from(engineConfig.classpath.map { it.toFile() })
 
-        openApiFile.set(engineConfig.openAPIFile.toFile())
         outputDir.set(engineConfig.outputDir.toFile())
     }
 
@@ -94,10 +90,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
     @get:CompileClasspath
     internal abstract val classpath : ConfigurableFileCollection
 
-    @get:Optional
-    @get:OutputFile
-    internal abstract val openApiFile: RegularFileProperty
-
     @get:OutputDirectory
     internal abstract val outputDir: DirectoryProperty
 
@@ -109,19 +101,15 @@ public abstract class EngineGenerateTask : DefaultTask() {
         try {
             val conf = engineConfigurationSettings.get().toEngineConfiguration()
 
-            val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
 
             val endpoints = conf.browserCallableFinder.find(conf);
-            parserProcessor.process(endpoints)
             generatorProcessor.process(endpoints)
         } catch (e: IOException) {
             throw GradleException("Endpoint collection failed", e)
         } catch (e: InterruptedException) {
             throw GradleException("Endpoint collection failed", e)
         } catch (e: GeneratorException) {
-            throw GradleException("Execution failed", e)
-        } catch (e: ParserException) {
             throw GradleException("Execution failed", e)
         }
     }
