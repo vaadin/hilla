@@ -84,7 +84,9 @@ final class SchemaProcessor {
     }
 
     private Schema<?> arraySchema() {
-        return nullify(new ArraySchema(), true);
+        // For bare arrays without type information, set items to anySchema
+        // to ensure valid OpenAPI (items is required for ArraySchema)
+        return nullify(new ArraySchema().items(anySchema()), true);
     }
 
     private Schema<?> booleanSchema() {
@@ -105,7 +107,9 @@ final class SchemaProcessor {
     }
 
     private Schema<?> iterableSchema() {
-        var schema = nullify(new ArraySchema(), true);
+        // For bare iterables without type information, set items to anySchema
+        // to ensure valid OpenAPI (items is required for ArraySchema)
+        var schema = nullify(new ArraySchema().items(anySchema()), true);
         var _type = (ClassRefSignatureModel) type;
 
         if (type.isNonJDKClass()) {
