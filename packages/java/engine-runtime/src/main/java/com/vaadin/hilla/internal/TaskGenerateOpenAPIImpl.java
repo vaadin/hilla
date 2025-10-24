@@ -15,31 +15,26 @@
  */
 package com.vaadin.hilla.internal;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.jspecify.annotations.NonNull;
-import java.io.File;
-import java.net.URL;
-import java.util.Objects;
-import java.util.function.Function;
-
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.engine.ParserProcessor;
-
 import com.vaadin.flow.server.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
-import org.springframework.aop.framework.AopProxyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Generate OpenAPI json file for Vaadin Endpoints.
+ * No-op implementation of TaskGenerateOpenAPI.
+ *
+ * OpenAPI generation has been removed from Hilla. TypeScript is now generated
+ * directly from Java classes without using OpenAPI as an intermediate format.
+ *
+ * This class is kept as a no-op to satisfy the TaskGenerateOpenAPI interface
+ * requirement, but does nothing.
  */
 public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
         implements TaskGenerateOpenAPI {
+    private static final Logger logger = LoggerFactory
+            .getLogger(TaskGenerateOpenAPIImpl.class);
 
     /**
      * Create a task for generating OpenAPI spec.
@@ -52,31 +47,15 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     }
 
     /**
-     * Run Java class parser.
+     * No-op implementation. OpenAPI generation has been removed.
      *
-     * @throws ExecutionFailedException
+     * @throws ExecutionFailedException never thrown
      */
     @Override
     public void execute() throws ExecutionFailedException {
-        var engineConfiguration = getEngineConfiguration();
-        if (engineConfiguration.isProductionMode()) {
-            try {
-                var browserCallables = engineConfiguration
-                        .getBrowserCallableFinder().find(engineConfiguration);
-                var processor = new ParserProcessor(engineConfiguration);
-                processor.process(browserCallables);
-            } catch (Exception e) {
-                throw new ExecutionFailedException(
-                        "Failed to generate OpenAPI spec", e);
-            }
-        } else {
-            ApplicationContextProvider.runOnContext(applicationContext -> {
-                List<Class<?>> browserCallables = EndpointCodeGenerator
-                        .findBrowserCallables(engineConfiguration,
-                                applicationContext);
-                var processor = new ParserProcessor(engineConfiguration);
-                processor.process(browserCallables);
-            });
-        }
+        logger.debug(
+                "OpenAPI generation skipped - Hilla no longer generates OpenAPI specs. "
+                        + "TypeScript is generated directly from Java classes.");
+        // No-op: OpenAPI generation has been removed from Hilla
     }
 }

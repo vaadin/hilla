@@ -27,8 +27,6 @@ import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
-import com.vaadin.hilla.engine.ParserProcessor;
-
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint
  * generator tasks.
@@ -36,7 +34,7 @@ import com.vaadin.hilla.engine.ParserProcessor;
 public class EndpointGeneratorTaskFactoryImpl
         implements EndpointGeneratorTaskFactory {
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(ParserProcessor.class);
+            .getLogger(EndpointGeneratorTaskFactoryImpl.class);
 
     private static FrontendTools buildTools(Options options) {
         var settings = new FrontendToolsSettings(

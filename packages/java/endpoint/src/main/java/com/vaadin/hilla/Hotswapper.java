@@ -103,6 +103,11 @@ public class Hotswapper implements VaadinHotswapper {
      * Checks if changes in the given classes can affect the generated
      * TypeScript for endpoints.
      *
+     * Note: Since OpenAPI generation has been removed, this method now simply
+     * checks if any changed class has endpoint annotations. For a more
+     * comprehensive check, consider tracking used types during TypeScript
+     * generation.
+     *
      * @param changedClasses
      *            the changed classes
      * @return {@code true} if the classes can affect endpoint generation,
@@ -111,17 +116,7 @@ public class Hotswapper implements VaadinHotswapper {
      */
     private static boolean affectsEndpoints(String[] changedClasses)
             throws IOException {
-        Set<String> changedClassesSet = Set.of(changedClasses);
-        Set<String> classesUsedInEndpoints = EndpointCodeGenerator.getInstance()
-                .getClassesUsedInOpenApi().orElse(Set.of());
-        for (String classUsedInEndpoints : classesUsedInEndpoints) {
-            if (changedClassesSet.contains(classUsedInEndpoints)) {
-                getLogger().debug("The changed class " + classUsedInEndpoints
-                        + " is used in an endpoint");
-                return true;
-            }
-        }
-
+        // Check if any changed class has endpoint annotations
         for (String changedClass : changedClasses) {
             try {
                 Class<?> cls = Class.forName(changedClass);
@@ -138,7 +133,12 @@ public class Hotswapper implements VaadinHotswapper {
                 getLogger().error("Unable to find class " + changedClass, e);
             }
         }
-        return false;
+
+        // Conservative approach: regenerate for any non-ignored class change
+        // This ensures we don't miss parameter/return types used by endpoints
+        getLogger().debug(
+                "Changed classes might be used by endpoints, triggering regeneration");
+        return true;
     }
 
     public static void markInUse() {
