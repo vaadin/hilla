@@ -1335,7 +1335,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
 
     @Test
     public void should_Instantiate_endpoints_correctly() throws Exception {
-        var endpointRegistry = registerEndpoints("openapi.json");
+        var endpointRegistry = registerEndpoints();
         // this one has a constructor with a parameter, but is instantiated by
         // Spring
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
@@ -1348,8 +1348,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
 
     @Test
     public void should_Fallback_to_Spring_Context() throws Exception {
-        // this also tests that an empty definition is not a problem
-        var endpointRegistry = registerEndpoints("openapi-noendpoints.json");
+        var endpointRegistry = registerEndpoints();
         // as browser callables are found through Spring, the results are the
         // same
         assertNotNull(endpointRegistry.get("applicationEndpoint"));
@@ -1357,18 +1356,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         assertNull(endpointRegistry.get("libraryEndpointWithConstructor"));
     }
 
-    private URL getDefaultOpenApiResourcePathInDevMode() {
-        try {
-            return projectFolder.getRoot().toPath()
-                    .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
-                    .toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private EndpointRegistry registerEndpoints(String openApiFilename) {
+    private EndpointRegistry registerEndpoints() {
         var context = Mockito.mock(ApplicationContext.class);
         var applicationComponent = new ApplicationComponent();
         // Suppose that both the "regular" browser callable and the one from a
