@@ -1,7 +1,6 @@
 package com.vaadin.hilla;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
@@ -11,13 +10,18 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Utilities for interacting with the generated openapi.json.
+ *
+ * @deprecated OpenAPI generation has been removed from Hilla. TypeScript is now
+ *             generated directly from Java classes without using OpenAPI as an
+ *             intermediate format. These methods are kept for backward
+ *             compatibility but will return empty results.
  */
+@Deprecated(since = "25.0", forRemoval = true)
 public class OpenAPIUtil {
 
     private static final Logger LOGGER = LoggerFactory
@@ -33,17 +37,15 @@ public class OpenAPIUtil {
      * @return the contents of the generated openapi.json
      * @throws IOException
      *             if something went wrong
+     * @deprecated OpenAPI is no longer generated. This method always returns an
+     *             empty string.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public static String getCurrentOpenAPI(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        var openAPIPath = getCurrentOpenAPIPath(buildDirectory,
-                isProductionMode);
-        if (openAPIPath.isEmpty()) {
-            LOGGER.debug(
-                    "Trying to read the non-existing OpenApi json file. Empty string is returned.");
-            return "";
-        }
-        return Files.readString(openAPIPath.get());
+        LOGGER.warn(
+                "OpenAPI generation has been removed. getCurrentOpenAPI() always returns empty string.");
+        return "";
     }
 
     /**
@@ -56,13 +58,15 @@ public class OpenAPIUtil {
      * @return the Path to the openapi json file
      * @throws IOException
      *             if something went wrong
+     * @deprecated OpenAPI is no longer generated. This method always returns
+     *             Optional.empty().
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public static Optional<Path> getCurrentOpenAPIPath(Path buildDirectory,
             boolean isProductionMode) throws IOException {
-        var engineConfiguration = new EngineAutoConfiguration.Builder()
-                .buildDir(buildDirectory).productionMode(isProductionMode)
-                .withDefaultAnnotations().build();
-        return Optional.of(engineConfiguration.getOpenAPIFile());
+        LOGGER.warn(
+                "OpenAPI generation has been removed. getCurrentOpenAPIPath() always returns empty Optional.");
+        return Optional.empty();
     }
 
     /**
@@ -73,9 +77,20 @@ public class OpenAPIUtil {
      * @return a set of classes used
      * @throws IOException
      *             if parsing fails
+     * @deprecated OpenAPI is no longer generated. This method can still parse
+     *             legacy OpenAPI files if needed, but will not work with newly
+     *             generated endpoints.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public static Set<String> findOpenApiClasses(String openApiAsText)
             throws IOException {
+        if (openApiAsText == null || openApiAsText.isEmpty()) {
+            LOGGER.warn(
+                    "OpenAPI generation has been removed. findOpenApiClasses() returns empty set.");
+            return new HashSet<>();
+        }
+
+        // Keep parsing logic for backward compatibility with existing OpenAPI files
         JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
 
         Set<String> types = new HashSet<>();

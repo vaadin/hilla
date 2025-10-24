@@ -15,15 +15,11 @@
  */
 package com.vaadin.hilla;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,7 +29,6 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
-import com.vaadin.hilla.engine.ParserProcessor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +49,6 @@ public class EndpointCodeGenerator {
     private final VaadinContext context;
 
     private ApplicationConfiguration configuration;
-    private Set<String> classesUsedInOpenApi = null;
     private EngineAutoConfiguration engineConfiguration;
 
     /**
@@ -115,9 +109,6 @@ public class EndpointCodeGenerator {
                         return null;
                     })).filter(Objects::nonNull).distinct().toList();
 
-            ParserProcessor parser = new ParserProcessor(engineConfiguration);
-            parser.process(browserCallables);
-
             GeneratorProcessor generator = new GeneratorProcessor(
                     engineConfiguration);
             generator.process(browserCallables);
@@ -164,24 +155,5 @@ public class EndpointCodeGenerator {
                                     .toPath())
                     .productionMode(false).withDefaultAnnotations().build();
         }
-    }
-
-    public Optional<Set<String>> getClassesUsedInOpenApi() throws IOException {
-        if (classesUsedInOpenApi == null) {
-            initIfNeeded();
-            var conf = EngineAutoConfiguration.getDefault();
-            var openApiPath = conf.getOpenAPIFile();
-            if (openApiPath != null && openApiPath.toFile().exists()) {
-                try {
-                    classesUsedInOpenApi = OpenAPIUtil
-                            .findOpenApiClasses(Files.readString(openApiPath));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                LOGGER.debug("No OpenAPI file is available yet ...");
-            }
-        }
-        return Optional.ofNullable(classesUsedInOpenApi);
     }
 }
