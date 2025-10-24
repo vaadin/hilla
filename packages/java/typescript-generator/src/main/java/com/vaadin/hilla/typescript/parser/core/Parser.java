@@ -11,15 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.NonNull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.swagger.v3.oas.models.OpenAPI;
 
 import com.vaadin.hilla.typescript.codegen.ParserOutput;
 import com.vaadin.hilla.typescript.codegen.TypeScriptGenerator;
@@ -29,8 +25,9 @@ import com.vaadin.hilla.typescript.codegen.plugins.ModelPlugin;
 import com.vaadin.hilla.typescript.parser.models.ClassInfoModel;
 
 /**
- * The entrypoint class. It searches for the endpoint classes in the classpath
- * and produces an OpenAPI definition.
+ * The entrypoint class for TypeScript generation. It searches for endpoint
+ * classes in the classpath and generates TypeScript client code directly from
+ * Java classes, without using OpenAPI as an intermediate format.
  */
 public final class Parser {
     private static final Logger logger = LoggerFactory.getLogger(Parser.class);
@@ -56,73 +53,14 @@ public final class Parser {
             .of("com.vaadin.hilla.signals.handler.SignalsHandler");
 
     public Parser() {
-        try {
-            var basicOpenAPIString = new String(Objects
-                    .requireNonNull(Parser.class
-                            .getResourceAsStream("OpenAPIBase.json"))
-                    .readAllBytes());
-            var openAPI = parseOpenAPIFile(basicOpenAPIString,
-                    OpenAPIFileType.JSON, null);
-            this.config = new Config(openAPI);
-        } catch (IOException e) {
-            throw new ParserException("Failed to parse openAPI specification",
-                    e);
-        }
-    }
-
-    private static OpenAPI parseOpenAPIFile(@NonNull String source,
-            @NonNull OpenAPIFileType type, OpenAPI origin) {
-        try {
-            var mapper = type.getMapper();
-            if (origin != null) {
-                return mapper.readerForUpdating(origin).readValue(source);
-            } else {
-                return mapper.readValue(source, OpenAPI.class);
-            }
-        } catch (Exception e) {
-            throw new ParserException("Failed to parse OpenAPI file", e);
-        }
+        this.config = new Config();
     }
 
     /**
-     * Adds a parser {@link Plugin}.
-     *
-     * <p>
-     * Note that the order of the method calls will be maintained during
-     * processing.
-     *
-     * @param plugin
-     *            An instance of the parser plugin.
-     * @return this (for method chaining).
-     */
-    @NonNull
-    public Parser addPlugin(@NonNull Plugin plugin) {
-        config.plugins.add(Objects.requireNonNull(plugin));
-        return this;
-    }
-
-    /**
-     * Allows to programmatically change the default OpenAPI definition.
-     *
-     * @param action
-     *            a consumer lambda that accepts an OpenAPI instance.
-     * @return this (for method chaining).
-     */
-    @NonNull
-    public Parser adjustOpenAPI(@NonNull Consumer<OpenAPI> action) {
-        action.accept(config.openAPI);
-        return this;
-    }
-
-    /**
-     * Specifies the classpath where the parser will scan for endpoints.
-     * Specifying the classpath is required.
-     *
-     * <p>
-     * If the classpath is already set, it will be overridden.
+     * Specifies the classpath which the parser will scan for the classes.
      *
      * @param classPathElements
-     *            a list of paths forming the classpath.
+     *            A collection of paths in a form of strings
      * @return this (for method chaining).
      */
     @NonNull
@@ -131,11 +69,10 @@ public final class Parser {
     }
 
     /**
-     * Specifies the classpath where the parser will scan for endpoints.
-     * Specifying the classpath is required.
+     * Specifies the classpath which the parser will scan for the classes.
      *
      * @param classPathElements
-     *            a list of paths forming the classpath.
+     *            A collection of paths in a form of strings
      * @param override
      *            specifies if the parser should override the classpath if it is
      *            already specified.
@@ -144,20 +81,14 @@ public final class Parser {
     @NonNull
     public Parser classPath(@NonNull String[] classPathElements,
             boolean override) {
-        return classPath(
-                Arrays.asList(Objects.requireNonNull(classPathElements)),
-                override);
+        return classPath(Arrays.asList(classPathElements), override);
     }
 
     /**
-     * Specifies the classpath where the parser will scan for endpoints.
-     * Specifying the classpath is required.
-     *
-     * <p>
-     * If the classpath is already set, it will be overridden.
+     * Specifies the classpath which the parser will scan for the classes.
      *
      * @param classPathElements
-     *            a list of paths forming the classpath.
+     *            A collection of paths in a form of strings
      * @return this (for method chaining).
      */
     @NonNull
@@ -166,11 +97,10 @@ public final class Parser {
     }
 
     /**
-     * Specifies the classpath where the parser will scan for endpoints.
-     * Specifying the classpath is required.
+     * Specifies the classpath which the parser will scan for the classes.
      *
      * @param classPathElements
-     *            a list of paths forming the classpath.
+     *            A collection of paths in a form of strings
      * @param override
      *            specifies if the parser should override the classpath if it is
      *            already specified.
@@ -270,44 +200,9 @@ public final class Parser {
     }
 
     /**
-     * Scans the classpath, blocking until the scan is complete.
-     *
-     * @return A result OpenAPI object.
-     */
-    @NonNull
-    public OpenAPI execute(List<Class<?>> browserCallables) {
-        Objects.requireNonNull(config.classPathElements,
-                "[JVM Parser] classPath is not provided.");
-        if (config.endpointAnnotations == null
-                || config.endpointAnnotations.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "[JVM Parser] endpoint annotations are not provided.");
-        }
-
-        logger.debug("JVM Parser started");
-
-        browserCallables = browserCallables.stream().filter(
-                cls -> !INTERNAL_BROWSER_CALLABLES.contains(cls.getName()))
-                .toList();
-
-        var storage = new SharedStorage(config);
-
-        validateEndpointExposedClassesForAclAnnotations(browserCallables);
-        var rootNode = new RootNode(browserCallables, storage.getOpenAPI());
-        var pluginManager = new PluginManager(
-                storage.getParserConfig().getPlugins());
-        pluginManager.setStorage(storage);
-        var pluginExecutor = new PluginExecutor(pluginManager, rootNode);
-        pluginExecutor.execute();
-
-        logger.debug("JVM Parser finished successfully");
-
-        return storage.getOpenAPI();
-    }
-
-    /**
-     * Generates TypeScript files directly from Java endpoint classes, bypassing
-     * OpenAPI generation.
+     * Generates TypeScript client code directly from Java classes, without using
+     * OpenAPI as an intermediate format. This is the new direct Java-to-TypeScript
+     * generation approach.
      *
      * @param browserCallables the browser callable endpoint classes
      * @param outputDir        the output directory for generated TypeScript
@@ -423,137 +318,45 @@ public final class Parser {
     }
 
     /**
-     * Parses the OpenAPI source string with the provided parser and merges the
-     * result into the current OpenAPI object. This method is useful if you want
-     * to adjust some basic parts of the OpenAPI object like the application
-     * title, version, server description or URL.
-     *
-     * <p>
-     * If the method is used once, all the changes will be applied to the
-     * default OpenAPI object. Called multiple time, this function applies
-     * changes one by one in the order of method calls.
-     *
-     * @param source
-     *            The OpenAPI definition in the JSON or YAML format. You don't
-     *            have to specify all the fields required by the schema; the
-     *            result definition will use default fields.
-     * @param type
-     *            The parser for the OpenAPI definition
-     * @return this (for method chaining).
-     */
-    @NonNull
-    public Parser openAPISource(@NonNull String source,
-            @NonNull OpenAPIFileType type) {
-        config.openAPI = parseOpenAPIFile(Objects.requireNonNull(source),
-                Objects.requireNonNull(type), config.openAPI);
-
-        return this;
-    }
-
-    /**
-     * Adds a collection of parser {@link Plugin}s. If there are plugins already
-     * specified, they will be removed before addition.
-     *
-     * <p>
-     * Note that the order of the arguments will be maintained during
-     * processing.
-     *
-     * @param plugins
-     *            a collection of parser plugins.
-     * @return this (for method chaining).
-     */
-    @NonNull
-    public Parser plugins(@NonNull Plugin... plugins) {
-        return plugins(Arrays.asList(plugins));
-    }
-
-    /**
-     * Adds a collection of parser {@link Plugin}s. If there are already
-     * specified plugins, they will be removed before addition.
-     *
-     * <p>
-     * Note that the order of collection will be maintained during processing.
-     *
-     * @param plugins
-     *            a collection of parser plugins.
-     * @return this (for method chaining).
-     */
-    @NonNull
-    public Parser plugins(@NonNull Collection<? extends Plugin> plugins) {
-        config.plugins.clear();
-        config.plugins.addAll(Objects.requireNonNull(plugins));
-        return this;
-    }
-
-    /**
-     * An immutable parser configuration object. It allows to peek into the
-     * initial configuration of the parser during the scan.
+     * A configuration class used by the parser. It holds the necessary
+     * parameters for TypeScript generation.
      */
     public static final class Config {
-        private final List<Plugin> plugins = new ArrayList<>();
         private Set<String> classPathElements;
-        private List<Class<? extends Annotation>> endpointAnnotations = List
-                .of();
-        private List<Class<? extends Annotation>> endpointExposedAnnotations = List
-                .of();
-        private OpenAPI openAPI;
+        private List<Class<? extends Annotation>> endpointAnnotations;
+        private List<Class<? extends Annotation>> endpointExposedAnnotations;
 
-        private Config(OpenAPI openAPI) {
-            this.openAPI = openAPI;
+        Config() {
+            this.endpointAnnotations = new ArrayList<>();
+            this.endpointExposedAnnotations = new ArrayList<>();
         }
 
         /**
-         * Gets the collection of classpath elements.
+         * Gets a list of classes related to the parsed endpoints.
          *
-         * @return the collection of classpath elements.
+         * @return a set of strings with classpath elements
          */
-        @NonNull
         public Set<String> getClassPathElements() {
-            return classPathElements;
+            return classPathElements == null ? Set.of()
+                    : new HashSet<>(classPathElements);
         }
 
         /**
-         * Gets the name of endpoint annotation.
+         * Gets the list of endpoint annotations that the parser should look for.
          *
-         * @return the annotation name.
+         * @return a list of annotation classes
          */
-        @NonNull
         public List<Class<? extends Annotation>> getEndpointAnnotations() {
-            return endpointAnnotations;
+            return new ArrayList<>(endpointAnnotations);
         }
 
         /**
-         * Gets the name of `EndpointExposed` annotation.
+         * Gets the list of endpoint exposed annotations.
          *
-         * @return the annotation name.
+         * @return a list of annotation classes
          */
-        @NonNull
         public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
-            return endpointExposedAnnotations;
+            return new ArrayList<>(endpointExposedAnnotations);
         }
-
-        /**
-         * Gets the OpenAPI object.
-         *
-         * <p>
-         * Note that the object is mutable.
-         *
-         * @return OpenAPI object.
-         */
-        @NonNull
-        public OpenAPI getOpenAPI() {
-            return openAPI;
-        }
-
-        /**
-         * Returns a collection of parser plugins.
-         *
-         * @return the collection of parser plugins.
-         */
-        @NonNull
-        public Collection<Plugin> getPlugins() {
-            return plugins;
-        }
-
     }
 }

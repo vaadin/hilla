@@ -67,23 +67,12 @@
       <version>1.2.0.vaadin1</version>
     </dependency>
 
-    <!-- Jackson 2 for Swagger compatibility -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.20.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>2.20.0</version>
-    </dependency>
+    <!--
+      Jackson 3 for Hilla internal use
 
-    <!-- Jackson 3 for Hilla internal use -->
+      Note: Jackson 2 dependencies were removed as they were only needed for
+      Swagger/OpenAPI compatibility. We now use Jackson 3 exclusively.
+    -->
     <dependency>
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -95,37 +84,6 @@
     <dependency>
       <groupId>tools.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-    </dependency>
-
-    <!--
-      OpenAPI/Swagger dependencies - ONLY used by the Parser layer
-
-      The TypeScript codegen layer (com.vaadin.hilla.typescript.codegen) does NOT use OpenAPI.
-      It generates TypeScript directly from Java models (ClassInfoModel, MethodInfoModel, etc.)
-      without any OpenAPI intermediate format.
-
-      These dependencies are only needed by the Parser layer (com.vaadin.hilla.typescript.parser)
-      which still generates OpenAPI output for other tools and workflows.
-    -->
-    <dependency>
-      <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-core-jakarta</artifactId>
-      <version>${swagger.core.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.datatype</groupId>
-          <artifactId>jackson-datatype-jsr310</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.yaml</groupId>
-          <artifactId>snakeyaml</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-models-jakarta</artifactId>
-      <version>${swagger.models.version}</version>
     </dependency>
 
     <!-- Kotlin support -->
