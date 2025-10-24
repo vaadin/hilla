@@ -48,7 +48,7 @@ interface Configurable {
                 .artifactId(project.getArtifactId())
                 .classpath(project.getRuntimeClasspathElements())
                 .withDefaultAnnotations().mainClass(mainClass)
-                .nodeCommand(getNode()).productionMode(isProduction).build();
+                .productionMode(isProduction).build();
         EngineAutoConfiguration.setDefault(conf);
         return conf;
     }

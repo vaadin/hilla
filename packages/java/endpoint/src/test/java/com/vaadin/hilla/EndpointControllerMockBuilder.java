@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.typescript.parser.jackson.JacksonObjectMapperFactory;
 
 import jakarta.servlet.ServletContext;
 

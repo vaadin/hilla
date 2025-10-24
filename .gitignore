@@ -63,3 +63,6 @@ scripts/prepare/src/
 # vite cache
 .vite
 .mcp.json
+
+CLAUDE.md
+plans

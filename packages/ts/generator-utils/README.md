@@ -1,1 +1,0 @@
-# Hilla TypeScript Plugin utils
