@@ -97,7 +97,16 @@
       <artifactId>jackson-dataformat-yaml</artifactId>
     </dependency>
 
-    <!-- Swagger for OpenAPI model compatibility -->
+    <!--
+      OpenAPI/Swagger dependencies - ONLY used by the Parser layer
+
+      The TypeScript codegen layer (com.vaadin.hilla.typescript.codegen) does NOT use OpenAPI.
+      It generates TypeScript directly from Java models (ClassInfoModel, MethodInfoModel, etc.)
+      without any OpenAPI intermediate format.
+
+      These dependencies are only needed by the Parser layer (com.vaadin.hilla.typescript.parser)
+      which still generates OpenAPI output for other tools and workflows.
+    -->
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core-jakarta</artifactId>
