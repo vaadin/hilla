@@ -31,12 +31,7 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
     @BeforeEach
     public void setUp() throws IOException, URISyntaxException {
-        var referenceOpenAPIJsonFile = Path.of(Objects
-                .requireNonNull(getClass().getResource(
-                        "openapi/esmodule-generator-TwoEndpointsThreeMethods.json"))
-                .toURI());
-        Files.createDirectories(getOpenAPIFile().getParent());
-        Files.copy(referenceOpenAPIJsonFile, getOpenAPIFile());
+        // OpenAPI generation has been removed, so this test setup is no longer valid
         outputDirectory = Files.createDirectory(
                 getTemporaryDirectory().resolve(getOutputDirectory()));
     }
