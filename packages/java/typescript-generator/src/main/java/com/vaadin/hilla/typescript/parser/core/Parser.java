@@ -200,14 +200,16 @@ public final class Parser {
     }
 
     /**
-     * Generates TypeScript client code directly from Java classes, without using
-     * OpenAPI as an intermediate format. This is the new direct Java-to-TypeScript
-     * generation approach.
+     * Generates TypeScript client code directly from Java classes, without
+     * using OpenAPI as an intermediate format. This is the new direct
+     * Java-to-TypeScript generation approach.
      *
-     * @param browserCallables the browser callable endpoint classes
-     * @param outputDir        the output directory for generated TypeScript
-     *                         files
-     * @throws IOException if an error occurs while writing files
+     * @param browserCallables
+     *            the browser callable endpoint classes
+     * @param outputDir
+     *            the output directory for generated TypeScript files
+     * @throws IOException
+     *             if an error occurs while writing files
      */
     public void generateTypeScript(@NonNull List<Class<?>> browserCallables,
             @NonNull Path outputDir) throws IOException {
@@ -243,12 +245,16 @@ public final class Parser {
         // Create TypeScript generator with plugins (in order of execution)
         TypeScriptGenerator generator = new TypeScriptGenerator(
                 outputDir.toString());
-        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.TransferTypesPlugin());
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.TransferTypesPlugin());
         generator.addPlugin(new ModelPlugin());
-        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.SubtypesPlugin());
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.SubtypesPlugin());
         generator.addPlugin(new ClientPlugin());
-        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.PushPlugin());
-        generator.addPlugin(new com.vaadin.hilla.typescript.codegen.plugins.SignalsPlugin());
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.PushPlugin());
+        generator.addPlugin(
+                new com.vaadin.hilla.typescript.codegen.plugins.SignalsPlugin());
         generator.addPlugin(new BarrelPlugin());
 
         // Generate and write TypeScript files
@@ -342,7 +348,8 @@ public final class Parser {
         }
 
         /**
-         * Gets the list of endpoint annotations that the parser should look for.
+         * Gets the list of endpoint annotations that the parser should look
+         * for.
          *
          * @return a list of annotation classes
          */

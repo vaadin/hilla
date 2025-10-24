@@ -18,7 +18,8 @@ public final class TypeMapper {
     /**
      * Maps a Java type signature to a TypeScript type string.
      *
-     * @param signature the Java type signature from the parser
+     * @param signature
+     *            the Java type signature from the parser
      * @return the TypeScript type string
      */
     @NonNull

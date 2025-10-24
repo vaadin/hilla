@@ -162,8 +162,8 @@ public class JacksonPropertyModelTests {
                 JacksonPropertySharedTests.FieldAnnotation.class.getName(),
                 JacksonPropertySharedTests.MethodAnnotation.class.getName(),
                 JacksonPropertySharedTests.ParameterAnnotation.class.getName());
-        case "renamedPublicProperty", "renamedPrivateProperty" ->
-            Set.of(com.fasterxml.jackson.annotation.JsonProperty.class.getName());
+        case "renamedPublicProperty", "renamedPrivateProperty" -> Set.of(
+                com.fasterxml.jackson.annotation.JsonProperty.class.getName());
         default -> Set.of();
         };
 

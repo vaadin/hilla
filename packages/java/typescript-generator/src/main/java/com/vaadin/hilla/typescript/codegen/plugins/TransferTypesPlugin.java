@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Plugin that handles special transfer types (Flux, Signal, etc.).
- * Currently a placeholder - most type mapping is handled by TypeMapper.
+ * Plugin that handles special transfer types (Flux, Signal, etc.). Currently a
+ * placeholder - most type mapping is handled by TypeMapper.
  */
 public class TransferTypesPlugin implements TypeScriptGeneratorPlugin {
     private static final Logger logger = LoggerFactory

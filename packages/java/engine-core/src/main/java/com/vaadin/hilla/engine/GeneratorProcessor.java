@@ -62,8 +62,8 @@ public final class GeneratorProcessor {
 
             logger.debug("TypeScript generation completed successfully");
         } catch (IOException e) {
-            throw new GeneratorException(
-                    "Failed to generate TypeScript files", e);
+            throw new GeneratorException("Failed to generate TypeScript files",
+                    e);
         }
     }
 

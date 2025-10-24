@@ -18,8 +18,8 @@ public class TypeScriptWriter {
     /**
      * Adds an import statement.
      *
-     * @param importStatement the import statement (e.g., "import { Foo } from
-     *                        './Bar';")
+     * @param importStatement
+     *            the import statement (e.g., "import { Foo } from './Bar';")
      * @return this writer for chaining
      */
     @NonNull
@@ -33,8 +33,10 @@ public class TypeScriptWriter {
     /**
      * Adds a named import from a module.
      *
-     * @param names      the names to import
-     * @param modulePath the module path
+     * @param names
+     *            the names to import
+     * @param modulePath
+     *            the module path
      * @return this writer for chaining
      */
     @NonNull
@@ -51,8 +53,10 @@ public class TypeScriptWriter {
     /**
      * Adds a default import from a module.
      *
-     * @param name       the default import name
-     * @param modulePath the module path
+     * @param name
+     *            the default import name
+     * @param modulePath
+     *            the module path
      * @return this writer for chaining
      */
     @NonNull
@@ -66,8 +70,10 @@ public class TypeScriptWriter {
     /**
      * Adds a type-only import from a module.
      *
-     * @param names      the type names to import
-     * @param modulePath the module path
+     * @param names
+     *            the type names to import
+     * @param modulePath
+     *            the module path
      * @return this writer for chaining
      */
     @NonNull
@@ -84,7 +90,8 @@ public class TypeScriptWriter {
     /**
      * Adds an export statement.
      *
-     * @param exportStatement the export statement
+     * @param exportStatement
+     *            the export statement
      * @return this writer for chaining
      */
     @NonNull
@@ -96,7 +103,8 @@ public class TypeScriptWriter {
     /**
      * Appends content to the writer.
      *
-     * @param code the code to append
+     * @param code
+     *            the code to append
      * @return this writer for chaining
      */
     @NonNull
@@ -108,7 +116,8 @@ public class TypeScriptWriter {
     /**
      * Appends content followed by a newline.
      *
-     * @param code the code to append
+     * @param code
+     *            the code to append
      * @return this writer for chaining
      */
     @NonNull

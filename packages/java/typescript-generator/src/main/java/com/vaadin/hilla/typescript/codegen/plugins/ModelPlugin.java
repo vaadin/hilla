@@ -60,16 +60,15 @@ public class ModelPlugin implements TypeScriptGeneratorPlugin {
                 """;
 
         String className = classInfo.getSimpleName();
-        String code = template.replace("Person", className).replace(
-                "  name: string;\n  age: number;", properties);
+        String code = template.replace("Person", className)
+                .replace("  name: string;\n  age: number;", properties);
 
         writer.append(code);
         return writer.build();
     }
 
     private String generateProperties(ClassInfoModel classInfo) {
-        if (classInfo.getFields() == null
-                || classInfo.getFields().isEmpty()) {
+        if (classInfo.getFields() == null || classInfo.getFields().isEmpty()) {
             return "  // No properties";
         }
 

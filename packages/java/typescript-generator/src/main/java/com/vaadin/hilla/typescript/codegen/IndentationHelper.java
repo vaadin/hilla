@@ -15,8 +15,10 @@ public final class IndentationHelper {
     /**
      * Indents text (single or multiple lines) by the specified level.
      *
-     * @param text  the text to indent
-     * @param level the indentation level (number of indent units)
+     * @param text
+     *            the text to indent
+     * @param level
+     *            the indentation level (number of indent units)
      * @return the indented text
      */
     @NonNull
@@ -40,7 +42,8 @@ public final class IndentationHelper {
     /**
      * Creates an indentation string for the specified level.
      *
-     * @param level the indentation level
+     * @param level
+     *            the indentation level
      * @return the indentation string
      */
     @NonNull

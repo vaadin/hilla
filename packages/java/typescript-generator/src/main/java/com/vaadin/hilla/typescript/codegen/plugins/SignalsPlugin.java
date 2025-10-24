@@ -51,8 +51,7 @@ public class SignalsPlugin implements TypeScriptGeneratorPlugin {
                             "Generated client with signals for endpoint: {}",
                             endpoint.getSimpleName());
                 } catch (Exception e) {
-                    logger.error(
-                            "Failed to generate signals for endpoint: {}",
+                    logger.error("Failed to generate signals for endpoint: {}",
                             endpoint.getSimpleName(), e);
                 }
             }
@@ -123,8 +122,7 @@ public class SignalsPlugin implements TypeScriptGeneratorPlugin {
         }
 
         if (!signalImports.isEmpty()) {
-            writer.addNamedImport(signalImports,
-                    "@vaadin/hilla-react-signals");
+            writer.addNamedImport(signalImports, "@vaadin/hilla-react-signals");
         }
 
         // Add client import placeholder (will be added by TypeScriptWriter
@@ -147,7 +145,8 @@ public class SignalsPlugin implements TypeScriptGeneratorPlugin {
         writer.appendBlankLine();
 
         // Add a placeholder for client import
-        writer.appendLine("const client = { call: () => {} }; // TODO: Import actual client");
+        writer.appendLine(
+                "const client = { call: () => {} }; // TODO: Import actual client");
         writer.appendBlankLine();
 
         writer.append(methods);
@@ -184,8 +183,7 @@ public class SignalsPlugin implements TypeScriptGeneratorPlugin {
         String returnType = TypeMapper.toTypeScript(method.getResultType());
 
         String paramsList = method.getParameters().stream()
-                .map(this::formatParameter)
-                .collect(Collectors.joining(", "));
+                .map(this::formatParameter).collect(Collectors.joining(", "));
 
         String template;
         if (paramsList.isEmpty()) {
@@ -208,8 +206,8 @@ public class SignalsPlugin implements TypeScriptGeneratorPlugin {
                         "'" + endpoint.getSimpleName() + "'");
 
         if (!paramsList.isEmpty()) {
-            code = code.replace("userId: string", paramsList).replace(
-                    "{ userId }", buildParamsObject(method));
+            code = code.replace("userId: string", paramsList)
+                    .replace("{ userId }", buildParamsObject(method));
         }
 
         return code;
@@ -222,8 +220,7 @@ public class SignalsPlugin implements TypeScriptGeneratorPlugin {
 
         // Build parameter list (without init parameter)
         String paramsList = method.getParameters().stream()
-                .map(this::formatParameter)
-                .collect(Collectors.joining(", "));
+                .map(this::formatParameter).collect(Collectors.joining(", "));
 
         // Determine if this is NumberSignal (simple), ValueSignal (needs
         // options), or ListSignal

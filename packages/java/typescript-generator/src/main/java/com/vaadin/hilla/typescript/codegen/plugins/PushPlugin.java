@@ -117,8 +117,7 @@ public class PushPlugin implements TypeScriptGeneratorPlugin {
 
         // Build parameter list
         String paramsList = method.getParameters().stream()
-                .map(this::formatParameter)
-                .collect(Collectors.joining(", "));
+                .map(this::formatParameter).collect(Collectors.joining(", "));
 
         String paramsWithOptions = paramsList.isEmpty()
                 ? "init?: EndpointRequestInit"

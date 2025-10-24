@@ -16,10 +16,13 @@ import tools.jackson.databind.introspect.BeanPropertyDefinition;
 final class JacksonPropertySharedTests {
 
     static final Map<String, List<String>> stringifiedTypes = Map.ofEntries(
-            Map.entry("privatePropertyWithAccessors", List.of(
-                    "@" + MethodTypeAnnotation.class.getName() + "() java.lang.Byte",
-                    "@" + ParameterTypeAnnotation.class.getName() + "() java.lang.Byte",
-                    "@" + FieldTypeAnnotation.class.getName() + "() java.lang.Byte")),
+            Map.entry("privatePropertyWithAccessors",
+                    List.of("@" + MethodTypeAnnotation.class.getName()
+                            + "() java.lang.Byte",
+                            "@" + ParameterTypeAnnotation.class.getName()
+                                    + "() java.lang.Byte",
+                            "@" + FieldTypeAnnotation.class.getName()
+                                    + "() java.lang.Byte")),
             Map.entry("privateProperty",
                     List.of("java.util.Map<java.lang.String, java.lang.Long>",
                             "java.util.Map<java.lang.String, java.lang.Long>")),

@@ -84,8 +84,7 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
 
         // Build parameter list
         String paramsList = method.getParameters().stream()
-                .map(this::formatParameter)
-                .collect(Collectors.joining(", "));
+                .map(this::formatParameter).collect(Collectors.joining(", "));
 
         String paramsWithOptions = paramsList.isEmpty()
                 ? "init?: EndpointRequestInit"
@@ -111,8 +110,7 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
 
         String code = template.replace("getUser", methodName)
                 .replace("Promise<User>", "Promise<" + returnType + ">")
-                .replace("'UserEndpoint'",
-                        "'" + endpoint.getSimpleName() + "'")
+                .replace("'UserEndpoint'", "'" + endpoint.getSimpleName() + "'")
                 .replace("'getUser'", "'" + methodName + "'");
 
         // Only replace parameter-specific parts if we have parameters

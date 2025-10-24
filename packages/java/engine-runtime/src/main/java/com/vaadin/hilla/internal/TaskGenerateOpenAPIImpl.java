@@ -49,7 +49,8 @@ public class TaskGenerateOpenAPIImpl extends AbstractTaskEndpointGenerator
     /**
      * No-op implementation. OpenAPI generation has been removed.
      *
-     * @throws ExecutionFailedException never thrown
+     * @throws ExecutionFailedException
+     *             never thrown
      */
     @Override
     public void execute() throws ExecutionFailedException {

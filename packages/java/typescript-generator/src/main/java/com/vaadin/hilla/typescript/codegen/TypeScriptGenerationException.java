@@ -8,7 +8,8 @@ public class TypeScriptGenerationException extends RuntimeException {
     /**
      * Creates a new exception with a message.
      *
-     * @param message the error message
+     * @param message
+     *            the error message
      */
     public TypeScriptGenerationException(String message) {
         super(message);
@@ -17,8 +18,10 @@ public class TypeScriptGenerationException extends RuntimeException {
     /**
      * Creates a new exception with a message and cause.
      *
-     * @param message the error message
-     * @param cause   the cause
+     * @param message
+     *            the error message
+     * @param cause
+     *            the cause
      */
     public TypeScriptGenerationException(String message, Throwable cause) {
         super(message, cause);

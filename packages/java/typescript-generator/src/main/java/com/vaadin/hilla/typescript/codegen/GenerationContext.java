@@ -18,7 +18,8 @@ public class GenerationContext {
     /**
      * Creates a new generation context.
      *
-     * @param outputDirectory the output directory for generated files
+     * @param outputDirectory
+     *            the output directory for generated files
      */
     public GenerationContext(@NonNull String outputDirectory) {
         this.outputDirectory = outputDirectory;
@@ -37,8 +38,10 @@ public class GenerationContext {
     /**
      * Sets an attribute in the context.
      *
-     * @param key   the attribute key
-     * @param value the attribute value
+     * @param key
+     *            the attribute key
+     * @param value
+     *            the attribute value
      */
     public void setAttribute(@NonNull String key, @Nullable Object value) {
         attributes.put(key, value);
@@ -47,7 +50,8 @@ public class GenerationContext {
     /**
      * Gets an attribute from the context.
      *
-     * @param key the attribute key
+     * @param key
+     *            the attribute key
      * @return an optional containing the attribute value, or empty if not found
      */
     @NonNull
@@ -58,9 +62,12 @@ public class GenerationContext {
     /**
      * Gets an attribute from the context with a specific type.
      *
-     * @param key  the attribute key
-     * @param type the expected type
-     * @param <T>  the type parameter
+     * @param key
+     *            the attribute key
+     * @param type
+     *            the expected type
+     * @param <T>
+     *            the type parameter
      * @return an optional containing the typed attribute value, or empty if not
      *         found or wrong type
      */
@@ -73,7 +80,8 @@ public class GenerationContext {
     /**
      * Checks if an attribute exists in the context.
      *
-     * @param key the attribute key
+     * @param key
+     *            the attribute key
      * @return true if the attribute exists
      */
     public boolean hasAttribute(@NonNull String key) {
@@ -83,7 +91,8 @@ public class GenerationContext {
     /**
      * Removes an attribute from the context.
      *
-     * @param key the attribute key
+     * @param key
+     *            the attribute key
      * @return the removed value, or empty if not found
      */
     @NonNull

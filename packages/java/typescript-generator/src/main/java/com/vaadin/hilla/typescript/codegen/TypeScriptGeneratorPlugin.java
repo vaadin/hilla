@@ -14,9 +14,10 @@ public interface TypeScriptGeneratorPlugin {
     /**
      * Executes this plugin to generate TypeScript code.
      *
-     * @param parserOutput the parser output containing endpoints and entities
-     * @param context      the generation context for sharing state between
-     *                     plugins
+     * @param parserOutput
+     *            the parser output containing endpoints and entities
+     * @param context
+     *            the generation context for sharing state between plugins
      * @return a map of file paths to generated TypeScript content
      */
     @NonNull
