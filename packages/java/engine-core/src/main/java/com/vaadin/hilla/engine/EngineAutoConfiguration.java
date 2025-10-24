@@ -33,7 +33,6 @@ public class EngineAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EngineAutoConfiguration.class);
 
-    public static final String OPEN_API_PATH = "hilla-openapi.json";
     private Set<Path> classpath = Arrays
             .stream(System.getProperty("java.class.path")
                     .split(File.pathSeparator))
@@ -143,12 +142,6 @@ public class EngineAutoConfiguration {
 
     public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
         return parser.getEndpointExposedAnnotations();
-    }
-
-    public Path getOpenAPIFile() {
-        return productionMode
-                ? buildDir.resolve("classes").resolve(OPEN_API_PATH)
-                : buildDir.resolve(OPEN_API_PATH);
     }
 
     public BrowserCallableFinder getBrowserCallableFinder() {
