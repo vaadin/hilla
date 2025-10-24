@@ -181,15 +181,4 @@ public class EndpointWithRestControllerTest {
                 .thenReturn(appConfig);
         return context;
     }
-
-    private URL getDefaultOpenApiResourcePathInDevMode() {
-        try {
-            return projectFolder.getRoot().toPath()
-                    .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
-                    .toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
