@@ -90,7 +90,8 @@ public class OpenAPIUtil {
             return new HashSet<>();
         }
 
-        // Keep parsing logic for backward compatibility with existing OpenAPI files
+        // Keep parsing logic for backward compatibility with existing OpenAPI
+        // files
         JsonNode openApi = new ObjectMapper().readTree(openApiAsText);
 
         Set<String> types = new HashSet<>();

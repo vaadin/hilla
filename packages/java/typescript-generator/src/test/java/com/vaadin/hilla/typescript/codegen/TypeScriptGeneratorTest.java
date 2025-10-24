@@ -49,7 +49,8 @@ public class TypeScriptGeneratorTest {
 
         String result = writer.build();
 
-        assertTrue(result.contains("import { Component } from '@angular/core';"));
+        assertTrue(
+                result.contains("import { Component } from '@angular/core';"));
         assertTrue(result.contains("import type { User } from './models';"));
         assertTrue(result.contains("export class MyClass"));
     }
@@ -74,7 +75,8 @@ public class TypeScriptGeneratorTest {
         assertEquals("value", context.getAttribute("test").orElse(null));
 
         context.setAttribute("number", 42);
-        assertEquals(42, context.getAttribute("number", Integer.class).orElse(null));
+        assertEquals(42,
+                context.getAttribute("number", Integer.class).orElse(null));
 
         context.removeAttribute("test");
         assertFalse(context.hasAttribute("test"));
@@ -141,8 +143,7 @@ public class TypeScriptGeneratorTest {
 
         // Should have valid syntax for no-parameter method
         assertTrue(
-                generatedCode.contains(
-                        "getEntity(init?: EndpointRequestInit)"),
+                generatedCode.contains("getEntity(init?: EndpointRequestInit)"),
                 "Generated TypeScript should have valid syntax for no-parameter method");
 
         // Should have empty object for parameters in call
@@ -184,15 +185,13 @@ public class TypeScriptGeneratorTest {
 
         // Should generate FluxTestEndpointSubscriptions.ts
         assertTrue(
-                generatedFiles
-                        .containsKey("FluxTestEndpointSubscriptions.ts"),
+                generatedFiles.containsKey("FluxTestEndpointSubscriptions.ts"),
                 "Should generate subscriptions file for Flux endpoint");
         String generatedCode = generatedFiles
                 .get("FluxTestEndpointSubscriptions.ts");
 
         // Should have subscription method for streamMessages
-        assertTrue(
-                generatedCode.contains("subscribeToStreamMessages"),
+        assertTrue(generatedCode.contains("subscribeToStreamMessages"),
                 "Should generate subscription method for streamMessages");
 
         // Should have subscription method for countTo
@@ -246,9 +245,8 @@ public class TypeScriptGeneratorTest {
         String generatedCode = generatedFiles.get("FilterTestSubtypes.ts");
 
         // Should have union type definition
-        assertTrue(
-                generatedCode
-                        .contains("export type FilterTest = OrFilterTest | AndFilterTest"),
+        assertTrue(generatedCode.contains(
+                "export type FilterTest = OrFilterTest | AndFilterTest"),
                 "Should generate union type");
 
         // Should have type guard for OrFilterTest
@@ -303,8 +301,7 @@ public class TypeScriptGeneratorTest {
         Map<String, String> generatedFiles = generator.generate(parserOutput);
 
         // Should generate NumberSignalTestEndpoint.ts
-        assertTrue(
-                generatedFiles.containsKey("NumberSignalTestEndpoint.ts"),
+        assertTrue(generatedFiles.containsKey("NumberSignalTestEndpoint.ts"),
                 "Should generate endpoint file with signals");
         String generatedCode = generatedFiles
                 .get("NumberSignalTestEndpoint.ts");
@@ -325,8 +322,7 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("return new NumberSignal(0,"),
                 "Should construct NumberSignal with 0 as default");
         assertTrue(
-                generatedCode.contains(
-                        "endpoint: 'NumberSignalTestEndpoint'"),
+                generatedCode.contains("endpoint: 'NumberSignalTestEndpoint'"),
                 "Should pass endpoint name");
         assertTrue(generatedCode.contains("method: 'counter'"),
                 "Should pass method name");
@@ -336,14 +332,11 @@ public class TypeScriptGeneratorTest {
                 generatedCode
                         .contains("function sharedValue(highOrLow: boolean)"),
                 "Should have sharedValue method with parameter");
-        assertTrue(
-                generatedCode.contains("params: { highOrLow }"),
+        assertTrue(generatedCode.contains("params: { highOrLow }"),
                 "Should pass parameters to signal constructor");
 
         // Regular method should still be async with Promise
-        assertTrue(
-                generatedCode
-                        .contains("async function regularMethod"),
+        assertTrue(generatedCode.contains("async function regularMethod"),
                 "Regular methods should still be async");
         assertTrue(generatedCode.contains("Promise<string>"),
                 "Regular methods should return Promise");

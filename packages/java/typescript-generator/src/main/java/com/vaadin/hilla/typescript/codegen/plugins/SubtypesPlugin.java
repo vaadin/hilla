@@ -46,8 +46,7 @@ public class SubtypesPlugin implements TypeScriptGeneratorPlugin {
                 if (jsonSubTypes != null && jsonSubTypes.value().length > 0) {
                     String subtypesCode = generateSubtypesFile(classInfo,
                             jsonSubTypes);
-                    String fileName = classInfo.getSimpleName()
-                            + "Subtypes.ts";
+                    String fileName = classInfo.getSimpleName() + "Subtypes.ts";
                     generatedFiles.put(fileName, subtypesCode);
                     logger.debug("Generated subtypes file for: {}",
                             classInfo.getSimpleName());

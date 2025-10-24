@@ -18,8 +18,10 @@ public class ParserOutput {
     /**
      * Creates a new parser output.
      *
-     * @param endpoints the endpoint classes (e.g., @BrowserCallable classes)
-     * @param entities  the entity/model classes referenced by endpoints
+     * @param endpoints
+     *            the endpoint classes (e.g., @BrowserCallable classes)
+     * @param entities
+     *            the entity/model classes referenced by endpoints
      */
     public ParserOutput(@NonNull List<ClassInfoModel> endpoints,
             @NonNull List<ClassInfoModel> entities) {

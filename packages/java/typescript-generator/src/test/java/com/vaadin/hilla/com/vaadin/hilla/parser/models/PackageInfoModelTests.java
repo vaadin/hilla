@@ -50,8 +50,8 @@ public class PackageInfoModelTests {
     @DisplayName("It should get annotations with ClassInfo")
     @ParameterizedTest(name = ModelProvider.testNamePattern)
     @ArgumentsSource(ModelProvider.class)
-    @Disabled("ClassGraph limitation: ScanResult is null for package-level annotations in source models, " +
-              "causing getClassInfo() to return Optional.empty. This is a known ClassGraph library issue.")
+    @Disabled("ClassGraph limitation: ScanResult is null for package-level annotations in source models, "
+            + "causing getClassInfo() to return Optional.empty. This is a known ClassGraph library issue.")
     public void should_GetAnnotationsWithClassInfo(PackageInfoModel model,
             ModelKind kind) {
         assertEquals(List.of(ClassInfoModel.of(Foo.class)),

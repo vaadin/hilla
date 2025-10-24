@@ -29,7 +29,8 @@ public class TypeScriptGenerator {
     /**
      * Creates a new TypeScript generator.
      *
-     * @param outputDirectory the output directory for generated files
+     * @param outputDirectory
+     *            the output directory for generated files
      */
     public TypeScriptGenerator(@NonNull String outputDirectory) {
         this.outputDirectory = outputDirectory;
@@ -38,7 +39,8 @@ public class TypeScriptGenerator {
     /**
      * Adds a plugin to the generator.
      *
-     * @param plugin the plugin to add
+     * @param plugin
+     *            the plugin to add
      * @return this generator for chaining
      */
     @NonNull
@@ -51,7 +53,8 @@ public class TypeScriptGenerator {
     /**
      * Generates TypeScript code from parser output.
      *
-     * @param parserOutput the parser output containing endpoints and entities
+     * @param parserOutput
+     *            the parser output containing endpoints and entities
      * @return a map of file paths to generated content
      */
     @NonNull
@@ -62,8 +65,8 @@ public class TypeScriptGenerator {
         // Sort plugins by order
         List<TypeScriptGeneratorPlugin> sortedPlugins = new ArrayList<>(
                 plugins);
-        sortedPlugins.sort(Comparator.comparingInt(
-                TypeScriptGeneratorPlugin::getOrder));
+        sortedPlugins.sort(
+                Comparator.comparingInt(TypeScriptGeneratorPlugin::getOrder));
 
         // Execute each plugin
         for (TypeScriptGeneratorPlugin plugin : sortedPlugins) {
@@ -87,8 +90,10 @@ public class TypeScriptGenerator {
     /**
      * Generates TypeScript code and writes it to files.
      *
-     * @param parserOutput the parser output containing endpoints and entities
-     * @throws IOException if an I/O error occurs while writing files
+     * @param parserOutput
+     *            the parser output containing endpoints and entities
+     * @throws IOException
+     *             if an I/O error occurs while writing files
      */
     public void generateAndWrite(@NonNull ParserOutput parserOutput)
             throws IOException {

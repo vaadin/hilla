@@ -31,7 +31,8 @@ public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
     @BeforeEach
     public void setUp() throws IOException, URISyntaxException {
-        // OpenAPI generation has been removed, so this test setup is no longer valid
+        // OpenAPI generation has been removed, so this test setup is no longer
+        // valid
         outputDirectory = Files.createDirectory(
                 getTemporaryDirectory().resolve(getOutputDirectory()));
     }

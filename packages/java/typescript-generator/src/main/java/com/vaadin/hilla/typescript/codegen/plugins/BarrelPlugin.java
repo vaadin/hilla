@@ -63,8 +63,8 @@ public class BarrelPlugin implements TypeScriptGeneratorPlugin {
         // Use template
         String template = "export * as UserEndpoint from './UserEndpoint.js';";
 
-        return template.replace("UserEndpoint", endpointName).replace(
-                "'./UserEndpoint.js'", "'./" + endpointName + ".js'");
+        return template.replace("UserEndpoint", endpointName)
+                .replace("'./UserEndpoint.js'", "'./" + endpointName + ".js'");
     }
 
     @Override

@@ -74,7 +74,8 @@ public class Hotswapper implements VaadinHotswapper {
                 || changedClass.startsWith("javax.")
                 || changedClass.startsWith("sun.")
                 || changedClass.startsWith("com.sun.")
-                || changedClass.startsWith("com.vaadin.hilla.typescript.parser.")
+                || changedClass
+                        .startsWith("com.vaadin.hilla.typescript.parser.")
                 || changedClass.startsWith("com.vaadin.hilla.engine.")
                 || changedClass.startsWith("com.vaadin.flow.")
                 || changedClass.startsWith("com.vaadin.base.")
