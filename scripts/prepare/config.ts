@@ -38,7 +38,7 @@ export const componentOptions = ['lit', 'react'];
 
 export const local = {
   src: new URL(`scripts/prepare/src/`, root),
-  versionedPackageJson: new URL('packages/ts/generator-core/package.json', root),
+  versionedPackageJson: new URL('packages/ts/frontend/package.json', root),
   results: new URL(`scripts/prepare/results/`, root),
   components: new URL(`scripts/prepare/templates/components/`, root),
 };
