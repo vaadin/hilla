@@ -62,7 +62,6 @@
   },
   "dependencies": {
     "@ungap/with-resolvers": "0.1.0",
-    "@vaadin/hilla-generator-utils": "25.0.0-beta1",
     "@vaadin/hilla-react-auth": "25.0.0-beta1",
     "@vaadin/hilla-react-signals": "25.0.0-beta1",
     "tsc-template": "0.2.3",

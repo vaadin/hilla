@@ -1,6 +1,6 @@
-import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
+import createSourceFile from './codegen/createSourceFile.js';
+import DependencyManager from './codegen/DependencyManager.js';
+import PathManager from './codegen/PathManager.js';
 import ast from 'tsc-template';
 import {
   type CallExpression,
