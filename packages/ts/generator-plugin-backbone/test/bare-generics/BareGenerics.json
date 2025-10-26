@@ -12,15 +12,15 @@
   ],
   "tags": [
     {
-      "name": "BareTypeEndpoint",
-      "x-class-name": "com.vaadin.hilla.parser.plugins.backbone.bare.BareTypeEndpoint"
+      "name": "BareGenericsEndpoint",
+      "x-class-name": "com.vaadin.hilla.test.BareGenericsEndpoint"
     }
   ],
   "paths": {
-    "/BareTypeEndpoint/getBareList": {
+    "/BareGenericsEndpoint/getBareList": {
       "post": {
-        "tags": ["BareTypeEndpoint"],
-        "operationId": "BareTypeEndpoint_getBareList_POST",
+        "tags": ["BareGenericsEndpoint"],
+        "operationId": "BareGenericsEndpoint_getBareList_POST",
         "responses": {
           "200": {
             "description": "",
@@ -39,10 +39,10 @@
         }
       }
     },
-    "/BareTypeEndpoint/getBareMap": {
+    "/BareGenericsEndpoint/getBareMap": {
       "post": {
-        "tags": ["BareTypeEndpoint"],
-        "operationId": "BareTypeEndpoint_getBareMap_POST",
+        "tags": ["BareGenericsEndpoint"],
+        "operationId": "BareGenericsEndpoint_getBareMap_POST",
         "responses": {
           "200": {
             "description": "",
@@ -61,10 +61,10 @@
         }
       }
     },
-    "/BareTypeEndpoint/getBareOptional": {
+    "/BareGenericsEndpoint/getBareOptional": {
       "post": {
-        "tags": ["BareTypeEndpoint"],
-        "operationId": "BareTypeEndpoint_getBareOptional_POST",
+        "tags": ["BareGenericsEndpoint"],
+        "operationId": "BareGenericsEndpoint_getBareOptional_POST",
         "responses": {
           "200": {
             "description": "",
