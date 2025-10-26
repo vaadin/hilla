@@ -5,16 +5,21 @@ import com.vaadin.hilla.typescript.codegen.ParserOutput;
 import com.vaadin.hilla.typescript.codegen.TypeMapper;
 import com.vaadin.hilla.typescript.codegen.TypeScriptGeneratorPlugin;
 import com.vaadin.hilla.typescript.codegen.TypeScriptWriter;
+import com.vaadin.hilla.typescript.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.typescript.parser.models.ClassInfoModel;
+import com.vaadin.hilla.typescript.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.typescript.parser.models.MethodInfoModel;
 import com.vaadin.hilla.typescript.parser.models.MethodParameterInfoModel;
+import com.vaadin.hilla.typescript.parser.models.SignatureModel;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -50,9 +55,28 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
     private String generateEndpointClient(ClassInfoModel endpoint) {
         TypeScriptWriter writer = new TypeScriptWriter();
 
+        // Collect all required type imports from method signatures
+        Set<String> requiredTypes = new HashSet<>();
+        for (MethodInfoModel method : endpoint.getMethods()) {
+            if (isPublicMethod(method)) {
+                // Collect types from return type
+                collectRequiredTypes(method.getResultType(), requiredTypes);
+
+                // Collect types from parameters
+                for (MethodParameterInfoModel param : method.getParameters()) {
+                    collectRequiredTypes(param.getType(), requiredTypes);
+                }
+            }
+        }
+
         // Add imports
         writer.addNamedImport(List.of("ConnectClient", "EndpointRequestInit"),
                 "@vaadin/hilla-frontend");
+
+        // Add type imports for custom entity types
+        for (String typeName : requiredTypes) {
+            writer.addTypeImport(List.of(typeName), "./" + typeName + ".js");
+        }
 
         // Generate client methods for each public method in the endpoint
         String methods = endpoint.getMethods().stream()
@@ -139,6 +163,53 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
                 .map(MethodParameterInfoModel::getName)
                 .collect(Collectors.joining(", "));
         return "{ " + paramsStr + " }";
+    }
+
+    /**
+     * Recursively collects custom types that need to be imported. Walks through
+     * type signatures to find class references, including nested generic types.
+     *
+     * @param signature
+     *            the type signature to analyze
+     * @param requiredTypes
+     *            the set to collect type names into
+     */
+    private void collectRequiredTypes(SignatureModel signature,
+            Set<String> requiredTypes) {
+        if (signature instanceof ArraySignatureModel) {
+            // For arrays, recurse into the element type
+            ArraySignatureModel arraySignature = (ArraySignatureModel) signature;
+            collectRequiredTypes(arraySignature.getNestedType(), requiredTypes);
+        } else if (signature instanceof ClassRefSignatureModel) {
+            ClassRefSignatureModel classRef = (ClassRefSignatureModel) signature;
+            String fullName = classRef.getClassInfo().getName();
+
+            // Only add import for custom types (not standard Java types)
+            if (isCustomType(fullName)) {
+                requiredTypes.add(classRef.getClassInfo().getSimpleName());
+            }
+
+            // Recurse into generic type arguments (e.g., List<Entity>)
+            for (SignatureModel typeArg : classRef.getTypeArguments()) {
+                collectRequiredTypes(typeArg, requiredTypes);
+            }
+        }
+        // BaseSignatureModel (primitives) don't need imports
+    }
+
+    /**
+     * Checks if a type is a custom type that needs to be imported. Standard
+     * Java types that map to TypeScript primitives don't need imports.
+     *
+     * @param fullName
+     *            the fully qualified class name
+     * @return true if the type needs an import
+     */
+    private boolean isCustomType(String fullName) {
+        // Standard types that don't need imports
+        return !fullName.startsWith("java.lang.")
+                && !fullName.startsWith("java.util.")
+                && !fullName.startsWith("java.time.");
     }
 
     @Override
