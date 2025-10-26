@@ -1,6 +1,6 @@
 package com.vaadin.hilla;
 
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.typescript.parser.jackson.JacksonObjectMapperFactory;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 

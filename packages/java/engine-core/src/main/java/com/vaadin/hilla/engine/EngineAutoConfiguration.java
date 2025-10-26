@@ -33,7 +33,6 @@ public class EngineAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(EngineAutoConfiguration.class);
 
-    public static final String OPEN_API_PATH = "hilla-openapi.json";
     private Set<Path> classpath = Arrays
             .stream(System.getProperty("java.class.path")
                     .split(File.pathSeparator))
@@ -49,7 +48,6 @@ public class EngineAutoConfiguration {
     private ParserConfiguration parser;
     private BrowserCallableFinder browserCallableFinder;
     private boolean productionMode = false;
-    private String nodeCommand = "node";
     private ClassFinder classFinder;
     private ClassLoader classLoader;
     private EngineConfiguration userEngineConfiguration;
@@ -114,10 +112,6 @@ public class EngineAutoConfiguration {
         return productionMode;
     }
 
-    public String getNodeCommand() {
-        return nodeCommand;
-    }
-
     public ClassFinder getClassFinder() {
         return classFinder;
     }
@@ -148,12 +142,6 @@ public class EngineAutoConfiguration {
 
     public List<Class<? extends Annotation>> getEndpointExposedAnnotations() {
         return parser.getEndpointExposedAnnotations();
-    }
-
-    public Path getOpenAPIFile() {
-        return productionMode
-                ? buildDir.resolve("classes").resolve(OPEN_API_PATH)
-                : buildDir.resolve(OPEN_API_PATH);
     }
 
     public BrowserCallableFinder getBrowserCallableFinder() {
@@ -262,7 +250,6 @@ public class EngineAutoConfiguration {
             this.configuration.mainClass = configuration.mainClass;
             this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
-            this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.classFinder = configuration.classFinder;
             this.configuration.classLoader = configuration.classLoader;
             this.configuration.parser.setEndpointAnnotations(
@@ -342,11 +329,6 @@ public class EngineAutoConfiguration {
 
         public Builder productionMode(boolean value) {
             configuration.productionMode = value;
-            return this;
-        }
-
-        public Builder nodeCommand(String value) {
-            configuration.nodeCommand = value;
             return this;
         }
 

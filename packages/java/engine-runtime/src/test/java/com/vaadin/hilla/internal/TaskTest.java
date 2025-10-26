@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -46,11 +44,6 @@ public class TaskTest {
         return "build/classes";
     }
 
-    protected Path getOpenAPIFile() {
-        return getTemporaryDirectory().resolve(getBuildDirectory())
-                .resolve(EngineAutoConfiguration.OPEN_API_PATH);
-    }
-
     protected String getFrontendDirectory() {
         return "frontend";
     }
@@ -68,10 +61,5 @@ public class TaskTest {
                 .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
                 .outputDir(getOutputDirectory()).withDefaultAnnotations()
                 .build();
-    }
-
-    protected OpenAPI getGeneratedOpenAPI() {
-        return new OpenAPIV3Parser()
-                .read(getOpenAPIFile().toFile().getAbsolutePath());
     }
 }

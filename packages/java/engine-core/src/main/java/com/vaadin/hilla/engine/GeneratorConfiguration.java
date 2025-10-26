@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.vaadin.hilla.parser.utils.ConfigList;
+import com.vaadin.hilla.typescript.parser.utils.ConfigList;
 
 public final class GeneratorConfiguration {
     private Plugins plugins;
