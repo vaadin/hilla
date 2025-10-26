@@ -51,7 +51,7 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
         TypeScriptWriter writer = new TypeScriptWriter();
 
         // Add imports
-        writer.addNamedImport(List.of("EndpointRequestInit"),
+        writer.addNamedImport(List.of("ConnectClient", "EndpointRequestInit"),
                 "@vaadin/hilla-frontend");
 
         // Generate client methods for each public method in the endpoint
@@ -65,6 +65,8 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
         writer.appendLine(
                 " * " + endpoint.getSimpleName() + " endpoint client.");
         writer.appendLine(" */");
+        writer.appendBlankLine();
+        writer.appendLine("const client = new ConnectClient();");
         writer.appendBlankLine();
         writer.append(methods);
 
