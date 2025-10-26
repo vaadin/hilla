@@ -1,6 +1,6 @@
 import ts, { type ExportAssignment, type ExportDeclaration, type Identifier, type Statement } from 'typescript';
-import createFullyUniqueIdentifier from './createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
+import createFullyUniqueIdentifier from './createFullyUniqueIdentifier.js';
 import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';
 import { createDependencyRecord, type DependencyRecord } from './utils.js';
 

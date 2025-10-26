@@ -1,6 +1,3 @@
-import createSourceFile from './codegen/createSourceFile.js';
-import DependencyManager from './codegen/DependencyManager.js';
-import PathManager from './codegen/PathManager.js';
 import ast from 'tsc-template';
 import {
   type CallExpression,
@@ -13,6 +10,9 @@ import {
 } from 'typescript';
 import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
+import createSourceFile from './codegen/createSourceFile.js';
+import DependencyManager from './codegen/DependencyManager.js';
+import PathManager from './codegen/PathManager.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
 import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
