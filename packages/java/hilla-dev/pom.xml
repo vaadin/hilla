@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
     <name>Hilla development</name>
     <description>Hilla features that are only available during development</description>
-    <url>https://hilla.dev</url>
+    <url>https://vaadin.com/hilla</url>
 
     <properties>
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>

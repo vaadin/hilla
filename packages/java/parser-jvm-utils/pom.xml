@@ -12,6 +12,8 @@
 
     <artifactId>hilla-parser-jvm-utils</artifactId>
     <name>Hilla JVM Parser Utils</name>
+    <description>Utilities for Hilla JVM-based parsers</description>
+    <url>https://vaadin.com/hilla</url>
     <packaging>jar</packaging>
 
     <properties>
