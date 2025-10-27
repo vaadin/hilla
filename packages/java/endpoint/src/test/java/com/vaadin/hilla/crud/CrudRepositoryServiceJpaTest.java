@@ -10,9 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.autoconfigure.web.SpringDataWebProperties;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -96,9 +96,9 @@ public class CrudRepositoryServiceJpaTest {
     @Test
     public void listWithMaxPagination() {
         // too late to autowire, so set manually
-        var springDataWebProperties = new SpringDataWebProperties();
-        springDataWebProperties.getPageable().setMaxPageSize(2);
-        testCrudRepositoryService.springDataWebProperties = springDataWebProperties;
+        var dataWebProperties = new DataWebProperties();
+        dataWebProperties.getPageable().setMaxPageSize(2);
+        testCrudRepositoryService.dataWebProperties = dataWebProperties;
 
         var result = testCrudRepositoryService.list(Pageable.ofSize(5), null);
         Assert.assertEquals(2, result.size());
