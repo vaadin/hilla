@@ -206,13 +206,11 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("@vaadin/hilla-frontend"),
                 "Should import from hilla-frontend");
 
-        // Should have callback parameters
-        assertTrue(generatedCode.contains("onNext:"),
-                "Should have onNext callback parameter");
-        assertTrue(generatedCode.contains("onError?:"),
-                "Should have optional onError callback parameter");
-        assertTrue(generatedCode.contains("onComplete?:"),
-                "Should have optional onComplete callback parameter");
+        // Should return Subscription objects (callbacks are set via fluent API)
+        assertTrue(generatedCode.contains("client.subscribe"),
+                "Should call client.subscribe");
+        assertTrue(generatedCode.contains("Subscription<"),
+                "Should return Subscription with generic type");
     }
 
     @Test
@@ -385,13 +383,11 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("const client = new ConnectClient()"),
                 "Should create ConnectClient instance");
 
-        // Should have subscription methods with callback parameters
-        assertTrue(generatedCode.contains("onNext:"),
-                "Should have onNext callback parameter");
-        assertTrue(generatedCode.contains("onError?:"),
-                "Should have optional onError callback");
-        assertTrue(generatedCode.contains("onComplete?:"),
-                "Should have optional onComplete callback");
+        // Should return Subscription objects (callbacks are set via fluent API)
+        assertTrue(generatedCode.contains("client.subscribe"),
+                "Should call client.subscribe");
+        assertTrue(generatedCode.contains("Subscription<"),
+                "Should return Subscription with generic type");
     }
 
     @Test
@@ -450,13 +446,10 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("Subscription"),
                 "Should import Subscription");
 
-        // Should handle method with parameters (note: parameter names may be lost in inner classes)
-        // Just verify the method signature includes parameters
+        // Should handle method with parameters
         assertTrue(
-                generatedCode.contains(
-                        "subscribeToStreamProductsByCategory(") && generatedCode
-                                .contains("onNext:"),
-                "Should include parameters in subscription method");
+                generatedCode.contains("subscribeToStreamProductsByCategory("),
+                "Should generate subscription method with parameters");
     }
 
     @Test
@@ -513,12 +506,10 @@ public class TypeScriptGeneratorTest {
         assertTrue(generatedCode.contains("Subscription"),
                 "Should import Subscription");
 
-        // Should handle method with parameters (note: parameter names may be lost in inner classes)
-        // Just verify the method has parameter before callbacks
+        // Should handle method with parameters
         assertTrue(
-                generatedCode.contains("subscribeToUserNotifications(") && generatedCode
-                        .contains("onNext:"),
-                "Should include parameters in subscription method");
+                generatedCode.contains("subscribeToUserNotifications("),
+                "Should generate subscription method with parameters");
     }
 
     // Static inner classes for SubtypesPlugin test

@@ -199,17 +199,20 @@ public class ClientPlugin implements TypeScriptGeneratorPlugin {
 
     /**
      * Checks if a type is a custom type that needs to be imported. Standard
-     * Java types that map to TypeScript primitives don't need imports.
+     * Java types and framework types that map to TypeScript primitives don't
+     * need imports.
      *
      * @param fullName
      *            the fully qualified class name
      * @return true if the type needs an import
      */
     private boolean isCustomType(String fullName) {
-        // Standard types that don't need imports
+        // Standard types and framework types that don't need imports
         return !fullName.startsWith("java.lang.")
                 && !fullName.startsWith("java.util.")
-                && !fullName.startsWith("java.time.");
+                && !fullName.startsWith("java.time.")
+                && !fullName.startsWith("reactor.core.")
+                && !fullName.startsWith("org.springframework.");
     }
 
     @Override

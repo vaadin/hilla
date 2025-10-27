@@ -105,8 +105,6 @@ public class PushPlugin implements TypeScriptGeneratorPlugin {
         // Add imports
         writer.addNamedImport(List.of("ConnectClient", "Subscription"),
                 "@vaadin/hilla-frontend");
-        writer.addNamedImport(List.of("EndpointRequestInit"),
-                "@vaadin/hilla-frontend");
 
         // Add type imports for custom entity types
         for (String typeName : requiredTypes) {
@@ -149,27 +147,22 @@ public class PushPlugin implements TypeScriptGeneratorPlugin {
         String paramsList = method.getParameters().stream()
                 .map(this::formatParameter).collect(Collectors.joining(", "));
 
-        String paramsWithOptions = paramsList.isEmpty()
-                ? "init?: EndpointRequestInit"
-                : paramsList + ", init?: EndpointRequestInit";
-
         // Use different templates based on whether method has parameters
         String template;
         if (paramsList.isEmpty()) {
             template = """
-                    export function subscribeToCountTo(onNext: (item: number) => void, onError?: (error: Error) => void, onComplete?: () => void, init?: EndpointRequestInit): Subscription<number> {
-                      return client.subscribe('FluxEndpoint', 'countTo', {}, { onNext, onError, onComplete }, init);
+                    export function subscribeToCountTo(): Subscription<number> {
+                      return client.subscribe('FluxEndpoint', 'countTo', {});
                     }
                     """;
         } else {
             template = """
-                    export function subscribeToCountTo(n: number, onNext: (item: number) => void, onError?: (error: Error) => void, onComplete?: () => void, init?: EndpointRequestInit): Subscription<number> {
-                      return client.subscribe('FluxEndpoint', 'countTo', { n }, { onNext, onError, onComplete }, init);
+                    export function subscribeToCountTo(n: number): Subscription<number> {
+                      return client.subscribe('FluxEndpoint', 'countTo', { n });
                     }
                     """;
         }
 
-        String callbackParams = paramsList.isEmpty() ? "" : paramsList + ", ";
         String subscribeName = "subscribeTo"
                 + Character.toUpperCase(methodName.charAt(0))
                 + methodName.substring(1);
@@ -237,17 +230,20 @@ public class PushPlugin implements TypeScriptGeneratorPlugin {
 
     /**
      * Checks if a type is a custom type that needs to be imported. Standard
-     * Java types that map to TypeScript primitives don't need imports.
+     * Java types and framework types that map to TypeScript primitives don't
+     * need imports.
      *
      * @param fullName
      *            the fully qualified class name
      * @return true if the type needs an import
      */
     private boolean isCustomType(String fullName) {
-        // Standard types that don't need imports
+        // Standard types and framework types that don't need imports
         return !fullName.startsWith("java.lang.")
                 && !fullName.startsWith("java.util.")
-                && !fullName.startsWith("java.time.");
+                && !fullName.startsWith("java.time.")
+                && !fullName.startsWith("reactor.core.")
+                && !fullName.startsWith("org.springframework.");
     }
 
     @Override
