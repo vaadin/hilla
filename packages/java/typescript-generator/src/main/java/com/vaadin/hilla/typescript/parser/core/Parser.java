@@ -22,7 +22,12 @@ import com.vaadin.hilla.typescript.codegen.TypeScriptGenerator;
 import com.vaadin.hilla.typescript.codegen.plugins.BarrelPlugin;
 import com.vaadin.hilla.typescript.codegen.plugins.ClientPlugin;
 import com.vaadin.hilla.typescript.codegen.plugins.ModelPlugin;
+import com.vaadin.hilla.typescript.parser.models.ArraySignatureModel;
 import com.vaadin.hilla.typescript.parser.models.ClassInfoModel;
+import com.vaadin.hilla.typescript.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.typescript.parser.models.MethodInfoModel;
+import com.vaadin.hilla.typescript.parser.models.MethodParameterInfoModel;
+import com.vaadin.hilla.typescript.parser.models.SignatureModel;
 
 /**
  * The entrypoint class for TypeScript generation. It searches for endpoint
@@ -235,9 +240,11 @@ public final class Parser {
         List<ClassInfoModel> endpoints = browserCallables.stream()
                 .map(ClassInfoModel::of).toList();
 
-        // For now, use empty list for entities
-        // TODO: Collect all classes referenced by endpoints
-        List<ClassInfoModel> entities = List.of();
+        // Collect all entity classes referenced by endpoints
+        List<ClassInfoModel> entities = collectReferencedEntities(endpoints);
+
+        logger.debug("Found {} endpoints and {} entities", endpoints.size(),
+                entities.size());
 
         // Create ParserOutput
         ParserOutput parserOutput = new ParserOutput(endpoints, entities);
@@ -321,6 +328,79 @@ public final class Parser {
     @NonNull
     public Config getConfig() {
         return config;
+    }
+
+    /**
+     * Collects all entity classes referenced by endpoints. Walks through method
+     * signatures to find custom types.
+     *
+     * @param endpoints
+     *            the endpoint classes to analyze
+     * @return list of entity classes
+     */
+    private List<ClassInfoModel> collectReferencedEntities(
+            List<ClassInfoModel> endpoints) {
+        Set<ClassInfoModel> entities = new HashSet<>();
+
+        for (ClassInfoModel endpoint : endpoints) {
+            for (MethodInfoModel method : endpoint.getMethods()) {
+                // Collect from return type
+                collectTypesFromSignature(method.getResultType(), entities);
+
+                // Collect from parameters
+                for (MethodParameterInfoModel param : method.getParameters()) {
+                    collectTypesFromSignature(param.getType(), entities);
+                }
+            }
+        }
+
+        return new ArrayList<>(entities);
+    }
+
+    /**
+     * Recursively collects custom types from a signature model.
+     *
+     * @param signature
+     *            the signature to analyze
+     * @param entities
+     *            the set to collect entities into
+     */
+    private void collectTypesFromSignature(SignatureModel signature,
+            Set<ClassInfoModel> entities) {
+        if (signature instanceof ArraySignatureModel) {
+            ArraySignatureModel arraySignature = (ArraySignatureModel) signature;
+            collectTypesFromSignature(arraySignature.getNestedType(), entities);
+        } else if (signature instanceof ClassRefSignatureModel) {
+            ClassRefSignatureModel classRef = (ClassRefSignatureModel) signature;
+            String fullName = classRef.getClassInfo().getName();
+
+            // Only collect custom types (not standard Java/framework types)
+            if (isCustomType(fullName)) {
+                entities.add(classRef.getClassInfo());
+            }
+
+            // Recurse into generic type arguments
+            for (SignatureModel typeArg : classRef.getTypeArguments()) {
+                collectTypesFromSignature(typeArg, entities);
+            }
+        }
+        // BaseSignatureModel (primitives) are skipped
+    }
+
+    /**
+     * Checks if a type is a custom type that needs to be generated. Standard
+     * Java types and framework types are excluded.
+     *
+     * @param fullName
+     *            the fully qualified class name
+     * @return true if the type should be included as an entity
+     */
+    private boolean isCustomType(String fullName) {
+        return !fullName.startsWith("java.lang.")
+                && !fullName.startsWith("java.util.")
+                && !fullName.startsWith("java.time.")
+                && !fullName.startsWith("reactor.core.")
+                && !fullName.startsWith("org.springframework.");
     }
 
     /**
