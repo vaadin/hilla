@@ -44,8 +44,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "24.9.2",
-    "@vaadin/icon": "24.9.2",
-    "@vaadin/icons": "24.9.2",
+    "@vaadin/icon": "24.9.4",
+    "@vaadin/icons": "24.9.4",
     "@vaadin/input-container": "24.9.2",
     "@vaadin/integer-field": "24.9.2",
     "@vaadin/item": "24.9.2",
@@ -78,7 +78,7 @@
     "@vaadin/text-area": "24.9.2",
     "@vaadin/text-field": "24.9.2",
     "@vaadin/time-picker": "24.9.2",
-    "@vaadin/tooltip": "24.9.2",
+    "@vaadin/tooltip": "24.9.4",
     "@vaadin/upload": "24.9.2",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "24.9.2",
@@ -159,8 +159,8 @@
       "@vaadin/hilla-frontend": "24.9.3",
       "@vaadin/hilla-lit-form": "24.9.3",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "24.9.2",
-      "@vaadin/icons": "24.9.2",
+      "@vaadin/icon": "24.9.4",
+      "@vaadin/icons": "24.9.4",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -193,7 +193,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "24.9.2",
+      "@vaadin/tooltip": "24.9.4",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "24.9.2",
@@ -236,7 +236,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "74dabd906c1a8f69c3ff48faaa1ef92f9d783b4ae4bf396d117261ed12c8ade4"
+    "hash": "3d4484b3bf95806d86906e96f7cb9821510f258eba50ebbda97190ce2ca308d5"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
