@@ -66,6 +66,11 @@
       <artifactId>jackson-dataformat-yaml</artifactId>
       <version>2.20.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>2.20.0</version>
+    </dependency>
     <!-- Jackson 3 for internal serialization -->
     <dependency>
       <groupId>tools.jackson.core</groupId>
@@ -139,13 +144,7 @@
       <artifactId>commons-lang3</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Jackson 2 datatype modules needed for Swagger Json util in tests -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.20.0</version>
-      <scope>test</scope>
-    </dependency>
+    <!-- Jackson 2 datatype modules needed for Swagger Json util in tests - provided by compile scope dependency above -->
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
