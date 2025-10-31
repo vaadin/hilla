@@ -83,6 +83,7 @@ public class PushConfigurer {
         // Override the global mapping set by Flow
         registration.addInitParameter(ApplicationConfig.JSR356_MAPPING_PATH,
                 hillaPushPath);
+        registration.addInitParameter(ApplicationConfig.ANALYTICS, "false");
         registration.setLoadOnStartup(0);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
