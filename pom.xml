@@ -22,7 +22,6 @@
     <module>packages/java/gradle-plugin</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
-    <module>packages/java/hilla-dev</module>
     <module>packages/java/typescript-generator</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
   </modules>
