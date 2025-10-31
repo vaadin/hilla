@@ -82,9 +82,9 @@
     "mobx": "6.3.3"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.27.1",
+    "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.6.0",
-    "@rollup/plugin-replace": "6.0.2",
+    "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -97,8 +97,8 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "5.0.4",
-    "magic-string": "0.30.19",
+    "@vitejs/plugin-react": "5.1.0",
+    "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "6.0.5",
     "strip-css-comments": "5.0.0",
@@ -189,9 +189,9 @@
       "mobx": "6.3.3"
     },
     "devDependencies": {
-      "@babel/preset-react": "7.27.1",
+      "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.6.0",
-      "@rollup/plugin-replace": "6.0.2",
+      "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
       "@vaadin/hilla-generator-cli": "25.0.0-beta2",
       "@vaadin/hilla-generator-core": "25.0.0-beta2",
@@ -204,8 +204,8 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.0.0-beta2",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.0.0-beta2",
       "@vaadin/hilla-generator-utils": "25.0.0-beta2",
-      "@vitejs/plugin-react": "5.0.4",
-      "magic-string": "0.30.19",
+      "@vitejs/plugin-react": "5.1.0",
+      "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "6.0.5",
       "strip-css-comments": "5.0.0",
@@ -215,7 +215,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "aeba3692f033629a4c411e5bf1335c46d00bd7a4da88d695525803193e2b253a"
+    "hash": "a03d0d3241e6a7ec4cc7a58ddb63bf87c37adde28b57f3690e0d441e4bbb8588"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

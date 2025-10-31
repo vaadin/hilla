@@ -23,7 +23,7 @@
     "lit": "3.3.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-router": "7.9.4"
+    "react-router": "7.9.5"
   },
   "devDependencies": {
     "@babel/preset-react": "7.27.1",
@@ -43,10 +43,10 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "5.0.4",
+    "@vitejs/plugin-react": "5.1.0",
     "async": "3.2.6",
     "glob": "11.0.3",
-    "magic-string": "0.30.19",
+    "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "6.0.3",
     "strip-css-comments": "5.0.0",

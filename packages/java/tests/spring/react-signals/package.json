@@ -21,12 +21,12 @@
     "lit": "3.3.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-router": "7.9.4"
+    "react-router": "7.9.5"
   },
   "devDependencies": {
-    "@babel/preset-react": "7.27.1",
+    "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.6.0",
-    "@rollup/plugin-replace": "6.0.2",
+    "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
@@ -41,8 +41,8 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "5.0.4",
-    "magic-string": "0.30.19",
+    "@vitejs/plugin-react": "5.1.0",
+    "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "6.0.5",
     "strip-css-comments": "5.0.0",
@@ -72,12 +72,12 @@
       "lit": "3.3.1",
       "react": "19.2.0",
       "react-dom": "19.2.0",
-      "react-router": "7.9.4"
+      "react-router": "7.9.5"
     },
     "devDependencies": {
-      "@babel/preset-react": "7.27.1",
+      "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.6.0",
-      "@rollup/plugin-replace": "6.0.2",
+      "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
       "@types/react": "19.2.2",
       "@types/react-dom": "19.2.2",
@@ -92,8 +92,8 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.0.0-beta2",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.0.0-beta2",
       "@vaadin/hilla-generator-utils": "25.0.0-beta2",
-      "@vitejs/plugin-react": "5.0.4",
-      "magic-string": "0.30.19",
+      "@vitejs/plugin-react": "5.1.0",
+      "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "6.0.5",
       "strip-css-comments": "5.0.0",
@@ -103,7 +103,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "5188066e35f1498d01bd666d4a03fefdcbc69a016b592732b102b748355295b9"
+    "hash": "c7daeb6ded757abcb42f42217f0400cd2bd24ac1ccd9b961c307f36fdab07367"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
