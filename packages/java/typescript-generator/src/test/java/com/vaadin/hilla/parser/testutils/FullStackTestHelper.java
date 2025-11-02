@@ -80,8 +80,8 @@ public class FullStackTestHelper {
 
             // Execute the generator via Node.js
             NodeRunner nodeRunner = new NodeRunner(targetDir.toFile());
-            NodeRunner.NodeResult result = nodeRunner
-                    .execute(scriptPath.toString(), openAPIJson);
+            NodeRunner.NodeResult result = nodeRunner.execute(
+                    scriptPath.toFile().getAbsolutePath(), openAPIJson);
 
             // Parse the output JSON
             @SuppressWarnings("unchecked")
@@ -163,7 +163,7 @@ public class FullStackTestHelper {
      * Get the snapshots directory for the test class.
      */
     public Path getSnapshotsDir() throws URISyntaxException, IOException {
-        return resourceLoader.find("snapshots");
+        return resourceLoader.find("snapshots").toPath();
     }
 
     /**
@@ -175,14 +175,20 @@ public class FullStackTestHelper {
 
     private Path findGeneratorScript() throws FullStackExecutionException {
         try {
-            // Script is in test/resources directory
-            Path scriptPath = resourceLoader.find("run-generator.mjs");
+            // Script is in test/resources directory root
+            // Use absolute path from resources root (leading slash)
+            var resource = getClass().getResource("/run-generator.mjs");
+            if (resource == null) {
+                throw new FullStackExecutionException(
+                        "Generator script not found in test resources: /run-generator.mjs");
+            }
+            Path scriptPath = Path.of(resource.toURI());
             if (!Files.exists(scriptPath)) {
                 throw new FullStackExecutionException(
                         "Generator script not found: " + scriptPath);
             }
             return scriptPath;
-        } catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException e) {
             throw new FullStackExecutionException(
                     "Failed to find generator script", e);
         }

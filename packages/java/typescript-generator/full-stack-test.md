@@ -16,6 +16,34 @@ Transform the testing approach from separate Java→OpenAPI and OpenAPI→TypeSc
 
 ---
 
+## Progress Status
+
+**Phase 1: Infrastructure** ✅ COMPLETE
+- NodeRunner.java ✅
+- run-generator.mjs ✅
+- FullStackTestHelper.java ✅
+- TypeScriptComparator.java ✅
+
+**Phase 2: Convert Tests** 🔄 IN PROGRESS (4/47 converted)
+
+**Transfertypes Plugin (4/8):**
+- ✅ UUIDFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ JsonNodeFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ MultipartFileFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ PushTypeFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ⏳ PageableTest
+- ⏳ BarePageableTest
+- ⏳ SignalTest (requires SignalsPlugin fix)
+- ⏳ MultipartFileMisuseTest
+
+**Other Plugins (~40 remaining):**
+- Backbone: ~20 tests
+- Nonnull: ~10 tests
+- Model: ~3 tests
+- Subtypes: ~1 test
+
+---
+
 ## Phase 1: Build Full-Stack Testing Infrastructure
 
 ### 1.1 Create Node.js Test Runner (Java)
@@ -79,10 +107,19 @@ helper.executeFullStack(openAPI); // Generates and checks TypeScript
 ### 2.2 Generate Initial TypeScript Snapshots
 **Location pattern:** `src/test/resources/com/vaadin/hilla/parser/.../snapshots/*.ts`
 
+**IMPORTANT: Only include snapshots for files relevant to what the test is verifying.**
+
 Run tests in "generate mode" to create initial snapshots:
 1. Execute TypeScript generator on existing openapi.json
-2. Save generated .ts files as snapshots
+2. Save generated .ts files as snapshots - **but only files that demonstrate the feature being tested**
 3. Manually review for correctness
+
+**Examples:**
+- **Transfertypes tests**: Only include endpoint files and generated model files (e.g., `UUIDEndpoint.ts`, `File.ts`)
+  - ❌ Do NOT include: `connect-client.default.ts`, `endpoints.ts` (barrel file)
+- **Backbone/Client tests**: Include `connect-client.default.ts` since that's what they test
+- **Model tests**: Include model files (e.g., `MyModel.ts`)
+- **Subtypes tests**: Include model files with type guards
 
 ### 2.3 Update TestHelper Usage
 - Remove `executeParserWithConfig()` calls
@@ -246,3 +283,62 @@ If issues arise:
 - **TS invocation**: Via direct Node.js script importing generator packages
 - **Snapshot updates**: Manual - developers update when intentional changes occur
 - **Code location**: Keep TS packages separate in packages/ts/generator-*
+
+---
+
+## Best Practices for Writing Full-Stack Tests
+
+### 1. Keep Snapshots Minimal and Focused
+
+**DO:**
+- ✅ Only include snapshots that demonstrate the specific feature being tested
+- ✅ For transfertypes tests: include endpoint files and any generated model files
+- ✅ For model tests: include the model TypeScript files
+- ✅ For client/backbone tests: include `connect-client.default.ts`
+- ✅ For subtypes tests: include model files with type guards
+
+**DON'T:**
+- ❌ Include `connect-client.default.ts` in every test
+- ❌ Include `endpoints.ts` barrel files unless testing barrel generation
+- ❌ Include unrelated generated files
+
+**Why?** Keeping snapshots minimal makes tests:
+- Easier to understand (clear what's being tested)
+- Faster to run (less file I/O and comparison)
+- Easier to maintain (fewer files to update when generator changes)
+- More focused (failures point to actual issues, not incidental changes)
+
+### 2. Test Names Should Clearly Indicate What's Being Verified
+
+**Examples:**
+- `UUIDFullStackTest` → verifies UUID → string transformation
+- `MultipartFileFullStackTest` → verifies MultipartFile → File transformation
+- `SignalsFullStackTest` → verifies Signals support in endpoints
+
+### 3. Snapshot Directory Structure
+
+```
+src/test/resources/com/vaadin/hilla/parser/plugins/{plugin}/{feature}/
+├── snapshots/
+│   ├── MyEndpoint.ts                      # Endpoint client methods
+│   ├── MyModel.ts                         # Generated models (if relevant)
+│   └── com/vaadin/hilla/runtime/...      # Runtime types (if relevant)
+└── (test Java files reference these snapshots)
+```
+
+### 4. When to Include Common Files
+
+**`connect-client.default.ts`**: Only in tests that verify:
+- Client generation behavior
+- Backbone plugin functionality
+- Authentication/authorization in clients
+
+**`endpoints.ts`**: Only in tests that verify:
+- Barrel file generation
+- Export structure
+
+**Model files**: Include when testing:
+- Transfer types (UUID, JsonNode, File, etc.)
+- Model generation and structure
+- Polymorphic types (subtypes)
+- Nullability annotations
