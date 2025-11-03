@@ -147,6 +147,14 @@ public class FluxIT extends ChromeBrowserTest {
         testFlux.$(TestBenchElement.class).id("username").sendKeys(user);
         testFlux.$(TestBenchElement.class).id("password").sendKeys(user);
         testFlux.$(TestBenchElement.class).id("login").click();
+
+        // Wait for the form submission to complete and page to redirect
+        waitForDocumentReady();
+
+        // Wait for Spring Security redirect to complete (URL should no longer
+        // contain /login)
+        waitUntil(driver -> !driver.getCurrentUrl().contains("/login"));
+
         open();
         testFlux = $("test-flux").waitForFirst();
         content = testFlux.$(TestBenchElement.class).id("content");
