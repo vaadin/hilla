@@ -169,4 +169,11 @@ public class FluxIT extends ChromeBrowserTest {
             return content.getText().equals(expected);
         }, 25);
     }
+
+    private void waitForDocumentReady() {
+        waitUntil(driver -> Boolean.TRUE
+                .equals(this.getCommandExecutor().executeScript(
+                        "return !window.reloadPending && window.document.readyState "
+                                + "=== 'complete';")));
+    }
 }
