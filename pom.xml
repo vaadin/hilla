@@ -22,16 +22,7 @@
     <module>packages/java/gradle-plugin</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
-    <module>packages/java/hilla-dev</module>
-    <module>packages/java/parser-jvm-core</module>
-    <module>packages/java/parser-jvm-plugin-backbone</module>
-    <module>packages/java/parser-jvm-plugin-model</module>
-    <module>packages/java/parser-jvm-plugin-nonnull</module>
-    <module>packages/java/parser-jvm-plugin-nonnull-kotlin</module>
-    <module>packages/java/parser-jvm-plugin-subtypes</module>
-    <module>packages/java/parser-jvm-plugin-transfertypes</module>
-    <module>packages/java/parser-jvm-test-utils</module>
-    <module>packages/java/parser-jvm-utils</module>
+    <module>packages/java/typescript-generator</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
   </modules>
 
@@ -93,7 +84,7 @@
     <flow.version>25.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
     <spring.boot.version>4.0.0-RC1</spring.boot.version>
-    <testbench.version>10.0.0-beta2</testbench.version>
+    <testbench.version>10.0.0-beta3</testbench.version>
     <jakarta.validation.version>3.1.1</jakarta.validation.version>
     <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
