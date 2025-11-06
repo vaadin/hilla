@@ -4,7 +4,7 @@ import {
   type AnyObject,
   type Enum,
   type Extensions,
-  type MCTo,
+  type TargetModel,
   Model,
   type ModelConverter,
   type Value,
@@ -60,7 +60,7 @@ export const ArrayModel: ArrayModel = new CoreModelBuilder(Model, (): unknown[] 
 export type ObjectModel<V, EX extends AnyObject = AnyObject> = Model<
   V,
   {
-    readonly [K in keyof EX]: EX[K] extends ModelConverter ? MCTo<EX[K], ObjectModel<V, EX>> : EX[K];
+    readonly [K in keyof EX]: EX[K] extends ModelConverter ? TargetModel<EX[K], ObjectModel<V, EX>> : EX[K];
   }
 >;
 export const ObjectModel = new CoreModelBuilder(Model, (): AnyObject => ({})).name('Object').build();

@@ -8,7 +8,7 @@ import {
   $owner,
   type AnyObject,
   type DefaultValueProvider,
-  type MCTo,
+  type TargetModel,
   type Model,
   type ModelConverter,
   type ModelMetadata,
@@ -162,7 +162,7 @@ export class ObjectModelBuilder<
 > extends CoreModelBuilder<
   V,
   {
-    readonly [K in keyof EX]: EX[K] extends ModelConverter ? MCTo<EX[K], ObjectModel<V, EX>> : EX[K];
+    readonly [K in keyof EX]: EX[K] extends ModelConverter ? TargetModel<EX[K], ObjectModel<V, EX>> : EX[K];
   },
   F
 > {
@@ -212,7 +212,6 @@ export class ObjectModelBuilder<
     },
     F
   >;
-  // { readonly [key in keyof EX | DK]: key extends DK ? DV : key extends keyof EX ? { readonly [K in keyof EX]: EX[K] extends ModelConverter ? MCTo<...> : EX[K]; }[key] : never; }
 
   /**
    * {@inheritDoc CoreModelBuilder.meta}

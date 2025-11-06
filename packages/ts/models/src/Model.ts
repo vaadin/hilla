@@ -245,21 +245,45 @@ export const Model: Model = Object.create(null, {
   },
 });
 
-export const $from = Symbol('from');
-export const $to = Symbol('to');
+/**
+ * The symbol marking source (parameter) type for model converter HKT
+ * signatures.
+ */
+export declare const $sourceModel: unique symbol;
 
-export type ModelConverter<FM extends Model = Model, TM extends Model = Model> = {
-  readonly [$from]: FM;
-  readonly [$to]: TM;
+/**
+ * The symbol marking target (return) type for model converter HKT
+ * signatures.
+ */
+export declare const $targetModel: unique symbol;
+
+/**
+ * Base HKT signature for model converter functions. Corresponds to a function
+ * such as.
+ */
+export type ModelConverter<SM extends Model = Model, TM extends Model = Model> = {
+  readonly [$sourceModel]: SM;
+  readonly [$targetModel]: TM;
 };
 
-export type MCFrom<MC extends ModelConverter> = MC[typeof $from];
+/**
+ * Gets the source type of the given model converter HKT signature.
+ */
+export type SourceModel<MC extends ModelConverter> = MC[typeof $sourceModel];
 
-export type MCTo<MC extends ModelConverter, MCF extends MCFrom<MC>> = (MC & {
-  readonly [$from]: MCF;
-})[typeof $to];
+/**
+ * Gets the target type of the given model converter HKT signature for the given
+ * source type.
+ */
+export type TargetModel<MC extends ModelConverter, SM extends SourceModel<MC>> = (MC & {
+  readonly [$sourceModel]: SM;
+})[typeof $targetModel];
 
-export interface MCCompose<A extends ModelConverter, B extends ModelConverter<Model, MCFrom<A>>>
-  extends ModelConverter<MCFrom<B>> {
-  readonly [$to]: MCTo<A, MCTo<B, MCFrom<this>>>;
+/**
+ * Makes functional composition of two given model converter HKT signatures,
+ * given A(x) and B(x) returns A(B(x)) HKT signature.
+ */
+export interface CompositeOf<A extends ModelConverter, B extends ModelConverter<Model, SourceModel<A>>>
+  extends ModelConverter<SourceModel<B>> {
+  readonly [$targetModel]: TargetModel<A, TargetModel<B, SourceModel<this>>>;
 }
