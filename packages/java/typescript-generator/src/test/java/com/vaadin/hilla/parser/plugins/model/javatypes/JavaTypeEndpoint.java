@@ -21,7 +21,8 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
-import com.vaadin.hilla.parser.plugins.model.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+
 
 @Endpoint
 public class JavaTypeEndpoint {

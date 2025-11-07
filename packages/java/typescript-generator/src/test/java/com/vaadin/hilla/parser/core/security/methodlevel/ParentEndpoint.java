@@ -17,7 +17,6 @@ package com.vaadin.hilla.parser.core.security.methodlevel;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.vaadin.hilla.parser.core.security.EndpointExposed;
 import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 @EndpointExposed

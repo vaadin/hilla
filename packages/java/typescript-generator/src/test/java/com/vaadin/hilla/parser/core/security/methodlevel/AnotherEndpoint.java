@@ -17,7 +17,6 @@ package com.vaadin.hilla.parser.core.security.methodlevel;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.vaadin.hilla.parser.core.security.Endpoint;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @PermitAll

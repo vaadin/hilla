@@ -17,7 +17,6 @@ package com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.javaendpoint
 
 import java.util.Optional;
 
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.EndpointExposed;
 import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 @EndpointExposed
