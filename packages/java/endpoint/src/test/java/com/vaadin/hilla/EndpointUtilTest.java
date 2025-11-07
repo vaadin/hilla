@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 

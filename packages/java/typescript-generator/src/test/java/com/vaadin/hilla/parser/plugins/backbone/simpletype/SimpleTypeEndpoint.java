@@ -15,9 +15,10 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.simpletype;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class SimpleTypeEndpoint {

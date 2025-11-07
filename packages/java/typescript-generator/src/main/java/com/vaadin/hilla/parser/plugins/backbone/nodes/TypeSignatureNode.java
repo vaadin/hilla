@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
+import io.swagger.v3.oas.models.media.Schema;
+import org.jspecify.annotations.NonNull;
+
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-
-import io.swagger.v3.oas.models.media.Schema;
-import org.jspecify.annotations.NonNull;
 
 public class TypeSignatureNode extends AbstractNode<SignatureModel, Schema<?>>
         implements TypedNode {

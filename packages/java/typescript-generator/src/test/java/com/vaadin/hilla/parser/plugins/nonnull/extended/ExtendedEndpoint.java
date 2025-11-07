@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.nonnull.extended;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import com.vaadin.hilla.parser.plugins.nonnull.basic.BasicEndpoint;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class ExtendedEndpoint extends BasicEndpoint {

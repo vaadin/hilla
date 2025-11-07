@@ -15,12 +15,11 @@
  */
 package com.vaadin.hilla.parser.models;
 
-import org.jspecify.annotations.NonNull;
-
 import java.lang.reflect.Field;
 import java.util.Objects;
 
 import io.github.classgraph.FieldInfo;
+import org.jspecify.annotations.NonNull;
 
 public abstract class FieldInfoModel extends AnnotatedAbstractModel
         implements ClassMemberModel {

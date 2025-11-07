@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.config;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 public class CustomConfigTest {
     private final TestHelper helper = new TestHelper(getClass());

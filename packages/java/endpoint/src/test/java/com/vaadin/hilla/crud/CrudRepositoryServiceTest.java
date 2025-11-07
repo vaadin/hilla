@@ -15,6 +15,9 @@
  */
 package com.vaadin.hilla.crud;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -39,9 +42,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.vaadin.hilla.BrowserCallable;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {

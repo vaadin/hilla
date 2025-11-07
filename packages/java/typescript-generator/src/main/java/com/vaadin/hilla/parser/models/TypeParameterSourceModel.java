@@ -19,11 +19,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.TypeParameter;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.utils.Streams;
-
-import io.github.classgraph.TypeParameter;
 
 final class TypeParameterSourceModel extends TypeParameterModel
         implements SourceSignatureModel {

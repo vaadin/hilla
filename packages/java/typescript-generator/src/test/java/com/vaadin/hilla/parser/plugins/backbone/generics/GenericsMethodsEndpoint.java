@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.generics;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.List;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class GenericsMethodsEndpoint {

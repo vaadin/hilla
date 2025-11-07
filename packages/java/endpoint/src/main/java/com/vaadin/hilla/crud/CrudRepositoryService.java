@@ -18,9 +18,9 @@ package com.vaadin.hilla.crud;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
-import org.jspecify.annotations.Nullable;
 
 import com.vaadin.hilla.EndpointExposed;
 

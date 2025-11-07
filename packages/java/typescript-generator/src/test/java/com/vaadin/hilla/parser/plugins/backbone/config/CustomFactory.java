@@ -20,8 +20,8 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.parser.jackson.ByteArrayModule;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 public class CustomFactory extends JacksonObjectMapperFactory.Json {
 

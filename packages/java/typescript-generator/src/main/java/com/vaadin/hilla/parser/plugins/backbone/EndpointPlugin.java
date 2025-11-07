@@ -19,9 +19,8 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Optional;
 
+import io.swagger.v3.oas.models.tags.Tag;
 import org.jspecify.annotations.NonNull;
-
-import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +29,10 @@ import com.vaadin.hilla.parser.core.NodeDependencies;
 import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.RootNode;
+import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
-
-import io.swagger.v3.oas.models.tags.Tag;
 
 public final class EndpointPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {

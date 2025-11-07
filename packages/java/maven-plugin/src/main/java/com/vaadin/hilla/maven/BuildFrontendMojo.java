@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.maven;
 
+import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+
 import java.io.File;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -31,8 +33,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.theme.Theme;
-
-import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
 
 /**
  * Goal that builds the frontend bundle.

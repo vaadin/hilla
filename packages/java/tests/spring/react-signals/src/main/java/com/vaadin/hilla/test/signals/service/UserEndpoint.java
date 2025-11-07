@@ -15,13 +15,14 @@
  */
 package com.vaadin.hilla.test.signals.service;
 
-import com.vaadin.hilla.test.signals.data.User;
-import com.vaadin.hilla.test.signals.security.AuthenticatedUser;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.hilla.Endpoint;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.test.signals.data.User;
+import com.vaadin.hilla.test.signals.security.AuthenticatedUser;
 
 @Endpoint
 @AnonymousAllowed

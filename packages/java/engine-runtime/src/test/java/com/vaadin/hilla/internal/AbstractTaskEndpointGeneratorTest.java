@@ -15,11 +15,12 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 class AbstractTaskEndpointGeneratorTest extends EndpointsTaskTest {
     @Test

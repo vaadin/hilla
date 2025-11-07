@@ -23,8 +23,6 @@ import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.AnnotatedWildcardType;
 import java.lang.reflect.TypeVariable;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.BaseTypeSignature;
 import io.github.classgraph.ClassRefTypeSignature;
@@ -32,6 +30,7 @@ import io.github.classgraph.HierarchicalTypeSignature;
 import io.github.classgraph.TypeArgument;
 import io.github.classgraph.TypeParameter;
 import io.github.classgraph.TypeVariableSignature;
+import org.jspecify.annotations.NonNull;
 
 public interface SignatureModel
         extends Model, SpecializedModel, AnnotatedModel {

@@ -15,9 +15,6 @@
  */
 package com.vaadin.hilla.engine.commandrunner;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import org.slf4j.Logger;
-
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +22,10 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 /**
  * A generic command runner which throws a {@link CommandRunnerException}.

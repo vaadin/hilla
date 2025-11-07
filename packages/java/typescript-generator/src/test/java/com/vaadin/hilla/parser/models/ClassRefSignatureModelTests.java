@@ -46,6 +46,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.FieldInfo;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -61,10 +64,6 @@ import com.vaadin.hilla.parser.test.helpers.Source;
 import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.utils.Streams;
-
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.FieldInfo;
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ClassRefSignatureModelTests {

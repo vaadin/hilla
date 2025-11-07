@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.PackageInfo;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -38,9 +40,6 @@ import com.vaadin.hilla.parser.models.pack.PackageInfoModelSample;
 import com.vaadin.hilla.parser.test.helpers.ModelKind;
 import com.vaadin.hilla.parser.test.helpers.Source;
 import com.vaadin.hilla.parser.test.helpers.SourceExtension;
-
-import io.github.classgraph.PackageInfo;
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class PackageInfoModelTests {

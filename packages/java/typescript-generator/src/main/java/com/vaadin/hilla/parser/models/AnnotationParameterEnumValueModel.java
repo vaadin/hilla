@@ -17,9 +17,8 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.AnnotationEnumValue;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotationParameterEnumValueModel implements Model {
     private ClassInfoModel classInfo;

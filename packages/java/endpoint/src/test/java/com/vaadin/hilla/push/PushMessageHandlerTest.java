@@ -25,21 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import tools.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.EndpointControllerConfiguration;
-import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
-import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.EndpointProperties;
-import com.vaadin.hilla.EndpointSubscription;
-import com.vaadin.hilla.ServletContextTestSetup;
-import com.vaadin.hilla.push.PushMessageHandler.SubscriptionInfo;
-import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
-import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
-import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
-import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
-import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
-import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Assert;
@@ -55,6 +40,22 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
+
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.EndpointControllerConfiguration;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
+import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.EndpointProperties;
+import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.ServletContextTestSetup;
+import com.vaadin.hilla.push.PushMessageHandler.SubscriptionInfo;
+import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
+import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
+import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
+import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
+import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
+import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,

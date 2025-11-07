@@ -15,16 +15,17 @@
  */
 package com.vaadin.hilla.signals.internal;
 
-import com.vaadin.signals.Id;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.signals.Id;
 
 public class SignalsRegistryTest {
 

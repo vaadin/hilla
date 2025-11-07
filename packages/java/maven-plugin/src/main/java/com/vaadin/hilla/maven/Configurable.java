@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.maven;
 
+import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
+
 import java.io.File;
 import java.util.Map;
 import java.util.Optional;
@@ -25,8 +27,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-
-import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
 
 interface Configurable {
     Map getPluginContext();

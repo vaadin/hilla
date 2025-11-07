@@ -15,21 +15,6 @@
  */
 package com.vaadin.hilla.signals.internal;
 
-import tools.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.AuthenticationUtil;
-import com.vaadin.hilla.EndpointInvocationException;
-import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.AbstractSignal;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.security.core.Authentication;
-
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -37,6 +22,22 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
+import tools.jackson.databind.ObjectMapper;
+
+import com.vaadin.hilla.AuthenticationUtil;
+import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.EndpointRegistry;
+import com.vaadin.signals.AbstractSignal;
 
 public class SecureSignalsRegistryTest {
 

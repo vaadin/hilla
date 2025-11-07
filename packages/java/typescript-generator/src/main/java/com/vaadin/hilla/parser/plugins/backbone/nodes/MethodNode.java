@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import io.swagger.v3.oas.models.PathItem;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.MethodInfoModel;
-import io.swagger.v3.oas.models.PathItem;
 
 public class MethodNode extends AbstractNode<MethodInfoModel, PathItem> {
     protected MethodNode(@NonNull MethodInfoModel source,

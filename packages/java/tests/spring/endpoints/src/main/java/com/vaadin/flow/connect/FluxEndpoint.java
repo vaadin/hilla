@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.connect;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+
 import java.time.Duration;
 
 import org.jspecify.annotations.NonNull;
@@ -22,12 +25,10 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import reactor.core.publisher.Flux;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.Endpoint;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
-import reactor.core.publisher.Flux;
 
 @Endpoint
 public class FluxEndpoint {

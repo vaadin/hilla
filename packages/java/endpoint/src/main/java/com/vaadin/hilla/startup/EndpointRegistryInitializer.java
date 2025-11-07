@@ -15,10 +15,11 @@
  */
 package com.vaadin.hilla.startup;
 
+import org.springframework.stereotype.Component;
+
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.hilla.EndpointController;
-import org.springframework.stereotype.Component;
 
 @Component
 public class EndpointRegistryInitializer implements VaadinServiceInitListener {

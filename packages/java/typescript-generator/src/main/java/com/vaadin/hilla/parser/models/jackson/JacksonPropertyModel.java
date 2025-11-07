@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import com.vaadin.hilla.parser.models.AnnotatedModel;
@@ -34,9 +35,7 @@ import com.vaadin.hilla.parser.models.Model;
 import com.vaadin.hilla.parser.models.NamedModel;
 import com.vaadin.hilla.parser.models.OwnedModel;
 import com.vaadin.hilla.parser.models.ReflectionModel;
-
 import com.vaadin.hilla.parser.models.SignatureModel;
-import org.jspecify.annotations.NonNull;
 
 public final class JacksonPropertyModel
         extends JacksonModel<FieldInfoModel, MethodInfoModel, MethodInfoModel>

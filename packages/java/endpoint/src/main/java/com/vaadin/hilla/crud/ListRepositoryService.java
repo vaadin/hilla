@@ -22,18 +22,18 @@ import java.util.List;
 import java.util.Optional;
 
 import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.hilla.EndpointExposed;
-import com.vaadin.hilla.crud.filter.Filter;
-
 import org.jspecify.annotations.Nullable;
-import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
+
+import com.vaadin.hilla.EndpointExposed;
+import com.vaadin.hilla.crud.filter.Filter;
 
 /**
  * A browser-callable service that delegates list operations to a JPA

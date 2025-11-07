@@ -15,9 +15,9 @@
  */
 package com.vaadin.hilla.endpointransfermapper;
 
-import com.vaadin.hilla.mappedtypes.Pageable;
-
 import org.springframework.data.domain.PageRequest;
+
+import com.vaadin.hilla.mappedtypes.Pageable;
 
 /**
  * A mapper between {@link Pageable} and {@link Pageable}.

@@ -17,9 +17,8 @@ package com.vaadin.hilla.parser.models;
 
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.AnnotationParameterValue;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotationParameterModel implements Model, NamedModel {
     private Object value;

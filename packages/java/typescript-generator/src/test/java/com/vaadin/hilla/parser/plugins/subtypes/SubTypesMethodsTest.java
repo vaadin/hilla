@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -27,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.subtypes.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class SubTypesMethodsTest {
     private final TestHelper helper = new TestHelper(getClass());

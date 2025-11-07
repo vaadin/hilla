@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.datetime;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class DateTimeEndpoint {

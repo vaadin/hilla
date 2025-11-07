@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.nonnull.superclassmethods;
 
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.util.Optional;
+
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 @EndpointExposed
 public class ReadOnlyEndpoint<T, ID> extends NonEndpointImpl

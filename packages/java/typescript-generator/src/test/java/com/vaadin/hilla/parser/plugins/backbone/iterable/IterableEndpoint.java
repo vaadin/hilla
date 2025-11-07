@@ -15,13 +15,14 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.iterable;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class IterableEndpoint {

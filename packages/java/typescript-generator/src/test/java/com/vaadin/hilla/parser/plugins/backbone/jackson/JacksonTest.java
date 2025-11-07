@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.jackson;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -23,12 +22,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
+
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.backbone.jackson.JacksonEndpoint.Sample;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 public class JacksonTest {
     private final TestHelper helper = new TestHelper(getClass());

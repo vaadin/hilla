@@ -15,14 +15,15 @@
  */
 package com.vaadin.hilla.test.signals.service;
 
-import com.vaadin.signals.NumberSignal;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.hilla.BrowserCallable;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Optional;
 
 import org.springframework.context.annotation.DependsOn;
+
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.signals.NumberSignal;
 
 @AnonymousAllowed
 @BrowserCallable

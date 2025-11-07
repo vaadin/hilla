@@ -15,11 +15,6 @@
  */
 package com.vaadin.hilla.crud;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.UUID;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -27,8 +22,14 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-import com.vaadin.hilla.crud.filter.PropertyStringFilter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.UUID;
+
 import org.springframework.data.jpa.domain.Specification;
+
+import com.vaadin.hilla.crud.filter.PropertyStringFilter;
 
 public class PropertyStringFilterSpecification<T> implements Specification<T> {
 

@@ -19,9 +19,8 @@ import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.TypeParameter;
+import org.jspecify.annotations.NonNull;
 
 public abstract class TypeParameterModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {

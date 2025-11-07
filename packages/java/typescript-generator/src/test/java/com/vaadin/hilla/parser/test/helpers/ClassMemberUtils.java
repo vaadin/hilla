@@ -28,8 +28,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.hilla.parser.models.MethodInfoModel;
-
 import io.github.classgraph.ArrayTypeSignature;
 import io.github.classgraph.BaseTypeSignature;
 import io.github.classgraph.ClassInfo;
@@ -39,6 +37,8 @@ import io.github.classgraph.MethodInfo;
 import io.github.classgraph.MethodParameterInfo;
 import io.github.classgraph.ScanResult;
 import io.github.classgraph.TypeSignature;
+
+import com.vaadin.hilla.parser.models.MethodInfoModel;
 
 public final class ClassMemberUtils {
     public static String capitalize(String str) {

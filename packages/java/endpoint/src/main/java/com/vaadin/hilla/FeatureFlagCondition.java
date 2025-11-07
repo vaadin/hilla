@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.di.Lookup;
-import com.vaadin.flow.di.ResourceProvider;
-
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.di.ResourceProvider;
 
 /**
  * Checks if a given feature flag, defined using

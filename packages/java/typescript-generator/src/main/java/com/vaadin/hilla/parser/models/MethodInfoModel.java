@@ -22,9 +22,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.MethodInfo;
+import org.jspecify.annotations.NonNull;
 
 public abstract class MethodInfoModel extends AnnotatedAbstractModel
         implements ClassMemberModel, ParameterizedModel {

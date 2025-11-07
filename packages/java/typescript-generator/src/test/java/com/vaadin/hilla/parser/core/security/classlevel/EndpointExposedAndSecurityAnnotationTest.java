@@ -15,18 +15,19 @@
  */
 package com.vaadin.hilla.parser.core.security.classlevel;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.net.URISyntaxException;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.ParserException;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
-import org.junit.jupiter.api.Test;
-
-import java.net.URISyntaxException;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EndpointExposedAndSecurityAnnotationTest {
 

@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
 
 public class EntityNode extends AbstractNode<ClassInfoModel, Schema<?>> {
     protected EntityNode(@NonNull ClassInfoModel source,

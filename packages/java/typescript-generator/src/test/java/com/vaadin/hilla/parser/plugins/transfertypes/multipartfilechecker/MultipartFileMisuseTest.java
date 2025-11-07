@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.multipartfilechecker;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;
@@ -27,6 +27,7 @@ import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileUsageException;
 import com.vaadin.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 public class MultipartFileMisuseTest {
     private final TestHelper helper = new TestHelper(getClass());

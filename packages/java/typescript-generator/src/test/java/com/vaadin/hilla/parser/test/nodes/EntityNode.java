@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.ClassInfoModel;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
 
 public final class EntityNode extends AbstractNode<ClassInfoModel, Schema<?>> {
     private EntityNode(@NonNull ClassInfoModel source,

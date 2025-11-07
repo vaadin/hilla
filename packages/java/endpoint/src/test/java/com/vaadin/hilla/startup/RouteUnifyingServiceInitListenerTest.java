@@ -15,10 +15,10 @@
  */
 package com.vaadin.hilla.startup;
 
+import static org.mockito.Mockito.mockStatic;
+
 import java.io.IOException;
 
-import com.vaadin.flow.server.Constants;
-import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,13 +29,13 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.UsageStatistics;
+import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUtil;
-import com.vaadin.flow.server.frontend.FrontendUtils;
-
-import static org.mockito.Mockito.mockStatic;
 
 public class RouteUnifyingServiceInitListenerTest {
 

@@ -19,10 +19,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.hotswap.VaadinHotswapper;
-import com.vaadin.flow.server.VaadinService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.hotswap.VaadinHotswapper;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Takes care of updating internals of Hilla that need updates when application

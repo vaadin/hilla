@@ -17,17 +17,17 @@ package com.vaadin.flow.spring.fusionsecurity;
 
 import java.math.BigDecimal;
 
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.fusionsecurity.data.Account;
-import com.vaadin.flow.spring.fusionsecurity.data.AccountRepository;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.fusionsecurity.data.Account;
+import com.vaadin.flow.spring.fusionsecurity.data.AccountRepository;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
 
 @SpringComponent
 public class DataGenerator {

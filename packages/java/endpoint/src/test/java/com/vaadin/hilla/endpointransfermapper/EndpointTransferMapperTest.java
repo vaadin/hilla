@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.vaadin.hilla.mappedtypes.Order;
-import com.vaadin.hilla.mappedtypes.Pageable;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.data.domain.AbstractPageRequest;
@@ -30,6 +27,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
+
+import com.vaadin.hilla.mappedtypes.Order;
+import com.vaadin.hilla.mappedtypes.Pageable;
 
 public class EndpointTransferMapperTest {
 

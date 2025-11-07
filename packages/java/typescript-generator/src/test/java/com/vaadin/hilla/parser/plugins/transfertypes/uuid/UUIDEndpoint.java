@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.uuid;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.UUID;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class UUIDEndpoint {

@@ -15,13 +15,12 @@
  */
 package com.vaadin.hilla.route;
 
+import static java.util.Map.entry;
+
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 
-import com.vaadin.flow.internal.menu.MenuRegistry;
-import com.vaadin.flow.server.*;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,9 +30,10 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import com.vaadin.flow.internal.menu.MenuRegistry;
+import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-
-import static java.util.Map.entry;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 @NotThreadSafe
 public class RouteUtilTest {

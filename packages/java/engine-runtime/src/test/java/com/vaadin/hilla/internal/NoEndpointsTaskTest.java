@@ -15,19 +15,10 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
-import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.engine.GeneratorProcessor;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import static org.junit.jupiter.api.Assertions.*;
 
 import jakarta.annotation.Nonnull;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -35,7 +26,18 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
+import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
+import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.engine.GeneratorProcessor;
 
 @SpringBootTest(classes = {
         NoEndpointsTaskTest.NoopApplicationContextProvider.class })

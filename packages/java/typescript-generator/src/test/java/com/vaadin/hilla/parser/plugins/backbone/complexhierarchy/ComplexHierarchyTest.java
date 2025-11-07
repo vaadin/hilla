@@ -15,19 +15,19 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.complexhierarchy;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentEndpoint;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.backbone.complexhierarchy.models.ComplexHierarchyGrandParentEndpoint;
 import com.vaadin.hilla.parser.plugins.backbone.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class ComplexHierarchyTest {
     private final TestHelper helper = new TestHelper(getClass());

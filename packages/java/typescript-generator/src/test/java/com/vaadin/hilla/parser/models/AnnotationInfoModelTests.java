@@ -33,6 +33,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.AnnotationClassRef;
+import io.github.classgraph.AnnotationEnumValue;
+import io.github.classgraph.AnnotationInfo;
+import io.github.classgraph.AnnotationParameterValue;
+import io.github.classgraph.ScanResult;
 import org.apache.commons.lang3.function.Failable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,12 +54,6 @@ import com.vaadin.hilla.parser.test.helpers.ModelKind;
 import com.vaadin.hilla.parser.test.helpers.Source;
 import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.utils.Streams;
-
-import io.github.classgraph.AnnotationClassRef;
-import io.github.classgraph.AnnotationEnumValue;
-import io.github.classgraph.AnnotationInfo;
-import io.github.classgraph.AnnotationParameterValue;
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class AnnotationInfoModelTests {

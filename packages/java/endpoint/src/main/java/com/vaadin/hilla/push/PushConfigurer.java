@@ -15,13 +15,13 @@
  */
 package com.vaadin.hilla.push;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import tools.jackson.databind.ObjectMapper;
-
-import com.vaadin.hilla.EndpointProperties;
 import org.atmosphere.client.TrackMessageSizeInterceptor;
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereFramework;
@@ -37,10 +37,10 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.hilla.EndpointInvoker;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
+import com.vaadin.hilla.EndpointProperties;
 
 /**
  * Defines the beans needed for push in Hilla.

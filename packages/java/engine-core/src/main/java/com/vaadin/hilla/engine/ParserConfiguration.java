@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.hilla.parser.core.PluginConfiguration;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
@@ -32,8 +34,6 @@ import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.utils.ConfigList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ParserConfiguration {
     private static final Logger LOGGER = LoggerFactory

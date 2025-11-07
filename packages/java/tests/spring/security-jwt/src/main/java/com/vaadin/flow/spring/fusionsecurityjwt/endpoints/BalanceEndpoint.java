@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.spring.fusionsecurityjwt.endpoints;
 
+import jakarta.annotation.security.PermitAll;
+
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
-import jakarta.annotation.security.PermitAll;
-
-import com.vaadin.hilla.Endpoint;
-import com.vaadin.flow.spring.fusionsecurity.service.BankService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
+
+import com.vaadin.flow.spring.fusionsecurity.service.BankService;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 @PermitAll

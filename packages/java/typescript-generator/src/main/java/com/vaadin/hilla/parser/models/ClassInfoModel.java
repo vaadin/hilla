@@ -32,9 +32,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.ClassInfo;
+import org.jspecify.annotations.NonNull;
 
 public abstract class ClassInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, SpecializedModel, ParameterizedModel {

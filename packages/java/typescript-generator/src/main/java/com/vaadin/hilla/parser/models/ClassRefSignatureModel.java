@@ -22,10 +22,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassRefTypeSignature;
+import org.jspecify.annotations.NonNull;
 
 public abstract class ClassRefSignatureModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel,

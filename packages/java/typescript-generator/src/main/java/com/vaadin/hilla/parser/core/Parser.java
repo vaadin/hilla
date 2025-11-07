@@ -28,12 +28,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.swagger.v3.oas.models.OpenAPI;
 
 /**
  * The entrypoint class. It searches for the endpoint classes in the classpath

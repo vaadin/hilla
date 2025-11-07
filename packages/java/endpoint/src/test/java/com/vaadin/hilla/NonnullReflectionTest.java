@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla;
 
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
@@ -25,8 +27,6 @@ import java.util.Map;
 import org.jspecify.annotations.NonNull;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 public class NonnullReflectionTest {
     private Field field;

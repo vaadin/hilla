@@ -15,7 +15,13 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.jspecify.annotations.NonNull;
+
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
 import com.vaadin.hilla.parser.core.NodeDependencies;
@@ -23,11 +29,6 @@ import com.vaadin.hilla.parser.core.NodePath;
 import com.vaadin.hilla.parser.models.*;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
-import org.jspecify.annotations.NonNull;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Adds support for Jackson's {@code JsonValue} annotation.

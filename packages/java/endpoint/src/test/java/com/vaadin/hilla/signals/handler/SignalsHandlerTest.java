@@ -15,28 +15,27 @@
  */
 package com.vaadin.hilla.signals.handler;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.signals.internal.InternalSignal;
-import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
-import com.vaadin.signals.Id;
-import com.vaadin.signals.NumberSignal;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import com.vaadin.hilla.signals.internal.InternalSignal;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
+import com.vaadin.signals.Id;
+import com.vaadin.signals.NumberSignal;
 
 public class SignalsHandlerTest {
 

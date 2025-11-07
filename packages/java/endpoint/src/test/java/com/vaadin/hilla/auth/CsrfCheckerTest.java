@@ -18,12 +18,12 @@ package com.vaadin.hilla.auth;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 public class CsrfCheckerTest {
     private CsrfChecker csrfChecker;

@@ -31,6 +31,9 @@ import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.stream.Stream;
 
+import io.github.classgraph.ArrayTypeSignature;
+import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,10 +49,6 @@ import com.vaadin.hilla.parser.test.helpers.ModelKind;
 import com.vaadin.hilla.parser.test.helpers.Source;
 import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
-
-import io.github.classgraph.ArrayTypeSignature;
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.ScanResult;
 
 @ExtendWith(SourceExtension.class)
 public class ArraySignatureModelTests {

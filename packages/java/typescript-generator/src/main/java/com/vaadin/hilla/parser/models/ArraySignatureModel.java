@@ -18,9 +18,8 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedArrayType;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.ArrayTypeSignature;
+import org.jspecify.annotations.NonNull;
 
 public abstract class ArraySignatureModel extends AnnotatedAbstractModel
         implements SignatureModel {

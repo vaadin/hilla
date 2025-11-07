@@ -23,13 +23,14 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationConfig;
-import tools.jackson.databind.util.IgnorePropertiesUtil;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.util.IgnorePropertiesUtil;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
 import com.vaadin.hilla.parser.core.Node;
@@ -41,8 +42,6 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.jackson.JacksonPropertyModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EntityNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.PropertyNode;
-
-import org.jspecify.annotations.NonNull;
 
 public final class PropertyPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {

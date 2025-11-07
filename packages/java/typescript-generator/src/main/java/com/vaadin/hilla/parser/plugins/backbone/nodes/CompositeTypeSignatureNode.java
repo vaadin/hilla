@@ -15,18 +15,18 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
-import org.jspecify.annotations.NonNull;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.models.media.Schema;
+import org.jspecify.annotations.NonNull;
+
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.AnnotationInfoModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import io.swagger.v3.oas.models.media.Schema;
 
 public final class CompositeTypeSignatureNode extends
         AbstractNode<List<SignatureModel>, Schema<?>> implements TypedNode {

@@ -18,7 +18,6 @@ package com.vaadin.hilla.startup;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
 
-import com.vaadin.hilla.auth.CsrfIndexHtmlRequestListener;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +26,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.hilla.auth.CsrfIndexHtmlRequestListener;
 
 public class CsrfServiceInitListenerTest {
     private CsrfServiceInitListener csrfServiceInitListener;

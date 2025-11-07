@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -28,8 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.hilla.utils.TestUtils;
-
-import static org.junit.Assert.assertTrue;
 
 public class NonnullParserTest {
     private static final String ANNOTATION_NAME = "NonNull";

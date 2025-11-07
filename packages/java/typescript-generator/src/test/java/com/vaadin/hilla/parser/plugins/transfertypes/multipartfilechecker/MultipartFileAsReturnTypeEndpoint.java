@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.multipartfilechecker;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class MultipartFileAsReturnTypeEndpoint {

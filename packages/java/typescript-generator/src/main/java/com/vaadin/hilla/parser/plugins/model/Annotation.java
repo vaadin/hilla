@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.model;
 
-import org.jspecify.annotations.NonNull;
 import java.util.Map;
+
+import org.jspecify.annotations.NonNull;
 
 public final class Annotation {
     private final Map<String, Object> attributes;

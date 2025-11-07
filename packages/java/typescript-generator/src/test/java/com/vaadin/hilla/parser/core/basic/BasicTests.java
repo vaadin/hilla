@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.core.basic;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URISyntaxException;
@@ -27,6 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class BasicTests {
     private static final List<String> STEPS = new LinkedList<>();

@@ -18,9 +18,8 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.MethodParameterInfo;
+import org.jspecify.annotations.NonNull;
 
 public abstract class MethodParameterInfoModel extends AnnotatedAbstractModel
         implements Model, NamedModel, OwnedModel<MethodInfoModel> {

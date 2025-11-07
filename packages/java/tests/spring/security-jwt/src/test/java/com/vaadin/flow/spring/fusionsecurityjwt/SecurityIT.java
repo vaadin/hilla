@@ -20,7 +20,6 @@ import java.util.Base64;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.Cookie;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 

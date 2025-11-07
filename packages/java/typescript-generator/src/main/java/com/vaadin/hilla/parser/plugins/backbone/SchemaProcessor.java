@@ -20,11 +20,6 @@ import static io.swagger.v3.oas.models.Components.COMPONENTS_SCHEMAS_REF;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
-import com.vaadin.hilla.parser.models.SignatureModel;
-
-import com.vaadin.hilla.parser.models.TypeParameterModel;
-import com.vaadin.hilla.parser.models.TypeVariableModel;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.BooleanSchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -36,6 +31,11 @@ import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+
+import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
+import com.vaadin.hilla.parser.models.SignatureModel;
+import com.vaadin.hilla.parser.models.TypeParameterModel;
+import com.vaadin.hilla.parser.models.TypeVariableModel;
 
 final class SchemaProcessor {
     private final SignatureModel type;

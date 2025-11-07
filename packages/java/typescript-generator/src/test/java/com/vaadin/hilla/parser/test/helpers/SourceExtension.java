@@ -18,6 +18,8 @@ package com.vaadin.hilla.parser.test.helpers;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -26,9 +28,6 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
-
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ScanResult;
 
 public class SourceExtension
         implements BeforeAllCallback, AfterAllCallback, ParameterResolver {

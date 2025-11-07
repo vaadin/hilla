@@ -15,11 +15,12 @@
  */
 package com.vaadin.hilla.test.signals.service;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.signals.NumberSignal;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
 
 @BrowserCallable
 public class SecureNumberSignalService {

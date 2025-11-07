@@ -18,9 +18,8 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.TypeVariableSignature;
+import org.jspecify.annotations.NonNull;
 
 public abstract class TypeVariableModel extends AnnotatedAbstractModel
         implements SignatureModel, NamedModel {

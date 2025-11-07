@@ -15,21 +15,21 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.push;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
 import com.vaadin.hilla.parser.plugins.transfertypes.test.helpers.TestHelper;
-import reactor.core.publisher.Flux;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class PushTypeTest {
     private final TestHelper helper = new TestHelper(getClass());

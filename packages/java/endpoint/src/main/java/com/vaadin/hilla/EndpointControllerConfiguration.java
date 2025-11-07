@@ -15,10 +15,10 @@
  */
 package com.vaadin.hilla;
 
+import jakarta.servlet.ServletContext;
+
 import java.lang.reflect.Method;
 
-import tools.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,15 +29,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPatternParser;
+import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
+import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-
-import jakarta.servlet.ServletContext;
 
 /**
  * A configuration class for customizing the {@link EndpointController} class.

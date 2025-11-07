@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.hilla.Endpoint;
 import reactor.core.publisher.Flux;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 public class EchoEndpoint {

@@ -15,22 +15,23 @@
  */
 package com.vaadin.hilla.signals.internal;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.AuthenticationUtil;
-import com.vaadin.hilla.EndpointInvocationException;
-import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.AbstractSignal;
 import jakarta.validation.constraints.NotNull;
-
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+
+import com.vaadin.hilla.AuthenticationUtil;
+import com.vaadin.hilla.EndpointInvocationException;
+import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.EndpointRegistry;
+import com.vaadin.signals.AbstractSignal;
 
 /**
  * Proxy for the accessing the SignalRegistry.

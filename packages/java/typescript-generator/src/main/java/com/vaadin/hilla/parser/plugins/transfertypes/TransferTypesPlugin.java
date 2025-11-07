@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;

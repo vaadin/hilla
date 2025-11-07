@@ -15,14 +15,14 @@
  */
 package com.vaadin.hilla.test;
 
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.TestBenchElement;
 
 public class BasicI18NIT extends ChromeBrowserTest {
 

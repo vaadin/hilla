@@ -17,6 +17,9 @@ package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.Optional;
 
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractPlugin;
@@ -29,10 +32,6 @@ import com.vaadin.hilla.parser.models.MethodInfoModel;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointExposedNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.EndpointNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
-
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 
 public final class MethodPlugin
         extends AbstractPlugin<BackbonePluginConfiguration> {

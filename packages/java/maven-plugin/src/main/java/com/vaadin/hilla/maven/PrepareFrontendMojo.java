@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.maven;
 
+import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+
 import java.io.File;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -24,8 +26,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-
-import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
 
 /**
  * This goal checks that node and npm tools are installed and creates or updates

@@ -15,9 +15,6 @@
  */
 package com.vaadin.hilla.test;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -25,6 +22,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.parallel.Browser;
 
 // Tests are disabled due to unstable signal implementation.
 // Re-enable when there is a new signal implementation.

@@ -15,7 +15,8 @@
  */
 package com.vaadin.hilla.engine;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -26,8 +27,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 

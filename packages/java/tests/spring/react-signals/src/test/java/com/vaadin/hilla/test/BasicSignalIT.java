@@ -15,14 +15,14 @@
  */
 package com.vaadin.hilla.test;
 
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.flow.testutil.ChromeBrowserTest;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 // Tests are disabled due to unstable signal implementation.
 // Re-enable when there is a new signal implementation.

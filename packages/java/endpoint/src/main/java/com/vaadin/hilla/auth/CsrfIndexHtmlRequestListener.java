@@ -16,6 +16,7 @@
 package com.vaadin.hilla.auth;
 
 import jakarta.servlet.http.Cookie;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;

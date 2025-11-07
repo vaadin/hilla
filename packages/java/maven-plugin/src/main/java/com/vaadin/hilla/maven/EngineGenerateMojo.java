@@ -15,6 +15,8 @@
  */
 package com.vaadin.hilla.maven;
 
+import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+
 import java.io.File;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -26,13 +28,11 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import com.vaadin.flow.plugin.maven.FlowModeAbstractMojo;
+import com.vaadin.hilla.engine.BrowserCallableFinderException;
 import com.vaadin.hilla.engine.GeneratorException;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 import com.vaadin.hilla.engine.ParserException;
 import com.vaadin.hilla.engine.ParserProcessor;
-
-import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
-import com.vaadin.hilla.engine.BrowserCallableFinderException;
 
 /**
  * Maven Plugin for Hilla. Handles parsing Java bytecode and generating

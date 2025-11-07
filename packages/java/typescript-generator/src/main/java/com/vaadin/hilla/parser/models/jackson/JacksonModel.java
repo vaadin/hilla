@@ -18,6 +18,7 @@ package com.vaadin.hilla.parser.models.jackson;
 import java.util.Optional;
 
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
+
 import com.vaadin.hilla.parser.models.AnnotatedAbstractModel;
 import com.vaadin.hilla.parser.models.AnnotatedModel;
 import com.vaadin.hilla.parser.models.Model;

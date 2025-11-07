@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.spring.fusionsecurityjwt.endpoints;
 
-import com.vaadin.hilla.Endpoint;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.fusionsecurity.SecurityUtils;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 @AnonymousAllowed

@@ -15,9 +15,10 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.push;
 
+import reactor.core.publisher.Flux;
+
 import com.vaadin.hilla.EndpointSubscription;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import reactor.core.publisher.Flux;
 
 @Endpoint
 public class PushTypeEndpoint {

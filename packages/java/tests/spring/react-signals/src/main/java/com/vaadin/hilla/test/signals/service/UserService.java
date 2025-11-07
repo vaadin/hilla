@@ -15,14 +15,15 @@
  */
 package com.vaadin.hilla.test.signals.service;
 
-import com.vaadin.hilla.test.signals.data.User;
-import com.vaadin.hilla.test.signals.data.UserRepository;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.vaadin.hilla.test.signals.data.User;
+import com.vaadin.hilla.test.signals.data.UserRepository;
 
 @Service
 public class UserService {

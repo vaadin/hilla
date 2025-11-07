@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.nonnull.basic;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -31,6 +29,8 @@ import com.vaadin.hilla.parser.plugins.nonnull.AnnotationMatcher;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import com.vaadin.hilla.parser.plugins.nonnull.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class BasicTest {
     private final TestHelper helper = new TestHelper(getClass());

@@ -15,16 +15,18 @@
  */
 package com.vaadin.hilla;
 
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Method;
 import java.security.Principal;
 
-import tools.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
-import com.vaadin.hilla.auth.EndpointAccessChecker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,12 +40,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import tools.jackson.databind.node.ObjectNode;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
+import com.vaadin.hilla.auth.EndpointAccessChecker;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, JacksonProperties.class,

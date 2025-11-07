@@ -18,9 +18,8 @@ package com.vaadin.hilla.parser.models;
 import java.lang.reflect.AnnotatedType;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.BaseTypeSignature;
+import org.jspecify.annotations.NonNull;
 
 public abstract class BaseSignatureModel extends AnnotatedAbstractModel
         implements SignatureModel {

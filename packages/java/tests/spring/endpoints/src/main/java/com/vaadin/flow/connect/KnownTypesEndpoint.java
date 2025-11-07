@@ -15,10 +15,9 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.hilla.Endpoint;
-
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.router.Location;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.Endpoint;
 
 /**
  * Endpoint referencing data types known to work with Hilla TypeScript

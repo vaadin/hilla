@@ -19,9 +19,8 @@ import java.lang.reflect.AnnotatedType;
 import java.util.List;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.TypeArgument;
+import org.jspecify.annotations.NonNull;
 
 public abstract class TypeArgumentModel extends AnnotatedAbstractModel
         implements SignatureModel {

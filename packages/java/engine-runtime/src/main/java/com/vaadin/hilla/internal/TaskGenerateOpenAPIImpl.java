@@ -17,13 +17,12 @@ package com.vaadin.hilla.internal;
 
 import java.util.List;
 
+import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointCodeGenerator;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
-
-import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
 /**
  * Generate OpenAPI json file for Vaadin Endpoints.

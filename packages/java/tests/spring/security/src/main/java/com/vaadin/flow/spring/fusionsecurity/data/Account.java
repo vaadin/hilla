@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.spring.fusionsecurity.data;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+
+import java.math.BigDecimal;
 
 @Entity
 public class Account {

@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.model.validation;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -27,7 +25,11 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.model.test.helpers.TestHelper;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
+import com.vaadin.hilla.parser.plugins.model.Endpoint;
+import com.vaadin.hilla.parser.plugins.model.EndpointExposed;
 import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class ValidationTest {
     private final TestHelper helper = new TestHelper(getClass());

@@ -20,11 +20,11 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.JavascriptExecutor;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
-import org.openqa.selenium.JavascriptExecutor;
 
 public abstract class AbstractGridTest extends ChromeBrowserTest {
 

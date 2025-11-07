@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.generics;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.Map;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class GenericsExtendedEndpoint<T extends Map<?, ?>> {

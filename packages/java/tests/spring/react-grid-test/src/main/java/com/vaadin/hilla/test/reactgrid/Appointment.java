@@ -15,12 +15,12 @@
  */
 package com.vaadin.hilla.test.reactgrid;
 
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
-import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Appointment extends AbstractEntity {

@@ -33,6 +33,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.ClassRefTypeSignature;
+import io.github.classgraph.FieldInfo;
+import io.github.classgraph.ScanResult;
+import io.github.classgraph.TypeArgument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,11 +53,6 @@ import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.test.helpers.context.AbstractContext;
 import com.vaadin.hilla.parser.utils.Streams;
-
-import io.github.classgraph.ClassRefTypeSignature;
-import io.github.classgraph.FieldInfo;
-import io.github.classgraph.ScanResult;
-import io.github.classgraph.TypeArgument;
 
 @ExtendWith(SourceExtension.class)
 public class TypeArgumentModelTests {

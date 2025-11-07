@@ -15,16 +15,6 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
-import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
-import com.vaadin.hilla.internal.fixtures.MyEndpoint;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.FileSystemUtils;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -32,6 +22,17 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.FileSystemUtils;
+
+import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.hilla.ApplicationContextProvider;
+import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
+import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 
 @SpringBootTest(classes = { CustomEndpoint.class, EndpointNoValue.class,
         MyEndpoint.class, ApplicationContextProvider.class })

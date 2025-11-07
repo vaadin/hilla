@@ -20,9 +20,9 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.vaadin.hilla.parser.utils.PluginException;
-
 import org.jspecify.annotations.NonNull;
+
+import com.vaadin.hilla.parser.utils.PluginException;
 
 public abstract class AbstractCompositePlugin<C extends PluginConfiguration>
         extends AbstractPlugin<C> {

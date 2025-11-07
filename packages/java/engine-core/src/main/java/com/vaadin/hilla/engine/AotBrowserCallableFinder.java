@@ -15,11 +15,6 @@
  */
 package com.vaadin.hilla.engine;
 
-import tools.jackson.databind.ObjectMapper;
-import org.springframework.boot.loader.tools.MainClassFinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -31,6 +26,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.loader.tools.MainClassFinder;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Finds browser callables (endpoints) in a non-running Hilla application, using

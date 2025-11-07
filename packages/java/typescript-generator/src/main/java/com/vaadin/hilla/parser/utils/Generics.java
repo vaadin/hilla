@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.parser.utils;
 
-import com.googlecode.gentyref.GenericTypeReflector;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
+
+import com.googlecode.gentyref.GenericTypeReflector;
 
 /**
  * Utility class for working with generics.

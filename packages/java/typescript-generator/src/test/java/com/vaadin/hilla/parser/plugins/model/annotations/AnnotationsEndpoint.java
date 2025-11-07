@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.parser.plugins.model.annotations;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -29,6 +28,9 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Version;
 
 import java.util.List;
+
+import com.vaadin.hilla.parser.plugins.model.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class AnnotationsEndpoint {

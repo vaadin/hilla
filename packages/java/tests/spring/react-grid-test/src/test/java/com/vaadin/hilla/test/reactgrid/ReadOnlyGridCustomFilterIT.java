@@ -15,9 +15,10 @@
  */
 package com.vaadin.hilla.test.reactgrid;
 
+import org.junit.Test;
+
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
-import org.junit.Test;
 
 public class ReadOnlyGridCustomFilterIT extends AbstractGridTest {
 

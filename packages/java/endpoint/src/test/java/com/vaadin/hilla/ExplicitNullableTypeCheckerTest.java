@@ -30,17 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.vaadin.hilla.nonnullapi.NonNullableEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jspecify.annotations.NonNull;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.lang.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import com.vaadin.hilla.endpoints.Id;
+import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;

@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.test.reactgrid;
 
-import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.crud.CrudRepositoryService;
 import org.springframework.stereotype.Service;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.crud.CrudRepositoryService;
 
 @BrowserCallable
 @Service

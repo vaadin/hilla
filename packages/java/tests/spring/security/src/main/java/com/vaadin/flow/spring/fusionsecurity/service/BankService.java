@@ -18,12 +18,12 @@ package com.vaadin.flow.spring.fusionsecurity.service;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.vaadin.flow.spring.fusionsecurity.SecurityUtils;
 import com.vaadin.flow.spring.fusionsecurity.data.Account;
 import com.vaadin.flow.spring.fusionsecurity.data.AccountRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class BankService {

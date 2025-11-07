@@ -25,14 +25,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.hilla.engine.commandrunner.CommandNotFoundException;
 import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.vaadin.hilla.parser.core.OpenAPIFileType;
 
 public final class GeneratorProcessor {
     public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";

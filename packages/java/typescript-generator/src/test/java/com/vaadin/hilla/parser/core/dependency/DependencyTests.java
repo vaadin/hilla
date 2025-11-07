@@ -15,21 +15,22 @@
  */
 package com.vaadin.hilla.parser.core.dependency;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.hilla.parser.core.Parser;
-import com.vaadin.hilla.parser.testutils.ResourceLoader;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.vaadin.hilla.parser.core.Parser;
+import com.vaadin.hilla.parser.testutils.ResourceLoader;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 public class DependencyTests {
     private static final List<String> classPath;

@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.spring.fusionsecurity;
 
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
+
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
 
 @Component
 public class SecurityUtils {

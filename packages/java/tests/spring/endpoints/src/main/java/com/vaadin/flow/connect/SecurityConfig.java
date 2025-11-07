@@ -15,7 +15,8 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
+import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -27,7 +28,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 
 @EnableWebSecurity
 @Configuration

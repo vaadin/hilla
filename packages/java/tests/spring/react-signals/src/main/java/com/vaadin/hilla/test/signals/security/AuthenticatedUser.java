@@ -15,14 +15,15 @@
  */
 package com.vaadin.hilla.test.signals.security;
 
-import com.vaadin.hilla.test.signals.data.User;
-import com.vaadin.hilla.test.signals.data.UserRepository;
-import com.vaadin.flow.spring.security.AuthenticationContext;
+import java.util.Optional;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import com.vaadin.hilla.test.signals.data.User;
+import com.vaadin.hilla.test.signals.data.UserRepository;
 
 @Component
 public class AuthenticatedUser {

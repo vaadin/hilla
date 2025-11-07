@@ -18,8 +18,6 @@ package com.vaadin.hilla.crud;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.hilla.crud.filter.PropertyStringFilter;
-import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +29,9 @@ import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.vaadin.hilla.crud.filter.PropertyStringFilter;
+import com.vaadin.hilla.crud.filter.PropertyStringFilter.Matcher;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest()

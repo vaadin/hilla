@@ -15,11 +15,12 @@
  */
 package com.vaadin.hilla.endpoint;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.Test;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EndpointGenerationIT {
     Path frontendDir = Path.of("src/main/frontend/generated");

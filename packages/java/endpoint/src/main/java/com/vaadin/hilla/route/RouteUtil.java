@@ -15,14 +15,7 @@
  */
 package com.vaadin.hilla.route;
 
-import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
-import com.vaadin.flow.server.*;
-import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.internal.menu.MenuRegistry;
-
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,7 +28,14 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.springframework.http.server.RequestPath;
+import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+
+import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
+import com.vaadin.flow.internal.menu.MenuRegistry;
+import com.vaadin.flow.server.*;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 /**
  * A container for utility methods related with Routes.

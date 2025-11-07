@@ -17,9 +17,10 @@ package com.vaadin.hilla.parser.plugins.backbone.nodes;
 
 import java.util.function.UnaryOperator;
 
-import com.vaadin.hilla.parser.models.SignatureModel;
 import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
+
+import com.vaadin.hilla.parser.models.SignatureModel;
 
 public interface TypedNode extends AnnotatedNode {
     @NonNull

@@ -15,19 +15,13 @@
  */
 package com.vaadin.hilla.parser.plugins.model.javatypes;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Version;
-import com.vaadin.hilla.parser.plugins.model.Endpoint;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+
+import com.vaadin.hilla.parser.plugins.model.Endpoint;
 
 @Endpoint
 public class JavaTypeEndpoint {

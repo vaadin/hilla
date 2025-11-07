@@ -20,9 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.AnnotationInfo;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotationInfoModel implements Model, NamedModel {
     private Optional<ClassInfoModel> classInfo;

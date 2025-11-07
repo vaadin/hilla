@@ -15,15 +15,12 @@
  */
 package com.vaadin.flow.spring.fusionsecurity;
 
+import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
+
 import java.util.Base64;
 import java.util.stream.Collectors;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
-import com.vaadin.flow.spring.security.RequestUtil;
-import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
-import com.vaadin.flow.spring.security.stateless.VaadinStatelessSecurityConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +40,11 @@ import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
+import com.vaadin.flow.spring.security.RequestUtil;
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
+import com.vaadin.flow.spring.security.stateless.VaadinStatelessSecurityConfigurer;
 
 @EnableWebSecurity
 @Configuration

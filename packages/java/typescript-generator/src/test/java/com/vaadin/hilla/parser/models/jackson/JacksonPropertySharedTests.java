@@ -25,8 +25,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.json.JsonMapper;
 
 final class JacksonPropertySharedTests {
 

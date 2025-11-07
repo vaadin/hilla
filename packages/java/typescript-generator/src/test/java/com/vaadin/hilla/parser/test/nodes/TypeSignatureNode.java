@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.parser.test.nodes;
 
+import io.swagger.v3.oas.models.media.Schema;
 import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.core.AbstractNode;
 import com.vaadin.hilla.parser.models.SignatureModel;
-import io.swagger.v3.oas.models.media.Schema;
 
 public final class TypeSignatureNode
         extends AbstractNode<SignatureModel, Schema<?>> {

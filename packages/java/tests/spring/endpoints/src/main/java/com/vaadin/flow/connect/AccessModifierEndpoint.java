@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.connect;
 
+import jakarta.annotation.security.PermitAll;
+
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.Endpoint;
-import jakarta.annotation.security.PermitAll;
 
 /**
  * Simple Vaadin Connect Service definition.

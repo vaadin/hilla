@@ -15,7 +15,8 @@
  */
 package com.vaadin.hilla.test.signals.security;
 
-import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
+import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -26,7 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 
 @EnableWebSecurity
 @Configuration

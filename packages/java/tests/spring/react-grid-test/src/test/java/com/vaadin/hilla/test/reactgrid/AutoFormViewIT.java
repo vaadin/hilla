@@ -15,13 +15,13 @@
  */
 package com.vaadin.hilla.test.reactgrid;
 
-import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
-import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 

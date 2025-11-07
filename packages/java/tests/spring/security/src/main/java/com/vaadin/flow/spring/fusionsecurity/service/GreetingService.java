@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.spring.fusionsecurity.service;
 
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.hilla.BrowserCallable;
-
 import org.jspecify.annotations.NonNull;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.BrowserCallable;
 
 @BrowserCallable
 @Transactional

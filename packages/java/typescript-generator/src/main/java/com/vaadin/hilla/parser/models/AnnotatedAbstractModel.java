@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jspecify.annotations.NonNull;
-
 import io.github.classgraph.AnnotationInfo;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AnnotatedAbstractModel implements AnnotatedModel {
     private List<AnnotationInfoModel> annotations;

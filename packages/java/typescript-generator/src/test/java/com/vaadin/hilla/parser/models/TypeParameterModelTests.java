@@ -32,6 +32,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.github.classgraph.ScanResult;
+import io.github.classgraph.TypeParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,9 +50,6 @@ import com.vaadin.hilla.parser.test.helpers.SourceExtension;
 import com.vaadin.hilla.parser.test.helpers.SpecializationChecker;
 import com.vaadin.hilla.parser.test.helpers.context.AbstractContext;
 import com.vaadin.hilla.parser.utils.Streams;
-
-import io.github.classgraph.ScanResult;
-import io.github.classgraph.TypeParameter;
 
 @ExtendWith(SourceExtension.class)
 public class TypeParameterModelTests {

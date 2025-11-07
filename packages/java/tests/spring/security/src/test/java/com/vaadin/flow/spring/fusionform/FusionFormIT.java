@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.spring.fusionform;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class FusionFormIT extends ChromeBrowserTest {
 

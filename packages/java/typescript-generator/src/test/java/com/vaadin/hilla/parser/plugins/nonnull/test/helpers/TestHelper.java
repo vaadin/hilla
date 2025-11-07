@@ -23,9 +23,9 @@ import java.nio.file.Path;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.core.util.Json;
-import com.vaadin.hilla.parser.testutils.ResourceLoader;
-
 import io.swagger.v3.oas.models.OpenAPI;
+
+import com.vaadin.hilla.parser.testutils.ResourceLoader;
 
 public final class TestHelper {
     private final ResourceLoader resourceLoader;

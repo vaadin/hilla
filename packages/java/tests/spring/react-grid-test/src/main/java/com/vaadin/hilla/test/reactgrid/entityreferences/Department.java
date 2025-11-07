@@ -22,6 +22,7 @@ import jakarta.persistence.OneToMany;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.vaadin.hilla.test.reactgrid.AbstractEntity;
 
 @Entity

@@ -15,16 +15,17 @@
  */
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin.helpers;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.core.util.Json;
-import com.vaadin.hilla.parser.testutils.ResourceLoader;
-import io.swagger.v3.oas.models.OpenAPI;
+import static com.vaadin.hilla.parser.testutils.JsonAssertions.assertEquals;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import static com.vaadin.hilla.parser.testutils.JsonAssertions.assertEquals;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+
+import com.vaadin.hilla.parser.testutils.ResourceLoader;
 
 public final class TestHelper {
     private final ResourceLoader resourceLoader;

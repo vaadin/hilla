@@ -15,15 +15,15 @@
  */
 package com.vaadin.hilla.test.reactgrid;
 
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
+import com.vaadin.testbench.parallel.Browser;
 
 // Some tests modify the number of items, so they need to not run in parallel.
 @RunWith(BlockJUnit4ClassRunner.class)

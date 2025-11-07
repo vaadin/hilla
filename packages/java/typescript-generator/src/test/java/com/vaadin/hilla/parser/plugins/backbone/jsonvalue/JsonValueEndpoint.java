@@ -17,6 +17,7 @@ package com.vaadin.hilla.parser.plugins.backbone.jsonvalue;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint

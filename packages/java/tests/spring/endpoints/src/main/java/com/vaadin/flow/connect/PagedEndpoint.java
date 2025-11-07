@@ -18,8 +18,6 @@ package com.vaadin.flow.connect;
 import java.util.List;
 import java.util.Objects;
 
-import com.vaadin.hilla.Endpoint;
-
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
@@ -29,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.hilla.Endpoint;
 
 /**
  *

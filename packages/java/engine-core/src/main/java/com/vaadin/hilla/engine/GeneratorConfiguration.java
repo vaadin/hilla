@@ -15,12 +15,13 @@
  */
 package com.vaadin.hilla.engine;
 
-import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import org.jspecify.annotations.NonNull;
 
 import com.vaadin.hilla.parser.utils.ConfigList;
 

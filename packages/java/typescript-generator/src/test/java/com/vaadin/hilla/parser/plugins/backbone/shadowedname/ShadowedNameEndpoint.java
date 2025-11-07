@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.shadowedname;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.ArrayList;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class ShadowedNameEndpoint {

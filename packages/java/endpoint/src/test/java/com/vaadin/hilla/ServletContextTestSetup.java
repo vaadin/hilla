@@ -21,12 +21,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.vaadin.flow.di.Lookup;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
 import org.mockito.Mockito;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ServletContextAware;
+
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 @Component
 public class ServletContextTestSetup implements ServletContextAware {
