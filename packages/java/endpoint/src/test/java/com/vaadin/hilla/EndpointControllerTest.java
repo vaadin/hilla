@@ -574,8 +574,8 @@ public class EndpointControllerTest {
                 .thenReturn("{\"expectedLength\":5}");
 
         // uploaded file
-        when(multipartRequest.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Collections.singletonMap("/fileToCheck", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
@@ -600,8 +600,8 @@ public class EndpointControllerTest {
                 .thenReturn("{}");
 
         // uploaded file
-        when(multipartRequest.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Collections.singletonMap("/fileToCheck", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
@@ -620,16 +620,17 @@ public class EndpointControllerTest {
                         "{\"fileData\":{\"owner\":\"John\"},\"expectedLength\":5}");
 
         // uploaded file
-        when(multipartRequest.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileData/file", multipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Collections.singletonMap("/fileData/file", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkOwnedFileLength", multipartRequest, null);
+                TEST_ENDPOINT_NAME, "checkOwnedFileLength", multipartRequest,
+                null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check John's file length OK"));
-}
+    }
 
     @Test
     public void should_AcceptMultipleMultipartFiles() throws IOException {
@@ -642,22 +643,23 @@ public class EndpointControllerTest {
         when(otherMultipartFile.getOriginalFilename()).thenReturn("hello.txt");
         when(otherMultipartFile.getSize()).thenReturn(4L);
         when(otherMultipartFile.getInputStream())
-                .thenReturn(new ByteArrayInputStream ("Ciao".getBytes()));
+                .thenReturn(new ByteArrayInputStream("Ciao".getBytes()));
 
-        when(multipartRequest.getFileMap())
-                .thenReturn(Map.of("/file1", multipartFile, "/file2", otherMultipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Map.of("/file1", multipartFile, "/file2", otherMultipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkMultipleFiles", multipartRequest, null);
+                TEST_ENDPOINT_NAME, "checkMultipleFiles", multipartRequest,
+                null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check multiple files OK"));
-}
+    }
 
-@Test
-@Ignore("FIXME: this test is flaky, it fails when executed fast enough")
-public void should_bePossibeToGetPrincipalInEndpoint() {
+    @Test
+    @Ignore("FIXME: this test is flaky, it fails when executed fast enough")
+    public void should_bePossibeToGetPrincipalInEndpoint() {
         when(principal.getName()).thenReturn("foo");
 
         EndpointController vaadinController = createVaadinController(

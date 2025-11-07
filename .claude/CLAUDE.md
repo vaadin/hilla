@@ -18,7 +18,7 @@ Hilla is a web framework that integrates a Spring Boot Java backend with a react
 ```bash
 npm install
 npm run build
-mvn clean formatter:format install -DskipTests
+mvn clean spotless:apply install -DskipTests
 ```
 
 ### TypeScript Development
@@ -55,7 +55,7 @@ npm test:react
 mvn clean install -DskipTests
 
 # Format code according to Vaadin conventions
-mvn formatter:format
+mvn spotless:apply
 
 # Run Java tests
 mvn test

@@ -65,7 +65,7 @@ mvn clean install
 mvn test
 
 # Format code
-mvn formatter:format
+mvn spotless:apply
 ```
 
 ## Migration Notes

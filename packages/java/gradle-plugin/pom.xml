@@ -21,6 +21,7 @@
 
     <properties>
         <gradle.executable>./gradlew</gradle.executable>
+        <formatter.basedir>${project.parent.basedir}</formatter.basedir>
     </properties>
 
     <dependencies>

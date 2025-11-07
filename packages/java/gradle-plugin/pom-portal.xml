@@ -12,6 +12,11 @@
   <artifactId>com.vaadin.hilla.gradle.plugin</artifactId>
   <name>Gradle Plugin portal for Hilla Engine</name>
   <packaging>pom</packaging>
+
+  <properties>
+    <formatter.basedir>${project.parent.basedir}</formatter.basedir>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>

@@ -93,7 +93,7 @@ If you want to develop Hilla, you can clone the repo and run tests using the fol
 git clone https://github.com/vaadin/hilla.git
 npm install
 npm run build
-mvn clean formatter:format install -DskipTests
+mvn clean spotless:apply install -DskipTests
 npm test
 mvn verify -Pproduction
 ```
