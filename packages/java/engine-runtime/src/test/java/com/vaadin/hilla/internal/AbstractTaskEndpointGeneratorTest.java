@@ -1,14 +1,8 @@
 package com.vaadin.hilla.internal;
 
 import com.vaadin.flow.server.ExecutionFailedException;
-import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
-import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
-import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
-import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 

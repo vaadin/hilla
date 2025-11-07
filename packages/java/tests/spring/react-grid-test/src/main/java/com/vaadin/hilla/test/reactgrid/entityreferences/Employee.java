@@ -1,7 +1,6 @@
 package com.vaadin.hilla.test.reactgrid.entityreferences;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;

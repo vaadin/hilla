@@ -2,7 +2,6 @@ package com.vaadin.hilla.parser.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 public enum OpenAPIFileType {
     // Use custom configured Jackson 2 mappers to match test expectations

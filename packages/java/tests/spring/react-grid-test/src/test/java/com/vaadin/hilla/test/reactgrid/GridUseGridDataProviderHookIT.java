@@ -5,7 +5,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.testbench.TestBenchElement;
 

@@ -1,10 +1,8 @@
 package com.vaadin.hilla.maven;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Profile;

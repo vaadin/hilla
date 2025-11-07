@@ -3,7 +3,6 @@ package com.vaadin.hilla;
 import static org.mockito.Mockito.mock;
 
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
 import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;

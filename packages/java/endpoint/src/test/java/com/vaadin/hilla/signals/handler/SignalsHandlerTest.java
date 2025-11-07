@@ -7,7 +7,6 @@ import com.vaadin.hilla.signals.internal.InternalSignal;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.NumberSignal;
-import com.vaadin.signals.SignalEnvironment;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,8 +16,6 @@ import org.mockito.Mockito;
 
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
-
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

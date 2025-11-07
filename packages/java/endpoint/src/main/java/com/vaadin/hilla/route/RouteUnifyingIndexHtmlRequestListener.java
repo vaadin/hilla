@@ -15,8 +15,6 @@
  */
 package com.vaadin.hilla.route;
 
-import java.io.IOException;
-
 import org.jsoup.nodes.DataNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

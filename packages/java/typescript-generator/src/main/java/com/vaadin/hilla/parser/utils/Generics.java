@@ -2,7 +2,6 @@ package com.vaadin.hilla.parser.utils;
 
 import com.googlecode.gentyref.GenericTypeReflector;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;

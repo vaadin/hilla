@@ -16,7 +16,6 @@
 
 package com.vaadin.hilla.startup;
 
-import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.SynchronizedRequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
