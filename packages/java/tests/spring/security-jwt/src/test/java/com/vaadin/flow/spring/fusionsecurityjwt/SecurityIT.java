@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.Cookie;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SecurityIT
         extends com.vaadin.flow.spring.fusionsecurity.SecurityIT {
@@ -134,9 +134,13 @@ public class SecurityIT
         Assert.assertNotNull(jwtCookie);
 
         String payload = jwtCookie.getValue().split("\\.")[1];
-        JsonObject payloadJson = Json
-                .parse(new String(Base64.getUrlDecoder().decode(payload)));
-        Assert.assertEquals(expectedUsername, payloadJson.getString("sub"));
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode payloadJson = objectMapper.readTree(new String(Base64.getUrlDecoder().decode(payload)));
+            Assert.assertEquals(expectedUsername, payloadJson.get("sub").asText());
+        } catch (Exception e) {
+            Assert.fail("Failed to parse JWT payload: " + e.getMessage());
+        }
     }
 
 }
