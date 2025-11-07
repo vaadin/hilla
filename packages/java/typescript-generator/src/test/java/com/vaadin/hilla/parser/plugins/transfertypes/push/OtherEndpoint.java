@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.push;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import reactor.core.publisher.Flux;
 
 // The purpose of this additional endpoint is to test multiple endpoints

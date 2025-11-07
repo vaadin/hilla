@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.complextype;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.List;
 import java.util.Map;
 

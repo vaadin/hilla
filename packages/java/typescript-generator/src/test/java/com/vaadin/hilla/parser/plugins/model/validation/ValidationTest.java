@@ -1,12 +1,12 @@
 package com.vaadin.hilla.parser.plugins.model.validation;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.hilla.parser.plugins.model.Endpoint;
-import com.vaadin.hilla.parser.plugins.model.EndpointExposed;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.parser.core.Parser;

@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.jackson;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;

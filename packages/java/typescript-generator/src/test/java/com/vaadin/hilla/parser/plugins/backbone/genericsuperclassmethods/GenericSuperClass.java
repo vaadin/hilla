@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.plugins.backbone.genericsuperclassmethods;
 
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
+
 @EndpointExposed
 public class GenericSuperClass<T> {
 

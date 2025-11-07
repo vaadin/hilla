@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.core.dependency;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;

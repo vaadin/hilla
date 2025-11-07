@@ -1,6 +1,7 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.push;
 
 import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import reactor.core.publisher.Flux;
 
 @Endpoint

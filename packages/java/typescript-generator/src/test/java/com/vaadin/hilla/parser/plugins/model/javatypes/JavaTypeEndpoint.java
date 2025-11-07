@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.model.javatypes;
 
-import com.vaadin.hilla.parser.plugins.model.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

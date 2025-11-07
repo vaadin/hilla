@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.complexhierarchy.models;
 
-import com.vaadin.hilla.parser.plugins.backbone.complexhierarchy.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class ComplexHierarchyGrandParentEndpoint {

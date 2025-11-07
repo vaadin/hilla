@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.plugins.nonnull.superclassmethods;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+
 @Endpoint
 public class PersonEndpoint extends CrudEndpoint<PersonEndpoint.Person, Integer>
         implements PagedData<PersonEndpoint.Person> {

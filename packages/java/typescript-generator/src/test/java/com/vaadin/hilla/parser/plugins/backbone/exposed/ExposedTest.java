@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.plugins.backbone.exposed;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;

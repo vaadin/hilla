@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.multipartfilechecker;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.List;
 import java.util.Set;
 
