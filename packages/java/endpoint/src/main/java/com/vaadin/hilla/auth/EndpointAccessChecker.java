@@ -13,17 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.auth;
-
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.util.function.Function;
 
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.lang.reflect.Method;
+import java.security.Principal;
+import java.util.function.Function;
 
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;

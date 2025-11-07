@@ -112,7 +112,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Validate Java Format
-        run: mvn -B formatter:validate
+        run: mvn -B spotless:check
       - name: Lint TypeScript
         run: npm run check
 

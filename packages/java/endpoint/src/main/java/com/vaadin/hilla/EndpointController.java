@@ -15,18 +15,14 @@
  */
 package com.vaadin.hilla;
 
-import com.vaadin.hilla.signals.handler.SignalsHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import tools.jackson.core.JsonPointer;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,6 +36,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
@@ -51,6 +51,7 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
+import com.vaadin.hilla.signals.handler.SignalsHandler;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.

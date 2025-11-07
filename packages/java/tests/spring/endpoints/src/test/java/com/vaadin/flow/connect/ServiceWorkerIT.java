@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.testutil.ChromeDeviceTest;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import com.vaadin.flow.testutil.ChromeDeviceTest;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Class for testing issues in a spring-boot container.

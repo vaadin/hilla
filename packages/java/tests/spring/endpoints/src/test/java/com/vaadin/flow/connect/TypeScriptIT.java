@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.connect;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;

@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.utils;
 
 import java.io.BufferedReader;
@@ -27,8 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
-
-import org.junit.Assert;
 
 public final class TestUtils {
     private TestUtils() {

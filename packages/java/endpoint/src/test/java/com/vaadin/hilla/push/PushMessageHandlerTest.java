@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.push;
 
 import java.time.Duration;
@@ -10,21 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import tools.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.EndpointControllerConfiguration;
-import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
-import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.EndpointProperties;
-import com.vaadin.hilla.EndpointSubscription;
-import com.vaadin.hilla.ServletContextTestSetup;
-import com.vaadin.hilla.push.PushMessageHandler.SubscriptionInfo;
-import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
-import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
-import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
-import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
-import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
-import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
 import org.junit.Assert;
@@ -40,6 +40,22 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
+
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.EndpointControllerConfiguration;
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
+import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.EndpointProperties;
+import com.vaadin.hilla.EndpointSubscription;
+import com.vaadin.hilla.ServletContextTestSetup;
+import com.vaadin.hilla.push.PushMessageHandler.SubscriptionInfo;
+import com.vaadin.hilla.push.messages.fromclient.SubscribeMessage;
+import com.vaadin.hilla.push.messages.fromclient.UnsubscribeMessage;
+import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
+import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
+import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
+import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,

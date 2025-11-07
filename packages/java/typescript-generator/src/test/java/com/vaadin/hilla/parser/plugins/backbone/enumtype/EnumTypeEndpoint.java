@@ -15,8 +15,9 @@
  */
 package com.vaadin.hilla.parser.plugins.backbone.enumtype;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.List;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class EnumTypeEndpoint {
@@ -39,8 +40,12 @@ public class EnumTypeEndpoint {
     }
 
     public enum EnumEntity {
-        ENUM1(1), ENUM2(2), ENUM_2(2), HELLO_WORLD(3), _HELLO(
-                4), MANY_MANY_WORDS(5);
+        ENUM1(1),
+        ENUM2(2),
+        ENUM_2(2),
+        HELLO_WORLD(3),
+        _HELLO(4),
+        MANY_MANY_WORDS(5);
 
         private final int value;
 

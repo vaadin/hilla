@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.rest;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +22,12 @@ import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import jakarta.servlet.ServletContext;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,15 +46,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
-
-import jakarta.servlet.ServletContext;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest

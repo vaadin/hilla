@@ -15,8 +15,8 @@
  */
 package com.vaadin.hilla.typeconversion;
 
-import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.EndpointControllerMockBuilder;
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,8 +36,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
-import java.io.IOException;
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest

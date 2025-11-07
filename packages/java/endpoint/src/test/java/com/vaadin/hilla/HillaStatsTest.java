@@ -15,31 +15,6 @@
  */
 package com.vaadin.hilla;
 
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.internal.UsageStatistics;
-import com.vaadin.flow.router.RouteData;
-import com.vaadin.flow.router.Router;
-import com.vaadin.flow.server.Platform;
-import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import static com.vaadin.hilla.HillaStats.ENDPOINT_ACTIVE;
 import static com.vaadin.hilla.HillaStats.HAS_ENDPOINT;
 import static com.vaadin.hilla.HillaStats.HAS_HILLA_CUSTOM_ROUTE;
@@ -53,6 +28,32 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import net.jcip.annotations.NotThreadSafe;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.UsageStatistics;
+import com.vaadin.flow.router.RouteData;
+import com.vaadin.flow.router.Router;
+import com.vaadin.flow.server.Platform;
+import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 @NotThreadSafe
 public class HillaStatsTest {
