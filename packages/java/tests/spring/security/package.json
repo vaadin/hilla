@@ -37,8 +37,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.0.0-beta3",
-    "@vaadin/icon": "25.0.0-beta3",
-    "@vaadin/icons": "25.0.0-beta3",
+    "@vaadin/icon": "25.0.0-beta4",
+    "@vaadin/icons": "25.0.0-beta4",
     "@vaadin/input-container": "25.0.0-beta3",
     "@vaadin/integer-field": "25.0.0-beta3",
     "@vaadin/item": "25.0.0-beta3",
@@ -70,7 +70,7 @@
     "@vaadin/text-area": "25.0.0-beta3",
     "@vaadin/text-field": "25.0.0-beta3",
     "@vaadin/time-picker": "25.0.0-beta3",
-    "@vaadin/tooltip": "25.0.0-beta3",
+    "@vaadin/tooltip": "25.0.0-beta4",
     "@vaadin/upload": "25.0.0-beta3",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.0.0-beta3",
@@ -145,8 +145,8 @@
       "@vaadin/hilla-frontend": "25.0.0-beta3",
       "@vaadin/hilla-lit-form": "25.0.0-beta3",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.0.0-beta3",
-      "@vaadin/icons": "25.0.0-beta3",
+      "@vaadin/icon": "25.0.0-beta4",
+      "@vaadin/icons": "25.0.0-beta4",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -178,7 +178,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.0.0-beta3",
+      "@vaadin/tooltip": "25.0.0-beta4",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.0.0-beta3",
@@ -217,7 +217,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "4545e9edc47ab7f6f541dcb9182e4cbeb5d824037a679591d19c3eee021a6607"
+    "hash": "be7397672eba60d8c130b965f091866c6de3b4e17aaad7c7c1b2dbfbca7c059b"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

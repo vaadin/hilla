@@ -6,10 +6,10 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
-    "@vaadin/icon": "25.0.0-beta3",
-    "@vaadin/icons": "25.0.0-beta3",
+    "@vaadin/icon": "25.0.0-beta4",
+    "@vaadin/icons": "25.0.0-beta4",
     "@vaadin/router": "2.0.0",
-    "@vaadin/tooltip": "25.0.0-beta3",
+    "@vaadin/tooltip": "25.0.0-beta4",
     "@vaadin/vaadin-lumo-styles": "25.0.0-beta3",
     "@vaadin/vaadin-themable-mixin": "25.0.0-beta3",
     "lit": "3.3.1"
@@ -47,10 +47,10 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/hilla-frontend": "25.0.0-beta3",
       "@vaadin/hilla-lit-form": "25.0.0-beta3",
-      "@vaadin/icon": "25.0.0-beta3",
-      "@vaadin/icons": "25.0.0-beta3",
+      "@vaadin/icon": "25.0.0-beta4",
+      "@vaadin/icons": "25.0.0-beta4",
       "@vaadin/router": "2.0.0",
-      "@vaadin/tooltip": "25.0.0-beta3",
+      "@vaadin/tooltip": "25.0.0-beta4",
       "@vaadin/vaadin-lumo-styles": "25.0.0-beta3",
       "@vaadin/vaadin-themable-mixin": "25.0.0-beta3",
       "lit": "3.3.1"
@@ -83,7 +83,7 @@
       "vite-plugin-checker": "0.11.0",
       "workbox-build": "7.3.0"
     },
-    "hash": "da9005100d9bc7f3cc802bb75e3ee8f6828c2ad73ab8c5b7194e5c9c7d33b9c8"
+    "hash": "e61490a1386a61724ce78bc214ecc5835a5a1402edd66702ed6acbba00c518d8"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
