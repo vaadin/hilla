@@ -181,11 +181,11 @@ public class JacksonPropertyModelTests {
         }
 
         var expected = switch (name) {
-        case "propertyGetterOnly", "propertySetterOnly" -> new Expected(false,
-                Optional.empty());
-        default -> new Expected(true,
-                Optional.of(FieldInfoModel.of(getDeclaredField(
-                        JacksonPropertySharedTests.Sample.class, name))));
+        case "propertyGetterOnly", "propertySetterOnly" ->
+            new Expected(false, Optional.empty());
+        default ->
+            new Expected(true, Optional.of(FieldInfoModel.of(getDeclaredField(
+                    JacksonPropertySharedTests.Sample.class, name))));
         };
 
         assertEquals(expected.hasField(), model.hasField());
@@ -201,8 +201,8 @@ public class JacksonPropertyModelTests {
         }
 
         var expected = switch (name) {
-        case "publicProperty", "renamedPublicProperty", "propertySetterOnly" -> new Expected(
-                false, Optional.empty());
+        case "publicProperty", "renamedPublicProperty", "propertySetterOnly" ->
+            new Expected(false, Optional.empty());
         default -> new Expected(true,
                 Optional.of(MethodInfoModel.of(getDeclaredMethod(
                         JacksonPropertySharedTests.Sample.class,
@@ -222,10 +222,12 @@ public class JacksonPropertyModelTests {
         }
 
         var expected = switch (name) {
-        case "privatePropertyWithAccessors", "propertySetterOnly" -> new Expected(
-                true,
-                getAnyDeclaredMethod(JacksonPropertySharedTests.Sample.class,
-                        toSetterName(name)).map(MethodInfoModel::of));
+        case "privatePropertyWithAccessors",
+                "propertySetterOnly" ->
+            new Expected(true,
+                    getAnyDeclaredMethod(
+                            JacksonPropertySharedTests.Sample.class,
+                            toSetterName(name)).map(MethodInfoModel::of));
         default -> new Expected(false, Optional.empty());
         };
 

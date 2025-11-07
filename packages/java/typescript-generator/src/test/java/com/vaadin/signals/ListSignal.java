@@ -1,3 +1,4 @@
 package com.vaadin.signals;
 
-public record ListSignal<T>() {}
+public record ListSignal<T>() {
+}

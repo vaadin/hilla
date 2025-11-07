@@ -1,3 +1,4 @@
 package com.vaadin.signals;
 
-public record NumberSignal() {}
+public record NumberSignal() {
+}

@@ -125,8 +125,9 @@ public class BaseSignatureModelTests {
     }
 
     private enum ModelKind {
-        SOURCE("SOURCE"), REFLECTION_COMPLETE(
-                "REFLECTION (complete)"), REFLECTION_BARE("REFLECTION (bare)");
+        SOURCE("SOURCE"),
+        REFLECTION_COMPLETE("REFLECTION (complete)"),
+        REFLECTION_BARE("REFLECTION (bare)");
 
         private final String text;
 

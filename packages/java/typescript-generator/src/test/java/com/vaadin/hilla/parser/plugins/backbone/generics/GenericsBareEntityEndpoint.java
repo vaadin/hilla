@@ -23,9 +23,7 @@ public class GenericsBareEntityEndpoint {
         return ref;
     }
 
-    public record GenericsRecord<T1,T2>(
-    T1 first, T2 second)
-    {
+    public record GenericsRecord<T1, T2>(T1 first, T2 second) {
     }
 
     public GenericsRecord<String, String> getRecord(

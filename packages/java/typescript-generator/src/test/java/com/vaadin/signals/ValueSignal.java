@@ -1,3 +1,4 @@
 package com.vaadin.signals;
 
-public record ValueSignal<T>() {}
+public record ValueSignal<T>() {
+}
