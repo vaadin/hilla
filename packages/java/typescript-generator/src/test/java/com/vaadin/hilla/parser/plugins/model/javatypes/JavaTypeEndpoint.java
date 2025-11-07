@@ -23,7 +23,6 @@ import java.util.List;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
-
 @Endpoint
 public class JavaTypeEndpoint {
     public JavaTypeTestEntity getTestEntity() {
