@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.datetime;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;

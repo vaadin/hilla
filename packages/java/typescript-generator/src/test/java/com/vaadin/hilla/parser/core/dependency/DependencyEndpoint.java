@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.core.dependency;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+
 @Endpoint
 public class DependencyEndpoint {
     private final DependencyEntityOne entityOne = new DependencyEntityOne();

@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.datetime;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

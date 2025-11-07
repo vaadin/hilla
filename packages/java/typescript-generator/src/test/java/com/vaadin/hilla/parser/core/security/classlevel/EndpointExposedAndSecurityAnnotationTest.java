@@ -2,9 +2,9 @@ package com.vaadin.hilla.parser.core.security.classlevel;
 
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.core.ParserException;
-import com.vaadin.hilla.parser.core.basic.Endpoint;
-import com.vaadin.hilla.parser.core.security.EndpointExposed;
 import com.vaadin.hilla.parser.testutils.ResourceLoader;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
@@ -39,7 +39,7 @@ public class EndpointExposedAndSecurityAnnotationTest {
                         .execute(endpoints));
 
         assertTrue(exception.getMessage().startsWith(
-                "Class `com.vaadin.hilla.parser.core.security.classlevel.ParentEndpoint` is annotated with `com.vaadin.hilla.parser.core.security.EndpointExposed` and `jakarta.annotation.security.RolesAllowed` annotation."));
+                "Class `com.vaadin.hilla.parser.core.security.classlevel.ParentEndpoint` is annotated with `com.vaadin.hilla.parser.testutils.annotations.EndpointExposed` and `jakarta.annotation.security.RolesAllowed` annotation."));
 
     }
 }

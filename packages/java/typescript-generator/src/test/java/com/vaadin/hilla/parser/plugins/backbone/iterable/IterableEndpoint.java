@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.backbone.iterable;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

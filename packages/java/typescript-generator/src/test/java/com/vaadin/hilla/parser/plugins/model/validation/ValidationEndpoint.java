@@ -1,9 +1,9 @@
 package com.vaadin.hilla.parser.plugins.model.validation;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.vaadin.hilla.parser.plugins.model.Endpoint;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;

@@ -16,6 +16,7 @@
 
 package com.vaadin.hilla.parser.plugins.nonnull.superclassmethods;
 
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

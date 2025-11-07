@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.nonnull.basic;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

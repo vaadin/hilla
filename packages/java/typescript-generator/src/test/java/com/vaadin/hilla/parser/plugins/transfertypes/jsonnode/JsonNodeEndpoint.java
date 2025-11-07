@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.jsonnode;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;

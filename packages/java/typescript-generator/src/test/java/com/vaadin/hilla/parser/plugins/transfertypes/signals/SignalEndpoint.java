@@ -1,5 +1,6 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.signals;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.NumberSignal;
 import com.vaadin.signals.Signal;

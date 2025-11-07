@@ -7,6 +7,8 @@ import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
 import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint;
 import com.vaadin.hilla.parser.plugins.nonnull.test.helpers.TestHelper;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

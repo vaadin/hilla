@@ -3,9 +3,9 @@ package com.vaadin.hilla.parser.plugins.model.annotations;
 import com.vaadin.hilla.parser.core.Parser;
 import com.vaadin.hilla.parser.model.test.helpers.TestHelper;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.model.Endpoint;
-import com.vaadin.hilla.parser.plugins.model.EndpointExposed;
 import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

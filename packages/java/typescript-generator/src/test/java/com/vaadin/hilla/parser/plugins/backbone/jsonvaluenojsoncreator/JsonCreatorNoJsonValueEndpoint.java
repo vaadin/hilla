@@ -2,6 +2,7 @@ package com.vaadin.hilla.parser.plugins.backbone.jsonvaluenojsoncreator;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
 @Endpoint
 public class JsonCreatorNoJsonValueEndpoint {

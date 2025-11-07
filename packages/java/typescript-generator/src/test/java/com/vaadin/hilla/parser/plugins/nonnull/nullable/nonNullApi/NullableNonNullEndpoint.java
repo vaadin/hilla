@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi;
 
-import com.vaadin.hilla.parser.plugins.nonnull.nullable.Endpoint;
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Id;
 import jakarta.persistence.Version;

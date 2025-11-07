@@ -1,5 +1,7 @@
 package com.vaadin.hilla.parser.core.basic;
 
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+
 @Endpoint
 public class BasicEndpoint {
     public final String foo = "FOO";

@@ -16,6 +16,7 @@
 
 package com.vaadin.hilla.parser.plugins.backbone.superclassmethods;
 
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 import java.util.Optional;
 
 @EndpointExposed
