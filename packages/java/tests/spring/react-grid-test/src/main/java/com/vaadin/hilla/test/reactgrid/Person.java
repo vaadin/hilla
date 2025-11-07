@@ -17,7 +17,11 @@ package com.vaadin.hilla.test.reactgrid;
 
 import jakarta.persistence.Entity;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Entity

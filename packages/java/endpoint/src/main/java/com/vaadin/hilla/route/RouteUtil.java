@@ -33,7 +33,8 @@ import org.springframework.util.AntPathMatcher;
 
 import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
 import com.vaadin.flow.internal.menu.MenuRegistry;
-import com.vaadin.flow.server.*;
+import com.vaadin.flow.server.Mode;
+import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
