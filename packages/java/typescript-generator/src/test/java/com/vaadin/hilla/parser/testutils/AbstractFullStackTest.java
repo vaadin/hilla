@@ -148,15 +148,27 @@ public abstract class AbstractFullStackTest {
             // Find the run-generator.mjs script
             Path scriptPath = findGeneratorScript();
 
-            // Execute the generator via Node.js
-            NodeRunner nodeRunner = new NodeRunner(targetDir.toFile());
-            NodeRunner.NodeResult result = nodeRunner.execute(
-                    scriptPath.toFile().getAbsolutePath(), openAPIJson);
+            // Write OpenAPI JSON to temp file (FrontendUtils doesn't support stdin piping)
+            Path tempFile = Files.createTempFile("openapi", ".json");
+            String output;
+            try {
+                Files.writeString(tempFile, openAPIJson);
+
+                // Execute Node.js script using Flow's FrontendUtils
+                output = com.vaadin.flow.server.frontend.FrontendUtils
+                        .executeCommand(
+                                List.of("node",
+                                        scriptPath.toFile().getAbsolutePath()),
+                                pb -> pb.directory(targetDir.toFile())
+                                        .redirectInput(tempFile.toFile()));
+            } finally {
+                Files.deleteIfExists(tempFile);
+            }
 
             // Parse the output JSON
             @SuppressWarnings("unchecked")
-            Map<String, Object> resultJson = objectMapper
-                    .readValue(result.getStdout(), Map.class);
+            Map<String, Object> resultJson = objectMapper.readValue(output,
+                    Map.class);
 
             @SuppressWarnings("unchecked")
             List<Map<String, String>> filesJson = (List<Map<String, String>>) resultJson
@@ -183,7 +195,7 @@ public abstract class AbstractFullStackTest {
         } catch (JsonProcessingException e) {
             throw new FullStackExecutionException(
                     "Failed to serialize OpenAPI to JSON", e);
-        } catch (NodeRunner.NodeExecutionException e) {
+        } catch (com.vaadin.flow.server.frontend.FrontendUtils.CommandExecutionException e) {
             throw new FullStackExecutionException(
                     "Failed to execute TypeScript generator", e);
         } catch (IOException e) {
