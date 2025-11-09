@@ -119,8 +119,7 @@ public abstract class AbstractFullStackTest {
                 .endpointExposedAnnotations(List.of(EndpointExposed.class))
                 .addPlugin(new BackbonePlugin())
                 .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new ModelPlugin())
-                .addPlugin(new NonnullPlugin())
+                .addPlugin(new ModelPlugin()).addPlugin(new NonnullPlugin())
                 .addPlugin(new SubTypesPlugin())
                 .addPlugin(new MultipartFileCheckerPlugin())
                 .execute(Arrays.asList(endpointClasses));
@@ -148,7 +147,8 @@ public abstract class AbstractFullStackTest {
             // Find the run-generator.mjs script
             Path scriptPath = findGeneratorScript();
 
-            // Write OpenAPI JSON to temp file (FrontendUtils doesn't support stdin piping)
+            // Write OpenAPI JSON to temp file (FrontendUtils doesn't support
+            // stdin piping)
             Path tempFile = Files.createTempFile("openapi", ".json");
             String output;
             try {
