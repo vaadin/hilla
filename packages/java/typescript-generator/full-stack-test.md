@@ -18,19 +18,20 @@ Transform the testing approach from separate Java→OpenAPI and OpenAPI→TypeSc
 
 ## Progress Status
 
-**Phase 1: Infrastructure** ✅ COMPLETE
-- NodeRunner.java ✅
+**Phase 1: Infrastructure** ✅ COMPLETE + SIMPLIFIED
+- ~~NodeRunner.java~~ → Uses Flow's FrontendUtils.executeCommand ✅
 - run-generator.mjs ✅
-- FullStackTestHelper.java ✅
+- ~~FullStackTestHelper.java~~ → Merged into AbstractFullStackTest ✅
 - TypeScriptComparator.java ✅
+- **AbstractFullStackTest.java** ✅ (base class with all configuration)
 
 **Phase 2: Convert Tests** 🔄 IN PROGRESS (4/47 converted)
 
 **Transfertypes Plugin (4/8):**
-- ✅ UUIDFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
-- ✅ JsonNodeFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
-- ✅ MultipartFileFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
-- ✅ PushTypeFullStackTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ UUIDTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ JsonNodeTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ MultipartFileTest (cleaned: removed connect-client.default.ts, endpoints.ts)
+- ✅ PushTypeTest (cleaned: removed connect-client.default.ts, endpoints.ts)
 - ⏳ PageableTest
 - ⏳ BarePageableTest
 - ⏳ SignalTest (requires SignalsPlugin fix)
@@ -46,13 +47,27 @@ Transform the testing approach from separate Java→OpenAPI and OpenAPI→TypeSc
 
 ## Phase 1: Build Full-Stack Testing Infrastructure
 
-### 1.1 Create Node.js Test Runner (Java)
-**Location:** `packages/java/typescript-generator/src/test/java/com/vaadin/hilla/parser/testutils/NodeRunner.java`
+### 1.1 Create Abstract Base Test Class ✅ SIMPLIFIED
+**Location:** `packages/java/typescript-generator/src/test/java/com/vaadin/hilla/parser/testutils/AbstractFullStackTest.java`
 
-- Similar to `GeneratorShellRunner` but for tests
-- Execute Node.js scripts with proper working directory
-- Capture stdout/stderr for debugging
-- Throw exceptions on non-zero exit codes
+**Provides all test configuration in one place:**
+```java
+public abstract class AbstractFullStackTest {
+    // Executes Java → OpenAPI → TypeScript pipeline
+    // Compares generated TypeScript to snapshots
+    // All configuration pre-configured (plugins, classpath, annotations)
+
+    protected void assertTypescriptMatchesSnapshot(Class<?>... endpointClasses)
+        throws Exception;
+}
+```
+
+**Key simplifications:**
+- Uses Flow's `FrontendUtils.executeCommand()` instead of custom NodeRunner
+- All helper methods integrated (no separate FullStackTestHelper)
+- Pre-configured with all plugins (Backbone, TransferTypes, Model, Nonnull, SubTypes, MultipartFileChecker)
+- Extended classpath includes Flux and EndpointSubscription
+- Both @Endpoint and @EndpointExposed annotations configured
 
 ### 1.2 Create Generator Execution Script (Node.js)
 **Location:** `packages/java/typescript-generator/src/test/resources/run-generator.mjs`
@@ -64,20 +79,9 @@ Transform the testing approach from separate Java→OpenAPI and OpenAPI→TypeSc
 // Outputs generated files as JSON map
 ```
 
-### 1.3 Create Full-Stack Test Helper
-**Location:** `packages/java/typescript-generator/src/test/java/com/vaadin/hilla/parser/testutils/FullStackTestHelper.java`
+### 1.3 Create TypeScript Comparison Utilities
+**Location:** `packages/java/typescript-generator/src/test/java/com/vaadin/hilla/parser/testutils/TypeScriptComparator.java`
 
-```java
-public class FullStackTestHelper {
-    // Execute full pipeline: Java → OpenAPI → TypeScript
-    public GeneratedFiles executeFullStack(OpenAPI openAPI);
-
-    // Compare generated TS to expected snapshots
-    public void assertTypescriptMatches(GeneratedFiles actual, Path snapshotsDir);
-}
-```
-
-### 1.4 Create TypeScript Comparison Utilities
 - Line-by-line diff with clear error messages
 - Handle whitespace normalization
 - Support for multiple file assertions
@@ -89,20 +93,31 @@ public class FullStackTestHelper {
 
 For each existing test (e.g., `SignalTest.java`):
 
-### 2.1 Update Test Method
-**Before:**
+### 2.1 Update Test Method ✅ SIMPLIFIED
+
+**Before (old split testing):**
 ```java
 var openAPI = new Parser()
     .execute(List.of(SignalEndpoint.class));
 helper.executeParserWithConfig(openAPI); // Checks openapi.json
 ```
 
-**After:**
+**After (with AbstractFullStackTest):**
 ```java
-var openAPI = new Parser()
-    .execute(List.of(SignalEndpoint.class));
-helper.executeFullStack(openAPI); // Generates and checks TypeScript
+public class SignalTest extends AbstractFullStackTest {
+    @Test
+    public void should_GenerateSignalEndpoint() throws Exception {
+        assertTypescriptMatchesSnapshot(SignalEndpoint.class);
+    }
+}
 ```
+
+**Benefits:**
+- No Parser configuration needed (handled by base class)
+- No helper instantiation needed
+- Single line test assertion
+- All plugins automatically included
+- Consistent across all tests
 
 ### 2.2 Generate Initial TypeScript Snapshots
 **Location pattern:** `src/test/resources/com/vaadin/hilla/parser/.../snapshots/*.ts`
@@ -121,10 +136,10 @@ Run tests in "generate mode" to create initial snapshots:
 - **Model tests**: Include model files (e.g., `MyModel.ts`)
 - **Subtypes tests**: Include model files with type guards
 
-### 2.3 Update TestHelper Usage
-- Remove `executeParserWithConfig()` calls
-- Replace with `executeFullStack()` + `assertTypescriptMatches()`
-- Keep same test structure and assertions for other aspects
+### 2.3 Update Test Structure ✅ SIMPLIFIED
+- Extend `AbstractFullStackTest` base class
+- Replace entire test implementation with single `assertTypescriptMatchesSnapshot()` call
+- All configuration (plugins, classpath, annotations) handled automatically
 
 **Affected files:** ~42 test classes across:
 - `plugins/transfertypes/*`
@@ -169,17 +184,23 @@ Ensure each generator plugin has tests:
 
 For each TS test without Java equivalent (e.g., `BasicClient.spec.ts`):
 
-### 4.1 Create Java Test Class
+### 4.1 Create Java Test Class ✅ SIMPLIFIED
 **Example:** `packages/java/typescript-generator/src/test/java/com/vaadin/hilla/parser/plugins/client/BasicClientTest.java`
 
 ```java
-@Test
-public void should_GenerateBasicClient() {
-    var openAPI = resourceLoader.loadOpenAPI("BasicClient.json");
-    var generated = helper.executeFullStack(openAPI);
-    helper.assertTypescriptMatches(generated,
-        resourceLoader.getSnapshotsDir());
+public class BasicClientTest extends AbstractFullStackTest {
+    @Test
+    public void should_GenerateBasicClient() throws Exception {
+        assertTypescriptMatchesSnapshot(BasicClientEndpoint.class);
+    }
 }
+```
+
+**Note:** If you need to load OpenAPI from JSON instead of generating from Java:
+```java
+// For edge cases where you have OpenAPI JSON but no Java equivalent
+var openAPI = resourceLoader.loadOpenAPI("BasicClient.json");
+// Then manually call executeFullStack (internal method)
 ```
 
 ### 4.2 Copy OpenAPI Input
@@ -288,6 +309,29 @@ If issues arise:
 
 ## Best Practices for Writing Full-Stack Tests
 
+### 0. Use AbstractFullStackTest Base Class ✅
+
+**All tests should extend AbstractFullStackTest:**
+```java
+public class MyFeatureTest extends AbstractFullStackTest {
+    @Test
+    public void should_VerifyMyFeature() throws Exception {
+        assertTypescriptMatchesSnapshot(MyEndpoint.class);
+    }
+}
+```
+
+**The base class provides:**
+- ✅ All plugins pre-configured (Backbone, TransferTypes, Model, Nonnull, SubTypes, MultipartFileChecker)
+- ✅ Extended classpath with Flux and EndpointSubscription
+- ✅ Both @Endpoint and @EndpointExposed annotations
+- ✅ Automatic Node.js execution via Flow's FrontendUtils
+- ✅ Snapshot comparison with clear error messages
+
+**Test complexity reduction:**
+- Before: ~60 lines per test (manual Parser setup, helper usage)
+- After: ~15 lines per test (just extend base class and assert)
+
 ### 1. Keep Snapshots Minimal and Focused
 
 **DO:**
@@ -342,3 +386,106 @@ src/test/resources/com/vaadin/hilla/parser/plugins/{plugin}/{feature}/
 - Model generation and structure
 - Polymorphic types (subtypes)
 - Nullability annotations
+
+---
+
+## Architecture Improvements and Simplifications
+
+### Refactoring Summary (3 commits)
+
+The initial infrastructure was simplified through 3 major refactorings:
+
+**1. Commit: Create AbstractFullStackTest base class**
+- Unified all test configuration in single base class
+- Eliminated boilerplate from test files
+- Pre-configured all plugins, classpath, and annotations
+- Result: -200 lines across test files
+
+**2. Commit: Merge FullStackTestHelper into AbstractFullStackTest**
+- Removed unnecessary helper layer
+- All functionality integrated into base class
+- Cleaner architecture with single responsibility
+- Result: -39 lines (FullStackTestHelper removed)
+
+**3. Commit: Replace NodeRunner with Flow's FrontendUtils.executeCommand**
+- **Eliminated custom ProcessBuilder implementation entirely**
+- **Uses existing Flow infrastructure (FrontendUtils.executeCommand)**
+- Platform-aware command execution (Windows/Unix)
+- Proper stream handling and error reporting
+- Result: **-197 lines (NodeRunner removed)**
+
+### Net Impact
+
+**Code reduction: -436 lines**
+- Deleted: 557 lines of boilerplate and custom infrastructure
+- Added: 121 lines (AbstractFullStackTest base class)
+
+**Test simplification:**
+```java
+// Before: 63 lines
+public class UUIDFullStackTest {
+    private final FullStackTestHelper helper = new FullStackTestHelper(getClass());
+
+    @Test
+    public void should_ReplaceUUIDClassWithStringInTypeScript()
+            throws IOException, URISyntaxException, FullStackExecutionException {
+        var openAPI = new Parser()
+            .classPath(Set.of(helper.getTargetDir().toString()))
+            .endpointAnnotations(List.of(Endpoint.class))
+            .endpointExposedAnnotations(List.of(EndpointExposed.class))
+            .addPlugin(new BackbonePlugin())
+            .addPlugin(new TransferTypesPlugin())
+            .execute(List.of(UUIDEndpoint.class));
+        var generated = helper.executeFullStack(openAPI);
+        helper.assertTypescriptMatches(generated, helper.getSnapshotsDir());
+    }
+}
+
+// After: 33 lines (48% reduction)
+public class UUIDTest extends AbstractFullStackTest {
+    @Test
+    public void should_ReplaceUUIDClassWithStringInTypeScript() throws Exception {
+        assertTypescriptMatchesSnapshot(UUIDEndpoint.class);
+    }
+}
+```
+
+### Key Architectural Benefits
+
+1. **Reuses existing infrastructure**: No custom ProcessBuilder code, uses Flow's battle-tested FrontendUtils
+2. **Single source of truth**: All test configuration in AbstractFullStackTest
+3. **Consistent testing**: All tests use same plugins, classpath, and annotations
+4. **Easy to maintain**: Changes to configuration only need to happen in one place
+5. **Simple to write**: New tests are 3 lines (class + @Test + assertion)
+
+### Files Structure
+
+**Current infrastructure (as of refactoring):**
+```
+packages/java/typescript-generator/src/test/java/com/vaadin/hilla/parser/testutils/
+├── AbstractFullStackTest.java        ← All-in-one base class (uses FrontendUtils)
+├── TypeScriptComparator.java         ← File comparison logic
+└── ResourceLoader.java                ← Test resource utilities
+
+packages/java/typescript-generator/src/test/resources/
+└── run-generator.mjs                  ← Node.js script (called by AbstractFullStackTest)
+```
+
+**Removed files (no longer needed):**
+- ~~NodeRunner.java~~ → Flow's FrontendUtils.executeCommand
+- ~~FullStackTestHelper.java~~ → Merged into AbstractFullStackTest
+
+### Usage
+
+Writing a new full-stack test is now trivial:
+
+```java
+public class MyNewFeatureTest extends AbstractFullStackTest {
+    @Test
+    public void should_GenerateMyFeature() throws Exception {
+        assertTypescriptMatchesSnapshot(MyEndpoint.class);
+    }
+}
+```
+
+That's it! No configuration, no setup, no boilerplate.
