@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-crud",
-  "version": "24.8.12",
+  "version": "24.8.13",
   "description": "Hilla CRUD utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -54,9 +54,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.8.12",
-    "@vaadin/hilla-lit-form": "24.8.12",
-    "@vaadin/hilla-react-form": "24.8.12",
+    "@vaadin/hilla-frontend": "24.8.13",
+    "@vaadin/hilla-lit-form": "24.8.13",
+    "@vaadin/hilla-react-form": "24.8.13",
     "@vaadin/vaadin-lumo-styles": "24.8.12",
     "@vaadin/react-components": "24.8.12",
     "type-fest": "4.35.0"
