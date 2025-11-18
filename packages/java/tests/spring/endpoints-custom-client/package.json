@@ -10,7 +10,7 @@
     "@vaadin/icon": "24.8.12",
     "@vaadin/icons": "24.8.12",
     "@vaadin/polymer-legacy-adapter": "24.8.12",
-    "@vaadin/router": "2.0.0",
+    "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "24.8.12",
     "@vaadin/vaadin-lumo-styles": "24.8.12",
     "@vaadin/vaadin-themable-mixin": "24.8.12",
@@ -95,7 +95,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "f4b00175cf522eda6875ec6956bde668ca498f0a79a77fac840cadc1f90fa1b9"
+    "hash": "a8c5974c4559a4064304540b6c00f7f5342b4eaca5cda8204e3bb7a75f1a8cdb"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

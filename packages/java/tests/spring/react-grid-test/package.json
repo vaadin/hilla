@@ -153,7 +153,6 @@
     "@vaadin/vaadin-usage-statistics": "$@vaadin/vaadin-usage-statistics",
     "@vaadin/react-components": "$@vaadin/react-components",
     "@vaadin/react-components-pro": "$@vaadin/react-components-pro",
-    "@vaadin/router": "2.0.0",
     "@vaadin/a11y-base": "24.8.12",
     "@vaadin/accordion": "24.8.12",
     "@vaadin/app-layout": "24.8.12",
@@ -220,6 +219,7 @@
     "@vaadin/dashboard": "24.8.12",
     "@vaadin/grid-pro": "24.8.12",
     "@vaadin/map": "24.8.12",
-    "@vaadin/rich-text-editor": "24.8.12"
+    "@vaadin/rich-text-editor": "24.8.12",
+    "@vaadin/router": "2.0.1"
   }
 }
