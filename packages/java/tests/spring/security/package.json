@@ -63,7 +63,7 @@
     "@vaadin/progress-bar": "24.9.5",
     "@vaadin/radio-group": "24.9.5",
     "@vaadin/rich-text-editor": "24.9.5",
-    "@vaadin/router": "2.0.0",
+    "@vaadin/router": "2.0.1",
     "@vaadin/scroller": "24.9.5",
     "@vaadin/select": "24.9.5",
     "@vaadin/side-nav": "24.9.5",
@@ -231,7 +231,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "acda786e147b28e78bc8b651ba98803eef14b1dc5170c9a031371470993c46ba"
+    "hash": "8b77bdc2471fc78c6add9c69bdd01e6b2a2a9abaa0ba3b81605ee933567e50e3"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
