@@ -65,8 +65,8 @@ public class RouteUtil implements FileRouterRequestUtil {
     }
 
     public boolean isAnonymousRoute(HttpServletRequest request) {
-        var config = ApplicationConfiguration.get(
-                new VaadinServletContext(request.getServletContext()));
+        var config = ApplicationConfiguration
+                .get(new VaadinServletContext(request.getServletContext()));
         boolean isLiveReloadMode = config.getMode()
                 .equals(Mode.DEVELOPMENT_FRONTEND_LIVERELOAD);
         if (registeredRoutes == null || isLiveReloadMode) {
@@ -133,8 +133,8 @@ public class RouteUtil implements FileRouterRequestUtil {
             includeView = viewInfo -> validateViewAccessible(viewInfo,
                     isUserAuthenticated, request::isUserInRole);
         } else {
-            includeView = viewInfo -> !viewInfo.loginRequired() || (
-                    viewInfo.rolesAllowed() != null
+            includeView = viewInfo -> !viewInfo.loginRequired()
+                    || (viewInfo.rolesAllowed() != null
                             && viewInfo.rolesAllowed().length > 0);
         }
         return includeView;
