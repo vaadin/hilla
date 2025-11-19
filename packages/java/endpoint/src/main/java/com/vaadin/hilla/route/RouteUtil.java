@@ -28,7 +28,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.springframework.http.server.RequestPath;
-import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
@@ -43,7 +42,6 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@Component
 public class RouteUtil implements FileRouterRequestUtil {
 
     private Map<String, AvailableViewInfo> registeredRoutes = null;
@@ -66,6 +64,20 @@ public class RouteUtil implements FileRouterRequestUtil {
         }
     }
 
+    public boolean isAnonymousRoute(HttpServletRequest request) {
+        var config = ApplicationConfiguration.get(
+                new VaadinServletContext(request.getServletContext()));
+        boolean isLiveReloadMode = config.getMode()
+                .equals(Mode.DEVELOPMENT_FRONTEND_LIVERELOAD);
+        if (registeredRoutes == null || isLiveReloadMode) {
+            collectClientRoutes(config);
+        }
+
+        var viewConfig = getRouteData(request, false);
+
+        return viewConfig.isPresent();
+    }
+
     /**
      * Checks if the given request is allowed route to the user.
      *
@@ -84,15 +96,16 @@ public class RouteUtil implements FileRouterRequestUtil {
             collectClientRoutes(config);
         }
 
-        var viewConfig = getRouteData(request);
+        var viewConfig = getRouteData(request, true);
 
         return viewConfig.isPresent();
     }
 
     private static void filterClientViews(
             Map<String, AvailableViewInfo> configurations,
-            HttpServletRequest request) {
-        final boolean isUserAuthenticated = request.getUserPrincipal() != null;
+            HttpServletRequest request, boolean filterByPrincipal) {
+        var includeView = getAvailableViewInfoPredicate(request,
+                filterByPrincipal);
 
         Set<String> clientEntries = new HashSet<>(configurations.keySet());
         for (String key : clientEntries) {
@@ -100,10 +113,8 @@ public class RouteUtil implements FileRouterRequestUtil {
                 continue;
             }
             AvailableViewInfo viewInfo = configurations.get(key);
-            boolean routeValid = validateViewAccessible(viewInfo,
-                    isUserAuthenticated, request::isUserInRole);
 
-            if (!routeValid) {
+            if (!includeView.test(viewInfo)) {
                 configurations.remove(key);
                 if (viewInfo.children() != null
                         && !viewInfo.children().isEmpty()) {
@@ -112,6 +123,21 @@ public class RouteUtil implements FileRouterRequestUtil {
                 }
             }
         }
+    }
+
+    private static Predicate<AvailableViewInfo> getAvailableViewInfoPredicate(
+            HttpServletRequest request, boolean filterByPrincipal) {
+        Predicate<AvailableViewInfo> includeView;
+        if (filterByPrincipal) {
+            boolean isUserAuthenticated = request.getUserPrincipal() != null;
+            includeView = viewInfo -> validateViewAccessible(viewInfo,
+                    isUserAuthenticated, request::isUserInRole);
+        } else {
+            includeView = viewInfo -> !viewInfo.loginRequired() || (
+                    viewInfo.rolesAllowed() != null
+                            && viewInfo.rolesAllowed().length > 0);
+        }
+        return includeView;
     }
 
     /**
@@ -152,13 +178,13 @@ public class RouteUtil implements FileRouterRequestUtil {
         }
     }
 
-    private Optional<AvailableViewInfo> getRouteData(
-            HttpServletRequest request) {
+    private Optional<AvailableViewInfo> getRouteData(HttpServletRequest request,
+            boolean filterByPrincipal) {
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
         Map<String, AvailableViewInfo> availableRoutes = new HashMap<>(
                 registeredRoutes);
-        filterClientViews(availableRoutes, request);
+        filterClientViews(availableRoutes, request, filterByPrincipal);
         return Optional.ofNullable(getRouteByPath(availableRoutes,
                 requestPath.pathWithinApplication().value()));
     }
