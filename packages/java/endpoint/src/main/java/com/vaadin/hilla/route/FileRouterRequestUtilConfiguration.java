@@ -27,8 +27,6 @@ class FileRouterRequestUtilConfiguration {
     @Bean
     @ConditionalOnMissingBean
     FileRouterRequestUtil hillaFileRouterRequestUtil() {
-        return request -> {
-            return false;
-        };
+        return new RouteUtil();
     }
 }
