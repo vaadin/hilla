@@ -18,6 +18,7 @@ package com.vaadin.hilla.route;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +28,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.RequestPath;
 import org.springframework.util.AntPathMatcher;
 
@@ -42,11 +45,31 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
+@NullMarked
 public class RouteUtil implements FileRouterRequestUtil {
 
+    @Nullable
     private Map<String, AvailableViewInfo> registeredRoutes = null;
 
     public RouteUtil() {
+    }
+
+    public boolean isAnonymousRoute(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false).map(info -> !info.loginRequired())
+                .orElse(false);
+    }
+
+    public boolean isSecuredRoute(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false)
+                .map(AvailableViewInfo::loginRequired).orElse(false);
+    }
+
+    public Set<String> getAllowedAuthorities(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false).map(AvailableViewInfo::rolesAllowed)
+                .map(Set::of).orElseGet(Collections::emptySet);
     }
 
     /**
@@ -64,20 +87,6 @@ public class RouteUtil implements FileRouterRequestUtil {
         }
     }
 
-    public boolean isAnonymousRoute(HttpServletRequest request) {
-        var config = ApplicationConfiguration
-                .get(new VaadinServletContext(request.getServletContext()));
-        boolean isLiveReloadMode = config.getMode()
-                .equals(Mode.DEVELOPMENT_FRONTEND_LIVERELOAD);
-        if (registeredRoutes == null || isLiveReloadMode) {
-            collectClientRoutes(config);
-        }
-
-        var viewConfig = getRouteData(request, false);
-
-        return viewConfig.isPresent();
-    }
-
     /**
      * Checks if the given request is allowed route to the user.
      *
@@ -88,6 +97,11 @@ public class RouteUtil implements FileRouterRequestUtil {
      */
     @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, true).isPresent();
+    }
+
+    private void collectClientRoutesIfNecessary(HttpServletRequest request) {
         var config = ApplicationConfiguration
                 .get(new VaadinServletContext(request.getServletContext()));
         boolean isLiveReloadMode = config.getMode()
@@ -95,17 +109,12 @@ public class RouteUtil implements FileRouterRequestUtil {
         if (registeredRoutes == null || isLiveReloadMode) {
             collectClientRoutes(config);
         }
-
-        var viewConfig = getRouteData(request, true);
-
-        return viewConfig.isPresent();
     }
 
     private static void filterClientViews(
             Map<String, AvailableViewInfo> configurations,
-            HttpServletRequest request, boolean filterByPrincipal) {
-        var includeView = getAvailableViewInfoPredicate(request,
-                filterByPrincipal);
+            HttpServletRequest request) {
+        final boolean isUserAuthenticated = request.getUserPrincipal() != null;
 
         Set<String> clientEntries = new HashSet<>(configurations.keySet());
         for (String key : clientEntries) {
@@ -113,8 +122,10 @@ public class RouteUtil implements FileRouterRequestUtil {
                 continue;
             }
             AvailableViewInfo viewInfo = configurations.get(key);
+            boolean routeValid = validateViewAccessible(viewInfo,
+                    isUserAuthenticated, request::isUserInRole);
 
-            if (!includeView.test(viewInfo)) {
+            if (!routeValid) {
                 configurations.remove(key);
                 if (viewInfo.children() != null
                         && !viewInfo.children().isEmpty()) {
@@ -123,21 +134,6 @@ public class RouteUtil implements FileRouterRequestUtil {
                 }
             }
         }
-    }
-
-    private static Predicate<AvailableViewInfo> getAvailableViewInfoPredicate(
-            HttpServletRequest request, boolean filterByPrincipal) {
-        Predicate<AvailableViewInfo> includeView;
-        if (filterByPrincipal) {
-            boolean isUserAuthenticated = request.getUserPrincipal() != null;
-            includeView = viewInfo -> validateViewAccessible(viewInfo,
-                    isUserAuthenticated, request::isUserInRole);
-        } else {
-            includeView = viewInfo -> !viewInfo.loginRequired()
-                    || (viewInfo.rolesAllowed() != null
-                            && viewInfo.rolesAllowed().length > 0);
-        }
-        return includeView;
     }
 
     /**
@@ -182,9 +178,12 @@ public class RouteUtil implements FileRouterRequestUtil {
             boolean filterByPrincipal) {
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
-        Map<String, AvailableViewInfo> availableRoutes = new HashMap<>(
-                registeredRoutes);
-        filterClientViews(availableRoutes, request, filterByPrincipal);
+        Map<String, AvailableViewInfo> availableRoutes = registeredRoutes != null
+                ? new HashMap<>(registeredRoutes)
+                : Collections.emptyMap();
+        if (filterByPrincipal) {
+            filterClientViews(availableRoutes, request);
+        }
         return Optional.ofNullable(getRouteByPath(availableRoutes,
                 requestPath.pathWithinApplication().value()));
     }
@@ -200,7 +199,7 @@ public class RouteUtil implements FileRouterRequestUtil {
      *            the URL path to get the client view configuration for
      * @return - the client view configuration for the given route
      */
-    protected synchronized AvailableViewInfo getRouteByPath(
+    protected synchronized @Nullable AvailableViewInfo getRouteByPath(
             Map<String, AvailableViewInfo> availableRoutes, String path) {
         final Set<String> routes = availableRoutes.keySet();
         final AntPathMatcher pathMatcher = new AntPathMatcher();
