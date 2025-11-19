@@ -22,11 +22,11 @@ import org.springframework.context.annotation.Bean;
 import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
 
 @AutoConfiguration
-class FileRouterRequestUtilConfiguration {
+class RouteUtilConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
-    FileRouterRequestUtil hillaFileRouterRequestUtil() {
+    @ConditionalOnMissingBean(FileRouterRequestUtil.class)
+    RouteUtil hillaFileRouterRequestUtil() {
         return new RouteUtil();
     }
 }
