@@ -1,0 +1,86 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.parser.plugins.backbone;
+
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import org.jspecify.annotations.NonNull;
+
+import com.vaadin.hilla.parser.core.AbstractPlugin;
+import com.vaadin.hilla.parser.core.Node;
+import com.vaadin.hilla.parser.core.NodeDependencies;
+import com.vaadin.hilla.parser.core.NodePath;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodNode;
+import com.vaadin.hilla.parser.plugins.backbone.nodes.MethodParameterNode;
+
+public final class MethodParameterPlugin
+        extends AbstractPlugin<BackbonePluginConfiguration> {
+
+    @Override
+    public void enter(NodePath<?> nodePath) {
+        var node = nodePath.getNode();
+        var parentNode = nodePath.getParentPath().getNode();
+        if (node instanceof MethodParameterNode
+                && parentNode instanceof MethodNode) {
+            var pathItem = (PathItem) parentNode.getTarget();
+            if (pathItem.getPost().getRequestBody() == null) {
+                pathItem.getPost().setRequestBody(createRequestBody());
+            }
+        }
+    }
+
+    @Override
+    public void exit(NodePath<?> nodePath) {
+    }
+
+    @NonNull
+    @Override
+    public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
+        if (nodeDependencies.getNode() instanceof MethodNode) {
+            var methodNode = (MethodNode) nodeDependencies.getNode();
+            return nodeDependencies
+                    .appendChildNodes(getParametersStream(methodNode));
+        }
+        return nodeDependencies;
+    }
+
+    private RequestBody createRequestBody() {
+        var requestMap = new ObjectSchema();
+        return new RequestBody().content(new Content().addMediaType(
+                MethodPlugin.MEDIA_TYPE, new MediaType().schema(requestMap)));
+    }
+
+    private Stream<Node<?, ?>> getParametersStream(MethodNode methodNode) {
+        var parameters = new ArrayList<>(
+                methodNode.getSource().getParameters());
+        var parameterNodes = new ArrayList<Node<?, ?>>(parameters.size());
+        for (var i = 0; i < parameters.size(); i++) {
+            var parameter = parameters.get(i);
+            var name = Optional.ofNullable(parameters.get(i).getName())
+                    .orElse(String.format("_param_%d", i));
+            parameterNodes.add(i, MethodParameterNode.of(parameter, name));
+        }
+        return parameterNodes.stream();
+    }
+
+}

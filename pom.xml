@@ -22,16 +22,7 @@
     <module>packages/java/gradle-plugin</module>
     <module>packages/java/hilla</module>
     <module>packages/java/hilla-bom</module>
-    <module>packages/java/hilla-dev</module>
-    <module>packages/java/parser-jvm-core</module>
-    <module>packages/java/parser-jvm-plugin-backbone</module>
-    <module>packages/java/parser-jvm-plugin-model</module>
-    <module>packages/java/parser-jvm-plugin-nonnull</module>
-    <module>packages/java/parser-jvm-plugin-nonnull-kotlin</module>
-    <module>packages/java/parser-jvm-plugin-subtypes</module>
-    <module>packages/java/parser-jvm-plugin-transfertypes</module>
-    <module>packages/java/parser-jvm-test-utils</module>
-    <module>packages/java/parser-jvm-utils</module>
+    <module>packages/java/typescript-generator</module>
     <module>packages/java/runtime-plugin-transfertypes</module>
   </modules>
 
@@ -50,7 +41,7 @@
     <profile>
       <id>gradle</id>
       <activation>
-        <jdk>(,18]</jdk>
+        <jdk>(,22]</jdk>
       </activation>
       <modules>
         <module>packages/java/gradle-plugin</module>
@@ -78,22 +69,23 @@
     <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
     <formatter.basedir>${project.basedir}</formatter.basedir>
-    <classgraph.version>4.8.180</classgraph.version>
+    <spotless.plugin.version>3.0.0</spotless.plugin.version>
+    <classgraph.version>4.8.184</classgraph.version>
     <gentyref.version>1.2.0.vaadin1</gentyref.version>
     <jsr305.version>3.0.2</jsr305.version>
     <jna.version>5.14.0</jna.version>
-    <swagger.core.version>2.2.36</swagger.core.version>
-    <swagger.models.version>2.2.36</swagger.models.version>
+    <swagger.core.version>2.2.38</swagger.core.version>
+    <swagger.models.version>2.2.38</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson2.version>2.20.0</jackson2.version>
+    <jackson2.version>2.20.1</jackson2.version>
     <jackson-annotations.version>2.20</jackson-annotations.version>
-    <jackson.version>3.0.0-rc9</jackson.version>
+    <jackson.version>3.0.1</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.0-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>4.0.0-M3</spring.boot.version>
-    <testbench.version>10.0.0-alpha4</testbench.version>
+    <spring.boot.version>4.0.0-RC2</spring.boot.version>
+    <testbench.version>10.0.0-beta4</testbench.version>
     <jakarta.validation.version>3.1.1</jakarta.validation.version>
     <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
     <jakarta.activation.api.version>2.1.2</jakarta.activation.api.version>
@@ -119,11 +111,21 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:https:https://github.com/vaadin/hilla.git</connection>
-    <developerConnection>scm:git:https://github.com/vaadin/hilla.git</developerConnection>
+    <connection>scm:git:https://github.com/vaadin/hilla.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/vaadin/hilla.git</developerConnection>
     <url>https://github.com/vaadin/hilla</url>
     <tag>HEAD</tag>
   </scm>
+
+  <developers>
+    <developer>
+      <id>vaadin</id>
+      <name>Vaadin Team</name>
+      <email>info@vaadin.com</email>
+      <organization>Vaadin Ltd</organization>
+      <organizationUrl>https://vaadin.com</organizationUrl>
+    </developer>
+  </developers>
 
   <repositories>
     <!-- The order of definitions matters. Explicitly defining central
@@ -406,14 +408,24 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>net.revelc.code.formatter</groupId>
-        <artifactId>formatter-maven-plugin</artifactId>
-        <version>2.23.0</version>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.plugin.version}</version>
         <configuration>
-          <configFile>${formatter.basedir}/.config/VaadinJavaConventions.xml</configFile>
-          <!-- Provide a dummy JS config file to avoid errors -->
-          <configJsFile>${formatter.basedir}/.config/VaadinJavaConventions.xml</configJsFile>
-          <lineEnding>LF</lineEnding>
+          <java>
+            <eclipse>
+              <file>${formatter.basedir}/.config/VaadinJavaConventions.xml</file>
+            </eclipse>
+            <endWithNewline/>
+            <removeUnusedImports/>
+            <importOrder>
+              <file>${formatter.basedir}/.config/hilla.importorder</file>
+            </importOrder>
+            <forbidWildcardImports/>
+            <licenseHeader>
+              <file>${formatter.basedir}/.config/apache2-license-header.txt</file>
+            </licenseHeader>
+          </java>
         </configuration>
       </plugin>
 

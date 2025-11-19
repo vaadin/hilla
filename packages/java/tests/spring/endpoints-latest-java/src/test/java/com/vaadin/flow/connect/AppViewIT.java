@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public class AppViewIT extends ChromeBrowserTest {
 

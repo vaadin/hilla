@@ -16,20 +16,21 @@
 package com.vaadin.hilla;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 
-import com.vaadin.flow.internal.hilla.EndpointRequestUtil;
-import com.vaadin.hilla.auth.EndpointAccessChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.pattern.PathPattern;
-
 import org.springframework.web.util.pattern.PathPatternParser;
+
+import com.vaadin.flow.internal.hilla.EndpointRequestUtil;
+import com.vaadin.hilla.auth.EndpointAccessChecker;
 
 /**
  * A util class related to classes available to the browser.
