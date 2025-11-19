@@ -50,7 +50,7 @@ public class RouteUtilTest {
     private MockedStatic<MenuRegistry> menuRegistryMockedStatic;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         applicationConfigurationMockedStatic = Mockito
                 .mockStatic(ApplicationConfiguration.class);
         applicationConfigurationMockedStatic
@@ -64,9 +64,108 @@ public class RouteUtilTest {
     }
 
     @After
-    public void teardown() throws Exception {
+    public void teardown() {
         applicationConfigurationMockedStatic.close();
         menuRegistryMockedStatic.close();
+    }
+
+    @Test
+    public void isAnonymousRoute_loginNotRequired_returnsTrue() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test", new String[0], false, "/test",
+                false, false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertTrue(routeUtil.isAnonymousRoute(request));
+    }
+
+    @Test
+    public void isAnonymousRoute_loginRequired_returnsFalse() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test", new String[0], true, "/test",
+                false, false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertFalse(routeUtil.isAnonymousRoute(request));
+    }
+
+    @Test
+    public void isAnonymousRoute_invalidRoute_returnFalse() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        routeUtil.setRoutes(Collections.emptyMap());
+        Assert.assertFalse(routeUtil.isAnonymousRoute(request));
+    }
+
+    @Test
+    public void isSecuredRoute_loginNotRequired_returnsFalse() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test", new String[0], false, "/test",
+                false, false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertFalse(routeUtil.isSecuredRoute(request));
+    }
+
+    @Test
+    public void isSecuredRoute_loginRequired_returnsTrue() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test", new String[0], true, "/test",
+                false, false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertTrue(routeUtil.isSecuredRoute(request));
+    }
+
+    @Test
+    public void isSecuredRoute_invalidRoute_returnFalse() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        routeUtil.setRoutes(Collections.emptyMap());
+        Assert.assertFalse(routeUtil.isSecuredRoute(request));
+    }
+
+    @Test
+    public void getAllowedAuthorities_noRoles_returnsEmptySet() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test", new String[0], false, "/test",
+                false, false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertTrue(routeUtil.getAllowedAuthorities(request).isEmpty());
+    }
+
+    @Test
+    public void getAllowedAuthorities_hasRoles_returnsRolesSet() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test",
+                new String[] { "ROLE_ADMIN", "ROLE_USER" }, false, "/test",
+                false, false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertEquals(2, routeUtil.getAllowedAuthorities(request).size());
+        Assert.assertTrue(routeUtil.getAllowedAuthorities(request)
+                .contains("ROLE_ADMIN"));
+        Assert.assertTrue(
+                routeUtil.getAllowedAuthorities(request).contains("ROLE_USER"));
+    }
+
+    @Test
+    public void getAllowedAuthorities_nullRoles_returnsEmptySet() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test", null, false, "/test", false,
+                false, null, null, null, false, "");
+        routeUtil.setRoutes(Collections.singletonMap("/test", info));
+        Assert.assertTrue(routeUtil.getAllowedAuthorities(request).isEmpty());
+    }
+
+    @Test
+    public void getAllowedAuthorities_invalidRoute_returnEmptySet() {
+        request.setRequestURI("/context/test");
+        request.setContextPath("/context");
+        routeUtil.setRoutes(Collections.emptyMap());
+        Assert.assertTrue(routeUtil.getAllowedAuthorities(request).isEmpty());
     }
 
     @Test
