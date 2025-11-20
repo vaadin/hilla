@@ -1,5 +1,5 @@
 /* eslint-disable accessor-pairs,no-void,sort-keys */
-import { ArrayModel, BooleanModel, type Model, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-models';
+import { ArrayModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-models';
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
@@ -112,10 +112,8 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
   set value(value: T | undefined) {
     if (
       this.model instanceof BinderStringModel ||
-      this.model === StringModel ||
       this.model instanceof StringModel ||
       this.model instanceof BinderNumberModel ||
-      this.model === NumberModel ||
       this.model instanceof NumberModel
     ) {
       this.#element.value = value ?? ('' as T);
@@ -302,7 +300,7 @@ export class CheckedFieldStrategy<
   E extends CheckedFieldElement<T> = CheckedFieldElement<T>,
 > extends GenericFieldStrategy<T, E> {
   override get value(): T | undefined {
-    if (this.model instanceof BinderBooleanModel || this.model === BooleanModel || this.model instanceof BooleanModel) {
+    if (this.model instanceof BinderBooleanModel || this.model instanceof BooleanModel) {
       return this.element.checked as T;
     }
 
@@ -340,10 +338,8 @@ export class ComboBoxFieldStrategy<
     if (
       this.model &&
       (this.model instanceof BinderObjectModel ||
-        this.model === ObjectModel ||
         this.model instanceof ObjectModel ||
         this.model instanceof BinderArrayModel ||
-        (this.model as Model) === ArrayModel ||
         this.model instanceof ArrayModel)
     ) {
       const { selectedItem } = this.element;
@@ -356,10 +352,8 @@ export class ComboBoxFieldStrategy<
   override set value(val: T | undefined) {
     if (
       this.model instanceof BinderObjectModel ||
-      this.model === ObjectModel ||
       this.model instanceof ObjectModel ||
       this.model instanceof BinderArrayModel ||
-      (this.model as Model) === ArrayModel ||
       this.model instanceof ArrayModel
     ) {
       this.element.selectedItem = val ?? null;

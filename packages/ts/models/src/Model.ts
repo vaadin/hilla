@@ -245,6 +245,10 @@ export const Model: Model = Object.create(null, {
   },
 });
 
+// The following symbols are used to define HKT signatures for model converter
+// functions, enabling type inference for functional composition for them.
+// Inspired by: https://stackoverflow.com/a/69247453
+
 /**
  * The symbol marking source (parameter) type for model converter HKT
  * signatures.

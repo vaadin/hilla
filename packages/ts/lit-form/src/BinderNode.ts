@@ -75,6 +75,12 @@ export const _clearValidation = Symbol('clearValidation');
 
 const nodes = new WeakMap<ProvisionalModel, BinderNode>();
 
+/**
+ * Given the model instance attached to the BinderNode, returns the corresponding BinderNode.
+ *
+ * @param model - The model instance
+ * @returns The corresponding BinderNode
+ */
 export function getBinderNode<M extends ProvisionalModel>(model: M): BinderNode<M> {
   let node = nodes.get(model);
 
@@ -86,6 +92,12 @@ export function getBinderNode<M extends ProvisionalModel>(model: M): BinderNode<
   return node as BinderNode<M>;
 }
 
+/**
+ * Returns the corresponding validator for the given constraint.
+ *
+ * @param constraint - The constraint to get the validator for
+ * @returns The corresponding validator
+ */
 function getConstraintValidator<T>(constraint: Constraint<T>): Validator<T> {
   const constraintTypes = [
     Null,
@@ -125,6 +137,12 @@ function getConstraintValidator<T>(constraint: Constraint<T>): Validator<T> {
   throw new Error(`Unsupported constraint: ${constraint.name}`);
 }
 
+/**
+ * Returns the array of validators for the given model.
+ *
+ * @param model - The model to get the validators for
+ * @returns The array of validators
+ */
 function getModelValidators<M extends ProvisionalModel>(model: M): ReadonlyArray<Validator<Value<M>>> {
   if (model instanceof AbstractModel) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -303,7 +321,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
     let { model }: { model: ProvisionalModel } = this;
     let name = '';
 
-    while (model[$owner] instanceof AbstractModel || model[$owner] === Model || model[$owner] instanceof Model) {
+    while (model[$owner] instanceof AbstractModel || model[$owner] instanceof Model) {
       name = `${String(model[$key])}${name ? `.${name}` : ''}`;
       model = model[$owner];
     }
@@ -324,7 +342,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    */
   get parent(): BinderNode | undefined {
     const modelParent = this.model[$owner];
-    return modelParent instanceof AbstractModel || modelParent === Model || modelParent instanceof Model
+    return modelParent instanceof AbstractModel || modelParent instanceof Model
       ? getBinderNode(modelParent)
       : undefined;
   }
@@ -359,6 +377,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
 
     this.initializeValue();
 
+    // Retrieve the value from the parent's value using the key from the model.
     const key = this.model[$key];
 
     // The value of parent in unknown, so we need to cast it.

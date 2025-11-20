@@ -37,10 +37,10 @@ export function getStringConverter<V>(model: ProvisionalModel<V>): StringConvert
     return undefined;
   }
 
-  if (model === BooleanModel || model instanceof BooleanModel) {
+  if (model instanceof BooleanModel) {
     return booleanStringConverter as StringConverter<V>;
   }
-  if (model === NumberModel || model instanceof NumberModel) {
+  if (model instanceof NumberModel) {
     return numberStringConverter as StringConverter<V>;
   }
   if (model instanceof EnumModel) {

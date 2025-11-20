@@ -70,13 +70,12 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
     modelClass: DetachedModelConstructor<M & AbstractModel> | (M & Model),
     config?: BinderRootConfiguration<Value<M>>,
   ) {
-    const isModel = modelClass === Model || modelClass instanceof Model;
     super(
-      (isModel
+      (modelClass instanceof Model
         ? m.attach(modelClass, () => this as Target<Value<M>>)
         : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>)) as M,
     );
-    if (!isModel) {
+    if (!(modelClass instanceof Model)) {
       // @ts-expect-error the model's parent is the binder
       this.model[$owner] = this;
     }
