@@ -25,13 +25,13 @@ import {
  * function; otherwise the attribute object should be provided.
  */
 export class ConstraintBuilder<V = unknown, const N extends string = string, A extends AnyObject = EmptyObject> {
-  private supportedModel: Model<V>;
-  private [$name]: N | undefined;
-  private readonly attributeDefaults: Required<A>;
+  #supportedModel: Model<V>;
+  protected [$name]: N | undefined;
+  readonly #attributeDefaults: Required<A>;
 
   constructor() {
-    this.supportedModel = Model as unknown as Model<V>;
-    this.attributeDefaults = {} as unknown as Required<A>;
+    this.#supportedModel = Model as unknown as Model<V>;
+    this.#attributeDefaults = {} as unknown as Required<A>;
   }
 
   /**
@@ -40,7 +40,7 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
    * @param supportedModel - The model that the constraint is applicable to.
    */
   model<const M extends Model<V>>(supportedModel: M): ConstraintBuilder<Value<M>, N, A> {
-    this.supportedModel = supportedModel;
+    this.#supportedModel = supportedModel;
     return this as any;
   }
 
@@ -70,7 +70,7 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
     N,
     (A extends EmptyObject ? AnyObject : A) & Readonly<undefined extends AV ? Partial<Record<AN, AV>> : Record<AN, AV>>
   > {
-    (this.attributeDefaults as Record<string, unknown>)[name] = model[$defaultValue];
+    (this.#attributeDefaults as Record<string, unknown>)[name] = model[$defaultValue];
     return this as any;
   }
 
@@ -82,7 +82,8 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
    */
   build(this: string extends N ? never : this): NonAttributedConstraint<V | undefined, N, A> {
     const name = this[$name];
-    const { attributeDefaults, supportedModel } = this;
+    const attributeDefaults = this.#attributeDefaults;
+    const supportedModel = this.#supportedModel;
 
     function assertSupportedModel(model: Model<V>): void {
       if (!(model instanceof supportedModel)) {
