@@ -17,8 +17,10 @@ import {
  *
  * @typeParam V - The value type of the constraint.
  * @typeParam N - The name of the constraint.
- * @typeParam A - The attributes for the constraint function. It is an object with string
- * keys and arbitrary values. When the `value` attribute is the only one,
+ * @typeParam A - The attributes for the constraint function, object with string
+ * keys and arbitrary values. Attributes are required or optional settings for
+ * a particular constraint, for example, the 'min' and 'max' settings for the
+ * `Size({min, max})` constraint. When the `value` attribute is the only one,
  * the value can be given directly as the first argument of the constraint
  * function; otherwise the attribute object should be provided.
  */
