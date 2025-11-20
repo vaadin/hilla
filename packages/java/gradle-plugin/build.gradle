@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import groovy.xml.XmlSlurper
 
 /***********************************************************************************************************************
  *
@@ -21,12 +22,17 @@ plugins {
  **********************************************************************************************************************/
 
 def pom = new XmlSlurper().parse(rootProject.file('pom.xml'))
+def pomArtifactId = pom.artifactId.text()
 defaultTasks('jar', 'test')
-group pom.parent.groupId
-version = project.hasProperty('hilla.version') ? project.getProperty('hilla.version') : pom.parent.version
-archivesBaseName = pom.artifactId
-sourceCompatibility = 21
-targetCompatibility = 21
+group = pom.parent.groupId.text()
+version = project.hasProperty('hilla.version') ? project.getProperty('hilla.version') : pom.parent.version.text()
+base {
+    archivesName = pomArtifactId
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 def rootPom = new XmlSlurper().parse(rootProject.file('../../../pom.xml'))
 def springBootVersion = rootPom.properties['spring.boot.version']
 def flowVersion = rootPom.properties['flow.version']
@@ -178,7 +184,7 @@ pluginBundle {
     }
     mavenCoordinates {
         groupId = project.group
-        artifactId = project.archivesBaseName
+        artifactId = pomArtifactId
     }
 }
 
@@ -186,7 +192,7 @@ publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId = project.group
-			artifactId = project.archivesBaseName
+			artifactId = pomArtifactId
 			version = project.version
 
 			from components.java
