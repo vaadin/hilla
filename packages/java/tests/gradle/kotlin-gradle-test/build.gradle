@@ -95,23 +95,9 @@ import org.gradle.internal.os.OperatingSystem
 
 def isWindows = OperatingSystem.current().isWindows()
 
-tasks.register('productionBuild', Exec) {
-	description = 'Builds the Spring Boot application for production.'
-    def command
-    if (isWindows) {
-        command = ['cmd', '/c', 'gradlew.bat', 'clean', '-Pvaadin.productionMode', 'build', '-x', 'test']
-    } else {
-        command = ['sh', '-c', './gradlew clean -Pvaadin.productionMode build -x test']
-    }
-	commandLine command
-	doLast {
-		logger.info("Production build started...")
-	}
-}
-
 tasks.register('bootStart') {
 	description = 'Starts the Spring Boot application for integration tests.'
-	dependsOn productionBuild
+    dependsOn assemble
 	doLast {
 		logger.info("Running the application in production for integration tests...")
         // Retrieve the jar task
