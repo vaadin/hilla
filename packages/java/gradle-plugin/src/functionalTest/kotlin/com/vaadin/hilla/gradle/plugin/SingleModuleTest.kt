@@ -43,7 +43,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly(false)
+        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
@@ -58,7 +58,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
         buildResult.expectTaskSucceded("hillaGenerate")
 
-        verifyOpenApiJsonFileGeneratedProperly(true)
+        verifyOpenApiJsonFileGeneratedProperly()
         verifyEndpointsTsFileGeneratedProperly()
     }
 
@@ -86,8 +86,8 @@ class SingleModuleTest : AbstractGradleTest() {
 
 
 
-    private fun verifyOpenApiJsonFileGeneratedProperly(productionMode: Boolean) {
-        val openApiJsonFileName = (if (productionMode) "classes/" else "") + "hilla-openapi.json"
+    private fun verifyOpenApiJsonFileGeneratedProperly() {
+        val openApiJsonFileName = "classes/hilla-openapi.json"
         val openApiJsonFile = testProject.folder("build").resolve(openApiJsonFileName)
 
         expect(true, "hilla-openapi.json should be created after executing hillaGenerate task!") {
