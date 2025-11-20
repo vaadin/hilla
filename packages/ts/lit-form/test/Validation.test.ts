@@ -67,7 +67,7 @@ class OrderView extends LitElement {
     }
   `;
 
-  binder = new Binder<OrderModel>(this, OrderModel);
+  binder = new Binder(this, OrderModel);
 
   @query('#submitting')
   accessor submitting: HTMLInputElement | null = null;

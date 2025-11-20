@@ -1,8 +1,7 @@
-import type { Model } from '@vaadin/hilla-models';
 import type { LitElement } from 'lit';
 import { type BinderConfiguration, BinderRoot } from './BinderRoot.js';
-import type { AbstractModel, DetachedModelConstructor, Value } from './Models.js';
-import type { ProvisionalModel } from './ProvisionalModel.js';
+import type { Value } from './Models.js';
+import type { ProvisionalModel, ProvisionalModelConstructor } from './ProvisionalModel.js';
 
 /**
  * A Binder controls all aspects of a single form.
@@ -29,11 +28,7 @@ export class Binder<M extends ProvisionalModel> extends BinderRoot<M> {
    * binder = new Binder(orderView, OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(
-    context: Element,
-    modelClass: DetachedModelConstructor<M & AbstractModel> | (M & Model),
-    config?: BinderConfiguration<Value<M>>,
-  ) {
+  constructor(context: Element, modelClass: ProvisionalModelConstructor<M>, config?: BinderConfiguration<Value<M>>) {
     const changeCallback =
       config?.onChange ??
       (typeof (context as LitElement).requestUpdate === 'function'

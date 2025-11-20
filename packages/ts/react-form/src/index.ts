@@ -2,13 +2,11 @@
 import {
   _fromString,
   _validity,
-  type AbstractModel,
   type ProvisionalModel,
   type BinderConfiguration,
   type BinderNode,
   BinderRoot,
   CHANGED,
-  type DetachedModelConstructor,
   type FieldStrategy,
   getBinderNode,
   getDefaultFieldStrategy,
@@ -20,6 +18,7 @@ import {
   type ArrayModel as BinderArrayModel,
   type ArrayItemModel,
   getStringConverter,
+  type ProvisionalModelConstructor,
 } from '@vaadin/hilla-lit-form';
 import { type ArrayModel, Model } from '@vaadin/hilla-models';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
@@ -252,7 +251,7 @@ function useFields<M extends ProvisionalModel>(node: BinderNode<M>): FieldDirect
 }
 
 export function useForm<M extends ProvisionalModel>(
-  modelClass: DetachedModelConstructor<M & AbstractModel> | (M & Model),
+  modelClass: ProvisionalModelConstructor<M>,
   config?: BinderConfiguration<Value<M>>,
 ): UseFormResult<M> {
   const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});

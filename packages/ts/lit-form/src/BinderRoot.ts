@@ -4,7 +4,7 @@ import m from '@vaadin/hilla-models';
 import { _clearValidation, _setErrorsWithDescendants, _update, BinderNode, CHANGED } from './BinderNode.js';
 import { type FieldElement, type FieldStrategy, getDefaultFieldStrategy } from './Field.js';
 import { type AbstractModel, createDetachedModel, type DetachedModelConstructor, type Value } from './Models.js';
-import type { ProvisionalModel } from './ProvisionalModel.js';
+import type { ProvisionalModel, ProvisionalModelConstructor } from './ProvisionalModel.js';
 import type { ClassStaticProperties } from './types.js';
 import {
   type InterpolateMessageCallback,
@@ -66,10 +66,7 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
    * binder = new BinderRoot(OrderModel, {onSubmit: async (order) => {endpoint.save(order)}});
    * ```
    */
-  constructor(
-    modelClass: DetachedModelConstructor<M & AbstractModel> | (M & Model),
-    config?: BinderRootConfiguration<Value<M>>,
-  ) {
+  constructor(modelClass: ProvisionalModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
     super(
       (modelClass instanceof Model
         ? m.attach(modelClass, () => this as Target<Value<M>>)
