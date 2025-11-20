@@ -1,3 +1,5 @@
+import groovy.xml.XmlSlurper
+
 // Configure plugin versions from root pom.xml
 pluginManagement {
     // Read versions from root pom.xml - fail if not found
@@ -12,7 +14,7 @@ pluginManagement {
     if (!springBootVersionForPlugin) {
         throw new GradleException("spring.boot.version not found in root pom.xml")
     }
-    
+
     plugins {
         id 'org.springframework.boot' version "${springBootVersionForPlugin}"
     }
@@ -52,7 +54,7 @@ buildscript {
     def rootPomFile = new File(rootDir, '../../../../../pom.xml')
     def rootPom = new XmlSlurper().parse(rootPomFile)
     def hillaVersion = rootPom.version.text()
-    
+
     repositories {
         mavenLocal()
         mavenCentral()
