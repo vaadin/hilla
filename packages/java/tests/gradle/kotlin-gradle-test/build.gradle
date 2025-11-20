@@ -93,8 +93,6 @@ allOpen {
 import java.util.concurrent.Executors
 import org.gradle.internal.os.OperatingSystem
 
-def isWindows = OperatingSystem.current().isWindows()
-
 tasks.register('bootStart') {
 	description = 'Starts the Spring Boot application for integration tests.'
     dependsOn assemble
