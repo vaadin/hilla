@@ -18,6 +18,7 @@ package com.vaadin.hilla.route;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,8 +28,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.RequestPath;
-import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
@@ -43,12 +45,31 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@Component
+@NullMarked
 public class RouteUtil implements FileRouterRequestUtil {
 
+    @Nullable
     private Map<String, AvailableViewInfo> registeredRoutes = null;
 
     public RouteUtil() {
+    }
+
+    public boolean isAnonymousRoute(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false).map(info -> !info.loginRequired())
+                .orElse(false);
+    }
+
+    public boolean isSecuredRoute(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false)
+                .map(AvailableViewInfo::loginRequired).orElse(false);
+    }
+
+    public Set<String> getAllowedAuthorities(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false).map(AvailableViewInfo::rolesAllowed)
+                .map(Set::of).orElseGet(Collections::emptySet);
     }
 
     /**
@@ -76,6 +97,11 @@ public class RouteUtil implements FileRouterRequestUtil {
      */
     @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, true).isPresent();
+    }
+
+    private void collectClientRoutesIfNecessary(HttpServletRequest request) {
         var config = ApplicationConfiguration
                 .get(new VaadinServletContext(request.getServletContext()));
         boolean isLiveReloadMode = config.getMode()
@@ -83,10 +109,6 @@ public class RouteUtil implements FileRouterRequestUtil {
         if (registeredRoutes == null || isLiveReloadMode) {
             collectClientRoutes(config);
         }
-
-        var viewConfig = getRouteData(request);
-
-        return viewConfig.isPresent();
     }
 
     private static void filterClientViews(
@@ -152,13 +174,16 @@ public class RouteUtil implements FileRouterRequestUtil {
         }
     }
 
-    private Optional<AvailableViewInfo> getRouteData(
-            HttpServletRequest request) {
+    private Optional<AvailableViewInfo> getRouteData(HttpServletRequest request,
+            boolean filterByPrincipal) {
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
-        Map<String, AvailableViewInfo> availableRoutes = new HashMap<>(
-                registeredRoutes);
-        filterClientViews(availableRoutes, request);
+        Map<String, AvailableViewInfo> availableRoutes = registeredRoutes != null
+                ? new HashMap<>(registeredRoutes)
+                : Collections.emptyMap();
+        if (filterByPrincipal) {
+            filterClientViews(availableRoutes, request);
+        }
         return Optional.ofNullable(getRouteByPath(availableRoutes,
                 requestPath.pathWithinApplication().value()));
     }
@@ -174,7 +199,7 @@ public class RouteUtil implements FileRouterRequestUtil {
      *            the URL path to get the client view configuration for
      * @return - the client view configuration for the given route
      */
-    protected synchronized AvailableViewInfo getRouteByPath(
+    protected synchronized @Nullable AvailableViewInfo getRouteByPath(
             Map<String, AvailableViewInfo> availableRoutes, String path) {
         final Set<String> routes = availableRoutes.keySet();
         final AntPathMatcher pathMatcher = new AntPathMatcher();
