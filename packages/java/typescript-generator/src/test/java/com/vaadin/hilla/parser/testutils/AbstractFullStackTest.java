@@ -129,6 +129,17 @@ public abstract class AbstractFullStackTest {
         assertTypescriptMatches(generated, getSnapshotsDir());
     }
 
+    // Standard Hilla generator plugins in the correct loading order
+    private static final List<String> GENERATOR_PLUGINS = List.of(
+            "@vaadin/hilla-generator-plugin-backbone",
+            "@vaadin/hilla-generator-plugin-model",
+            "@vaadin/hilla-generator-plugin-transfertypes",
+            "@vaadin/hilla-generator-plugin-subtypes",
+            "@vaadin/hilla-generator-plugin-signals",
+            "@vaadin/hilla-generator-plugin-push",
+            "@vaadin/hilla-generator-plugin-client",
+            "@vaadin/hilla-generator-plugin-barrel");
+
     /**
      * Execute the full stack: Java → OpenAPI → TypeScript
      *
@@ -140,54 +151,54 @@ public abstract class AbstractFullStackTest {
      */
     private GeneratedFiles executeFullStack(OpenAPI openAPI)
             throws FullStackExecutionException {
+        Path tempDir = null;
+        Path tempFile = null;
         try {
             // Serialize OpenAPI to JSON
             String openAPIJson = objectMapper.writeValueAsString(openAPI);
 
-            // Find the run-generator.mjs script
-            Path scriptPath = findGeneratorScript();
+            // Find the CLI executable using require.resolve pattern
+            Path cliPath = resolveCliPath();
 
-            // Write OpenAPI JSON to temp file (FrontendUtils doesn't support
-            // stdin piping)
-            Path tempFile = Files.createTempFile("openapi", ".json");
-            String output;
-            try {
-                Files.writeString(tempFile, openAPIJson);
+            // Create temp output directory and OpenAPI file
+            tempDir = Files.createTempDirectory("hilla-test-output");
+            tempFile = Files.createTempFile("openapi", ".json");
+            Files.writeString(tempFile, openAPIJson);
 
-                // Execute Node.js script using Flow's FrontendUtils
-                output = com.vaadin.flow.server.frontend.FrontendUtils
-                        .executeCommand(
-                                List.of("node",
-                                        scriptPath.toFile().getAbsolutePath()),
-                                pb -> pb.directory(targetDir.toFile())
-                                        .redirectInput(tempFile.toFile()));
-            } finally {
-                Files.deleteIfExists(tempFile);
+            // Build CLI command with all plugins
+            var command = new java.util.ArrayList<String>();
+            command.add("node");
+            command.add(cliPath.toString());
+            command.add(tempFile.toAbsolutePath().toString());
+            command.add("-o");
+            command.add(tempDir.toAbsolutePath().toString());
+            for (String plugin : GENERATOR_PLUGINS) {
+                command.add("-p");
+                command.add(plugin);
             }
 
-            // Parse the output JSON
-            @SuppressWarnings("unchecked")
-            Map<String, Object> resultJson = objectMapper.readValue(output,
-                    Map.class);
+            LOGGER.debug("Executing CLI: {}", String.join(" ", command));
 
-            @SuppressWarnings("unchecked")
-            List<Map<String, String>> filesJson = (List<Map<String, String>>) resultJson
-                    .get("files");
+            // Execute the CLI
+            com.vaadin.flow.server.frontend.FrontendUtils.executeCommand(
+                    command, pb -> pb.directory(targetDir.toFile()));
 
-            if (filesJson == null) {
-                throw new FullStackExecutionException(
-                        "Generator output missing 'files' property");
-            }
-
-            // Convert to GeneratedFiles
+            // Read generated files from output directory
             Map<String, String> files = new HashMap<>();
-            for (Map<String, String> fileJson : filesJson) {
-                String name = fileJson.get("name");
-                String content = fileJson.get("content");
-                if (name != null && content != null) {
-                    files.put(name, content);
-                }
-            }
+            final Path outputDir = tempDir;
+            Files.walk(outputDir).filter(Files::isRegularFile)
+                    .filter(p -> p.toString().endsWith(".ts")).forEach(path -> {
+                        try {
+                            String relativePath = outputDir.relativize(path)
+                                    .toString();
+                            String content = Files.readString(path);
+                            files.put(relativePath, content);
+                        } catch (IOException e) {
+                            throw new RuntimeException(
+                                    "Failed to read generated file: " + path,
+                                    e);
+                        }
+                    });
 
             LOGGER.info("Generated {} TypeScript files", files.size());
             return new GeneratedFiles(files);
@@ -197,11 +208,64 @@ public abstract class AbstractFullStackTest {
                     "Failed to serialize OpenAPI to JSON", e);
         } catch (com.vaadin.flow.server.frontend.FrontendUtils.CommandExecutionException e) {
             throw new FullStackExecutionException(
-                    "Failed to execute TypeScript generator", e);
+                    "Failed to execute TypeScript generator CLI", e);
         } catch (IOException e) {
             throw new FullStackExecutionException(
-                    "Failed to parse generator output", e);
+                    "Failed during full-stack execution", e);
+        } finally {
+            // Clean up temp files
+            try {
+                if (tempFile != null) {
+                    Files.deleteIfExists(tempFile);
+                }
+                if (tempDir != null) {
+                    deleteRecursively(tempDir);
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Failed to clean up temp files", e);
+            }
         }
+    }
+
+    /**
+     * Resolve the path to the Hilla generator CLI executable using Node's
+     * require.resolve.
+     *
+     * @see <a href=
+     *      "https://github.com/vaadin/flow/blob/main/flow-server/src/main/java/com/vaadin/flow/server/frontend/FrontendTools.java">
+     *      Flow's FrontendTools.getNpmPackageExecutable</a>
+     */
+    private Path resolveCliPath() throws FullStackExecutionException {
+        try {
+            String script = """
+                    var path = require('path');
+                    var jsonPath = require.resolve('@vaadin/hilla-generator-cli/package.json');
+                    var json = require(jsonPath);
+                    console.log(path.resolve(path.dirname(jsonPath), json.bin['tsgen']));
+                    """;
+            String cliPath = com.vaadin.flow.server.frontend.FrontendUtils
+                    .executeCommand(List.of("node", "--eval", script),
+                            pb -> pb.directory(targetDir.toFile()))
+                    .trim();
+            return Path.of(cliPath);
+        } catch (com.vaadin.flow.server.frontend.FrontendUtils.CommandExecutionException e) {
+            throw new FullStackExecutionException("Failed to resolve CLI path",
+                    e);
+        }
+    }
+
+    /**
+     * Recursively delete a directory and its contents.
+     */
+    private void deleteRecursively(Path path) throws IOException {
+        if (Files.isDirectory(path)) {
+            try (var entries = Files.list(path)) {
+                for (Path entry : entries.toList()) {
+                    deleteRecursively(entry);
+                }
+            }
+        }
+        Files.deleteIfExists(path);
     }
 
     /**
@@ -246,27 +310,6 @@ public abstract class AbstractFullStackTest {
      */
     private Path getSnapshotsDir() throws URISyntaxException, IOException {
         return resourceLoader.find("snapshots").toPath();
-    }
-
-    private Path findGeneratorScript() throws FullStackExecutionException {
-        try {
-            // Script is in test/resources directory root
-            // Use absolute path from resources root (leading slash)
-            var resource = getClass().getResource("/run-generator.mjs");
-            if (resource == null) {
-                throw new FullStackExecutionException(
-                        "Generator script not found in test resources: /run-generator.mjs");
-            }
-            Path scriptPath = Path.of(resource.toURI());
-            if (!Files.exists(scriptPath)) {
-                throw new FullStackExecutionException(
-                        "Generator script not found: " + scriptPath);
-            }
-            return scriptPath;
-        } catch (URISyntaxException e) {
-            throw new FullStackExecutionException(
-                    "Failed to find generator script", e);
-        }
     }
 
     /**
