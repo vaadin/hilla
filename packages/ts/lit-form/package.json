@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-lit-form",
-  "version": "25.0.0-beta6",
+  "version": "25.0.0-beta7",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -69,7 +69,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "25.0.0-beta6",
+    "@vaadin/hilla-frontend": "25.0.0-beta7",
     "validator": "13.12.0"
   },
   "peerDependencies": {
