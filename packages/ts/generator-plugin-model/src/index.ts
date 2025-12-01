@@ -26,7 +26,7 @@ export default class ModelPlugin extends Plugin {
     storage.pluginStorage.set(this.constructor.MODEL_PLUGIN_FILE_TAGS, this.#tags);
   }
 
-  #processEntities(schemas: OpenAPIV3.ComponentsObject['schemas'] | undefined): readonly SourceFile[] {
+  #processEntities(schemas: OpenAPIV3.ComponentsObject['schemas']): readonly SourceFile[] {
     this.logger.debug('Processing entities');
 
     if (!schemas) {

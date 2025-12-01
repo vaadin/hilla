@@ -250,6 +250,7 @@ export class ObjectModelBuilder<
           named: F['named'];
           // Adding the property name to all existing self-referencing
           // properties.
+          // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
           selfRefKeys: F['selfRefKeys'] | PK;
         }
       > {
