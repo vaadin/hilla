@@ -33,8 +33,7 @@ public class ChunksIT {
     @Before
     public void loadChunks() throws IOException {
         chunks = new ObjectMapper()
-                .readTree(
-                        ChunksIT.class.getResource("/vaadin-i18n/i18n.json"))
+                .readTree(ChunksIT.class.getResource("/vaadin-i18n/i18n.json"))
                 .path("chunks");
     }
 
