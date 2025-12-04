@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-form",
-  "version": "25.0.0-beta7",
+  "version": "25.0.0-beta8",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -44,7 +44,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "25.0.0-beta7"
+    "@vaadin/hilla-lit-form": "25.0.0-beta8"
   },
   "peerDependencies": {
     "react": "18 || 19",
