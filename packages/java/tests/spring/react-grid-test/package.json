@@ -50,7 +50,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "7.2.7",
-    "vite-plugin-checker": "0.11.0",
+    "vite-plugin-checker": "0.12.0",
     "workbox-build": "7.4.0"
   },
   "vaadin": {
@@ -102,10 +102,10 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "7.2.7",
-      "vite-plugin-checker": "0.11.0",
+      "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0"
     },
-    "hash": "8adc69e7046687943a4d38aa76b633ba3876da809014c73fcf0a81c61226a230"
+    "hash": "46603412d95b067dd7f37ad88ee9a12d34cc0242e386a81a4ad3a932f68029db"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
