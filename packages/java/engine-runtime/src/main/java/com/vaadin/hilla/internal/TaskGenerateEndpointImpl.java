@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.frontend.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
