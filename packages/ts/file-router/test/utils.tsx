@@ -150,6 +150,7 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
         {
           path: 'login',
           file: new URL('login.tsx', dir),
+          flowLayout: true,
         },
         {
           path: 'nameToReplace',
@@ -252,7 +253,7 @@ export function createTestingServerViewConfigs(metas: readonly RouteMeta[]): rea
       }
 
       if (path === 'login') {
-        return { title: 'login', skipLayouts: true };
+        return { title: 'login', skipLayouts: true, flowLayout: false };
       }
 
       return { ...(path.length > 0 ? { title: path } : {}), children: _children };
