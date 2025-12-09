@@ -66,12 +66,6 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
                   (${code})
                 `);
                 config = script.runInThisContext() as ViewConfig;
-                if (config.flowLayout === undefined) {
-                  const copy = JSON.parse(JSON.stringify(config));
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                  copy.flowLayout = flowLayout ?? false;
-                  config = copy;
-                }
               }
             } else if (node.getText(sourceFile).startsWith('export default')) {
               waitingForIdentifier = true;
@@ -81,7 +75,10 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             }
           }
 
-          config ??= { flowLayout: flowLayout ?? false };
+          config = {
+            ...(config ?? {}),
+            flowLayout: config?.flowLayout ?? flowLayout ?? false,
+          };
 
           let title: string;
 
