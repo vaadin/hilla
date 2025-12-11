@@ -13,9 +13,9 @@ import chaiDom from 'chai-dom';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
-import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../src/autoform.js';
-import type { CrudService } from '../src/crud.js';
-import { LocaleContext } from '../src/locale.js';
+import { AutoForm, type AutoFormLayoutRendererProps, type AutoFormProps, emptyItem } from '../../src/autoform.js';
+import type { CrudService } from '../../src/crud.js';
+import { LocaleContext } from '../../src/locale.js';
 import ConfirmDialogController from './ConfirmDialogController.js';
 import FormController from './FormController.js';
 import {
@@ -28,7 +28,7 @@ import {
   PersonModel,
   personService,
   PersonWithSimpleIdPropertyModel,
-  NamedModel,
+  PersonWithoutIdPropertyModel,
 } from './test-models-and-services.js';
 import { nextFrame } from './test-utils.js';
 
@@ -875,7 +875,14 @@ describe('@vaadin/hilla-react-crud', () => {
         // Model without discernible ID property
         form = await FormController.init(
           user,
-          render(<AutoForm service={service} model={NamedModel} item={person} deleteButtonVisible={true} />).container,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonWithoutIdPropertyModel}
+              item={person}
+              deleteButtonVisible={true}
+            />,
+          ).container,
         );
         expect(form.queryButton('Delete...')).not.to.exist;
       });
