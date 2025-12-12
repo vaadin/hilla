@@ -322,7 +322,7 @@ public class CommandRunnerTest {
             @Override
             public List<String> executables() {
                 return CommandRunner.IS_WINDOWS ? List.of("cmd.exe")
-                        : List.of("/bin/sh");
+                        : List.of("/bin/bash");
             }
 
             @Override
