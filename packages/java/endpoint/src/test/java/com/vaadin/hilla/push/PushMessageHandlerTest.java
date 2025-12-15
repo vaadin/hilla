@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.push;
 
 import java.time.Duration;
@@ -10,7 +25,23 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import net.jcip.annotations.NotThreadSafe;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit4.SpringRunner;
+import reactor.core.publisher.Flux;
+import tools.jackson.databind.ObjectMapper;
+
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerConfiguration;
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
@@ -25,27 +56,10 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageComplete;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageError;
 import com.vaadin.hilla.push.messages.toclient.ClientMessageUpdate;
-import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import reactor.core.publisher.Flux;
 
 @SpringBootTest(classes = { PushMessageHandler.class,
         ServletContextTestSetup.class, EndpointProperties.class,
-        Jackson2ObjectMapperBuilder.class, JacksonProperties.class,
-        PushMessageHandler.class, ObjectMapper.class,
+        JacksonProperties.class, PushMessageHandler.class, ObjectMapper.class,
         EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
@@ -64,7 +78,7 @@ public class PushMessageHandlerTest {
     @Autowired
     private PushMessageHandler pushMessageHandler;
 
-    @MockBean
+    @MockitoBean
     private EndpointInvoker endpointInvoker;
 
     @Autowired

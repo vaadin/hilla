@@ -1,27 +1,19 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla;
-
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.lang.reflect.Method;
-import java.security.Principal;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
-import com.vaadin.hilla.auth.EndpointAccessChecker;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -29,9 +21,34 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.lang.reflect.Method;
+import java.security.Principal;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import tools.jackson.databind.node.ObjectNode;
+
+import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
+import com.vaadin.hilla.auth.EndpointAccessChecker;
+import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+
 @SpringBootTest(classes = { ServletContextTestSetup.class,
-        EndpointProperties.class, Jackson2ObjectMapperBuilder.class,
-        JacksonProperties.class, EndpointController.class })
+        EndpointProperties.class, JacksonProperties.class,
+        EndpointController.class })
 @ContextConfiguration(classes = { EndpointControllerConfiguration.class })
 @RunWith(SpringRunner.class)
 public class EndpointInvokerTest {
@@ -64,6 +81,7 @@ public class EndpointInvokerTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         when(requestMock.getUserPrincipal()).thenReturn(principal);
 
         when(endpointNameChecker.check(any())).thenReturn(null);
@@ -178,13 +196,24 @@ public class EndpointInvokerTest {
                 .check(any(Class.class), any(), any());
     }
 
+    static class TeapotException extends EndpointHttpException {
+        TeapotException() {
+            super("I'm a teapot");
+        }
+
+        @Override
+        public HttpStatus getHttpStatus() {
+            return HttpStatus.I_AM_A_TEAPOT;
+        }
+    }
+
     @Test
     public void httpExceptionIsRethrown() {
         @Endpoint
         class TestEndpoint {
 
-            public String sayHello() throws EndpointHttpException {
-                throw new EndpointHttpException(418, "I'm a teapot");
+            public String sayHello() throws TeapotException {
+                throw new TeapotException();
             }
         }
 
@@ -192,7 +221,7 @@ public class EndpointInvokerTest {
 
         endpointRegistry.registerEndpoint(test);
 
-        var ex = assertThrows(EndpointHttpException.class,
+        var ex = assertThrows(TeapotException.class,
                 () -> endpointInvoker.invoke("TestEndpoint", "sayhello", body,
                         principal, requestMock::isUserInRole));
         assertEquals(418, ex.getHttpStatusCode());

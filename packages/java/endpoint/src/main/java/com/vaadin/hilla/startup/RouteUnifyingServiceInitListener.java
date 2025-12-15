@@ -13,10 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.startup;
 
-import com.vaadin.flow.server.HandlerHelper;
+import java.io.IOException;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
+
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.SynchronizedRequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
@@ -24,24 +32,14 @@ import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.shared.ApplicationConstants;
 import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.hilla.HillaStats;
+import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
 import com.vaadin.hilla.route.RouteUnifyingIndexHtmlRequestListener;
 import com.vaadin.hilla.route.RouteUtil;
 import com.vaadin.hilla.route.ServerAndClientViewsProvider;
-import com.vaadin.hilla.route.RouteUnifyingConfigurationProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Service init listener to add the
@@ -57,8 +55,6 @@ public class RouteUnifyingServiceInitListener
 
     private final NavigationAccessControl accessControl;
 
-    private final ViewAccessChecker viewAccessChecker;
-
     private final RouteUtil routeUtil;
 
     /**
@@ -70,12 +66,10 @@ public class RouteUnifyingServiceInitListener
     @Autowired
     public RouteUnifyingServiceInitListener(RouteUtil routeUtil,
             RouteUnifyingConfigurationProperties routeUnifyingConfigurationProperties,
-            @Nullable NavigationAccessControl accessControl,
-            @Nullable ViewAccessChecker viewAccessChecker) {
+            @Nullable NavigationAccessControl accessControl) {
         this.routeUtil = routeUtil;
         this.routeUnifyingConfigurationProperties = routeUnifyingConfigurationProperties;
         this.accessControl = accessControl;
-        this.viewAccessChecker = viewAccessChecker;
     }
 
     @Override
@@ -87,7 +81,7 @@ public class RouteUnifyingServiceInitListener
         boolean hasHillaFsRoute = false;
         if (deploymentConfiguration.isReactEnabled()) {
             var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, accessControl, viewAccessChecker,
+                    deploymentConfiguration, accessControl,
                     routeUnifyingConfigurationProperties
                             .isExposeServerRoutesToClient());
             var routeUnifyingIndexHtmlRequestListener = new RouteUnifyingIndexHtmlRequestListener(

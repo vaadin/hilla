@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-form",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "Hilla form utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:react": "npm run test",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -44,7 +44,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.8.0-alpha5"
+    "@vaadin/hilla-lit-form": "25.0.0-rc2"
   },
   "peerDependencies": {
     "react": "18 || 19",

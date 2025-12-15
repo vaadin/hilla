@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-signals",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "Signals for Hilla React",
   "main": "index.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:react": "npm run test",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@preact/signals-react": "3.0.1",
-    "@vaadin/hilla-frontend": "24.8.0-alpha5",
+    "@vaadin/hilla-frontend": "25.0.0-rc2",
     "nanoid": "5.0.9"
   },
   "peerDependencies": {

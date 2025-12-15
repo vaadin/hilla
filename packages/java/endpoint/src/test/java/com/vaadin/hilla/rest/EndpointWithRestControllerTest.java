@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.rest;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +22,12 @@ import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import jakarta.servlet.ServletContext;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +35,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -42,15 +46,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
 import com.vaadin.hilla.EndpointController;
 import com.vaadin.hilla.EndpointControllerMockBuilder;
-
-import jakarta.servlet.ServletContext;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -130,7 +128,8 @@ public class EndpointWithRestControllerTest {
     public void should_RepsectJacksonAnnotation_when_serializeBean()
             throws Exception {
         String result = callEndpointMethod("getBeanWithJacksonAnnotation");
-        assertEquals("{\"rating\":2,\"bookId\":null,\"name\":null}", result);
+        // Jackson 3 uses alphabetical property ordering by default
+        assertEquals("{\"bookId\":null,\"name\":null,\"rating\":2}", result);
     }
 
     @Test
@@ -166,8 +165,8 @@ public class EndpointWithRestControllerTest {
         String endpointName = TestEndpoints.class.getSimpleName();
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         return mockMvcForEndpoint.perform(requestBuilder).andReturn()
                 .getResponse().getContentAsString();
@@ -185,7 +184,8 @@ public class EndpointWithRestControllerTest {
         try {
             return projectFolder.getRoot().toPath()
                     .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
+                    .toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

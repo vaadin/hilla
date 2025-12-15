@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-i18n",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "Hilla I18n utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -23,7 +23,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:react": "npm run test",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -44,8 +44,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.8.0-alpha5",
-    "@vaadin/hilla-react-signals": "24.8.0-alpha5",
+    "@vaadin/hilla-frontend": "25.0.0-rc2",
+    "@vaadin/hilla-react-signals": "25.0.0-rc2",
     "intl-messageformat": "10.7.11"
   },
   "peerDependencies": {

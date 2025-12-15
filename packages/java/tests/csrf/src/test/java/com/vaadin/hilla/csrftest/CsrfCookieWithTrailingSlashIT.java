@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.csrftest;
 
 import java.io.IOException;
@@ -24,10 +23,10 @@ import java.net.HttpCookie;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 public class CsrfCookieWithTrailingSlashIT extends ChromeBrowserTest {
     @Test

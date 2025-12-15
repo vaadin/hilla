@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url';
 import type { JSX } from 'react';
 import sinon from 'sinon';
 import type { Logger } from 'vite';
+import type { ServerViewConfig } from '../src/shared/internal.js';
+import { transformTree } from '../src/shared/transformTree.js';
 import type { RouteModule } from '../src/types.js';
 import type { RouteMeta } from '../src/vite-plugin/collectRoutesFromFS.js';
 
@@ -62,6 +64,12 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     mkdir(new URL('test/issue-002571-empty-layout/', dir), { recursive: true }),
   ]);
   await Promise.all([
+    appendFile(new URL('@layout.tsx', dir), 'export default function Layout() {}'),
+    appendFile(new URL('@index.tsx', dir), 'export default function Index() {}'),
+    appendFile(
+      new URL('login.tsx', dir),
+      'export const config = { skipLayouts: true }; export default function Login() {}',
+    ),
     appendFile(
       new URL('profile/account/@layout.tsx', dir),
       "export const config = { title: 'Account' };\nexport default function AccountLayout() {};",
@@ -122,94 +130,135 @@ export async function createTestingRouteFiles(dir: URL): Promise<void> {
     appendFile(new URL('test/empty.tsx', dir), ''),
     appendFile(new URL('test/_ignored.tsx', dir), 'export default function Ignored() {};'),
     appendFile(new URL('test/no-default-export.tsx', dir), 'export const config = { title: "No Default Export" };'),
+    appendFile(
+      new URL('test/non-lazy.tsx', dir),
+      'export const config = { lazy: false };\nexport default function NonLazy() {};',
+    ),
   ]);
 }
 
 export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
   return [
     {
-      path: 'nameToReplace',
-      file: new URL('nameToReplace.tsx', dir),
-    },
-    {
-      path: 'profile',
+      path: '',
+      layout: new URL('@layout.tsx', dir),
       children: [
-        { path: '', file: new URL('profile/@index.tsx', dir) },
         {
-          path: 'account',
-          layout: new URL('profile/account/@layout.tsx', dir),
+          path: '',
+          file: new URL('@index.tsx', dir),
+        },
+        {
+          path: 'login',
+          file: new URL('login.tsx', dir),
+          flowLayout: true,
+        },
+        {
+          path: 'nameToReplace',
+          file: new URL('nameToReplace.tsx', dir),
+        },
+        {
+          path: 'profile',
           children: [
+            { path: '', file: new URL('profile/@index.tsx', dir) },
             {
-              path: 'security',
+              path: 'account',
+              layout: new URL('profile/account/@layout.tsx', dir),
               children: [
                 {
-                  path: 'password',
-                  file: new URL('profile/account/security/password.jsx', dir),
+                  path: 'security',
+                  children: [
+                    {
+                      path: 'password',
+                      file: new URL('profile/account/security/password.jsx', dir),
+                    },
+                    {
+                      path: 'two-factor-auth',
+                      file: new URL('profile/account/security/two-factor-auth.tsx', dir),
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              path: 'friends',
+              layout: new URL('profile/friends/@layout.tsx', dir),
+              children: [
+                {
+                  path: 'list',
+                  file: new URL('profile/friends/list.jsx', dir),
                 },
                 {
-                  path: 'two-factor-auth',
-                  file: new URL('profile/account/security/two-factor-auth.tsx', dir),
+                  path: '{user}',
+                  file: new URL('profile/friends/{user}.tsx', dir),
                 },
               ],
             },
           ],
         },
+        // Directories where all files are ignored are also ignored (`empty-dir`)
         {
-          path: 'friends',
-          layout: new URL('profile/friends/@layout.tsx', dir),
+          path: 'test',
           children: [
+            // Ignored route that has the name `_ignored.tsx` is not included in the route meta.
+            // Also empty files or files without default export are not included.
             {
-              path: 'list',
-              file: new URL('profile/friends/list.jsx', dir),
+              path: '{{optional}}',
+              file: new URL('test/{{optional}}.tsx', dir),
             },
             {
-              path: '{user}',
-              file: new URL('profile/friends/{user}.tsx', dir),
+              path: '{...wildcard}',
+              file: new URL('test/{...wildcard}.tsx', dir),
             },
-          ],
-        },
-      ],
-    },
-    // Directories where all files are ignored are also ignored (`empty-dir`)
-    {
-      path: 'test',
-      children: [
-        // Ignored route that has the name `_ignored.tsx` is not included in the route meta.
-        // Also empty files or files without default export are not included.
-        {
-          path: '{{optional}}',
-          file: new URL('test/{{optional}}.tsx', dir),
-        },
-        {
-          path: '{...wildcard}',
-          file: new URL('test/{...wildcard}.tsx', dir),
-        },
-        {
-          path: 'issue-002378',
-          children: [
             {
-              path: '{requiredParam}',
+              path: 'issue-002378',
               children: [
                 {
-                  path: 'edit',
-                  file: new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
+                  path: '{requiredParam}',
+                  children: [
+                    {
+                      path: 'edit',
+                      file: new URL('test/issue-002378/{requiredParam}/edit.tsx', dir),
+                    },
+                  ],
                 },
               ],
             },
+            {
+              path: 'issue-002571-empty-layout',
+              layout: new URL('test/issue-002571-empty-layout/@layout.tsx', dir),
+              children: [],
+            },
+            {
+              path: 'issue-002879-config-below',
+              file: new URL('test/issue-002879-config-below.tsx', dir),
+            },
+            {
+              path: 'non-lazy',
+              file: new URL('test/non-lazy.tsx', dir),
+            },
           ],
-        },
-        {
-          path: 'issue-002571-empty-layout',
-          layout: new URL('test/issue-002571-empty-layout/@layout.tsx', dir),
-          children: [],
-        },
-        {
-          path: 'issue-002879-config-below',
-          file: new URL('test/issue-002879-config-below.tsx', dir),
         },
       ],
     },
   ];
+}
+
+export function createTestingServerViewConfigs(metas: readonly RouteMeta[]): readonly ServerViewConfig[] {
+  return transformTree(metas, null, (_metas, next) =>
+    _metas.map(({ path, children }) => {
+      const _children = children ? next(children) : [];
+
+      if (path === 'non-lazy') {
+        return { title: path, lazy: false, children: _children };
+      }
+
+      if (path === 'login') {
+        return { title: 'login', skipLayouts: true, flowLayout: false };
+      }
+
+      return { ...(path.length > 0 ? { title: path } : {}), children: _children };
+    }),
+  );
 }
 
 export const components: Record<string, RouteModule> = {

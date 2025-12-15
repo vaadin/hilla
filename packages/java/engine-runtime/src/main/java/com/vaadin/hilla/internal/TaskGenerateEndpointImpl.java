@@ -15,10 +15,10 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.frontend.ExecutionFailedException;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
 
 /**
@@ -33,7 +33,7 @@ public class TaskGenerateEndpointImpl extends AbstractTaskEndpointGenerator
      * @param engineConfiguration
      *            Hilla engine configuration instance
      */
-    TaskGenerateEndpointImpl(EngineConfiguration engineConfiguration) {
+    TaskGenerateEndpointImpl(EngineAutoConfiguration engineConfiguration) {
         super(engineConfiguration);
     }
 

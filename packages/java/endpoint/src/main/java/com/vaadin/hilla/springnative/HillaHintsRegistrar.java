@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.springnative;
 
 import java.io.BufferedReader;
@@ -9,8 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.router.MenuData;
-import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
@@ -18,9 +32,10 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.vaadin.flow.router.MenuData;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
 import com.vaadin.hilla.OpenAPIUtil;
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.push.PushEndpoint;
 import com.vaadin.hilla.push.messages.fromclient.AbstractServerMessage;
 import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
@@ -31,7 +46,7 @@ import com.vaadin.hilla.push.messages.toclient.AbstractClientMessage;
 public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
 
     private static final String openApiResourceName = "/"
-            + EngineConfiguration.OPEN_API_PATH;
+            + EngineAutoConfiguration.OPEN_API_PATH;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -81,7 +96,8 @@ public class HillaHintsRegistrar implements RuntimeHintsRegistrar {
             logger.error("Error while scanning and registering endpoint types",
                     e);
         }
-        hints.resources().registerPattern(EngineConfiguration.OPEN_API_PATH);
+        hints.resources()
+                .registerPattern(EngineAutoConfiguration.OPEN_API_PATH);
     }
 
     private Collection<Class<?>> getMessageTypes(Class<?> cls) {

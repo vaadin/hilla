@@ -26,9 +26,10 @@ function* walkAST(node: Node): Generator<Node> {
  * routes along with managing the client-side routes.
  *
  * @param views - The route metadata tree.
+ * @returns A view configuration tree.
  */
-export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<string> {
-  const res = await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
+export default async function createViewConfigJson(views: readonly RouteMeta[]): Promise<readonly ServerViewConfig[]> {
+  return await transformTree<readonly RouteMeta[], Promise<readonly ServerViewConfig[]>>(
     views,
     null,
     async (routes, next) =>
@@ -58,14 +59,13 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'config') {
               if (node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
                 const code = node.initializer.getText(sourceFile);
-                const script = new Script(`(${code})`);
+                const script = new Script(`
+                  function key(x) {
+                    return x[0];
+                  }
+                  (${code})
+                `);
                 config = script.runInThisContext() as ViewConfig;
-                if (config.flowLayout === undefined) {
-                  const copy = JSON.parse(JSON.stringify(config));
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                  copy.flowLayout = flowLayout ?? false;
-                  config = copy;
-                }
               }
             } else if (node.getText(sourceFile).startsWith('export default')) {
               waitingForIdentifier = true;
@@ -75,7 +75,10 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
             }
           }
 
-          config ??= { flowLayout: flowLayout ?? false };
+          config = {
+            ...(config ?? {}),
+            flowLayout: config?.flowLayout ?? flowLayout ?? false,
+          };
 
           let title: string;
 
@@ -101,6 +104,4 @@ export default async function createViewConfigJson(views: readonly RouteMeta[]):
         }),
       ),
   );
-
-  return JSON.stringify(res, undefined, 2);
 }

@@ -1,24 +1,69 @@
-import { template, transform as transformer } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type CallExpression, type Identifier, type VariableStatement } from 'typescript';
-
+import ast from 'tsc-template';
+import {
+  type CallExpression,
+  createPrinter,
+  factory,
+  type Identifier,
+  NewLineKind,
+  type ObjectLiteralExpression,
+  type PropertyAccessExpression,
+} from 'typescript';
+import type { ServerViewConfig } from '../shared/internal.js';
 import { transformTree } from '../shared/transformTree.js';
 import type { RouteMeta } from './collectRoutesFromFS.js';
 import type { RuntimeFileUrls } from './generateRuntimeFiles.js';
 import { convertFSRouteSegmentToURLPatternFormat } from './utils.js';
 
-const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+const printer = createPrinter({ newLine: NewLineKind.LineFeed });
 
 const fileExtensions = ['.ts', '.tsx', '.js', '.jsx'];
+
+const HILLA_FILE_ROUTER = '@vaadin/hilla-file-router';
+const HILLA_FILE_ROUTER_RUNTIME = `${HILLA_FILE_ROUTER}/runtime.js`;
+const HILLA_FILE_ROUTER_TYPES = `${HILLA_FILE_ROUTER}/types.js`;
+
+type LazyModule = Readonly<{
+  path: string;
+  config: ServerViewConfig;
+  lazyId: Identifier;
+}>;
+
+type RegularModule = Readonly<{
+  componentId: PropertyAccessExpression;
+  configId: PropertyAccessExpression;
+  flowLayout?: boolean;
+}>;
+
+function isLazyModule(mod: LazyModule | RegularModule | undefined): mod is LazyModule {
+  return !!mod && 'path' in mod;
+}
+
+function isLazyRoute(pathContext: readonly string[], path: string, config: Readonly<ServerViewConfig>): boolean {
+  if (config.lazy !== undefined) {
+    return config.lazy;
+  }
+
+  // "/" and "/login" are eager by default
+  const rootContext = !pathContext.some(Boolean);
+  const eagerDefault = rootContext && (path === '' || path === 'login');
+  return !eagerDefault;
+}
 
 class RouteFromMetaProcessor {
   readonly #manager: DependencyManager;
   readonly #views: readonly RouteMeta[];
+  readonly #configs: readonly ServerViewConfig[];
 
-  constructor(views: readonly RouteMeta[], { code: codeFile }: RuntimeFileUrls) {
+  constructor(
+    views: readonly RouteMeta[],
+    viewConfigs: readonly ServerViewConfig[],
+    { code: codeFile }: RuntimeFileUrls,
+  ) {
     this.#views = views;
+    this.#configs = viewConfigs;
 
     const codeDir = new URL('./', codeFile);
     this.#manager = new DependencyManager(new PathManager({ extension: '.js', relativeTo: codeDir }));
@@ -26,18 +71,18 @@ class RouteFromMetaProcessor {
 
   /**
    * Loads all the files from the received metadata and creates a framework-agnostic route tree.
-   *
-   * @param views - The abstract route tree.
-   * @param generatedDir - The directory where the generated view file will be stored.
    */
   process(): string {
     const {
       paths,
-      imports: { named, namespace },
+      imports: { namespace, named },
     } = this.#manager;
     const errors: string[] = [];
 
-    const routes = transformTree<readonly RouteMeta[], readonly CallExpression[]>(this.#views, null, (metas, next) => {
+    const routes = transformTree<
+      [pathContext: readonly string[], metas: readonly RouteMeta[], configs: readonly ServerViewConfig[]],
+      readonly CallExpression[]
+    >([[], this.#views, this.#configs], null, ([pathContext, metas, configs], next) => {
       errors.push(
         ...metas
           .map((route) => route.path)
@@ -45,48 +90,65 @@ class RouteFromMetaProcessor {
           .map((dup) => `console.error("Two views share the same path: ${dup}");`),
       );
 
-      return metas.map(({ file, layout, path, children, flowLayout }) => {
+      return metas.map(({ file, layout, path, children }, index) => {
+        const config = configs[index]!;
         let _children: readonly CallExpression[] | undefined;
 
         if (children) {
-          _children = next(children);
+          // Assuming that if we have `children` in the route, we also have
+          // `children` in the config.
+          _children = next([[...pathContext, path], children, config.children!]);
         }
 
-        let mod: Identifier | undefined;
+        let module: LazyModule | RegularModule | undefined;
+
+        let relativePath: string | undefined;
+        let fileName: string | undefined;
+
         if (file) {
           const fileExt = fileExtensions.find((ext) => file.pathname.endsWith(ext));
-          mod = namespace.add(paths.createRelativePath(file, fileExt), `Page`);
+          relativePath = paths.createRelativePath(file, fileExt);
+          fileName = 'Page';
         } else if (layout) {
           const fileExt = fileExtensions.find((ext) => layout.pathname.endsWith(ext));
-          mod = namespace.add(paths.createRelativePath(layout, fileExt), `Layout`);
+          relativePath = paths.createRelativePath(layout, fileExt);
+          fileName = 'Layout';
         }
 
-        const moduleExtension = flowLayout ? { flowLayout } : undefined;
+        if (relativePath && fileName) {
+          if (isLazyRoute(pathContext, path, config)) {
+            module = {
+              path: relativePath,
+              config,
+              lazyId: named.getIdentifier('react', 'lazy') ?? named.add('react', 'lazy'),
+            } satisfies LazyModule;
+          } else {
+            const mod = namespace.add(relativePath, fileName);
+            const reactModuleType =
+              named.getIdentifier(HILLA_FILE_ROUTER_TYPES, 'RouteModule') ??
+              named.add(HILLA_FILE_ROUTER_TYPES, 'RouteModule', true);
 
-        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), mod, moduleExtension, _children);
+            module = {
+              componentId: ast`${mod}.default`.node as PropertyAccessExpression,
+              configId: ast`(${mod} as ${reactModuleType}).config`.node as PropertyAccessExpression,
+              flowLayout: config.flowLayout,
+            } satisfies RegularModule;
+          }
+        }
+
+        return this.#createRouteData(convertFSRouteSegmentToURLPatternFormat(path), module, _children);
       });
     });
 
     const agnosticRouteId =
-      named.getIdentifier('@vaadin/hilla-file-router/types.js', 'AgnosticRoute') ??
-      named.add('@vaadin/hilla-file-router/types.js', 'AgnosticRoute', true);
-
-    let routeDeclaration = template(
-      `${errors.join('\n')}
-
-const routes: readonly AGNOSTIC_ROUTE[] = ROUTE;
-
-export default routes;
-`,
-      [
-        transformer((node) =>
-          ts.isIdentifier(node) && node.text === 'ROUTE' ? ts.factory.createArrayLiteralExpression(routes, true) : node,
-        ),
-        transformer((node) => (ts.isIdentifier(node) && node.text === 'AGNOSTIC_ROUTE' ? agnosticRouteId : node)),
-      ],
-    );
-
-    routeDeclaration = [...this.#manager.imports.toCode(), ...routeDeclaration];
+      named.getIdentifier(HILLA_FILE_ROUTER_TYPES, 'AgnosticRoute') ??
+      named.add(HILLA_FILE_ROUTER_TYPES, 'AgnosticRoute', true);
+    const routeDeclaration = [
+      ...this.#manager.imports.toCode(),
+      ...ast`${errors.join('\n')}
+const routes: readonly ${agnosticRouteId}[] = ${factory.createArrayLiteralExpression(routes, true)};
+export default routes;`.source.statements,
+    ];
 
     const file = createSourceFile(routeDeclaration, 'file-routes.ts');
     return printer.printFile(file);
@@ -97,50 +159,53 @@ export default routes;
    * create a route tree.
    *
    * @param path - The path of the route.
-   * @param mod - The name of the route module imported as a namespace.
+   * @param module - The module to build route from.
    * @param children - The list of child route call expressions.
    */
   #createRouteData(
     path: string,
-    mod: Identifier | undefined,
-    extension?: Readonly<Record<string, unknown>>,
-    children?: readonly CallExpression[],
+    module: LazyModule | RegularModule | undefined,
+    children: readonly CallExpression[] | undefined,
   ): CallExpression {
     const { named } = this.#manager.imports;
 
-    let extendModuleId: Identifier | undefined;
-    let modNode = '';
+    const createRouteId =
+      named.getIdentifier(HILLA_FILE_ROUTER_RUNTIME, 'createRoute') ??
+      named.add(HILLA_FILE_ROUTER_RUNTIME, 'createRoute');
 
-    if (extension) {
-      extendModuleId =
-        named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'extendModule') ??
-        named.add('@vaadin/hilla-file-router/runtime.js', 'extendModule');
-      modNode = `, EXTEND_MODULE(MOD, ${JSON.stringify(extension)})`;
-    } else if (mod) {
-      modNode = `, MOD`;
+    let component: PropertyAccessExpression | CallExpression | undefined;
+    let config: PropertyAccessExpression | ObjectLiteralExpression | string | undefined;
+
+    if (isLazyModule(module)) {
+      const { children: _c, params: _p, ...viewConfig } = module.config;
+
+      component = ast`${module.lazyId}(() => import('${module.path}')`.node as CallExpression;
+      config = Object.keys(viewConfig).length > 0 ? JSON.stringify(viewConfig) : '';
+    } else if (module) {
+      component = module.componentId;
+      config = module.flowLayout
+        ? (ast`const a = %{ { ...${module.configId}, flowLayout: ${module.flowLayout.toString()} } }%`
+            .node as ObjectLiteralExpression)
+        : module.configId;
     }
 
-    const createRouteId =
-      named.getIdentifier('@vaadin/hilla-file-router/runtime.js', 'createRoute') ??
-      named.add('@vaadin/hilla-file-router/runtime.js', 'createRoute');
+    const _children = children ? factory.createArrayLiteralExpression(children, true) : '';
 
-    return template(
-      `const route = CREATE_ROUTE("${path}", ${modNode}${children ? `, CHILDREN` : ''})`,
-      ([statement]) => (statement as VariableStatement).declarationList.declarations[0].initializer as CallExpression,
-      [
-        transformer((node) =>
-          ts.isIdentifier(node) && node.text === 'CHILDREN'
-            ? ts.factory.createArrayLiteralExpression(children, true)
-            : node,
-        ),
-        transformer((node) => (ts.isIdentifier(node) && node.text === 'MOD' ? (mod ?? ts.factory.createNull()) : node)),
-        transformer((node) => (ts.isIdentifier(node) && node.text === 'EXTEND_MODULE' ? extendModuleId : node)),
-        transformer((node) => (ts.isIdentifier(node) && node.text === 'CREATE_ROUTE' ? createRouteId : node)),
-      ],
-    );
+    // ```ts
+    // createRoute("grandparent", {...grandparentConfig, flowLayout: true}, [
+    //   createRoute("parent", ParentPage, parentConfig, [
+    //     createRoute("child", lazy(() => import('../ChildPage.js')), { title: 'Child Page' }),
+    //   ]),
+    // ]),
+    // ```
+    return ast`${createRouteId}("${path}", ${component ?? ''}, ${config ?? ''}, ${_children})`.node as CallExpression;
   }
 }
 
-export default function createRoutesFromMeta(views: readonly RouteMeta[], urls: RuntimeFileUrls): string {
-  return new RouteFromMetaProcessor(views, urls).process();
+export default function createRoutesFromMeta(
+  views: readonly RouteMeta[],
+  viewConfigs: readonly ServerViewConfig[],
+  urls: RuntimeFileUrls,
+): string {
+  return new RouteFromMetaProcessor(views, viewConfigs, urls).process();
 }

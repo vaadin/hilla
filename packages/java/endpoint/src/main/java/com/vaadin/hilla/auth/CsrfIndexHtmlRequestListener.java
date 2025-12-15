@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.auth;
 
 import jakarta.servlet.http.Cookie;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;

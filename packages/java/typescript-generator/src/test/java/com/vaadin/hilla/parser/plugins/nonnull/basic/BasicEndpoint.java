@@ -1,0 +1,109 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.hilla.parser.plugins.nonnull.basic;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+
+@Endpoint
+public class BasicEndpoint {
+    @Nonnull
+    public Map<String, @Nonnull List<@Nonnull ExtendedNonNullableModel>> complexType(
+            @Nonnull Map<String, @Nonnull List<@Nonnull ExtendedNonNullableModel>> map) {
+        return map;
+    }
+
+    @org.jspecify.annotations.NonNull
+    public List<@Nonnull String> mixedAnnotations(@Nonnull String parameter) {
+        return List.of(parameter);
+    }
+
+    @org.jspecify.annotations.NonNull
+    public String nonTypeAnnotation(
+            @org.jspecify.annotations.NonNull String nonTypeParameter) {
+        return nonTypeParameter;
+    }
+
+    public String nullableType(String nullableParameter) {
+        return nullableParameter;
+    }
+
+    @Nonnull
+    public String simpleType(@Nonnull String str) {
+        return str;
+    }
+
+    public List<@Nonnull ? extends String> typeArgumentWildcard(
+            List<@Nonnull ? extends String> list) {
+        return list;
+    }
+
+    public <@Nonnull T extends String> List<T> typeParameter(List<T> list) {
+        return list;
+    }
+
+    public List<@Nonnull NonNullableModel> typeWithTypeArgument(
+            List<@Nonnull NonNullableModel> list) {
+        return list;
+    }
+
+    @Nonnull
+    public Optional<@Nonnull String> optional(
+            @Nonnull Optional<@Nonnull String> opt) {
+        return opt;
+    }
+
+    @Nonnull
+    public NonNullableFieldModel nonNullableFieldModel(
+            @Nonnull NonNullableFieldModel nonNullableFieldModel) {
+        return nonNullableFieldModel;
+    }
+
+    public static class ExtendedNonNullableModel extends NonNullableModel {
+        @org.jspecify.annotations.NonNull
+        public List<@Nonnull String> mixedAnnotations;
+
+        @org.jspecify.annotations.NonNull
+        public String nonTypeAnnotation;
+    }
+
+    public static class NonNullableModel {
+        @Nonnull
+        public Map<String, @Nonnull List<@Nonnull NonNullableModel>> complexTypeField;
+        public String nullableField;
+        @Nonnull
+        public String protectedField;
+        @Nonnull
+        public String publicField;
+        public List<@Nonnull String> typeWithTypeArgument;
+    }
+
+    public static class NonNullableFieldModel {
+        @Nonnull
+        private List<@Nonnull String> stringList;
+
+        public List<String> getStringList() {
+            return this.stringList;
+        }
+
+        public void setStringList(List<String> stringList) {
+            this.stringList = stringList;
+        }
+    }
+}

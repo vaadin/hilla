@@ -13,8 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla;
+
+import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -35,12 +36,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.hilla.parser.utils.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNullApi;
 
-import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
+import com.vaadin.hilla.parser.utils.Generics;
 
 /**
  * A helper class for ExplicitNullableTypeChecker.

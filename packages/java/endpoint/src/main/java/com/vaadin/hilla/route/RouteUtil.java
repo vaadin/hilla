@@ -1,15 +1,24 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.route;
 
-import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
-import com.vaadin.flow.server.*;
-import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.internal.menu.MenuRegistry;
-
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,20 +28,51 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.server.RequestPath;
 import org.springframework.util.AntPathMatcher;
+
+import com.vaadin.flow.internal.hilla.FileRouterRequestUtil;
+import com.vaadin.flow.internal.menu.MenuRegistry;
+import com.vaadin.flow.server.Mode;
+import com.vaadin.flow.server.VaadinServletContext;
+import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 /**
  * A container for utility methods related with Routes.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@Component
+@NullMarked
 public class RouteUtil implements FileRouterRequestUtil {
 
+    @Nullable
     private Map<String, AvailableViewInfo> registeredRoutes = null;
 
     public RouteUtil() {
+    }
+
+    @Override
+    public boolean isAnonymousRoute(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false).map(info -> !info.loginRequired())
+                .orElse(false);
+    }
+
+    @Override
+    public boolean isSecuredRoute(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false)
+                .map(AvailableViewInfo::loginRequired).orElse(false);
+    }
+
+    @Override
+    public Set<String> getAllowedAuthorities(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, false).map(AvailableViewInfo::rolesAllowed)
+                .map(Set::of).orElseGet(Collections::emptySet);
     }
 
     /**
@@ -60,6 +100,11 @@ public class RouteUtil implements FileRouterRequestUtil {
      */
     @Override
     public boolean isRouteAllowed(HttpServletRequest request) {
+        collectClientRoutesIfNecessary(request);
+        return getRouteData(request, true).isPresent();
+    }
+
+    private void collectClientRoutesIfNecessary(HttpServletRequest request) {
         var config = ApplicationConfiguration
                 .get(new VaadinServletContext(request.getServletContext()));
         boolean isLiveReloadMode = config.getMode()
@@ -67,10 +112,6 @@ public class RouteUtil implements FileRouterRequestUtil {
         if (registeredRoutes == null || isLiveReloadMode) {
             collectClientRoutes(config);
         }
-
-        var viewConfig = getRouteData(request);
-
-        return viewConfig.isPresent();
     }
 
     private static void filterClientViews(
@@ -136,13 +177,16 @@ public class RouteUtil implements FileRouterRequestUtil {
         }
     }
 
-    private Optional<AvailableViewInfo> getRouteData(
-            HttpServletRequest request) {
+    private Optional<AvailableViewInfo> getRouteData(HttpServletRequest request,
+            boolean filterByPrincipal) {
         var requestPath = RequestPath.parse(request.getRequestURI(),
                 request.getContextPath());
-        Map<String, AvailableViewInfo> availableRoutes = new HashMap<>(
-                registeredRoutes);
-        filterClientViews(availableRoutes, request);
+        Map<String, AvailableViewInfo> availableRoutes = registeredRoutes != null
+                ? new HashMap<>(registeredRoutes)
+                : Collections.emptyMap();
+        if (filterByPrincipal) {
+            filterClientViews(availableRoutes, request);
+        }
         return Optional.ofNullable(getRouteByPath(availableRoutes,
                 requestPath.pathWithinApplication().value()));
     }
@@ -158,7 +202,7 @@ public class RouteUtil implements FileRouterRequestUtil {
      *            the URL path to get the client view configuration for
      * @return - the client view configuration for the given route
      */
-    protected synchronized AvailableViewInfo getRouteByPath(
+    protected synchronized @Nullable AvailableViewInfo getRouteByPath(
             Map<String, AvailableViewInfo> availableRoutes, String path) {
         final Set<String> routes = availableRoutes.keySet();
         final AntPathMatcher pathMatcher = new AntPathMatcher();

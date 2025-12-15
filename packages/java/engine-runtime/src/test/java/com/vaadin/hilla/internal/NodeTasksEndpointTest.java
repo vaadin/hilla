@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,14 +24,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
-import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
-import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.test.context.ContextConfiguration;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
@@ -24,9 +36,12 @@ import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder;
 import com.vaadin.flow.server.frontend.scanner.ClassFinder.DefaultClassFinder;
+import com.vaadin.hilla.ApplicationContextProvider;
 import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.engine.EngineConfiguration;
-import org.springframework.test.context.ContextConfiguration;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
+import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
+import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
+import com.vaadin.hilla.internal.fixtures.MyEndpoint;
 
 @ContextConfiguration(classes = { CustomEndpoint.class, EndpointNoValue.class,
         MyEndpoint.class, ApplicationContextProvider.class })
@@ -83,9 +98,10 @@ public class NodeTasksEndpointTest extends EndpointsTaskTest {
     public void should_GenerateEndpointFilesInProductionBuildTask()
             throws Exception {
         options = options.withProductionMode(true);
-        var engineConfiguration = new EngineConfiguration.Builder()
-                .browserCallableFinder(() -> List.of(MyEndpoint.class)).build();
-        EngineConfiguration.setDefault(engineConfiguration);
+        var engineConfiguration = new EngineAutoConfiguration.Builder()
+                .browserCallableFinder((conf) -> List.of(MyEndpoint.class))
+                .build();
+        EngineAutoConfiguration.setDefault(engineConfiguration);
 
         new NodeTasks(options).execute();
         assertEndpointFilesInProductionMode(true);

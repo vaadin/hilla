@@ -1,16 +1,8 @@
-import { batch, type ReadonlySignal, signal, type Signal } from '@vaadin/hilla-react-signals';
+import { batch, computed, type ReadonlySignal, signal, type Signal } from '@vaadin/hilla-react-signals';
 import { DefaultBackend, type I18nBackend } from './backend.js';
 import { FormatCache } from './FormatCache.js';
 import { getLanguageSettings, updateLanguageSettings } from './settings.js';
 import type { I18nOptions, Translations, TranslationsResult } from './types.js';
-
-interface VaadinGlobal {
-  Vaadin?: {
-    featureFlags?: {
-      hillaI18n?: boolean;
-    };
-  };
-}
 
 function determineInitialLanguage(options?: I18nOptions): string {
   // Use explicitly configured language if defined
@@ -26,6 +18,13 @@ function determineInitialLanguage(options?: I18nOptions): string {
   return navigator.language;
 }
 
+const keyLiteralMarker: unique symbol = Symbol('keyMarker');
+
+/**
+ * A type for translation keys. It is a string with a special marker.
+ */
+export type I18nKey = string & { [keyLiteralMarker]: unknown };
+
 export class I18n {
   readonly #backend: I18nBackend = new DefaultBackend();
 
@@ -34,17 +33,14 @@ export class I18n {
   readonly #translations: Signal<Translations> = signal({});
   readonly #resolvedLanguage: Signal<string | undefined> = signal(undefined);
   readonly #chunks = new Set<string>();
+  readonly #alreadyRequestedKeys: Signal<ReadonlySet<string>> = signal(new Set());
+  readonly #batchedKeys = new Set<string>();
+  #batchedKeysPromise: Promise<ReadonlySet<string>> | undefined = undefined;
 
   #formatCache: FormatCache = new FormatCache(navigator.language);
+  readonly #translationSignalCache = new Map<string, ReadonlySignal<string>>();
 
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!(globalThis as VaadinGlobal).Vaadin?.featureFlags?.hillaI18n) {
-      // Remove when removing feature flag
-      throw new Error(
-        `The Hilla I18n API is currently considered experimental and may change in the future. To use it you need to explicitly enable it in Copilot or by adding com.vaadin.experimental.hillaI18n=true to vaadin-featureflags.properties`,
-      );
-    }
     // @ts-expect-error import.meta.hot does not have TS definitions
     if (import.meta.hot) {
       // @ts-expect-error import.meta.hot does not have TS definitions
@@ -113,8 +109,8 @@ export class I18n {
    * @param options - Optional options object to specify the initial language.
    */
   async configure(options?: I18nOptions): Promise<void> {
-    const initialLanguage = determineInitialLanguage(options);
-    await this.updateLanguage(initialLanguage);
+    const language = determineInitialLanguage(options);
+    await this.updateLanguage({ language });
   }
 
   /**
@@ -139,7 +135,7 @@ export class I18n {
    * @param newLanguage - a valid IETF BCP 47 language tag, such as `en` or `en-US`
    */
   async setLanguage(newLanguage: string): Promise<void> {
-    await this.updateLanguage(newLanguage, true);
+    await this.updateLanguage({ language: newLanguage, updateSettings: true });
   }
 
   /**
@@ -158,43 +154,94 @@ export class I18n {
     this.#chunks.add(chunkName);
 
     if (this.#language.value) {
-      await this.updateLanguage(this.#language.value, false, chunkName);
+      await this.updateLanguage({ chunkName });
     }
   }
 
-  private async updateLanguage(newLanguage: string, updateSettings = false, newChunk?: string) {
-    if (this.#language.value === newLanguage && !newChunk) {
+  private async requestKeys(keys: readonly string[]): Promise<void> {
+    if (this.#batchedKeysPromise) {
+      // Keys request is being queued - add keys to the batch.
+      for (const key of keys) {
+        this.#batchedKeys.add(key);
+      }
       return;
     }
 
-    const chunks = newChunk
-      ? [newChunk] // New chunk is registered, load only that
-      : this.#chunks.size > 0
+    const nonBatchedKeys = keys.filter((key) => !this.#batchedKeys.has(key));
+    if (nonBatchedKeys.length === 0) {
+      // Keys request for these is already in progress - skip another request.
+      return;
+    }
+
+    // New request
+    this.#batchedKeys.clear();
+    for (const key of nonBatchedKeys) {
+      this.#batchedKeys.add(key);
+    }
+    // Wait to possibly collect other synchronously requested keys
+    this.#batchedKeysPromise = Promise.resolve(this.#batchedKeys);
+    await this.#batchedKeysPromise;
+    this.#batchedKeysPromise = undefined;
+    const batchedKeys = [...this.#batchedKeys];
+    return this.updateLanguage({ keys: batchedKeys }).then(() => {
+      console.warn(['A server call was made to translate keys those were not loaded:', ...batchedKeys].join('\n  - '));
+    });
+  }
+
+  private async updateLanguage(
+    options:
+      | { readonly language: string; updateSettings?: boolean }
+      | { readonly chunkName: string }
+      | { readonly keys: string[] },
+  ) {
+    const { language, updateSettings, chunkName, keys } = {
+      language: this.#language.value,
+      updateSettings: false,
+      chunkName: undefined,
+      keys: undefined,
+      ...options,
+    };
+
+    const partialLoad = !!chunkName || !!keys?.length;
+
+    if (language === undefined || (language === this.#language.value && !partialLoad)) {
+      return;
+    }
+
+    const chunks = chunkName
+      ? [chunkName] // New chunk is registered, load only that
+      : this.#chunks.size && !keys?.length
         ? [...this.#chunks.values()] // Load the new language for all chunks registered so far
-        : undefined; // Load the new language without specifying chunks, assuming dev. mode
+        : undefined; // Load the new language without specifying chunks, assuming dev. mode or keys requested
 
     let translationsResult: TranslationsResult;
     try {
-      translationsResult = await this.#backend.loadTranslations(newLanguage, chunks);
+      translationsResult = await this.#backend.loadTranslations(language, chunks, keys);
     } catch (e) {
-      console.error(`Failed to load translations for language: ${newLanguage}`, e);
+      console.error(`Failed to load translations for language: ${language}`, e);
       return;
     }
 
     // Update all signals together to avoid triggering side effects multiple times
     batch(() => {
-      this.#translations.value = newChunk
+      this.#translations.value = partialLoad
         ? { ...this.#translations.value, ...translationsResult.translations }
         : translationsResult.translations;
-      this.#language.value = newLanguage;
       this.#resolvedLanguage.value = translationsResult.resolvedLanguage;
-      this.#formatCache = new FormatCache(newLanguage);
-      this.#initialized.value = true;
+      if (language !== this.#language.value) {
+        this.#language.value = language;
+        this.#formatCache = new FormatCache(language);
+      }
+      this.#initialized.value = !!language;
+
+      if (!partialLoad) {
+        this.#alreadyRequestedKeys.value = new Set<string>();
+      } else if (keys?.length) {
+        this.#alreadyRequestedKeys.value = new Set([...this.#alreadyRequestedKeys.value, ...keys]);
+      }
 
       if (updateSettings) {
-        updateLanguageSettings({
-          language: newLanguage,
-        });
+        updateLanguageSettings({ language });
       }
     });
   }
@@ -244,16 +291,75 @@ export class I18n {
    * Likewise, signal effects automatically subscribe to translation changes
    * when calling this method.
    *
-   * @param key - The translation key to translate
+   * @param key - The key to translate
    * @param params - Optional object with placeholder values
    */
-  translate(key: string, params?: Record<string, unknown>): string {
+  translate(key: I18nKey, params?: Record<string, unknown>): string {
     const translation = this.#translations.value[key];
     if (!translation) {
-      return key;
+      return this.handleMissingTranslation(key);
     }
     const format = this.#formatCache.getFormat(translation);
     return format.format(params) as string;
+  }
+
+  /**
+   * Creates a computed signal with translated string for to the given key.
+   * This method uses dynamic loading and does not guarantee immediate
+   * availability of the translation.
+   *
+   * If the translation for the given key has not been loaded yet at the time
+   * of the call, loads the translation for the key and updates the returned
+   * signal value.
+   *
+   * When given an `undefined` key, returns empty string signal value.
+   *
+   * @param key - The translation key to translate
+   * @param params - Optional object with placeholder values
+   */
+  translateDynamic(key: string | undefined, params?: Record<string, unknown>): ReadonlySignal<string> {
+    // Return a signal that depends on #translations and #language signals.
+    // If the key is not found, it will wait for a language to be defined
+    // and then try to load the key from the server.
+    if (this.#translationSignalCache.has(key ?? '')) {
+      return this.#translationSignalCache.get(key ?? '')!;
+    }
+
+    if (!key) {
+      const translationSignal = computed(() => '');
+      this.#translationSignalCache.set('', translationSignal);
+      return translationSignal;
+    }
+
+    const translationSignal = computed(() => {
+      const translation = this.#translations.value[key];
+
+      if (!translation) {
+        if (this.#alreadyRequestedKeys.value.has(key)) {
+          // No hope to load this key, return it as is
+          return this.handleMissingTranslation(key);
+        }
+
+        if (this.#language.value) {
+          // eslint-disable-next-line no-void
+          void this.requestKeys([key]);
+        }
+
+        // Prevent flashing the key in the UI
+        return '';
+      }
+
+      const format = this.#formatCache.getFormat(translation);
+      return format.format(params) as string;
+    });
+
+    this.#translationSignalCache.set(key, translationSignal);
+    return translationSignal;
+  }
+
+  private handleMissingTranslation(key: string): string {
+    const lang = this.#language.value ? `${this.#language.value.split(/[_-]/u)[0]}: ` : '';
+    return `!${lang}${key}`;
   }
 }
 
@@ -261,12 +367,23 @@ export class I18n {
  * The global I18n instance that is used to initialize translations, change the
  * current language, and translate strings.
  */
-export const i18n: I18n = new I18n();
+const i18n: I18n = new I18n();
+
+/**
+ * A tagged template literal function to create translation keys.
+ * The {@link translate} function requires using this tag.
+ * E.g.:
+ *   translate(key`my.translation.key`)
+ */
+function keyTag(strings: readonly string[], ..._values: never[]): I18nKey {
+  return Object.assign(strings[0], { [keyLiteralMarker]: undefined }) as I18nKey;
+}
 
 /**
  * Returns a translated string for the given translation key. The key should
  * match a key in the loaded translations. If no translation is found for the
- * key, the key itself is returned.
+ * key, a modified version of the key is returned to indicate that the translation
+ * is missing.
  *
  * Translations may contain placeholders, following the ICU MessageFormat
  * syntax. They can be replaced by passing a `params` object with placeholder
@@ -286,6 +403,9 @@ export const i18n: I18n = new I18n();
  *
  * @param key - The translation key to translate
  * @param params - Optional object with placeholder values
- */ export function translate(key: string, params?: Record<string, unknown>): string {
+ */
+export function translate(key: I18nKey, params?: Record<string, unknown>): string {
   return i18n.translate(key, params);
 }
+
+export { i18n, keyTag as key };

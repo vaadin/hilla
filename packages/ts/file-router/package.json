@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-file-router",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "Hilla file-based router",
   "main": "index.js",
   "module": "index.js",
@@ -26,7 +26,7 @@
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:react": "npm run test",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -61,9 +61,11 @@
     "react-router": "7"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-utils": "24.8.0-alpha5",
-    "@vaadin/hilla-react-auth": "24.8.0-alpha5",
-    "@vaadin/hilla-react-signals": "24.8.0-alpha5",
-    "typescript": "5.8.3"
+    "@ungap/with-resolvers": "0.1.0",
+    "@vaadin/hilla-generator-utils": "25.0.0-rc2",
+    "@vaadin/hilla-react-auth": "25.0.0-rc2",
+    "@vaadin/hilla-react-signals": "25.0.0-rc2",
+    "tsc-template": "0.2.3",
+    "typescript": "5.9.3"
   }
 }

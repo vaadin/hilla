@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-lit-form",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "Hilla form utils",
   "main": "index.js",
   "module": "index.js",
@@ -21,7 +21,7 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -69,7 +69,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "24.8.0-alpha5",
+    "@vaadin/hilla-frontend": "25.0.0-rc2",
     "validator": "13.12.0"
   },
   "peerDependencies": {

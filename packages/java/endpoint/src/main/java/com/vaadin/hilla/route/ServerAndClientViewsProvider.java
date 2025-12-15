@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.route;
 
 import java.util.Collections;
@@ -13,21 +28,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.menu.MenuRegistry;
+import com.vaadin.flow.router.BeforeEnterListener;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.auth.NavigationAccessControl;
-import com.vaadin.flow.server.auth.ViewAccessChecker;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.menu.RouteParamType;
 
 public class ServerAndClientViewsProvider {
@@ -35,8 +51,8 @@ public class ServerAndClientViewsProvider {
     private final NavigationAccessControl accessControl;
     private final DeploymentConfiguration deploymentConfiguration;
     private final boolean exposeServerRoutesToClient;
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final ViewAccessChecker viewAccessChecker;
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .addMixIn(AvailableViewInfo.class, IgnoreMixin.class).build();
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ServerAndClientViewsProvider.class);
@@ -52,18 +68,14 @@ public class ServerAndClientViewsProvider {
     public ServerAndClientViewsProvider(
             DeploymentConfiguration deploymentConfiguration,
             @Nullable NavigationAccessControl accessControl,
-            @Nullable ViewAccessChecker viewAccessChecker,
             boolean exposeServerRoutesToClient) {
         this.deploymentConfiguration = deploymentConfiguration;
         this.accessControl = accessControl;
-        this.viewAccessChecker = viewAccessChecker;
         this.exposeServerRoutesToClient = exposeServerRoutesToClient;
-
-        mapper.addMixIn(AvailableViewInfo.class, IgnoreMixin.class);
     }
 
     public String createFileRoutesJson(VaadinRequest request)
-            throws JsonProcessingException {
+            throws JacksonException {
         final Map<String, AvailableViewInfo> availableViews = new HashMap<>(
                 collectClientViews(request));
         final boolean hasAutoLayout = MenuRegistry.hasHillaMainLayout(
@@ -137,7 +149,7 @@ public class ServerAndClientViewsProvider {
         }
         final var serverRouteRegistry = vaadinService.getRouter().getRegistry();
 
-        var accessControls = Stream.of(accessControl, viewAccessChecker)
+        var accessControls = Stream.<BeforeEnterListener> of(accessControl)
                 .filter(Objects::nonNull).toList();
 
         var serverRoutes = new HashMap<String, AvailableViewInfo>();

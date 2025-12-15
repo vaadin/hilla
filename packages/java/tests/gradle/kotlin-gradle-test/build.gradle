@@ -1,9 +1,11 @@
+// The Spring Boot version needs to be applied in settings.gradle
+// See settings.gradle pluginManagement block
 plugins {
-	id 'org.jetbrains.kotlin.jvm' version '1.9.25'
-	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
-	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
-	id 'org.jetbrains.kotlin.plugin.allopen' version '1.9.25'
-	id 'org.springframework.boot' version '3.4.1'
+	id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+	id 'org.jetbrains.kotlin.plugin.spring' version "$kotlinVersion"
+	id 'org.jetbrains.kotlin.plugin.jpa' version "$kotlinVersion"
+	id 'org.jetbrains.kotlin.plugin.allopen' version "$kotlinVersion"
+	id 'org.springframework.boot'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -11,10 +13,25 @@ apply plugin: 'com.vaadin.hilla'
 
 group = 'com.vaadin.hilla.gradle.test'
 
+// Get versions from settings.gradle - fail if not available
+if (!gradle.ext.has('hillaVersion')) {
+    throw new GradleException("hillaVersion not set. Versions must be read from root pom.xml via settings.gradle")
+}
+if (!gradle.ext.has('flowVersion')) {
+    throw new GradleException("flowVersion not set. Versions must be read from root pom.xml via settings.gradle")
+}
+if (!gradle.ext.has('vaadinComponentsVersion')) {
+    throw new GradleException("vaadinComponentsVersion not set. Versions must be read from root pom.xml via settings.gradle")
+}
+
+def effectiveHillaVersion = gradle.ext.hillaVersion
+def effectiveFlowVersion = gradle.ext.flowVersion
+def effectiveVaadinComponentsVersion = gradle.ext.vaadinComponentsVersion
+
 dependencyManagement {
     imports {
-        mavenBom "com.vaadin:hilla-bom:$hillaVersion"
-        mavenBom "com.vaadin:flow-bom:$flowVersion"
+        mavenBom "com.vaadin:hilla-bom:$effectiveHillaVersion"
+        mavenBom "com.vaadin:flow-bom:$effectiveFlowVersion"
     }
 }
 
@@ -28,10 +45,12 @@ repositories {
 dependencies {
     implementation 'com.vaadin:vaadin-spring'
     implementation 'com.vaadin:hilla'
-    implementation "com.vaadin:fix-lumo:$hillaVersion"
+    implementation "com.vaadin:fix-lumo:$effectiveHillaVersion"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.parttio:line-awesome:1.1.0'
     implementation 'com.vaadin:vaadin-dev-server'
+    implementation 'org.springframework.boot:spring-boot-webmvc'
+    implementation 'org.springframework.boot:spring-boot-data-commons'
     runtimeOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
@@ -42,10 +61,10 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    testImplementation "com.vaadin:flow-test-util:$flowVersion"
-	testImplementation "com.vaadin:vaadin-button-testbench:$vaadinComponentsVersion"
-	testImplementation "com.vaadin:vaadin-text-field-testbench:$vaadinComponentsVersion"
-	testImplementation "com.vaadin:vaadin-grid-testbench:$vaadinComponentsVersion"
+    testImplementation "com.vaadin:flow-test-util:$effectiveFlowVersion"
+	testImplementation "com.vaadin:vaadin-button-testbench:$effectiveVaadinComponentsVersion"
+	testImplementation "com.vaadin:vaadin-text-field-testbench:$effectiveVaadinComponentsVersion"
+	testImplementation "com.vaadin:vaadin-grid-testbench:$effectiveVaadinComponentsVersion"
 }
 
 sourceSets {
@@ -74,25 +93,9 @@ allOpen {
 import java.util.concurrent.Executors
 import org.gradle.internal.os.OperatingSystem
 
-def isWindows = OperatingSystem.current().isWindows()
-
-tasks.register('productionBuild', Exec) {
-	description = 'Builds the Spring Boot application for production.'
-    def command
-    if (isWindows) {
-        command = ['cmd', '/c', 'gradlew.bat', 'clean', '-Pvaadin.productionMode', 'build', '-x', 'test']
-    } else {
-        command = ['sh', '-c', './gradlew clean -Pvaadin.productionMode build -x test']
-    }
-	commandLine command
-	doLast {
-		logger.info("Production build started...")
-	}
-}
-
 tasks.register('bootStart') {
 	description = 'Starts the Spring Boot application for integration tests.'
-	dependsOn productionBuild
+    dependsOn assemble
 	doLast {
 		logger.info("Running the application in production for integration tests...")
         // Retrieve the jar task
@@ -145,6 +148,6 @@ tasks.register('integrationTest', Test) {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }

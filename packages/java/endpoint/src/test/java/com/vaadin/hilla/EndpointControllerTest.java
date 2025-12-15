@@ -1,9 +1,25 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,6 +31,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,13 +47,14 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -37,20 +63,17 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
-import org.springframework.boot.autoconfigure.jackson.JacksonProperties;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.internal.CurrentInstance;
@@ -65,6 +88,7 @@ import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.endpoints.IterableEndpoint;
 import com.vaadin.hilla.endpoints.PersonEndpoint;
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.exception.EndpointException;
 import com.vaadin.hilla.exception.EndpointValidationException;
 import com.vaadin.hilla.packages.application.ApplicationComponent;
@@ -72,15 +96,6 @@ import com.vaadin.hilla.packages.application.ApplicationEndpoint;
 import com.vaadin.hilla.packages.library.LibraryEndpoint;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 import com.vaadin.hilla.testendpoint.BridgeMethodTestEndpoint;
-
-import jakarta.annotation.security.DenyAll;
-import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 
 public class EndpointControllerTest {
     private static final TestClass TEST_ENDPOINT = new TestClass();
@@ -203,14 +218,36 @@ public class EndpointControllerTest {
                     : "Check multiple files FAILED";
         }
 
-        @AnonymousAllowed
-        public void throwCustomHttpException() throws EndpointHttpException {
-            throw new EndpointHttpException(418, "I'm a teapot");
+        static class TeapotException extends EndpointHttpException {
+            TeapotException() {
+                super("I'm a teapot");
+            }
+
+            @Override
+            public HttpStatus getHttpStatus() {
+                return HttpStatus.I_AM_A_TEAPOT;
+            }
         }
 
         @AnonymousAllowed
-        public void throwInvalidHttpException() throws EndpointHttpException {
-            throw new EndpointHttpException(200, "All right!");
+        public void throwCustomHttpException() throws TeapotException {
+            throw new TeapotException();
+        }
+
+        static class InvalidHttpException extends EndpointHttpException {
+            InvalidHttpException() {
+                super("All right!");
+            }
+
+            @Override
+            public HttpStatus getHttpStatus() {
+                return HttpStatus.OK;
+            }
+        }
+
+        @AnonymousAllowed
+        public void throwInvalidHttpException() throws InvalidHttpException {
+            throw new InvalidHttpException();
         }
     }
 
@@ -536,13 +573,12 @@ public class EndpointControllerTest {
         var vaadinController = createVaadinController(TEST_ENDPOINT,
                 new EndpointAccessChecker(new AccessAnnotationChecker()));
 
-        var response = vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
-                "throwInvalidHttpException", createRequestParameters("{}"),
-                requestMock);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-                response.getStatusCode());
-        assertTrue(response.getBody().contains("throwInvalidHttpException"));
+        var e = assertThrows(IllegalArgumentException.class,
+                () -> vaadinController.serveEndpoint(TEST_ENDPOINT_NAME,
+                        "throwInvalidHttpException",
+                        createRequestParameters("{}"), requestMock));
+        assertEquals("Only 4xx and 5xx status codes are allowed",
+                e.getMessage());
     }
 
     @Test
@@ -552,8 +588,8 @@ public class EndpointControllerTest {
                 .thenReturn("{\"expectedLength\":5}");
 
         // uploaded file
-        when(multipartRequest.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Collections.singletonMap("/fileToCheck", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
@@ -578,8 +614,8 @@ public class EndpointControllerTest {
                 .thenReturn("{}");
 
         // uploaded file
-        when(multipartRequest.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileToCheck", multipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Collections.singletonMap("/fileToCheck", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
@@ -598,16 +634,17 @@ public class EndpointControllerTest {
                         "{\"fileData\":{\"owner\":\"John\"},\"expectedLength\":5}");
 
         // uploaded file
-        when(multipartRequest.getFileMap())
-                .thenReturn(Collections.singletonMap("/fileData/file", multipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Collections.singletonMap("/fileData/file", multipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkOwnedFileLength", multipartRequest, null);
+                TEST_ENDPOINT_NAME, "checkOwnedFileLength", multipartRequest,
+                null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check John's file length OK"));
-}
+    }
 
     @Test
     public void should_AcceptMultipleMultipartFiles() throws IOException {
@@ -620,22 +657,23 @@ public class EndpointControllerTest {
         when(otherMultipartFile.getOriginalFilename()).thenReturn("hello.txt");
         when(otherMultipartFile.getSize()).thenReturn(4L);
         when(otherMultipartFile.getInputStream())
-                .thenReturn(new ByteArrayInputStream ("Ciao".getBytes()));
+                .thenReturn(new ByteArrayInputStream("Ciao".getBytes()));
 
-        when(multipartRequest.getFileMap())
-                .thenReturn(Map.of("/file1", multipartFile, "/file2", otherMultipartFile));
+        when(multipartRequest.getFileMap()).thenReturn(
+                Map.of("/file1", multipartFile, "/file2", otherMultipartFile));
 
         var vaadinController = createVaadinController(TEST_ENDPOINT);
         var response = vaadinController.serveMultipartEndpoint(
-                TEST_ENDPOINT_NAME, "checkMultipleFiles", multipartRequest, null);
+                TEST_ENDPOINT_NAME, "checkMultipleFiles", multipartRequest,
+                null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Check multiple files OK"));
-}
+    }
 
-@Test
-@Ignore("FIXME: this test is flaky, it fails when executed fast enough")
-public void should_bePossibeToGetPrincipalInEndpoint() {
+    @Test
+    @Ignore("FIXME: this test is flaky, it fails when executed fast enough")
+    public void should_bePossibeToGetPrincipalInEndpoint() {
         when(principal.getName()).thenReturn("foo");
 
         EndpointController vaadinController = createVaadinController(
@@ -992,18 +1030,11 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         var contextMock = mock(ApplicationContext.class);
         ObjectMapper mockSpringObjectMapper = mock(ObjectMapper.class);
         ObjectMapper mockOwnObjectMapper = mock(ObjectMapper.class);
-        Jackson2ObjectMapperBuilder mockObjectMapperBuilder = mock(
-                Jackson2ObjectMapperBuilder.class);
         JacksonProperties mockJacksonProperties = mock(JacksonProperties.class);
         when(contextMock.getBean(ObjectMapper.class))
                 .thenReturn(mockSpringObjectMapper);
         when(contextMock.getBean(JacksonProperties.class))
                 .thenReturn(mockJacksonProperties);
-        when(contextMock.getBean(Jackson2ObjectMapperBuilder.class))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.createXmlMapper(false))
-                .thenReturn(mockObjectMapperBuilder);
-        when(mockObjectMapperBuilder.build()).thenReturn(mockOwnObjectMapper);
         when(mockJacksonProperties.getVisibility())
                 .thenReturn(Collections.emptyMap());
         EndpointRegistry registry = new EndpointRegistry(
@@ -1018,8 +1049,6 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
                 mockOwnObjectMapper).registerEndpoints();
 
         verify(contextMock, never()).getBean(ObjectMapper.class);
-        verify(contextMock, times(1))
-                .getBean(Jackson2ObjectMapperBuilder.class);
     }
 
     @Test
@@ -1076,8 +1105,12 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         assertEquals(expectedErrorMessage, jsonNodes.get("message").asText());
         assertEquals(2, jsonNodes.get("validationErrorData").size());
 
-        List<String> parameterNames = jsonNodes.get("validationErrorData")
-                .findValuesAsText("parameterName");
+        List<String> parameterNames = new ArrayList<>();
+        jsonNodes.get("validationErrorData").forEach(node -> {
+            if (node.has("parameterName")) {
+                parameterNames.add(node.get("parameterName").asText());
+            }
+        });
         assertEquals(2, parameterNames.size());
         assertTrue(parameterNames.contains("date"));
         assertTrue(parameterNames.contains("number"));
@@ -1344,7 +1377,8 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
         try {
             return projectFolder.getRoot().toPath()
                     .resolve(appConfig.getBuildFolder())
-                    .resolve(EngineConfiguration.OPEN_API_PATH).toUri().toURL();
+                    .resolve(EngineAutoConfiguration.OPEN_API_PATH).toUri()
+                    .toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -1412,12 +1446,7 @@ public void should_bePossibeToGetPrincipalInEndpoint() {
     }
 
     private ObjectNode createRequestParameters(String jsonBody) {
-        try {
-            return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
-        } catch (IOException e) {
-            throw new AssertionError(String
-                    .format("Failed to deserialize the json: %s", jsonBody), e);
-        }
+        return new ObjectMapper().readValue(jsonBody, ObjectNode.class);
     }
 
     private <T> EndpointController createVaadinController(T endpoint) {

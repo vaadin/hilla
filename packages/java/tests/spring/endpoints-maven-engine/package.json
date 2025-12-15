@@ -12,7 +12,6 @@
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
     "@vaadin/icon": "24.8.0-alpha11",
     "@vaadin/icons": "24.8.0-alpha11",
-    "@vaadin/polymer-legacy-adapter": "24.8.0-alpha8",
     "@vaadin/tooltip": "24.8.0-alpha11",
     "@vaadin/vaadin-lumo-styles": "24.8.0-alpha11",
     "@vaadin/vaadin-themable-mixin": "24.8.0-alpha11",
@@ -20,7 +19,7 @@
     "lit": "3.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-router": "7.4.1"
+    "react-router": "7.9.3"
   },
   "devDependencies": {
     "@babel/preset-react": "7.26.3",
@@ -49,7 +48,6 @@
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/icon": "24.8.0-alpha5",
       "@vaadin/icons": "24.8.0-alpha5",
-      "@vaadin/polymer-legacy-adapter": "24.8.0-alpha4",
       "@vaadin/tooltip": "24.8.0-alpha5",
       "@vaadin/vaadin-lumo-styles": "24.8.0-alpha4",
       "@vaadin/vaadin-themable-mixin": "24.8.0-alpha4",
@@ -74,7 +72,7 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.8.2",
-      "vite": "6.2.3",
+      "vite": "6.2.4",
       "vite-plugin-checker": "0.9.1",
       "workbox-build": "7.3.0",
       "workbox-core": "7.3.0",
@@ -92,7 +90,6 @@
     "react-router": "$react-router",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
-    "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@vaadin/tooltip": "$@vaadin/tooltip"

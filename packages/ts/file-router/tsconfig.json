@@ -3,7 +3,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["es2021", "dom"],
-    "isolatedDeclarations": true
+    "isolatedDeclarations": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src", "test"],
   "exclude": ["test/**/*.snap.ts"]

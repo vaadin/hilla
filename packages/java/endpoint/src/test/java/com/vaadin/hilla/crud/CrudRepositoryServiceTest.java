@@ -1,4 +1,22 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.crud;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +31,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.DeleteSpecification;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.UpdateSpecification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
@@ -23,9 +43,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.vaadin.hilla.BrowserCallable;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
         CrudRepositoryServiceTest.DefaultJpaRepositoryService.class,
@@ -33,7 +50,10 @@ import static org.junit.Assert.assertNotNull;
         CrudRepositoryServiceTest.CustomCrudRepositoryService.class,
         CrudRepositoryServiceTest.CustomJpaRepository.class,
         CrudRepositoryServiceTest.CustomJpaRepositoryService.class })
-@EnableAutoConfiguration
+// Exclude SpringBootAutoConfiguration to avoid loading websocket-related beans
+// that require jakarta.websocket dependencies not available in test scope
+@EnableAutoConfiguration(exclude = {
+        com.vaadin.flow.spring.SpringBootAutoConfiguration.class })
 public class CrudRepositoryServiceTest {
 
     @Repository
@@ -63,6 +83,12 @@ public class CrudRepositoryServiceTest {
         }
 
         @Override
+        public Page<TestObject> findAll(Specification<TestObject> spec,
+                Specification<TestObject> countSpec, Pageable pageable) {
+            return null;
+        }
+
+        @Override
         public long count(Specification<TestObject> spec) {
             return 0;
         }
@@ -73,14 +99,19 @@ public class CrudRepositoryServiceTest {
         }
 
         @Override
-        public long delete(Specification<TestObject> spec) {
+        public long update(UpdateSpecification<TestObject> spec) {
+            return 0;
+        }
+
+        @Override
+        public long delete(DeleteSpecification<TestObject> spec) {
             return 0;
         }
 
         @Override
         public <S extends TestObject, R> R findBy(
                 Specification<TestObject> spec,
-                Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+                Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
             return null;
         }
 
@@ -193,6 +224,12 @@ public class CrudRepositoryServiceTest {
         }
 
         @Override
+        public Page<TestObject> findAll(Specification<TestObject> spec,
+                Specification<TestObject> countSpec, Pageable pageable) {
+            return null;
+        }
+
+        @Override
         public <S extends TestObject> List<S> findAll(Example<S> example,
                 Sort sort) {
             return null;
@@ -231,14 +268,19 @@ public class CrudRepositoryServiceTest {
         }
 
         @Override
-        public long delete(Specification<TestObject> spec) {
+        public long update(UpdateSpecification<TestObject> spec) {
+            return 0;
+        }
+
+        @Override
+        public long delete(DeleteSpecification<TestObject> spec) {
             return 0;
         }
 
         @Override
         public <S extends TestObject, R> R findBy(
                 Specification<TestObject> spec,
-                Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+                Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
             return null;
         }
 

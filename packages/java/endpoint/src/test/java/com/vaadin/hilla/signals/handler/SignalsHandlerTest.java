@@ -1,29 +1,41 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.signals.handler;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vaadin.hilla.EndpointControllerMockBuilder;
-import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
-import com.vaadin.hilla.signals.NumberSignal;
-import com.vaadin.hilla.signals.Signal;
-import com.vaadin.hilla.signals.core.event.ListStateEvent;
-import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.context.ApplicationContext;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
-
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Mockito;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+
+import com.vaadin.hilla.signals.internal.InternalSignal;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
+import com.vaadin.signals.Id;
+import com.vaadin.signals.NumberSignal;
 
 public class SignalsHandlerTest {
 
@@ -36,16 +48,10 @@ public class SignalsHandlerTest {
 
     @BeforeClass
     public static void setup() {
-        var appCtx = Mockito.mock(ApplicationContext.class);
-        var endpointObjectMapper = EndpointControllerMockBuilder
-                .createEndpointObjectMapper(appCtx,
-                        new JacksonObjectMapperFactory.Json());
-        Signal.setMapper(endpointObjectMapper);
     }
 
     @AfterClass
     public static void tearDown() {
-        Signal.setMapper(null);
     }
 
     @Before
@@ -60,34 +66,49 @@ public class SignalsHandlerTest {
 
         NumberSignal numberSignal = new NumberSignal();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
-                .thenAnswer(invocation -> numberSignal);
+                .thenAnswer(invocation -> new InternalSignal(numberSignal,
+                        new ObjectMapper()));
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_2))
-                .thenAnswer(invocation -> numberSignal);
+                .thenAnswer(invocation -> new InternalSignal(numberSignal,
+                        new ObjectMapper()));
 
-        assertEquals(signalsRegistry.get(CLIENT_SIGNAL_ID_1).getId(),
-                signalsRegistry.get(CLIENT_SIGNAL_ID_2).getId());
+        assertEquals(signalsRegistry.get(CLIENT_SIGNAL_ID_1).id(),
+                signalsRegistry.get(CLIENT_SIGNAL_ID_2).id());
 
-        var signalId = numberSignal.getId();
-        var expectedSignalEventJson = new ObjectNode(mapper.getNodeFactory())
-                .put("value", 0.0).put("id", signalId.toString())
-                .put("type", "snapshot");
+        var signalId = numberSignal.id();
 
         // first client subscribe to a signal, it registers the signal:
-        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
-                "method", CLIENT_SIGNAL_ID_1, null, null);
+        Flux<JsonNode> firstFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_1, null);
         firstFlux.subscribe(next -> {
             assertNotNull(next);
-            assertEquals(expectedSignalEventJson, next);
+            // Check the new format structure
+            assertTrue(next.has("@type"));
+            assertEquals("snapshot", next.get("@type").asText());
+            assertTrue(next.has("commandId"));
+            assertTrue(next.has("nodes"));
+            assertTrue(next.get("nodes").has(""));
+            assertTrue(next.get("nodes").get("").has("value"));
+            assertEquals(0.0, next.get("nodes").get("").get("value").asDouble(),
+                    0.0);
         }, error -> {
             throw new RuntimeException(error);
         });
 
         // another client subscribes to the same signal:
-        Flux<ObjectNode> secondFlux = signalsHandler.subscribe("endpoint",
-                "method", CLIENT_SIGNAL_ID_2, null, null);
+        Flux<JsonNode> secondFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_2, null);
         secondFlux.subscribe(next -> {
             assertNotNull(next);
-            assertEquals(expectedSignalEventJson, next);
+            // Check the new format structure
+            assertTrue(next.has("@type"));
+            assertEquals("snapshot", next.get("@type").asText());
+            assertTrue(next.has("commandId"));
+            assertTrue(next.has("nodes"));
+            assertTrue(next.get("nodes").has(""));
+            assertTrue(next.get("nodes").get("").has("value"));
+            assertEquals(0.0, next.get("nodes").get("").get("value").asDouble(),
+                    0.0);
         }, error -> {
             throw new RuntimeException(error);
         });
@@ -95,145 +116,60 @@ public class SignalsHandlerTest {
 
     @Test
     public void when_signalIsNotRegistered_update_throwsException() {
-        var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 0.0)
-                .put("id", UUID.randomUUID().toString()).put("type", "set");
+        var setCommand = new ObjectNode(mapper.getNodeFactory())
+                .put("commandId", Id.random().asBase64())
+                .put("targetNodeId", Id.random().asBase64()).put("@type", "set")
+                .put("value", 0.0);
         assertThrows(IllegalStateException.class,
-                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent));
+                () -> signalsHandler.update(CLIENT_SIGNAL_ID_1, setCommand));
     }
 
     @Test
     public void when_signalIsRegistered_update_notifiesTheSubscribers()
             throws Exception {
         NumberSignal numberSignal = new NumberSignal(10.0);
-        var signalId = numberSignal.getId();
+        var signalId = numberSignal.id();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
-                .thenAnswer(invocation -> numberSignal);
+                .thenAnswer(invocation -> new InternalSignal(numberSignal,
+                        new ObjectMapper()));
+        Flux<JsonNode> firstFlux = signalsHandler.subscribe("endpoint",
+                "method", CLIENT_SIGNAL_ID_1, null);
 
-        Flux<ObjectNode> firstFlux = signalsHandler.subscribe("endpoint",
-                "method", CLIENT_SIGNAL_ID_1, null, null);
-
-        var setEvent = new ObjectNode(mapper.getNodeFactory()).put("value", 42)
-                .put("id", UUID.randomUUID().toString()).put("type", "set");
-        signalsHandler.update(CLIENT_SIGNAL_ID_1, setEvent);
+        var setCommand = new ObjectNode(mapper.getNodeFactory())
+                .put("commandId", Id.random().asBase64())
+                .put("targetNodeId", signalId.asBase64()).put("@type", "set")
+                .put("value", 42);
+        signalsHandler.update(CLIENT_SIGNAL_ID_1, setCommand);
 
         var expectedUpdatedSignalEventJson = new ObjectNode(
-                mapper.getNodeFactory()).put("value", 42.0)
-                .put("id", signalId.toString()).put("type", "snapshot")
-                .put("accepted", true);
-        StepVerifier.create(firstFlux)
-                .expectNext(expectedUpdatedSignalEventJson).thenCancel()
-                .verify();
-    }
+                mapper.getNodeFactory()).put("@type", "snapshot");
+        // Add the commandId field (we can't predict it since it's random)
+        expectedUpdatedSignalEventJson.put("commandId", "");
 
-    @Test
-    public void when_parentClientSignalIdIsNotNull_andParentSignalExists_subscribe_returnsSubscription()
-            throws Exception {
-        String parentClientSignalId = "parent-signal-id";
-        String clientSignalId = CLIENT_SIGNAL_ID_1;
+        // Create the nodes structure
+        var nodesObject = mapper.createObjectNode();
+        var rootNodeObject = mapper.createObjectNode();
+        rootNodeObject.put("@type", "d");
+        rootNodeObject.putNull("parent");
+        rootNodeObject.put("lastUpdate", "");
+        rootNodeObject.putNull("scopeOwner");
+        rootNodeObject.put("value", 42);
+        rootNodeObject.set("listChildren", mapper.createArrayNode());
+        rootNodeObject.set("mapChildren", mapper.createObjectNode());
+        nodesObject.set("", rootNodeObject);
+        expectedUpdatedSignalEventJson.set("nodes", nodesObject);
 
-        // Mock parent signal
-        Signal parentSignal = Mockito.mock(Signal.class);
-
-        // Mock registry.get(parentClientSignalId) to return parentSignal
-        when(signalsRegistry.get(parentClientSignalId))
-                .thenReturn(parentSignal);
-
-        // Mock parentSignal.subscribe(clientSignalId) to return a
-        // Flux<ObjectNode>
-        ObjectNode expectedNode = mapper.createObjectNode();
-        expectedNode.put("key", "value");
-        Flux<ObjectNode> expectedFlux = Flux.just(expectedNode);
-        when(parentSignal.subscribe(clientSignalId)).thenReturn(expectedFlux);
-
-        // Call subscribe with parentClientSignalId not null
-        Flux<ObjectNode> resultFlux = signalsHandler.subscribe("endpoint",
-                "method", clientSignalId, null, parentClientSignalId);
-
-        // Verify that unsubscribe is called upon completion
-        StepVerifier.create(resultFlux).expectNext(expectedNode).thenCancel()
-                .verify();
-
-        // Verify that registry.unsubscribe(clientSignalId) is called
-        Mockito.verify(signalsRegistry).unsubscribe(clientSignalId);
-    }
-
-    @Test
-    public void when_parentClientSignalIdIsNotNull_andParentSignalDoesNotExist_subscribe_returnsErrorFlux()
-            throws Exception {
-        String parentClientSignalId = "parent-signal-id";
-        String clientSignalId = CLIENT_SIGNAL_ID_1;
-
-        // Mock registry.get(parentClientSignalId) to return null
-        when(signalsRegistry.get(parentClientSignalId)).thenReturn(null);
-
-        // Call subscribe with parentClientSignalId not null
-        Flux<ObjectNode> resultFlux = signalsHandler.subscribe("endpoint",
-                "method", clientSignalId, null, parentClientSignalId);
-
-        // Verify that the resultFlux emits an error
-        StepVerifier.create(resultFlux).expectErrorMatches(
-                throwable -> throwable instanceof IllegalStateException
-                        && throwable.getMessage().contains(
-                                "Parent Signal not found for parent client signal id: "
-                                        + parentClientSignalId))
-                .verify();
-
-        // Ensure that unsubscribe is not called since subscription did not
-        // succeed
-        Mockito.verify(signalsRegistry, Mockito.never())
-                .unsubscribe(clientSignalId);
-    }
-
-    @Test
-    public void when_parentSignalIdIsNotNull_andParentSignalExists_update_callsSubmitOnParentSignal()
-            throws Exception {
-        String parentSignalId = "parent-signal-id";
-
-        // Create an event ObjectNode with parentSignalId
-        ObjectNode event = mapper.createObjectNode();
-        event.put(ListStateEvent.Field.PARENT_SIGNAL_ID, parentSignalId);
-        event.put("id", UUID.randomUUID().toString());
-        event.put("type", "someType");
-
-        // Mock registry.get(parentSignalId) to return a mock parentSignal
-        Signal parentSignal = Mockito.mock(Signal.class);
-        when(signalsRegistry.get(parentSignalId)).thenReturn(parentSignal);
-
-        // Call update
-        signalsHandler.update(CLIENT_SIGNAL_ID_1, event);
-
-        // Verify that parentSignal.submit(event) was called
-        Mockito.verify(parentSignal).submit(event);
-    }
-
-    @Test
-    public void when_parentSignalIdIsNotNull_andParentSignalDoesNotExist_update_throwsException()
-            throws Exception {
-        String parentSignalId = "parent-signal-id";
-
-        // Create an event ObjectNode with parentSignalId
-        ObjectNode event = mapper.createObjectNode();
-        event.put(ListStateEvent.Field.PARENT_SIGNAL_ID, parentSignalId);
-        event.put("id", UUID.randomUUID().toString());
-        event.put("type", "someType");
-
-        // Mock registry.get(parentSignalId) to return null
-        when(signalsRegistry.get(parentSignalId)).thenReturn(null);
-
-        // Call update and expect an IllegalStateException
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class, () -> {
-                    signalsHandler.update(CLIENT_SIGNAL_ID_1, event);
-                });
-
-        // Verify the exception message
-        String expectedMessage = "Parent Signal not found for signal id: "
-                + parentSignalId;
-        assertEquals(expectedMessage, exception.getMessage());
-
-        // Ensure that no interaction with clientSignalId's signal occurred
-        Mockito.verify(signalsRegistry, Mockito.never())
-                .get(CLIENT_SIGNAL_ID_1);
+        StepVerifier.create(firstFlux).expectNextMatches(jsonNode -> {
+            // Check the structure matches what we expect, ignoring dynamic
+            // fields
+            return jsonNode.has("@type")
+                    && jsonNode.get("@type").asText().equals("snapshot")
+                    && jsonNode.has("commandId") && jsonNode.has("nodes")
+                    && jsonNode.get("nodes").has("")
+                    && jsonNode.get("nodes").get("").has("value")
+                    && jsonNode.get("nodes").get("").get("value")
+                            .asDouble() == 42.0;
+        }).thenCancel().verify();
     }
 
     @Test
@@ -241,7 +177,7 @@ public class SignalsHandlerTest {
         signalsHandler = new SignalsHandler(null);
         var exception = assertThrows(IllegalStateException.class,
                 () -> signalsHandler.subscribe("endpoint", "method",
-                        CLIENT_SIGNAL_ID_1, null, null));
+                        CLIENT_SIGNAL_ID_1, null));
         assertTrue(exception.getMessage().contains(
                 "The Hilla Fullstack Signals API is currently considered experimental"));
 

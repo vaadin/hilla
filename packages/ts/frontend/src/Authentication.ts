@@ -1,55 +1,105 @@
 import type { MiddlewareClass, MiddlewareContext, MiddlewareNext } from './Connect.js';
 import CookieManager from './CookieManager.js';
-import { getSpringCsrfInfo, getSpringCsrfTokenHeadersForAuthRequest, VAADIN_CSRF_HEADER } from './CsrfUtils.js';
+import csrfInfoSource, {
+  VAADIN_CSRF_HEADER,
+  clearCsrfInfoMeta,
+  type CsrfInfo,
+  CsrfInfoType,
+  extractCsrfInfoFromMeta,
+  updateCsrfInfoMeta,
+} from './CsrfInfoSource.js';
+
+function createHeaders(headerEntries: ReadonlyArray<readonly [name: string, value: string]>): Headers {
+  const headers = new Headers();
+  for (const [name, value] of headerEntries) {
+    headers.append(name, value);
+  }
+  return headers;
+}
 
 const JWT_COOKIE_NAME = 'jwt.headerAndPayload';
 
-function getSpringCsrfTokenFromResponseBody(body: string): Record<string, string> {
+async function getCsrfInfoFromResponseBody(body: string): Promise<CsrfInfo> {
   const doc = new DOMParser().parseFromString(body, 'text/html');
-  return getSpringCsrfInfo(doc);
+  return extractCsrfInfoFromMeta(doc);
 }
 
-function clearSpringCsrfMetaTags() {
-  Array.from(document.head.querySelectorAll('meta[name="_csrf"], meta[name="_csrf_header"]')).forEach((el) =>
-    el.remove(),
-  );
-}
-
-function updateSpringCsrfMetaTags(springCsrfInfo: Record<string, string>) {
-  clearSpringCsrfMetaTags();
-  const headerNameMeta: HTMLMetaElement = document.createElement('meta');
-  headerNameMeta.name = '_csrf_header';
-  headerNameMeta.content = springCsrfInfo._csrf_header;
-  document.head.appendChild(headerNameMeta);
-  const tokenMeta: HTMLMetaElement = document.createElement('meta');
-  tokenMeta.name = '_csrf';
-  tokenMeta.content = springCsrfInfo._csrf;
-  document.head.appendChild(tokenMeta);
-}
-
-const getVaadinCsrfTokenFromResponseBody = (body: string): string | undefined => {
-  const match = /window\.Vaadin = \{TypeScript: \{"csrfToken":"([0-9a-zA-Z\\-]{36})"\}\};/iu.exec(body);
-  return match ? match[1] : undefined;
-};
-
-async function updateCsrfTokensBasedOnResponse(response: Response): Promise<string | undefined> {
+async function updateCsrfTokensBasedOnResponse(response: Response): Promise<void> {
   const responseText = await response.text();
-  const token = getVaadinCsrfTokenFromResponseBody(responseText);
-  const springCsrfTokenInfo = getSpringCsrfTokenFromResponseBody(responseText);
-  updateSpringCsrfMetaTags(springCsrfTokenInfo);
-
-  return token;
+  const csrfInfo = await getCsrfInfoFromResponseBody(responseText);
+  updateCsrfInfoMeta(csrfInfo, document);
 }
 
-async function doLogout(logoutUrl: URL | string, headers: Record<string, string>) {
+async function doFetchLogout(
+  logoutUrl: URL | string,
+  headerEntries: ReadonlyArray<readonly [name: string, value: string]>,
+) {
+  const headers = createHeaders(headerEntries);
   const response = await fetch(logoutUrl, { headers, method: 'POST' });
   if (!response.ok) {
     throw new Error(`failed to logout with response ${response.status}`);
   }
 
   await updateCsrfTokensBasedOnResponse(response);
+  csrfInfoSource.reset();
 
   return response;
+}
+
+async function doFormLogout(
+  url: URL | string,
+  formDataEntries: ReadonlyArray<readonly [name: string, value: string]>,
+): Promise<void> {
+  const logoutUrl = typeof url === 'string' ? url : url.toString();
+
+  // Create form to send POST request
+  const form = document.createElement('form');
+  form.setAttribute('method', 'POST');
+  form.setAttribute('action', logoutUrl);
+  form.style.display = 'none';
+
+  // Add data to form as hidden input fields
+  for (const [name, value] of formDataEntries) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'hidden');
+    input.setAttribute('name', name);
+    input.setAttribute('value', value);
+
+    form.appendChild(input);
+  }
+
+  // Append form to page and submit it to perform logout and redirect
+  document.body.appendChild(form);
+
+  // No code should run after a form submission, as it will navigate away.
+  // The promise will reject after a long timeout to avoid executing code after
+  // (old user code has a `reload` call that could happen before the form submission).
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Form submission did not navigate away after 10 seconds.'));
+    }, 10000);
+    form.submit();
+  });
+}
+
+async function doLogout(doc: Document, options?: LogoutOptions): Promise<Response> {
+  // performing fetch logout only makes sense if at least one of the 'navigate'
+  // or 'onSuccess' is defined, otherwise we can just do a form logout:
+  const shouldSubmitFormLogout = !options?.navigate && !options?.onSuccess;
+  // this assumes the default Spring Security logout configuration (handler URL)
+  const logoutUrl = options?.logoutUrl ?? 'logout';
+  const csrfInfo = doc === document ? await csrfInfoSource.get() : await extractCsrfInfoFromMeta(doc);
+  if (shouldSubmitFormLogout) {
+    const formDataEntries = csrfInfo.type === CsrfInfoType.SPRING ? csrfInfo.formDataEntries : [];
+    await doFormLogout(logoutUrl, formDataEntries);
+    // This should never be reached, as form submission will navigate away
+    return new Response(null, {
+      status: 500,
+      statusText: 'Form submission did not navigate away.',
+    } as ResponseInit);
+  }
+  const headerEntries = csrfInfo.type === CsrfInfoType.SPRING ? csrfInfo.headerEntries : [];
+  return await doFetchLogout(logoutUrl, headerEntries);
 }
 
 export interface LoginResult {
@@ -143,8 +193,9 @@ export async function login(username: string, password: string, options?: LoginO
     data.append('password', password);
 
     const loginProcessingUrl = options?.loginProcessingUrl ?? 'login';
-    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    headers.source = 'typescript';
+    const csrfInfo = await csrfInfoSource.get();
+    const headers = createHeaders(csrfInfo.headerEntries);
+    headers.append('source', 'typescript');
     const response = await fetch(loginProcessingUrl, {
       body: data,
       headers,
@@ -160,16 +211,19 @@ export async function login(username: string, password: string, options?: LoginO
     const loginSuccessful = response.ok && result === 'success';
 
     if (loginSuccessful) {
-      const vaadinCsrfToken = response.headers.get('Vaadin-CSRF') ?? undefined;
-
       const springCsrfHeader = response.headers.get('Spring-CSRF-header') ?? undefined;
       const springCsrfToken = response.headers.get('Spring-CSRF-token') ?? undefined;
       if (springCsrfHeader && springCsrfToken) {
-        const springCsrfTokenInfo: Record<string, string> = {};
-        springCsrfTokenInfo._csrf = springCsrfToken;
-        // eslint-disable-next-line camelcase
-        springCsrfTokenInfo._csrf_header = springCsrfHeader;
-        updateSpringCsrfMetaTags(springCsrfTokenInfo);
+        updateCsrfInfoMeta(
+          {
+            headerEntries: [[springCsrfHeader, springCsrfToken]],
+            formDataEntries: [],
+            type: CsrfInfoType.SPRING,
+            timestamp: Date.now(),
+          },
+          document,
+        );
+        csrfInfoSource.reset();
       }
 
       if (options?.onSuccess) {
@@ -185,7 +239,6 @@ export async function login(username: string, password: string, options?: LoginO
         defaultUrl,
         error: false,
         redirectUrl: savedUrl,
-        token: vaadinCsrfToken,
       };
     }
     return {
@@ -211,22 +264,19 @@ export async function login(username: string, password: string, options?: LoginO
  * @param options - defines additional options, e.g, the logoutUrl.
  */
 export async function logout(options?: LogoutOptions): Promise<void> {
-  // this assumes the default Spring Security logout configuration (handler URL)
-  const logoutUrl = options?.logoutUrl ?? 'logout';
   let response: Response | undefined;
   try {
-    const headers = getSpringCsrfTokenHeadersForAuthRequest(document);
-    response = await doLogout(logoutUrl, headers);
+    response = await doLogout(document, options);
   } catch {
     try {
       const noCacheResponse = await fetch('?nocache');
       const responseText = await noCacheResponse.text();
       const doc = new DOMParser().parseFromString(responseText, 'text/html');
-      const headers = getSpringCsrfTokenHeadersForAuthRequest(doc);
-      response = await doLogout(logoutUrl, headers);
+      response = await doLogout(doc, options);
     } catch (error) {
       // clear the token if the call fails
-      clearSpringCsrfMetaTags();
+      clearCsrfInfoMeta(document);
+      csrfInfoSource.reset();
       throw error;
     }
   } finally {

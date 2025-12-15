@@ -15,8 +15,8 @@
  */
 package com.vaadin.hilla.typeconversion;
 
-import com.vaadin.hilla.EndpointController;
-import com.vaadin.hilla.EndpointControllerMockBuilder;
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,7 +24,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -36,8 +36,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
-
-import java.io.IOException;
+import com.vaadin.hilla.EndpointController;
+import com.vaadin.hilla.EndpointControllerMockBuilder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest
@@ -101,8 +101,8 @@ public abstract class BaseTypeConversionTest {
         String requestUrl = String.format("/%s/%s", endpointName, methodName);
         String body = String.format("{\"value\": %s}", requestValue);
         RequestBuilder requestBuilder = MockMvcRequestBuilders.post(requestUrl)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE).content(body)
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                .accept(MediaType.APPLICATION_JSON_VALUE).content(body)
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
         return mockMvc.perform(requestBuilder).andReturn().getResponse();
     }
 

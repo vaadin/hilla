@@ -17,9 +17,10 @@ package com.vaadin.hilla.endpointransfermapper;
 
 import java.util.List;
 
-import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper.Mapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+
+import com.vaadin.hilla.endpointransfermapper.EndpointTransferMapper.Mapper;
 
 /**
  * A mapper between {@link Page} and {@link List}.

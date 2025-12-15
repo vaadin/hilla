@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-frontend",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "Hilla core frontend utils",
   "main": "index.js",
   "module": "index.js",
@@ -20,7 +20,7 @@
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -68,5 +68,10 @@
   },
   "peerDependencies": {
     "lit": "^3.0.0"
-  }
+  },
+  "sideEffects": [
+    "./index.js",
+    "./Connect.js",
+    "./CsrfInfoSource.js"
+  ]
 }

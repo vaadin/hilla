@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [ main, '24.6', '24.5', '2.5', '1.5' ]
+    branches: [main, '24.9', '24.8', '24.7', '24.6', '2.5', '1.5']
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -15,6 +15,7 @@ on:
       - 'scripts/generator/templates/**/*.md'
   pull_request_target:
     types: [opened, synchronize, reopened]
+    branches: [main]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -29,25 +30,19 @@ concurrency:
   cancel-in-progress: true
 env:
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+  _HEAD_REF: ${{ github.head_ref }}
+  _REF_NAME: ${{ github.ref_name }}
+  _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
     runs-on: ubuntu-latest
+    environment: ${{ github.event.pull_request.head.repo.fork && 'pr-tests' || '' }}
     timeout-minutes: 5
     env:
       NX_SKIP_NX_CACHE: true
 
     steps:
-      - uses: actions-cool/check-user-permission@main
-        id: checkUser
-        with:
-          username: ${{github.triggering_actor}}
-          require: 'write'
-      - name: Fail on external workflow triggering
-        if: ${{ steps.checkUser.outputs.require-result != 'true' && github.actor != 'dependabot[bot]' }}
-        run: |
-          echo "🚫 **${{ github.actor }}** is an external contributor, a **${{ github.repository }}** team member has to review this changes and re-run this build" \
-            | tee -a $GITHUB_STEP_SUMMARY && exit 1
       - name: Check secrets
         run: |
           [ -z "${{secrets.TB_LICENSE}}" ] \
@@ -56,7 +51,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -70,7 +65,6 @@ jobs:
             mvn -q -DskipTests \
               -Dexec.executable='echo' \
               -Dexec.args='${project.groupId}:${project.artifactId}' \
-              -Dexec.skip='${maven.deploy.skip}' \
               exec:exec \
             | perl -pe 's/\.(?=.*:)/\//g' \
             | sed -e 's/:/\//' \
@@ -97,7 +91,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -110,7 +104,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Validate Java Format
-        run: mvn -B formatter:validate
+        run: mvn -B spotless:check
       - name: Lint TypeScript
         run: npm run check
 
@@ -124,7 +118,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -165,7 +159,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -216,7 +210,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -228,9 +222,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -276,7 +267,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -288,9 +279,6 @@ jobs:
           set -x
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -312,69 +300,6 @@ jobs:
             packages/java/gradle-plugin/build/test-results/*
             packages/java/gradle-plugin/build/reports/*
 
-  test-react-18:
-    needs:
-      - init
-    name: React 18 Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - name: Install Chrome
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
-      - name: Checkout Project Code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-      - name: Setup
-        uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
-        with:
-          name: saved-workspace
-      - name: Restore Workspace
-        run: |
-          set -x
-          tar xf workspace.tar
-          tar cf - .m2 | (cd ~ && tar xf -)
-      - name: Install Maven local artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
-      - name: Install React 18
-        run: npm run build:react-18
-      - name: Test
-        run: npm run test:react
-        env:
-          CI: true
-          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
-      - name: Set TB License
-        run: |
-          TB_LICENSE=${{secrets.TB_LICENSE}}
-          mkdir -p ~/.vaadin/
-          echo '{"username":"'`echo $TB_LICENSE | cut -d / -f1`'","proKey":"'`echo $TB_LICENSE | cut -d / -f2`'"}' > ~/.vaadin/proKey
-      - name: Verify
-        run: |
-          (
-            cd packages/java/tests && \
-            mvn -B -am -ntp -fae \
-              -Dfailsafe.forkCount=4 \
-              -Dcom.vaadin.testbench.Parameters.testsInParallel=5 \
-              -Dfailsafe.rerunFailingTestsCount=2 \
-              -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 \
-              -Dmaven.wagon.http.retryHandler.count=3 \
-              -P\!it-modules \
-              -Preact-18 \
-              -Pproduction \
-              verify
-          )
-      - uses: actions/upload-artifact@v4
-        if: ${{ failure() || success() }}
-        with:
-          name: saved-outputs-it-${{ matrix.os }}-${{ matrix.it-modules }}
-          path: |
-            packages/java/tests/**/target/*-reports/*
-            packages/java/tests/**/error-screenshots/*.png
-
   test-all:
     name: Tests Summary
     runs-on: ubuntu-latest
@@ -385,7 +310,6 @@ jobs:
       - test-typescript
       - test-it
       - test-gradle
-      - test-react-18
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4

@@ -1,33 +1,51 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.connect;
 
-import com.vaadin.flow.spring.security.VaadinWebSecurity;
+import static com.vaadin.flow.spring.security.VaadinSecurityConfigurer.vaadin;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.SecurityFilterChain;
+
+import com.vaadin.flow.spring.security.VaadinAwareSecurityContextHolderStrategyConfiguration;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends VaadinWebSecurity {
+@Profile("default")
+@Import(VaadinAwareSecurityContextHolderStrategyConfiguration.class)
+public class SecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf((h) -> h
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/login")));
-
-        http.authorizeHttpRequests(
-                (h) -> h.requestMatchers(new AntPathRequestMatcher("/flux"))
-                        .permitAll());
-        http.authorizeHttpRequests((h) -> h
-                .requestMatchers(new AntPathRequestMatcher("/type-script"))
-                .permitAll());
-        super.configure(http);
-        setLoginView(http, "/login");
+    @Bean
+    SecurityFilterChain vaadinSecurityFilterChain(HttpSecurity http)
+            throws Exception {
+        return http.csrf((h) -> h.ignoringRequestMatchers("/login"))
+                .authorizeHttpRequests((h) -> h
+                        .requestMatchers("/flux", "/type-script").permitAll())
+                .authorizeHttpRequests(h -> h
+                        .requestMatchers("/", "/access-mod", "/more/levels/url")
+                        .authenticated())
+                .with(vaadin(), cfg -> cfg.loginView("/login")).build();
     }
 
     @Bean

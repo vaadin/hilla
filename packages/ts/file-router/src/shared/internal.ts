@@ -5,11 +5,11 @@ import type { RouteParamType } from './routeParamType.js';
  * Internal type used for server communication and menu building. It extends the
  * view configuration with the route parameters.
  */
-export type ServerViewConfig = Readonly<{
+export type ServerViewConfig<T = unknown> = Readonly<{
   children?: readonly ServerViewConfig[];
   params?: Readonly<Record<string, RouteParamType>>;
 }> &
-  ViewConfig;
+  ViewConfig<T>;
 
 export type VaadinObject = Readonly<{
   views: Readonly<Record<string, ViewConfig>>;

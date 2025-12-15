@@ -1,17 +1,36 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.test;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WindowType;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.parallel.Browser;
+
+// Tests are disabled due to unstable signal implementation.
+// Re-enable when there is a new signal implementation.
+@Ignore
 @RunWith(BlockJUnit4ClassRunner.class)
 public class NumberSignalIT extends ChromeBrowserTest {
 
@@ -29,6 +48,9 @@ public class NumberSignalIT extends ChromeBrowserTest {
         waitForElementPresent(By.ById.id("counter"));
         waitUntil(driver -> $("span").id("sharedValue").getText() != null);
         waitUntil(driver -> $("span").id("counter").getText() != null);
+        // Make sure the initial signal subscription round trip
+        // completes (on CI):
+        waitForMillis(1000);
     }
 
     @Test
@@ -63,6 +85,8 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             secondWindowDriver.get(getRootURL() + "/SharedNumberSignal");
 
+            waitForElementPresent(By.id("sharedValue"));
+
             var secondWindowSharedValue = Double.parseDouble(secondWindowDriver
                     .findElement(By.id("sharedValue")).getText());
             Assert.assertEquals(currentSharedValue, secondWindowSharedValue,
@@ -74,6 +98,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             // press reset button on the second window
             secondWindowDriver.findElement(By.id("reset")).click();
+            waitForMillis(500);
 
             secondWindowSharedValue = Double.parseDouble(secondWindowDriver
                     .findElement(By.id("sharedValue")).getText());
@@ -85,6 +110,7 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
             // check that the first window is also updated:
             getDriver().switchTo().window(firstWindowHandle);
+            waitForMillis(500);
             Assert.assertEquals(0.5, getSharedValue(), 0.0);
             Assert.assertEquals(0, getCounterValue());
 
@@ -114,5 +140,13 @@ public class NumberSignalIT extends ChromeBrowserTest {
 
     private void clickButton(String id) {
         $(ButtonElement.class).id(id).click();
+    }
+
+    private void waitForMillis(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

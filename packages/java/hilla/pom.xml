@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>24.8-SNAPSHOT</version>
+        <version>25.0-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
     <name>Hilla Platform</name>
     <description>Hilla Platform</description>
-    <url>https://hilla.dev</url>
+    <url>https://vaadin.com/hilla</url>
 
     <properties>
         <formatter.basedir>${project.parent.basedir}</formatter.basedir>

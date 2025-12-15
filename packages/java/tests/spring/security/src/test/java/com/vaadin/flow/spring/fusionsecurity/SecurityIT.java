@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.spring.fusionsecurity;
 
 import java.util.ArrayList;
@@ -6,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,8 +28,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
+import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
@@ -291,16 +305,19 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void private_page_reactive_endpoint_works() {
+    public void private_page_endpoints_work() {
         open("login");
         loginUser();
-        navigateTo("private");
+        navigateTo("private", true);
+
         waitUntil(driver -> $("output").attribute("id", "balanceUpdates")
                 .exists());
         waitUntil(driver -> !$("output").id("balanceUpdates").getText()
                 .isEmpty());
         String balanceUpdates = $("output").id("balanceUpdates").getText();
         Assert.assertEquals("10000", balanceUpdates);
+
+        assertPrivateEndpointWorks();
     }
 
     protected void navigateTo(String path) {
@@ -389,8 +406,7 @@ public class SecurityIT extends ChromeBrowserTest {
     private void login(String username, String password) {
         assertLoginViewShown();
 
-        LoginFormElement form = $(LoginOverlayElement.class).first()
-                .getLoginForm();
+        LoginOverlayElement form = $(LoginOverlayElement.class).first();
         form.getUsernameField().setValue(username);
         form.getPasswordField().setValue(password);
         form.submit();
@@ -435,6 +451,10 @@ public class SecurityIT extends ChromeBrowserTest {
         return waitUntil(driver -> $("public-view").get(0));
     }
 
+    private TestBenchElement getPrivateView() {
+        return waitUntil(driver -> $("private-view").get(0));
+    }
+
     protected void simulateNewServer() {
         TestBenchElement mainView = waitUntil(driver -> $("main-view").get(0));
         callAsyncMethod(mainView, "invalidateSessionIfPresent");
@@ -465,6 +485,17 @@ public class SecurityIT extends ChromeBrowserTest {
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);
+    }
+
+    protected void assertPrivateEndpointWorks() {
+        String balanceBefore = getPrivateView().findElement(By.id("balance"))
+                .getText();
+        Assert.assertNotNull(balanceBefore);
+        callAsyncMethod(getPrivateView(), "applyForLoan");
+        String balanceAfter = getPrivateView().findElement(By.id("balance"))
+                .getText();
+        Assert.assertNotNull(balanceAfter);
+        Assert.assertNotEquals(balanceAfter, balanceBefore);
     }
 
     private String formatArgumentRef(int index) {

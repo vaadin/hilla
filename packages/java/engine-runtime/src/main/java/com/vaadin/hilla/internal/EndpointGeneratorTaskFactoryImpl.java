@@ -15,7 +15,6 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
-
+import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
 
 /**
@@ -45,7 +44,6 @@ public class EndpointGeneratorTaskFactoryImpl
         settings.setNodeDownloadRoot(options.getNodeDownloadRoot());
         settings.setForceAlternativeNode(options.isRequireHomeNodeExec());
         settings.setUseGlobalPnpm(options.isUseGlobalPnpm());
-        settings.setAutoUpdate(options.isNodeAutoUpdate());
         settings.setNodeVersion(options.getNodeVersion());
 
         return new FrontendTools(settings);
@@ -91,8 +89,9 @@ public class EndpointGeneratorTaskFactoryImpl
         }
     }
 
-    private static EngineConfiguration configureFromOptions(Options options) {
-        return new EngineConfiguration.Builder()
+    private static EngineAutoConfiguration configureFromOptions(
+            Options options) {
+        return new EngineAutoConfiguration.Builder()
                 .baseDir(options.getNpmFolder().toPath())
                 .buildDir(options.getBuildDirectoryName())
                 .outputDir(options.getFrontendGeneratedFolder().toPath())

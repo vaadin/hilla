@@ -1,4 +1,24 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.route;
+
+import static com.vaadin.flow.internal.menu.MenuRegistry.FILE_ROUTES_JSON_NAME;
+import static com.vaadin.flow.internal.menu.MenuRegistry.FILE_ROUTES_JSON_PROD_PATH;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,13 +29,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.vaadin.flow.di.Instantiator;
-import com.vaadin.flow.di.Lookup;
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.internal.CurrentInstance;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinRequest;
 
 import com.sun.security.auth.UserPrincipal;
 import org.apache.commons.io.FileUtils;
@@ -31,25 +44,25 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.CurrentInstance;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteData;
 import com.vaadin.flow.router.RouteParameterData;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.MenuAccessControl;
 import com.vaadin.flow.server.communication.IndexHtmlResponse;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
-import com.vaadin.flow.internal.menu.MenuRegistry;
-
-import static com.vaadin.flow.internal.menu.MenuRegistry.FILE_ROUTES_JSON_NAME;
-import static com.vaadin.flow.internal.menu.MenuRegistry.FILE_ROUTES_JSON_PROD_PATH;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 public class RouteUnifyingIndexHtmlRequestListenerTest {
 
@@ -85,7 +98,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
         Mockito.when(vaadinService.getDeploymentConfiguration())
                 .thenReturn(deploymentConfiguration);
         serverClientViewsProvider = new ServerAndClientViewsProvider(
-                deploymentConfiguration, null, null, true);
+                deploymentConfiguration, null, true);
         requestListener = new RouteUnifyingIndexHtmlRequestListener(
                 serverClientViewsProvider);
 
@@ -181,162 +194,22 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     @Test
     public void when_productionMode_anonymous_user_should_modifyIndexHtmlResponse_with_anonymously_allowed_routes()
             throws IOException {
-        try (MockedStatic<VaadinService> mocked = Mockito
-                .mockStatic(VaadinService.class);
-                MockedStatic<MenuRegistry> menuRegistry = Mockito
-                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
-            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
-
-            Mockito.when(
-                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
-                    .thenReturn(productionRouteFile.toURI().toURL());
-
-            menuRegistry.when(() -> MenuRegistry.getClassLoader())
-                    .thenReturn(mockClassLoader);
-            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            Mockito.when(deploymentConfiguration.isProductionMode())
-                    .thenReturn(true);
-            Mockito.when(vaadinRequest.getUserPrincipal()).thenReturn(null);
-
-            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
-        }
-        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass().getResource(
-                "/META-INF/VAADIN/available-views-anonymous.json"));
-
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
-            MatcherAssert.assertThat("Generated missing fieldName " + field,
-                    actual.has(field), Matchers.is(true));
-            MatcherAssert.assertThat("Missing element " + field,
-                    actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        testProductionModeWithRoles(null, null,
+                "/META-INF/VAADIN/available-views-anonymous.json");
     }
 
     @Test
     public void when_productionMode_authenticated_user_should_modifyIndexHtmlResponse_with_user_allowed_routes()
             throws IOException {
-        try (MockedStatic<VaadinService> mocked = Mockito
-                .mockStatic(VaadinService.class);
-                MockedStatic<MenuRegistry> menuRegistry = Mockito
-                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
-            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
-
-            Mockito.when(
-                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
-                    .thenReturn(productionRouteFile.toURI().toURL());
-
-            menuRegistry.when(() -> MenuRegistry.getClassLoader())
-                    .thenReturn(mockClassLoader);
-            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            Mockito.when(deploymentConfiguration.isProductionMode())
-                    .thenReturn(true);
-            Mockito.when(vaadinRequest.isUserInRole("ROLE_USER"))
-                    .thenReturn(true);
-
-            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
-        }
-        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-user.json"));
-
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
-            MatcherAssert.assertThat("Generated missing fieldName " + field,
-                    actual.has(field), Matchers.is(true));
-            MatcherAssert.assertThat("Missing element " + field,
-                    actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        testProductionModeWithRoles(true, "ROLE_USER",
+                "/META-INF/VAADIN/available-views-user.json");
     }
 
     @Test
     public void when_productionMode_admin_user_should_modifyIndexHtmlResponse_with_anonymous_and_admin_allowed_routes()
             throws IOException {
-        try (MockedStatic<VaadinService> mocked = Mockito
-                .mockStatic(VaadinService.class);
-                MockedStatic<MenuRegistry> menuRegistry = Mockito
-                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
-            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
-
-            Mockito.when(
-                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
-                    .thenReturn(productionRouteFile.toURI().toURL());
-
-            menuRegistry.when(() -> MenuRegistry.getClassLoader())
-                    .thenReturn(mockClassLoader);
-            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            Mockito.when(deploymentConfiguration.isProductionMode())
-                    .thenReturn(true);
-            Mockito.when(vaadinRequest.isUserInRole("ROLE_ADMIN"))
-                    .thenReturn(true);
-            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
-        }
-        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-admin.json"));
-
-        MatcherAssert.assertThat("Different amount of items", actual.size(),
-                Matchers.is(expected.size()));
-
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
-            MatcherAssert.assertThat("Generated missing fieldName " + field,
-                    actual.has(field), Matchers.is(true));
-            MatcherAssert.assertThat("Missing element " + field,
-                    actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
-
+        testProductionModeWithRoles(true, "ROLE_ADMIN",
+                "/META-INF/VAADIN/available-views-admin.json", true);
     }
 
     @Test
@@ -350,37 +223,8 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             mockDevelopmentMode();
             requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
         }
-        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/available-views-admin.json"));
-
-        MatcherAssert.assertThat("Different amount of items", actual.size(),
-                Matchers.is(expected.size()));
-
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
-            MatcherAssert.assertThat("Generated missing fieldName " + field,
-                    actual.has(field), Matchers.is(true));
-            MatcherAssert.assertThat("Missing element " + field,
-                    actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        verifyAndAssertViews("/META-INF/VAADIN/available-views-admin.json",
+                true);
     }
 
     @Test
@@ -456,122 +300,16 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
     @Test
     public void when_exposeServerRoutesToClient_false_serverSideRoutesAreNotInResponse()
             throws IOException {
-        try (MockedStatic<VaadinService> mocked = Mockito
-                .mockStatic(VaadinService.class);
-                MockedStatic<MenuRegistry> menuRegistry = Mockito
-                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
-            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
-
-            Mockito.when(
-                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
-                    .thenReturn(productionRouteFile.toURI().toURL());
-
-            menuRegistry.when(() -> MenuRegistry.getClassLoader())
-                    .thenReturn(mockClassLoader);
-            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            Mockito.when(deploymentConfiguration.isProductionMode())
-                    .thenReturn(true);
-            Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
-                    .thenReturn(true);
-            var serverClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, null, null, false);
-            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
-                    serverClientViewsProvider);
-
-            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
-        }
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-        MatcherAssert.assertThat(
-                "No data nodes for script tag", indexHtmlResponse.getDocument()
-                        .head().select("script").dataNodes().isEmpty(),
-                Matchers.is(false));
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/only-client-views.json"));
-
-        MatcherAssert.assertThat("Different amount of items", actual.size(),
-                Matchers.is(expected.size()));
-
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
-            String field = elementsFields.next();
-            MatcherAssert.assertThat("Generated missing fieldName " + field,
-                    actual.has(field), Matchers.is(true));
-            MatcherAssert.assertThat("Missing element " + field,
-                    actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        testWithCustomViewsProvider(false, null,
+                "/META-INF/VAADIN/only-client-views.json");
     }
 
     @Test
     public void when_exposeServerRoutesToClient_noLayout_serverSideRoutesAreNotInResponse()
             throws IOException {
-
-        try (MockedStatic<VaadinService> mocked = Mockito
-                .mockStatic(VaadinService.class);
-                MockedStatic<MenuRegistry> menuRegistry = Mockito
-                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
-            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
-
-            Mockito.when(menuAccessControl.getPopulateClientSideMenu())
-                    .thenReturn(MenuAccessControl.PopulateClientMenu.AUTOMATIC);
-
-            Mockito.when(
-                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
-                    .thenReturn(productionRouteFile.toURI().toURL());
-
-            menuRegistry.when(() -> MenuRegistry.getClassLoader())
-                    .thenReturn(mockClassLoader);
-            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
-            Mockito.when(deploymentConfiguration.isProductionMode())
-                    .thenReturn(true);
-            Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
-                    .thenReturn(true);
-            var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, null, null, true);
-            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
-                    serverAndClientViewsProvider);
-
-            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
-        }
-        MatcherAssert.assertThat(
-                indexHtmlResponse.getDocument().head().select("script"),
-                Matchers.notNullValue());
-        MatcherAssert.assertThat(
-                "No data nodes for script tag", indexHtmlResponse.getDocument()
-                        .head().select("script").dataNodes().isEmpty(),
-                Matchers.is(false));
-
-        DataNode script = indexHtmlResponse.getDocument().head()
-                .select("script").dataNodes().get(0);
-
-        final String scriptText = script.getWholeData();
-        MatcherAssert.assertThat(scriptText,
-                Matchers.startsWith(SCRIPT_STRING));
-
-        final String views = scriptText.substring(SCRIPT_STRING.length());
-
-        final var mapper = new ObjectMapper();
-
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(getClass()
-                .getResource("/META-INF/VAADIN/only-client-views.json"));
-
-        MatcherAssert.assertThat("Different amount of items", actual.size(),
-                Matchers.is(expected.size()));
+        testWithCustomViewsProvider(true,
+                MenuAccessControl.PopulateClientMenu.AUTOMATIC,
+                "/META-INF/VAADIN/only-client-views.json", true, false);
     }
 
     @Test
@@ -614,7 +352,7 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
             Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
                     .thenReturn(true);
             var serverAndClientViewsProvider = new ServerAndClientViewsProvider(
-                    deploymentConfiguration, null, null, true);
+                    deploymentConfiguration, null, true);
             var requestListener = new RouteUnifyingIndexHtmlRequestListener(
                     serverAndClientViewsProvider);
 
@@ -636,24 +374,25 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 Matchers.startsWith(SCRIPT_STRING));
 
         final String views = scriptText.substring(SCRIPT_STRING.length());
+        final String cleanViews = removeTrailingSemicolon(views);
 
         final var mapper = new ObjectMapper();
 
-        var actual = mapper.readTree(views);
-        var expected = mapper.readTree(
-                getClass().getResource("/META-INF/VAADIN/" + expectedJsonFile));
+        var actual = mapper.readTree(cleanViews);
+        var expected = mapper.readTree(getClass()
+                .getResourceAsStream("/META-INF/VAADIN/" + expectedJsonFile));
 
         MatcherAssert.assertThat("Different amount of items", actual.size(),
                 Matchers.is(expected.size()));
 
-        Iterator<String> elementsFields = expected.fieldNames();
-        do {
+        Iterator<String> elementsFields = expected.propertyNames().iterator();
+        while (elementsFields.hasNext()) {
             String field = elementsFields.next();
             MatcherAssert.assertThat("Generated missing fieldName " + field,
                     actual.has(field), Matchers.is(true));
             MatcherAssert.assertThat("Missing element " + field,
                     actual.get(field), Matchers.equalTo(expected.get(field)));
-        } while (elementsFields.hasNext());
+        }
     }
 
     private void mockDevelopmentMode() throws IOException {
@@ -674,6 +413,170 @@ public class RouteUnifyingIndexHtmlRequestListenerTest {
                 .getResourceAsStream(jsonFile)) {
             FileUtils.copyInputStreamToFile(routes, clientFiles);
         }
+    }
+
+    private void testProductionModeWithRoles(Boolean hasUserPrincipal,
+            String role, String expectedJsonPath) throws IOException {
+        testProductionModeWithRoles(hasUserPrincipal, role, expectedJsonPath,
+                false);
+    }
+
+    private void testProductionModeWithRoles(Boolean hasUserPrincipal,
+            String role, String expectedJsonPath, boolean checkSize)
+            throws IOException {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class);
+                MockedStatic<MenuRegistry> menuRegistry = Mockito
+                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
+            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
+
+            Mockito.when(
+                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
+                    .thenReturn(productionRouteFile.toURI().toURL());
+
+            menuRegistry.when(() -> MenuRegistry.getClassLoader())
+                    .thenReturn(mockClassLoader);
+            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
+            Mockito.when(deploymentConfiguration.isProductionMode())
+                    .thenReturn(true);
+
+            if (hasUserPrincipal == null) {
+                Mockito.when(vaadinRequest.getUserPrincipal()).thenReturn(null);
+            } else if (role != null) {
+                Mockito.when(vaadinRequest.isUserInRole(role)).thenReturn(true);
+            }
+
+            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+        }
+        verifyAndAssertViews(expectedJsonPath, checkSize);
+    }
+
+    private void verifyAndAssertViews(String expectedJsonPath,
+            boolean checkSize) throws IOException {
+        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
+        verifyAndAssertViewsWithoutDocumentVerification(expectedJsonPath,
+                checkSize);
+    }
+
+    private void verifyAndAssertViewsWithoutDocumentVerification(
+            String expectedJsonPath, boolean checkSize) throws IOException {
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
+
+        DataNode script = indexHtmlResponse.getDocument().head()
+                .select("script").dataNodes().get(0);
+
+        final String scriptText = script.getWholeData();
+        MatcherAssert.assertThat(scriptText,
+                Matchers.startsWith(SCRIPT_STRING));
+
+        final String views = scriptText.substring(SCRIPT_STRING.length());
+        final String cleanViews = removeTrailingSemicolon(views);
+
+        final var mapper = new ObjectMapper();
+
+        var actual = mapper.readTree(cleanViews);
+        var expected = mapper
+                .readTree(getClass().getResourceAsStream(expectedJsonPath));
+
+        if (checkSize) {
+            MatcherAssert.assertThat("Different amount of items", actual.size(),
+                    Matchers.is(expected.size()));
+        }
+
+        Iterator<String> elementsFields = expected.propertyNames().iterator();
+        while (elementsFields.hasNext()) {
+            String field = elementsFields.next();
+            MatcherAssert.assertThat("Generated missing fieldName " + field,
+                    actual.has(field), Matchers.is(true));
+            MatcherAssert.assertThat("Missing element " + field,
+                    actual.get(field), Matchers.equalTo(expected.get(field)));
+        }
+    }
+
+    private void testWithCustomViewsProvider(boolean exposeServerRoutes,
+            MenuAccessControl.PopulateClientMenu populateClientMenu,
+            String expectedJsonPath) throws IOException {
+        testWithCustomViewsProvider(exposeServerRoutes, populateClientMenu,
+                expectedJsonPath, true, true);
+    }
+
+    private void testWithCustomViewsProvider(boolean exposeServerRoutes,
+            MenuAccessControl.PopulateClientMenu populateClientMenu,
+            String expectedJsonPath, boolean checkSize, boolean checkFields)
+            throws IOException {
+        try (MockedStatic<VaadinService> mocked = Mockito
+                .mockStatic(VaadinService.class);
+                MockedStatic<MenuRegistry> menuRegistry = Mockito
+                        .mockStatic(MenuRegistry.class, CALLS_REAL_METHODS)) {
+            ClassLoader mockClassLoader = Mockito.mock(ClassLoader.class);
+
+            if (populateClientMenu != null) {
+                Mockito.when(menuAccessControl.getPopulateClientSideMenu())
+                        .thenReturn(populateClientMenu);
+            }
+
+            Mockito.when(
+                    mockClassLoader.getResource(FILE_ROUTES_JSON_PROD_PATH))
+                    .thenReturn(productionRouteFile.toURI().toURL());
+
+            menuRegistry.when(() -> MenuRegistry.getClassLoader())
+                    .thenReturn(mockClassLoader);
+            mocked.when(VaadinService::getCurrent).thenReturn(vaadinService);
+            Mockito.when(deploymentConfiguration.isProductionMode())
+                    .thenReturn(true);
+            Mockito.when(vaadinRequest.isUserInRole(Mockito.anyString()))
+                    .thenReturn(true);
+            var serverClientViewsProvider = new ServerAndClientViewsProvider(
+                    deploymentConfiguration, null, exposeServerRoutes);
+            var requestListener = new RouteUnifyingIndexHtmlRequestListener(
+                    serverClientViewsProvider);
+
+            requestListener.modifyIndexHtmlResponse(indexHtmlResponse);
+        }
+
+        Mockito.verify(indexHtmlResponse, Mockito.times(1)).getDocument();
+        MatcherAssert.assertThat(
+                indexHtmlResponse.getDocument().head().select("script"),
+                Matchers.notNullValue());
+        MatcherAssert.assertThat(
+                "No data nodes for script tag", indexHtmlResponse.getDocument()
+                        .head().select("script").dataNodes().isEmpty(),
+                Matchers.is(false));
+
+        if (checkFields) {
+            verifyAndAssertViewsWithoutDocumentVerification(expectedJsonPath,
+                    checkSize);
+        } else {
+            DataNode script = indexHtmlResponse.getDocument().head()
+                    .select("script").dataNodes().get(0);
+
+            final String scriptText = script.getWholeData();
+            MatcherAssert.assertThat(scriptText,
+                    Matchers.startsWith(SCRIPT_STRING));
+
+            final String views = scriptText.substring(SCRIPT_STRING.length());
+            // Remove trailing semicolon if present - Jackson 3 is stricter
+            final String cleanViews = views.endsWith(";")
+                    ? views.substring(0, views.length() - 1)
+                    : views;
+
+            final var mapper = new ObjectMapper();
+
+            var actual = mapper.readTree(cleanViews);
+            var expected = mapper
+                    .readTree(getClass().getResourceAsStream(expectedJsonPath));
+
+            MatcherAssert.assertThat("Different amount of items", actual.size(),
+                    Matchers.is(expected.size()));
+        }
+    }
+
+    private String removeTrailingSemicolon(String views) {
+        // Jackson 3 is stricter about trailing content
+        return views.endsWith(";") ? views.substring(0, views.length() - 1)
+                : views;
     }
 
     @PageTitle("RouteTarget")

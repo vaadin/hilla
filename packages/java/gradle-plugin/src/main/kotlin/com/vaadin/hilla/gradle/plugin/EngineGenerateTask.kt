@@ -16,8 +16,8 @@
 package com.vaadin.hilla.gradle.plugin
 
 import java.io.IOException
-import com.vaadin.gradle.PluginEffectiveConfiguration
-import com.vaadin.gradle.VaadinFlowPluginExtension
+import com.vaadin.flow.gradle.PluginEffectiveConfiguration
+import com.vaadin.flow.gradle.VaadinFlowPluginExtension
 import com.vaadin.hilla.engine.GeneratorException
 import com.vaadin.hilla.engine.GeneratorProcessor
 import com.vaadin.hilla.engine.ParserException
@@ -112,7 +112,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
             val parserProcessor = ParserProcessor(conf)
             val generatorProcessor = GeneratorProcessor(conf)
 
-            val endpoints = conf.browserCallableFinder.findBrowserCallables();
+            val endpoints = conf.browserCallableFinder.find(conf);
             parserProcessor.process(endpoints)
             generatorProcessor.process()
         } catch (e: IOException) {

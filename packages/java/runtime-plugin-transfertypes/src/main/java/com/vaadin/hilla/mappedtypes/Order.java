@@ -15,9 +15,9 @@
  */
 package com.vaadin.hilla.mappedtypes;
 
-import org.jspecify.annotations.NonNull;
 import jakarta.validation.constraints.NotBlank;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.NullHandling;
 

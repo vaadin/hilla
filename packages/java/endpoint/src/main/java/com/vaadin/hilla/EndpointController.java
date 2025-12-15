@@ -15,18 +15,14 @@
  */
 package com.vaadin.hilla;
 
-import com.vaadin.hilla.signals.handler.SignalsHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,6 +36,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinRequest;
@@ -51,6 +51,7 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointInternalException;
 import com.vaadin.hilla.auth.CsrfChecker;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.exception.EndpointException;
+import com.vaadin.hilla.signals.handler.SignalsHandler;
 
 /**
  * The controller that is responsible for processing Vaadin endpoint requests.
@@ -182,7 +183,7 @@ public class EndpointController {
      *            the current response
      * @return execution result as a JSON string or an error message string
      */
-    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(path = ENDPOINT_METHODS, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> serveEndpoint(
             @PathVariable("endpoint") String endpointName,
             @PathVariable("method") String methodName,
@@ -283,7 +284,7 @@ public class EndpointController {
 
                 try {
                     body = objectMapper.readValue(bodyPart, ObjectNode.class);
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     LOGGER.error("Request body does not contain valid JSON", e);
                     return ResponseEntity
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -314,7 +315,7 @@ public class EndpointController {
             try {
                 return ResponseEntity
                         .ok(endpointInvoker.writeValueAsString(returnValue));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 String errorMessage = String.format(
                         "Failed to serialize endpoint '%s' method '%s' response. "
                                 + "Double check method's return type or specify a custom mapper bean with qualifier '%s'",
@@ -327,7 +328,7 @@ public class EndpointController {
             try {
                 return ResponseEntity.badRequest().body(endpointInvoker
                         .createResponseErrorObject(e.getSerializationData()));
-            } catch (JsonProcessingException ee) {
+            } catch (JacksonException ee) {
                 String errorMessage = "Failed to serialize error object for endpoint exception. ";
                 LOGGER.error(errorMessage, e);
                 return ResponseEntity.internalServerError().body(errorMessage);
@@ -365,7 +366,7 @@ public class EndpointController {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(endpointInvoker.createResponseErrorObject(
                             endpointException.getSerializationData()));
-        } catch (JsonProcessingException ee) {
+        } catch (JacksonException ee) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(endpointInvoker.createResponseErrorObject(
                             messages.caption() + ". " + messages.message()));

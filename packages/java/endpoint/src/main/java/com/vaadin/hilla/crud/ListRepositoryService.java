@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.crud;
 
 import jakarta.annotation.PostConstruct;
@@ -7,18 +22,18 @@ import java.util.List;
 import java.util.Optional;
 
 import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.hilla.EndpointExposed;
-import com.vaadin.hilla.crud.filter.Filter;
-
 import org.jspecify.annotations.Nullable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
+
+import com.vaadin.hilla.EndpointExposed;
+import com.vaadin.hilla.crud.filter.Filter;
 
 /**
  * A browser-callable service that delegates list operations to a JPA
@@ -28,14 +43,14 @@ import org.springframework.data.repository.CrudRepository;
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {
 
-    // https://github.com/spring-projects/spring-boot/blob/1d35deaaf02cca9af84fdaceddf5335149db0aec/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/data/web/SpringDataWebProperties.java#L84
+    // https://github.com/spring-projects/spring-boot/blob/1d35deaaf02cca9af84fdaceddf5335149db0aec/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/data/web/DataWebProperties.java#L84
     static final int DEFAULT_PAGE_SIZE_LIMIT = 2000;
 
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired(required = false)
-    SpringDataWebProperties springDataWebProperties;
+    DataWebProperties dataWebProperties;
 
     private R repository;
     private final Class<T> entityClass;
@@ -83,9 +98,9 @@ public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaS
     }
 
     private PageRequest limitSize(Pageable pageable) {
-        int maxPageSize = Optional.ofNullable(springDataWebProperties)
-                .map(SpringDataWebProperties::getPageable)
-                .map(SpringDataWebProperties.Pageable::getMaxPageSize)
+        int maxPageSize = Optional.ofNullable(dataWebProperties)
+                .map(DataWebProperties::getPageable)
+                .map(DataWebProperties.Pageable::getMaxPageSize)
                 .orElse(DEFAULT_PAGE_SIZE_LIMIT);
 
         var effectivePageSize = pageable.isPaged()

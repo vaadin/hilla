@@ -40,9 +40,10 @@ describe('@vaadin/hilla-frontend', () => {
       handleMessage(msg: AbstractMessage): unknown;
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/connect');
+      await fluxConnection.ready;
       _fluxConnectionHelper = {
         handleMessage(msg) {
           getSubscriptionEventSpies()?.onMessage?.({ responseBody: JSON.stringify(msg) });
@@ -337,15 +338,17 @@ describe('@vaadin/hilla-frontend', () => {
       expect(events).to.equal(1);
     });
 
-    it('by default it should use the default url', () => {
+    it('by default it should use the default url', async () => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/connect');
+      await fluxConnection.ready;
       expect(subscribeStub.lastCall.firstArg).to.have.property('url').which.equals('/HILLA/push');
     });
 
-    it('should use a custom prefix when connecting', () => {
+    it('should use a custom prefix when connecting', async () => {
       subscribeStub.resetHistory();
       fluxConnection = new FluxConnection('/custom/connect');
+      await fluxConnection.ready;
       expect(subscribeStub.lastCall.firstArg).to.have.property('url').which.equals('/custom/HILLA/push');
     });
 

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.engine;
 
 import java.io.BufferedReader;
@@ -10,14 +25,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.hilla.engine.commandrunner.CommandNotFoundException;
 import com.vaadin.hilla.engine.commandrunner.CommandRunnerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.vaadin.hilla.parser.core.OpenAPIFileType;
 
 public final class GeneratorProcessor {
     public static String GENERATED_FILE_LIST_NAME = "generated-file-list.txt";
@@ -32,7 +47,7 @@ public final class GeneratorProcessor {
     private final Path outputDirectory;
     private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
 
-    public GeneratorProcessor(EngineConfiguration conf) {
+    public GeneratorProcessor(EngineAutoConfiguration conf) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
         this.outputDirectory = conf.getOutputDir();
@@ -165,8 +180,8 @@ public final class GeneratorProcessor {
     private OpenAPI getOpenAPI() throws IOException {
         String source = Files.readString(openAPIFile);
         var mapper = OpenAPIFileType.JSON.getMapper();
-        var reader = mapper.reader();
-        return reader.readValue(source, OpenAPI.class);
+        var reader = mapper.readerFor(OpenAPI.class);
+        return reader.readValue(source);
     }
 
     private boolean isOpenAPIEmpty() {

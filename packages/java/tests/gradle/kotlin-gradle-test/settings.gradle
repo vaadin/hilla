@@ -1,12 +1,67 @@
+import groovy.xml.XmlSlurper
+
+// Configure plugin versions from root pom.xml
+pluginManagement {
+    // Read versions from root pom.xml - fail if not found
+    def rootPomFile = new File(rootDir, '../../../../../pom.xml')
+    if (!rootPomFile.exists()) {
+        throw new GradleException("Root pom.xml not found at ${rootPomFile.absolutePath}. Versions must be read from the root pom.xml")
+    }
+
+    def rootPom = new XmlSlurper().parse(rootPomFile)
+    def springBootVersionForPlugin = rootPom.properties.'spring.boot.version'.text()
+
+    if (!springBootVersionForPlugin) {
+        throw new GradleException("spring.boot.version not found in root pom.xml")
+    }
+
+    plugins {
+        id 'org.springframework.boot' version "${springBootVersionForPlugin}"
+    }
+}
+
 rootProject.name = 'kotlin-gradle-test'
 
+// Read versions from root pom.xml - fail if not found
+def rootPomFile = new File(rootDir, '../../../../../pom.xml')
+if (!rootPomFile.exists()) {
+    throw new GradleException("Root pom.xml not found at ${rootPomFile.absolutePath}. Versions must be read from the root pom.xml")
+}
+
+def rootPom = new XmlSlurper().parse(rootPomFile)
+def hillaVersionValue = rootPom.version.text()
+def flowVersionValue = rootPom.properties.'flow.version'.text()
+def springBootVersionValue = rootPom.properties.'spring.boot.version'.text()
+def vaadinComponentsVersionValue = rootPom.properties.'vaadin.components.version'.text() ?: '25.0-SNAPSHOT'
+
+if (!hillaVersionValue) {
+    throw new GradleException("hilla.version not found in root pom.xml")
+}
+if (!flowVersionValue) {
+    throw new GradleException("flow.version not found in root pom.xml")
+}
+if (!springBootVersionValue) {
+    throw new GradleException("spring.boot.version not found in root pom.xml")
+}
+
+gradle.ext.hillaVersion = hillaVersionValue
+gradle.ext.flowVersion = flowVersionValue
+gradle.ext.springBootVersion = springBootVersionValue
+gradle.ext.vaadinComponentsVersion = vaadinComponentsVersionValue
+
 buildscript {
+    // Read version again in buildscript scope
+    def rootPomFile = new File(rootDir, '../../../../../pom.xml')
+    def rootPom = new XmlSlurper().parse(rootPomFile)
+    def hillaVersion = rootPom.version.text()
+
     repositories {
         mavenLocal()
         mavenCentral()
         maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+        maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
     }
     dependencies {
-        classpath("com.vaadin:hilla-gradle-plugin:$hillaVersion")
+        classpath("com.vaadin:hilla-gradle-plugin:${hillaVersion}")
     }
 }

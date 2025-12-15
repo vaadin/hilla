@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-utils",
-  "version": "24.8.0-alpha5",
+  "version": "25.0.0-rc2",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
@@ -14,7 +14,7 @@
     "lint:fix": "eslint src test --fix",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
-    "test:watch": "vitest",
+    "test:watch": "vitest --inspect --no-file-parallelism",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -22,6 +22,7 @@
     "./dependencies/ExportManager.js": "./dependencies/ExportManager.js",
     "./dependencies/ImportManager.js": "./dependencies/ImportManager.js",
     "./dependencies/PathManager.js": "./dependencies/PathManager.js",
+    "./dependencies/StatementRecordManager.js": "./dependencies/StatementRecordManager.js",
     "./testing/snapshotMatcher.js": "./testing/snapshotMatcher.js",
     "./ast.js": "./ast.js",
     "./createFullyUniqueIdentifier.js": "./createFullyUniqueIdentifier.js",
@@ -57,6 +58,6 @@
   "dependencies": {
     "pino": "9.6.0",
     "pino-pretty": "10.3.1",
-    "typescript": "5.8.3"
+    "typescript": "5.9.3"
   }
 }

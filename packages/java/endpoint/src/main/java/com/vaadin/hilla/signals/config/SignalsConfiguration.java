@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,34 +13,34 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla.signals.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.hilla.ConditionalOnFeatureFlag;
-import com.vaadin.hilla.EndpointInvoker;
-import com.vaadin.hilla.signals.Signal;
-import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
-import com.vaadin.hilla.signals.handler.SignalsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.ObjectMapper;
+
+import com.vaadin.hilla.ConditionalOnFeatureFlag;
+import com.vaadin.hilla.EndpointInvoker;
+import com.vaadin.hilla.signals.handler.SignalsHandler;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 
 /**
  * Spring beans configuration for signals.
  */
-@Configuration
+@Configuration("signalsConfiguration")
 public class SignalsConfiguration {
 
     private SecureSignalsRegistry signalsRegistry;
     private SignalsHandler signalsHandler;
     private final EndpointInvoker endpointInvoker;
+    private final ObjectMapper objectMapper;
 
     public SignalsConfiguration(EndpointInvoker endpointInvoker,
             @Qualifier("hillaEndpointObjectMapper") ObjectMapper hillaEndpointObjectMapper) {
         this.endpointInvoker = endpointInvoker;
-        Signal.setMapper(hillaEndpointObjectMapper);
+        this.objectMapper = hillaEndpointObjectMapper;
     }
 
     /**
@@ -53,7 +53,8 @@ public class SignalsConfiguration {
     @Bean
     public SecureSignalsRegistry signalsRegistry() {
         if (signalsRegistry == null) {
-            signalsRegistry = new SecureSignalsRegistry(endpointInvoker);
+            signalsRegistry = new SecureSignalsRegistry(endpointInvoker,
+                    objectMapper);
         }
         return signalsRegistry;
     }
@@ -64,7 +65,7 @@ public class SignalsConfiguration {
      *
      * @return SignalsHandler endpoint instance
      */
-    @Bean
+    @Bean(name = "hillaSignalsHandler")
     public SignalsHandler signalsHandler(
             @Autowired(required = false) SecureSignalsRegistry signalsRegistry) {
         if (signalsHandler == null) {

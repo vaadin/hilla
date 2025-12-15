@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.hilla;
 
 import static org.mockito.Mockito.never;
@@ -31,17 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.vaadin.hilla.nonnullapi.NonNullableEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jspecify.annotations.NonNull;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.lang.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import com.vaadin.hilla.endpoints.Id;
+import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 
 public class ExplicitNullableTypeCheckerTest {
     private ExplicitNullableTypeChecker explicitNullableTypeChecker;
@@ -508,7 +505,7 @@ public class ExplicitNullableTypeCheckerTest {
     /**
      * Method for testing
      */
-    @javax.annotation.Nonnull
+    @jakarta.annotation.Nonnull
     public String stringNonnull() {
         return "";
     }
