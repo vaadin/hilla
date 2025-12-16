@@ -205,7 +205,7 @@
                 <arg>-Xemit-jvm-type-annotations</arg>
               </args>
               <sourceDirs>
-                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                <sourceDir>src/main/kotlin</sourceDir>
               </sourceDirs>
             </configuration>
           </execution>
@@ -222,7 +222,8 @@
                 <arg>-Xemit-jvm-type-annotations</arg>
               </args>
               <sourceDirs>
-                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                <sourceDir>src/test/kotlin</sourceDir>
+                <sourceDir>src/test/java</sourceDir>
               </sourceDirs>
             </configuration>
           </execution>

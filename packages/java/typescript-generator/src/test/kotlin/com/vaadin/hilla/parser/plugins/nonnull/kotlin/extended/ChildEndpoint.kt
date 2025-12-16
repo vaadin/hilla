@@ -1,7 +1,7 @@
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin.extended
 
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.Endpoint
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.SimpleEndpoint
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint
 
 @Endpoint
 class ChildEndpoint : SimpleEndpoint() {
