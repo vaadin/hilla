@@ -206,10 +206,12 @@ public interface CommandRunner {
 
             var stdOutThread = new Thread(
                     () -> stdOutHandler.accept(process.getInputStream()));
+            stdOutThread.setDaemon(true);
             stdOutThread.start();
 
             var stdErrThread = new Thread(
                     () -> stdErrHandler.accept(process.getErrorStream()));
+            stdErrThread.setDaemon(true);
             stdErrThread.start();
 
             if (stdIn != null) {
