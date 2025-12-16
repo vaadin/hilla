@@ -1,5 +1,5 @@
 .auto-crud {
-  flex: 1;
+  flex: auto;
   display: flex;
   overflow: hidden;
   position: relative;
