@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-plugin-signals",
-  "version": "24.8.15",
+  "version": "24.8.16",
   "description": "A Hilla TypeScript Generator plugin to add Shared Signals support",
   "main": "index.js",
   "type": "module",
@@ -49,8 +49,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-core": "24.8.15",
-    "@vaadin/hilla-generator-utils": "24.8.15",
+    "@vaadin/hilla-generator-core": "24.8.16",
+    "@vaadin/hilla-generator-utils": "24.8.16",
     "fast-deep-equal": "3.1.3",
     "iterator-helpers-polyfill": "3.0.1",
     "openapi-types": "12.1.3",
@@ -58,8 +58,8 @@
     "typescript": "5.8.3"
   },
   "devDependencies": {
-    "@vaadin/hilla-generator-plugin-backbone": "24.8.15",
-    "@vaadin/hilla-generator-plugin-client": "24.8.15",
-    "@vaadin/hilla-generator-plugin-transfertypes": "24.8.15"
+    "@vaadin/hilla-generator-plugin-backbone": "24.8.16",
+    "@vaadin/hilla-generator-plugin-client": "24.8.16",
+    "@vaadin/hilla-generator-plugin-transfertypes": "24.8.16"
   }
 }
