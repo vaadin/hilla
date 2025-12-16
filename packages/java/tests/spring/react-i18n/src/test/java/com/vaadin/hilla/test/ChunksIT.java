@@ -26,15 +26,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ChunksTest {
+public class ChunksIT {
 
     private JsonNode chunks;
 
     @Before
     public void loadChunks() throws IOException {
         chunks = new ObjectMapper()
-                .readTree(
-                        ChunksTest.class.getResource("/vaadin-i18n/i18n.json"))
+                .readTree(ChunksIT.class.getResource("/vaadin-i18n/i18n.json"))
                 .path("chunks");
     }
 

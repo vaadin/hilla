@@ -31,8 +31,8 @@ import tools.jackson.core.util.Separators;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.flow.internal.FileIOUtils;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.frontend.FileIOUtils;
 import com.vaadin.flow.server.frontend.NodeUpdater;
 
 /**

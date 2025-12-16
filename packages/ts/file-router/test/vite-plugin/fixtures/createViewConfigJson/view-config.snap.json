@@ -14,7 +14,7 @@
       {
         "route": "login",
         "skipLayouts": true,
-        "flowLayout": false,
+        "flowLayout": true,
         "params": {},
         "title": "Login"
       },

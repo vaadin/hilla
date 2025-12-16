@@ -24,7 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FileRoutesTest {
+public class FileRoutesIT {
 
     private String fileRoutes;
 

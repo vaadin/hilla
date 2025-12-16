@@ -90,7 +90,7 @@ class RouteFromMetaProcessor {
           .map((dup) => `console.error("Two views share the same path: ${dup}");`),
       );
 
-      return metas.map(({ file, layout, path, children, flowLayout }, index) => {
+      return metas.map(({ file, layout, path, children }, index) => {
         const config = configs[index]!;
         let _children: readonly CallExpression[] | undefined;
 
@@ -121,7 +121,7 @@ class RouteFromMetaProcessor {
               path: relativePath,
               config,
               lazyId: named.getIdentifier('react', 'lazy') ?? named.add('react', 'lazy'),
-            };
+            } satisfies LazyModule;
           } else {
             const mod = namespace.add(relativePath, fileName);
             const reactModuleType =
@@ -131,8 +131,8 @@ class RouteFromMetaProcessor {
             module = {
               componentId: ast`${mod}.default`.node as PropertyAccessExpression,
               configId: ast`(${mod} as ${reactModuleType}).config`.node as PropertyAccessExpression,
-              flowLayout,
-            };
+              flowLayout: config.flowLayout,
+            } satisfies RegularModule;
           }
         }
 

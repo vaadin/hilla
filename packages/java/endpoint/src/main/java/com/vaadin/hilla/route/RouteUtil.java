@@ -54,18 +54,21 @@ public class RouteUtil implements FileRouterRequestUtil {
     public RouteUtil() {
     }
 
+    @Override
     public boolean isAnonymousRoute(HttpServletRequest request) {
         collectClientRoutesIfNecessary(request);
         return getRouteData(request, false).map(info -> !info.loginRequired())
                 .orElse(false);
     }
 
+    @Override
     public boolean isSecuredRoute(HttpServletRequest request) {
         collectClientRoutesIfNecessary(request);
         return getRouteData(request, false)
                 .map(AvailableViewInfo::loginRequired).orElse(false);
     }
 
+    @Override
     public Set<String> getAllowedAuthorities(HttpServletRequest request) {
         collectClientRoutesIfNecessary(request);
         return getRouteData(request, false).map(AvailableViewInfo::rolesAllowed)

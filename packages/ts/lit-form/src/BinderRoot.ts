@@ -20,7 +20,7 @@ import {
 
 export type BinderConfiguration<T> = Readonly<{
   onChange?(oldValue?: T): void;
-  onSubmit?(value: T): Promise<T | undefined | void>;
+  onSubmit?(value: T): Promise<T | void>;
 }>;
 
 export type BinderRootConfiguration<T> = BinderConfiguration<T> &
@@ -175,7 +175,7 @@ export class BinderRoot<M extends AbstractModel = AbstractModel> extends BinderN
    *
    * It's a no-op if the onSubmit callback is undefined.
    */
-  async submit(): Promise<Value<M> | undefined | void> {
+  async submit(): Promise<Value<M> | void> {
     const onSubmit = this.#config?.onSubmit;
     if (onSubmit) {
       return this.submitTo(onSubmit);

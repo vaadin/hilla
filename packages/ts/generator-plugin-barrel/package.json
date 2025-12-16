@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-plugin-barrel",
-  "version": "25.0.0-beta5",
+  "version": "25.0.0",
   "description": "A Hilla TypeScript Generator plugin to generate barrel file",
   "main": "index.js",
   "type": "module",
@@ -49,9 +49,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-generator-core": "25.0.0-beta5",
-    "@vaadin/hilla-generator-plugin-backbone": "25.0.0-beta5",
-    "@vaadin/hilla-generator-utils": "25.0.0-beta5",
+    "@vaadin/hilla-generator-core": "25.0.0",
+    "@vaadin/hilla-generator-plugin-backbone": "25.0.0",
+    "@vaadin/hilla-generator-utils": "25.0.0",
     "typescript": "5.9.3"
   }
 }
