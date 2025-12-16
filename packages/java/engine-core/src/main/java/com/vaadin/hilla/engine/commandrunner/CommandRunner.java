@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -191,34 +193,40 @@ public interface CommandRunner {
 
         var exitCode = 0;
 
+        var stdOutException = new AtomicReference<IOException>();
+        var stdOutHandler = createInputStreamHandler(stdOut, stdOutException);
+
+        var stdErrException = new AtomicReference<IOException>();
+        var stdErrHandler = createInputStreamHandler(stdErr, stdErrException);
+
         try {
             var processBuilder = createProcessBuilder(commandWithArgs);
 
             var process = processBuilder.start();
 
-            var threads = Stream
-                    .of(new Pipe<>(stdOut, process.getInputStream()),
-                            new Pipe<>(stdErr, process.getErrorStream()),
-                            new Pipe<>(stdIn, process.getOutputStream()))
-                    .filter(handler -> handler.consumer() != null)
-                    .map(handler -> {
-                        var t = new Thread(() -> {
-                            try (var stream = handler.stream()) {
-                                ((Consumer<Closeable>) handler.consumer())
-                                        .accept(stream);
-                            } catch (IOException e) {
-                                getLogger().error("Error while handling stream",
-                                        e);
-                            }
-                        });
-                        t.start();
-                        return t;
-                    }).toList();
+            var stdOutThread = new Thread(
+                    () -> stdOutHandler.accept(process.getInputStream()));
+            stdOutThread.setDaemon(true);
+            stdOutThread.start();
+
+            var stdErrThread = new Thread(
+                    () -> stdErrHandler.accept(process.getErrorStream()));
+            stdErrThread.setDaemon(true);
+            stdErrThread.start();
+
+            if (stdIn != null) {
+                stdIn.accept(process.getOutputStream());
+            }
 
             exitCode = process.waitFor();
 
-            for (var thread : threads) {
-                thread.join();
+            stdOutThread.join();
+            if (stdOutException.get() != null) {
+                throw stdOutException.get();
+            }
+            stdErrThread.join();
+            if (stdErrException.get() != null) {
+                throw stdErrException.get();
             }
         } catch (IOException | InterruptedException e) {
             // Tries to figure out if the command is not found. This is not a
@@ -238,6 +246,23 @@ public interface CommandRunner {
             throw new CommandRunnerException("Command failed with exit code "
                     + exitCode + ": " + executable);
         }
+    }
+
+    private Consumer<InputStream> createInputStreamHandler(
+            Consumer<InputStream> inputStreamConsumer,
+            AtomicReference<IOException> ioException) {
+        return (inputStream -> {
+            try {
+                if (inputStreamConsumer != null) {
+                    inputStreamConsumer.accept(inputStream);
+                } else {
+                    new BufferedReader(new InputStreamReader(inputStream))
+                            .transferTo(OutputStreamWriter.nullWriter());
+                }
+            } catch (IOException e) {
+                ioException.set(e);
+            }
+        });
     }
 
     /**
