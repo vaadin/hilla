@@ -74,7 +74,7 @@ mvn test -Dtest=ClassName#methodName
 
 **Java modules** (`packages/java/*`):
 1. Build with `mvn clean install`
-2. In your test app's `pom.xml`, set version to `25.0-SNAPSHOT`
+2. In your test app's `pom.xml`, set version to `25.1-SNAPSHOT`
 3. Add Vaadin pre-release repository (see README.md for configuration)
 
 **TypeScript modules** (`packages/ts/*`):
@@ -215,7 +215,7 @@ Key points:
 ### Key Java Dependencies
 - Spring Boot 4.0.0-M3
 - Jackson 3.0.0-rc9 (with Jackson 2 for OpenAPI)
-- Vaadin Flow 25.0-SNAPSHOT
+- Vaadin Flow 25.1-SNAPSHOT
 - Swagger Parser 2.1.15
 
 ### Key TypeScript Dependencies
