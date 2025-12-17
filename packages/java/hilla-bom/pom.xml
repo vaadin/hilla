@@ -13,7 +13,7 @@
     <artifactId>hilla-bom</artifactId>
     <packaging>pom</packaging>
     <name>Hilla Platform (Bill of Materials)</name>
-    <version>25.0-SNAPSHOT</version>
+    <version>25.1-SNAPSHOT</version>
     <description>Hilla Platform (Bill of Materials)</description>
     <url>https://vaadin.com/hilla</url>
 

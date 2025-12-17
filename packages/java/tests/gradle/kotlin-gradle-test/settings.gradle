@@ -32,7 +32,7 @@ def rootPom = new XmlSlurper().parse(rootPomFile)
 def hillaVersionValue = rootPom.version.text()
 def flowVersionValue = rootPom.properties.'flow.version'.text()
 def springBootVersionValue = rootPom.properties.'spring.boot.version'.text()
-def vaadinComponentsVersionValue = rootPom.properties.'vaadin.components.version'.text() ?: '25.0-SNAPSHOT'
+def vaadinComponentsVersionValue = rootPom.properties.'vaadin.components.version'.text() ?: '25.1-SNAPSHOT'
 
 if (!hillaVersionValue) {
     throw new GradleException("hilla.version not found in root pom.xml")

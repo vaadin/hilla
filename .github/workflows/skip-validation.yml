@@ -2,7 +2,7 @@ name: Validation
 
 on:
   push:
-    branches: [ main, '24.9', '24.8', '24.7', '24.6', '2.5', '1.5' ]
+    branches: [ main, '25.0', '24.9', '2.5', '1.5' ]
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -10,7 +10,7 @@ on:
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
   pull_request_target:
-    branches: [main, '24.9', '24.8', '24.7', '24.6', '2.5', '1.5']
+    branches: [main]
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
