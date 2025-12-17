@@ -131,14 +131,14 @@ public abstract class AbstractFullStackTest {
 
     // Standard Hilla generator plugins in the correct loading order
     private static final List<String> GENERATOR_PLUGINS = List.of(
-            "@vaadin/hilla-generator-plugin-backbone",
-            "@vaadin/hilla-generator-plugin-model",
             "@vaadin/hilla-generator-plugin-transfertypes",
-            "@vaadin/hilla-generator-plugin-subtypes",
-            "@vaadin/hilla-generator-plugin-signals",
-            "@vaadin/hilla-generator-plugin-push",
+            "@vaadin/hilla-generator-plugin-backbone",
             "@vaadin/hilla-generator-plugin-client",
-            "@vaadin/hilla-generator-plugin-barrel");
+            "@vaadin/hilla-generator-plugin-model",
+            "@vaadin/hilla-generator-plugin-barrel",
+            "@vaadin/hilla-generator-plugin-push",
+            "@vaadin/hilla-generator-plugin-signals",
+            "@vaadin/hilla-generator-plugin-subtypes");
 
     /**
      * Execute the full stack: Java → OpenAPI → TypeScript
