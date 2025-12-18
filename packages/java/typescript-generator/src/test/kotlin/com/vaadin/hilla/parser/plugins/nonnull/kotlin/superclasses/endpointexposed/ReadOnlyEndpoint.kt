@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.endpointexposed
 
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.EndpointExposed
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.javaendpointexposed.NonEndpoint
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.javaendpointexposed.NonEndpointImpl
 

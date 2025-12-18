@@ -1,7 +1,7 @@
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic
 
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.Endpoint
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic.data.*
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import java.time.LocalDate

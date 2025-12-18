@@ -1,21 +1,21 @@
-package com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.endpointexposed
+package com.vaadin.hilla.parser.plugins.nonnull.kotlin.basic
 
 import com.vaadin.hilla.parser.core.Parser
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin
 import com.vaadin.hilla.parser.plugins.model.ModelPlugin
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.Endpoint
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.EndpointExposed
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.helpers.TestHelper
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed
 import org.junit.jupiter.api.Test
 
-class EndpointExposedTest {
+class SimpleEndpointTest {
+
     private val helper: TestHelper = TestHelper(javaClass)
 
     @Test
-    fun should_correctlyResolveNullability_of_methodsFromHierarchyOfEndpointExposed() {
-
-        val kotlinNullabilityPlugin = KotlinNullabilityPlugin()
+    fun should_takeKotlinNullabilityIntoAccount() {
+        val plugin = KotlinNullabilityPlugin()
 
         val openAPI = Parser()
             .classPath(setOf(helper.targetDir.toString()))
@@ -23,8 +23,8 @@ class EndpointExposedTest {
             .endpointExposedAnnotations(listOf(EndpointExposed::class.java))
             .addPlugin(BackbonePlugin())
             .addPlugin(ModelPlugin())
-            .addPlugin(kotlinNullabilityPlugin)
-            .execute(listOf(PersonEndpoint::class.java))
+            .addPlugin(plugin)
+            .execute(listOf(SimpleEndpoint::class.java))
 
         helper.executeParserWithConfig(openAPI)
     }
