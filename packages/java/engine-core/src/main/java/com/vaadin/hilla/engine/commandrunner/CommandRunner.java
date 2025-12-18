@@ -1,16 +1,39 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.hilla.engine.commandrunner;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 /**
  * A generic command runner which throws a {@link CommandRunnerException}.
@@ -170,31 +193,41 @@ public interface CommandRunner {
 
         var exitCode = 0;
 
+        var stdOutException = new AtomicReference<IOException>();
+        var stdOutHandler = createInputStreamHandler(stdOut, stdOutException);
+
+        var stdErrException = new AtomicReference<IOException>();
+        var stdErrHandler = createInputStreamHandler(stdErr, stdErrException);
+
         try {
             var processBuilder = createProcessBuilder(commandWithArgs);
 
             var process = processBuilder.start();
 
+            var stdOutThread = new Thread(
+                    () -> stdOutHandler.accept(process.getInputStream()));
+            stdOutThread.setDaemon(true);
+            stdOutThread.start();
+
+            var stdErrThread = new Thread(
+                    () -> stdErrHandler.accept(process.getErrorStream()));
+            stdErrThread.setDaemon(true);
+            stdErrThread.start();
+
             if (stdIn != null) {
-                // Allow the caller to write to the command's standard input
-                try (var outputStream = process.getOutputStream()) {
-                    stdIn.accept(outputStream);
-                }
-            }
-
-            if (stdOut != null) {
-                try (var inputStream = process.getInputStream()) {
-                    stdOut.accept(inputStream);
-                }
-            }
-
-            if (stdErr != null) {
-                try (var inputStream = process.getErrorStream()) {
-                    stdErr.accept(inputStream);
-                }
+                stdIn.accept(process.getOutputStream());
             }
 
             exitCode = process.waitFor();
+
+            stdOutThread.join();
+            if (stdOutException.get() != null) {
+                throw stdOutException.get();
+            }
+            stdErrThread.join();
+            if (stdErrException.get() != null) {
+                throw stdErrException.get();
+            }
         } catch (IOException | InterruptedException e) {
             // Tries to figure out if the command is not found. This is not a
             // 100% reliable way to do it, but an exception will be thrown
@@ -213,6 +246,23 @@ public interface CommandRunner {
             throw new CommandRunnerException("Command failed with exit code "
                     + exitCode + ": " + executable);
         }
+    }
+
+    private Consumer<InputStream> createInputStreamHandler(
+            Consumer<InputStream> inputStreamConsumer,
+            AtomicReference<IOException> ioException) {
+        return (inputStream -> {
+            try {
+                if (inputStreamConsumer != null) {
+                    inputStreamConsumer.accept(inputStream);
+                } else {
+                    new BufferedReader(new InputStreamReader(inputStream))
+                            .transferTo(OutputStreamWriter.nullWriter());
+                }
+            } catch (IOException e) {
+                ioException.set(e);
+            }
+        });
     }
 
     /**
@@ -284,4 +334,10 @@ public interface CommandRunner {
     default Map<String, String> environment() {
         return Map.of("JAVA_HOME", getCurrentJavaProcessJavaHome());
     }
+    // end of interface (comment added to help formatter)
+    }
+
+    // used internally to pair consumers with their streams
+record Pipe<T extends Closeable>(Consumer<T> consumer, T stream)
+    {
 }
