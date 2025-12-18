@@ -1,29 +1,19 @@
-package com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.javaendpointexposed
+package com.vaadin.hilla.parser.plugins.nonnull.kotlin.superclasses.endpointexposed
 
 import com.vaadin.hilla.parser.core.Parser
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin
 import com.vaadin.hilla.parser.plugins.model.ModelPlugin
-import com.vaadin.hilla.parser.plugins.nonnull.AnnotationMatcher
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.Endpoint
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.EndpointExposed
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.helpers.TestHelper
 import org.junit.jupiter.api.Test
 
-class JavaEndpointExposedTest {
+class EndpointExposedTest {
     private val helper: TestHelper = TestHelper(javaClass)
 
     @Test
-    fun should_respectNullabilityAnnotations_of_methodsFromJavaEndpointExposed() {
-
-        val nullabilityPlugin = NonnullPlugin()
-        nullabilityPlugin.setConfiguration(
-            NonnullPluginConfig(
-                setOf(AnnotationMatcher(Nonnull::class.java.getName(), false, 0)),
-            null)
-        );
+    fun should_correctlyResolveNullability_of_methodsFromHierarchyOfEndpointExposed() {
 
         val kotlinNullabilityPlugin = KotlinNullabilityPlugin()
 
@@ -34,7 +24,6 @@ class JavaEndpointExposedTest {
             .addPlugin(BackbonePlugin())
             .addPlugin(ModelPlugin())
             .addPlugin(kotlinNullabilityPlugin)
-            .addPlugin(nullabilityPlugin)
             .execute(listOf(PersonEndpoint::class.java))
 
         helper.executeParserWithConfig(openAPI)

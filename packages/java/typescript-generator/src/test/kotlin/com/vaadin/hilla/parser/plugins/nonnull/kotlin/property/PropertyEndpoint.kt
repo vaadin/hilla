@@ -1,6 +1,6 @@
 package com.vaadin.hilla.parser.plugins.nonnull.kotlin.property
 
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.Endpoint
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint
 
 @Endpoint
 class PropertyEndpoint {
