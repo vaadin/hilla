@@ -4,9 +4,9 @@ import com.vaadin.hilla.parser.core.Parser
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin
 import com.vaadin.hilla.parser.plugins.model.ModelPlugin
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.Endpoint
-import com.vaadin.hilla.parser.plugins.nonnull.kotlin.annotation.EndpointExposed
 import com.vaadin.hilla.parser.plugins.nonnull.kotlin.helpers.TestHelper
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint
+import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed
 import org.junit.jupiter.api.Test
 
 class ChildEndpointTest {
