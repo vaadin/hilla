@@ -335,8 +335,9 @@ public interface CommandRunner {
         return Map.of("JAVA_HOME", getCurrentJavaProcessJavaHome());
     }
     // end of interface (comment added to help formatter)
-}
+    }
 
-// used internally to pair consumers with their streams
-record Pipe<T extends Closeable>(Consumer<T> consumer, T stream) {
+    // used internally to pair consumers with their streams
+record Pipe<T extends Closeable>(Consumer<T> consumer, T stream)
+    {
 }
