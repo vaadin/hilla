@@ -42,8 +42,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.0.0",
-    "@vaadin/icon": "25.0.0",
-    "@vaadin/icons": "25.0.0",
+    "@vaadin/icon": "25.0.1",
+    "@vaadin/icons": "25.0.1",
     "@vaadin/input-container": "25.0.0",
     "@vaadin/integer-field": "25.0.0",
     "@vaadin/item": "25.0.0",
@@ -75,7 +75,7 @@
     "@vaadin/text-area": "25.0.0",
     "@vaadin/text-field": "25.0.0",
     "@vaadin/time-picker": "25.0.0",
-    "@vaadin/tooltip": "25.0.0",
+    "@vaadin/tooltip": "25.0.1",
     "@vaadin/upload": "25.0.0",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.0.0",
@@ -150,8 +150,8 @@
       "@vaadin/hilla-frontend": "25.0.0",
       "@vaadin/hilla-lit-form": "25.0.0",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.0.0",
-      "@vaadin/icons": "25.0.0",
+      "@vaadin/icon": "25.0.1",
+      "@vaadin/icons": "25.0.1",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -183,7 +183,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.0.0",
+      "@vaadin/tooltip": "25.0.1",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.0.0",
@@ -222,7 +222,7 @@
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0"
     },
-    "hash": "11c17bb98e4acb8147dd6f54b912e9edbbd1bb03ab69230eea1055de1a2ed745"
+    "hash": "44e1feae43822b309cb4489ca5543a66889f45a9b77488931a7ad21f41380413"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
