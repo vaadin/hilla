@@ -470,6 +470,8 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
 
   removeSelf(): void {
     if (this.#isArrayItem()) {
+      // Removing item in a read-only array involves computing a new array with
+      // the current item filtered out by numeric index obtained from `$key`.
       const newValue = (this.parent.value ?? []).filter((_, i) => i !== this.model[$key]);
       const newDefaultValue = (this.parent.defaultValue ?? []).filter((_, i) => i !== this.model[$key]);
       this.parent.#setValueState(newValue, newDefaultValue);
