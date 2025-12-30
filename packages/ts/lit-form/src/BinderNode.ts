@@ -168,6 +168,12 @@ function createEmptyValue<M extends ProvisionalModel>(model: M) {
   return model[$defaultValue];
 }
 
+function createEmptyArrayItemValue<M extends ArrayModel | BinderArrayModel>(model: M): ArrayItemModel<M> {
+  return (
+    model instanceof BinderArrayModel ? model[_createEmptyItemValue]() : model[$itemModel][$defaultValue]
+  ) as ArrayItemModel<M>;
+}
+
 function getErrorPropertyName(valueError: ValueError): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
 }
@@ -428,11 +434,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
    */
   appendItem(item?: Value<ArrayItemModel<M>>): void {
     if (this.#isArray()) {
-      const itemValueOrEmptyValue =
-        item ??
-        (this.model instanceof BinderArrayModel
-          ? this.model[_createEmptyItemValue]()
-          : this.model[$itemModel][$defaultValue]);
+      const itemValueOrEmptyValue = item ?? createEmptyArrayItemValue(this.model);
       const newValue = [...(this.value ?? []), itemValueOrEmptyValue];
       const newDefaultValue = [...(this.defaultValue ?? []), itemValueOrEmptyValue];
       this.#setValueState(newValue, newDefaultValue);
@@ -457,11 +459,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
 
   prependItem(item?: Value<ArrayItemModel<M>>): void {
     if (this.#isArray()) {
-      const itemValueOrEmptyValue =
-        item ??
-        (this.model instanceof BinderArrayModel
-          ? this.model[_createEmptyItemValue]()
-          : this.model[$itemModel][$defaultValue]);
+      const itemValueOrEmptyValue = item ?? createEmptyArrayItemValue(this.model);
       const newValue = [itemValueOrEmptyValue, ...(this.value ?? [])];
       const newDefaultValue = [itemValueOrEmptyValue, ...(this.defaultValue ?? [])];
       this.#setValueState(newValue, newDefaultValue);
