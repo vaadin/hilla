@@ -441,7 +441,7 @@ describe('@vaadin/hilla-lit-form', () => {
         await litHierarchyView.updateComplete;
         const anotherLevel3Models = [...m.items(binder.model.anotherLevel2)];
         expect(anotherLevel3Models).to.have.lengthOf(1);
-        expect(binder.for(anotherLevel3Models[0]).name).to.be('anotherLevel2.0');
+        expect(binder.for(anotherLevel3Models[0]).name).to.equal('anotherLevel2.0');
         expect(binder.for(anotherLevel3Models[0]).required).to.be.false;
       });
 
