@@ -428,7 +428,7 @@ describe('@vaadin/hilla-lit-form', () => {
         const { binder } = litHierarchyView;
         await litHierarchyView.updateComplete;
         const level3Models = [...m.items(binder.model.level2)];
-        assert.lengthOf(level3Models, 1);
+        expect(level3Models).to.have.lengthOf(1);
         assert.isDefined(binder.for(level3Models[0].level3.level4.name4).parent?.defaultValue);
         // Automatic node initialization should preserve pristine state
         assert.isFalse(binder.dirty);
@@ -440,9 +440,9 @@ describe('@vaadin/hilla-lit-form', () => {
         binder.for(binder.model.anotherLevel2).appendItem();
         await litHierarchyView.updateComplete;
         const anotherLevel3Models = [...m.items(binder.model.anotherLevel2)];
-        assert.lengthOf(anotherLevel3Models, 1);
-        assert.equal(binder.for(anotherLevel3Models[0]).name, 'anotherLevel2.0');
-        assert.isFalse(binder.for(anotherLevel3Models[0]).required);
+        expect(anotherLevel3Models).to.have.lengthOf(1);
+        expect(binder.for(anotherLevel3Models[0]).name).to.be('anotherLevel2.0');
+        expect(binder.for(anotherLevel3Models[0]).required).to.be.false;
       });
 
       it('should clear with optional array', async () => {
