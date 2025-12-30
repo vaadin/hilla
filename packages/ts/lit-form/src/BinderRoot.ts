@@ -69,7 +69,7 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
   constructor(modelClass: ProvisionalModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
     super(
       (modelClass instanceof Model
-        ? m.attach(modelClass, () => this as Target<Value<M>>)
+        ? m.attach(modelClass as M & Model, () => this as Target<Value<M>>)
         : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>)) as M,
     );
     if (!(modelClass instanceof Model)) {

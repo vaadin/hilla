@@ -4,4 +4,4 @@
 export interface StringConverter<T> {
   fromString(this: void, value: string): T | undefined;
   toString(this: void, value: T | undefined): string;
-};
+}

@@ -1,5 +1,11 @@
 import { EndpointError } from '@vaadin/hilla-frontend';
-import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@vaadin/hilla-lit-form';
+import {
+  type AbstractModel,
+  type DetachedModelConstructor,
+  type ProvisionalModelConstructor,
+  ValidationError,
+  type Value,
+} from '@vaadin/hilla-lit-form';
 import { useForm, type UseFormResult } from '@vaadin/hilla-react-form';
 import { Button } from '@vaadin/react-components/Button.js';
 import { ConfirmDialog } from '@vaadin/react-components/ConfirmDialog';
@@ -276,7 +282,7 @@ export function AutoForm<M extends AbstractModel>({
   onDeleteSuccess,
   onDeleteError,
 }: AutoFormProps<M>): JSX.Element {
-  const form = useForm(model, {
+  const form = useForm(model as ProvisionalModelConstructor<M>, {
     onSubmit: async (formItem) => service.save(formItem),
   });
   const formErrorRef = useRef<HTMLDivElement>(null);
