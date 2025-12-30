@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [ main, '24.9', '24.8', '24.7', '24.6', '2.5', '1.5' ]
+    branches: [main, '25.0', '24.9', '2.5', '1.5']
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -15,6 +15,7 @@ on:
       - 'scripts/generator/templates/**/*.md'
   pull_request_target:
     types: [opened, synchronize, reopened]
+    branches: [main]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -25,32 +26,23 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.head_ref }} || ${{ github.ref_name }}
+  group: ${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-  HEAD_REF: ${{ github.head_ref }}
-  REF_NAME: ${{ github.ref_name }}
-  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  _HEAD_REF: ${{ github.head_ref }}
+  _REF_NAME: ${{ github.ref_name }}
+  _HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 jobs:
   init:
     name: Build Java and TypeScript for other tasks
     runs-on: ubuntu-latest
+    environment: ${{ github.event.pull_request.head.repo.fork && 'pr-tests' || '' }}
     timeout-minutes: 5
     env:
       NX_SKIP_NX_CACHE: true
 
     steps:
-      - uses: actions-cool/check-user-permission@main
-        id: checkUser
-        with:
-          username: ${{github.triggering_actor}}
-          require: 'write'
-      - name: Fail on external workflow triggering
-        if: ${{ steps.checkUser.outputs.require-result != 'true' && github.actor != 'dependabot[bot]' }}
-        run: |
-          echo "🚫 **${{ github.actor }}** is an external contributor, a **${{ github.repository }}** team member has to review this changes and re-run this build" \
-            | tee -a $GITHUB_STEP_SUMMARY && exit 1
       - name: Check secrets
         run: |
           [ -z "${{secrets.TB_LICENSE}}" ] \
@@ -59,7 +51,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{env.HEAD_SHA}}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -99,7 +91,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{env.HEAD_SHA}}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -126,7 +118,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{env.HEAD_SHA}}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -167,7 +159,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{env.HEAD_SHA}}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -218,7 +210,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{env.HEAD_SHA}}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
@@ -275,7 +267,7 @@ jobs:
       - name: Checkout Project Code
         uses: actions/checkout@v4
         with:
-          ref: ${{env.HEAD_SHA}}
+          ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup

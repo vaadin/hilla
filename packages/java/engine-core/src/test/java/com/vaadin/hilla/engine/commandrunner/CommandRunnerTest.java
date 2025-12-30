@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -315,7 +314,6 @@ public class CommandRunnerTest {
     }
 
     @Test
-    @Disabled("Does not work on mac")
     void processInputOutput_isHandledCorrectly() throws CommandRunnerException {
         String input = "Hello, CommandRunner!"
                 + (CommandRunner.IS_WINDOWS ? "\r\n" : "\n");
@@ -324,13 +322,13 @@ public class CommandRunnerTest {
             @Override
             public List<String> executables() {
                 return CommandRunner.IS_WINDOWS ? List.of("cmd.exe")
-                        : List.of("cat");
+                        : List.of("/bin/bash");
             }
 
             @Override
             public String[] arguments() {
                 return CommandRunner.IS_WINDOWS ? new String[] { "/c", "more" }
-                        : new String[] {};
+                        : new String[] { "-c", "\"cat\"" };
             }
 
             @Override
@@ -343,6 +341,7 @@ public class CommandRunnerTest {
             try {
                 os.write(input.getBytes(StandardCharsets.UTF_8));
                 os.flush();
+                os.close();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

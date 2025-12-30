@@ -21,6 +21,10 @@ function cleanupRouteMeta(route: Writable<RouteMeta>): void {
     delete route.layout;
   }
 
+  if (route.flowLayout) {
+    delete route.flowLayout;
+  }
+
   (route.children as RouteMeta[] | undefined)
     ?.sort(({ path: a }, { path: b }) => collator.compare(a, b))
     .forEach(cleanupRouteMeta);

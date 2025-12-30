@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.server.ExecutionFailedException;
+import com.vaadin.flow.server.frontend.ExecutionFailedException;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 class AbstractTaskEndpointGeneratorTest extends EndpointsTaskTest {

@@ -59,12 +59,11 @@ export default class SignalProcessor {
         if (isFunctionDeclaration(node)) {
           // Check if the function is a signal method.
           if (node.name && this.#methods.has(node.name.text)) {
-            // Get the signal class ID that was already imported in
-            // TransferTypes plugin.
-            const signalId = imports.named.getIdentifier(
-              HILLA_REACT_SIGNALS,
-              simplifyFullyQualifiedName(this.#methods.get(node.name.text)!),
-            )!;
+            // Get or add the signal class identifier for runtime use.
+            const signalClassName = simplifyFullyQualifiedName(this.#methods.get(node.name.text)!);
+            const signalId =
+              imports.named.getIdentifier(HILLA_REACT_SIGNALS, signalClassName) ??
+              imports.named.add(HILLA_REACT_SIGNALS, signalClassName);
 
             // Remove the `init` parameter.
             const params = node.parameters.filter(

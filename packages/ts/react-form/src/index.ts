@@ -76,7 +76,7 @@ export type UseFormResult<M extends ProvisionalModel> = Omit<UseFormPartResult<M
     submitting: boolean;
     setDefaultValue(value: Value<M>): void;
     setValue(value: Value<M>): void;
-    submit(): Promise<Value<M> | undefined | void>;
+    submit(): Promise<Value<M> | void>;
     reset(): void;
     clear(): void;
     read(value: Value<M> | null | undefined): void;
