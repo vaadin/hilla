@@ -168,7 +168,7 @@ describe('@vaadin/hilla-lit-form', () => {
         .validate()
         .then((errors) => {
           expect(errors.map((e) => e.validator.constructor.name).sort((a, b) => a.localeCompare(b, 'en'))).to.eql([
-            'Required',
+            'NotBlank',
             'Size',
           ]);
         }));
