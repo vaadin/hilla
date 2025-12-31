@@ -1,5 +1,6 @@
 import chaiLike from 'chai-like';
 import { beforeEach, chai, describe, expect, it } from 'vitest';
+import { ConstraintBuilder } from '../src/ConstraintBuilder.js';
 import m, {
   $defaultValue,
   $enum,
@@ -10,6 +11,7 @@ import m, {
   $name,
   $optional,
   $owner,
+  $constraints,
   ArrayModel,
   BooleanModel,
   type EnumModel,
@@ -19,11 +21,20 @@ import m, {
   PrimitiveModel,
   StringModel,
   type Target,
+  Null,
+  NotNull,
+  NotBlank,
+  NotEmpty,
+  Min,
+  Max,
+  Size,
+  type Value,
+  type Constraint,
 } from '../src/index.js';
 
 chai.use(chaiLike);
 
-describe('@vaadin/hilla-form-models', () => {
+describe('@vaadin/hilla-models', () => {
   enum Role {
     Guest = 'guest',
     User = 'user',
@@ -110,19 +121,68 @@ describe('@vaadin/hilla-form-models', () => {
     );
   });
 
-  it('should allow self-reference', () => {
+  it('should allow self-reference with optional`', () => {
     interface Employee {
       supervisor?: Employee;
     }
 
-    const EmployeeModel = m
-      .object<Employee>('Employee')
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      .property('supervisor', m.optional)
-      .build();
+    const EmployeeModel = m.object<Employee>('Employee').property('supervisor', m.optional(m.self)).build();
 
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
+    expect(EmployeeModel.supervisor.supervisor.toString()).to.be.equal(
+      '[[[:detached: / model] Employee / supervisor?] Employee / supervisor?] Employee',
+    );
+
+    // Type assertion to verify that the resulting type is optional.
+    const optionalEmployee: Value<typeof EmployeeModel.supervisor> = undefined;
+    expect(optionalEmployee).to.be.undefined;
+  });
+
+  it('should allow self-reference with array', () => {
+    interface Employee {
+      colleagues: Employee[];
+    }
+
+    const EmployeeModel = m.object<Employee>('Employee').property('colleagues', m.array(m.self)).build();
+
+    expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: [] });
+    const items = Array.from(m.items(EmployeeModel.colleagues));
+    expect(items).to.be.an('array').with.lengthOf(0);
+  });
+
+  it('should allow self-reference with optional array', () => {
+    interface Employee {
+      colleagues?: Employee[];
+    }
+
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('colleagues', m.optional(m.array(m.self)))
+      .build();
+    expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel.colleagues).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel.colleagues).to.have.property($itemModel).which.equals(EmployeeModel);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: undefined });
+  });
+
+  it('should allow self-reference with array of optional', () => {
+    interface Employee {
+      colleagues: Array<Employee | undefined>;
+    }
+
+    const EmployeeModel = m
+      .object<Employee>('Employee')
+      .property('colleagues', m.array(m.optional(m.self)))
+      .build();
+
+    expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
+    expect(EmployeeModel.colleagues[$itemModel].colleagues[$itemModel])
+      .to.have.property('colleagues')
+      .which.is.instanceof(ArrayModel);
+    expect(EmployeeModel.colleagues[$itemModel]).to.have.property($optional).which.equals(true);
+    expect(EmployeeModel).to.have.property($defaultValue).which.is.like({ colleagues: [] });
   });
 
   it('should allow array types', () => {
@@ -160,7 +220,7 @@ describe('@vaadin/hilla-form-models', () => {
 
   it('should has name prefixed with "@" if attached', () => {
     const target: Target<Named> = { value: { name: 'John Doe' } };
-    const AttachedNamedModel = m.attach(NamedModel, target);
+    const AttachedNamedModel = m.attach(NamedModel, () => target);
 
     expect(AttachedNamedModel).to.have.property($name, '@Named');
   });
@@ -193,7 +253,10 @@ describe('@vaadin/hilla-form-models', () => {
       name: string;
     }
 
-    const NamedWithMetaModel = m.object<NamedWithMeta>('NamedWithMeta').property('name', StringModel, { meta }).build();
+    const NamedWithMetaModel = m
+      .object<NamedWithMeta>('NamedWithMeta')
+      .property('name', m.meta(StringModel, meta))
+      .build();
 
     expect(NamedWithMetaModel.name).to.have.property($meta).which.is.equal(meta);
   });
@@ -203,14 +266,29 @@ describe('@vaadin/hilla-form-models', () => {
       name?: string;
     }
 
+    // Verify that a non-optional model is allowed
+    m.object<Optional>('Optional').property('name', StringModel).build();
+
     const OptionalModel = m.object<Optional>('Optional').property('name', m.optional(StringModel)).build();
+
+    // Verify that undefined is assignable
+    const _name: (typeof OptionalModel)['name'][typeof $defaultValue] = undefined;
 
     expect(OptionalModel).to.have.property('name').which.is.instanceof(StringModel);
     expect(OptionalModel.name).to.have.property($optional).which.is.true;
     expect(OptionalModel.name.toString()).to.be.equal('[[:detached: / model] Optional / name?] string');
+    expect(OptionalModel[$defaultValue]).to.be.like({});
   });
 
-  describe('m.value', () => {
+  it('should make an any model', () => {
+    type AnyKey = { readonly key: any };
+    const AnyKeyModel = m.object<AnyKey>('AnyKey').property('key', Model).build();
+
+    const anyKeyPropModel = AnyKeyModel.key;
+    expect(anyKeyPropModel.toString()).to.be.equal('[[:detached: / model] AnyKey / key] unknown');
+  });
+
+  describe('m.getValue', () => {
     let target: Target<Person>;
 
     beforeEach(() => {
@@ -232,7 +310,7 @@ describe('@vaadin/hilla-form-models', () => {
     });
 
     it('gets the default value if the model is detached', () => {
-      const personValue = m.value(PersonModel);
+      const personValue = m.getValue(PersonModel);
       expect(personValue).to.be.like({
         name: '',
         address: {
@@ -242,28 +320,28 @@ describe('@vaadin/hilla-form-models', () => {
         },
       });
 
-      expect(m.value(PersonModel.name)).to.be.string('');
-      expect(m.value(PersonModel.address)).to.be.like({
+      expect(m.getValue(PersonModel.name)).to.be.string('');
+      expect(m.getValue(PersonModel.address)).to.be.like({
         street: {
           name: '',
         },
       });
 
-      expect(m.value(PersonModel.address.street)).to.be.like({
+      expect(m.getValue(PersonModel.address.street)).to.be.like({
         name: '',
       });
 
-      expect(m.value(PersonModel.address.street.name)).to.be.string('');
+      expect(m.getValue(PersonModel.address.street.name)).to.be.string('');
     });
 
     it('returns the value from the attached target', () => {
-      const AttachedPersonModel = m.attach(PersonModel, target);
+      const AttachedPersonModel = m.attach(PersonModel, () => target);
 
       expect(AttachedPersonModel).to.have.property($owner).which.is.equal(target);
-      expect(m.value(AttachedPersonModel)).to.be.equal(target.value);
-      expect(m.value(AttachedPersonModel.name)).to.be.equal(target.value.name);
-      expect(m.value(AttachedPersonModel.address)).to.be.equal(target.value.address);
-      expect(m.value(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
+      expect(m.getValue(AttachedPersonModel)).to.be.equal(target.value);
+      expect(m.getValue(AttachedPersonModel.name)).to.be.equal(target.value.name);
+      expect(m.getValue(AttachedPersonModel.address)).to.be.equal(target.value.address);
+      expect(m.getValue(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
     });
   });
 
@@ -282,7 +360,7 @@ describe('@vaadin/hilla-form-models', () => {
 
     describe('NumberModel', () => {
       it('should have a default value', () => {
-        expect(NumberModel[$defaultValue]).to.be.equal(0);
+        expect(NumberModel[$defaultValue]).to.be.NaN;
       });
     });
 
@@ -305,7 +383,7 @@ describe('@vaadin/hilla-form-models', () => {
           ],
         };
 
-        const AttachedCommentsModel = m.attach(m.array(CommentModel), target);
+        const AttachedCommentsModel = m.attach(m.array(CommentModel), () => target);
 
         const items = [...m.items(AttachedCommentsModel)];
 
@@ -315,7 +393,7 @@ describe('@vaadin/hilla-form-models', () => {
           expect(items[i]).to.be.instanceof(CommentModel);
           expect(items[i]).to.have.property($owner).which.is.equal(AttachedCommentsModel);
           expect(items[i]).to.have.property($key).which.is.equal(i);
-          expect(m.value(items[i])).to.be.equal(target.value[i]);
+          expect(m.getValue(items[i])).to.be.equal(target.value[i]);
         }
       });
     });
@@ -324,6 +402,107 @@ describe('@vaadin/hilla-form-models', () => {
       it('should have a default value', () => {
         expect(ObjectModel[$defaultValue]).to.be.like({});
       });
+    });
+  });
+
+  describe('Validation constraints support', () => {
+    it('should support defining validators on properties', () => {
+      // Verify the type of the constraints, correct cases:
+      m.constrained(StringModel, NotNull({}));
+      m.constrained(StringModel, NotNull({ message: 'message' }));
+      m.constrained(StringModel, NotNull());
+      m.constrained(NumberModel, NotNull());
+      m.constrained(BooleanModel, NotNull());
+      m.constrained(m.array(StringModel), NotNull, NotEmpty, Size({ min: 1 }));
+      m.constrained(m.array(StringModel), NotNull, NotEmpty, Size({ max: 10 }));
+      m.constrained(m.optional(NamedModel), NotNull());
+      m.constrained(m.optional(NamedModel), NotNull({ message: 'message' }));
+
+      m.constrained(m.array(StringModel), Null());
+      m.constrained(m.optional(NamedModel), Null({ message: 'message' }));
+
+      // ..., error cases;
+      [
+        () => {
+          // @ts-expect-error TS2345 - Max constraint is not applicable to StringModel
+          m.constrained(StringModel, Max(10));
+        },
+        () => {
+          // @ts-expect-error TS2345 - NotBlank constraint is not applicable to NumberModel
+          m.constrained(NumberModel, NotBlank);
+        },
+        () => {
+          // @ts-expect-error TS2345 - Email constraint is not applicable to ArrayModel<StringModel>
+          m.constrained(m.array(StringModel), Email);
+        },
+      ].forEach((errorCase) => {
+        expect(errorCase).to.throw();
+      });
+
+      m.constrained(StringModel, NotEmpty());
+      m.constrained(NumberModel, Min({ value: 1 }));
+      m.constrained(NumberModel, Max(10));
+
+      // Verify the type of the constrained model, inner model
+      const constrainedNumbersModel = m.constrained(m.array(NumberModel), NotEmpty(), Size({ min: 3 }));
+      ((_numbersModel: ArrayModel<NumberModel>) => {})(constrainedNumbersModel);
+
+      const commentModelWithConstrainedText = m
+        .object<Comment>('Comment')
+        .property('title', StringModel)
+        .property('text', m.constrained(StringModel, NotBlank(), NotEmpty(), Size({ max: 140 })))
+        .build();
+      ((_commentModel: typeof CommentModel) => {})(commentModelWithConstrainedText);
+      const commentTextModelWithConstraints = commentModelWithConstrainedText.text;
+      expect(commentTextModelWithConstraints[$constraints]).to.be.an('array').with.lengthOf(3);
+      expect(m.isConstraint(commentTextModelWithConstraints[$constraints][0], NotBlank)).to.be.true;
+      expect(m.isConstraint(commentTextModelWithConstraints[$constraints][1], NotEmpty)).to.be.true;
+      expect(m.isConstraint(commentTextModelWithConstraints[$constraints][2], Size)).to.be.true;
+
+      // Verify that the original model is not modified
+      const _textStringModel: StringModel = CommentModel.text;
+      expect((CommentModel.text as Model<string, { readonly [$constraints]?: Constraint }>)[$constraints]).to.be.like(
+        [],
+      );
+
+      const [, , sizeConstraintDescriptor] = commentTextModelWithConstraints[$constraints];
+      ((_constraintType: Constraint) => {})(Size);
+      expect(m.isConstraint(sizeConstraintDescriptor, Size)).to.be.true;
+      if (m.isConstraint(sizeConstraintDescriptor, Size)) {
+        const {
+          name,
+          attributes: { min, max },
+        } = sizeConstraintDescriptor;
+        expect(name).to.be.equal('Size');
+        expect(min).to.be.equal(0);
+        expect(max).to.be.equal(140);
+      }
+    });
+
+    it('should support defining validators on array items', () => {
+      const personModelWithNonEmptyComments = m
+        .extend(PersonModel)
+        .object<Person>('Person')
+        .property('comments', m.constrained(m.array(CommentModel), NotEmpty()))
+        .build();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect((personModelWithNonEmptyComments as any)[$constraints]).to.be.like([]);
+      expect(personModelWithNonEmptyComments.comments[$constraints]).to.be.an('array').with.lengthOf(1);
+      expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], NotEmpty)).to.be.true;
+      expect(m.isConstraint(personModelWithNonEmptyComments.comments[$constraints][0], Size)).to.be.false;
+      expect(personModelWithNonEmptyComments.comments[$constraints][0].attributes).to.be.like({});
+      expect(personModelWithNonEmptyComments.comments[$constraints][0].name).to.be.equal('NotEmpty');
+    });
+
+    it('should support custom constraints', () => {
+      const HasTitle = new ConstraintBuilder().model(ObjectModel).name('HasTitle').build();
+      expect(HasTitle.name).to.equal('HasTitle');
+
+      const hasTitleConstrainedModel = m.constrained(CommentModel, HasTitle);
+      // Verify the type of the constrained model
+      ((_commentModel: typeof CommentModel) => {})(hasTitleConstrainedModel);
+      expect(hasTitleConstrainedModel[$constraints]).to.be.like([HasTitle]);
     });
   });
 });
