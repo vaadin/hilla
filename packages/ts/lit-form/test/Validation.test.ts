@@ -167,8 +167,10 @@ describe('@vaadin/hilla-lit-form', () => {
         .for(binder.model.customer)
         .validate()
         .then((errors) => {
-          // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
-          expect(errors.map((e) => e.validator.constructor.name).sort()).to.eql(['NotBlank', 'Size']);
+          expect(errors.map((e) => e.validator.constructor.name).sort((a, b) => a.localeCompare(b, 'en'))).to.eql([
+            'Required',
+            'Size',
+          ]);
         }));
 
     it('should run all nested validations per model', async () => {
