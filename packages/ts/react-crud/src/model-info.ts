@@ -1,15 +1,26 @@
 import {
-  BooleanModel,
-  NumberModel,
-  StringModel,
+  AbstractModel,
+  BooleanModel as BinderBooleanModel,
+  NumberModel as BinderNumberModel,
+  StringModel as BinderStringModel,
   _meta,
   createDetachedModel,
-  type AbstractModel,
   type DetachedModelConstructor,
-  type ModelMetadata,
-  EnumModel,
-  ObjectModel,
+  EnumModel as BinderEnumModel,
+  ObjectModel as BinderObjectModel,
+  type ProvisionalModel,
 } from '@vaadin/hilla-lit-form';
+import {
+  type Annotation,
+  type AnnotationValue,
+  BooleanModel,
+  EnumModel,
+  Model,
+  type ModelMetadata,
+  NumberModel,
+  ObjectModel,
+  StringModel,
+} from '@vaadin/hilla-models';
 
 export type PropertyType =
   | 'boolean'
@@ -46,24 +57,24 @@ const javaTypeMap: Record<string, PropertyType> = {
   'java.sql.Date': 'datetime',
 };
 
-function determinePropertyType(model: AbstractModel): PropertyType {
+function determinePropertyType(model: ProvisionalModel): PropertyType {
   // Try detecting by Java type
-  const { javaType } = model[_meta];
+  const javaType = model instanceof AbstractModel ? model[_meta].javaType : (model as Model)[_meta]?.jvmType;
   const propertyType = javaType ? javaTypeMap[javaType] : undefined;
   if (propertyType) {
     return propertyType;
   }
 
   // Otherwise detect by model instance
-  if (model instanceof StringModel) {
+  if (model instanceof BinderStringModel || model === StringModel || model instanceof StringModel) {
     return 'string';
-  } else if (model instanceof NumberModel) {
+  } else if (model instanceof BinderNumberModel || model === NumberModel || model instanceof NumberModel) {
     return 'decimal';
-  } else if (model instanceof BooleanModel) {
+  } else if (model instanceof BinderBooleanModel || model === BooleanModel || model instanceof BooleanModel) {
     return 'boolean';
-  } else if (model instanceof EnumModel) {
+  } else if (model instanceof BinderEnumModel || model instanceof EnumModel || model instanceof EnumModel) {
     return 'enum';
-  } else if (model instanceof ObjectModel) {
+  } else if (model instanceof BinderObjectModel || model === ObjectModel || model instanceof ObjectModel) {
     return 'object';
   }
 
@@ -75,11 +86,11 @@ export interface PropertyInfo {
   humanReadableName: string;
   type: PropertyType;
   meta: ModelMetadata;
-  model: AbstractModel;
+  model: ProvisionalModel;
 }
 
 export function hasAnnotation(meta: ModelMetadata, annotationName: string): boolean {
-  return meta.annotations?.some((annotation) => annotation.name === annotationName) ?? false;
+  return meta.annotations?.some((annotation) => annotation.jvmType === annotationName) ?? false;
 }
 
 // This is from vaadin-grid-column.js, should be used from there maybe. At least we must be 100% sure to match grid and fields
@@ -92,24 +103,37 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-const getPropertyNames = (model: DetachedModelConstructor<AbstractModel>): string[] => {
+const getPropertyNames = (model: ProvisionalModel): string[] => {
   const propertyNames: string[] = [];
 
-  for (let proto = model; proto !== ObjectModel; proto = Object.getPrototypeOf(proto)) {
-    // parent properties are added at the beginning
-    propertyNames.unshift(...Object.keys(Object.getOwnPropertyDescriptors(proto.prototype)).filter((p) => p !== 'new'));
+  if (model instanceof AbstractModel) {
+    const modelClass = model.constructor as unknown as DetachedModelConstructor<AbstractModel>;
+    for (let proto = modelClass; proto !== BinderObjectModel; proto = Object.getPrototypeOf(proto)) {
+      // skip `constructor`, take only own properties with getters or value
+      const descriptorEntries = Object.entries(Object.getOwnPropertyDescriptors(proto.prototype)).filter(
+        ([_name, propertyDescriptor]) =>
+          Object.hasOwn(propertyDescriptor, 'get') || !(propertyDescriptor.value instanceof Function),
+      );
+      // parent properties are added at the beginning
+      propertyNames.unshift(...descriptorEntries.map(([name]) => name));
+    }
+  } else {
+    for (let proto = model; proto !== ObjectModel; proto = Object.getPrototypeOf(proto)) {
+      propertyNames.unshift(...Object.getOwnPropertyNames(proto));
+    }
   }
 
   return propertyNames;
 };
 
 export class ModelInfo {
-  private readonly modelInstance: AbstractModel;
+  private readonly modelInstance: ProvisionalModel;
 
   readonly idProperty?: PropertyInfo;
 
-  constructor(model: DetachedModelConstructor<AbstractModel>, idPropertyName?: string) {
-    this.modelInstance = createDetachedModel(model);
+  constructor(model: DetachedModelConstructor<AbstractModel> | Model, idPropertyName?: string) {
+    const isModel = model === Model || model instanceof Model;
+    this.modelInstance = isModel ? model : createDetachedModel(model as DetachedModelConstructor<AbstractModel>);
 
     // Try to find id property
     this.idProperty = ModelInfo.resolveIdProperty(this, idPropertyName);
@@ -131,11 +155,11 @@ export class ModelInfo {
     return idProperty;
   }
 
-  private static resolvePropertyModel(modelInstance: AbstractModel, path: string): AbstractModel | undefined {
+  private static resolvePropertyModel(modelInstance: ProvisionalModel, path: string): ProvisionalModel | undefined {
     const parts = path.split('.');
-    let currentModel: AbstractModel | undefined = modelInstance;
+    let currentModel: ProvisionalModel | undefined = modelInstance;
     for (const part of parts) {
-      if (!currentModel || !(currentModel instanceof ObjectModel)) {
+      if (!currentModel || !(currentModel instanceof BinderObjectModel || currentModel instanceof ObjectModel)) {
         return undefined;
       }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -149,7 +173,7 @@ export class ModelInfo {
     if (!model) {
       return [];
     }
-    return getPropertyNames(model.constructor as any)
+    return getPropertyNames(model)
       .map((name) => {
         const effectivePath = path ? `${path}.${name}` : name;
         return this.getProperty(effectivePath);
@@ -159,14 +183,26 @@ export class ModelInfo {
 
   getProperty(path: string): PropertyInfo | undefined {
     const propertyModel = ModelInfo.resolvePropertyModel(this.modelInstance, path);
-    if (!propertyModel?.[_meta]) {
+    if (!propertyModel) {
       return undefined;
     }
 
     const pathParts = path.split('.');
     const name = pathParts[pathParts.length - 1];
 
-    const meta = propertyModel[_meta];
+    const meta =
+      propertyModel instanceof AbstractModel
+        ? ({
+            jvmType: propertyModel[_meta].javaType,
+            annotations: propertyModel[_meta].annotations?.map(
+              (annotation) =>
+                ({
+                  jvmType: annotation.name,
+                  attributes: annotation.attributes as Record<string, AnnotationValue>,
+                }) satisfies Annotation,
+            ),
+          } satisfies ModelMetadata)
+        : (propertyModel[_meta] ?? {});
     const humanReadableName = _generateHeader(name);
     const type = determinePropertyType(propertyModel);
 

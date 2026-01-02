@@ -2,12 +2,11 @@
 import {
   _fromString,
   _validity,
-  type AbstractModel,
+  type ProvisionalModel,
   type BinderConfiguration,
   type BinderNode,
   BinderRoot,
   CHANGED,
-  type DetachedModelConstructor,
   type FieldStrategy,
   getBinderNode,
   getDefaultFieldStrategy,
@@ -16,9 +15,12 @@ import {
   type Validator,
   type Value,
   type ValueError,
-  type ArrayModel,
+  type ArrayModel as BinderArrayModel,
   type ArrayItemModel,
+  getStringConverter,
+  type ProvisionalModelConstructor,
 } from '@vaadin/hilla-lit-form';
+import { type ArrayModel, Model } from '@vaadin/hilla-models';
 import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Writable } from 'type-fest';
 
@@ -46,9 +48,9 @@ export type FieldDirectiveResult = Readonly<{
   ref(element: HTMLElement | null): void;
 }>;
 
-export type FieldDirective = (model: AbstractModel) => FieldDirectiveResult;
+export type FieldDirective = (model: ProvisionalModel) => FieldDirectiveResult;
 
-export type UseFormPartResult<M extends AbstractModel> = Readonly<{
+export type UseFormPartResult<M extends ProvisionalModel> = Readonly<{
   defaultValue?: Value<M>;
   dirty: boolean;
   errors: readonly ValueError[];
@@ -68,7 +70,7 @@ export type UseFormPartResult<M extends AbstractModel> = Readonly<{
   validate(): Promise<readonly ValueError[]>;
 }>;
 
-export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
+export type UseFormResult<M extends ProvisionalModel> = Omit<UseFormPartResult<M>, 'setValue' | 'value'> &
   Readonly<{
     value: Value<M>;
     submitting: boolean;
@@ -81,7 +83,7 @@ export type UseFormResult<M extends AbstractModel> = Omit<UseFormPartResult<M>, 
     update(): void;
   }>;
 
-export type UseFormArrayPartResult<M extends ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
+export type UseFormArrayPartResult<M extends BinderArrayModel | ArrayModel> = Omit<UseFormPartResult<M>, 'field'> & {
   items: ReadonlyArray<ArrayItemModel<M>>;
 };
 
@@ -97,11 +99,27 @@ type FieldState<T = unknown> = {
   ref(element: HTMLElement | null): void;
 };
 
-function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
-  return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
+function convertFieldValue<T extends ProvisionalModel>(model: T, fieldValue: unknown) {
+  if (typeof fieldValue !== 'string') {
+    return fieldValue;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  const stringConverter = getStringConverter(model);
+  if (stringConverter) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    return stringConverter.fromString(fieldValue);
+  }
+
+  if (hasFromString(model)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return model[_fromString](fieldValue);
+  }
+
+  return fieldValue;
 }
 
-function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
+function getFormPart<M extends ProvisionalModel>(node: BinderNode<M>): Omit<UseFormPartResult<M>, 'field'> {
   return {
     addValidator: node.addValidator.bind(node),
     get defaultValue() {
@@ -132,13 +150,13 @@ function getFormPart<M extends AbstractModel>(node: BinderNode<M>): Omit<UseForm
   };
 }
 
-function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective {
+function useFields<M extends ProvisionalModel>(node: BinderNode<M>): FieldDirective {
   const update = useUpdate();
 
   return useMemo(() => {
-    const registry = new WeakMap<AbstractModel, FieldState>();
+    const registry = new WeakMap<ProvisionalModel, FieldState>();
 
-    return ((model: AbstractModel) => {
+    return ((model: ProvisionalModel) => {
       isRendering = true;
       const n = getBinderNode(model);
 
@@ -232,15 +250,15 @@ function useFields<M extends AbstractModel>(node: BinderNode<M>): FieldDirective
   }, [node]);
 }
 
-export function useForm<M extends AbstractModel>(
-  Model: DetachedModelConstructor<M>,
+export function useForm<M extends ProvisionalModel>(
+  modelClass: ProvisionalModelConstructor<M>,
   config?: BinderConfiguration<Value<M>>,
 ): UseFormResult<M> {
   const configRef = useRef<Writable<BinderConfiguration<Value<M>>>>({});
   configRef.current.onSubmit = config?.onSubmit;
   configRef.current.onChange = config?.onChange;
   const update = useUpdate();
-  const binder = useMemo(() => new BinderRoot(Model, configRef.current), [Model]);
+  const binder = useMemo(() => new BinderRoot(modelClass, configRef.current), [Model]);
   const field = useFields(binder);
   const clear = binder.clear.bind(binder);
 
@@ -269,7 +287,7 @@ export function useForm<M extends AbstractModel>(
   };
 }
 
-export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResult<M> {
+export function useFormPart<M extends ProvisionalModel>(model: M): UseFormPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
   const field = useFields(binderNode);
@@ -288,7 +306,7 @@ export function useFormPart<M extends AbstractModel>(model: M): UseFormPartResul
  * @param model - The array model to access
  * @returns The array model part of the form
  */
-export function useFormArrayPart<M extends ArrayModel>(model: M): UseFormArrayPartResult<M> {
+export function useFormArrayPart<M extends BinderArrayModel>(model: M): UseFormArrayPartResult<M> {
   isRendering = true;
   const binderNode = getBinderNode(model);
   isRendering = false;

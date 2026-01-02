@@ -1,5 +1,13 @@
 import { EndpointError } from '@vaadin/hilla-frontend';
-import { type AbstractModel, type DetachedModelConstructor, ValidationError, type Value } from '@vaadin/hilla-lit-form';
+import {
+  type AbstractModel,
+  type DetachedModelConstructor,
+  type ProvisionalModel,
+  type ProvisionalModelConstructor,
+  ValidationError,
+  type Value,
+} from '@vaadin/hilla-lit-form';
+import type { Model } from '@vaadin/hilla-models';
 import { useForm, type UseFormResult } from '@vaadin/hilla-react-form';
 import { Button } from '@vaadin/react-components/Button.js';
 import { ConfirmDialog } from '@vaadin/react-components/ConfirmDialog';
@@ -79,12 +87,12 @@ export type DeleteEvent<TItem> = {
   item: TItem;
 };
 
-export type AutoFormLayoutRendererProps<M extends AbstractModel> = Readonly<{
+export type AutoFormLayoutRendererProps<M extends ProvisionalModel> = Readonly<{
   form: UseFormResult<M>;
   children: ReadonlyArray<ReactElement<AutoFormFieldProps>>;
 }>;
 
-export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentStyleProps &
+export type AutoFormProps<M extends ProvisionalModel = ProvisionalModel> = ComponentStyleProps &
   Readonly<{
     /**
      * The service to use for saving and deleting items. This must be a
@@ -103,7 +111,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * have a type that is supported. Use the `visibleFields` option to customize
      * which fields to show and in which order.
      */
-    model: DetachedModelConstructor<M>;
+    model: DetachedModelConstructor<M & AbstractModel> | (M & Model);
     /**
      * The property to use to detect an item's ID. The item ID is required for
      * deleting items via the `FormService.delete` method. The delete button
@@ -256,7 +264,7 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
  * />
  * ```
  */
-export function AutoForm<M extends AbstractModel>({
+export function AutoForm<M extends ProvisionalModel>({
   service,
   model,
   itemIdProperty,
@@ -276,7 +284,7 @@ export function AutoForm<M extends AbstractModel>({
   onDeleteSuccess,
   onDeleteError,
 }: AutoFormProps<M>): JSX.Element {
-  const form = useForm(model, {
+  const form = useForm(model as ProvisionalModelConstructor<M>, {
     onSubmit: async (formItem) => service.save(formItem),
   });
   const formErrorRef = useRef<HTMLDivElement>(null);

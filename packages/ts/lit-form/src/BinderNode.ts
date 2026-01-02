@@ -15,23 +15,57 @@
  * the License.
  */
 // TODO: Fix dependency cycle
-
+import m, {
+  $defaultValue,
+  $key,
+  $optional,
+  $owner,
+  NumberModel,
+  $constraints,
+  type Constraint,
+  Null,
+  NotNull,
+  AssertTrue,
+  AssertFalse,
+  Min,
+  Max,
+  DecimalMin,
+  Negative,
+  NegativeOrZero,
+  Positive,
+  PositiveOrZero,
+  Size,
+  Digits,
+  Past,
+  // PastOrPresent, // not supported
+  Future,
+  // FutureOrPresent, // not supported
+  Pattern,
+  NotEmpty,
+  NotBlank,
+  Email,
+  type NonAttributedConstraint,
+  Model,
+  ArrayModel,
+  ObjectModel,
+  $itemModel,
+} from '@vaadin/hilla-models';
+import type { Constructor, EmptyObject } from 'type-fest';
 import type { BinderRoot } from './BinderRoot.js';
 import {
   _createEmptyItemValue,
-  _key,
-  _parent,
   _validators,
   AbstractModel,
   type ArrayItemModel,
-  ArrayModel,
+  ArrayModel as BinderArrayModel,
   getObjectModelOwnAndParentGetters,
-  ObjectModel,
+  ObjectModel as BinderObjectModel,
   type Value,
 } from './Models.js';
+import type { ProvisionalModel } from './ProvisionalModel.js';
 import type { ClassStaticProperties } from './types.js';
 import type { Validator, ValueError } from './Validation.js';
-import { ValidityStateValidator } from './Validators.js';
+import * as Validators from './Validators.js';
 import { _validity } from './Validity.js';
 
 export const _updateValidation = Symbol('updateValidation');
@@ -39,9 +73,15 @@ export const _update = Symbol('update');
 export const _setErrorsWithDescendants = Symbol('setErrorsWithDescendants');
 export const _clearValidation = Symbol('clearValidation');
 
-const nodes = new WeakMap<AbstractModel, BinderNode>();
+const nodes = new WeakMap<ProvisionalModel, BinderNode>();
 
-export function getBinderNode<M extends AbstractModel>(model: M): BinderNode<M> {
+/**
+ * Given the model instance attached to the BinderNode, returns the corresponding BinderNode.
+ *
+ * @param model - The model instance
+ * @returns The corresponding BinderNode
+ */
+export function getBinderNode<M extends ProvisionalModel>(model: M): BinderNode<M> {
   let node = nodes.get(model);
 
   if (!node) {
@@ -52,17 +92,99 @@ export function getBinderNode<M extends AbstractModel>(model: M): BinderNode<M> 
   return node as BinderNode<M>;
 }
 
+/**
+ * Returns the corresponding validator for the given constraint.
+ *
+ * @param constraint - The constraint to get the validator for
+ * @returns The corresponding validator
+ */
+function getConstraintValidator<T>(constraint: Constraint<T>): Validator<T> {
+  const constraintTypes = [
+    Null,
+    NotNull,
+    AssertTrue,
+    AssertFalse,
+    Min,
+    Max,
+    DecimalMin,
+    Negative,
+    NegativeOrZero,
+    Positive,
+    PositiveOrZero,
+    Size,
+    Digits,
+    Past,
+    // PastOrPresent, // not supported
+    Future,
+    // FutureOrPresent, // not supported
+    Pattern,
+    NotEmpty,
+    NotBlank,
+    Email,
+  ];
+  for (const constraintType of constraintTypes) {
+    if (m.isConstraint(constraint, constraintType as NonAttributedConstraint)) {
+      // eslint-disable-next-line import/namespace
+      const Validator = Validators[constraintType.name] as Constructor<
+        Validator<T>,
+        EmptyObject extends typeof constraint.attributes
+          ? [typeof constraint.attributes | undefined]
+          : [typeof constraint.attributes]
+      >;
+      return new Validator(constraint.attributes);
+    }
+  }
+  throw new Error(`Unsupported constraint: ${constraint.name}`);
+}
+
+/**
+ * Returns the array of validators for the given model.
+ *
+ * @param model - The model to get the validators for
+ * @returns The array of validators
+ */
+function getModelValidators<M extends ProvisionalModel>(model: M): ReadonlyArray<Validator<Value<M>>> {
+  if (model instanceof AbstractModel) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return model[_validators];
+  }
+
+  const validators: Array<Validator<Value<M>>> =
+    model instanceof NumberModel ? [new Validators.IsNumber(model[$optional]) as Validator<Value<M>>] : [];
+
+  for (const constraint of model[$constraints]) {
+    const validator = getConstraintValidator<Value<M>>(constraint);
+    validators.push(validator);
+  }
+
+  return validators;
+}
+
+function createEmptyValue<M extends ProvisionalModel>(model: M) {
+  if (model instanceof AbstractModel) {
+    return model.constructor.createEmptyValue();
+  }
+
+  return model[$defaultValue];
+}
+
+function createEmptyArrayItemValue<M extends ArrayModel | BinderArrayModel>(model: M): ArrayItemModel<M> {
+  return (
+    model instanceof BinderArrayModel ? model[_createEmptyItemValue]() : model[$itemModel][$defaultValue]
+  ) as ArrayItemModel<M>;
+}
+
 function getErrorPropertyName(valueError: ValueError): string {
   return typeof valueError.property === 'string' ? valueError.property : getBinderNode(valueError.property).name;
 }
 
-function updateObjectOrArrayKey<M extends AbstractModel>(
+function updateObjectOrArrayKey<M extends ProvisionalModel>(
   model: M,
   value: Value<M>,
   key: keyof any,
   keyValue: unknown,
 ): Value<M> {
-  if (model instanceof ObjectModel) {
+  if (model instanceof BinderObjectModel || model instanceof ObjectModel) {
     // Value contained in object - replace object in parent
     return {
       ...(value as Record<never, never> & Value<M>),
@@ -74,14 +196,14 @@ function updateObjectOrArrayKey<M extends AbstractModel>(
     throw new TypeError('Unexpected undefined value');
   }
 
-  if (model instanceof ArrayModel) {
+  if (model instanceof BinderArrayModel || model instanceof ArrayModel) {
     // Value contained in array - replace array in parent
     const array = (value as unknown[]).slice();
     array[key as number] = keyValue;
     return array as Value<M>;
   }
 
-  throw new TypeError(`Unknown model type ${(model as AbstractModel).constructor.name}`);
+  throw new TypeError(`Unknown model type ${model.constructor.name}`);
 }
 
 export const CHANGED = new Event('binder-node-changed');
@@ -98,9 +220,9 @@ class NotArrayItemModelError extends Error {
   }
 }
 
-declare class ArrayItemBinderNode<M extends AbstractModel> extends BinderNode<M> {
+declare class ArrayItemBinderNode<M extends ProvisionalModel> extends BinderNode<M> {
   // @ts-expect-error: re-defining the parent getter.
-  declare readonly parent: BinderNode<ArrayModel<M>>;
+  declare readonly parent: BinderNode<BinderArrayModel<M>>;
 }
 
 const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
@@ -113,7 +235,7 @@ const defaultArrayItemCache = new WeakMap<BinderNode, unknown>();
  * and array models have child nodes of field and array item model
  * instances.
  */
-export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTarget {
+export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends EventTarget {
   declare readonly ['constructor']: ClassStaticProperties<typeof BinderNode<M>>;
   readonly model: M;
   /**
@@ -126,15 +248,15 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   [_validity]?: ValidityState;
   #ownErrors?: ReadonlyArray<ValueError<Value<M>>>;
   #validators: ReadonlyArray<Validator<Value<M>>>;
-  readonly #validityStateValidator: ValidityStateValidator<Value<M>>;
+  readonly #validityStateValidator: Validators.ValidityStateValidator<Value<M>>;
   #visited = false;
 
   constructor(model: M) {
     super();
     this.model = model;
     nodes.set(model, this);
-    this.#validityStateValidator = new ValidityStateValidator<Value<M>>();
-    this.#validators = model[_validators];
+    this.#validityStateValidator = new Validators.ValidityStateValidator<Value<M>>();
+    this.#validators = getModelValidators(model);
 
     // Workaround for children initialization with private props
     if (this.constructor === BinderNode) {
@@ -159,7 +281,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    * The default value related to the model
    */
   get defaultValue(): Value<M> | undefined {
-    const key = this.model[_key];
+    const key = this.model[$key];
     const parentDefaultValue = this.parent!.defaultValue as Readonly<Partial<Record<typeof key, Value<M>>>>;
 
     if (this.#isArrayItem() && !(key in parentDefaultValue)) {
@@ -167,7 +289,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
         return defaultArrayItemCache.get(this.parent) as Value<M>;
       }
 
-      const value = this.model.constructor.createEmptyValue();
+      const value = createEmptyValue(this.model);
       defaultArrayItemCache.set(this.parent, value);
       return value as Value<M>;
     }
@@ -202,12 +324,12 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    * attribute on the field components.
    */
   get name(): string {
-    let { model }: { model: AbstractModel } = this;
+    let { model }: { model: ProvisionalModel } = this;
     let name = '';
 
-    while (model[_parent] instanceof AbstractModel) {
-      name = `${String(model[_key])}${name ? `.${name}` : ''}`;
-      model = model[_parent];
+    while (model[$owner] instanceof AbstractModel || model[$owner] instanceof Model) {
+      name = `${String(model[$key])}${name ? `.${name}` : ''}`;
+      model = model[$owner];
     }
 
     return name;
@@ -225,8 +347,10 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    * otherwise undefined for the top-level binder.
    */
   get parent(): BinderNode | undefined {
-    const modelParent = this.model[_parent];
-    return modelParent instanceof AbstractModel ? getBinderNode(modelParent) : undefined;
+    const modelParent = this.model[$owner];
+    return modelParent instanceof AbstractModel || modelParent instanceof Model
+      ? getBinderNode(modelParent)
+      : undefined;
   }
 
   /**
@@ -259,7 +383,8 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
     this.initializeValue();
 
-    const key = this.model[_key];
+    // Retrieve the value from the parent's value using the key from the model.
+    const key = this.model[$key];
 
     // The value of parent in unknown, so we need to cast it.
     type ParentValue = Readonly<Record<typeof key, Value<M>>>;
@@ -309,7 +434,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    */
   appendItem(item?: Value<ArrayItemModel<M>>): void {
     if (this.#isArray()) {
-      const itemValueOrEmptyValue = item ?? this.model[_createEmptyItemValue]();
+      const itemValueOrEmptyValue = item ?? createEmptyArrayItemValue(this.model);
       const newValue = [...(this.value ?? []), itemValueOrEmptyValue];
       const newDefaultValue = [...(this.defaultValue ?? []), itemValueOrEmptyValue];
       this.#setValueState(newValue, newDefaultValue);
@@ -323,7 +448,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
    *
    * @param model - The nested model instance
    */
-  for<N extends AbstractModel>(model: N): BinderNode<N> {
+  for<N extends ProvisionalModel>(model: N): BinderNode<N> {
     const binderNode = getBinderNode(model);
     if (binderNode.binder !== this.binder) {
       throw new Error('Unknown binder');
@@ -334,7 +459,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
   prependItem(item?: Value<ArrayItemModel<M>>): void {
     if (this.#isArray()) {
-      const itemValueOrEmptyValue = item ?? this.model[_createEmptyItemValue]();
+      const itemValueOrEmptyValue = item ?? createEmptyArrayItemValue(this.model);
       const newValue = [itemValueOrEmptyValue, ...(this.value ?? [])];
       const newDefaultValue = [itemValueOrEmptyValue, ...(this.defaultValue ?? [])];
       this.#setValueState(newValue, newDefaultValue);
@@ -345,8 +470,10 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
 
   removeSelf(): void {
     if (this.#isArrayItem()) {
-      const newValue = (this.parent.value ?? []).filter((_, i) => i !== this.model[_key]);
-      const newDefaultValue = (this.parent.defaultValue ?? []).filter((_, i) => i !== this.model[_key]);
+      // Removing item in a read-only array involves computing a new array with
+      // the current item filtered out by numeric index obtained from `$key`.
+      const newValue = (this.parent.value ?? []).filter((_, i) => i !== this.model[$key]);
+      const newDefaultValue = (this.parent.defaultValue ?? []).filter((_, i) => i !== this.model[$key]);
       this.parent.#setValueState(newValue, newDefaultValue);
     } else {
       throw new NotArrayItemModelError();
@@ -420,7 +547,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       return;
     }
 
-    if (this.#isObject()) {
+    if (this.model instanceof BinderObjectModel) {
       for (const [, getter] of getObjectModelOwnAndParentGetters(this.model)) {
         const childModel = getter.call(this.model);
         // We need to skip all non-initialised optional fields here in order
@@ -430,27 +557,41 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
         // non-optional fields plus those optional fields whose values were
         // set from initial `binder.read()` or `binder.clear()` or by using a
         // binder node (e.g., form binding) for a nested field.
-        if (childModel[_key] in (this.defaultValue as Record<never, never>)) {
+        if (childModel[$key] in (this.defaultValue as Record<never, never>)) {
           yield getBinderNode(childModel);
         }
       }
-    } else if (this.#isArray()) {
+    } else if (this.model instanceof BinderArrayModel) {
       for (const childBinderNode of this.model) {
         yield childBinderNode;
+      }
+    } else if (this.model instanceof ObjectModel) {
+      // eslint-disable-next-line @typescript-eslint/no-for-in-array,no-restricted-syntax
+      for (const propName in this.model) {
+        // We need to skip all non-initialised optional fields here in order
+        // to prevent infinite recursion for circular references in the model.
+        // Here we rely on presence of keys in `defaultValue` to detect all
+        // initialised fields. The keys in `defaultValue` are defined for all
+        // non-optional fields plus those optional fields whose values were
+        // set from initial `binder.read()` or `binder.clear()` or by using a
+        // binder node (e.g., form binding) for a nested field.
+        if (propName in (this.defaultValue as Record<never, never>)) {
+          yield getBinderNode((this.model as unknown as Record<string, Model>)[propName]);
+        }
+      }
+    } else if (this.model instanceof ArrayModel) {
+      for (const childModel of m.items(this.model)) {
+        yield getBinderNode(childModel);
       }
     }
   }
 
-  #isArray(): this is BinderNode<ArrayModel> {
-    return this.model instanceof ArrayModel;
+  #isArray(): this is BinderNode<ArrayModel | BinderArrayModel> {
+    return this.model instanceof ArrayModel || this.model instanceof BinderArrayModel;
   }
 
   #isArrayItem(): this is ArrayItemBinderNode<M> {
-    return this.model[_parent] instanceof ArrayModel;
-  }
-
-  #isObject(): this is BinderNode<ObjectModel> {
-    return this.model instanceof ObjectModel;
+    return this.model[$owner] instanceof BinderArrayModel || this.model[$owner] instanceof ArrayModel;
   }
 
   *#requestValidationOfDescendants(): Generator<Promise<readonly ValueError[]>, void, void> {
@@ -493,22 +634,22 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       this.parent.initializeValue(true);
     }
 
-    const key = this.model[_key];
+    const key = this.model[$key];
     let value: Value<M> | undefined = this.parent
-      ? (this.parent.value as Record<typeof key, Value<M>>)[this.model[_key]]
+      ? (this.parent.value as Record<typeof key, Value<M>>)[this.model[$key]]
       : undefined;
 
     const defaultValue: Value<M> | undefined = this.parent
-      ? (this.parent.defaultValue as Readonly<Record<typeof key, Value<M>>>)[this.model[_key]]
+      ? (this.parent.defaultValue as Readonly<Record<typeof key, Value<M>>>)[this.model[$key]]
       : undefined;
 
     if (value === undefined) {
       // Initialize value if this is the root level node, or it is enforced
       if (forceInitialize || !this.parent) {
-        value = this.model.constructor.createEmptyValue() as Value<M>;
+        value = createEmptyValue(this.model) as Value<M>;
         this.#setValueState(value, defaultValue === undefined ? value : defaultValue);
       } else if (
-        this.parent.model instanceof ObjectModel &&
+        this.parent.model instanceof BinderObjectModel &&
         !(key in ((this.parent.value || {}) as Partial<Record<typeof key, Value<M>>>))
       ) {
         this.#setValueState(undefined, defaultValue === undefined ? value : defaultValue);
@@ -519,7 +660,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
   #setValueState(value: Value<M> | undefined, defaultValue: Value<M> | undefined): void {
     const { parent } = this;
     if (parent) {
-      const key = this.model[_key];
+      const key = this.model[$key];
       const parentValue = updateObjectOrArrayKey(parent.model, parent.value, key, value);
       const keepPristine = value === defaultValue && parent.value === parent.defaultValue;
       if (keepPristine) {

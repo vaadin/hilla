@@ -1,14 +1,4 @@
-import {
-  BooleanModel,
-  EnumModel,
-  NumberModel,
-  ObjectModel,
-  StringModel,
-  _enum,
-  _getPropertyModel,
-  makeEnumEmptyValueCreator,
-  makeObjectEmptyValueCreator,
-} from '@vaadin/hilla-lit-form';
+import m, { BooleanModel, NumberModel, StringModel } from '@vaadin/hilla-models';
 import type { CountService, CrudService, ListService } from '../src/crud.js';
 import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
@@ -16,31 +6,77 @@ import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 
+const intModel = m.meta(NumberModel, { jvmType: 'int' });
+const floatModel = m.meta(NumberModel, { jvmType: 'float' });
+
+const LocalDateModel = m.meta(StringModel, { jvmType: 'java.time.LocalDate' });
+const LocalTimeModel = m.meta(StringModel, { jvmType: 'java.time.LocalTime' });
+const LocalDateTimeModel = m.meta(StringModel, { jvmType: 'java.time.LocalDateTime' });
+
+type HasIdVersion = {
+  id?: number;
+  version?: number;
+};
+const idNumberModel = m.meta(m.optional(NumberModel), { annotations: [{ jvmType: 'jakarta.persistence.Id' }] });
+const versionNumberModel = m.meta(m.optional(NumberModel), {
+  annotations: [{ jvmType: 'jakarta.persistence.Version' }],
+});
+
 export interface Company extends HasIdVersion {
   name: string;
   foundedDate: string;
 }
+export const CompanyModel = m
+  .object<Company>('Company')
+  .property('id', idNumberModel)
+  .property('version', versionNumberModel)
+  .property('name', StringModel)
+  .property('foundedDate', StringModel)
+  .build();
+export type CompanyModel = typeof CompanyModel;
 
 export enum Gender {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
   NON_BINARY = 'NON_BINARY',
 }
+export const GenderModel = m.enum(Gender, 'Gender');
+export type GenderModel = typeof GenderModel;
 
 export interface Named {
   firstName: string;
   lastName: string;
 }
+export const NamedModel = m
+  .object<Named>('Named')
+  .property('firstName', StringModel)
+  .property('lastName', StringModel)
+  .build();
+export type NamedModel = typeof NamedModel;
 
 export interface Address {
   street: string;
   city: string;
   country: string;
 }
+export const AddressModel = m
+  .object<Address>('Address')
+  .property('street', StringModel)
+  .property('city', StringModel)
+  .property('country', StringModel)
+  .build();
+export type AddressModel = typeof AddressModel;
 
 export interface Department extends HasIdVersion {
   name?: string;
 }
+export const DepartmentModel = m
+  .object<Department>('Department')
+  .property('id', idNumberModel)
+  .property('version', versionNumberModel)
+  .property('name', StringModel)
+  .build();
+export type DepartmentModel = typeof DepartmentModel;
 
 export interface Person extends HasIdVersion, Named {
   gender: Gender;
@@ -54,6 +90,23 @@ export interface Person extends HasIdVersion, Named {
   address?: Address;
   department?: Department;
 }
+export const PersonModel = m
+  .extend(NamedModel)
+  .object<Person>('Person')
+  .property('id', idNumberModel)
+  .property('version', versionNumberModel)
+  .property('gender', GenderModel)
+  .property('email', StringModel)
+  .property('someInteger', intModel)
+  .property('someDecimal', floatModel)
+  .property('vip', BooleanModel)
+  .property('birthDate', LocalDateModel)
+  .property('shiftStart', LocalTimeModel)
+  .property('appointmentTime', LocalDateTimeModel)
+  .property('address', m.meta(AddressModel, { annotations: [{ jvmType: 'jakarta.persistence.OneToOne' }] }))
+  .property('department', m.meta(DepartmentModel, { annotations: [{ jvmType: 'jakarta.persistence.ManyToOne' }] }))
+  .build();
+export type PersonModel = typeof PersonModel;
 
 export interface NestedTestValues {
   nestedString: string;
@@ -61,6 +114,14 @@ export interface NestedTestValues {
   nestedBoolean: boolean;
   nestedDate?: string;
 }
+export const NestedTestModel = m
+  .object<NestedTestValues>('NestedTest')
+  .property('nestedString', StringModel)
+  .property('nestedNumber', intModel)
+  .property('nestedBoolean', BooleanModel)
+  .property('nestedDate', LocalDateModel)
+  .build();
+export type NestedTestModel = typeof NestedTestModel;
 
 export interface ColumnRendererTestValues extends HasIdVersion {
   string: string;
@@ -73,314 +134,42 @@ export interface ColumnRendererTestValues extends HasIdVersion {
   localDateTime?: string;
   nested?: NestedTestValues;
 }
+export const ColumnRendererTestModel = m
+  .object<ColumnRendererTestValues>('ColumnRendererTest')
+  .property('id', idNumberModel)
+  .property('version', versionNumberModel)
+  .property('string', StringModel)
+  .property('integer', intModel)
+  .property('decimal', floatModel)
+  .property('boolean', BooleanModel)
+  .property('enum', m.optional(GenderModel))
+  .property('localDate', m.optional(LocalDateModel))
+  .property('localTime', m.optional(LocalTimeModel))
+  .property('localDateTime', m.optional(LocalDateTimeModel))
+  .property(
+    'nested',
+    m.meta(m.optional(NestedTestModel), { annotations: [{ jvmType: 'jakarta.persistence.OneToOne' }] }),
+  )
+  .build();
+export type ColumnRendererTestModel = typeof ColumnRendererTestModel;
 
 export interface UserData extends HasIdVersion {
   name?: string;
 }
+export const UserDataModel = m
+  .object<UserData>('UserData')
+  .property('id', idNumberModel)
+  .property('version', versionNumberModel)
+  .property('name', m.optional(StringModel))
+  .build();
+export type UserDataModel = typeof UserDataModel;
 
-class GenderModel extends EnumModel<typeof Gender> {
-  static override createEmptyValue = makeEnumEmptyValueCreator(GenderModel);
-  readonly [_enum] = Gender;
-}
-
-export class NamedModel<T extends Named = Named> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(NamedModel);
-
-  get firstName(): StringModel {
-    return this[_getPropertyModel]('firstName', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get lastName(): StringModel {
-    return this[_getPropertyModel]('lastName', (parent, key) => new StringModel(parent, key, false));
-  }
-}
-
-export class AddressModel<T extends Address = Address> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(AddressModel);
-
-  get street(): StringModel {
-    return this[_getPropertyModel]('street', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get city(): StringModel {
-    return this[_getPropertyModel]('city', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get country(): StringModel {
-    return this[_getPropertyModel]('country', (parent, key) => new StringModel(parent, key, false));
-  }
-}
-
-export class DepartmentModel<T extends Department = Department> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(DepartmentModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) =>
-        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
-    );
-  }
-
-  get version(): NumberModel {
-    return this[_getPropertyModel](
-      'version',
-      (parent, key) =>
-        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
-    );
-  }
-
-  get name(): StringModel {
-    return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, false));
-  }
-}
-
-export class PersonModel<T extends Person = Person> extends NamedModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) =>
-        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
-    );
-  }
-
-  get version(): NumberModel {
-    return this[_getPropertyModel](
-      'version',
-      (parent, key) =>
-        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
-    );
-  }
-
-  get gender(): GenderModel {
-    return this[_getPropertyModel]('gender', (parent, key) => new GenderModel(parent, key, false));
-  }
-
-  get email(): StringModel {
-    return this[_getPropertyModel]('email', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get someInteger(): NumberModel {
-    return this[_getPropertyModel](
-      'someInteger',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
-    );
-  }
-
-  get someDecimal(): NumberModel {
-    return this[_getPropertyModel](
-      'someDecimal',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'float' } }),
-    );
-  }
-
-  get vip(): BooleanModel {
-    return this[_getPropertyModel]('vip', (parent, key) => new BooleanModel(parent, key, false));
-  }
-
-  get birthDate(): StringModel {
-    return this[_getPropertyModel](
-      'birthDate',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
-    );
-  }
-
-  get shiftStart(): StringModel {
-    return this[_getPropertyModel](
-      'shiftStart',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
-    );
-  }
-
-  get appointmentTime(): StringModel {
-    return this[_getPropertyModel](
-      'appointmentTime',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
-    );
-  }
-
-  get address(): AddressModel {
-    return this[_getPropertyModel](
-      'address',
-      (parent, key) =>
-        new AddressModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.OneToOne' }] } }),
-    );
-  }
-
-  get department(): DepartmentModel {
-    return this[_getPropertyModel](
-      'department',
-      (parent, key) =>
-        new DepartmentModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.ManyToOne' }] } }),
-    );
-  }
-}
-
-export class PersonWithSimpleIdPropertyModel<T extends Person = Person> extends NamedModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
-  }
-}
-
-export class PersonWithoutIdPropertyModel<T extends Person = Person> extends NamedModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(PersonModel);
-}
-
-export class CompanyModel<T extends Company = Company> extends ObjectModel<T> {
-  declare static createEmptyValue: () => Company;
-
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
-    );
-  }
-
-  get version(): NumberModel {
-    return this[_getPropertyModel](
-      'version',
-      (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
-    );
-  }
-
-  get name(): StringModel {
-    return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get foundedDate(): StringModel {
-    return this[_getPropertyModel]('foundedDate', (parent, key) => new StringModel(parent, key, false));
-  }
-}
-
-export class NestedTestModel<T extends NestedTestValues = NestedTestValues> extends ObjectModel<T> {
-  declare static createEmptyValue: () => Company;
-
-  get nestedString(): StringModel {
-    return this[_getPropertyModel]('nestedString', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get nestedNumber(): NumberModel {
-    return this[_getPropertyModel](
-      'nestedNumber',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
-    );
-  }
-
-  get nestedBoolean(): BooleanModel {
-    return this[_getPropertyModel]('nestedBoolean', (parent, key) => new BooleanModel(parent, key, false));
-  }
-
-  get nestedDate(): StringModel {
-    return this[_getPropertyModel](
-      'nestedDate',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
-    );
-  }
-}
-
-export class ColumnRendererTestModel<
-  T extends ColumnRendererTestValues = ColumnRendererTestValues,
-> extends ObjectModel<T> {
-  declare static createEmptyValue: () => Company;
-
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) =>
-        new NumberModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
-    );
-  }
-
-  get string(): StringModel {
-    return this[_getPropertyModel]('string', (parent, key) => new StringModel(parent, key, false));
-  }
-
-  get integer(): NumberModel {
-    return this[_getPropertyModel](
-      'integer',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'int' } }),
-    );
-  }
-
-  get decimal(): NumberModel {
-    return this[_getPropertyModel](
-      'decimal',
-      (parent, key) => new NumberModel(parent, key, false, { meta: { javaType: 'float' } }),
-    );
-  }
-
-  get boolean(): BooleanModel {
-    return this[_getPropertyModel]('boolean', (parent, key) => new BooleanModel(parent, key, false));
-  }
-
-  get enum(): GenderModel {
-    return this[_getPropertyModel]('enum', (parent, key) => new GenderModel(parent, key, false));
-  }
-
-  get localDate(): StringModel {
-    return this[_getPropertyModel](
-      'localDate',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDate' } }),
-    );
-  }
-
-  get localTime(): StringModel {
-    return this[_getPropertyModel](
-      'localTime',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalTime' } }),
-    );
-  }
-
-  get localDateTime(): StringModel {
-    return this[_getPropertyModel](
-      'localDateTime',
-      (parent, key) => new StringModel(parent, key, false, { meta: { javaType: 'java.time.LocalDateTime' } }),
-    );
-  }
-
-  get nested(): NestedTestModel {
-    return this[_getPropertyModel](
-      'nested',
-      (parent, key) =>
-        new NestedTestModel(parent, key, false, { meta: { annotations: [{ name: 'jakarta.persistence.OneToOne' }] } }),
-    );
-  }
-}
-
-export class UserDataModel<T extends UserData = UserData> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(UserDataModel);
-
-  get id(): NumberModel {
-    return this[_getPropertyModel](
-      'id',
-      (parent, key) =>
-        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Id' }] } }),
-    );
-  }
-
-  get version(): NumberModel {
-    return this[_getPropertyModel](
-      'version',
-      (parent, key) =>
-        new NumberModel(parent, key, true, { meta: { annotations: [{ name: 'jakarta.persistence.Version' }] } }),
-    );
-  }
-
-  get name(): StringModel {
-    return this[_getPropertyModel]('name', (parent, key) => new StringModel(parent, key, true));
-  }
-}
-
-type HasIdVersion = {
-  id?: number;
-  version?: number;
-};
+export const PersonWithSimpleIdPropertyModel = m
+  .extend(PersonModel)
+  .object<Person>('PersonWithSimpleIdProperty')
+  .property('id', NumberModel)
+  .build();
+export type PersonWithSimpleIdPropertyModel = typeof PersonWithSimpleIdPropertyModel;
 
 export const createService = <T extends HasIdVersion>(
   initialData: T[],

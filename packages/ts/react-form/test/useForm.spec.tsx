@@ -8,6 +8,7 @@ import {
   cleanup,
 } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { ValidationError } from '@vaadin/hilla-lit-form';
 import chaiAsPromised from 'chai-as-promised';
 import chaiDom from 'chai-dom';
 import { useEffect, useState } from 'react';
@@ -34,7 +35,7 @@ chai.use(chaiAsPromised);
 
 describe('@vaadin/hilla-react-form', () => {
   type UseFormSpy = sinon.SinonSpy<Parameters<typeof _useForm>, ReturnType<typeof _useForm>>;
-  const useForm = sinon.spy(_useForm) as typeof _useForm;
+  const useForm = sinon.spy(_useForm) as unknown as typeof _useForm;
 
   let onSubmit: (value: Login) => Promise<Login>;
   let onChange: (value: Login) => void;
@@ -102,7 +103,7 @@ describe('@vaadin/hilla-react-form', () => {
   beforeEach(() => {
     onSubmit = sinon.stub();
     onChange = sinon.stub();
-    (useForm as UseFormSpy).resetHistory();
+    (useForm as unknown as UseFormSpy).resetHistory();
   });
 
   afterEach(() => {
@@ -137,7 +138,17 @@ describe('@vaadin/hilla-react-form', () => {
       });
     });
 
-    it('does not call onSubmit if the form is invalid', async () => {
+    it('does not call onSubmit if the form is invalid', async ({ onTestFinished }) => {
+      function unhandledRejectionHandler(e: PromiseRejectionEvent) {
+        expect(e.reason).to.be.instanceOf(ValidationError);
+      }
+
+      onTestFinished(() => {
+        window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
+      });
+
+      window.addEventListener('unhandledrejection', unhandledRejectionHandler, { once: true });
+
       const { getByTestId } = render(<LoginForm />);
 
       await user.type(getByTestId('user.name'), 'johndoe');
@@ -146,7 +157,16 @@ describe('@vaadin/hilla-react-form', () => {
       expect(onSubmit).to.not.have.been.called;
     });
 
-    it('does not call onSubmit if the form has not been touched', async () => {
+    it('does not call onSubmit if the form has not been touched', async ({ onTestFinished }) => {
+      function unhandledRejectionHandler(e: PromiseRejectionEvent) {
+        expect(e.reason).to.be.instanceOf(ValidationError);
+      }
+      onTestFinished(() => {
+        window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
+      });
+
+      window.addEventListener('unhandledrejection', unhandledRejectionHandler, { once: true });
+
       const { getByTestId } = render(<LoginForm />);
 
       await user.click(getByTestId('submit'));
@@ -187,7 +207,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
-        const [{ read }] = (useForm as UseFormSpy).returnValues;
+        const [{ read }] = (useForm as unknown as UseFormSpy).returnValues;
         read({
           rememberMe: true,
           user: {
@@ -251,7 +271,7 @@ describe('@vaadin/hilla-react-form', () => {
 
       // eslint-disable-next-line @typescript-eslint/require-await
       await act(async () => {
-        const [{ read }] = (useForm as UseFormSpy).returnValues;
+        const [{ read }] = (useForm as unknown as UseFormSpy).returnValues;
         read({
           user: {
             id: 1,
