@@ -180,8 +180,8 @@ public abstract class AbstractFullStackTest {
             LOGGER.debug("Executing CLI: {}", String.join(" ", command));
 
             // Execute the CLI
-            com.vaadin.flow.internal.FrontendUtils.executeCommand(
-                    command, pb -> pb.directory(targetDir.toFile()));
+            com.vaadin.flow.internal.FrontendUtils.executeCommand(command,
+                    pb -> pb.directory(targetDir.toFile()));
 
             // Read generated files from output directory
             Map<String, String> files = new HashMap<>();

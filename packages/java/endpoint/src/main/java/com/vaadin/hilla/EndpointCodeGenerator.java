@@ -33,9 +33,9 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.frontend.FrontendTools;
-import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 import com.vaadin.hilla.engine.GeneratorProcessor;
