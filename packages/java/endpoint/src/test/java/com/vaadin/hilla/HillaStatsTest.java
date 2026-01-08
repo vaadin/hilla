@@ -47,13 +47,13 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.router.RouteData;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.Platform;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.internal.FrontendUtils;
 
 @NotThreadSafe
 public class HillaStatsTest {
