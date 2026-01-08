@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
 import com.vaadin.flow.server.frontend.FrontendTools;
 import com.vaadin.flow.server.frontend.FrontendToolsSettings;
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;

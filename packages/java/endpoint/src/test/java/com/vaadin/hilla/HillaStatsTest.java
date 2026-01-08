@@ -53,7 +53,7 @@ import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.Platform;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.internal.FrontendUtils;
 
 @NotThreadSafe
 public class HillaStatsTest {

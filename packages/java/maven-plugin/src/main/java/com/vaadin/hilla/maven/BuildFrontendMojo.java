@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.maven;
 
-import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+import static com.vaadin.flow.internal.FrontendUtils.FRONTEND;
 
 import java.io.File;
 
@@ -31,7 +31,7 @@ import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.server.Constants;
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.flow.theme.Theme;
 
 /**

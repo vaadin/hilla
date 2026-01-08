@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.internal.FrontendUtils;
 
 /**
  * A generic command runner which throws a {@link CommandRunnerException}.

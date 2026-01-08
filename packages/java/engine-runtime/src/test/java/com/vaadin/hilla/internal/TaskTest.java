@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.internal;
 
-import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
+import static com.vaadin.flow.internal.FrontendUtils.PARAM_FRONTEND_DIR;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,7 +26,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import com.vaadin.flow.internal.FrontendUtils;
 import com.vaadin.hilla.engine.EngineAutoConfiguration;
 
 public class TaskTest {

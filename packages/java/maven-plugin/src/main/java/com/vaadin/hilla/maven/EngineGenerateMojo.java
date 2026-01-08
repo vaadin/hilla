@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.maven;
 
-import static com.vaadin.flow.server.frontend.FrontendUtils.FRONTEND;
+import static com.vaadin.flow.internal.FrontendUtils.FRONTEND;
 
 import java.io.File;
 
