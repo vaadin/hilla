@@ -40,8 +40,14 @@
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
         </exclusion>
-
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-build-tools</artifactId>
+      <classifier>shaded</classifier>
+      <scope>provided</scope>
+      <version>${flow.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
