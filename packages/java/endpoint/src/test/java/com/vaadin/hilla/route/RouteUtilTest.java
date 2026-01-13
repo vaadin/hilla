@@ -33,6 +33,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.server.Mode;
 import com.vaadin.flow.server.menu.AvailableViewInfo;
+import com.vaadin.flow.server.menu.RouteParamType;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
 @NotThreadSafe
@@ -123,6 +124,32 @@ public class RouteUtilTest {
         request.setContextPath("/context");
         routeUtil.setRoutes(Collections.emptyMap());
         Assert.assertFalse(routeUtil.isSecuredRoute(request));
+    }
+
+    @Test
+    public void isSecuredRoute_withRequiredParameter_returnsTrue() {
+        request.setRequestURI("/context/test/12345");
+        request.setContextPath("/context");
+        var info = new AvailableViewInfo("Test Item", new String[0], true,
+                "/test/:testId", false, false, null, null,
+                Map.of(":testId", RouteParamType.REQUIRED), false, "");
+        routeUtil.setRoutes(Collections.singletonMap(info.route(), info));
+        Assert.assertTrue(routeUtil.isSecuredRoute(request));
+    }
+
+    @Test
+    public void isSecuredRoute_withOptionalParameter_returnsTrue() {
+        var info = new AvailableViewInfo("Test Item", new String[0], true,
+                "/test/:testId?/inner", false, false, null, null,
+                Map.of(":testId", RouteParamType.REQUIRED), false, "");
+        routeUtil.setRoutes(Collections.singletonMap(info.route(), info));
+
+        request.setRequestURI("/context/test/12345/inner");
+        request.setContextPath("/context");
+        Assert.assertTrue(routeUtil.isSecuredRoute(request));
+
+        request.setRequestURI("/context/test/inner");
+        Assert.assertTrue(routeUtil.isSecuredRoute(request));
     }
 
     @Test
