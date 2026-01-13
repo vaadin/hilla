@@ -42,7 +42,6 @@
       <groupId>com.vaadin</groupId>
       <artifactId>flow-build-tools</artifactId>
       <classifier>shaded</classifier>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
