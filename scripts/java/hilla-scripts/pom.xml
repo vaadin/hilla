@@ -35,6 +35,11 @@
             <artifactId>flow-server</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-build-tools</artifactId>
+            <classifier>shaded</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
