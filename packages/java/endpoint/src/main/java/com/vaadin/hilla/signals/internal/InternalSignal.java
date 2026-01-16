@@ -18,6 +18,7 @@ package com.vaadin.hilla.signals.internal;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.signals.function.CleanupCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -47,7 +48,7 @@ public class InternalSignal {
 
     private final AbstractSignal<?> signal;
     private final SignalTree tree;
-    private Runnable treeSubscriptionCanceler;
+    private CleanupCallback treeSubscriptionCanceler;
 
     // Commands in processing, mapping commandId -> clientSignalId
     private final Map<Id, ObjectNode> inProgressCommands = new HashMap<>();
@@ -100,7 +101,7 @@ public class InternalSignal {
                     getLogger().debug(
                             "No more subscribers, canceling tree subscription");
                     assert treeSubscriptionCanceler != null;
-                    treeSubscriptionCanceler.run();
+                    treeSubscriptionCanceler.cleanup();
                     treeSubscriptionCanceler = null;
                 }
             } finally {
