@@ -22,8 +22,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.hotswap.VaadinHotswapper;
-import com.vaadin.flow.server.VaadinService;
+import com.vaadin.base.devserver.hotswap.HotswapClassEvent;
+import com.vaadin.base.devserver.hotswap.VaadinHotswapper;
 
 /**
  * Takes care of updating internals of Hilla that need updates when application
@@ -38,11 +38,9 @@ public class Hotswapper implements VaadinHotswapper {
     }
 
     @Override
-    public boolean onClassLoadEvent(VaadinService vaadinService,
-            Set<Class<?>> classes, boolean redefined) {
-        onHotswap(redefined,
-                classes.stream().map(Class::getName).toArray(String[]::new));
-        return false;
+    public void onClassesChange(HotswapClassEvent event) {
+        onHotswap(event.isRedefined(), event.getChangedClasses().stream()
+                .map(Class::getName).toArray(String[]::new));
     }
 
     /**

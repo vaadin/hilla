@@ -180,8 +180,8 @@ public abstract class AbstractFullStackTest {
             LOGGER.debug("Executing CLI: {}", String.join(" ", command));
 
             // Execute the CLI
-            com.vaadin.flow.server.frontend.FrontendUtils.executeCommand(
-                    command, pb -> pb.directory(targetDir.toFile()));
+            com.vaadin.flow.internal.FrontendUtils.executeCommand(command,
+                    pb -> pb.directory(targetDir.toFile()));
 
             // Read generated files from output directory
             Map<String, String> files = new HashMap<>();
@@ -206,7 +206,7 @@ public abstract class AbstractFullStackTest {
         } catch (JsonProcessingException e) {
             throw new FullStackExecutionException(
                     "Failed to serialize OpenAPI to JSON", e);
-        } catch (com.vaadin.flow.server.frontend.FrontendUtils.CommandExecutionException e) {
+        } catch (com.vaadin.flow.internal.FrontendUtils.CommandExecutionException e) {
             throw new FullStackExecutionException(
                     "Failed to execute TypeScript generator CLI", e);
         } catch (IOException e) {
@@ -243,12 +243,12 @@ public abstract class AbstractFullStackTest {
                     var json = require(jsonPath);
                     console.log(path.resolve(path.dirname(jsonPath), json.bin['tsgen']));
                     """;
-            String cliPath = com.vaadin.flow.server.frontend.FrontendUtils
+            String cliPath = com.vaadin.flow.internal.FrontendUtils
                     .executeCommand(List.of("node", "--eval", script),
                             pb -> pb.directory(targetDir.toFile()))
                     .trim();
             return Path.of(cliPath);
-        } catch (com.vaadin.flow.server.frontend.FrontendUtils.CommandExecutionException e) {
+        } catch (com.vaadin.flow.internal.FrontendUtils.CommandExecutionException e) {
             throw new FullStackExecutionException("Failed to resolve CLI path",
                     e);
         }

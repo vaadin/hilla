@@ -31,6 +31,7 @@ import com.vaadin.signals.AbstractSignal;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.SignalCommand;
 import com.vaadin.signals.SignalUtils;
+import com.vaadin.signals.function.CleanupCallback;
 import com.vaadin.signals.impl.CommandResult;
 import com.vaadin.signals.impl.SignalTree;
 
@@ -47,7 +48,7 @@ public class InternalSignal {
 
     private final AbstractSignal<?> signal;
     private final SignalTree tree;
-    private Runnable treeSubscriptionCanceler;
+    private CleanupCallback treeSubscriptionCanceler;
 
     // Commands in processing, mapping commandId -> clientSignalId
     private final Map<Id, ObjectNode> inProgressCommands = new HashMap<>();
@@ -100,7 +101,7 @@ public class InternalSignal {
                     getLogger().debug(
                             "No more subscribers, canceling tree subscription");
                     assert treeSubscriptionCanceler != null;
-                    treeSubscriptionCanceler.run();
+                    treeSubscriptionCanceler.cleanup();
                     treeSubscriptionCanceler = null;
                 }
             } finally {

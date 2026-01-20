@@ -15,7 +15,7 @@
  */
 package com.vaadin.hilla.maven;
 
-import static com.vaadin.flow.server.frontend.FrontendUtils.GENERATED;
+import static com.vaadin.flow.internal.FrontendUtils.GENERATED;
 
 import java.io.File;
 import java.util.Map;

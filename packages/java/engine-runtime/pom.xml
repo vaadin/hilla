@@ -41,8 +41,7 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-build-tools</artifactId>
-      <version>${flow.version}</version>
-      <scope>test</scope>
+      <classifier>shaded</classifier>
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
