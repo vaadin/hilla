@@ -42,8 +42,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.1.0-alpha1",
-    "@vaadin/icon": "25.1.0-alpha1",
-    "@vaadin/icons": "25.1.0-alpha1",
+    "@vaadin/icon": "25.1.0-alpha3",
+    "@vaadin/icons": "25.1.0-alpha3",
     "@vaadin/input-container": "25.1.0-alpha1",
     "@vaadin/integer-field": "25.1.0-alpha1",
     "@vaadin/item": "25.1.0-alpha1",
@@ -75,7 +75,7 @@
     "@vaadin/text-area": "25.1.0-alpha1",
     "@vaadin/text-field": "25.1.0-alpha1",
     "@vaadin/time-picker": "25.1.0-alpha1",
-    "@vaadin/tooltip": "25.1.0-alpha1",
+    "@vaadin/tooltip": "25.1.0-alpha3",
     "@vaadin/upload": "25.1.0-alpha1",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.1.0-alpha1",
@@ -150,8 +150,8 @@
       "@vaadin/hilla-frontend": "25.1.0-alpha1",
       "@vaadin/hilla-lit-form": "25.1.0-alpha1",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.1.0-alpha1",
-      "@vaadin/icons": "25.1.0-alpha1",
+      "@vaadin/icon": "25.1.0-alpha3",
+      "@vaadin/icons": "25.1.0-alpha3",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -183,7 +183,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.1.0-alpha1",
+      "@vaadin/tooltip": "25.1.0-alpha3",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.1.0-alpha1",
@@ -222,7 +222,7 @@
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0"
     },
-    "hash": "13f72765758c18f6438916c24c1f9316848870ba6067d1893dd56d5d10e3231e"
+    "hash": "7f7fbf6e762e0c1120096dfd7aecacf6c0e6a9f0adaf22241ae5036a980eaa5c"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
