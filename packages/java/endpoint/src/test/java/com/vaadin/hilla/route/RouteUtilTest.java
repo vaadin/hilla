@@ -150,6 +150,9 @@ public class RouteUtilTest {
 
         request.setRequestURI("/context/test/inner");
         Assert.assertTrue(routeUtil.isSecuredRoute(request));
+
+        request.setRequestURI("/context/test");
+        Assert.assertFalse(routeUtil.isSecuredRoute(request));
     }
 
     @Test
