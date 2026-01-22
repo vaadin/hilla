@@ -42,9 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {
-    "@vaadin/hilla-lit-form": "25.1.0-alpha2"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": "18 || 19",
     "react-dom": "18 || 19"

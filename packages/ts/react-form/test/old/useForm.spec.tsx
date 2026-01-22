@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
-import { useForm as _useForm, useFormArrayPart, useFormPart } from '../src';
+import { useForm as _useForm, useFormArrayPart, useFormPart } from '../../src';
 import {
   type Contract,
   EntityModel,
@@ -67,13 +67,6 @@ describe('@vaadin/hilla-react-form', () => {
   function LoginForm() {
     const { field, model, submit, value, submitting } = useForm(LoginModel, { onChange, onSubmit });
 
-    const handleSubmit = () => {
-      submit().catch((_error: unknown) => {
-        // Handle validation errors silently, otherwise tests that deal with invalid state will
-        // fail in Vitest.
-      });
-    };
-
     return (
       <>
         <section>
@@ -82,7 +75,8 @@ describe('@vaadin/hilla-react-form', () => {
         </section>
         <output data-testid="output.user.name">{value.user.name}</output>
         <output data-testid="output.rememberMe">{String(value.rememberMe)}</output>
-        <button data-testid="submit" onClick={handleSubmit} type="submit">
+        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+        <button data-testid="submit" onClick={submit}>
           Submit
         </button>
         {submitting ? <span data-testid="submitting">Submitting...</span> : null}
