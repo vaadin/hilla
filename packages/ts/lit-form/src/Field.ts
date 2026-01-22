@@ -1,17 +1,19 @@
 /* eslint-disable accessor-pairs,no-void,sort-keys */
+import { ArrayModel, BooleanModel, NumberModel, ObjectModel, StringModel } from '@vaadin/hilla-models';
 import { type ElementPart, noChange, nothing, type PropertyPart } from 'lit';
 import { directive, Directive, type DirectiveParameters, type PartInfo, PartType } from 'lit/directive.js';
 import { getBinderNode } from './BinderNode.js';
 import {
   _fromString,
-  type AbstractModel,
-  ArrayModel,
-  BooleanModel,
+  ArrayModel as BinderArrayModel,
+  BooleanModel as BinderBooleanModel,
   hasFromString,
-  NumberModel,
-  ObjectModel,
+  NumberModel as BinderNumberModel,
+  ObjectModel as BinderObjectModel,
+  StringModel as BinderStringModel,
 } from './Models.js';
-import { StringModel } from './Models.js';
+import type { ProvisionalModel } from './ProvisionalModel.js';
+import { getStringConverter } from './stringConverters.js';
 import type { ValueError } from './Validation.js';
 import { _validity, defaultValidity } from './Validity.js';
 
@@ -49,7 +51,7 @@ interface FieldElementHolder<T> {
 }
 
 interface Field<T> extends FieldBase<T> {
-  readonly model?: AbstractModel<T>;
+  readonly model?: ProvisionalModel<T>;
 }
 
 interface FieldState<T> extends Field<T>, FieldElementHolder<T> {
@@ -74,7 +76,7 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
 
   abstract invalid: boolean;
 
-  readonly model?: AbstractModel<T>;
+  readonly model?: ProvisionalModel<T>;
 
   #element: E;
 
@@ -86,7 +88,7 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
 
   readonly #eventHandlers = new Map<string, EventHandler>();
 
-  constructor(element: E, model?: AbstractModel<T>) {
+  constructor(element: E, model?: ProvisionalModel<T>) {
     this.#element = element;
     this.model = model;
   }
@@ -108,7 +110,12 @@ export abstract class AbstractFieldStrategy<T = any, E extends FieldElement<T> =
   }
 
   set value(value: T | undefined) {
-    if (this.model instanceof StringModel || this.model instanceof NumberModel) {
+    if (
+      this.model instanceof BinderStringModel ||
+      this.model instanceof StringModel ||
+      this.model instanceof BinderNumberModel ||
+      this.model instanceof NumberModel
+    ) {
       this.#element.value = value ?? ('' as T);
       return;
     }
@@ -212,7 +219,7 @@ export class VaadinFieldStrategy<T = any, E extends FieldElement<T> = FieldEleme
   readonly #boundOnValidated = this.#onValidated.bind(this);
   readonly #boundOnUnparsableChange = this.#onUnparsableChange.bind(this);
 
-  constructor(element: E, model?: AbstractModel<T>) {
+  constructor(element: E, model?: ProvisionalModel<T>) {
     super(element, model);
     element.addEventListener('validated', this.#boundOnValidated);
     element.addEventListener('unparsable-change', this.#boundOnUnparsableChange);
@@ -293,7 +300,7 @@ export class CheckedFieldStrategy<
   E extends CheckedFieldElement<T> = CheckedFieldElement<T>,
 > extends GenericFieldStrategy<T, E> {
   override get value(): T | undefined {
-    if (this.model instanceof BooleanModel) {
+    if (this.model instanceof BinderBooleanModel || this.model instanceof BooleanModel) {
       return this.element.checked as T;
     }
 
@@ -328,7 +335,13 @@ export class ComboBoxFieldStrategy<
   E extends ComboBoxFieldElement<T> = ComboBoxFieldElement<T>,
 > extends VaadinFieldStrategy<T, E> {
   override get value(): T | undefined {
-    if (this.model && (this.model instanceof ObjectModel || this.model instanceof ArrayModel)) {
+    if (
+      this.model &&
+      (this.model instanceof BinderObjectModel ||
+        this.model instanceof ObjectModel ||
+        this.model instanceof BinderArrayModel ||
+        this.model instanceof ArrayModel)
+    ) {
       const { selectedItem } = this.element;
       return selectedItem ?? undefined;
     }
@@ -337,7 +350,12 @@ export class ComboBoxFieldStrategy<
   }
 
   override set value(val: T | undefined) {
-    if (this.model instanceof ObjectModel || this.model instanceof ArrayModel) {
+    if (
+      this.model instanceof BinderObjectModel ||
+      this.model instanceof ObjectModel ||
+      this.model instanceof BinderArrayModel ||
+      this.model instanceof ArrayModel
+    ) {
       this.element.selectedItem = val ?? null;
     } else {
       super.value = val;
@@ -423,7 +441,10 @@ type MaybeVaadinElementConstructor = {
   readonly version?: string;
 };
 
-export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: AbstractModel<T>): AbstractFieldStrategy<T> {
+export function getDefaultFieldStrategy<T>(
+  elm: FieldElement<T>,
+  model?: ProvisionalModel<T>,
+): AbstractFieldStrategy<T> {
   switch (elm.localName) {
     case 'vaadin-checkbox':
     case 'vaadin-radio-button':
@@ -441,7 +462,7 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
     case 'vaadin-time-picker':
       return new VaadinStringFieldStrategy(
         elm as FieldElement<string>,
-        model as AbstractModel<string>,
+        model as ProvisionalModel<string>,
       ) as AbstractFieldStrategy<T>;
     case 'vaadin-date-time-picker':
       return new VaadinDateTimeFieldStrategy(elm, model) as AbstractFieldStrategy<T>;
@@ -456,8 +477,21 @@ export function getDefaultFieldStrategy<T>(elm: FieldElement<T>, model?: Abstrac
   }
 }
 
-function convertFieldValue<T extends AbstractModel>(model: T, fieldValue: unknown) {
-  return typeof fieldValue === 'string' && hasFromString(model) ? model[_fromString](fieldValue) : fieldValue;
+function convertFieldValue<T extends ProvisionalModel>(model: T, fieldValue: unknown) {
+  if (typeof fieldValue !== 'string') {
+    return fieldValue;
+  }
+
+  const stringConverter = getStringConverter(model);
+  if (stringConverter) {
+    return stringConverter.fromString(fieldValue);
+  }
+
+  if (hasFromString(model)) {
+    return model[_fromString](fieldValue);
+  }
+
+  return fieldValue;
 }
 
 /**
@@ -483,7 +517,7 @@ export const field = directive(
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    override render(_model: AbstractModel<any>, _effect?: (element: Element) => void) {
+    override render(_model: ProvisionalModel<any>, _effect?: (element: Element) => void) {
       return nothing;
     }
 

@@ -1,11 +1,12 @@
 import type { BinderNode } from './BinderNode.js';
 import { getBinderNode } from './BinderNode.js';
 import type { BinderRoot } from './BinderRoot.js';
-import { AbstractModel, type Value } from './Models.js';
+import type { Value } from './Models.js';
+import type { ProvisionalModel } from './ProvisionalModel.js';
 import { IsNumber, Required, ValidityStateValidator } from './Validators.js';
 
 export interface ValueError<T = unknown> {
-  property: AbstractModel | string;
+  property: ProvisionalModel | string;
   message: string;
   value: T;
   validator: Validator<T>;
@@ -13,7 +14,7 @@ export interface ValueError<T = unknown> {
 }
 
 export interface ValidationResult {
-  property: AbstractModel | string;
+  property: ProvisionalModel | string;
   message?: string;
 }
 
@@ -25,7 +26,7 @@ export class ValidationError extends Error {
       [
         'There are validation errors in the form.',
         ...errors.map((e) => {
-          const property = e.property instanceof AbstractModel ? String(getBinderNode(e.property).value) : e.property;
+          const property = typeof e.property === 'string' ? e.property : String(getBinderNode(e.property).value);
           return `${property} - ${e.validator.constructor.name}${e.message ? `: ${e.message}` : ''}`;
         }),
       ].join('\n - '),
@@ -35,7 +36,7 @@ export class ValidationError extends Error {
   }
 }
 
-export type InterpolateMessageCallback<M extends AbstractModel> = (
+export type InterpolateMessageCallback<M extends ProvisionalModel> = (
   message: string,
   validator: Validator<Value<M>>,
   binderNode: BinderNode<M>,
@@ -75,7 +76,7 @@ function setPropertyAbsolutePath(binderNodeName: string, result: ValidationResul
   return result;
 }
 
-export async function runValidator<M extends AbstractModel>(
+export async function runValidator<M extends ProvisionalModel>(
   model: M,
   validator: Validator<Value<M>>,
   interpolateMessageCallback?: InterpolateMessageCallback<M>,

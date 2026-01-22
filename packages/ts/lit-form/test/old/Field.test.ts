@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions, no-shadow, @typescript-eslint/unbound-method */
-import { $defaultValue, $name, type Model } from '@vaadin/hilla-models';
 import chaiDom from 'chai-dom';
 import { LitElement, nothing, render } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -8,10 +7,12 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import isLength from 'validator/es/lib/isLength.js';
 import { afterEach, assert, beforeEach, chai, describe, expect, it } from 'vitest';
+import type { BinderNode } from '../../src/BinderNode.js';
+// API to test
 import {
   AbstractFieldStrategy,
+  type AbstractModel,
   Binder,
-  type BinderNode,
   CheckedFieldStrategy,
   CheckedGroupFieldStrategy,
   ComboBoxFieldStrategy,
@@ -24,9 +25,7 @@ import {
   SelectedFieldStrategy,
   VaadinDateTimeFieldStrategy,
   VaadinFieldStrategy,
-  type ProvisionalModel,
-} from '../src/index.js';
-// API to test
+} from '../../src/index.js';
 import { OrderModel, TestModel } from './TestModels.js';
 
 chai.use(sinonChai);
@@ -151,7 +150,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should set given non-empty value on reset with argument', async () => {
-        const emptyOrder = OrderModel[$defaultValue];
+        const emptyOrder = OrderModel.createEmptyValue();
         orderViewWithTextField.binder.read({
           ...emptyOrder,
           customer: {
@@ -167,7 +166,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       it('should set given empty value on reset with argument', async () => {
-        const emptyOrder = OrderModel[$defaultValue];
+        const emptyOrder = OrderModel.createEmptyValue();
         orderViewWithTextField.binder.read({
           ...emptyOrder,
           customer: {
@@ -179,7 +178,7 @@ describe('@vaadin/hilla-lit-form', () => {
         await orderViewWithTextField.updateComplete;
         orderViewWithTextField.notesField!.valueSpy.set.resetHistory();
 
-        orderViewWithTextField.binder.read(OrderModel[$defaultValue]);
+        orderViewWithTextField.binder.read(OrderModel.createEmptyValue());
         await orderViewWithTextField.updateComplete;
 
         expect(orderViewWithTextField.notesField!.valueSpy.set, '').to.be.calledWith;
@@ -583,7 +582,7 @@ describe('@vaadin/hilla-lit-form', () => {
           let currentStrategy: FieldStrategy;
           let element: Element & { value?: any };
 
-          function renderTag(model: Model) {
+          function renderTag(model: AbstractModel) {
             render(
               html`
                 <${tagName} ${field(model)}></${tagName}>`,
@@ -596,7 +595,7 @@ describe('@vaadin/hilla-lit-form', () => {
           it('should clear optional field to an empty string', () => {
             const model = binder.model.fieldOptionalString;
 
-            binder.read({ ...TestModel[$defaultValue], fieldOptionalString: 'test-value' });
+            binder.read({ ...TestModel.createEmptyValue(), fieldOptionalString: 'test-value' });
             renderTag(model);
             expect(currentStrategy.value).to.be.equal('test-value');
             expect(element.value).to.be.equal('test-value');
@@ -614,7 +613,7 @@ describe('@vaadin/hilla-lit-form', () => {
         let currentStrategy: FieldStrategy;
         let element: Element & { value?: any };
 
-        function renderTag(model: Model) {
+        function renderTag(model: AbstractModel) {
           render(
             html`
               <${tagName} ${field(model)}></${tagName}>`,
@@ -627,7 +626,7 @@ describe('@vaadin/hilla-lit-form', () => {
         it('should clear optional field to an empty string', () => {
           const model = binder.model.fieldOptionalString;
 
-          binder.read({ ...TestModel[$defaultValue], fieldOptionalString: '2024-12-14T11:15:30.1234567' });
+          binder.read({ ...TestModel.createEmptyValue(), fieldOptionalString: '2024-12-14T11:15:30.1234567' });
           renderTag(model);
 
           currentStrategy = getFieldStrategySpy.lastCall.returnValue;
@@ -816,14 +815,14 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       [
-        { model: binder.model.fieldString as Model, value: 'a-string-value' },
-        { model: binder.model.fieldBoolean as Model, value: true },
-        { model: binder.model.fieldNumber as Model, value: 10 },
-        { model: binder.model.fieldObject as Model, value: { foo: true } },
-        { model: binder.model.fieldArrayString as Model, value: ['a', 'b'] },
-        { model: binder.model.fieldArrayModel as Model, value: [{ idString: 'id' }] },
+        { model: binder.model.fieldString as AbstractModel<any>, value: 'a-string-value' },
+        { model: binder.model.fieldBoolean as AbstractModel<any>, value: true },
+        { model: binder.model.fieldNumber as AbstractModel<any>, value: 10 },
+        { model: binder.model.fieldObject as AbstractModel<any>, value: { foo: true } },
+        { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
+        { model: binder.model.fieldArrayModel as AbstractModel<any>, value: [{ idString: 'id' }] },
       ].forEach(({ model, value }, idx) => {
-        it(`VaadinFieldStrategy ${model[$name]} ${idx}`, async () => {
+        it(`VaadinFieldStrategy ${model.constructor.name} ${idx}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <any-vaadin-element-tag ${field(model)}></any-vaadin-element-tag>`, div);
@@ -868,11 +867,11 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       [
-        { model: binder.model.fieldString as Model, value: 'a-string-value' },
-        { model: binder.model.fieldBoolean as Model, value: true },
-        { model: binder.model.fieldNumber as Model, value: 10 },
+        { model: binder.model.fieldString as AbstractModel<any>, value: 'a-string-value' },
+        { model: binder.model.fieldBoolean as AbstractModel<any>, value: true },
+        { model: binder.model.fieldNumber as AbstractModel<any>, value: 10 },
       ].forEach(({ model, value }) => {
-        it(`ComboBoxFieldStrategy value for ${model[$name]}`, async () => {
+        it(`ComboBoxFieldStrategy value for ${model.constructor.name}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <vaadin-combo-box ${field(model)}></vaadin-combo-box>`, div);
@@ -918,10 +917,10 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       [
-        { model: binder.model.fieldObject as Model, value: { foo: true } },
-        { model: binder.model.fieldArrayString as Model, value: ['a', 'b'] },
+        { model: binder.model.fieldObject as AbstractModel<any>, value: { foo: true } },
+        { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
       ].forEach(({ model, value }) => {
-        it(`ComboBoxFieldStrategy selectedItem for ${model[$name]}`, async () => {
+        it(`ComboBoxFieldStrategy selectedItem for ${model.constructor.name}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <vaadin-combo-box ${field(model)}></vaadin-combo-box>`, div);
@@ -967,10 +966,10 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       [
-        { model: binder.model.fieldArrayString as Model, value: ['a', 'b'] },
-        { model: binder.model.fieldArrayModel as Model, value: [{ idString: 'id' }] },
+        { model: binder.model.fieldArrayString as AbstractModel<any>, value: ['a', 'b'] },
+        { model: binder.model.fieldArrayModel as AbstractModel<any>, value: [{ idString: 'id' }] },
       ].forEach(({ model, value }) => {
-        it(`MultiSelectComboBoxFieldStrategy selectedItems for ${model[$name]}`, async () => {
+        it(`MultiSelectComboBoxFieldStrategy selectedItems for ${model.constructor.name}`, async () => {
           let element;
           const renderElement = () => {
             render(html` <vaadin-multi-select-combo-box ${field(model)}></vaadin-multi-select-combo-box>`, div);
@@ -1076,7 +1075,7 @@ describe('@vaadin/hilla-lit-form', () => {
       });
 
       describe('Dynamic strategy', () => {
-        function renderElement<T extends HTMLElement>(tag: string, renderModel: Model): T {
+        function renderElement<T extends HTMLElement>(tag: string, renderModel: AbstractModel): T {
           const tagName = unsafeStatic(tag);
 
           render(
@@ -1089,7 +1088,7 @@ describe('@vaadin/hilla-lit-form', () => {
         }
 
         const stringValue = 'a-string-value';
-        let model: Model;
+        let model: AbstractModel;
         let binderNode: BinderNode;
 
         beforeEach(async () => {
@@ -1165,7 +1164,7 @@ describe('@vaadin/hilla-lit-form', () => {
       //   binderNode.value = stringValue;
       //   await resetBinderNodeValidation(binderNode);
       //
-      //   const renderElement = <T extends HTMLElement>(tag: string, renderModel: Model) => {
+      //   const renderElement = <T extends HTMLElement>(tag: string, renderModel: AbstractModel) => {
       //     const tagName = unsafeStatic(tag);
       //
       //     render(
@@ -1238,7 +1237,7 @@ describe('@vaadin/hilla-lit-form', () => {
             super(elm, TestModel);
           }
 
-          override getFieldStrategy(elm: any, model?: ProvisionalModel): FieldStrategy {
+          override getFieldStrategy(elm: any, model: AbstractModel<any>): FieldStrategy {
             return new MyStrategy(elm, model);
           }
         }
