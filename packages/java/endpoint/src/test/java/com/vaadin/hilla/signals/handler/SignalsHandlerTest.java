@@ -35,7 +35,7 @@ import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.hilla.signals.internal.InternalSignal;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 import com.vaadin.signals.Id;
-import com.vaadin.signals.NumberSignal;
+import com.vaadin.signals.shared.SharedNumberSignal;
 
 public class SignalsHandlerTest {
 
@@ -64,7 +64,7 @@ public class SignalsHandlerTest {
     public void when_signalAlreadyRegistered_subscribe_returnsSubscriptionOfSameInstance()
             throws Exception {
 
-        NumberSignal numberSignal = new NumberSignal();
+        SharedNumberSignal numberSignal = new SharedNumberSignal();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
                 .thenAnswer(invocation -> new InternalSignal(numberSignal,
                         new ObjectMapper()));
@@ -127,7 +127,7 @@ public class SignalsHandlerTest {
     @Test
     public void when_signalIsRegistered_update_notifiesTheSubscribers()
             throws Exception {
-        NumberSignal numberSignal = new NumberSignal(10.0);
+        SharedNumberSignal numberSignal = new SharedNumberSignal(10.0);
         var signalId = numberSignal.id();
         when(signalsRegistry.get(CLIENT_SIGNAL_ID_1))
                 .thenAnswer(invocation -> new InternalSignal(numberSignal,

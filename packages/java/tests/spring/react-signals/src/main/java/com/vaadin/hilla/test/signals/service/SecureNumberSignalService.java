@@ -20,21 +20,21 @@ import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.signals.NumberSignal;
+import com.vaadin.signals.shared.SharedNumberSignal;
 
 @BrowserCallable
 public class SecureNumberSignalService {
 
-    private final NumberSignal userCounter = new NumberSignal(20d);
-    private final NumberSignal adminCounter = new NumberSignal(30d);
+    private final SharedNumberSignal userCounter = new SharedNumberSignal(20d);
+    private final SharedNumberSignal adminCounter = new SharedNumberSignal(30d);
 
     @PermitAll
-    public NumberSignal userCounter() {
+    public SharedNumberSignal userCounter() {
         return userCounter;
     }
 
     @RolesAllowed("ADMIN")
-    public NumberSignal adminCounter() {
+    public SharedNumberSignal adminCounter() {
         return adminCounter;
     }
 

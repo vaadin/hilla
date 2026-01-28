@@ -27,13 +27,13 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.signals.AbstractSignal;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.SignalCommand;
-import com.vaadin.signals.SignalUtils;
 import com.vaadin.signals.function.CleanupCallback;
-import com.vaadin.signals.impl.CommandResult;
-import com.vaadin.signals.impl.SignalTree;
+import com.vaadin.signals.shared.AbstractSignal;
+import com.vaadin.signals.shared.SignalUtils;
+import com.vaadin.signals.shared.impl.CommandResult;
+import com.vaadin.signals.shared.impl.SignalTree;
 
 /**
  * A proxy for a signal instance that allows subscribing to it and submitting
