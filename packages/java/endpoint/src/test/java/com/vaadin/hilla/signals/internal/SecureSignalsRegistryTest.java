@@ -37,14 +37,14 @@ import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.AbstractSignal;
+import com.vaadin.signals.Signal;
 
 public class SecureSignalsRegistryTest {
 
     @Test
     public void when_accessToEndpointIsAllowed_signalInstanceIsRegistered()
             throws Exception {
-        AbstractSignal<?> signal = Mockito.mock(AbstractSignal.class);
+        Signal<?> signal = Mockito.mock(Signal.class);
         InternalSignal internalSignal = new InternalSignal(signal,
                 new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
@@ -68,7 +68,7 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_unsubscribedIsCalled_underlyingRegistryRemovesClientSignalToSignalMapping()
             throws Exception {
-        AbstractSignal<?> signal = Mockito.mock(AbstractSignal.class);
+        Signal<?> signal = Mockito.mock(Signal.class);
         InternalSignal internalSignal = new InternalSignal(signal,
                 new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
@@ -104,7 +104,7 @@ public class SecureSignalsRegistryTest {
     @Test
     public void when_accessToEndpointIsAllowed_get_returnsSignal()
             throws Exception {
-        AbstractSignal<?> signal = Mockito.mock(AbstractSignal.class);
+        Signal<?> signal = Mockito.mock(Signal.class);
         InternalSignal internalSignal = new InternalSignal(signal,
                 new ObjectMapper());
         EndpointInvoker invoker = mockEndpointInvokerThatGrantsAccess(signal);
@@ -163,7 +163,7 @@ public class SecureSignalsRegistryTest {
     }
 
     private EndpointInvoker mockEndpointInvokerThatGrantsAccess(
-            AbstractSignal<?> signal) throws Exception {
+            Signal<?> signal) throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
         when(invoker.invoke(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(), Mockito.any(), Mockito.any()))

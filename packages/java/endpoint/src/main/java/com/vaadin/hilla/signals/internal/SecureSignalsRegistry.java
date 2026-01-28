@@ -31,7 +31,7 @@ import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.AbstractSignal;
+import com.vaadin.signals.Signal;
 
 /**
  * Proxy for the accessing the SignalRegistry.
@@ -63,7 +63,7 @@ public class SecureSignalsRegistry {
                 .getSecurityHolderRoleChecker();
         checkAccess(endpointName, methodName, principal, isInRole);
 
-        AbstractSignal<?> signal = (AbstractSignal<?>) invoker
+        Signal<?> signal = (Signal<?>) invoker
                 .invoke(endpointName, methodName, body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));

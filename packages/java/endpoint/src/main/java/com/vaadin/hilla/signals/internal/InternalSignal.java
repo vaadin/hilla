@@ -27,7 +27,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-import com.vaadin.signals.AbstractSignal;
+import com.vaadin.signals.Signal;
 import com.vaadin.signals.Id;
 import com.vaadin.signals.SignalCommand;
 import com.vaadin.signals.SignalUtils;
@@ -46,7 +46,7 @@ public class InternalSignal {
     // ClientSignalId -> Subscriber's sink
     private final Map<String, Sinks.Many<JsonNode>> subscribers = new HashMap<>();
 
-    private final AbstractSignal<?> signal;
+    private final Signal<?> signal;
     private final SignalTree tree;
     private CleanupCallback treeSubscriptionCanceler;
 
@@ -56,7 +56,7 @@ public class InternalSignal {
     private final Map<Id, String> commandsOfSubscribers = new HashMap<>();
     private final ObjectMapper objectMapper;
 
-    public InternalSignal(AbstractSignal<?> signal, ObjectMapper objectMapper) {
+    public InternalSignal(Signal<?> signal, ObjectMapper objectMapper) {
         this.signal = signal;
         this.tree = SignalUtils.treeOf(signal);
         this.objectMapper = objectMapper;
