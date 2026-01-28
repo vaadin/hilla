@@ -31,7 +31,7 @@ import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.AbstractSignal;
+import com.vaadin.signals.shared.AbstractSignal;
 
 /**
  * Proxy for the accessing the SignalRegistry.
