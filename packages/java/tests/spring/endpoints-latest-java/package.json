@@ -16,10 +16,10 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
-    "@preact/signals-react-transform": "0.6.0",
+    "@preact/signals-react-transform": "0.8.0",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
-    "@types/node": "25.0.3",
+    "@types/node": "25.0.10",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
