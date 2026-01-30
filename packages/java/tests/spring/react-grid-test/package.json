@@ -4,14 +4,14 @@
   "type": "module",
   "dependencies": {
     "@vaadin/common-frontend": "0.0.19",
-    "@vaadin/hilla-file-router": "file:../../../../ts/file-router",
-    "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
-    "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/hilla-react-auth": "file:../../../../ts/react-auth",
-    "@vaadin/hilla-react-crud": "file:../../../../ts/react-crud",
-    "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
-    "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
-    "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
+    "@vaadin/hilla-file-router": "25.1.0-alpha2",
+    "@vaadin/hilla-frontend": "25.1.0-alpha2",
+    "@vaadin/hilla-lit-form": "25.1.0-alpha2",
+    "@vaadin/hilla-react-auth": "25.1.0-alpha2",
+    "@vaadin/hilla-react-crud": "25.1.0-alpha2",
+    "@vaadin/hilla-react-form": "25.1.0-alpha2",
+    "@vaadin/hilla-react-i18n": "25.1.0-alpha2",
+    "@vaadin/hilla-react-signals": "25.1.0-alpha2",
     "@vaadin/react-components": "25.1.0-alpha3",
     "@vaadin/react-components-pro": "25.1.0-alpha3",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
@@ -19,17 +19,17 @@
     "@vaadin/vaadin-themable-mixin": "25.1.0-alpha3",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "lit": "3.3.2",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-router": "7.12.0"
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-router": "7.13.0"
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
-    "@preact/signals-react-transform": "0.6.0",
+    "@preact/signals-react-transform": "0.8.0",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
-    "@types/node": "25.0.3",
-    "@types/react": "19.2.7",
+    "@types/node": "25.0.10",
+    "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -71,17 +71,17 @@
       "@vaadin/vaadin-themable-mixin": "25.1.0-alpha3",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "lit": "3.3.2",
-      "react": "19.2.3",
-      "react-dom": "19.2.3",
-      "react-router": "7.12.0"
+      "react": "19.2.4",
+      "react-dom": "19.2.4",
+      "react-router": "7.13.0"
     },
     "devDependencies": {
       "@babel/preset-react": "7.28.5",
-      "@preact/signals-react-transform": "0.6.0",
+      "@preact/signals-react-transform": "0.8.0",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
-      "@types/node": "25.0.3",
-      "@types/react": "19.2.7",
+      "@types/node": "25.0.10",
+      "@types/react": "19.2.9",
       "@types/react-dom": "19.2.3",
       "@vaadin/hilla-generator-cli": "25.1.0-alpha2",
       "@vaadin/hilla-generator-core": "25.1.0-alpha2",
@@ -105,7 +105,7 @@
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0"
     },
-    "hash": "c9bc1bb042f271dbbfe147acacb325d579e72e54114903f4f5681b3af54dd0b9"
+    "hash": "c6bbbbf8c7686bd0b97094e5d9c97af7dae390d349cb97fc4a417639747adf55"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -119,10 +119,6 @@
     "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/hilla-generator-plugin-backbone": "$@vaadin/hilla-generator-plugin-backbone",
     "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
-    "@vaadin/hilla-react-form": "$@vaadin/hilla-react-form",
-    "@vaadin/hilla-react-crud": "$@vaadin/hilla-react-crud",
-    "@vaadin/hilla-react-auth": "$@vaadin/hilla-react-auth",
-    "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
     "@vaadin/hilla-generator-plugin-subtypes": "$@vaadin/hilla-generator-plugin-subtypes",
     "react-dom": "$react-dom",
     "@types/react-dom": "$@types/react-dom",
@@ -202,6 +198,14 @@
     "@vaadin/dashboard": "25.1.0-alpha3",
     "@vaadin/grid-pro": "25.1.0-alpha3",
     "@vaadin/map": "25.1.0-alpha3",
-    "@vaadin/rich-text-editor": "25.1.0-alpha3"
+    "@vaadin/rich-text-editor": "25.1.0-alpha3",
+    "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
+    "@vaadin/hilla-react-auth": "$@vaadin/hilla-react-auth",
+    "@vaadin/hilla-react-crud": "$@vaadin/hilla-react-crud",
+    "@vaadin/hilla-file-router": "$@vaadin/hilla-file-router",
+    "@vaadin/hilla-react-i18n": "$@vaadin/hilla-react-i18n",
+    "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
+    "@vaadin/hilla-react-form": "$@vaadin/hilla-react-form",
+    "@vaadin/hilla-react-signals": "$@vaadin/hilla-react-signals"
   }
 }

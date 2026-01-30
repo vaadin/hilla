@@ -16,10 +16,10 @@
 package com.vaadin.hilla.parser.plugins.transfertypes.signals;
 
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.signals.ListSignal;
-import com.vaadin.signals.NumberSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.signals.shared.SharedNumberSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 
 @Endpoint
 public class SignalEndpoint {
@@ -27,15 +27,15 @@ public class SignalEndpoint {
         return null;
     }
 
-    public ValueSignal<String> getStringValueSignal() {
+    public SharedValueSignal<String> getStringValueSignal() {
         return null;
     }
 
-    public NumberSignal getNumberSignal() {
+    public SharedNumberSignal getNumberSignal() {
         return null;
     }
 
-    public ListSignal<String> getStringListSignal() {
+    public SharedListSignal<String> getStringListSignal() {
         return null;
     }
 }
