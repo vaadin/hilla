@@ -68,6 +68,7 @@ public class EngineAutoConfiguration {
     private ClassFinder classFinder;
     private ClassLoader classLoader;
     private EngineConfiguration userEngineConfiguration;
+    private HillaFeatureProperties featureProperties;
 
     private EngineAutoConfiguration() {
         baseDir = Path.of(System.getProperty("user.dir"));
@@ -135,6 +136,13 @@ public class EngineAutoConfiguration {
 
     public ClassFinder getClassFinder() {
         return classFinder;
+    }
+
+    public HillaFeatureProperties getFeatureProperties() {
+        if (featureProperties == null) {
+            featureProperties = HillaFeatureProperties.fromBaseDir(baseDir);
+        }
+        return featureProperties;
     }
 
     public ClassLoader getClassLoader() {
@@ -280,6 +288,7 @@ public class EngineAutoConfiguration {
             this.configuration.nodeCommand = configuration.nodeCommand;
             this.configuration.classFinder = configuration.classFinder;
             this.configuration.classLoader = configuration.classLoader;
+            this.configuration.featureProperties = configuration.featureProperties;
             this.configuration.parser.setEndpointAnnotations(
                     configuration.getEndpointAnnotations());
             this.configuration.parser.setEndpointExposedAnnotations(
@@ -372,6 +381,11 @@ public class EngineAutoConfiguration {
 
         public Builder classLoader(ClassLoader value) {
             configuration.classLoader = value;
+            return this;
+        }
+
+        public Builder featureProperties(HillaFeatureProperties value) {
+            configuration.featureProperties = value;
             return this;
         }
 

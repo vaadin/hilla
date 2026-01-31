@@ -16,9 +16,11 @@
 package com.vaadin.hilla.route;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
+@ConditionalOnProperty(name = "hilla.file-router.enabled", matchIfMissing = true)
 class RouteUtilConfiguration {
 
     @Bean

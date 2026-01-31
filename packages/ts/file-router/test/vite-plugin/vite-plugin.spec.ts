@@ -13,6 +13,18 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('@vaadin/hilla-file-router', () => {
+  describe('vite-plugin disabled', () => {
+    it('should return a no-op plugin when enabled is false', () => {
+      const plugin = vitePluginFileSystemRouter({ enabled: false });
+      expect(plugin).to.have.property('name', 'vite-plugin-file-router');
+      // A no-op plugin should not have configResolved, buildStart, etc.
+      expect(plugin).to.not.have.property('configResolved');
+      expect(plugin).to.not.have.property('buildStart');
+      expect(plugin).to.not.have.property('hotUpdate');
+      expect(plugin).to.not.have.property('transform');
+    });
+  });
+
   describe('vite-plugin', () => {
     let mockModuleGraph: {
       getModulesByFile(file: string): Set<EnvironmentModuleNode>;

@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -46,12 +47,14 @@ public final class GeneratorProcessor {
     private final Path openAPIFile;
     private final Path outputDirectory;
     private final GeneratorConfiguration.PluginsProcessor pluginsProcessor = new GeneratorConfiguration.PluginsProcessor();
+    private final HillaFeatureProperties featureProperties;
 
     public GeneratorProcessor(EngineAutoConfiguration conf) {
         this.baseDir = conf.getBaseDir();
         this.openAPIFile = conf.getOpenAPIFile();
         this.outputDirectory = conf.getOutputDir();
         this.nodeCommand = conf.getNodeCommand();
+        this.featureProperties = conf.getFeatureProperties();
         applyConfiguration(conf.getGenerator());
     }
 
@@ -163,12 +166,40 @@ public final class GeneratorProcessor {
     }
 
     private void preparePlugins(List<Object> arguments) {
+        var disabledPlugins = getDisabledPlugins();
+
         pluginsProcessor.process().stream()
                 .map(GeneratorConfiguration.Plugin::getPath).distinct()
-                .forEachOrdered(path -> {
+                .filter(path -> {
+                    if (disabledPlugins.contains(path)) {
+                        logger.info(
+                                "Skipping generator plugin '{}' (disabled by Hilla feature properties)",
+                                path);
+                        return false;
+                    }
+                    return true;
+                }).forEachOrdered(path -> {
                     arguments.add("-p");
                     arguments.add(path);
                 });
+    }
+
+    private Set<String> getDisabledPlugins() {
+        var disabled = new java.util.HashSet<String>();
+
+        if (!featureProperties.isVaadinUiEnabled()) {
+            disabled.add("@vaadin/hilla-generator-plugin-model");
+            logger.info(
+                    "Vaadin UI disabled: skipping model generator plugin");
+        }
+
+        if (!featureProperties.isAutoCrudEnabled()) {
+            disabled.add("@vaadin/hilla-generator-plugin-model");
+            logger.info(
+                    "Auto CRUD disabled: skipping model generator plugin");
+        }
+
+        return disabled;
     }
 
     private void prepareVerbose(List<Object> arguments) {
