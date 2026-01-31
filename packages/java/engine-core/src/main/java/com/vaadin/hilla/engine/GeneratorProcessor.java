@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -185,7 +186,7 @@ public final class GeneratorProcessor {
     }
 
     private Set<String> getDisabledPlugins() {
-        var disabled = new java.util.HashSet<String>();
+        var disabled = new HashSet<String>();
 
         if (!featureProperties.isVaadinUiEnabled()) {
             disabled.add("@vaadin/hilla-generator-plugin-model");
