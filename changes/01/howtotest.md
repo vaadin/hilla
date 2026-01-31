@@ -17,13 +17,16 @@ cd /home/user/haru
 mvn test -pl packages/java/engine-core -Dtest=HillaFeaturePropertiesTest
 ```
 
-This runs 9 tests covering:
+This runs 22 tests covering:
 - Default values (all true)
-- Missing properties file -> defaults
-- Empty properties file -> defaults
-- Individual feature disable/enable
-- All features disabled
-- Mixed properties
+- Missing configuration file -> defaults
+- Empty `.properties` file -> defaults
+- Individual feature disable/enable (`.properties`)
+- All features disabled (`.properties`)
+- Mixed properties with unrelated keys
+- `.yml` file: all disabled, single disabled, explicitly enabled, empty file, no hilla section, mixed content, quoted string values
+- `.yaml` extension support
+- Precedence: `.properties` > `.yml` > `.yaml`
 - Builder integration with EngineAutoConfiguration
 
 ### TypeScript: Vite Plugin disabled mode
@@ -52,7 +55,7 @@ Expected: 12 tests pass (11 existing + 1 new for `enabled=false`).
    - Verify: file-based routes work, `RouteUnifyingServiceInitListener` is registered
    - Check logs: no "Skipping" messages
 
-3. **With feature disabled**:
+3. **With feature disabled (properties format)**:
    ```properties
    # application.properties
    hilla.file-router.enabled=false
@@ -61,6 +64,15 @@ Expected: 12 tests pass (11 existing + 1 new for `enabled=false`).
    - Verify: `RouteUnifyingServiceInitListener` bean is NOT created
    - Check Spring debug logs: `@ConditionalOnProperty` should show the bean was skipped
    - Routes should NOT be unified (server-side routes not injected into client)
+
+4. **With feature disabled (YAML format)**:
+   ```yaml
+   # application.yml
+   hilla:
+     file-router:
+       enabled: false
+   ```
+   - Same verification as step 3
 
 ### Test Auto-CRUD Toggle
 
@@ -157,9 +169,14 @@ Negative matches:
 
 ## 5. Edge Cases to Verify
 
-- Properties file does not exist -> all features enabled
-- Properties file exists but is empty -> all features enabled
+- No configuration file exists -> all features enabled
+- Configuration file exists but is empty -> all features enabled (both `.properties` and `.yml`)
 - Property set to any value other than `false` -> treated as true
 - Property has whitespace: `hilla.file-router.enabled = false ` -> should work (trimmed)
 - Multiple features disabled simultaneously
-- Property in `application.yml` format (YAML) -> currently NOT supported by `HillaFeatureProperties.fromBaseDir()`, only `.properties` format. See futuresuggestions.md.
+- YAML with quoted string values: `enabled: "false"` -> should work
+- YAML with no `hilla:` section -> all features enabled (defaults)
+- YAML with mixed content (other Spring properties alongside Hilla) -> only Hilla properties extracted
+- Precedence: `.properties` overrides `.yml` when both exist
+- Precedence: `.yml` overrides `.yaml` when both exist
+- Only `.yaml` present (no `.properties` or `.yml`) -> `.yaml` is used

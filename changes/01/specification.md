@@ -31,21 +31,40 @@ Hilla is a web framework that integrates a Spring Boot Java backend with a react
 
 ## Task
 
-Create a single-file configuration mechanism using Spring Boot's standard `application.properties` that allows switching off these three features. Properties should default to `true` (all features enabled) for backward compatibility.
+Create a configuration mechanism using Spring Boot's standard `application.properties`, `application.yml`, or `application.yaml` that allows switching off these three features. Properties should default to `true` (all features enabled) for backward compatibility.
 
 ### Properties
 
 ```properties
+# application.properties format
 hilla.file-router.enabled=true    # default: true
 hilla.auto-crud.enabled=true      # default: true
 hilla.vaadin-ui.enabled=true      # default: true
 ```
 
+```yaml
+# application.yml / application.yaml format
+hilla:
+  file-router:
+    enabled: true    # default: true
+  auto-crud:
+    enabled: true    # default: true
+  vaadin-ui:
+    enabled: true    # default: true
+```
+
+### File Precedence
+
+Configuration files are checked in this order (first found wins):
+1. `application.properties`
+2. `application.yml`
+3. `application.yaml`
+
 ### Constraints
 
 - No files should be deleted, only modified with if-statement guards
 - Default behavior (all true) must be identical to current behavior
-- Build-time code generation must respect the toggles (read `application.properties` from `src/main/resources/`)
+- Build-time code generation must respect the toggles (read configuration from `src/main/resources/`)
 - Runtime Spring beans must respect the toggles (via `@ConditionalOnProperty`)
 - The Vite plugin must support an `enabled` option
 

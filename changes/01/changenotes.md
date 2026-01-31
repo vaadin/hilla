@@ -2,7 +2,7 @@
 
 ## Summary
 
-Added `application.properties`-driven feature toggles for file-router, auto-crud, and vaadin-ui. All default to `true` for backward compatibility.
+Added feature toggles for file-router, auto-crud, and vaadin-ui driven by `application.properties`, `application.yml`, or `application.yaml`. All default to `true` for backward compatibility. Files are checked in precedence order: `.properties` > `.yml` > `.yaml` (first found wins).
 
 ## Files Changed
 
@@ -10,29 +10,34 @@ Added `application.properties`-driven feature toggles for file-router, auto-crud
 
 #### 1. `packages/java/engine-core/src/main/java/com/vaadin/hilla/engine/HillaFeatureProperties.java`
 
-POJO that reads three boolean properties from `application.properties`:
+Reads three boolean properties from the application configuration file:
 - `hilla.file-router.enabled` (default: true)
 - `hilla.auto-crud.enabled` (default: true)
 - `hilla.vaadin-ui.enabled` (default: true)
 
+Supports `.properties` format (via `java.util.Properties`) and YAML format (via SnakeYAML). For YAML, navigates nested map structure (e.g. `hilla.file-router.enabled` maps to `hilla: { file-router: { enabled: false } }`). Handles both native YAML booleans and quoted string values.
+
 Key methods:
 - `defaults()` - returns instance with all features enabled
-- `fromBaseDir(Path baseDir)` - reads `src/main/resources/application.properties` from the project base directory. Falls back to all-true defaults if file is missing or unreadable.
+- `fromBaseDir(Path baseDir)` - checks for `application.properties`, then `application.yml`, then `application.yaml` under `src/main/resources/`. Uses the first file found. Falls back to all-true defaults if no file exists or cannot be read.
 - `isFileRouterEnabled()`, `isAutoCrudEnabled()`, `isVaadinUiEnabled()` - getters
 
-This works at **build time** (Maven/Gradle) by reading the properties file directly from the filesystem, without needing a Spring context.
+This works at **build time** (Maven/Gradle) by reading the configuration file directly from the filesystem, without needing a Spring context.
 
 #### 2. `packages/java/engine-core/src/test/java/com/vaadin/hilla/engine/HillaFeaturePropertiesTest.java`
 
-9 unit tests covering:
+22 unit tests covering:
 - All defaults enabled
-- Missing properties file -> defaults
-- Empty properties file -> defaults
-- Each feature disabled individually
-- All features disabled together
-- Explicit true values
+- Missing configuration file -> defaults
+- Empty `.properties` file -> defaults
+- Each feature disabled individually (`.properties`)
+- All features disabled together (`.properties`)
+- Explicit true values (`.properties`)
 - Mixed properties with unrelated keys
 - Missing individual properties default to true
+- `.yml` file: all disabled, single disabled, explicitly enabled, empty file, no hilla section, mixed content, quoted string values
+- `.yaml` extension support
+- Precedence: `.properties` over `.yml`, `.yml` over `.yaml`, `.yaml` when others absent
 - Builder retains feature properties on `EngineAutoConfiguration`
 
 ### Modified Files
@@ -45,18 +50,23 @@ Changes:
 - Added `Builder.featureProperties(HillaFeatureProperties)` method
 - Builder constructor copies `featureProperties` from source configuration
 
-#### 4. `packages/java/engine-core/src/main/java/com/vaadin/hilla/engine/GeneratorProcessor.java`
+#### 4. `packages/java/engine-core/pom.xml`
+
+Changes:
+- Added `org.yaml:snakeyaml` dependency (version managed by Spring Boot BOM via `spring-boot-dependencies`)
+
+#### 5. `packages/java/engine-core/src/main/java/com/vaadin/hilla/engine/GeneratorProcessor.java`
 
 Changes:
 - Added `HillaFeatureProperties featureProperties` field, initialized from `conf.getFeatureProperties()` in constructor
-- Added `import java.util.Set`
+- Added `import java.util.HashSet` and `import java.util.Set`
 - Modified `preparePlugins(List<Object> arguments)` to filter disabled plugins via `getDisabledPlugins()`
 - Added `getDisabledPlugins()` method that returns a `Set<String>` of plugin paths to skip:
   - When `vaadinUiEnabled=false` -> skips `@vaadin/hilla-generator-plugin-model`
   - When `autoCrudEnabled=false` -> skips `@vaadin/hilla-generator-plugin-model`
 - Logs info messages when plugins are skipped
 
-#### 5. `packages/java/endpoint/src/main/java/com/vaadin/hilla/startup/RouteUnifyingServiceInitListener.java`
+#### 6. `packages/java/endpoint/src/main/java/com/vaadin/hilla/startup/RouteUnifyingServiceInitListener.java`
 
 Changes:
 - Added import: `org.springframework.boot.autoconfigure.condition.ConditionalOnProperty`
@@ -64,7 +74,7 @@ Changes:
 
 When `hilla.file-router.enabled=false`, this Spring bean is not registered. This disables the route unification listener that injects server-side routes into HTML and handles dynamic route info requests.
 
-#### 6. `packages/java/endpoint/src/main/java/com/vaadin/hilla/route/RouteUtilConfiguration.java`
+#### 7. `packages/java/endpoint/src/main/java/com/vaadin/hilla/route/RouteUtilConfiguration.java`
 
 Changes:
 - Added import: `org.springframework.boot.autoconfigure.condition.ConditionalOnProperty`
@@ -72,7 +82,7 @@ Changes:
 
 When disabled, the `RouteUtil` bean (which implements `FileRouterRequestUtil`) is not registered.
 
-#### 7. `packages/java/endpoint/src/main/java/com/vaadin/hilla/route/RouteUnifyingConfiguration.java`
+#### 8. `packages/java/endpoint/src/main/java/com/vaadin/hilla/route/RouteUnifyingConfiguration.java`
 
 Changes:
 - Added import: `org.springframework.boot.autoconfigure.condition.ConditionalOnProperty`
@@ -80,13 +90,13 @@ Changes:
 
 When disabled, the `RouteUnifyingConfigurationProperties` bean is not registered.
 
-#### 8. `packages/ts/file-router/src/vite-plugin.ts`
+#### 9. `packages/ts/file-router/src/vite-plugin.ts`
 
 Changes:
 - Added `enabled?: boolean` to `PluginOptions` type (default: `true`)
 - Added early return in `vitePluginFileSystemRouter()`: when `enabled=false`, returns a no-op plugin object with only the `name` property (no `configResolved`, `buildStart`, `hotUpdate`, or `transform` hooks)
 
-#### 9. `packages/ts/file-router/test/vite-plugin/vite-plugin.spec.ts`
+#### 10. `packages/ts/file-router/test/vite-plugin/vite-plugin.spec.ts`
 
 Changes:
 - Added new describe block `'vite-plugin disabled'` with 1 test:
@@ -101,7 +111,11 @@ Maven/Gradle plugin executes
   -> EngineAutoConfiguration.Builder.build()
   -> EngineAutoConfiguration stores baseDir
   -> GeneratorProcessor(conf) reads conf.getFeatureProperties()
-     -> HillaFeatureProperties.fromBaseDir(baseDir) reads application.properties
+     -> HillaFeatureProperties.fromBaseDir(baseDir) checks for:
+        1. application.properties  (java.util.Properties)
+        2. application.yml         (SnakeYAML)
+        3. application.yaml        (SnakeYAML)
+        First file found wins; if none, defaults to all-enabled
   -> preparePlugins() filters disabled plugins from Node.js CLI arguments
   -> Node.js runs generator-cli with only enabled plugins
 ```

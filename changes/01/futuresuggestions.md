@@ -1,22 +1,12 @@
 # Future Suggestions: Hilla Feature Toggles
 
+## Implemented
+
+- ~~Support `application.yml` / `application.yaml` format~~ — Done. `HillaFeatureProperties.fromBaseDir()` now checks `.properties`, `.yml`, and `.yaml` in precedence order using SnakeYAML.
+
 ## Immediate Enhancements
 
-### 1. Support `application.yml` Format
-
-Currently `HillaFeatureProperties.fromBaseDir()` only reads `.properties` format. Many Spring Boot projects use YAML. Add:
-
-```java
-// In HillaFeatureProperties.java
-Path yamlFile = baseDir.resolve("src/main/resources/application.yml");
-if (Files.exists(yamlFile)) {
-    // Use SnakeYAML or Spring's YamlPropertiesFactoryBean to parse
-}
-```
-
-Priority: **High** - many real projects use YAML.
-
-### 2. Support Spring Profiles
+### 1. Support Spring Profiles
 
 Properties like `application-dev.properties` or `application-prod.properties` are common. The build-time reader could accept an active profile parameter:
 
@@ -28,7 +18,7 @@ public static HillaFeatureProperties fromBaseDir(Path baseDir, String activeProf
 
 The Maven/Gradle plugin already detects production mode, so this could be wired in.
 
-### 3. More Granular Generator Plugin Toggles
+### 2. More Granular Generator Plugin Toggles
 
 Currently only the `model` plugin is toggled. Extend to other plugins:
 
@@ -42,7 +32,7 @@ hilla.generator.plugins.subtypes.enabled=true
 
 This gives fine-grained control over what TypeScript code gets generated.
 
-### 4. Auto-CRUD Infrastructure Conditional Beans
+### 3. Auto-CRUD Infrastructure Conditional Beans
 
 The CRUD base classes (`CrudRepositoryService`, `ListRepositoryService`) are `@EndpointExposed` but not directly Spring-managed beans. Consider adding conditional registration for CRUD infrastructure:
 
@@ -50,7 +40,7 @@ The CRUD base classes (`CrudRepositoryService`, `ListRepositoryService`) are `@E
 - Filter-related OpenAPI schemas excluded when CRUD is disabled
 - Parser-level filtering to exclude CRUD service interfaces from OpenAPI generation
 
-### 5. Vite Plugin Reads from application.properties
+### 4. Vite Plugin Reads from application.properties
 
 Instead of requiring users to pass `enabled: false` in `vite.config.ts`, the Vite plugin could read `application.properties` directly:
 
@@ -71,13 +61,13 @@ This would make the single `application.properties` truly the only configuration
 
 ## Medium-Term Improvements
 
-### 6. Validation and Startup Warnings
+### 5. Validation and Startup Warnings
 
 When a feature is disabled but the user's code still references it:
 - If `hilla.auto-crud.enabled=false` but `@BrowserCallable` services extend `CrudRepositoryService`, log a warning
 - If `hilla.file-router.enabled=false` but `frontend/views/` directory exists with route files, log a warning
 
-### 7. IDE Integration
+### 6. IDE Integration
 
 Spring Boot configuration metadata (`META-INF/additional-spring-configuration-metadata.json`) for autocomplete in IntelliJ/VS Code:
 
@@ -106,7 +96,7 @@ Spring Boot configuration metadata (`META-INF/additional-spring-configuration-me
 }
 ```
 
-### 8. Runtime Configuration Properties Bean
+### 7. Runtime Configuration Properties Bean
 
 Create a proper `@ConfigurationProperties` class for runtime access:
 
@@ -127,7 +117,7 @@ public class HillaProperties {
 
 This would integrate with Spring Boot's property binding, validation, and relaxed binding (e.g., `HILLA_FILE_ROUTER_ENABLED` env var).
 
-### 9. Conditional npm Dependency Installation
+### 8. Conditional npm Dependency Installation
 
 When features are disabled, their npm dependencies could be excluded from `package.json` generation or skipped during install:
 - `hilla.vaadin-ui.enabled=false` -> skip `@vaadin/react-components` installation
@@ -137,7 +127,7 @@ This would reduce bundle size and install time.
 
 ## Long-Term Vision
 
-### 10. Feature Presets
+### 9. Feature Presets
 
 Pre-defined configuration profiles:
 
@@ -152,10 +142,10 @@ hilla.preset=full
 hilla.preset=api
 ```
 
-### 11. Build-Time Feature Detection
+### 10. Build-Time Feature Detection
 
 Automatically detect which features are actually used (by scanning imports, annotations) and skip unused ones without explicit configuration. This would be a zero-config optimization.
 
-### 12. Gradle Plugin Support
+### 11. Gradle Plugin Support
 
 The current implementation modifies Maven plugin path (`Configurable.java`) indirectly via `EngineAutoConfiguration`. The Gradle plugin (`HillaPlugin.kt`) should also be verified to propagate feature properties correctly through `EngineConfigurationSettings`.
