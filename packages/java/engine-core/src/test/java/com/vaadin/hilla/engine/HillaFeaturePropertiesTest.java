@@ -31,6 +31,8 @@ public class HillaFeaturePropertiesTest {
     @TempDir
     Path tempDir;
 
+    // ---- defaults and missing file ----
+
     @Test
     public void defaultsShouldHaveAllFeaturesEnabled() {
         var defaults = HillaFeatureProperties.defaults();
@@ -40,19 +42,19 @@ public class HillaFeaturePropertiesTest {
     }
 
     @Test
-    public void shouldReturnDefaultsWhenNoPropertiesFile() {
+    public void shouldReturnDefaultsWhenNoConfigFile() {
         var props = HillaFeatureProperties.fromBaseDir(tempDir);
         assertTrue(props.isFileRouterEnabled());
         assertTrue(props.isAutoCrudEnabled());
         assertTrue(props.isVaadinUiEnabled());
     }
 
+    // ---- .properties file ----
+
     @Test
     public void shouldReturnDefaultsWhenEmptyPropertiesFile()
             throws IOException {
-        var propsDir = tempDir.resolve("src/main/resources");
-        Files.createDirectories(propsDir);
-        Files.writeString(propsDir.resolve("application.properties"), "");
+        writeFile("application.properties", "");
 
         var props = HillaFeatureProperties.fromBaseDir(tempDir);
         assertTrue(props.isFileRouterEnabled());
@@ -62,7 +64,8 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldReadFileRouterDisabled() throws IOException {
-        writeProperties("hilla.file-router.enabled=false");
+        writeFile("application.properties",
+                "hilla.file-router.enabled=false");
 
         var props = HillaFeatureProperties.fromBaseDir(tempDir);
         assertFalse(props.isFileRouterEnabled());
@@ -72,7 +75,7 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldReadAutoCrudDisabled() throws IOException {
-        writeProperties("hilla.auto-crud.enabled=false");
+        writeFile("application.properties", "hilla.auto-crud.enabled=false");
 
         var props = HillaFeatureProperties.fromBaseDir(tempDir);
         assertTrue(props.isFileRouterEnabled());
@@ -82,7 +85,7 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldReadVaadinUiDisabled() throws IOException {
-        writeProperties("hilla.vaadin-ui.enabled=false");
+        writeFile("application.properties", "hilla.vaadin-ui.enabled=false");
 
         var props = HillaFeatureProperties.fromBaseDir(tempDir);
         assertTrue(props.isFileRouterEnabled());
@@ -92,7 +95,7 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldReadAllDisabled() throws IOException {
-        writeProperties("""
+        writeFile("application.properties", """
                 hilla.file-router.enabled=false
                 hilla.auto-crud.enabled=false
                 hilla.vaadin-ui.enabled=false
@@ -106,7 +109,7 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldReadExplicitlyEnabledFeatures() throws IOException {
-        writeProperties("""
+        writeFile("application.properties", """
                 hilla.file-router.enabled=true
                 hilla.auto-crud.enabled=true
                 hilla.vaadin-ui.enabled=true
@@ -120,7 +123,7 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldHandleMixedProperties() throws IOException {
-        writeProperties("""
+        writeFile("application.properties", """
                 hilla.file-router.enabled=false
                 hilla.auto-crud.enabled=true
                 hilla.vaadin-ui.enabled=false
@@ -135,14 +138,207 @@ public class HillaFeaturePropertiesTest {
 
     @Test
     public void shouldDefaultMissingPropertiesToTrue() throws IOException {
-        writeProperties("hilla.file-router.enabled=false");
+        writeFile("application.properties", "hilla.file-router.enabled=false");
 
         var props = HillaFeatureProperties.fromBaseDir(tempDir);
         assertFalse(props.isFileRouterEnabled());
-        // Not specified in properties file, should default to true
         assertTrue(props.isAutoCrudEnabled());
         assertTrue(props.isVaadinUiEnabled());
     }
+
+    // ---- .yml file ----
+
+    @Test
+    public void shouldReadYmlFileWithAllDisabled() throws IOException {
+        writeFile("application.yml", """
+                hilla:
+                  file-router:
+                    enabled: false
+                  auto-crud:
+                    enabled: false
+                  vaadin-ui:
+                    enabled: false
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertFalse(props.isFileRouterEnabled());
+        assertFalse(props.isAutoCrudEnabled());
+        assertFalse(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void shouldReadYmlFileWithSingleDisabled() throws IOException {
+        writeFile("application.yml", """
+                hilla:
+                  auto-crud:
+                    enabled: false
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertTrue(props.isFileRouterEnabled());
+        assertFalse(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void shouldReadYmlFileWithExplicitlyEnabled() throws IOException {
+        writeFile("application.yml", """
+                hilla:
+                  file-router:
+                    enabled: true
+                  auto-crud:
+                    enabled: true
+                  vaadin-ui:
+                    enabled: true
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertTrue(props.isFileRouterEnabled());
+        assertTrue(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void shouldReturnDefaultsForEmptyYml() throws IOException {
+        writeFile("application.yml", "");
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertTrue(props.isFileRouterEnabled());
+        assertTrue(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void shouldReturnDefaultsForYmlWithoutHillaSection()
+            throws IOException {
+        writeFile("application.yml", """
+                spring:
+                  datasource:
+                    url: jdbc:h2:mem:test
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertTrue(props.isFileRouterEnabled());
+        assertTrue(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void shouldHandleYmlWithMixedContent() throws IOException {
+        writeFile("application.yml", """
+                spring:
+                  datasource:
+                    url: jdbc:h2:mem:test
+                hilla:
+                  file-router:
+                    enabled: false
+                  vaadin-ui:
+                    enabled: false
+                server:
+                  port: 8080
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertFalse(props.isFileRouterEnabled());
+        assertTrue(props.isAutoCrudEnabled());
+        assertFalse(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void shouldHandleYmlStringValues() throws IOException {
+        writeFile("application.yml", """
+                hilla:
+                  file-router:
+                    enabled: "false"
+                  auto-crud:
+                    enabled: "true"
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertFalse(props.isFileRouterEnabled());
+        assertTrue(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    // ---- .yaml file ----
+
+    @Test
+    public void shouldReadYamlExtension() throws IOException {
+        writeFile("application.yaml", """
+                hilla:
+                  file-router:
+                    enabled: false
+                  auto-crud:
+                    enabled: false
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertFalse(props.isFileRouterEnabled());
+        assertFalse(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    // ---- precedence ----
+
+    @Test
+    public void propertiesFileShouldTakePrecedenceOverYml()
+            throws IOException {
+        writeFile("application.properties",
+                "hilla.file-router.enabled=false");
+        writeFile("application.yml", """
+                hilla:
+                  file-router:
+                    enabled: true
+                  auto-crud:
+                    enabled: false
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        // .properties wins: file-router is false
+        assertFalse(props.isFileRouterEnabled());
+        // .yml is ignored entirely, so auto-crud defaults to true
+        assertTrue(props.isAutoCrudEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void ymlShouldTakePrecedenceOverYaml() throws IOException {
+        writeFile("application.yml", """
+                hilla:
+                  auto-crud:
+                    enabled: false
+                """);
+        writeFile("application.yaml", """
+                hilla:
+                  auto-crud:
+                    enabled: true
+                  file-router:
+                    enabled: false
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        // .yml wins: auto-crud is false
+        assertFalse(props.isAutoCrudEnabled());
+        // .yaml is ignored, so file-router defaults to true
+        assertTrue(props.isFileRouterEnabled());
+        assertTrue(props.isVaadinUiEnabled());
+    }
+
+    @Test
+    public void yamlShouldBeUsedWhenNoPropertiesOrYml() throws IOException {
+        writeFile("application.yaml", """
+                hilla:
+                  vaadin-ui:
+                    enabled: false
+                """);
+
+        var props = HillaFeatureProperties.fromBaseDir(tempDir);
+        assertTrue(props.isFileRouterEnabled());
+        assertTrue(props.isAutoCrudEnabled());
+        assertFalse(props.isVaadinUiEnabled());
+    }
+
+    // ---- builder integration ----
 
     @Test
     public void builderShouldRetainFeatureProperties() {
@@ -155,9 +351,12 @@ public class HillaFeaturePropertiesTest {
         assertFalse(config.getFeatureProperties().isVaadinUiEnabled());
     }
 
-    private void writeProperties(String content) throws IOException {
-        var propsDir = tempDir.resolve("src/main/resources");
-        Files.createDirectories(propsDir);
-        Files.writeString(propsDir.resolve("application.properties"), content);
+    // ---- helper ----
+
+    private void writeFile(String fileName, String content)
+            throws IOException {
+        var resourcesDir = tempDir.resolve("src/main/resources");
+        Files.createDirectories(resourcesDir);
+        Files.writeString(resourcesDir.resolve(fileName), content);
     }
 }

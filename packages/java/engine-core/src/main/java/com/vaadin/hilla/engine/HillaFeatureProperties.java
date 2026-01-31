@@ -19,14 +19,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Reads Hilla feature toggle properties from
- * {@code application.properties}. All features default to {@code true}.
+ * {@code application.properties}, {@code application.yml}, or
+ * {@code application.yaml}. All features default to {@code true}.
+ * <p>
+ * Files are checked in the following precedence order (first found wins):
+ * <ol>
+ * <li>{@code application.properties}</li>
+ * <li>{@code application.yml}</li>
+ * <li>{@code application.yaml}</li>
+ * </ol>
  * <p>
  * Supported properties:
  * <ul>
@@ -46,6 +57,9 @@ public final class HillaFeatureProperties {
     private static final String PROP_FILE_ROUTER = "hilla.file-router.enabled";
     private static final String PROP_AUTO_CRUD = "hilla.auto-crud.enabled";
     private static final String PROP_VAADIN_UI = "hilla.vaadin-ui.enabled";
+
+    private static final List<String> CONFIG_FILE_NAMES = List.of(
+            "application.properties", "application.yml", "application.yaml");
 
     private final boolean fileRouterEnabled;
     private final boolean autoCrudEnabled;
@@ -69,45 +83,34 @@ public final class HillaFeatureProperties {
     }
 
     /**
-     * Reads feature properties from {@code application.properties} located
-     * under the given base directory (typically
-     * {@code src/main/resources/application.properties}).
+     * Reads feature properties from the application configuration file
+     * located under the given base directory (typically under
+     * {@code src/main/resources/}).
      * <p>
-     * If the file does not exist or cannot be read, all features default to
-     * {@code true}.
+     * Checks for {@code application.properties} first, then
+     * {@code application.yml}, then {@code application.yaml}. The first
+     * file found is used. If no file exists or cannot be read, all
+     * features default to {@code true}.
      *
      * @param baseDir
      *            the project base directory
      * @return the parsed feature properties
      */
     public static HillaFeatureProperties fromBaseDir(Path baseDir) {
-        Path propsFile = baseDir.resolve("src/main/resources/application.properties");
-        if (!Files.exists(propsFile)) {
-            LOGGER.debug(
-                    "No application.properties found at {}, all Hilla features enabled by default.",
-                    propsFile);
-            return defaults();
-        }
+        Path resourcesDir = baseDir.resolve("src/main/resources");
 
-        Properties props = new Properties();
-        try (InputStream is = Files.newInputStream(propsFile)) {
-            props.load(is);
-        } catch (IOException e) {
-            LOGGER.warn(
-                    "Failed to read application.properties at {}, all Hilla features enabled by default.",
-                    propsFile, e);
-            return defaults();
+        for (String fileName : CONFIG_FILE_NAMES) {
+            Path configFile = resourcesDir.resolve(fileName);
+            if (Files.exists(configFile)) {
+                return readConfigFile(configFile, fileName);
+            }
         }
-
-        boolean fileRouter = getBooleanProperty(props, PROP_FILE_ROUTER, true);
-        boolean autoCrud = getBooleanProperty(props, PROP_AUTO_CRUD, true);
-        boolean vaadinUi = getBooleanProperty(props, PROP_VAADIN_UI, true);
 
         LOGGER.debug(
-                "Hilla feature properties: file-router={}, auto-crud={}, vaadin-ui={}",
-                fileRouter, autoCrud, vaadinUi);
-
-        return new HillaFeatureProperties(fileRouter, autoCrud, vaadinUi);
+                "No application configuration file found in {}, "
+                        + "all Hilla features enabled by default.",
+                resourcesDir);
+        return defaults();
     }
 
     /**
@@ -129,6 +132,88 @@ public final class HillaFeatureProperties {
      */
     public boolean isVaadinUiEnabled() {
         return vaadinUiEnabled;
+    }
+
+    private static HillaFeatureProperties readConfigFile(Path configFile,
+            String fileName) {
+        if (fileName.endsWith(".properties")) {
+            return readPropertiesFile(configFile);
+        }
+        return readYamlFile(configFile);
+    }
+
+    private static HillaFeatureProperties readPropertiesFile(Path propsFile) {
+        Properties props = new Properties();
+        try (InputStream is = Files.newInputStream(propsFile)) {
+            props.load(is);
+        } catch (IOException e) {
+            LOGGER.warn(
+                    "Failed to read {}, all Hilla features enabled by default.",
+                    propsFile, e);
+            return defaults();
+        }
+
+        boolean fileRouter = getBooleanProperty(props, PROP_FILE_ROUTER, true);
+        boolean autoCrud = getBooleanProperty(props, PROP_AUTO_CRUD, true);
+        boolean vaadinUi = getBooleanProperty(props, PROP_VAADIN_UI, true);
+
+        LOGGER.debug(
+                "Hilla feature properties from {}: file-router={}, auto-crud={}, vaadin-ui={}",
+                propsFile, fileRouter, autoCrud, vaadinUi);
+
+        return new HillaFeatureProperties(fileRouter, autoCrud, vaadinUi);
+    }
+
+    private static HillaFeatureProperties readYamlFile(Path yamlFile) {
+        Map<String, Object> yamlMap;
+        try (InputStream is = Files.newInputStream(yamlFile)) {
+            Yaml yaml = new Yaml();
+            yamlMap = yaml.load(is);
+        } catch (IOException e) {
+            LOGGER.warn(
+                    "Failed to read {}, all Hilla features enabled by default.",
+                    yamlFile, e);
+            return defaults();
+        }
+
+        if (yamlMap == null) {
+            return defaults();
+        }
+
+        boolean fileRouter = getYamlBoolean(yamlMap, true, "hilla",
+                "file-router", "enabled");
+        boolean autoCrud = getYamlBoolean(yamlMap, true, "hilla", "auto-crud",
+                "enabled");
+        boolean vaadinUi = getYamlBoolean(yamlMap, true, "hilla", "vaadin-ui",
+                "enabled");
+
+        LOGGER.debug(
+                "Hilla feature properties from {}: file-router={}, auto-crud={}, vaadin-ui={}",
+                yamlFile, fileRouter, autoCrud, vaadinUi);
+
+        return new HillaFeatureProperties(fileRouter, autoCrud, vaadinUi);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static boolean getYamlBoolean(Map<String, Object> root,
+            boolean defaultValue, String... keys) {
+        Object current = root;
+        for (int i = 0; i < keys.length; i++) {
+            if (!(current instanceof Map)) {
+                return defaultValue;
+            }
+            current = ((Map<String, Object>) current).get(keys[i]);
+            if (current == null) {
+                return defaultValue;
+            }
+        }
+        if (current instanceof Boolean) {
+            return (Boolean) current;
+        }
+        if (current instanceof String) {
+            return Boolean.parseBoolean(((String) current).trim());
+        }
+        return defaultValue;
     }
 
     private static boolean getBooleanProperty(Properties props, String key,
