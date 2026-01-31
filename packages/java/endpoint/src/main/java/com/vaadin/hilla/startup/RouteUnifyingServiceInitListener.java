@@ -21,6 +21,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,7 @@ import com.vaadin.hilla.route.ServerAndClientViewsProvider;
  * {@link RouteUnifyingIndexHtmlRequestListener} to the service.
  */
 @Component
+@ConditionalOnProperty(name = "hilla.file-router.enabled", matchIfMissing = true)
 public class RouteUnifyingServiceInitListener
         implements VaadinServiceInitListener {
     private static final Logger LOGGER = LoggerFactory

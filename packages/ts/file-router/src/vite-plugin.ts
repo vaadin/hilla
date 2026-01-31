@@ -43,6 +43,13 @@ export type PluginOptions = Readonly<{
    * @defaultValue `false`
    */
   debug?: boolean;
+  /**
+   * Whether the file-router feature is enabled. When set to `false`,
+   * the plugin becomes a no-op and no route files are generated.
+   *
+   * @defaultValue `true`
+   */
+  enabled?: boolean;
 }>;
 
 /**
@@ -57,7 +64,14 @@ export default function vitePluginFileSystemRouter({
   extensions = ['.tsx', '.jsx'],
   isDevMode = false,
   debug = false,
+  enabled = true,
 }: PluginOptions = {}): Plugin {
+  if (!enabled) {
+    return {
+      name: 'vite-plugin-file-router',
+    };
+  }
+
   let _viewsDir: URL;
   let _outDir: URL;
   let _logger: Logger;
