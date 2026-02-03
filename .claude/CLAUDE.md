@@ -230,3 +230,28 @@ Key points:
 - Runs on push to main and PRs
 - Parallel test execution for Java tests
 - Coverage reporting with JaCoCo (Java) and c8 (TypeScript)
+
+## AI-Assisted Development with Vaadin MCP
+
+The Vaadin Documentation MCP Server provides intelligent semantic search over Vaadin and Hilla documentation, enabling AI assistants to retrieve framework-aware documentation.
+
+### Quick Setup for Claude Code
+
+Add the Vaadin MCP server to your Claude Code configuration:
+
+```bash
+claude mcp add vaadin --transport http https://mcp.vaadin.com/mcp
+```
+
+### Available Tools
+
+Once configured, the MCP server provides these tools:
+
+- **search_vaadin_docs**: Hybrid semantic and keyword search with framework filtering (Vaadin Flow/Java vs Hilla/React)
+- **get_full_document**: Retrieve complete documentation pages with full context
+- **get_vaadin_version**: Get the latest Vaadin version information
+
+### More Information
+
+- Repository: https://github.com/vaadin/vaadin-mcp
+- Production endpoint: https://mcp.vaadin.com/
