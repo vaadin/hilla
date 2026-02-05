@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-react-i18n",
-  "version": "25.1.0-alpha2",
+  "version": "25.1.0-alpha6",
   "description": "Hilla I18n utils for React",
   "main": "index.js",
   "module": "index.js",
@@ -44,8 +44,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-frontend": "25.1.0-alpha2",
-    "@vaadin/hilla-react-signals": "25.1.0-alpha2",
+    "@vaadin/hilla-frontend": "25.1.0-alpha6",
+    "@vaadin/hilla-react-signals": "25.1.0-alpha6",
     "intl-messageformat": "10.7.11"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-generator-utils",
-  "version": "25.1.0-alpha2",
+  "version": "25.1.0-alpha6",
   "description": "A set of utils for developing Hilla generator plugins",
   "main": "index.js",
   "type": "module",
