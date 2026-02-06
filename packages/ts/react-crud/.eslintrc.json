@@ -3,5 +3,5 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "ignorePatterns": ["src/types/**", "test/grid-test-utils.js"]
+  "ignorePatterns": ["src/types/**", "test/grid-test-utils.js", "test/old/grid-test-utils.js"]
 }
