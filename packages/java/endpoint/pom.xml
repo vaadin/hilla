@@ -37,10 +37,6 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>signals</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
         </dependency>
         <dependency>
