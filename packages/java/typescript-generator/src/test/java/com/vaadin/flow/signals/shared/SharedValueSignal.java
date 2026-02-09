@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.signals;
+package com.vaadin.flow.signals.shared;
 
-public record ListSignal<T>() {
+public record SharedValueSignal<T>() {
 }

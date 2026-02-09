@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.signals.Id;
+import com.vaadin.flow.signals.Id;
 
 /**
  * A registry for signal instances and their client signal id mappings.

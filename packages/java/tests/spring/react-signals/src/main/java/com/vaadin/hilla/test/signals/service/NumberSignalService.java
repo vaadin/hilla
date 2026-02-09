@@ -22,8 +22,8 @@ import java.util.Optional;
 import org.springframework.context.annotation.DependsOn;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.signals.shared.SharedNumberSignal;
 
 @AnonymousAllowed
 @BrowserCallable

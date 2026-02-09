@@ -19,8 +19,8 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.signals.shared.SharedNumberSignal;
 
 @BrowserCallable
 public class SecureNumberSignalService {

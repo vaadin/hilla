@@ -15,11 +15,11 @@
  */
 package com.vaadin.hilla.parser.plugins.transfertypes.signals;
 
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedNumberSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.shared.SharedNumberSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
 
 @Endpoint
 public class SignalEndpoint {

@@ -32,10 +32,10 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.flow.signals.Id;
+import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.hilla.signals.internal.InternalSignal;
 import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
-import com.vaadin.signals.Id;
-import com.vaadin.signals.shared.SharedNumberSignal;
 
 public class SignalsHandlerTest {
 
