@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.signals.Id;
+import com.vaadin.flow.signals.Id;
 
 public class SignalsRegistryTest {
 

@@ -33,11 +33,11 @@ import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
 import tools.jackson.databind.ObjectMapper;
 
+import com.vaadin.flow.signals.shared.AbstractSignal;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.shared.AbstractSignal;
 
 public class SecureSignalsRegistryTest {
 
