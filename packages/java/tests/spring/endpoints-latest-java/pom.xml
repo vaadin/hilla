@@ -42,11 +42,13 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>hilla-maven-plugin</artifactId>
+                <version>${project.version}</version>
             </plugin>
 
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
+                <version>${flow.version}</version>
             </plugin>
 
             <plugin>
