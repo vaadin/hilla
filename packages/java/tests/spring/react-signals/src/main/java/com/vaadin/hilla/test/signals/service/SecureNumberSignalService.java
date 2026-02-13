@@ -40,17 +40,17 @@ public class SecureNumberSignalService {
 
     @AnonymousAllowed
     public Long fetchUserCounterValue() {
-        return userCounter.value().longValue();
+        return userCounter.get().longValue();
     }
 
     @AnonymousAllowed
     public Long fetchAdminCounterValue() {
-        return adminCounter.value().longValue();
+        return adminCounter.get().longValue();
     }
 
     @AnonymousAllowed
     public void resetCounters() {
-        userCounter.value(20d);
-        adminCounter.value(30d);
+        userCounter.set(20d);
+        adminCounter.set(30d);
     }
 }
