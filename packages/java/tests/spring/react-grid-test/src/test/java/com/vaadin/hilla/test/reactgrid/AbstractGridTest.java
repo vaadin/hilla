@@ -117,11 +117,11 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
         // Give some time for React to render changes and make sure Hilla
         // endpoints finish loading
         this.waitUntil((driver) -> {
-            int loadingCount = ((Number) ((JavascriptExecutor) driver)
+            Object result = ((JavascriptExecutor) driver)
                     .executeAsyncScript(
                             "const resolve = arguments[arguments.length - 1];\n"
-                                    + "globalThis.setTimeout(() => { resolve(globalThis.Vaadin.connectionState.loadingCount); }, 100)"))
-                    .intValue();
+                                    + "globalThis.setTimeout(() => { resolve(globalThis.Vaadin?.connectionState?.loadingCount ?? 0); }, 100)");
+            int loadingCount = result instanceof Number number ? number.intValue() : 0;
             return loadingCount == 0;
         });
     }
