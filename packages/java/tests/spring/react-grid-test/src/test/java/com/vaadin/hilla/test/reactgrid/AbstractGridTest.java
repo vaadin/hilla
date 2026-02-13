@@ -118,7 +118,11 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
         // endpoints finish loading
         this.waitUntil((driver) -> Boolean.TRUE
                 .equals(((JavascriptExecutor) driver).executeAsyncScript(
-                        "const resolve = arguments[arguments.length - 1];\n"
-                                + "globalThis.setTimeout(() => { resolve(globalThis.Vaadin.connectionState.state === 'connected'); }, 100)")));
+                        """
+                                const resolve = arguments[arguments.length - 1];
+                                globalThis.setTimeout(() => {
+                                    resolve(globalThis.Vaadin.connectionState.state === 'connected');
+                                }, 100);
+                                """)));
     }
 }
