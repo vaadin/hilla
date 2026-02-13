@@ -116,11 +116,9 @@ public abstract class AbstractGridTest extends ChromeBrowserTest {
     private void waitForLoading() {
         // Give some time for React to render changes and make sure Hilla
         // endpoints finish loading
-        this.waitUntil((driver) -> {
-            Boolean.TRUE
-                    .equals(((JavascriptExecutor) driver).executeAsyncScript(
-                            "const resolve = arguments[arguments.length - 1];\n"
-                                    + "globalThis.setTimeout(() => { resolve(globalThis.Vaadin.connectionState.state === 'connected'); }, 100)"));
-        });
+        this.waitUntil((driver) -> Boolean.TRUE
+                .equals(((JavascriptExecutor) driver).executeAsyncScript(
+                        "const resolve = arguments[arguments.length - 1];\n"
+                                + "globalThis.setTimeout(() => { resolve(globalThis.Vaadin.connectionState.state === 'connected'); }, 100)")));
     }
 }
