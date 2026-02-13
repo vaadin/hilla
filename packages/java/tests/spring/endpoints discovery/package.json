@@ -7,12 +7,12 @@
     "@vaadin/common-frontend": "0.0.21",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "25.1.0-alpha6",
-    "@vaadin/icons": "25.1.0-alpha6",
+    "@vaadin/icon": "25.1.0-alpha7",
+    "@vaadin/icons": "25.1.0-alpha7",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "25.1.0-alpha6",
-    "@vaadin/vaadin-lumo-styles": "25.1.0-alpha6",
-    "@vaadin/vaadin-themable-mixin": "25.1.0-alpha6",
+    "@vaadin/tooltip": "25.1.0-alpha7",
+    "@vaadin/vaadin-lumo-styles": "25.1.0-alpha7",
+    "@vaadin/vaadin-themable-mixin": "25.1.0-alpha7",
     "lit": "3.3.2"
   },
   "devDependencies": {
