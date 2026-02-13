@@ -3,7 +3,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@vaadin/common-frontend": "0.0.19",
+    "@vaadin/common-frontend": "0.0.21",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/icon": "25.0.4",
@@ -46,7 +46,7 @@
   },
   "vaadin": {
     "dependencies": {
-      "@vaadin/common-frontend": "0.0.19",
+      "@vaadin/common-frontend": "0.0.21",
       "@vaadin/hilla-frontend": "25.0.5",
       "@vaadin/hilla-lit-form": "25.0.5",
       "@vaadin/icon": "25.0.4",
@@ -87,7 +87,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "b70ef585215911ee715b98dcbc69e7f992f909eb9c66eb39539f284adea73df8"
+    "hash": "4fdcf6868833eca0276168dc6a1c74e71f795b5ff3f9d0454e888bdc5519ce26"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
