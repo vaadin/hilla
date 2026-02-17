@@ -22,7 +22,7 @@
     "@vaadin/checkbox": "25.1.0-alpha7",
     "@vaadin/checkbox-group": "25.1.0-alpha7",
     "@vaadin/combo-box": "25.1.0-alpha7",
-    "@vaadin/common-frontend": "0.0.21",
+    "@vaadin/common-frontend": "0.0.22",
     "@vaadin/component-base": "25.1.0-alpha7",
     "@vaadin/confirm-dialog": "25.1.0-alpha7",
     "@vaadin/context-menu": "25.1.0-alpha7",
@@ -131,7 +131,7 @@
       "@vaadin/checkbox": "24.8.0-alpha4",
       "@vaadin/checkbox-group": "24.8.0-alpha4",
       "@vaadin/combo-box": "24.8.0-alpha4",
-      "@vaadin/common-frontend": "0.0.21",
+      "@vaadin/common-frontend": "0.0.22",
       "@vaadin/component-base": "24.8.0-alpha4",
       "@vaadin/confirm-dialog": "24.8.0-alpha4",
       "@vaadin/context-menu": "24.8.0-alpha4",
@@ -224,7 +224,7 @@
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0"
     },
-    "hash": "e17d7b788ad3210a037f5e7c0d43609b752904a14d237df3c49646c66a86389f"
+    "hash": "70f47e013549447619b24268e95f832065ee8f4395af8de9616eead52e2880c5"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
