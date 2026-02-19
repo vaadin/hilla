@@ -62,6 +62,29 @@ class SingleModuleTest : AbstractGradleTest() {
         verifyEndpointsTsFileGeneratedProperly()
     }
 
+    @Test
+    fun `flow filterClasspath configuration is applied to vaadinPrepareFrontend and vaadinBuildFrontend`() {
+        createProject(productionMode = true, filterClasspath = true)
+
+        val buildResult: BuildResult = testProject.build("vaadinBuildFrontend", checkTasksSuccessful = false)
+
+        // The build output contains two "Passing this classpath" lines:
+        // 1st from vaadinPrepareFrontend, 2nd from vaadinBuildFrontend.
+        // With filterClasspath { include("com.vaadin:*") }, non-vaadin jars
+        // like spring-boot-starter-web should be excluded from both.
+        val classpathLines = buildResult.output.lines()
+            .filter { it.contains("Passing this classpath to NodeTasks.Builder") }
+
+        expect(false, "vaadinPrepareFrontend classpath should not contain spring-boot-starter-web " +
+                "when filterClasspath { include(\"com.vaadin:*\") } is set") {
+            classpathLines.first().contains("spring-boot-starter-web")
+        }
+        expect(false, "vaadinBuildFrontend classpath should not contain spring-boot-starter-web " +
+                "when filterClasspath { include(\"com.vaadin:*\") } is set") {
+            classpathLines.last().contains("spring-boot-starter-web")
+        }
+    }
+
     // configuration cache currently does not support tests running in debug mode
     @Test
     fun `hillaGenerate support Gradle configuration cache`() {
@@ -162,7 +185,8 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     private fun createProject(withNpmInstall: Boolean = false, productionMode: Boolean = false,
-                              disableAllTasksToSimulateDryRun: Boolean = false) {
+                              disableAllTasksToSimulateDryRun: Boolean = false,
+                              filterClasspath: Boolean = false) {
 
         val npmInstallTask = if (withNpmInstall) {
             """
@@ -172,13 +196,13 @@ class SingleModuleTest : AbstractGradleTest() {
             """.trimIndent()
         } else ""
 
-        val productionBuild = if (productionMode) {
-            """
-                vaadin {
-                    productionMode = true
-                }
-            """.trimIndent()
-        } else ""
+        val vaadinBlock = buildList {
+            if (productionMode) add("    productionMode = true")
+            if (filterClasspath) add("    filterClasspath {\n        include(\"com.vaadin:*\")\n    }")
+        }.let { lines ->
+            if (lines.isEmpty()) ""
+            else "vaadin {\n${lines.joinToString("\n")}\n}"
+        }
 
         // We don't want to actually run the build in production,
         // but we just want to make sure of the task dependency.
@@ -218,7 +242,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
             $npmInstallTask
 
-            $productionBuild
+            $vaadinBlock
 
             $disableAllTasks
 
