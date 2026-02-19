@@ -49,8 +49,6 @@ public class HillaPlugin : Plugin<Project> {
 
         // only register Hilla tasks in projects that use Spring Boot
         project.plugins.withId("org.springframework.boot") {
-            project.tasks.replace("vaadinBuildFrontend", EngineBuildFrontendTask::class.java)
-
             project.tasks.apply {
                 register("hillaConfigure", EngineConfigureTask::class.java) {
                     it.configure(project)
