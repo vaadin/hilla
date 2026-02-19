@@ -27,9 +27,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Id;
 import com.vaadin.flow.signals.SignalCommand;
-import com.vaadin.flow.signals.function.CleanupCallback;
 import com.vaadin.flow.signals.shared.AbstractSignal;
 import com.vaadin.flow.signals.shared.SignalUtils;
 import com.vaadin.flow.signals.shared.impl.CommandResult;
@@ -48,7 +48,7 @@ public class InternalSignal {
 
     private final AbstractSignal<?> signal;
     private final SignalTree tree;
-    private CleanupCallback treeSubscriptionCanceler;
+    private Registration treeSubscriptionCanceler;
 
     // Commands in processing, mapping commandId -> clientSignalId
     private final Map<Id, ObjectNode> inProgressCommands = new HashMap<>();
@@ -101,7 +101,7 @@ public class InternalSignal {
                     getLogger().debug(
                             "No more subscribers, canceling tree subscription");
                     assert treeSubscriptionCanceler != null;
-                    treeSubscriptionCanceler.cleanup();
+                    treeSubscriptionCanceler.remove();
                     treeSubscriptionCanceler = null;
                 }
             } finally {
