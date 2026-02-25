@@ -147,7 +147,6 @@
     "@vaadin/aura": "25.1.0-alpha9",
     "@vaadin/avatar": "25.1.0-alpha9",
     "@vaadin/avatar-group": "25.1.0-alpha9",
-    "@vaadin/badge": "25.1.0-alpha8",
     "@vaadin/button": "25.1.0-alpha9",
     "@vaadin/card": "25.1.0-alpha9",
     "@vaadin/checkbox": "25.1.0-alpha9",
@@ -208,6 +207,7 @@
     "@vaadin/dashboard": "25.1.0-alpha9",
     "@vaadin/grid-pro": "25.1.0-alpha9",
     "@vaadin/map": "25.1.0-alpha9",
-    "@vaadin/rich-text-editor": "25.1.0-alpha9"
+    "@vaadin/rich-text-editor": "25.1.0-alpha9",
+    "@vaadin/badge": "25.1.0-alpha9"
   }
 }
