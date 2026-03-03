@@ -30,7 +30,7 @@ import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Id;
 import com.vaadin.flow.signals.SignalCommand;
-import com.vaadin.flow.signals.shared.AbstractSignal;
+import com.vaadin.flow.signals.shared.AbstractSharedSignal;
 import com.vaadin.flow.signals.shared.SignalUtils;
 import com.vaadin.flow.signals.shared.impl.CommandResult;
 import com.vaadin.flow.signals.shared.impl.SignalTree;
@@ -46,7 +46,7 @@ public class InternalSignal {
     // ClientSignalId -> Subscriber's sink
     private final Map<String, Sinks.Many<JsonNode>> subscribers = new HashMap<>();
 
-    private final AbstractSignal<?> signal;
+    private final AbstractSharedSignal<?> signal;
     private final SignalTree tree;
     private Registration treeSubscriptionCanceler;
 
@@ -56,7 +56,8 @@ public class InternalSignal {
     private final Map<Id, String> commandsOfSubscribers = new HashMap<>();
     private final ObjectMapper objectMapper;
 
-    public InternalSignal(AbstractSignal<?> signal, ObjectMapper objectMapper) {
+    public InternalSignal(AbstractSharedSignal<?> signal,
+            ObjectMapper objectMapper) {
         this.signal = signal;
         this.tree = SignalUtils.treeOf(signal);
         this.objectMapper = objectMapper;
