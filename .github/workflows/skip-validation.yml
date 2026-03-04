@@ -2,15 +2,15 @@ name: Validation
 
 on:
   push:
-    branches: [ main, '25.0', '24.9', '2.5', '1.5' ]
+    branches: [ main, '25.1', '25.0', '24.9', '2.5', '1.5' ]
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
-  pull_request_target:
-    branches: [main]
+  pull_request:
+    branches: ['25.1']
     paths:
       - 'hilla-logo.svg'
       - 'README.md'
