@@ -8,17 +8,17 @@ import { useEffect, useRef } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
-import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
-import type { CountService, CrudService, ListService } from '../src/crud.js';
-import type { HeaderFilterRendererProps } from '../src/header-filter.js';
-import { LocaleContext } from '../src/locale.js';
-import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
-import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
-import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
-import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
-import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
+import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../../src/autogrid.js';
+import type { CountService, CrudService, ListService } from '../../src/crud.js';
+import type { HeaderFilterRendererProps } from '../../src/header-filter.js';
+import { LocaleContext } from '../../src/locale.js';
+import type AndFilter from '../../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
+import type FilterUnion from '../../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import Matcher from '../../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type Sort from '../../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
+import Direction from '../../src/types/org/springframework/data/domain/Sort/Direction.js';
+import NullHandling from '../../src/types/org/springframework/data/domain/Sort/NullHandling.js';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {
@@ -31,12 +31,12 @@ import {
   Gender,
   getItem,
   type HasTestInfo,
-  NamedModel,
   type Person,
   personData,
   personListService,
   PersonModel,
   personService,
+  PersonWithoutIdPropertyModel,
   PersonWithSimpleIdPropertyModel,
 } from './test-models-and-services.js';
 import { nextFrame } from './test-utils.js';
@@ -1898,7 +1898,10 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(grid.instance.itemIdPath).to.equal('email');
 
         // Model without discernible ID property
-        grid = await GridController.init(render(<AutoGrid service={personService()} model={NamedModel} />), user);
+        grid = await GridController.init(
+          render(<AutoGrid service={personService()} model={PersonWithoutIdPropertyModel} />),
+          user,
+        );
         expect(grid.instance.itemIdPath).to.be.undefined;
       });
     });
