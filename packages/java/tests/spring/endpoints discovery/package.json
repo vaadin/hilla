@@ -11,8 +11,8 @@
     "@vaadin/icons": "25.1.0-beta2",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "25.1.0-beta2",
-    "@vaadin/vaadin-lumo-styles": "25.1.0-beta1",
-    "@vaadin/vaadin-themable-mixin": "25.1.0-beta1",
+    "@vaadin/vaadin-lumo-styles": "25.1.0-beta2",
+    "@vaadin/vaadin-themable-mixin": "25.1.0-beta2",
     "lit": "3.3.2"
   },
   "devDependencies": {
