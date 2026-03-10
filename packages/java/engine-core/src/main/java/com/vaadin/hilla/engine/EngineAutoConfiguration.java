@@ -56,6 +56,7 @@ public class EngineAutoConfiguration {
     private String groupId;
     private String artifactId;
     private String mainClass;
+    private List<String> sourceClasses = List.of();
     private Path buildDir;
     private Path baseDir;
     private List<Path> classesDirs;
@@ -98,6 +99,10 @@ public class EngineAutoConfiguration {
 
     public String getMainClass() {
         return mainClass;
+    }
+
+    public List<String> getSourceClasses() {
+        return sourceClasses;
     }
 
     public Path getBuildDir() {
@@ -275,6 +280,7 @@ public class EngineAutoConfiguration {
             this.configuration.groupId = configuration.groupId;
             this.configuration.artifactId = configuration.artifactId;
             this.configuration.mainClass = configuration.mainClass;
+            this.configuration.sourceClasses = configuration.sourceClasses;
             this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
@@ -347,6 +353,11 @@ public class EngineAutoConfiguration {
 
         public Builder mainClass(String value) {
             configuration.mainClass = value;
+            return this;
+        }
+
+        public Builder sourceClasses(List<String> sourceClasses) {
+            configuration.sourceClasses = sourceClasses;
             return this;
         }
 

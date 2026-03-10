@@ -18,6 +18,7 @@ package com.vaadin.hilla.maven;
 import static com.vaadin.flow.internal.FrontendUtils.FRONTEND;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
@@ -60,6 +61,9 @@ public final class EngineGenerateMojo extends AbstractMojo
     @Parameter(property = "mainClass")
     private String mainClass;
 
+    @Parameter
+    private String[] sourceClasses;
+
     @Override
     public void execute() throws EngineGenerateMojoException {
         var project = (MavenProject) getPluginContext().get("project");
@@ -94,6 +98,11 @@ public final class EngineGenerateMojo extends AbstractMojo
     @Override
     public String getMainClass() {
         return mainClass;
+    }
+
+    @Override
+    public String[] getSourceClasses() {
+        return sourceClasses;
     }
 
     @Override
