@@ -183,9 +183,19 @@ public class EngineAutoConfiguration {
             result = (conf) -> {
                 var exceptions = new ArrayList<BrowserCallableFinderException>();
 
-                return Stream.<BrowserCallableFinder> of(
+                var classFinders = Stream.<BrowserCallableFinder>of(
                         LookupBrowserCallableFinder::find,
-                        AotBrowserCallableFinder::find).map(finder -> {
+                        AotBrowserCallableFinder::find
+                );
+
+                if (conf.getMainClass() != null || !conf.getSourceClasses().isEmpty()) {
+                    // Use Spring-based class finder with explicit configuration
+                    classFinders = Stream.<BrowserCallableFinder>of(
+                            AotBrowserCallableFinder::find
+                    );
+                }
+
+                return classFinders.map(finder -> {
                             try {
                                 return finder.find(conf);
                             } catch (BrowserCallableFinderException e) {
