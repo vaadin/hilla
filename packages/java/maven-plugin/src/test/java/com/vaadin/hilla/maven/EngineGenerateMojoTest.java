@@ -42,8 +42,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
                     // Verify configuration argument
                     var conf = (EngineAutoConfiguration) context.arguments()
-                            .get(0);
-                    verifyConfiguration(conf);
+                            .getFirst();
+                    assertEquals(conf.getBaseDir(), getTemporaryDirectory());
                 });
                 var mockedConstructionGenerator = Mockito.mockConstruction(
                         GeneratorProcessor.class, Mockito.withSettings()
@@ -55,8 +55,8 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
                             // Verify configuration argument
                             var conf = (EngineAutoConfiguration) context
-                                    .arguments().get(0);
-                            verifyConfiguration(conf);
+                                    .arguments().getFirst();
+                            assertEquals(conf.getBaseDir(), getTemporaryDirectory());
                         }));) {
 
             // Lookup and initialize mojo
@@ -68,12 +68,12 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
 
             assertEquals(1, mockedConstructionParser.constructed().size(),
                     "expected to construct " + "ParserProcessor");
-            var parserProcessor = mockedConstructionParser.constructed().get(0);
+            var parserProcessor = mockedConstructionParser.constructed().getFirst();
 
             assertEquals(1, mockedConstructionGenerator.constructed().size(),
                     "expected to construct " + "GeneratorProcessor");
             var generatorProcessor = mockedConstructionGenerator.constructed()
-                    .get(0);
+                    .getFirst();
 
             var inOrder = Mockito.inOrder(parserProcessor, generatorProcessor);
             inOrder.verify(parserProcessor).process(List.of());
@@ -81,7 +81,51 @@ public class EngineGenerateMojoTest extends AbstractMojoTest {
         }
     }
 
-    private void verifyConfiguration(EngineAutoConfiguration conf) {
-        assertEquals(conf.getBaseDir(), getTemporaryDirectory());
+    @Test
+    public void should_setConfiguration() throws Exception {
+        var mainClass = "com.vaadin.hilla.test.MainClass";
+        var sourceClasses = new String[] {
+                "com.vaadin.hilla.test.TestConfiguration",
+                "com.vaadin.hilla.test.TestLibraryConfiguration",
+        };
+
+        try (var mockedConstructionParser = Mockito.mockConstruction(
+                ParserProcessor.class,
+                Mockito.withSettings().defaultAnswer(Answers.RETURNS_SELF),
+                (mock, context) -> {
+                    // Verify ParserProcessor constructor arguments
+                    assertEquals(1, context.arguments().size(),
+                            "expected 1 ParserProcessor argument");
+
+                    // Verify configuration argument
+                    var conf = (EngineAutoConfiguration) context.arguments()
+                            .getFirst();
+                    assertEquals(mainClass, conf.getMainClass());
+                    assertEquals(List.of(sourceClasses), conf.getSourceClasses());
+                });
+             var mockedConstructionGenerator = Mockito.mockConstruction(
+                     GeneratorProcessor.class, Mockito.withSettings()
+                             .defaultAnswer(Answers.RETURNS_SELF),
+                     ((mock, context) -> {
+                         // Verify GeneratorProcessor arguments
+                         assertEquals(1, context.arguments().size(),
+                                 "expected 1 GeneratorProcessor argument");
+
+                         // Verify configuration argument
+                         var conf = (EngineAutoConfiguration) context
+                                 .arguments().getFirst();
+                         assertEquals(mainClass, conf.getMainClass());
+                         assertEquals(List.of(sourceClasses), conf.getSourceClasses());
+                     }));) {
+
+            // Lookup and initialize mojo
+            var engineGenerateMojo = (EngineGenerateMojo) lookupMojo("generate",
+                    getTestConfiguration());
+            setVariableValueToObject(engineGenerateMojo, "mainClass", mainClass);
+            setVariableValueToObject(engineGenerateMojo, "sourceClasses", sourceClasses);
+            engineGenerateMojo
+                    .setPluginContext(Map.of("project", getMavenProject()));
+            engineGenerateMojo.execute();
+        }
     }
 }
