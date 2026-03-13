@@ -111,6 +111,10 @@ public class HillaPlugin : Plugin<Project> {
             val pluginClasspath = project.buildscript.configurations.getByName("classpath")
                 .resolve().stream().map { it.toString() }.filter { it.contains("-loader-tools") }
             val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
+            val mainClass = project.findProperty("com.vaadin.hilla.mainClass") as String?
+                ?: project.findProperty("mainClass") as String?
+            val sourceClasses = (project.findProperty("com.vaadin.hilla.sourceClasses") as String?)?.split(",")
+                ?: listOf()
 
             return EngineAutoConfiguration.Builder()
                 .baseDir(baseDir)
@@ -121,7 +125,8 @@ public class HillaPlugin : Plugin<Project> {
                 .artifactId(project.name)
                 .classpath(classpath)
                 .withDefaultAnnotations()
-                .mainClass(project.findProperty("mainClass") as String?)
+                .mainClass(mainClass)
+                .sourceClasses(sourceClasses)
                 .productionMode(vaadinExtension.productionMode.getOrElse(false))
                 .build()
         }
@@ -143,6 +148,7 @@ internal data class EngineConfigurationSettings(
     val artifactId: String,
     val classpath: List<String>,
     val mainClass: String?,
+    val sourceClasses: List<String>,
     val productionMode: Boolean
 ) : Serializable {
     fun toEngineConfiguration(): EngineAutoConfiguration {
@@ -156,6 +162,7 @@ internal data class EngineConfigurationSettings(
             .classpath(classpath)
             .withDefaultAnnotations()
             .mainClass(mainClass)
+            .sourceClasses(sourceClasses)
             .productionMode(productionMode)
             .build()
     }
@@ -170,6 +177,7 @@ internal fun EngineAutoConfiguration.toInputs(): EngineConfigurationSettings {
         artifactId = this.artifactId,
         classpath = this.classpath.map { it.toString() },
         mainClass = this.mainClass,
+        sourceClasses = this.sourceClasses,
         productionMode = this.isProductionMode
     )
 }
