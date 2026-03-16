@@ -115,9 +115,20 @@ public class InternalSignal {
             CommandResult result) {
         var commandToEmit = inProgressCommands
                 .remove(processedCommand.commandId());
+        if (commandToEmit != null) {
+            commandToEmit.put("accepted", result.accepted());
+            if (result instanceof CommandResult.Reject reject) {
+                commandToEmit.put("reason", reject.reason());
+            }
+        }
         if (result.accepted()) {
+            // For server-originated commands (e.g. signal.set() from Java),
+            // there is no stored command JSON, so serialize from the processed
+            // command:
+            ObjectNode nodeToEmit = commandToEmit != null ? commandToEmit
+                    : objectMapper.valueToTree(processedCommand);
             subscribers.entrySet().removeIf(
-                    client -> tryEmitCommandToSubscriber(commandToEmit,
+                    client -> tryEmitCommandToSubscriber(nodeToEmit,
                             client.getKey(), client.getValue()));
         } else {
             // only notify the client that issued the failed command
@@ -130,7 +141,9 @@ public class InternalSignal {
                 return;
             }
 
-            boolean failure = tryEmitCommandToSubscriber(commandToEmit,
+            ObjectNode rejectToEmit = commandToEmit != null ? commandToEmit
+                    : objectMapper.valueToTree(processedCommand);
+            boolean failure = tryEmitCommandToSubscriber(rejectToEmit,
                     clientSignalId, subscribers.get(clientSignalId));
             if (failure) {
                 // remove the subscriber if it failed to emit to:

@@ -152,6 +152,7 @@ class ServerConnection {
 
 export const $update = Symbol('update');
 export const $processServerResponse = Symbol('processServerResponse');
+export const $handleRejection = Symbol('handleRejection');
 export const $setValueQuietly = Symbol('setValueQuietly');
 export const $resolveOperation = Symbol('resolveOperation');
 export const $createOperation = Symbol('createOperation');
@@ -323,13 +324,27 @@ export abstract class FullStackSignal<T> extends DependencyTrackingSignal<T> {
    */
   protected abstract [$processServerResponse](command: SignalCommand): void;
 
+  /**
+   * Handles a rejected command from the server. Subclasses can override
+   * to revert optimistic state changes.
+   *
+   * @param command - The rejected command.
+   */
+  protected [$handleRejection](command: SignalCommand): void {
+    this[$resolveOperation](command.commandId, command.reason ?? 'Command rejected by server');
+  }
+
   #connect() {
     this.server
       .connect()
       .onSubscriptionLost(() => 'resubscribe' as ActionOnLostSubscription)
       .onNext((command: SignalCommand) => {
         this.#paused = true;
-        this[$processServerResponse](command);
+        if (command.accepted === false) {
+          this[$handleRejection](command);
+        } else {
+          this[$processServerResponse](command);
+        }
         this.#paused = false;
       });
   }

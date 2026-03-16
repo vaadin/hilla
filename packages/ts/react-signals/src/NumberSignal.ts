@@ -1,6 +1,13 @@
-import { createIncrementCommand, isIncrementCommand, type SignalCommand } from './commands.js';
+import {
+  createIncrementCommand,
+  isIncrementCommand,
+  isSetCommand,
+  isSnapshotCommand,
+  type SignalCommand,
+} from './commands.js';
 import {
   $createOperation,
+  $handleRejection,
   $processServerResponse,
   $resolveOperation,
   $setValueQuietly,
@@ -14,8 +21,15 @@ import { ValueSignal } from './ValueSignal.js';
  */
 export class NumberSignal extends ValueSignal<number> {
   /**
+   * Pending increment operations applied optimistically, keyed by commandId.
+   */
+  readonly #pendingIncrements = new Map<string, number>();
+
+  /**
    * Atomically increments the value of this signal by the given delta amount.
-   * The value is decremented if the delta is negative.
+   * The value is decremented if the delta is negative. The increment is applied
+   * optimistically — the local value updates immediately before server
+   * confirmation.
    * @param delta - The increment amount
    * @returns An operation containing the eventual result
    */
@@ -27,6 +41,9 @@ export class NumberSignal extends ValueSignal<number> {
 
     const command = createIncrementCommand('', delta);
     const promise = this[$update](command);
+    // Apply optimistically
+    this.#pendingIncrements.set(command.commandId, delta);
+    this[$setValueQuietly](this.value + delta);
     return this[$createOperation]({ id: command.commandId, promise });
   }
 
@@ -39,10 +56,32 @@ export class NumberSignal extends ValueSignal<number> {
 
   protected override [$processServerResponse](command: SignalCommand): void {
     if (isIncrementCommand(command)) {
-      this[$setValueQuietly](this.value + command.delta);
+      if (this.#pendingIncrements.has(command.commandId)) {
+        // Our own increment — already applied optimistically, just remove from pending
+        this.#pendingIncrements.delete(command.commandId);
+      } else {
+        // Remote increment — apply the delta
+        this[$setValueQuietly](this.value + command.delta);
+      }
       this[$resolveOperation](command.commandId, undefined);
     } else {
+      // A set or snapshot resets the confirmed state — clear pending increments
+      if (isSetCommand(command) || isSnapshotCommand(command)) {
+        this.#pendingIncrements.clear();
+      }
       super[$processServerResponse](command);
     }
+  }
+
+  protected override [$handleRejection](command: SignalCommand): void {
+    if (isIncrementCommand(command)) {
+      const delta = this.#pendingIncrements.get(command.commandId);
+      if (delta !== undefined) {
+        // Revert the optimistic increment
+        this[$setValueQuietly](this.value - delta);
+        this.#pendingIncrements.delete(command.commandId);
+      }
+    }
+    super[$handleRejection](command);
   }
 }
