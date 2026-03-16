@@ -127,8 +127,8 @@ public class InternalSignal {
             // command:
             ObjectNode nodeToEmit = commandToEmit != null ? commandToEmit
                     : objectMapper.valueToTree(processedCommand);
-            subscribers.entrySet().removeIf(
-                    client -> tryEmitCommandToSubscriber(nodeToEmit,
+            subscribers.entrySet()
+                    .removeIf(client -> tryEmitCommandToSubscriber(nodeToEmit,
                             client.getKey(), client.getValue()));
         } else {
             // only notify the client that issued the failed command
