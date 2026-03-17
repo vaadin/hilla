@@ -28,7 +28,7 @@
     "@preact/signals-react-transform": "0.8.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
-    "@types/node": "25.3.0",
+    "@types/node": "25.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -45,7 +45,7 @@
     "@vitejs/plugin-react": "5.1.4",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "7.0.0",
+    "rollup-plugin-visualizer": "7.0.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
@@ -80,7 +80,7 @@
       "@preact/signals-react-transform": "0.8.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
-      "@types/node": "25.3.0",
+      "@types/node": "25.5.0",
       "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3",
       "@vaadin/hilla-generator-cli": "25.1.0-beta3",
@@ -97,7 +97,7 @@
       "@vitejs/plugin-react": "5.1.4",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "7.0.0",
+      "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
@@ -105,7 +105,7 @@
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0"
     },
-    "hash": "5684426716b2ed1a53985ef45e927312e427e743b6285f71c177f5d3d8849fee"
+    "hash": "df69294aca394d5bfae07a89d2e3baa9a4e32b6474970a149c5c8ad2283f9b0a"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
