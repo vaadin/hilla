@@ -391,7 +391,7 @@ export const createService = <T extends HasIdVersion>(
   let _callCount = 0;
 
   function filterData(filter: FilterUnion | undefined): T[] {
-    if (filter && filter['@type'] === 'propertyString') {
+    if (filter?.['@type'] === 'propertyString') {
       return data.filter((item) => {
         const propertyValue = (item as Record<string, any>)[filter.propertyId];
         if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
