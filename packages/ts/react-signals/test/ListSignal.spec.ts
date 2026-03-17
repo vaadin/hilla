@@ -601,5 +601,175 @@ describe('@vaadin/hilla-react-signals', () => {
       }
       await expect(result).to.be.fulfilled;
     });
+
+    it('should apply optimistic insert immediately before server confirms', () => {
+      subscribeToSignalViaEffect(listSignal);
+      expect(listSignal.value).to.be.empty;
+
+      listSignal.insertLast('Alice');
+      expect(listSignal.value).to.have.length(1);
+      expect(listSignal.value[0].value).to.equal('Alice');
+    });
+
+    it('should skip re-applying own confirmed insertLast', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      listSignal.insertLast('Alice');
+      expect(listSignal.value).to.have.length(1);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+      const confirmCommand = createServerInsertCommand(commandId, 'entry-1', 'Alice');
+      simulateReceivedChange(subscription, confirmCommand);
+
+      // Should still have exactly 1 entry (no duplicate)
+      expect(listSignal.value).to.have.length(1);
+    });
+
+    it('should apply optimistic insertFirst at the beginning', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Bob' });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(1);
+
+      listSignal.insertFirst('Alice');
+      expect(listSignal.value).to.have.length(2);
+      expect(listSignal.value[0].value).to.equal('Alice');
+      expect(listSignal.value[1].value).to.equal('Bob');
+    });
+
+    it('should apply optimistic remove immediately before server confirms', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob' });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(2);
+
+      const [firstElement] = listSignal.value;
+      listSignal.remove(firstElement);
+      expect(listSignal.value).to.have.length(1);
+      expect(listSignal.value[0].value).to.equal('Bob');
+    });
+
+    it('should skip re-applying own confirmed remove', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob' });
+      simulateReceivedChange(subscription, snapshotCommand);
+
+      const [firstElement] = listSignal.value;
+      listSignal.remove(firstElement);
+      expect(listSignal.value).to.have.length(1);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+      const confirmCommand = createServerRemoveCommand(commandId, '1');
+      simulateReceivedChange(subscription, confirmCommand);
+
+      // Should still have exactly 1 entry (no double-remove)
+      expect(listSignal.value).to.have.length(1);
+      expect(listSignal.value[0].value).to.equal('Bob');
+    });
+
+    it('should send correct command when clear() is called', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      listSignal.clear();
+      expect(client.call).to.have.been.calledOnce;
+
+      const [, , params] = client.call.firstCall.args;
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: listSignal.id,
+          command: {
+            commandId: (params?.command as { commandId: string }).commandId,
+            targetNodeId: '',
+            '@type': 'clear',
+          },
+        },
+        { mute: true },
+      );
+    });
+
+    it('should clear the list optimistically', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob', '3': 'Charlie' });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(3);
+
+      listSignal.clear();
+      expect(listSignal.value).to.be.empty;
+    });
+
+    it('should handle server clear command', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob' });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(2);
+
+      simulateReceivedChange(subscription, {
+        '@type': 'clear',
+        commandId: 'remote-clear',
+        targetNodeId: '',
+      } as SignalCommand);
+      expect(listSignal.value).to.be.empty;
+    });
+
+    it('should revert optimistic insert on rejection', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const { result } = listSignal.insertLast('Alice');
+      result.catch(() => {});
+      expect(listSignal.value).to.have.length(1);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+
+      simulateReceivedChange(subscription, {
+        '@type': 'insert',
+        commandId,
+        targetNodeId: '',
+        value: 'Alice',
+        position: { after: null, before: '' },
+        accepted: false,
+        reason: 'conflict',
+      } as unknown as SignalCommand);
+
+      expect(listSignal.value).to.be.empty;
+    });
+
+    it('should revert optimistic remove on rejection', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob' });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(2);
+
+      const [firstElement] = listSignal.value;
+      const { result } = listSignal.remove(firstElement);
+      result.catch(() => {});
+      expect(listSignal.value).to.have.length(1);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+
+      simulateReceivedChange(subscription, {
+        '@type': 'remove',
+        commandId,
+        targetNodeId: firstElement.id,
+        expectedParentId: '',
+        accepted: false,
+        reason: 'conflict',
+      } as unknown as SignalCommand);
+
+      // Should be restored
+      expect(listSignal.value).to.have.length(2);
+      expect(listSignal.value[0].value).to.equal('Alice');
+    });
   });
 });

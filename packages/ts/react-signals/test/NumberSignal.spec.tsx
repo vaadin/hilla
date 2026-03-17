@@ -185,5 +185,86 @@ describe('@vaadin/hilla-react-signals', () => {
       subscribeToSignalViaEffect(numberSignal);
       await expect(numberSignal.incrementBy(0).result).to.be.fulfilled;
     });
+
+    it('should apply optimistic increment immediately', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(10);
+      // Value should update before server confirms
+      expect(numberSignal.value).to.equal(52);
+    });
+
+    it('should skip re-applying own confirmed increment', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(10);
+      expect(numberSignal.value).to.equal(52);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+
+      // Server confirms our increment — value should not change again
+      simulateReceivedChange(subscription, {
+        commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 10,
+      } as IncrementCommand);
+
+      expect(numberSignal.value).to.equal(52);
+    });
+
+    it('should revert optimistic increment on rejection', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      const { result } = numberSignal.incrementBy(10);
+      result.catch(() => {});
+      expect(numberSignal.value).to.equal(52);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+
+      simulateReceivedChange(subscription, {
+        commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 10,
+        accepted: false,
+        reason: 'conflict',
+      } as unknown as SignalCommand);
+
+      expect(numberSignal.value).to.equal(42);
+    });
+
+    it('should clear pending increments on snapshot', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(10);
+      expect(numberSignal.value).to.equal(52);
+
+      // Snapshot resets everything
+      simulateReceivedChange(subscription, {
+        commandId: 'snapshot-id',
+        targetNodeId: '',
+        '@type': 'snapshot',
+        nodes: {
+          '': {
+            '@type': 'ValueSignal',
+            parent: null,
+            lastUpdate: null,
+            scopeOwner: null,
+            value: 100,
+            listChildren: [],
+            mapChildren: {},
+          },
+        },
+      } as unknown as SignalCommand);
+
+      expect(numberSignal.value).to.equal(100);
+    });
   });
 });
