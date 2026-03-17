@@ -391,17 +391,17 @@ export const createService = <T extends HasIdVersion>(
   let _callCount = 0;
 
   function filterData(filter: FilterUnion | undefined): T[] {
-    if (filter && filter['@type'] === 'propertyString') {
-      return data.filter((item) => {
-        const propertyValue = (item as Record<string, any>)[filter.propertyId];
-        if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
-          return propertyValue.includes(filter.filterValue);
-        }
-        return propertyValue === filter.filterValue;
-      });
-    }
-    return data;
+  if (filter?.['@type'] === 'propertyString') {
+    return data.filter((item) => {
+      const propertyValue = (item as Record<string, any>)[filter.propertyId];
+      if (filter.matcher === Matcher.CONTAINS && typeof propertyValue === 'string') {
+        return propertyValue.includes(filter.filterValue);
+      }
+      return propertyValue === filter.filterValue;
+    });
   }
+  return data;
+}
 
   return {
     // eslint-disable-next-line @typescript-eslint/require-await
