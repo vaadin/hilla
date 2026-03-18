@@ -396,13 +396,15 @@ public class EngineAutoConfiguration {
             return this;
         }
 
-        public Builder endpointAnnotations(
+        @SafeVarargs
+        public final Builder endpointAnnotations(
                 Class<? extends Annotation>... value) {
             configuration.parser.setEndpointAnnotations(Arrays.asList(value));
             return this;
         }
 
-        public Builder endpointExposedAnnotations(
+        @SafeVarargs
+        public final Builder endpointExposedAnnotations(
                 Class<? extends Annotation>... value) {
             configuration.parser
                     .setEndpointExposedAnnotations(Arrays.asList(value));
