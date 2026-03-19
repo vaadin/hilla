@@ -100,8 +100,8 @@ public class AotBrowserCallableFinder {
                     }).filter(Objects::nonNull).findFirst().orElse(null);
             if (mainClass == null && !sourceClasses.isEmpty()) {
                 LOGGER.debug(
-                        "Spring Boot application because a main class is not "
-                                + "found. The \"sourceClasses\" configuration "
+                        "The Spring Boot application main class is not found. \""
+                                + "The \"sourceClasses\" configuration "
                                 + "will be used for finding Hilla browser "
                                 + "callable endpoints.");
                 mainClass = SPRING_APPLICATION_CLASS_NAME;
