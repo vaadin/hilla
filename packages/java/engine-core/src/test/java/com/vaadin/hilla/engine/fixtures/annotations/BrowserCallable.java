@@ -15,16 +15,16 @@
  */
 package com.vaadin.hilla.engine.fixtures.annotations;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.stereotype.Component;
+
 /**
- * Test annotation to mark browser callable classes. Supports optional value
- * for custom endpoint names.
+ * Test annotation to mark browser callable classes. Supports optional value for
+ * custom endpoint names.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

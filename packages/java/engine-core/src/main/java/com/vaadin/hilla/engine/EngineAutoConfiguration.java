@@ -183,37 +183,35 @@ public class EngineAutoConfiguration {
             result = (conf) -> {
                 var exceptions = new ArrayList<BrowserCallableFinderException>();
 
-                var classFinders = Stream.<BrowserCallableFinder>of(
+                var classFinders = Stream.<BrowserCallableFinder> of(
                         LookupBrowserCallableFinder::find,
-                        AotBrowserCallableFinder::find
-                );
+                        AotBrowserCallableFinder::find);
 
-                if (conf.getMainClass() != null || !conf.getSourceClasses().isEmpty()) {
+                if (conf.getMainClass() != null
+                        || !conf.getSourceClasses().isEmpty()) {
                     // Use Spring-based class finder with explicit configuration
-                    classFinders = Stream.<BrowserCallableFinder>of(
-                            AotBrowserCallableFinder::find
-                    );
+                    classFinders = Stream.<BrowserCallableFinder> of(
+                            AotBrowserCallableFinder::find);
                 }
 
                 return classFinders.map(finder -> {
-                            try {
-                                return finder.find(conf);
-                            } catch (BrowserCallableFinderException e) {
-                                exceptions.add(e);
-                                return null;
-                            }
-                        }).filter(Objects::nonNull).findFirst()
-                        .orElseThrow(() -> {
-                            if (exceptions.isEmpty()) {
-                                return new ParserException(
-                                        "No browser-callable classes found");
-                            } else {
-                                var exception = new ParserException(
-                                        "Failed to find browser-callable classes");
-                                exceptions.forEach(exception::addSuppressed);
-                                return exception;
-                            }
-                        });
+                    try {
+                        return finder.find(conf);
+                    } catch (BrowserCallableFinderException e) {
+                        exceptions.add(e);
+                        return null;
+                    }
+                }).filter(Objects::nonNull).findFirst().orElseThrow(() -> {
+                    if (exceptions.isEmpty()) {
+                        return new ParserException(
+                                "No browser-callable classes found");
+                    } else {
+                        var exception = new ParserException(
+                                "Failed to find browser-callable classes");
+                        exceptions.forEach(exception::addSuppressed);
+                        return exception;
+                    }
+                });
             };
         }
 

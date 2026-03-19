@@ -18,7 +18,6 @@ package com.vaadin.hilla.maven;
 import static com.vaadin.flow.internal.FrontendUtils.FRONTEND;
 
 import java.io.File;
-import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;

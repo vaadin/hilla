@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,21 +132,20 @@ public class AotBrowserCallableFinder {
         var classpath = engineConfiguration.getClasspath().stream()
                 .filter(Files::exists).toList();
 
-        var args = new ArrayList<>(List.of(
-                "-cp",
+        var args = new ArrayList<>(List.of("-cp",
                 classpath.stream().map(AotBrowserCallableFinder::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
-                SPRING_AOT_PROCESSOR,
-                applicationClass
-        ));
+                SPRING_AOT_PROCESSOR, applicationClass));
         args.add(quotePath(aotOutput.resolve("sources")));
         args.add(quotePath(aotOutput.resolve("resources")));
         args.add(quotePath(classesDirectory));
         args.add(engineConfiguration.getGroupId());
         args.add(engineConfiguration.getArtifactId());
-        if (SPRING_APPLICATION_CLASS_NAME.equals(applicationClass) && !engineConfiguration.getSourceClasses().isEmpty()) {
+        if (SPRING_APPLICATION_CLASS_NAME.equals(applicationClass)
+                && !engineConfiguration.getSourceClasses().isEmpty()) {
             // Use explicit Spring bean sources from configuration
-            var sources = String.join(",", engineConfiguration.getSourceClasses());
+            var sources = String.join(",",
+                    engineConfiguration.getSourceClasses());
             args.add("--spring.main.sources=" + sources);
         }
 

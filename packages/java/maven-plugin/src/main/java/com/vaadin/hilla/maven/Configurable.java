@@ -57,7 +57,8 @@ interface Configurable {
                     "mainClass");
         }
 
-        var sourceClasses = List.of(Objects.requireNonNullElse(getSourceClasses(), new String[0]));
+        var sourceClasses = List.of(
+                Objects.requireNonNullElse(getSourceClasses(), new String[0]));
 
         var conf = new EngineAutoConfiguration.Builder()
                 .baseDir(project.getBasedir().toPath())
@@ -67,8 +68,8 @@ interface Configurable {
                 .artifactId(project.getArtifactId())
                 .classpath(project.getRuntimeClasspathElements())
                 .withDefaultAnnotations().mainClass(mainClass)
-                .sourceClasses(sourceClasses)
-                .nodeCommand(getNode()).productionMode(isProduction).build();
+                .sourceClasses(sourceClasses).nodeCommand(getNode())
+                .productionMode(isProduction).build();
         EngineAutoConfiguration.setDefault(conf);
         return conf;
     }

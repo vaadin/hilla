@@ -31,7 +31,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -83,8 +82,7 @@ public class EngineAutoConfigurationTest {
                 .getAnnotatedClasses((Class<? extends Annotation>) any()))
                 .thenReturn(Set.of(EndpointFromClassFinder.class));
         var conf = new EngineAutoConfiguration.Builder()
-                .classFinder(classFinder)
-                .sourceClasses(List.of())
+                .classFinder(classFinder).sourceClasses(List.of())
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
         assertEquals(List.of(EndpointFromClassFinder.class),
                 conf.getBrowserCallableFinder().find(conf));
@@ -128,8 +126,7 @@ public class EngineAutoConfigurationTest {
                 .thenReturn(Set.of(EndpointFromClassFinder.class,
                         EndpointFromClassFinderWithCustomName.class));
         var conf = new EngineAutoConfiguration.Builder()
-                .classFinder(classFinder)
-                .mainClass("com.example.Main")
+                .classFinder(classFinder).mainClass("com.example.Main")
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
@@ -167,8 +164,7 @@ public class EngineAutoConfigurationTest {
                 .thenReturn(Set.of(EndpointFromClassFinder.class,
                         EndpointFromClassFinderWithCustomName.class));
         var conf = new EngineAutoConfiguration.Builder()
-                .classFinder(classFinder)
-                .sourceClasses(sourceClasses)
+                .classFinder(classFinder).sourceClasses(sourceClasses)
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
         sourceClasses.clear(); // should have no effect
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
