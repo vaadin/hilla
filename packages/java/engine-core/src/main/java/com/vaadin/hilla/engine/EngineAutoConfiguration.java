@@ -367,7 +367,7 @@ public class EngineAutoConfiguration {
         }
 
         public Builder sourceClasses(List<String> sourceClasses) {
-            configuration.sourceClasses = sourceClasses;
+            configuration.sourceClasses = List.copyOf(sourceClasses);
             return this;
         }
 

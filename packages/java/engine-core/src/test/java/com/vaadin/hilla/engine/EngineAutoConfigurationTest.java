@@ -30,6 +30,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -148,6 +150,27 @@ public class EngineAutoConfigurationTest {
                 .classFinder(classFinder)
                 .sourceClasses(List.of("com.example.Config"))
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
+            when(AotBrowserCallableFinder.find(conf))
+                    .thenReturn(List.of(EndpointFromAot.class));
+            assertEquals(List.of(EndpointFromAot.class),
+                    conf.getBrowserCallableFinder().find(conf));
+        }
+    }
+
+    @Test
+    public void shouldPreventSourceClassesListMutation() throws Exception {
+        var sourceClasses = new ArrayList<>(List.of("com.example.Config"));
+        var classFinder = mock(ClassFinder.class);
+        when(classFinder
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class,
+                        EndpointFromClassFinderWithCustomName.class));
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder)
+                .sourceClasses(sourceClasses)
+                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        sourceClasses.clear(); // should have no effect
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
