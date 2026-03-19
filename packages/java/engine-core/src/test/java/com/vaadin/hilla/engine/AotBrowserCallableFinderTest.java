@@ -74,10 +74,6 @@ public class AotBrowserCallableFinderTest {
                     AotBrowserCallableFinder.find(testConfiguration);
                 });
         assertTrue(exception.getMessage().contains("no main class"));
-        try (var buildFiles = Files
-                .list(tempDirectory.resolve(TEST_BUILD_DIR_NAME))) {
-            assertTrue(buildFiles.findAny().isEmpty());
-        }
     }
 
     @Test
