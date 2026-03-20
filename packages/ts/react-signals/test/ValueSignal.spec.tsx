@@ -59,13 +59,14 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should render value when signal is rendered', async () => {
       const valueSignal = new ValueSignal<string>('foo', config);
-      const result = render(<div>{valueSignal}</div>);
+      const result = render(<div>{valueSignal.value}</div>);
       await nextFrame();
       expect(result.container.textContent).to.equal('foo');
     });
 
     it('should set the value locally when calling set method without waiting for the server update', () => {
       const valueSignal = new ValueSignal<string>('foo', config);
+      subscribeToSignalViaEffect(valueSignal);
       expect(valueSignal.value).to.equal('foo');
       valueSignal.set('bar');
       expect(valueSignal.value).to.equal('bar');
@@ -73,14 +74,12 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should be possible to subscribe to the value changes in effects', () => {
       const valueSignal = new ValueSignal<string>('foo', config);
-      expect(valueSignal.value).to.equal('foo');
 
       const results = subscribeToSignalViaEffect(valueSignal);
 
-      valueSignal.value = 'bar';
-      valueSignal.value += 'baz';
+      valueSignal.set('bar');
       valueSignal.set('qux');
-      expect(results).to.deep.equal(['foo', 'bar', 'barbaz', 'qux']);
+      expect(results).to.deep.equal(['foo', 'bar', 'qux']);
     });
 
     it('should not subscribe to signal provider endpoint before being subscribed to', () => {

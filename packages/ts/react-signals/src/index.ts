@@ -7,6 +7,6 @@ export { NumberSignal } from './NumberSignal.js';
 export { ValueSignal } from './ValueSignal.js';
 export { ListSignal } from './ListSignal.js';
 export { MapSignal } from './MapSignal.js';
-export type { OperationSubscription } from './ValueSignal.js';
 export { FullStackSignal } from './FullStackSignal.js';
-export type { Operation } from './FullStackSignal.js';
+export type { Operation, ServerConnectionConfig } from './FullStackSignal.js';
+export { Connection } from './Connection.js';

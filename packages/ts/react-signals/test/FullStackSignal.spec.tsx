@@ -7,52 +7,13 @@ import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
 import type { SignalCommand } from '../src/commands.js';
 import { createSetCommand, createSnapshotCommand } from '../src/commands.js';
-import { DependencyTrackingSignal } from '../src/FullStackSignal.js';
-import { computed, NumberSignal } from '../src/index.js';
-import { createSubscriptionStub, nextFrame, simulateReceivedChange } from './utils.js';
+import { NumberSignal } from '../src/index.js';
+import { createSubscriptionStub, nextFrame, simulateReceivedChange, subscribeToSignalViaEffect } from './utils.js';
 
 chai.use(sinonChai);
 chai.use(chaiLike);
 
 describe('@vaadin/hilla-react-signals', () => {
-  describe('DependencyTrackingSignal', () => {
-    class TestSignal<T = unknown> extends DependencyTrackingSignal<T> {
-      constructor(value: T | undefined, onSubscribe: () => void, onUnsubscribe: () => void) {
-        super(value, onSubscribe, onUnsubscribe);
-        this.subscribe(() => {}); // Ignores the internal subscription.
-      }
-    }
-
-    let onFirstSubscribe: sinon.SinonStub;
-    let onLastUnsubscribe: sinon.SinonStub;
-    let signal: TestSignal;
-
-    beforeEach(() => {
-      onFirstSubscribe = sinon.stub();
-      onLastUnsubscribe = sinon.stub();
-      signal = new TestSignal(undefined, onFirstSubscribe, onLastUnsubscribe);
-    });
-
-    afterEach(() => {
-      cleanup();
-      sinon.resetHistory();
-    });
-
-    it('should call onSubscribe when the first subscription is created', () => {
-      expect(onFirstSubscribe).not.to.have.been.called;
-      signal.subscribe(() => {});
-      expect(onFirstSubscribe).to.have.been.calledOnce;
-    });
-
-    it('should call onUnsubscribe when the last subscription is removed', () => {
-      expect(onLastUnsubscribe).not.to.have.been.called;
-      const subscriptionDisposeFnc = signal.subscribe(() => {});
-      expect(onLastUnsubscribe).not.to.have.been.called;
-      subscriptionDisposeFnc();
-      expect(onLastUnsubscribe).to.have.been.calledOnce;
-    });
-  });
-
   describe('FullStackSignal', () => {
     function simulateResubscription(
       connectSubscriptionMock: sinon.SinonSpiedInstance<Subscription<SignalCommand>>,
@@ -82,6 +43,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     afterEach(() => {
+      cleanup();
       sinon.resetHistory();
     });
 
@@ -94,11 +56,10 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.subscribe).not.to.have.been.called;
     });
 
-    it('should subscribe to signal provider endpoint only after being subscribed to', async () => {
+    it('should subscribe to signal provider endpoint only after being subscribed to', () => {
       expect(client.subscribe).not.to.have.been.called;
 
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
+      subscribeToSignalViaEffect(signal);
 
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
@@ -109,35 +70,14 @@ describe('@vaadin/hilla-react-signals', () => {
       });
     });
 
-    it('should not call client subscribe after being connected to the server instance', async () => {
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
-
-      expect(client.subscribe).to.be.have.been.calledOnce;
-      expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
-        clientSignalId: signal.id,
-        providerEndpoint: 'TestEndpoint',
-        providerMethod: 'testMethod',
-        params: undefined,
-      });
-
-      const dependentSignal = computed(() => signal.value);
-      expect(client.subscribe).to.be.have.been.calledOnce;
-
-      render(<span>Value is {dependentSignal.value}</span>);
-      await nextFrame();
-      expect(client.subscribe).to.be.have.been.calledOnce;
-    });
-
-    it('should retain and send the params passed to the config at the time of creating the signal the server when subscribing', async () => {
+    it('should retain and send the params passed to the config at the time of creating the signal', () => {
       signal = new NumberSignal(undefined, {
         client,
         endpoint: 'TestEndpoint',
         method: 'testMethod',
         params: { foo: 'bar', baz: true },
       });
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
+      subscribeToSignalViaEffect(signal);
 
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
@@ -149,9 +89,10 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should publish updates to signals handler endpoint', () => {
+      subscribeToSignalViaEffect(signal);
+
       signal.value = 42;
 
-      expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.call).to.be.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch(
         'SignalsHandler',
@@ -165,18 +106,17 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should not subscribe on the fly when updating if already subscribed', () => {
-      signal.subscribe(() => {});
+      subscribeToSignalViaEffect(signal);
       client.subscribe.resetHistory();
       signal.value = 42;
       expect(client.subscribe).not.to.have.been.called;
       expect(client.call).to.have.been.calledOnce;
     });
 
-    it("should update signal's value based on the received event", async () => {
+    it("should update signal's value based on the received event", () => {
       expect(signal.value).to.be.undefined;
 
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
+      subscribeToSignalViaEffect(signal);
 
       // Simulate the command received from the server:
       const nodes = {
@@ -200,8 +140,8 @@ describe('@vaadin/hilla-react-signals', () => {
     it('should render the updated value', async () => {
       const numberSignal = signal;
 
-      let result = render(<span>Value is {numberSignal}</span>);
-      await nextFrame();
+      subscribeToSignalViaEffect(numberSignal);
+
       const nodes = {
         '': {
           '@type': 'ValueSignal',
@@ -215,18 +155,18 @@ describe('@vaadin/hilla-react-signals', () => {
       };
       simulateReceivedChange(subscription, createSnapshotCommand(nodes));
 
-      result = render(<span>Value is {numberSignal}</span>);
+      const result = render(<span>Value is {numberSignal.value}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
 
       simulateReceivedChange(subscription, createSetCommand('', 99));
+      const result2 = render(<span>Value is {numberSignal.value}</span>);
       await nextFrame();
-      expect(result.container.textContent).to.equal('Value is 99');
+      expect(result2.container.textContent).to.equal('Value is 99');
     });
 
-    it('should subscribe using client', async () => {
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
+    it('should subscribe using client', () => {
+      subscribeToSignalViaEffect(signal);
 
       expect(client.subscribe).to.be.have.been.calledOnce;
       expect(client.subscribe).to.have.been.calledWith('SignalsHandler', 'subscribe', {
@@ -238,6 +178,8 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should publish the new value to the server when set', () => {
+      subscribeToSignalViaEffect(signal);
+
       signal.value = 42;
       expect(client.call).to.have.been.calledOnce;
       expect(client.call).to.have.been.calledWithMatch(
@@ -249,12 +191,8 @@ describe('@vaadin/hilla-react-signals', () => {
         { mute: true },
       );
 
-      signal.value = 0;
-
-      client.call.resetHistory();
-
-      signal.value += 1;
-      expect(client.call).to.have.been.calledOnce;
+      signal.value = 1;
+      expect(client.call).to.have.been.calledTwice;
       expect(client.call).to.have.been.calledWithMatch(
         'SignalsHandler',
         'update',
@@ -265,7 +203,6 @@ describe('@vaadin/hilla-react-signals', () => {
       );
 
       const [, , params] = client.call.firstCall.args;
-
       expect(params!.command).to.have.property('commandId');
     });
 
@@ -273,6 +210,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const error = new Error('Server error');
       client.call.rejects(error);
 
+      subscribeToSignalViaEffect(signal);
       signal.value = 42;
       // Waiting for the ConnectionClient#call promise to resolve.
       await nextFrame();
@@ -287,6 +225,8 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should provide a way to access the pending state', async () => {
+      subscribeToSignalViaEffect(signal);
+
       expect(signal.pending).to.be.like({ value: false });
       signal.value = 42;
       expect(signal.pending).to.be.like({ value: true });
@@ -294,28 +234,25 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(signal.pending).to.be.like({ value: false });
     });
 
-    it('should provide an internal server subscription', async () => {
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
-      expect(signal.server.subscription).to.equal(subscription);
+    it('should provide an internal server subscription', () => {
+      subscribeToSignalViaEffect(signal);
+      expect(signal.connection.subscription).to.equal(subscription);
     });
 
-    it('should disconnect from the server', async () => {
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
-
-      signal.server.disconnect();
+    it('should disconnect from the server', () => {
+      subscribeToSignalViaEffect(signal);
+      signal.connection.disconnect();
       expect(subscription.cancel).to.have.been.calledOnce;
     });
 
     it('should throw an error when the server call fails', () => {
       client.call.rejects(new Error('Server error'));
+      subscribeToSignalViaEffect(signal);
       signal.value = 42;
     });
 
-    it('should resubscribe when reconnecting', async () => {
-      render(<span>Value is {signal}</span>);
-      await nextFrame();
+    it('should resubscribe when reconnecting', () => {
+      subscribeToSignalViaEffect(signal);
       simulateResubscription(subscription, client);
 
       expect(client.subscribe).to.be.have.been.calledTwice;

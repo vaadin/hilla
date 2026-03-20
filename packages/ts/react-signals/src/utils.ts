@@ -1,4 +1,4 @@
-import type { ReadonlySignal } from '@preact/signals-react';
+import type { ReadonlySignal } from '@preact/signals-core';
 
 export async function createPromiseFromSignal<T, U, E>(
   signal: ReadonlySignal<T>,
@@ -34,4 +34,14 @@ export function randomId(sizeBytes = 8): string {
     end -= 1;
   }
   return base64.slice(0, end);
+}
+
+/**
+ * Error thrown when a tree operation encounters an inconsistent state.
+ */
+export class InconsistentTreeError extends Error {
+  constructor(nodeId: string) {
+    super(`Inconsistent tree: node ${nodeId} not found`);
+    this.name = 'InconsistentTreeError';
+  }
 }

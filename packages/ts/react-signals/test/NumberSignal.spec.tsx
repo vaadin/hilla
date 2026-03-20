@@ -52,25 +52,27 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should render value when signal is rendered', async () => {
       const numberSignal = new NumberSignal(42, config);
-      const result = render(<span>Value is {numberSignal}</span>);
+      const result = render(<span>Value is {numberSignal.value}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
     });
 
     it('should set the underlying value locally without waiting for server confirmation', () => {
       const numberSignal = new NumberSignal(undefined, config);
+      subscribeToSignalViaEffect(numberSignal);
       expect(numberSignal.value).to.be.undefined;
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
       const anotherNumberSignal = new NumberSignal(undefined, config);
+      subscribeToSignalViaEffect(anotherNumberSignal);
 
       const results: Array<number | undefined> = [];
       effect(() => {
         results.push(anotherNumberSignal.value);
       });
       anotherNumberSignal.value = 42;
-      anotherNumberSignal.value += 1;
+      anotherNumberSignal.value = 43;
 
       expect(results).to.be.like([undefined, 42, 43]);
     });

@@ -37,7 +37,7 @@ describe('@vaadin/hilla-react-signals', () => {
         mapChildren[key] = childId;
         nodes[childId] = {
           '@type': 'ValueSignal',
-          parent: null,
+          parent: '',
           lastUpdate: null,
           scopeOwner: null,
           value,
@@ -133,7 +133,7 @@ describe('@vaadin/hilla-react-signals', () => {
       const confirmCommand = createServerPutCommand(commandId, 'name', 'Alice');
       simulateReceivedChange(subscription, confirmCommand);
 
-      // Should still have exactly 1 entry (no duplicate)
+      // After confirmation the map should still have the entry
       expect(mapSignal.value.size).to.equal(1);
       expect(mapSignal.value.get('name')!.value).to.equal('Alice');
     });
