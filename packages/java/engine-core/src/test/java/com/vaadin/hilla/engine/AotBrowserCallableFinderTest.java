@@ -68,7 +68,7 @@ public class AotBrowserCallableFinderTest {
     }
 
     @Test
-    public void find_Default_ThrowsNoMainClass() throws IOException {
+    public void find_Default_ThrowsNoMainClass() {
         var exception = assertThrows(BrowserCallableFinderException.class,
                 () -> {
                     AotBrowserCallableFinder.find(testConfiguration);
