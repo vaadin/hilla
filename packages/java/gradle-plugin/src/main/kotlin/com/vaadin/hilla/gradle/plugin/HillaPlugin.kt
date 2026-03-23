@@ -113,8 +113,8 @@ public class HillaPlugin : Plugin<Project> {
             val classpath = Stream.concat(pluginClasspath, classpathElements).distinct().toList()
             val mainClass = project.findProperty("com.vaadin.hilla.mainClass") as String?
                 ?: project.findProperty("mainClass") as String?
-            val sourceClasses = (project.findProperty("com.vaadin.hilla.sourceClasses") as String?)?.split(",")
-                ?: listOf()
+            val sourceClasses = (project.findProperty("com.vaadin.hilla.sourceClasses") as String?)
+                ?: ""
 
             return EngineAutoConfiguration.Builder()
                 .baseDir(baseDir)
@@ -126,7 +126,7 @@ public class HillaPlugin : Plugin<Project> {
                 .classpath(classpath)
                 .withDefaultAnnotations()
                 .mainClass(mainClass)
-                .sourceClasses(sourceClasses)
+                .sourceClasses(if (sourceClasses.isEmpty()) emptyList() else sourceClasses.split(","))
                 .productionMode(vaadinExtension.productionMode.getOrElse(false))
                 .build()
         }

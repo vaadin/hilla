@@ -28,6 +28,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
@@ -37,6 +38,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.declarative.dsl.schema.ConfigureAccessor
 
 /**
  * Task that generates the endpoints.ts and model TS classes
@@ -62,7 +64,10 @@ public abstract class EngineGenerateTask : DefaultTask() {
     internal fun configure(project: Project) {
         groupId.set(project.group.toString())
         artifactId.set(project.name)
-        mainClass.set(project.findProperty("mainClass") as String?)
+        mainClass.set(project.findProperty("com.vaadin.hilla.mainClass") as String?
+            ?: project.findProperty("mainClass") as String?)
+        sourceClasses.set((project.findProperty("com.vaadin.hilla.sourceClasses") as String?)?.split(",")
+            ?: emptyList())
         val engineConfig = HillaPlugin.createEngineConfiguration(
             project,
             VaadinFlowPluginExtension.get(project)
@@ -87,6 +92,9 @@ public abstract class EngineGenerateTask : DefaultTask() {
     @get:Optional
     @get:Input
     internal abstract val mainClass: Property<String?>
+
+    @get:Input
+    internal abstract val sourceClasses: ListProperty<String>
 
     @get:Input
     internal abstract val engineConfigurationSettings: Property<EngineConfigurationSettings>
