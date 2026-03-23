@@ -148,7 +148,7 @@ internal data class EngineConfigurationSettings(
     val artifactId: String,
     val classpath: List<String>,
     val mainClass: String?,
-    val sourceClasses: List<String>,
+    val sourceClasses: String, // use comma-separated string to avoid Gradle configuration cache issues
     val productionMode: Boolean
 ) : Serializable {
     fun toEngineConfiguration(): EngineAutoConfiguration {
@@ -162,7 +162,7 @@ internal data class EngineConfigurationSettings(
             .classpath(classpath)
             .withDefaultAnnotations()
             .mainClass(mainClass)
-            .sourceClasses(sourceClasses)
+            .sourceClasses(sourceClasses.split(","))
             .productionMode(productionMode)
             .build()
     }
@@ -177,7 +177,7 @@ internal fun EngineAutoConfiguration.toInputs(): EngineConfigurationSettings {
         artifactId = this.artifactId,
         classpath = this.classpath.map { it.toString() },
         mainClass = this.mainClass,
-        sourceClasses = this.sourceClasses,
+        sourceClasses = this.sourceClasses.joinToString(","),
         productionMode = this.isProductionMode
     )
 }
