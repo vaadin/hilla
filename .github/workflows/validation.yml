@@ -37,7 +37,7 @@ jobs:
     name: Build Java and TypeScript for other tasks
     runs-on: ubuntu-latest
     environment: ${{ github.event.pull_request.head.repo.fork && 'pr-tests' || '' }}
-    timeout-minutes: 5
+    timeout-minutes: 20
     env:
       NX_SKIP_NX_CACHE: true
 
