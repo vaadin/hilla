@@ -102,6 +102,24 @@ export abstract class FullStackSignal<T> {
           }
         : undefined,
     );
+
+    // Copy React JSX integration properties from Signal.prototype
+    // ($$typeof, type, props, ref — added by @preact/signals-react/runtime)
+    // so that FullStackSignal instances render directly in JSX like native signals.
+    const signalProto = Object.getPrototypeOf(this.#derived) as Record<string, unknown>;
+    for (const key of ['$$typeof', 'type', 'ref']) {
+      const desc = Object.getOwnPropertyDescriptor(signalProto, key);
+      if (desc) {
+        Object.defineProperty(this, key, desc);
+      }
+    }
+    // props getter must return {data: this} (not the derived signal)
+    if (Object.getOwnPropertyDescriptor(signalProto, 'props')) {
+      Object.defineProperty(this, 'props', {
+        configurable: true,
+        get: () => ({ data: this }),
+      });
+    }
   }
 
   /**
