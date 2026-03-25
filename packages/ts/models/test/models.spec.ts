@@ -130,7 +130,8 @@ describe('@vaadin/hilla-models', () => {
 
     expect(EmployeeModel).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
     expect(EmployeeModel.supervisor).to.have.property('supervisor').which.is.instanceof(EmployeeModel);
-    expect(EmployeeModel.supervisor.supervisor.toString()).to.be.equal(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    expect((EmployeeModel.supervisor as any).supervisor.toString()).to.be.equal(
       '[[[:detached: / model] Employee / supervisor?] Employee / supervisor?] Employee',
     );
 
@@ -178,7 +179,8 @@ describe('@vaadin/hilla-models', () => {
       .build();
 
     expect(EmployeeModel).to.have.property('colleagues').which.is.instanceof(ArrayModel);
-    expect(EmployeeModel.colleagues[$itemModel].colleagues[$itemModel])
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect((EmployeeModel.colleagues[$itemModel] as any).colleagues[$itemModel])
       .to.have.property('colleagues')
       .which.is.instanceof(ArrayModel);
     expect(EmployeeModel.colleagues[$itemModel]).to.have.property($optional).which.equals(true);
