@@ -30,8 +30,10 @@ export type ModelConverterFn<SM extends Model = Model, TM extends Model = Model>
 /**
  * Universal converter function type for models and model converter functions.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export type ModelConverterCallable<
   MC extends ModelConverter,
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   F extends ModelConverterFn<SourceModel<MC>, TargetModel<MC, SourceModel<MC>>>,
 > = F extends (model: Model, ...extraArgs: infer E) => Model
   ? <const IMC extends ModelConverter>(modelConverter: IMC, ...extraArgs: E) => CompositeOf<MC, IMC>
@@ -49,6 +51,7 @@ export type ModelConverterCallable<
  */
 function createModelConverter<
   const MC extends ModelConverter,
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   const F extends ModelConverterFn<SourceModel<MC>, TargetModel<MC, SourceModel<MC>>>,
 >(modelConverterFn: F): MC & F & ModelConverterCallable<MC, F> {
   return ((modelOrConverter: Model | ModelConverterFn, ...extraArgs: readonly any[]) => {
@@ -96,6 +99,7 @@ function optionalImpl<const M extends Model>(model: M) {
  *
  * @param base - The base model to extend.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export const optional = createModelConverter<OptionalOf, typeof optionalImpl>(optionalImpl);
 
 /**
@@ -103,6 +107,7 @@ export const optional = createModelConverter<OptionalOf, typeof optionalImpl>(op
  * items of the given model.
  */
 export interface ArrayOf extends ModelConverter {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   readonly [$targetModel]: ArrayModel<SourceModel<this>>;
 }
 function arrayImpl<const M extends Model>(model: M) {
@@ -116,6 +121,7 @@ function arrayImpl<const M extends Model>(model: M) {
  *
  * @param itemModel - The model of the items in the array.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export const array = createModelConverter<ArrayOf, typeof arrayImpl>(arrayImpl);
 
 function constrainedImpl<const M extends Model>(
@@ -141,6 +147,7 @@ function constrainedImpl<const M extends Model>(
  * @param constraint - The constraint to apply.
  * @param moreConstraints - Additional constraints to apply.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export const constrained = createModelConverter<IdentityOf, typeof constrainedImpl>(constrainedImpl);
 
 function metaImpl<const M extends Model>(this: void, model: M, metadata: ModelMetadata): M {
@@ -152,4 +159,5 @@ function metaImpl<const M extends Model>(this: void, model: M, metadata: ModelMe
  * @param model - The model to define metadata for.
  * @param metadata - The metadata to define.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export const meta = createModelConverter<IdentityOf, typeof metaImpl>(metaImpl);
