@@ -62,7 +62,7 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing a signal for the inserted entry and the eventual result
    */
   insertAt(value: T, at: ListPosition): Operation {
-    const command = createInsertCommand<T>(ZERO, value, at);
+    const command = createInsertCommand(ZERO, value, at);
     const promise = this[$update](command);
     return this[$createOperation]({ id: command.commandId, promise });
   }
