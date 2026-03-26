@@ -1,9 +1,15 @@
+import { useSignals } from '@preact/signals-react/runtime';
 import type { ActionOnLostSubscription } from '@vaadin/hilla-frontend';
+import { version as reactVersion } from 'react';
 import { isSnapshotCommand, type SignalCommand } from './commands.js';
 import { Connection, type ServerConnectionConfig } from './Connection.js';
 import { computed, signal, type ReadonlySignal, type Signal } from './core.js';
 import { applyCommand, emptyTree, type NodeTree } from './NodeTree.js';
 import { randomId } from './utils.js';
+
+// React element symbol — same logic as @preact/signals-react/runtime
+const [reactMajor] = reactVersion.split('.').map(Number);
+const REACT_ELEMENT_TYPE = Symbol.for(reactMajor >= 19 ? 'react.transitional.element' : 'react.element');
 
 /**
  * A return type for signal operations that exposes a `result` property of type
@@ -103,23 +109,25 @@ export abstract class FullStackSignal<T> {
         : undefined,
     );
 
-    // Copy React JSX integration properties from Signal.prototype
-    // ($$typeof, type, props, ref — added by @preact/signals-react/runtime)
-    // so that FullStackSignal instances render directly in JSX like native signals.
-    const signalProto = Object.getPrototypeOf(this.#derived) as Record<string, unknown>;
-    for (const key of ['$$typeof', 'type', 'ref']) {
-      const desc = Object.getOwnPropertyDescriptor(signalProto, key);
-      if (desc) {
-        Object.defineProperty(this, key, desc);
-      }
-    }
-    // props getter must return {data: this} (not the derived signal)
-    if (Object.getOwnPropertyDescriptor(signalProto, 'props')) {
-      Object.defineProperty(this, 'props', {
+    // Define React JSX integration properties directly so that
+    // FullStackSignal instances render in JSX like native signals.
+    // This mirrors what @preact/signals-react/runtime does on Signal.prototype.
+    Object.defineProperties(this, {
+      $$typeof: { configurable: true, value: REACT_ELEMENT_TYPE },
+      type: {
         configurable: true,
-        get: () => ({ data: this }),
-      });
-    }
+        value: ({ data: sig }: { data: FullStackSignal<T> }) => {
+          const store = useSignals(1);
+          try {
+            return sig.value;
+          } finally {
+            store.f();
+          }
+        },
+      },
+      props: { configurable: true, get: () => ({ data: this }) },
+      ref: { configurable: true, value: null },
+    });
   }
 
   /**
