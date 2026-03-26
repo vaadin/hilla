@@ -51,7 +51,6 @@ public class AotBrowserCallableFinderTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        tempDirectory = Files.createTempDirectory("test");
         buildDirectory = tempDirectory.resolve(TEST_BUILD_DIR_NAME);
         buildClasssesDirectory = buildDirectory.resolve("classes");
         Files.createDirectories(buildClasssesDirectory);

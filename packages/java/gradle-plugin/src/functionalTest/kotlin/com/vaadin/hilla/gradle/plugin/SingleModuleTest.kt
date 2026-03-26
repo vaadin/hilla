@@ -19,7 +19,6 @@ package com.vaadin.hilla.gradle.plugin
 import com.vaadin.flow.internal.FrontendUtils
 import io.swagger.v3.core.util.Json
 import io.swagger.v3.oas.models.OpenAPI
-import org.gradle.internal.declarativedsl.parsing.main
 import org.gradle.testkit.runner.BuildResult
 import org.junit.Test
 import java.io.File

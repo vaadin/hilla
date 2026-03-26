@@ -162,7 +162,7 @@ internal data class EngineConfigurationSettings(
             .classpath(classpath)
             .withDefaultAnnotations()
             .mainClass(mainClass)
-            .sourceClasses(sourceClasses.split(","))
+            .sourceClasses(if (sourceClasses.isEmpty()) emptyList() else sourceClasses.split(","))
             .productionMode(productionMode)
             .build()
     }

@@ -38,7 +38,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.declarative.dsl.schema.ConfigureAccessor
 
 /**
  * Task that generates the endpoints.ts and model TS classes
