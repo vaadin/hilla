@@ -65,6 +65,13 @@ describe('NodeTree', () => {
       const result = applyCommand(tree, createIncrementCommand('', 5));
       expect(result).to.be.null;
     });
+
+    it('should treat undefined value as 0 for increment', () => {
+      const tree = emptyTree();
+      const result = applyCommand(tree, createIncrementCommand('', 5));
+      expect(result).not.to.be.null;
+      expect(getNodeValue(result!, '')).to.equal(5);
+    });
   });
 
   describe('applyCommand - insert', () => {

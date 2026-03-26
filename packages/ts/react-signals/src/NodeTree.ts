@@ -126,12 +126,14 @@ export function applyCommand(tree: NodeTree, command: SignalCommand): NodeTree |
   }
 
   if (isIncrementCommand(command)) {
-    if (typeof node.value !== 'number') {
+    // Treat undefined as 0 (default before server snapshot arrives)
+    const current = node.value === undefined ? 0 : node.value;
+    if (typeof current !== 'number') {
       return null;
     }
     return new Map(tree).set(nodeId, {
       ...node,
-      value: node.value + command.delta,
+      value: current + command.delta,
     });
   }
 
