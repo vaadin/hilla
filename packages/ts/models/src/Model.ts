@@ -287,7 +287,9 @@ export type TargetModel<MC extends ModelConverter, SM extends SourceModel<MC>> =
  * Makes functional composition of two given model converter HKT signatures,
  * given A(x) and B(x) returns A(B(x)) HKT signature.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
 export interface CompositeOf<A extends ModelConverter, B extends ModelConverter<Model, SourceModel<A>>>
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   extends ModelConverter<SourceModel<B>> {
   readonly [$targetModel]: TargetModel<A, TargetModel<B, SourceModel<this>>>;
 }
