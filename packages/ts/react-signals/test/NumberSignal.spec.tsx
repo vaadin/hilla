@@ -241,6 +241,14 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(numberSignal.value).to.equal(42);
     });
 
+    it('should return the integer part of the value from valueAsInt()', () => {
+      const numberSignal = new NumberSignal(42.7, config);
+      expect(numberSignal.valueAsInt()).to.equal(42);
+
+      const negativeSignal = new NumberSignal(-3.9, config);
+      expect(negativeSignal.valueAsInt()).to.equal(-3);
+    });
+
     it('should clear pending increments on snapshot', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);

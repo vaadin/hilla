@@ -495,6 +495,34 @@ describe('@vaadin/hilla-react-signals', () => {
       await expect(result).to.be.fulfilled;
     });
 
+    it('should send the correct event when insertAt is called with a custom position', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice', '2': 'Bob' });
+      simulateReceivedChange(subscription, snapshotCommand);
+
+      const [firstChild] = listSignal.value;
+      listSignal.insertAt('Charlie', ListPosition.after(firstChild));
+      expect(client.call).to.have.been.calledOnce;
+
+      const [, , params] = client.call.firstCall.args;
+      expect(client.call).to.have.been.calledWithMatch(
+        'SignalsHandler',
+        'update',
+        {
+          clientSignalId: listSignal.id,
+          command: {
+            commandId: (params?.command as { commandId: string }).commandId,
+            targetNodeId: '',
+            '@type': 'insert',
+            position: { after: firstChild.id, before: null },
+            value: 'Charlie',
+          },
+        },
+        { mute: true },
+      );
+    });
+
     it('should process snapshot command correctly', () => {
       subscribeToSignalViaEffect(listSignal);
 

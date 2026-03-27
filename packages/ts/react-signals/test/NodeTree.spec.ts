@@ -95,6 +95,53 @@ describe('NodeTree', () => {
       expect(getNodeValue(tree, children[1])).to.equal('Bob');
     });
 
+    it('should insert after a specific child', () => {
+      let tree = emptyTree();
+      tree = applyCommand(tree, createInsertCommand('', 'Alice', ListPosition.last()))!;
+      tree = applyCommand(tree, createInsertCommand('', 'Charlie', ListPosition.last()))!;
+      const children = getListChildren(tree, '');
+      const [aliceId] = children;
+      // Insert Bob after Alice
+      tree = applyCommand(tree, createInsertCommand('', 'Bob', ListPosition.after({ id: aliceId })))!;
+      const newChildren = getListChildren(tree, '');
+      expect(newChildren).to.have.length(3);
+      expect(getNodeValue(tree, newChildren[0])).to.equal('Alice');
+      expect(getNodeValue(tree, newChildren[1])).to.equal('Bob');
+      expect(getNodeValue(tree, newChildren[2])).to.equal('Charlie');
+    });
+
+    it('should insert between two children', () => {
+      let tree = emptyTree();
+      tree = applyCommand(tree, createInsertCommand('', 'Alice', ListPosition.last()))!;
+      tree = applyCommand(tree, createInsertCommand('', 'Charlie', ListPosition.last()))!;
+      const children = getListChildren(tree, '');
+      const [aliceId, charlieId] = children;
+      // Insert Bob between Alice and Charlie
+      tree = applyCommand(
+        tree,
+        createInsertCommand('', 'Bob', ListPosition.between({ id: aliceId }, { id: charlieId })),
+      )!;
+      const newChildren = getListChildren(tree, '');
+      expect(newChildren).to.have.length(3);
+      expect(getNodeValue(tree, newChildren[0])).to.equal('Alice');
+      expect(getNodeValue(tree, newChildren[1])).to.equal('Bob');
+      expect(getNodeValue(tree, newChildren[2])).to.equal('Charlie');
+    });
+
+    it('should fail to insert between when constraint is violated', () => {
+      let tree = emptyTree();
+      tree = applyCommand(tree, createInsertCommand('', 'Alice', ListPosition.last()))!;
+      tree = applyCommand(tree, createInsertCommand('', 'Bob', ListPosition.last()))!;
+      tree = applyCommand(tree, createInsertCommand('', 'Charlie', ListPosition.last()))!;
+      const children = getListChildren(tree, '');
+      // Try to insert between Alice and Charlie — but Bob is between them, not Charlie
+      const result = applyCommand(
+        tree,
+        createInsertCommand('', 'Dave', ListPosition.between({ id: children[0] }, { id: children[2] })),
+      );
+      expect(result).to.be.null;
+    });
+
     it('should insert multiple items', () => {
       let tree = emptyTree();
       tree = applyCommand(tree, createInsertCommand('', 'Alice', ListPosition.last()))!;

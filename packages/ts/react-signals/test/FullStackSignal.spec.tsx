@@ -258,6 +258,41 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(client.subscribe).to.be.have.been.calledTwice;
     });
 
+    it('should fall back to confirmed tree when unconfirmed command fails to apply', () => {
+      const numberSignal = new NumberSignal(undefined, { client, endpoint: 'TestEndpoint', method: 'testMethod' });
+      subscribeToSignalViaEffect(numberSignal);
+
+      // Receive a snapshot setting value to a string (non-numeric)
+      const nodes = {
+        '': {
+          '@type': 'ValueSignal',
+          parent: null,
+          lastUpdate: null,
+          scopeOwner: null,
+          value: 'not-a-number',
+          listChildren: [],
+          mapChildren: {},
+        },
+      };
+      simulateReceivedChange(subscription, createSnapshotCommand(nodes));
+
+      // Now try to increment — will fail in applyCommand, should fall back to confirmed tree
+      numberSignal.incrementBy(5);
+      expect(numberSignal.value).to.equal('not-a-number');
+    });
+
+    it('should support valueOf, toString, and toJSON', () => {
+      const numberSignal = new NumberSignal(42, { client, endpoint: 'TestEndpoint', method: 'testMethod' });
+      expect(numberSignal.valueOf()).to.equal(42);
+      expect(numberSignal.toString()).to.equal('42');
+      expect(numberSignal.toJSON()).to.equal(42);
+    });
+
+    it('should not throw when disconnecting without active subscription', () => {
+      // signal has not been subscribed to yet
+      expect(() => signal.connection.disconnect()).not.to.throw();
+    });
+
     it('should not generate a random id when id is provided for the constructor', () => {
       signal = new NumberSignal(
         undefined,
