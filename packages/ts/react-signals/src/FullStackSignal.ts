@@ -12,6 +12,19 @@ const [reactMajor] = reactVersion.split('.').map(Number);
 const REACT_ELEMENT_TYPE = Symbol.for(reactMajor >= 19 ? 'react.transitional.element' : 'react.element');
 
 /**
+ * React component used as the `type` property on FullStackSignal instances,
+ * enabling direct JSX rendering. React calls this as a component.
+ */
+function SignalValue<T>({ data: sig }: { data: { value: T } }): T {
+  const store = useSignals(1);
+  try {
+    return sig.value;
+  } finally {
+    store.f();
+  }
+}
+
+/**
  * A return type for signal operations that exposes a `result` property of type
  * `Promise`, that resolves when the operation is completed.
  */
@@ -116,14 +129,7 @@ export abstract class FullStackSignal<T> {
       $$typeof: { configurable: true, value: REACT_ELEMENT_TYPE },
       type: {
         configurable: true,
-        value: ({ data: sig }: { data: FullStackSignal<T> }) => {
-          const store = useSignals(1);
-          try {
-            return sig.value;
-          } finally {
-            store.f();
-          }
-        },
+        value: SignalValue,
       },
       props: { configurable: true, get: () => ({ data: this }) },
       ref: { configurable: true, value: null },
