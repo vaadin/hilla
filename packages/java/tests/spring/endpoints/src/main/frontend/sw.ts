@@ -158,7 +158,7 @@ self.addEventListener('push', (e) => {
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
-  e.waitUntil(focusOrOpenWindow());
+  e.waitUntil(await focusOrOpenWindow());
 });
 
 async function focusOrOpenWindow() {
