@@ -293,6 +293,22 @@ describe('@vaadin/hilla-react-signals', () => {
       expect(() => signal.connection.disconnect()).not.to.throw();
     });
 
+    it('should wrap non-Error rejection as Error', async () => {
+      client.call.rejects('string-error');
+
+      subscribeToSignalViaEffect(signal);
+      signal.value = 42;
+      await nextFrame();
+
+      expect(signal.error.value).to.be.instanceOf(Error);
+      expect(signal.error.value?.message).to.equal('string-error');
+    });
+
+    it('should peek at the value without subscribing', () => {
+      const numberSignal = new NumberSignal(42, { client, endpoint: 'TestEndpoint', method: 'testMethod' });
+      expect(numberSignal.peek()).to.equal(42);
+    });
+
     it('should not generate a random id when id is provided for the constructor', () => {
       signal = new NumberSignal(
         undefined,

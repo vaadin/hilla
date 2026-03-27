@@ -164,6 +164,15 @@ describe('NodeTree', () => {
       expect(getListChildren(tree, '')).to.have.length(0);
     });
 
+    it('should remove a map child via remove command', () => {
+      let tree = emptyTree();
+      tree = applyCommand(tree, createPutCommand('', 'name', 'Alice'))!;
+      const mapChildren = getMapChildren(tree, '');
+      const childId = mapChildren.get('name')!;
+      tree = applyCommand(tree, createRemoveCommand(childId, ''))!;
+      expect(getMapChildren(tree, '').size).to.equal(0);
+    });
+
     it('should return null when removing root node (no parent)', () => {
       const tree = emptyTree();
       const result = applyCommand(tree, createRemoveCommand('', ''));
