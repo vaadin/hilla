@@ -294,14 +294,15 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should wrap non-Error rejection as Error', async () => {
-      client.call.rejects('string-error');
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+      client.call.returns(Promise.reject(42));
 
       subscribeToSignalViaEffect(signal);
       signal.value = 42;
       await nextFrame();
 
       expect(signal.error.value).to.be.instanceOf(Error);
-      expect(signal.error.value?.message).to.equal('string-error');
+      expect(signal.error.value?.message).to.equal('42');
     });
 
     it('should peek at the value without subscribing', () => {
