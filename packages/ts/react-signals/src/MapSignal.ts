@@ -45,7 +45,7 @@ export class MapSignal<T> extends FullStackSignal<Map<string, ValueSignal<T>>> {
    * @returns An operation containing the eventual result
    */
   put(key: string, value: T): Operation {
-    return this.sendCommand(createPutCommand<T>(ZERO, key, value));
+    return this.sendCommand(createPutCommand(ZERO, key, value));
   }
 
   /**

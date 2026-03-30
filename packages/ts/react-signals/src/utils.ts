@@ -1,4 +1,4 @@
-import type { ReadonlySignal } from '@preact/signals-core';
+import type { ReadonlySignal } from '@preact/signals-react';
 
 export async function createPromiseFromSignal<T, U, E>(
   signal: ReadonlySignal<T>,
