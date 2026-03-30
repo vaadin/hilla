@@ -56,6 +56,7 @@ public class EngineAutoConfiguration {
     private String groupId;
     private String artifactId;
     private String mainClass;
+    private List<String> sourceClasses = List.of();
     private Path buildDir;
     private Path baseDir;
     private List<Path> classesDirs;
@@ -98,6 +99,10 @@ public class EngineAutoConfiguration {
 
     public String getMainClass() {
         return mainClass;
+    }
+
+    public List<String> getSourceClasses() {
+        return sourceClasses;
     }
 
     public Path getBuildDir() {
@@ -178,27 +183,35 @@ public class EngineAutoConfiguration {
             result = (conf) -> {
                 var exceptions = new ArrayList<BrowserCallableFinderException>();
 
-                return Stream.<BrowserCallableFinder> of(
+                var classFinders = Stream.<BrowserCallableFinder> of(
                         LookupBrowserCallableFinder::find,
-                        AotBrowserCallableFinder::find).map(finder -> {
-                            try {
-                                return finder.find(conf);
-                            } catch (BrowserCallableFinderException e) {
-                                exceptions.add(e);
-                                return null;
-                            }
-                        }).filter(Objects::nonNull).findFirst()
-                        .orElseThrow(() -> {
-                            if (exceptions.isEmpty()) {
-                                return new ParserException(
-                                        "No browser-callable classes found");
-                            } else {
-                                var exception = new ParserException(
-                                        "Failed to find browser-callable classes");
-                                exceptions.forEach(exception::addSuppressed);
-                                return exception;
-                            }
-                        });
+                        AotBrowserCallableFinder::find);
+
+                if (conf.getMainClass() != null
+                        || !conf.getSourceClasses().isEmpty()) {
+                    // Use Spring-based class finder with explicit configuration
+                    classFinders = Stream.<BrowserCallableFinder> of(
+                            AotBrowserCallableFinder::find);
+                }
+
+                return classFinders.map(finder -> {
+                    try {
+                        return finder.find(conf);
+                    } catch (BrowserCallableFinderException e) {
+                        exceptions.add(e);
+                        return null;
+                    }
+                }).filter(Objects::nonNull).findFirst().orElseThrow(() -> {
+                    if (exceptions.isEmpty()) {
+                        return new ParserException(
+                                "No browser-callable classes found");
+                    } else {
+                        var exception = new ParserException(
+                                "Failed to find browser-callable classes");
+                        exceptions.forEach(exception::addSuppressed);
+                        return exception;
+                    }
+                });
             };
         }
 
@@ -275,6 +288,7 @@ public class EngineAutoConfiguration {
             this.configuration.groupId = configuration.groupId;
             this.configuration.artifactId = configuration.artifactId;
             this.configuration.mainClass = configuration.mainClass;
+            this.configuration.sourceClasses = configuration.sourceClasses;
             this.configuration.browserCallableFinder = configuration.browserCallableFinder;
             this.configuration.productionMode = configuration.productionMode;
             this.configuration.nodeCommand = configuration.nodeCommand;
@@ -350,6 +364,11 @@ public class EngineAutoConfiguration {
             return this;
         }
 
+        public Builder sourceClasses(List<String> sourceClasses) {
+            configuration.sourceClasses = List.copyOf(sourceClasses);
+            return this;
+        }
+
         public Builder browserCallableFinder(BrowserCallableFinder finder) {
             configuration.browserCallableFinder = finder;
             return this;
@@ -375,13 +394,15 @@ public class EngineAutoConfiguration {
             return this;
         }
 
-        public Builder endpointAnnotations(
+        @SafeVarargs
+        public final Builder endpointAnnotations(
                 Class<? extends Annotation>... value) {
             configuration.parser.setEndpointAnnotations(Arrays.asList(value));
             return this;
         }
 
-        public Builder endpointExposedAnnotations(
+        @SafeVarargs
+        public final Builder endpointExposedAnnotations(
                 Class<? extends Annotation>... value) {
             configuration.parser
                     .setEndpointExposedAnnotations(Arrays.asList(value));

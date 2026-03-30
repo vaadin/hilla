@@ -60,6 +60,9 @@ public final class EngineGenerateMojo extends AbstractMojo
     @Parameter(property = "mainClass")
     private String mainClass;
 
+    @Parameter
+    private String[] sourceClasses;
+
     @Override
     public void execute() throws EngineGenerateMojoException {
         var project = (MavenProject) getPluginContext().get("project");
@@ -94,6 +97,11 @@ public final class EngineGenerateMojo extends AbstractMojo
     @Override
     public String getMainClass() {
         return mainClass;
+    }
+
+    @Override
+    public String[] getSourceClasses() {
+        return sourceClasses;
     }
 
     @Override
