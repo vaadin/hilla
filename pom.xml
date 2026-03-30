@@ -85,6 +85,7 @@
     <swagger.models.version>2.2.32</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
     <jackson.version>2.21.2</jackson.version>
+    <jackson.annotation.version>2.21</jackson.annotation.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>24.10-SNAPSHOT</flow.version>
@@ -213,7 +214,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson.annotation.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
