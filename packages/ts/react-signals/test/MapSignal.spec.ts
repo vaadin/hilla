@@ -51,7 +51,7 @@ describe('@vaadin/hilla-react-signals', () => {
     }
 
     function createServerPutCommand(commandId: string, key: string, value: string): PutCommand<string> {
-      const command = createPutCommand<string>(ZERO, key, value);
+      const command = createPutCommand(ZERO, key, value);
       return { ...command, commandId };
     }
 
