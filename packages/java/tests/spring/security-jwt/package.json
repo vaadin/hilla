@@ -192,8 +192,8 @@
       "@vaadin/tooltip": "25.1.0",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "25.2.0-alpha2",
-      "@vaadin/vaadin-themable-mixin": "25.2.0-alpha2",
+      "@vaadin/vaadin-lumo-styles": "25.2.0-alpha3",
+      "@vaadin/vaadin-themable-mixin": "25.2.0-alpha3",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "@vaadin/vertical-layout": "24.8.0-alpha4",
       "@vaadin/virtual-list": "24.8.0-alpha4",
@@ -230,7 +230,7 @@
       "@rolldown/plugin-babel": "0.2.1",
       "@babel/core": "7.29.0"
     },
-    "hash": "a90c95936ac4183f201b099fe67ed01d7a670eac493b63f40fc949c1022108cb"
+    "hash": "a253f14bd13726ade9cc1ddf19456bdad8b25cb97edd0ce7d74b4d83f97a3837"
   },
   "overrides": {
     "@vaadin/icon": "$@vaadin/icon",
@@ -326,7 +326,7 @@
     "@vaadin/aura": "$@vaadin/aura",
     "@vaadin/slider": "$@vaadin/slider",
     "@vaadin/badge": "$@vaadin/badge",
-    "@vaadin/react-components": "25.2.0-alpha2",
-    "@vaadin/react-components-pro": "25.2.0-alpha2"
+    "@vaadin/react-components": "25.2.0-alpha3",
+    "@vaadin/react-components-pro": "25.2.0-alpha3"
   }
 }

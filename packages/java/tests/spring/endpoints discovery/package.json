@@ -16,10 +16,8 @@
     "lit": "3.3.2"
   },
   "devDependencies": {
-    "@babel/core": "7.29.0",
     "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
-    "@rolldown/plugin-babel": "0.2.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
     "@types/node": "25.5.0",
@@ -43,26 +41,26 @@
     "typescript": "5.9.3",
     "vite": "8.0.3",
     "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0"
+    "workbox-build": "7.4.0",
+    "@rolldown/plugin-babel": "0.2.1",
+    "@babel/core": "7.29.0"
   },
   "vaadin": {
     "dependencies": {
       "@vaadin/common-frontend": "0.0.22",
       "@vaadin/hilla-frontend": "25.1.0-beta1",
       "@vaadin/hilla-lit-form": "25.1.0-beta1",
-      "@vaadin/icon": "25.2.0-alpha3",
-      "@vaadin/icons": "25.2.0-alpha3",
+      "@vaadin/icon": "25.1.0",
+      "@vaadin/icons": "25.1.0",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.2.0-alpha3",
+      "@vaadin/tooltip": "25.1.0",
       "@vaadin/vaadin-lumo-styles": "25.2.0-alpha3",
       "@vaadin/vaadin-themable-mixin": "25.2.0-alpha3",
       "lit": "3.3.2"
     },
     "devDependencies": {
-      "@babel/core": "7.29.0",
       "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.8.1",
-      "@rolldown/plugin-babel": "0.2.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
       "@types/node": "25.5.0",
@@ -86,9 +84,11 @@
       "typescript": "5.9.3",
       "vite": "8.0.3",
       "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0"
+      "workbox-build": "7.4.0",
+      "@rolldown/plugin-babel": "0.2.1",
+      "@babel/core": "7.29.0"
     },
-    "hash": "9d55ef672628626b6e8e9099e361ee73b86dbd6eb2a9a4b1ca935d3c1b14ab81"
+    "hash": "7ce60a4446de26fe99b5f2b31b8611e89fee93ddd8f7bc8826c83426784e4cc4"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",

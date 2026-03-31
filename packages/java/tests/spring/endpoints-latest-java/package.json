@@ -53,8 +53,8 @@
       "@vaadin/icons": "25.1.0",
       "@vaadin/router": "2.0.1",
       "@vaadin/tooltip": "25.1.0",
-      "@vaadin/vaadin-lumo-styles": "25.2.0-alpha2",
-      "@vaadin/vaadin-themable-mixin": "25.2.0-alpha2",
+      "@vaadin/vaadin-lumo-styles": "25.2.0-alpha3",
+      "@vaadin/vaadin-themable-mixin": "25.2.0-alpha3",
       "lit": "3.3.2"
     },
     "devDependencies": {
@@ -87,7 +87,7 @@
       "@rolldown/plugin-babel": "0.2.1",
       "@babel/core": "7.29.0"
     },
-    "hash": "5e45f921a3baebbf5ba2a9a918b612515e71963921f2799f718f025bc69f49f4"
+    "hash": "7ce60a4446de26fe99b5f2b31b8611e89fee93ddd8f7bc8826c83426784e4cc4"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
