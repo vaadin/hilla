@@ -151,7 +151,7 @@ type FieldRendererProps = Readonly<{
 function getPropertyModel(form: UseFormResult<any>, propertyInfo: PropertyInfo) {
   const pathParts = propertyInfo.name.split('.');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return pathParts.reduce<any>((model, property) => (model ? model[property] : undefined), form.model);
+  return pathParts.reduce((model, property) => (model ? model[property] : undefined), form.model);
 }
 
 function renderFieldElement(
