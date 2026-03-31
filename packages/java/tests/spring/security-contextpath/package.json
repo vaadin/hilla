@@ -114,7 +114,9 @@
     "typescript": "5.9.3",
     "vite": "8.0.3",
     "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0"
+    "workbox-build": "7.4.0",
+    "@rolldown/plugin-babel": "0.2.1",
+    "@babel/core": "7.29.0"
   },
   "vaadin": {
     "dependencies": {
@@ -215,16 +217,18 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.1.0-beta1",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.1.0-beta1",
       "@vaadin/hilla-generator-utils": "25.1.0-beta1",
-      "@vitejs/plugin-react": "5.1.4",
+      "@vitejs/plugin-react": "6.0.1",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.1",
+      "vite": "8.0.3",
       "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0"
+      "workbox-build": "7.4.0",
+      "@rolldown/plugin-babel": "0.2.1",
+      "@babel/core": "7.29.0"
     },
     "hash": "a90c95936ac4183f201b099fe67ed01d7a670eac493b63f40fc949c1022108cb"
   },

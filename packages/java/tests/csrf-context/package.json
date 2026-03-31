@@ -12,7 +12,16 @@
     "@vaadin/tooltip": "25.2.0-alpha2",
     "@vaadin/vaadin-lumo-styles": "25.2.0-alpha2",
     "@vaadin/vaadin-themable-mixin": "25.2.0-alpha2",
-    "lit": "3.3.2"
+    "lit": "3.3.2",
+    "react-dom": "19.2.4",
+    "@vaadin/hilla-react-auth": "25.1.0-beta1",
+    "react": "19.2.4",
+    "react-router": "7.13.1",
+    "@vaadin/hilla-react-crud": "25.1.0-beta1",
+    "@vaadin/hilla-file-router": "25.1.0-beta1",
+    "@vaadin/hilla-react-i18n": "25.1.0-beta1",
+    "@vaadin/hilla-react-form": "25.1.0-beta1",
+    "@vaadin/hilla-react-signals": "25.1.0-beta1"
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
@@ -40,7 +49,11 @@
     "typescript": "5.9.3",
     "vite": "8.0.3",
     "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0"
+    "workbox-build": "7.4.0",
+    "@rolldown/plugin-babel": "0.2.1",
+    "@types/react-dom": "19.2.3",
+    "@babel/core": "7.29.0",
+    "@types/react": "19.2.14"
   },
   "vaadin": {
     "dependencies": {
@@ -53,7 +66,16 @@
       "@vaadin/tooltip": "25.1.0",
       "@vaadin/vaadin-lumo-styles": "25.2.0-alpha2",
       "@vaadin/vaadin-themable-mixin": "25.2.0-alpha2",
-      "lit": "3.3.2"
+      "lit": "3.3.2",
+      "react-dom": "19.2.4",
+      "@vaadin/hilla-react-auth": "25.1.0-beta1",
+      "react": "19.2.4",
+      "react-router": "7.13.1",
+      "@vaadin/hilla-react-crud": "25.1.0-beta1",
+      "@vaadin/hilla-file-router": "25.1.0-beta1",
+      "@vaadin/hilla-react-i18n": "25.1.0-beta1",
+      "@vaadin/hilla-react-form": "25.1.0-beta1",
+      "@vaadin/hilla-react-signals": "25.1.0-beta1"
     },
     "devDependencies": {
       "@babel/preset-react": "7.28.5",
@@ -72,16 +94,20 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.1.0-beta1",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.1.0-beta1",
       "@vaadin/hilla-generator-utils": "25.1.0-beta1",
-      "@vitejs/plugin-react": "5.1.4",
+      "@vitejs/plugin-react": "6.0.1",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.1",
+      "vite": "8.0.3",
       "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0"
+      "workbox-build": "7.4.0",
+      "@rolldown/plugin-babel": "0.2.1",
+      "@types/react-dom": "19.2.3",
+      "@babel/core": "7.29.0",
+      "@types/react": "19.2.14"
     },
     "hash": "4169cbad332eb5dee7f47e8f8613821df8d465484b0c33cc539dc69fd22720ab"
   },
