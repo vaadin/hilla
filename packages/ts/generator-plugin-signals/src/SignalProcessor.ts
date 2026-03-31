@@ -54,7 +54,7 @@ export default class SignalProcessor {
     const initTypeId = imports.named.getIdentifier('@vaadin/hilla-frontend', 'EndpointRequestInit');
     let initTypeUsageCount = 0;
 
-    const [file] = transform<SourceFile>(this.#sourceFile, [
+    const [file] = transform(this.#sourceFile, [
       createTransformer((node) => {
         if (isFunctionDeclaration(node)) {
           // Check if the function is a signal method.

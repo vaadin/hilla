@@ -24,7 +24,6 @@ import {
   type Player,
   type PlayerModel,
   PostalAddressModel,
-  type Project,
   TeamModel,
 } from './models.js';
 
@@ -298,7 +297,7 @@ describe('@vaadin/hilla-react-form', () => {
 
     it('should be updatable', async () => {
       function UpdatableForm() {
-        const [projects] = useState<Project[]>([
+        const [projects] = useState([
           { id: 1, name: 'P1' },
           { id: 2, name: 'P2' },
         ]);
