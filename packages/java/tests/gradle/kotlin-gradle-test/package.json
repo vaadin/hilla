@@ -12,11 +12,11 @@
     "@vaadin/hilla-react-form": "file:../../../../ts/react-form",
     "@vaadin/hilla-react-i18n": "file:../../../../ts/react-i18n",
     "@vaadin/hilla-react-signals": "file:../../../../ts/react-signals",
-    "@vaadin/react-components": "25.2.0-alpha4",
-    "@vaadin/react-components-pro": "25.2.0-alpha4",
+    "@vaadin/react-components": "25.2.0-alpha5",
+    "@vaadin/react-components-pro": "25.2.0-alpha5",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
-    "@vaadin/vaadin-lumo-styles": "25.2.0-alpha4",
-    "@vaadin/vaadin-themable-mixin": "25.2.0-alpha4",
+    "@vaadin/vaadin-lumo-styles": "25.2.0-alpha5",
+    "@vaadin/vaadin-themable-mixin": "25.2.0-alpha5",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "lit": "3.3.2",
     "react": "19.2.4",
@@ -24,8 +24,10 @@
     "react-router": "7.13.1"
   },
   "devDependencies": {
+    "@babel/core": "7.29.0",
     "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
+    "@rolldown/plugin-babel": "0.2.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
     "@types/node": "25.5.0",
@@ -76,8 +78,10 @@
       "react-router": "7.12.0"
     },
     "devDependencies": {
+      "@babel/core": "7.29.0",
       "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.6.0",
+      "@rolldown/plugin-babel": "0.2.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
       "@types/node": "25.0.3",
