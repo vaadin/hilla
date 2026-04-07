@@ -43,9 +43,11 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
+    "@babel/core": "7.29.0",
     "@nx/js": "20.4.5",
     "@open-wc/testing": "4.0.0",
     "@preact/signals-react-transform": "0.8.1",
+    "@rolldown/plugin-babel": "0.2.1",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.2.0",
     "@testing-library/user-event": "14.6.1",
@@ -62,10 +64,10 @@
     "@types/sinon": "17.0.3",
     "@types/sinon-chai": "4.0.0",
     "@types/validator": "13.12.2",
-    "@vaadin/bundles": "25.0.0-alpha19",
-    "@vaadin/react-components": "25.2.0-alpha2",
-    "@vaadin/react-components-pro": "25.2.0-alpha2",
-    "@vitejs/plugin-react": "5.1.4",
+    "@vaadin/bundles": "25.2.0-alpha4",
+    "@vaadin/react-components": "25.2.0-alpha6",
+    "@vaadin/react-components-pro": "25.2.0-alpha6",
+    "@vitejs/plugin-react": "6.0.1",
     "@vitest/browser": "3.1.1",
     "@vitest/coverage-v8": "3.1.1",
     "@vitest/ui": "3.1.1",
@@ -109,7 +111,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.35.0",
     "typescript": "5.9.3",
-    "vite": "7.3.1",
+    "vite": "8.0.5",
     "vitest": "3.1.1"
   }
 }
