@@ -84,8 +84,10 @@
     "mobx": "6.3.3"
   },
   "devDependencies": {
+    "@babel/core": "7.29.0",
     "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
+    "@rolldown/plugin-babel": "0.2.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
     "@types/node": "25.5.0",
@@ -109,9 +111,7 @@
     "typescript": "5.9.3",
     "vite": "8.0.3",
     "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0",
-    "@rolldown/plugin-babel": "0.2.1",
-    "@babel/core": "7.29.0"
+    "workbox-build": "7.4.0"
   },
   "vaadin": {
     "dependencies": {
@@ -150,8 +150,8 @@
       "@vaadin/hilla-frontend": "25.2.0-alpha1",
       "@vaadin/hilla-lit-form": "25.2.0-alpha1",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.1.0",
-      "@vaadin/icons": "25.1.0",
+      "@vaadin/icon": "25.2.0-alpha6",
+      "@vaadin/icons": "25.2.0-alpha6",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -184,7 +184,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.1.0",
+      "@vaadin/tooltip": "25.2.0-alpha6",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.2.0-alpha6",
@@ -196,8 +196,10 @@
       "mobx": "6.3.3"
     },
     "devDependencies": {
+      "@babel/core": "7.29.0",
       "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.8.1",
+      "@rolldown/plugin-babel": "0.2.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
       "@types/node": "25.5.0",
@@ -221,11 +223,9 @@
       "typescript": "5.9.3",
       "vite": "8.0.3",
       "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0",
-      "@rolldown/plugin-babel": "0.2.1",
-      "@babel/core": "7.29.0"
+      "workbox-build": "7.4.0"
     },
-    "hash": "f314931beed0159803b9a2ccaf798484d067482af1b79e16c80e293625087beb"
+    "hash": "11f564ede83b360077b75b9e116e468fbaf3e78213d60951f246e1d6d8cfee61"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
