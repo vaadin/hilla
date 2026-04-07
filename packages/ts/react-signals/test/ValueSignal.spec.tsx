@@ -44,13 +44,13 @@ describe('@vaadin/hilla-react-signals', () => {
       const valueSignal1 = new ValueSignal<string>(undefined, config);
       expect(valueSignal1.value).to.be.undefined;
 
-      const valueSignal2 = new ValueSignal<string>('foo', config);
+      const valueSignal2 = new ValueSignal('foo', config);
       expect(valueSignal2.value).to.equal('foo');
 
-      const valueSignal3 = new ValueSignal<boolean>(true, config);
+      const valueSignal3 = new ValueSignal(true, config);
       expect(valueSignal3.value).to.equal(true);
 
-      const valueSignal4 = new ValueSignal<number>(42, config);
+      const valueSignal4 = new ValueSignal(42, config);
       expect(valueSignal4.value).to.equal(42);
 
       const valueSignal5 = new ValueSignal<Person>({ name: 'Alice', age: 42, registered: true }, config);
@@ -58,14 +58,14 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should render value when signal is rendered', async () => {
-      const valueSignal = new ValueSignal<string>('foo', config);
+      const valueSignal = new ValueSignal('foo', config);
       const result = render(<div>{valueSignal.value}</div>);
       await nextFrame();
       expect(result.container.textContent).to.equal('foo');
     });
 
     it('should set the value locally when calling set method without waiting for the server update', () => {
-      const valueSignal = new ValueSignal<string>('foo', config);
+      const valueSignal = new ValueSignal('foo', config);
       subscribeToSignalViaEffect(valueSignal);
       expect(valueSignal.value).to.equal('foo');
       valueSignal.set('bar');
@@ -73,7 +73,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should be possible to subscribe to the value changes in effects', () => {
-      const valueSignal = new ValueSignal<string>('foo', config);
+      const valueSignal = new ValueSignal('foo', config);
 
       const results = subscribeToSignalViaEffect(valueSignal);
 
@@ -103,7 +103,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should resolve the result promise after set', async () => {
-      const valueSignal = new ValueSignal<string>('a', config);
+      const valueSignal = new ValueSignal('a', config);
       subscribeToSignalViaEffect(valueSignal);
       const { result } = valueSignal.set('b');
       const [, , params] = client.call.firstCall.args;
@@ -117,7 +117,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should skip re-applying own confirmed set', () => {
-      const valueSignal = new ValueSignal<string>('original', config);
+      const valueSignal = new ValueSignal('original', config);
       subscribeToSignalViaEffect(valueSignal);
 
       valueSignal.set('updated');
@@ -138,7 +138,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should not overwrite newer optimistic set when earlier set is confirmed', () => {
-      const valueSignal = new ValueSignal<string>('original', config);
+      const valueSignal = new ValueSignal('original', config);
       subscribeToSignalViaEffect(valueSignal);
 
       valueSignal.set('first');
@@ -160,7 +160,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should revert to confirmed value on set rejection', () => {
-      const valueSignal = new ValueSignal<string>('original', config);
+      const valueSignal = new ValueSignal('original', config);
       subscribeToSignalViaEffect(valueSignal);
 
       const { result } = valueSignal.set('rejected-value');
@@ -184,7 +184,7 @@ describe('@vaadin/hilla-react-signals', () => {
     });
 
     it('should update confirmed value from snapshot', () => {
-      const valueSignal = new ValueSignal<string>('original', config);
+      const valueSignal = new ValueSignal('original', config);
       subscribeToSignalViaEffect(valueSignal);
 
       simulateReceivedChange(subscription, {
