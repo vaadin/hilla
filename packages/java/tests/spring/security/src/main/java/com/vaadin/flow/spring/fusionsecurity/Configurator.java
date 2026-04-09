@@ -19,9 +19,9 @@ import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@StyleSheet(Lumo.STYLESHEET)
-@StyleSheet(Lumo.UTILITY_STYLESHEET)
-@StyleSheet("css/styles.css")
+@StyleSheet("context://" + Lumo.STYLESHEET)
+@StyleSheet("context://" + Lumo.UTILITY_STYLESHEET)
+@StyleSheet("context://css/styles.css")
 public class Configurator implements AppShellConfigurator {
 
 }

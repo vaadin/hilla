@@ -72,7 +72,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> {
             auth
                     // Public access
-                    .requestMatchers("/public/**").permitAll()
+                    .requestMatchers("/public/**", "/css/**", "/lumo/**").permitAll()
                     .requestMatchers(requestUtil.applyUrlMapping("/"),
                             requestUtil.applyUrlMapping("/form"),
                             requestUtil.applyUrlMapping("/proxied-service"))
