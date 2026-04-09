@@ -40,7 +40,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "8.0.5",
+    "vite": "8.0.8",
     "vite-plugin-checker": "0.12.0",
     "workbox-build": "7.4.0",
     "workbox-core": "7.3.0",
@@ -85,13 +85,13 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "8.0.5",
+      "vite": "8.0.8",
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0",
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "0cd88d93ce384d45ad6b828ea9e2e3492818b3e7693af991cc852ef2aa8fd515"
+    "hash": "1988fe8d68624d947884744cd2fd9340cfb41ee5da56a503a58d2707ed659352"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
