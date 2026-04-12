@@ -19,7 +19,7 @@ export class MapSignal<T> extends FullStackSignal<Map<string, ValueSignal<T>>> {
     const result = new Map<string, ValueSignal<T>>();
     for (const [key, childId] of mapChildren) {
       const childNode = tree.get(childId);
-      if (childNode && 'value' in childNode) {
+      if (childNode?.value !== undefined) {
         result.set(key, new ValueSignal(childNode.value as T, this.getConfig(), childId, this));
       }
     }

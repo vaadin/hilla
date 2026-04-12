@@ -5,9 +5,22 @@ import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { beforeEach, describe, expect, it, chai } from 'vitest';
-import type { SignalCommand, InsertCommand, RemoveCommand, Node } from '../src/commands.js';
-import { createSnapshotCommand, createInsertCommand, createRemoveCommand, ListPosition } from '../src/commands.js';
-import { ListSignal } from '../src/index.js';
+import type {
+  SignalCommand,
+  InsertCommand,
+  RemoveCommand,
+  AdoptAtCommand,
+  PositionCondition,
+  Node,
+} from '../src/commands.js';
+import {
+  createSnapshotCommand,
+  createInsertCommand,
+  createRemoveCommand,
+  createAdoptAtCommand,
+  ListPosition,
+} from '../src/commands.js';
+import { ListSignal, ValueSignal } from '../src/index.js';
 import { createSubscriptionStub, subscribeToSignalViaEffect, simulateReceivedChange } from './utils.js';
 
 chai.use(sinonChai);
@@ -65,6 +78,31 @@ describe('@vaadin/hilla-react-signals', () => {
     ): RemoveCommand {
       const command = createRemoveCommand(targetNodeId, expectedParentId);
       return { ...command, commandId };
+    }
+
+    function createServerAdoptAtCommand(
+      commandId: string,
+      targetNodeId: string,
+      childId: string,
+      position: ListPosition,
+    ): AdoptAtCommand {
+      const command = createAdoptAtCommand(targetNodeId, childId, position);
+      return { ...command, commandId };
+    }
+
+    function createServerPositionCondition(
+      commandId: string,
+      targetNodeId: string,
+      childId: string,
+      expectedPosition: ListPosition,
+    ): PositionCondition {
+      return {
+        '@type': 'pos' as const,
+        commandId,
+        targetNodeId,
+        childId,
+        expectedPosition,
+      };
     }
 
     beforeEach(() => {
@@ -521,6 +559,239 @@ describe('@vaadin/hilla-react-signals', () => {
         },
         { mute: true },
       );
+    });
+
+    it('should do nothing when the update for removing a non-existing entry is received', () => {
+      subscribeToSignalViaEffect(listSignal);
+      expect(listSignal.value).to.be.empty;
+      const removeCommand = createServerRemoveCommand('some-id', 'non-existing-entry-id');
+      simulateReceivedChange(subscription, removeCommand);
+      expect(listSignal.value).to.be.empty;
+
+      const snapshotCommand = createServerSnapshotCommand('123', {
+        '1': 'Alice',
+        '2': 'Bob',
+      });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(2);
+
+      simulateReceivedChange(subscription, removeCommand);
+      expect(listSignal.value).to.have.length(2);
+    });
+
+    it('should do nothing when a non existent signal is passed to remove function', () => {
+      subscribeToSignalViaEffect(listSignal);
+      const snapshotCommand = createServerSnapshotCommand('123', {
+        '1': 'Alice',
+        '2': 'Bob',
+        '3': 'John',
+        '4': 'Jane',
+      });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(4);
+
+      const nonExistentSignal = new ValueSignal('', {
+        client,
+        endpoint: 'NameService',
+        method: 'nameListSignal',
+      });
+      listSignal.remove(nonExistentSignal);
+      expect(listSignal.value).to.have.length(4);
+    });
+
+    it('should handle insert at specific positions correctly', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', {
+        '1': 'Alice',
+        '2': 'Bob',
+        '3': 'Charlie',
+      });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(3);
+
+      // Insert after '1' (after Alice)
+      const insertAfterCommand = createServerInsertCommand('after-id', '', 'David', {
+        after: '1',
+        before: null,
+      });
+      simulateReceivedChange(subscription, insertAfterCommand);
+      expect(listSignal.value).to.have.length(4);
+      expect(listSignal.value[1].value).to.equal('David');
+
+      // Insert before '3' (before Charlie)
+      const insertBeforeCommand = createServerInsertCommand('before-id', '', 'Eve', {
+        after: null,
+        before: '3',
+      });
+      simulateReceivedChange(subscription, insertBeforeCommand);
+      expect(listSignal.value).to.have.length(5);
+      expect(listSignal.value[3].value).to.equal('Eve');
+    });
+
+    it('should handle commands with targetNodeId updating a child value', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', { '1': 'Alice' });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(1);
+      expect(listSignal.value[0].value).to.equal('Alice');
+
+      const setCommand = {
+        '@type': 'set' as const,
+        commandId: 'set-cmd',
+        targetNodeId: '1',
+        value: 'Updated Alice',
+      };
+      simulateReceivedChange(subscription, setCommand);
+      expect(listSignal.value).to.have.length(1);
+      expect(listSignal.value[0].value).to.equal('Updated Alice');
+    });
+
+    it('should handle snapshot commands with missing child nodes gracefully', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const nodes: Record<string, Node> = {
+        '': {
+          '@type': 'ListSignal',
+          parent: null,
+          lastUpdate: null,
+          scopeOwner: null,
+          listChildren: ['1', '2'],
+          mapChildren: {},
+        },
+        '1': {
+          '@type': 'ValueSignal',
+          parent: '',
+          lastUpdate: null,
+          scopeOwner: null,
+          value: 'Alice',
+          listChildren: [],
+          mapChildren: {},
+        },
+        '2': {
+          '@type': 'SomeOtherSignal',
+          parent: '',
+          lastUpdate: null,
+          scopeOwner: null,
+          listChildren: [],
+          mapChildren: {},
+        },
+      };
+
+      const snapshotCommand = { ...createSnapshotCommand(nodes), commandId: 'snapshot' };
+      simulateReceivedChange(subscription, snapshotCommand);
+
+      // Node '2' has no value property, should be filtered out
+      expect(listSignal.value).to.have.length(1);
+      expect(listSignal.value[0].value).to.equal('Alice');
+    });
+
+    it('should handle position condition commands', () => {
+      subscribeToSignalViaEffect(listSignal);
+      const positionCommand = createServerPositionCondition('pos-cmd', '', 'child-1', ListPosition.last());
+      expect(() => simulateReceivedChange(subscription, positionCommand as unknown as SignalCommand)).not.to.throw;
+    });
+
+    it('should handle adopt-at commands for moving children', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', {
+        '1': 'Alice',
+        '2': 'Bob',
+        '3': 'Charlie',
+      });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(3);
+      expect(listSignal.value[0].value).to.equal('Alice');
+      expect(listSignal.value[1].value).to.equal('Bob');
+      expect(listSignal.value[2].value).to.equal('Charlie');
+
+      // Move Bob to end
+      const moveToEndCommand = createServerAdoptAtCommand('move-cmd', '', '2', ListPosition.last());
+      simulateReceivedChange(subscription, moveToEndCommand);
+
+      expect(listSignal.value).to.have.length(3);
+      expect(listSignal.value[0].value).to.equal('Alice');
+      expect(listSignal.value[1].value).to.equal('Charlie');
+      expect(listSignal.value[2].value).to.equal('Bob');
+
+      // Move Charlie to beginning
+      const moveToBeginCommand = createServerAdoptAtCommand('move-cmd-2', '', '3', ListPosition.first());
+      simulateReceivedChange(subscription, moveToBeginCommand);
+
+      expect(listSignal.value).to.have.length(3);
+      expect(listSignal.value[0].value).to.equal('Charlie');
+      expect(listSignal.value[1].value).to.equal('Alice');
+      expect(listSignal.value[2].value).to.equal('Bob');
+    });
+
+    it('should handle adopt-at commands with specific positioning', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', {
+        '1': 'Alice',
+        '2': 'Bob',
+        '3': 'Charlie',
+        '4': 'David',
+      });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(4);
+
+      // Move David after Alice
+      const moveAfterAliceCommand = createServerAdoptAtCommand('move-after', '', '4', { after: '1', before: null });
+      simulateReceivedChange(subscription, moveAfterAliceCommand);
+
+      expect(listSignal.value).to.have.length(4);
+      expect(listSignal.value[0].value).to.equal('Alice');
+      expect(listSignal.value[1].value).to.equal('David');
+      expect(listSignal.value[2].value).to.equal('Bob');
+      expect(listSignal.value[3].value).to.equal('Charlie');
+    });
+
+    it('should handle adopt-at commands for non-existing children gracefully', () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const snapshotCommand = createServerSnapshotCommand('snapshot', {
+        '1': 'Alice',
+        '2': 'Bob',
+      });
+      simulateReceivedChange(subscription, snapshotCommand);
+      expect(listSignal.value).to.have.length(2);
+
+      const moveNonExistingCommand = createServerAdoptAtCommand(
+        'move-non-existing',
+        '',
+        'non-existing-id',
+        ListPosition.last(),
+      );
+
+      expect(() => simulateReceivedChange(subscription, moveNonExistingCommand)).not.to.throw;
+      expect(listSignal.value).to.have.length(2);
+      expect(listSignal.value[0].value).to.equal('Alice');
+      expect(listSignal.value[1].value).to.equal('Bob');
+    });
+
+    it('should resolve the result promise after removing a non-existing entry', async () => {
+      subscribeToSignalViaEffect(listSignal);
+
+      const nonExistentSignal = new ValueSignal('', {
+        client,
+        endpoint: 'NameService',
+        method: 'nameListSignal',
+      });
+
+      const { result } = listSignal.remove(nonExistentSignal);
+
+      if (client.call.called) {
+        const [, , params] = client.call.firstCall.args;
+        const removeCommand = createServerRemoveCommand(
+          (params!.command as { commandId: string }).commandId,
+          nonExistentSignal.id,
+        );
+        simulateReceivedChange(subscription, removeCommand);
+      }
+      await expect(result).to.be.fulfilled;
     });
 
     it('should process snapshot command correctly', () => {

@@ -18,7 +18,7 @@ export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
     return childIds
       .map((childId) => {
         const childNode = tree.get(childId);
-        if (childNode && 'value' in childNode) {
+        if (childNode?.value !== undefined) {
           return new ValueSignal(childNode.value as T, this.getConfig(), childId, this);
         }
         return null;
