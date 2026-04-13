@@ -42,8 +42,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "8.0.8",
-    "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0"
+    "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
     "dependencies": {
@@ -85,24 +84,24 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "8.0.8",
-      "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0"
+      "vite-plugin-checker": "0.12.0"
     },
-    "hash": "669fca17537b91f0373a1a57f5b343f7c7ecebc79cf133f1e98490e6601feba2"
+    "hash": "c0db8c3f5927d21138f997ce9f79ffac9e6a90a05977926d8a3080f60d253d0a",
+    "overrides": {
+      "@vaadin/common-frontend": "$@vaadin/common-frontend",
+      "@vaadin/icon": "$@vaadin/icon",
+      "@vaadin/icons": "$@vaadin/icons",
+      "@vaadin/router": "$@vaadin/router",
+      "@vaadin/tooltip": "$@vaadin/tooltip",
+      "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+      "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
+      "lit": "$lit"
+    }
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "lit": "$lit",
     "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
-    "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
-    "@vaadin/hilla-generator-core": "$@vaadin/hilla-generator-core",
-    "@vaadin/hilla-generator-plugin-backbone": "$@vaadin/hilla-generator-plugin-backbone",
-    "@vaadin/hilla-generator-plugin-barrel": "$@vaadin/hilla-generator-plugin-barrel",
-    "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
-    "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
-    "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
-    "@vaadin/hilla-generator-plugin-signals": "$@vaadin/hilla-generator-plugin-signals",
-    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
     "@vaadin/router": "$@vaadin/router",
     "@vaadin/icon": "$@vaadin/icon",
