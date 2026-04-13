@@ -14,10 +14,6 @@ inputs:
     description: Cache version prefix — increment to bust all stale caches
     required: false
     default: 'v1'
-  cache-maven:
-    description: Whether to cache the Maven repository (~/.m2/repository). Disable for jobs that build from source to avoid stale SNAPSHOT artifacts.
-    required: false
-    default: 'true'
 
 runs:
   using: composite
@@ -33,11 +29,12 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: 'temurin'
     - name: Cache Maven repository
-      if: ${{ inputs.cache-maven == 'true' }}
       uses: actions/cache@v4
       with:
         path: ~/.m2/repository
         key: ${{ inputs.cache-version }}-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ inputs.cache-version }}-${{ runner.os }}-maven-
     - name: Cache node_modules
       uses: actions/cache@v4
       id: cache-node_modules

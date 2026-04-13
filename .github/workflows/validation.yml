@@ -283,8 +283,6 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          cache-maven: 'false'
       - uses: actions/download-artifact@v4
         with:
           name: saved-workspace
@@ -296,6 +294,8 @@ jobs:
       - name: Install Maven local artifacts (Windows)
         if: runner.os == 'Windows'
         run: mvn install -B -ntp -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
