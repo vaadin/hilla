@@ -15,10 +15,13 @@
  */
 package com.vaadin.flow.spring.fusionsecurity;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 
-@Theme("spring-security-test-app")
+@StyleSheet("context://" + Lumo.STYLESHEET)
+@StyleSheet("context://" + Lumo.UTILITY_STYLESHEET)
+@StyleSheet("context://css/styles.css")
 public class Configurator implements AppShellConfigurator {
 
 }
