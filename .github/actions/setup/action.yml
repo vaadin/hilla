@@ -10,6 +10,10 @@ inputs:
     description: Java version
     required: true
     default: '21'
+  cache-version:
+    description: Cache version prefix — increment to bust all stale caches
+    required: false
+    default: 'v1'
 
 runs:
   using: composite
@@ -24,7 +28,13 @@ runs:
       with:
         java-version: ${{ inputs.java-version }}
         distribution: 'temurin'
-        cache: maven
+    - name: Cache Maven repository
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ inputs.cache-version }}-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ inputs.cache-version }}-${{ runner.os }}-maven-
     - name: Cache node_modules
       uses: actions/cache@v4
       id: cache-node_modules
@@ -32,7 +42,7 @@ runs:
         path: |
           node_modules
           packages/ts/*/node_modules
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+        key: ${{ inputs.cache-version }}-${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
     - name: Install npm dependencies
       if: ${{ steps.cache-node_modules.outputs.cache-hit != 'true' }}
       shell: bash
