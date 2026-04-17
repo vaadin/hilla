@@ -39,8 +39,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "7.3.2",
-    "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0"
+    "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
     "dependencies": {
@@ -80,24 +79,24 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "7.3.2",
-      "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0"
+      "vite-plugin-checker": "0.12.0"
     },
-    "hash": "8da679bc857bd81e7601c92c9e4bf2ed8ab9a78e6e6be42f93a377d350542d44"
+    "hash": "fa60459dbd0a842f64de804e70ad79ba548e54e0daea5b2c54289f3eab3ad257",
+    "overrides": {
+      "@vaadin/common-frontend": "$@vaadin/common-frontend",
+      "@vaadin/icon": "$@vaadin/icon",
+      "@vaadin/icons": "$@vaadin/icons",
+      "@vaadin/router": "$@vaadin/router",
+      "@vaadin/tooltip": "$@vaadin/tooltip",
+      "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+      "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
+      "lit": "$lit"
+    }
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "lit": "$lit",
     "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
-    "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
-    "@vaadin/hilla-generator-core": "$@vaadin/hilla-generator-core",
-    "@vaadin/hilla-generator-plugin-backbone": "$@vaadin/hilla-generator-plugin-backbone",
-    "@vaadin/hilla-generator-plugin-barrel": "$@vaadin/hilla-generator-plugin-barrel",
-    "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
-    "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
-    "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
-    "@vaadin/hilla-generator-plugin-signals": "$@vaadin/hilla-generator-plugin-signals",
-    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/router": "$@vaadin/router",
     "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
     "@vaadin/icon": "$@vaadin/icon",
