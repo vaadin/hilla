@@ -507,10 +507,7 @@ export class BinderNode<M extends AbstractModel = AbstractModel> extends EventTa
       if (forceInitialize || !this.parent) {
         value = this.model.constructor.createEmptyValue() as Value<M>;
         this.#setValueState(value, defaultValue === undefined ? value : defaultValue);
-      } else if (
-        this.parent.model instanceof ObjectModel &&
-        !(key in ((this.parent.value || {}) as Partial<Record<typeof key, Value<M>>>))
-      ) {
+      } else if (this.parent.model instanceof ObjectModel && !(key in Object(this.parent.value ?? {}))) {
         this.#setValueState(undefined, defaultValue === undefined ? value : defaultValue);
       }
     }
