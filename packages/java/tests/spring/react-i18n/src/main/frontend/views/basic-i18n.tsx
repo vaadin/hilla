@@ -1,3 +1,4 @@
+import { useSignals } from '@preact/signals-react/runtime';
 import type { ViewConfig } from '@vaadin/hilla-file-router/types.js';
 import { i18n, key, translate } from '@vaadin/hilla-react-i18n';
 import { TextField } from '@vaadin/react-components';
@@ -12,6 +13,7 @@ export const config: ViewConfig<Detail> = {
 };
 
 export default function BasicI18NView() {
+  useSignals();
   return (
     <section className="flex p-m gap-m items-end">
       <TextField id="name" label={translate(key`basic.form.name.label`)} />

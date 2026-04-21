@@ -1,5 +1,6 @@
 import { useComboBoxDataProvider } from '@vaadin/hilla-react-crud';
 import { useSignal } from '@vaadin/hilla-react-signals';
+import { useSignals } from '@preact/signals-react/runtime';
 import { Button, ComboBox } from '@vaadin/react-components';
 import { useState } from 'react';
 import { PersonCustomService } from 'Frontend/generated/endpoints';
@@ -7,6 +8,7 @@ import Direction from 'Frontend/generated/org/springframework/data/domain/Sort/D
 import NullHandling from 'Frontend/generated/org/springframework/data/domain/Sort/NullHandling';
 
 export default function ComboBoxUseComboBoxDataProviderHook(): React.JSX.Element {
+  useSignals();
   const [sort] = useState({
     orders: [{ property: 'lastName', direction: Direction.ASC, ignoreCase: true, nullHandling: NullHandling.NATIVE }],
   });
