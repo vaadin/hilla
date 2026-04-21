@@ -81,6 +81,7 @@ public class ComboBoxUseComboBoxDataProviderHookIT extends ChromeBrowserTest {
         TestBenchElement filterInput = $("input").withId("filter")
                 .waitForFirst();
         filterInput.sendKeys("c");
+        filterInput.dispatchEvent("input", Map.of("bubbles", true));
         waitUntil(driver -> getOptions(comboBox).size() < size);
         options = getOptions(comboBox);
         Assert.assertEquals("Baker", options.get(0)); // Zack
