@@ -31,7 +31,7 @@ describe('@vaadin/hilla-react-crud', () => {
           filterValue: 'not empty',
           matcher: Matcher.CONTAINS,
           '@type': 'propertyString',
-        } as FilterUnion);
+        });
         expect(filterEmpty).to.be.false;
       });
 
