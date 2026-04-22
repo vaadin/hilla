@@ -67,11 +67,13 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
    * ```
    */
   constructor(modelClass: ProvisionalModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
+    /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion -- narrows ternary union to M */
     super(
       (modelClass instanceof Model
         ? m.attach(modelClass as M & Model, () => this as Target<Value<M>>)
         : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>)) as M,
     );
+    /* eslint-enable @typescript-eslint/no-unnecessary-type-assertion */
     if (!(modelClass instanceof Model)) {
       // @ts-expect-error the model's parent is the binder
       this.model[$owner] = this;
@@ -95,8 +97,8 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
     this.dispatchEvent(CHANGED);
   }
 
-  override get binder(): BinderRoot {
-    return this as BinderRoot;
+  override get binder(): this {
+    return this;
   }
 
   /**
