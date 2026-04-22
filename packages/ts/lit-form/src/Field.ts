@@ -465,7 +465,7 @@ export function getDefaultFieldStrategy<T>(
         model as ProvisionalModel<string>,
       ) as AbstractFieldStrategy<T>;
     case 'vaadin-date-time-picker':
-      return new VaadinDateTimeFieldStrategy(elm, model) as AbstractFieldStrategy<T>;
+      return new VaadinDateTimeFieldStrategy(elm, model);
     default:
       if (elm.localName === 'input' && /^(checkbox|radio)$/u.test((elm as unknown as HTMLInputElement).type)) {
         return new CheckedFieldStrategy(elm as CheckedFieldElement<T>, model);

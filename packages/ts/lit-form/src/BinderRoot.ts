@@ -68,9 +68,9 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
    */
   constructor(modelClass: ProvisionalModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
     super(
-      (modelClass instanceof Model
+      modelClass instanceof Model
         ? m.attach(modelClass as M & Model, () => this as Target<Value<M>>)
-        : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>)) as M,
+        : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>),
     );
     if (!(modelClass instanceof Model)) {
       // @ts-expect-error the model's parent is the binder
@@ -95,8 +95,8 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
     this.dispatchEvent(CHANGED);
   }
 
-  override get binder(): BinderRoot {
-    return this as BinderRoot;
+  override get binder(): this {
+    return this;
   }
 
   /**
