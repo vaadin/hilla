@@ -94,7 +94,7 @@ export class EntityProcessor {
       this.#id,
       EntityProcessor.#processTypeParameters(schema),
       undefined,
-      this.#processTypeElements(schema as ObjectSchema),
+      this.#processTypeElements(schema),
     );
   }
 
