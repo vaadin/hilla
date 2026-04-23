@@ -90,6 +90,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
+    "@babel/plugin-transform-react-jsx-development": "7.27.1",
     "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
     "@rolldown/plugin-babel": "0.2.3",
@@ -114,7 +115,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "8.0.9",
+    "vite": "8.0.10",
     "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
@@ -201,6 +202,7 @@
     },
     "devDependencies": {
       "@babel/core": "7.29.0",
+      "@babel/plugin-transform-react-jsx-development": "7.27.1",
       "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.8.1",
       "@rolldown/plugin-babel": "0.2.3",
@@ -225,10 +227,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "8.0.9",
+      "vite": "8.0.10",
       "vite-plugin-checker": "0.12.0"
     },
-    "hash": "76a5bd58f4ee85811c0a982aabade8b9c57702d0d2c1d019acc4c9d3c3640806",
+    "hash": "8402ec6bcbd052c073bfe9b218193a8752335f0e26b9c1f9484c4115c640335d",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@polymer/iron-icon": "$@polymer/iron-icon",
