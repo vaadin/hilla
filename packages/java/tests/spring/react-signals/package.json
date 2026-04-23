@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
+    "@babel/plugin-transform-react-jsx-development": "7.27.1",
     "@babel/preset-react": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
     "@rolldown/plugin-babel": "0.2.3",
@@ -51,7 +52,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "8.0.9",
+    "vite": "8.0.10",
     "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
@@ -78,6 +79,7 @@
     },
     "devDependencies": {
       "@babel/core": "7.29.0",
+      "@babel/plugin-transform-react-jsx-development": "7.27.1",
       "@babel/preset-react": "7.28.5",
       "@preact/signals-react-transform": "0.8.1",
       "@rolldown/plugin-babel": "0.2.3",
@@ -104,10 +106,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "8.0.9",
+      "vite": "8.0.10",
       "vite-plugin-checker": "0.12.0"
     },
-    "hash": "1b56963c081648b05d2ff6df610aa1b3848aa896f0664a2a2f0363e5bb282879",
+    "hash": "8edf2af11fa34a063ce48c71b3e266423e6eb3026d32dcef171dbe9bc745724e",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0-alpha8",
       "@vaadin/accordion": "25.2.0-alpha8",
