@@ -1,46 +1,46 @@
-import { CollectionSignal } from './CollectionSignal.js';
-import {
-  createInsertCommand,
-  createRemoveCommand,
-  isAdoptAtCommand,
-  isInsertCommand,
-  isPositionCondition,
-  isRemoveCommand,
-  isSetCommand,
-  isSnapshotCommand,
-  ListPosition,
-  ZERO,
-  type AdoptAtCommand,
-  type InsertCommand,
-  type PositionCondition,
-  type RemoveCommand,
-  type SetCommand,
-  type SnapshotCommand,
-} from './commands.js';
-import {
-  $createOperation,
-  $processServerResponse,
-  $resolveOperation,
-  $setValueQuietly,
-  $update,
-  type Operation,
-  type ServerConnectionConfig,
-} from './FullStackSignal.js';
+import { createClearCommand, createInsertCommand, createRemoveCommand, ListPosition, ZERO } from './commands.js';
+import type { ServerConnectionConfig } from './Connection.js';
+import { FullStackSignal, type Operation } from './FullStackSignal.js';
+import { getListChildren, type NodeTree } from './NodeTree.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
  * A signal containing a list of values. Supports atomic updates to the list structure.
  * Each value in the list is accessed as a separate ValueSignal instance.
  */
-export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
+export class ListSignal<T> extends FullStackSignal<Array<ValueSignal<T>>> {
   constructor(config: ServerConnectionConfig, id?: string) {
     super([], config, id);
+  }
+
+  protected deriveValue(tree: NodeTree): Array<ValueSignal<T>> {
+    const childIds = getListChildren(tree, '');
+    return childIds
+      .map((childId) => {
+        const childNode = tree.get(childId);
+        if (childNode?.value !== undefined) {
+          return new ValueSignal(childNode.value as T, this.getConfig(), childId, this);
+        }
+        return null;
+      })
+      .filter(Boolean) as Array<ValueSignal<T>>;
+  }
+
+  override get value(): Array<ValueSignal<T>> {
+    return super.value;
+  }
+
+  /**
+   * @readonly
+   */
+  override set value(_: never) {
+    throw new Error('Value of the collection signals cannot be set.');
   }
 
   /**
    * Inserts a value as the first entry in this list.
    * @param value - The value to insert
-   * @returns An operation containing a signal for the inserted entry and the eventual result
+   * @returns An operation containing the eventual result
    */
   insertFirst(value: T): Operation {
     return this.insertAt(value, ListPosition.first());
@@ -49,7 +49,7 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
   /**
    * Inserts a value as the last entry in this list.
    * @param value - The value to insert
-   * @returns An operation containing a signal for the inserted entry and the eventual result
+   * @returns An operation containing the eventual result
    */
   insertLast(value: T): Operation {
     return this.insertAt(value, ListPosition.last());
@@ -59,12 +59,10 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
    * Inserts a value at the given position in this list.
    * @param value - The value to insert
    * @param at - The insert position
-   * @returns An operation containing a signal for the inserted entry and the eventual result
+   * @returns An operation containing the eventual result
    */
   insertAt(value: T, at: ListPosition): Operation {
-    const command = createInsertCommand(ZERO, value, at);
-    const promise = this[$update](command);
-    return this[$createOperation]({ id: command.commandId, promise });
+    return this.sendCommand(createInsertCommand(ZERO, value, at));
   }
 
   /**
@@ -73,88 +71,14 @@ export class ListSignal<T> extends CollectionSignal<Array<ValueSignal<T>>> {
    * @returns An operation containing the eventual result
    */
   remove(child: ValueSignal<T>): Operation {
-    const command = createRemoveCommand(child.id, ZERO);
-    const promise = this[$update](command);
-    return this[$createOperation]({ id: command.commandId, promise });
+    return this.sendCommand(createRemoveCommand(child.id, ZERO));
   }
 
-  protected override [$processServerResponse](
-    command: InsertCommand<T> | RemoveCommand | AdoptAtCommand | PositionCondition | SnapshotCommand | SetCommand<T>,
-  ): void {
-    // Check if the command has a targetNodeId and reroute it to the corresponding child
-    if ((isSnapshotCommand(command) || isSetCommand(command)) && command.targetNodeId) {
-      const targetChild = this.value.find((child) => child.id === command.targetNodeId);
-
-      if (targetChild) {
-        targetChild[$processServerResponse](command);
-        return;
-      }
-    }
-
-    if (isInsertCommand<T>(command)) {
-      const valueSignal = new ValueSignal<T>(command.value, this.server.config, command.commandId, this);
-      let insertIndex = this.value.length;
-      const pos = command.position;
-      if (pos.after === '' && pos.before == null) {
-        insertIndex = 0;
-      } else if (pos.after == null && pos.before === '') {
-        insertIndex = this.value.length;
-      } else if (typeof pos.after === 'string' && pos.after !== '') {
-        const idx = this.value.findIndex((v) => v.id === pos.after);
-        insertIndex = idx !== -1 ? idx + 1 : this.value.length;
-      } else if (typeof pos.before === 'string' && pos.before !== '') {
-        const idx = this.value.findIndex((v) => v.id === pos.before);
-        insertIndex = idx !== -1 ? idx : this.value.length;
-      }
-      const newList = [...this.value.slice(0, insertIndex), valueSignal, ...this.value.slice(insertIndex)];
-      this[$setValueQuietly](newList);
-      this[$resolveOperation](command.commandId, undefined);
-    } else if (isRemoveCommand(command)) {
-      const removeIndex = this.value.findIndex((child) => child.id === command.targetNodeId);
-      if (removeIndex !== -1) {
-        const newList = [...this.value.slice(0, removeIndex), ...this.value.slice(removeIndex + 1)];
-        this[$setValueQuietly](newList);
-      }
-      this[$resolveOperation](command.commandId, undefined);
-    } else if (isAdoptAtCommand(command)) {
-      const moveIndex = this.value.findIndex((child) => child.id === command.childId);
-      if (moveIndex !== -1) {
-        const [movedChild] = this.value.splice(moveIndex, 1);
-        let newIndex = this.value.length;
-        const pos = command.position;
-        if (pos.after === '' && pos.before == null) {
-          newIndex = 0;
-        } else if (pos.after == null && pos.before === '') {
-          newIndex = this.value.length;
-        } else if (typeof pos.after === 'string' && pos.after !== '') {
-          const idx = this.value.findIndex((v) => v.id === pos.after);
-          newIndex = idx !== -1 ? idx + 1 : this.value.length;
-        } else if (typeof pos.before === 'string' && pos.before !== '') {
-          const idx = this.value.findIndex((v) => v.id === pos.before);
-          newIndex = idx !== -1 ? idx : this.value.length;
-        }
-        this.value.splice(newIndex, 0, movedChild);
-      }
-      this[$resolveOperation](command.commandId, undefined);
-    } else if (isPositionCondition(command)) {
-      this[$resolveOperation](command.commandId, undefined);
-    } else if (isSnapshotCommand(command)) {
-      const { nodes } = command;
-      const listNode = nodes[''];
-
-      const childrenIds = listNode.listChildren;
-      const valueSignals = childrenIds
-        .map((childId) => {
-          const childNode = nodes[childId];
-          if ('value' in childNode) {
-            return new ValueSignal<T>(childNode.value as T, this.server.config, childId, this);
-          }
-          return null;
-        })
-        .filter(Boolean) as Array<ValueSignal<T>>;
-
-      this[$setValueQuietly](valueSignals);
-      this[$resolveOperation](command.commandId, undefined);
-    }
+  /**
+   * Removes all children from this list.
+   * @returns An operation containing the eventual result
+   */
+  clear(): Operation {
+    return this.sendCommand(createClearCommand(ZERO));
   }
 }
