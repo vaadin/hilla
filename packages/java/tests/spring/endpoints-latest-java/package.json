@@ -41,11 +41,8 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.3.1",
-    "vite-plugin-checker": "0.12.0",
-    "workbox-build": "7.4.0",
-    "workbox-core": "7.4.0",
-    "workbox-precaching": "7.4.0"
+    "vite": "7.3.2",
+    "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
     "dependencies": {
@@ -87,13 +84,23 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.1",
-      "vite-plugin-checker": "0.12.0",
-      "workbox-build": "7.4.0",
-      "workbox-core": "7.4.0",
-      "workbox-precaching": "7.4.0"
+      "vite": "7.3.2",
+      "vite-plugin-checker": "0.12.0"
     },
-    "hash": "93f90f80393fe349376df05e31700a061bef1ffc6c835ccb0800ad6cd22508e7"
+    "hash": "26bad68552afa5cc777d6af1c2c3102f2b5940a3ef19f26ed95b01a342547d6a",
+    "overrides": {
+      "@polymer/polymer": "$@polymer/polymer",
+      "@vaadin/common-frontend": "$@vaadin/common-frontend",
+      "@vaadin/icon": "$@vaadin/icon",
+      "@vaadin/icons": "$@vaadin/icons",
+      "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
+      "@vaadin/router": "$@vaadin/router",
+      "@vaadin/tooltip": "$@vaadin/tooltip",
+      "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+      "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
+      "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
+      "lit": "$lit"
+    }
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -101,15 +108,6 @@
     "lit": "$lit",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
-    "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
-    "@vaadin/hilla-generator-core": "$@vaadin/hilla-generator-core",
-    "@vaadin/hilla-generator-plugin-backbone": "$@vaadin/hilla-generator-plugin-backbone",
-    "@vaadin/hilla-generator-plugin-barrel": "$@vaadin/hilla-generator-plugin-barrel",
-    "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
-    "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
-    "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
-    "@vaadin/hilla-generator-plugin-signals": "$@vaadin/hilla-generator-plugin-signals",
-    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
     "@vaadin/router": "$@vaadin/router",
     "@vaadin/icon": "$@vaadin/icon",
