@@ -69,7 +69,8 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
   constructor(modelClass: ProvisionalModelConstructor<M>, config?: BinderRootConfiguration<Value<M>>) {
     super(
       (modelClass instanceof Model
-        ? m.attach(modelClass as M & Model, () => this as Target<Value<M>>)
+        ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          m.attach(modelClass as M & Model, () => this as Target<Value<M>>)
         : createDetachedModel(modelClass as DetachedModelConstructor<M & AbstractModel>)) as M,
     );
     if (!(modelClass instanceof Model)) {
@@ -95,8 +96,8 @@ export class BinderRoot<M extends ProvisionalModel = ProvisionalModel> extends B
     this.dispatchEvent(CHANGED);
   }
 
-  override get binder(): BinderRoot {
-    return this as BinderRoot;
+  override get binder(): this {
+    return this;
   }
 
   /**
