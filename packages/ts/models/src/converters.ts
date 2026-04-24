@@ -110,11 +110,11 @@ export interface ArrayOf extends ModelConverter {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   readonly [$targetModel]: ArrayModel<SourceModel<this>>;
 }
-function arrayImpl<const M extends Model>(model: M) {
+function arrayImpl<const M extends Model>(model: M): ArrayModel<M> {
   return new CoreModelBuilder<Array<Value<M>>>(ArrayModel, (): Array<Value<M>> => [])
     .name(`Array<${model[$name]}>`)
-    .define($itemModel, { value: model })
-    .build() as ArrayModel<M>;
+    .define<typeof $itemModel, M>($itemModel, { value: model })
+    .build();
 }
 /**
  * Creates a new model that represents an array of items.
