@@ -19,7 +19,18 @@ self.skipWaiting();
 clientsClaim();
 
 declare var OFFLINE_PATH: string; // defined by Webpack/Vite
-declare var VITE_ENABLED: boolean; // defined by Webpack/Vite
+
+declare global {
+  interface ImportMeta {
+    readonly env: {
+      readonly MODE: string;
+      readonly BASE_URL: string;
+      readonly PROD: boolean;
+      readonly DEV: boolean;
+      readonly SSR: boolean;
+    } & Readonly<Record<string, string>>;
+  }
+}
 
 // Combine manifest entries injected at compile-time by Webpack/Vite
 // with ones that Flow injects at runtime through `sw-runtime-resources-precache.js`.
@@ -80,7 +91,7 @@ const networkFirst = new NetworkFirst({
   plugins: [checkConnectionPlugin()]
 });
 
-if (process.env.NODE_ENV === 'development' && VITE_ENABLED) {
+if (import.meta.env.DEV) {
   self.addEventListener('activate', (event) => {
     event.waitUntil(caches.delete(cacheNames.runtime));
   });
