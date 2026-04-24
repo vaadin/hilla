@@ -41,11 +41,13 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.3.1",
+    "vite": "7.3.2",
     "vite-plugin-checker": "0.12.0",
     "workbox-build": "7.4.0",
     "workbox-core": "7.4.0",
-    "workbox-precaching": "7.4.0"
+    "workbox-precaching": "7.4.0",
+    "workbox-routing": "7.4.0",
+    "workbox-strategies": "7.4.0"
   },
   "vaadin": {
     "dependencies": {
@@ -87,13 +89,33 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.1",
+      "vite": "7.3.2",
       "vite-plugin-checker": "0.12.0",
       "workbox-build": "7.4.0",
       "workbox-core": "7.4.0",
-      "workbox-precaching": "7.4.0"
+      "workbox-precaching": "7.4.0",
+      "workbox-routing": "7.4.0",
+      "workbox-strategies": "7.4.0"
     },
-    "hash": "93f90f80393fe349376df05e31700a061bef1ffc6c835ccb0800ad6cd22508e7"
+    "hash": "f4e4e11435e6cbea363d7e3bfbc448cd6fb7fb6f1975127d5d68f96e9dcc5842",
+    "overrides": {
+      "@polymer/polymer": "$@polymer/polymer",
+      "@vaadin/common-frontend": "$@vaadin/common-frontend",
+      "@vaadin/icon": "$@vaadin/icon",
+      "@vaadin/icons": "$@vaadin/icons",
+      "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
+      "@vaadin/router": "$@vaadin/router",
+      "@vaadin/tooltip": "$@vaadin/tooltip",
+      "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+      "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
+      "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
+      "lit": "$lit",
+      "workbox-build": {
+        "@rollup/plugin-terser": "1.0.0",
+        "glob": "13.0.6",
+        "serialize-javascript": "7.0.4"
+      }
+    }
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
@@ -102,21 +124,17 @@
     "@vaadin/router": "$@vaadin/router",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
-    "@vaadin/hilla-generator-cli": "$@vaadin/hilla-generator-cli",
-    "@vaadin/hilla-generator-core": "$@vaadin/hilla-generator-core",
-    "@vaadin/hilla-generator-plugin-backbone": "$@vaadin/hilla-generator-plugin-backbone",
-    "@vaadin/hilla-generator-plugin-barrel": "$@vaadin/hilla-generator-plugin-barrel",
-    "@vaadin/hilla-generator-plugin-client": "$@vaadin/hilla-generator-plugin-client",
-    "@vaadin/hilla-generator-plugin-model": "$@vaadin/hilla-generator-plugin-model",
-    "@vaadin/hilla-generator-plugin-push": "$@vaadin/hilla-generator-plugin-push",
-    "@vaadin/hilla-generator-plugin-signals": "$@vaadin/hilla-generator-plugin-signals",
-    "@vaadin/hilla-generator-utils": "$@vaadin/hilla-generator-utils",
     "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
     "@vaadin/polymer-legacy-adapter": "$@vaadin/polymer-legacy-adapter",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
-    "@vaadin/tooltip": "$@vaadin/tooltip"
+    "@vaadin/tooltip": "$@vaadin/tooltip",
+    "workbox-build": {
+      "glob": "13.0.6",
+      "serialize-javascript": "7.0.4",
+      "@rollup/plugin-terser": "1.0.0"
+    }
   }
 }
