@@ -13,7 +13,7 @@ inputs:
   cache-version:
     description: Cache version prefix — increment to bust all stale caches
     required: false
-    default: 'v1'
+    default: 'v24'
 
 runs:
   using: composite
