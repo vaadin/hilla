@@ -6,12 +6,12 @@
     "@vaadin/common-frontend": "0.0.22",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "25.2.0-alpha8",
-    "@vaadin/icons": "25.2.0-alpha8",
+    "@vaadin/icon": "25.2.0-alpha9",
+    "@vaadin/icons": "25.2.0-alpha9",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "25.2.0-alpha8",
-    "@vaadin/vaadin-lumo-styles": "25.2.0-alpha8",
-    "@vaadin/vaadin-themable-mixin": "25.2.0-alpha8",
+    "@vaadin/tooltip": "25.2.0-alpha9",
+    "@vaadin/vaadin-lumo-styles": "25.2.0-alpha9",
+    "@vaadin/vaadin-themable-mixin": "25.2.0-alpha9",
     "lit": "3.3.2"
   },
   "devDependencies": {
@@ -40,7 +40,7 @@
     "rollup-plugin-visualizer": "7.0.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vite": "8.0.10",
     "vite-plugin-checker": "0.12.0"
   },
@@ -49,12 +49,12 @@
       "@vaadin/common-frontend": "0.0.22",
       "@vaadin/hilla-frontend": "25.2.0-alpha4",
       "@vaadin/hilla-lit-form": "25.2.0-alpha4",
-      "@vaadin/icon": "25.2.0-alpha8",
-      "@vaadin/icons": "25.2.0-alpha8",
+      "@vaadin/icon": "25.2.0-alpha9",
+      "@vaadin/icons": "25.2.0-alpha9",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.2.0-alpha8",
-      "@vaadin/vaadin-lumo-styles": "25.2.0-alpha8",
-      "@vaadin/vaadin-themable-mixin": "25.2.0-alpha8",
+      "@vaadin/tooltip": "25.2.0-alpha9",
+      "@vaadin/vaadin-lumo-styles": "25.2.0-alpha9",
+      "@vaadin/vaadin-themable-mixin": "25.2.0-alpha9",
       "lit": "3.3.2"
     },
     "devDependencies": {
@@ -83,11 +83,11 @@
       "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "5.9.3",
+      "typescript": "6.0.3",
       "vite": "8.0.10",
       "vite-plugin-checker": "0.12.0"
     },
-    "hash": "9a5e3f3c9e71c8f31dc573e2f3323007c42996d3b14c4f784b0be93e79a3bfbc",
+    "hash": "8ff0dede0389cf01aa3c67536483142fd54466d3ee93f036e66c81ada3e55235",
     "overrides": {
       "@vaadin/common-frontend": "$@vaadin/common-frontend",
       "@vaadin/icon": "$@vaadin/icon",
