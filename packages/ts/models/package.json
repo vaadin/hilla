@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/hilla-models",
-  "version": "25.1.3",
+  "version": "25.1.4",
   "description": "Generative form models for Hilla",
   "main": "index.js",
   "module": "index.js",
