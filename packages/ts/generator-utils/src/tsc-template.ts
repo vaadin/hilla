@@ -46,10 +46,17 @@ function isTemplateResult(value: unknown): value is TemplateResult {
   return typeof value === 'object' && value !== null && 'brand' in value && value.brand === $templateResult;
 }
 
+// Anchored, fixed-length patterns — no nested or overlapping quantifiers, so
+// matching is linear in the input length (no ReDoS surface).
+const START_MARKER = /\/\*\*\s*@START\s*\*\//iu;
+const END_MARKER = /\/\*\*\s*@END\s*\*\//iu;
+
 function extractCodePart(str: string): string {
-  const [, startResult = str] = /\/\*\*\s*@START\s*\*\/([\s\S]*)/iu.exec(str) ?? [];
-  const [, endResult = startResult] = /([\s\S]*?)\/\*\*\s*@END\s*\*\//iu.exec(startResult) ?? [];
-  return endResult.trim();
+  const startMatch = START_MARKER.exec(str);
+  const afterStart = startMatch ? str.slice(startMatch.index + startMatch[0].length) : str;
+  const endMatch = END_MARKER.exec(afterStart);
+  const codePart = endMatch ? afterStart.slice(0, endMatch.index) : afterStart;
+  return codePart.trim();
 }
 
 function isInjectedNode(node: Node): boolean {
