@@ -65,7 +65,6 @@
     "@vaadin/hilla-generator-utils": "25.2.0-alpha6",
     "@vaadin/hilla-react-auth": "25.2.0-alpha6",
     "@vaadin/hilla-react-signals": "25.2.0-alpha6",
-    "tsc-template": "0.2.3",
     "typescript": "6.0.3"
   }
 }
