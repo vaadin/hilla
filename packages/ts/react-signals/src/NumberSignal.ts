@@ -1,12 +1,5 @@
-import { createIncrementCommand, isIncrementCommand, type SignalCommand } from './commands.js';
-import {
-  $createOperation,
-  $processServerResponse,
-  $resolveOperation,
-  $setValueQuietly,
-  $update,
-  type Operation,
-} from './FullStackSignal.js';
+import { createIncrementCommand } from './commands.js';
+import type { Operation } from './FullStackSignal.js';
 import { ValueSignal } from './ValueSignal.js';
 
 /**
@@ -15,19 +8,18 @@ import { ValueSignal } from './ValueSignal.js';
 export class NumberSignal extends ValueSignal<number> {
   /**
    * Atomically increments the value of this signal by the given delta amount.
-   * The value is decremented if the delta is negative.
+   * The value is decremented if the delta is negative. The increment is applied
+   * optimistically — the local value updates immediately before server
+   * confirmation.
    * @param delta - The increment amount
    * @returns An operation containing the eventual result
    */
   incrementBy(delta: number): Operation {
     if (delta === 0) {
-      const resolvedPromise = Promise.resolve(undefined);
-      return this[$createOperation]({ id: '', promise: resolvedPromise });
+      return this.createResolvedOperation();
     }
 
-    const command = createIncrementCommand('', delta);
-    const promise = this[$update](command);
-    return this[$createOperation]({ id: command.commandId, promise });
+    return this.sendCommand(createIncrementCommand('', delta));
   }
 
   /**
@@ -35,14 +27,5 @@ export class NumberSignal extends ValueSignal<number> {
    */
   valueAsInt(): number {
     return Math.trunc(this.value);
-  }
-
-  protected override [$processServerResponse](command: SignalCommand): void {
-    if (isIncrementCommand(command)) {
-      this[$setValueQuietly](this.value + command.delta);
-      this[$resolveOperation](command.commandId, undefined);
-    } else {
-      super[$processServerResponse](command);
-    }
   }
 }
