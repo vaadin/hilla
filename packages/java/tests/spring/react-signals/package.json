@@ -19,9 +19,9 @@
     "@vaadin/vaadin-themable-mixin": "25.2.0-alpha10",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "lit": "3.3.2",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-router": "7.13.1"
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "react-router": "7.14.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
@@ -31,7 +31,7 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
-    "@types/node": "25.5.0",
+    "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -52,8 +52,8 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.0.10",
-    "vite-plugin-checker": "0.12.0"
+    "vite": "8.0.11",
+    "vite-plugin-checker": "0.13.0"
   },
   "vaadin": {
     "dependencies": {
@@ -73,9 +73,9 @@
       "@vaadin/vaadin-themable-mixin": "25.2.0-alpha10",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "lit": "3.3.2",
-      "react": "19.2.4",
-      "react-dom": "19.2.4",
-      "react-router": "7.13.1"
+      "react": "19.2.6",
+      "react-dom": "19.2.6",
+      "react-router": "7.14.2"
     },
     "devDependencies": {
       "@babel/core": "7.29.0",
@@ -85,7 +85,7 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
-      "@types/node": "25.5.0",
+      "@types/node": "25.6.0",
       "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3",
       "@vaadin/hilla-generator-cli": "25.2.0-alpha6",
@@ -106,10 +106,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.0.10",
-      "vite-plugin-checker": "0.12.0"
+      "vite": "8.0.11",
+      "vite-plugin-checker": "0.13.0"
     },
-    "hash": "dc40e4cf545058ec68b80695bc64655f50e288c5587afa0bea933c49e691e3ab",
+    "hash": "fd3c461e7707ef665fbf6cafed00028ea5239f7cfa0fdaffa0ef254bc8eae9b0",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0-alpha10",
       "@vaadin/accordion": "25.2.0-alpha10",
