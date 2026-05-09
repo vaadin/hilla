@@ -88,6 +88,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
+    "@babel/types": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
@@ -200,6 +201,7 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.28.5",
+      "@babel/types": "7.28.5",
       "@preact/signals-react-transform": "0.8.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
@@ -225,7 +227,7 @@
       "vite": "7.3.2",
       "vite-plugin-checker": "0.12.0"
     },
-    "hash": "caf3bb99175b010da86e292c29fbb42f36c4acd46de74de14c6733d9e222f581",
+    "hash": "5fd67d05182fe860f41b5b1b146e36c1325d63c2b74486c1e42501da9383003a",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@polymer/polymer": "$@polymer/polymer",
