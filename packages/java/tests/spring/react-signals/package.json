@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
+    "@babel/types": "7.28.5",
     "@preact/signals-react-transform": "0.8.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
@@ -76,6 +77,7 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.28.5",
+      "@babel/types": "7.28.5",
       "@preact/signals-react-transform": "0.8.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
@@ -103,7 +105,7 @@
       "vite": "7.3.2",
       "vite-plugin-checker": "0.12.0"
     },
-    "hash": "2ede1695bcf0c21c1a728edd25033f05039d6d6bedb58254d38ed0a54d1facc0",
+    "hash": "6a1427d819727e6751f3d71c8813815a30d002af671f33da1dd7fd32a11dff0f",
     "overrides": {
       "@vaadin/a11y-base": "25.1.2",
       "@vaadin/accordion": "25.1.2",
