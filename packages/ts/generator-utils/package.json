@@ -29,7 +29,8 @@
     "./createSourceFile.js": "./createSourceFile.js",
     "./memoize.js": "./memoize.js",
     "./LoggerFactory.js": "./LoggerFactory.js",
-    "./PluginError.js": "./PluginError.js"
+    "./PluginError.js": "./PluginError.js",
+    "./tsc-template.js": "./tsc-template.js"
   },
   "repository": {
     "type": "git",
