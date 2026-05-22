@@ -12,7 +12,7 @@
     "@vaadin/tooltip": "25.2.0-alpha13",
     "@vaadin/vaadin-lumo-styles": "25.2.0-alpha13",
     "@vaadin/vaadin-themable-mixin": "25.2.0-alpha13",
-    "lit": "3.3.2"
+    "lit": "3.3.3"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
@@ -23,7 +23,7 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
-    "@types/node": "25.6.0",
+    "@types/node": "25.9.1",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -35,14 +35,14 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.0.1",
+    "@vitejs/plugin-react": "6.0.2",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.0.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.0.12",
+    "vite": "8.0.14",
     "vite-plugin-checker": "0.13.0",
     "workbox-build": "7.4.1",
     "workbox-core": "7.4.1",
@@ -61,7 +61,7 @@
       "@vaadin/tooltip": "25.2.0-alpha13",
       "@vaadin/vaadin-lumo-styles": "25.2.0-alpha13",
       "@vaadin/vaadin-themable-mixin": "25.2.0-alpha13",
-      "lit": "3.3.2"
+      "lit": "3.3.3"
     },
     "devDependencies": {
       "@babel/core": "7.29.0",
@@ -72,7 +72,7 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
-      "@types/node": "25.6.0",
+      "@types/node": "25.9.1",
       "@vaadin/hilla-generator-cli": "25.2.0-alpha9",
       "@vaadin/hilla-generator-core": "25.2.0-alpha9",
       "@vaadin/hilla-generator-plugin-backbone": "25.2.0-alpha9",
@@ -84,14 +84,14 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.2.0-alpha9",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.2.0-alpha9",
       "@vaadin/hilla-generator-utils": "25.2.0-alpha9",
-      "@vitejs/plugin-react": "6.0.1",
+      "@vitejs/plugin-react": "6.0.2",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.0.12",
+      "vite": "8.0.14",
       "vite-plugin-checker": "0.13.0",
       "workbox-build": "7.4.1",
       "workbox-core": "7.4.1",
@@ -99,7 +99,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "ffeac12ad345321a76083d5c23500b2621eb8fe785cd08db3e9c421a1c1ec078",
+    "hash": "632e466ca7aaaf9f6a4cf06841c14b921158a013b7b8392fd8862c522b896ff3",
     "overrides": {
       "@vaadin/common-frontend": "$@vaadin/common-frontend",
       "@vaadin/icon": "$@vaadin/icon",
