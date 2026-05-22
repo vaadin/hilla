@@ -116,7 +116,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.0.12",
+    "vite": "8.0.14",
     "vite-plugin-checker": "0.13.0"
   },
   "vaadin": {
@@ -229,10 +229,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.0.12",
+      "vite": "8.0.14",
       "vite-plugin-checker": "0.13.0"
     },
-    "hash": "e5b973f914376cfe137e2bdc7d5b78c555c8abebd27be99e8f43ca100e5990b8",
+    "hash": "7f48afdcbec3c9757fb0275e7fab15036a690af35b30004dbb1226b73db87922",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@polymer/iron-icon": "$@polymer/iron-icon",
