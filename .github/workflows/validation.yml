@@ -13,7 +13,7 @@ on:
       - '.github/ISSUE_TEMPLATE/*'
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
     paths-ignore:
@@ -29,6 +29,7 @@ concurrency:
   group: ${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
   _HEAD_REF: ${{ github.head_ref }}
   _REF_NAME: ${{ github.ref_name }}
@@ -37,19 +38,19 @@ jobs:
   init:
     name: Build Java and TypeScript for other tasks
     runs-on: ubuntu-latest
-    environment: ${{ github.event.pull_request.head.repo.fork && 'pr-tests' || '' }}
     timeout-minutes: 10
     env:
       NX_SKIP_NX_CACHE: true
 
     steps:
       - name: Check secrets
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
           [ -z "${{secrets.TB_LICENSE}}" ] \
             && echo "🚫 **TB_LICENSE** is not defined, check that **${{github.repository}}** repo has a valid secret" \
             | tee -a $GITHUB_STEP_SUMMARY && exit 1 || exit 0
       - name: Checkout Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
@@ -74,7 +75,7 @@ jobs:
           find packages/java/tests -path */src/main/resources/vaadin-core-versions.json -print0 | xargs -0 tar rf workspace.tar
           find scripts/prepare/results -print0 | xargs -0 tar rf workspace.tar
           tar rf workspace.tar $(find packages/ts -name node_modules -prune -o -print | git check-ignore --stdin)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: saved-workspace
           path: workspace.tar
@@ -89,13 +90,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -116,13 +117,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -137,8 +138,8 @@ jobs:
           COVFILES=$(find packages/java -wholename 'target/site/jacoco/jacoco.xml' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        if: ${{ env.COVFILES != '' }}
-        uses: codecov/codecov-action@v4
+        if: ${{ env.COVFILES != '' && !github.event.pull_request.head.repo.fork }}
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -157,13 +158,13 @@ jobs:
         id: setup-chrome
         uses: browser-actions/setup-chrome@v1
       - name: Checkout Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -181,7 +182,8 @@ jobs:
           COVFILES=$(find packages/ts -wholename '*/.coverage/lcov.info' | tr '\n' ',' | sed '$s/,$//')
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
-        uses: codecov/codecov-action@v4
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -192,6 +194,7 @@ jobs:
   test-it:
     needs:
       - init
+    if: ${{ !github.event.pull_request.head.repo.fork }}
     name: ITs
     timeout-minutes: 25
     strategy:
@@ -208,13 +211,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -242,7 +245,7 @@ jobs:
               -Pproduction \
               verify
           )
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs-it-${{ matrix.os }}-${{ matrix.it-modules }}
@@ -253,6 +256,7 @@ jobs:
   test-gradle:
     needs:
       - init
+    if: ${{ !github.event.pull_request.head.repo.fork }}
     name: Gradle tests
     timeout-minutes: 25
     strategy:
@@ -265,13 +269,13 @@ jobs:
 
     steps:
       - name: Checkout Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{env._HEAD_SHA}}
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -280,7 +284,7 @@ jobs:
           tar xf workspace.tar
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -292,7 +296,7 @@ jobs:
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
         run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs-gradle-${{ matrix.os }}
@@ -314,10 +318,10 @@ jobs:
       - test-gradle
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v5
         with:
           name: saved-outputs
           pattern: saved-outputs-*
       - name: Fail if test jobs did not succeed
-        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || needs.test-it.result != 'success' || needs.test-gradle.result != 'success' }}
+        if: ${{ needs.check-style.result != 'success' || needs.test-java.result != 'success' || needs.test-typescript.result != 'success' || (needs.test-it.result != 'success' && needs.test-it.result != 'skipped') || (needs.test-gradle.result != 'success' && needs.test-gradle.result != 'skipped') }}
         run: exit 1
