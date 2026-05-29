@@ -4,8 +4,8 @@ import type { TransformResult } from 'rollup';
 import type { EnvironmentModuleNode, HotUpdateOptions, Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
-const INJECTION =
-  "if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {nextExports = { ...nextExports, config: currentExports.config };}";
+const REFRESH_IGNORE_VIRTUAL_ID = 'virtual:hilla-fs-router-refresh-ignore';
+const RESOLVED_REFRESH_IGNORE_VIRTUAL_ID = `\0${REFRESH_IGNORE_VIRTUAL_ID}`;
 
 /**
  * The options for the Vite file-based router plugin.
@@ -99,6 +99,32 @@ export default function vitePluginFileSystemRouter({
     async buildStart() {
       await _generateRuntimeFiles();
     },
+    resolveId(source) {
+      if (source === REFRESH_IGNORE_VIRTUAL_ID) {
+        return RESOLVED_REFRESH_IGNORE_VIRTUAL_ID;
+      }
+      return undefined;
+    },
+    load(id) {
+      if (id !== RESOLVED_REFRESH_IGNORE_VIRTUAL_ID) {
+        return undefined;
+      }
+      return `
+const VIEWS_DIR = ${JSON.stringify(_viewsDirPosix)};
+const IGNORED = ['config'];
+if (typeof window !== 'undefined') {
+  const prev = window.__getReactRefreshIgnoredExports;
+  window.__getReactRefreshIgnoredExports = (ctx) => {
+    const inherited = prev ? prev(ctx) : [];
+    const id = typeof ctx?.id === 'string' ? ctx.id.split('?', 1)[0] : '';
+    if (id.startsWith(VIEWS_DIR)) {
+      return inherited.length ? [...inherited, ...IGNORED] : IGNORED;
+    }
+    return inherited;
+  };
+}
+`;
+    },
     async hotUpdate({ file, modules }: HotUpdateOptions): Promise<void | EnvironmentModuleNode[]> {
       const fileUrlString = String(pathToFileURL(file));
 
@@ -159,42 +185,30 @@ export default function vitePluginFileSystemRouter({
       return undefined;
     },
     transform(code, id): Promise<TransformResult> | TransformResult {
-      let modifiedCode = code;
-      if (id.startsWith(_viewsDirPosix) && !basename(id).startsWith('_')) {
-        if (isDevMode) {
-          // To enable HMR for route files with exported configurations, we need
-          // to address a limitation in `react-refresh`. This library requires
-          // strict equality (`===`) for non-component exports. However, the
-          // dynamic nature of HMR makes maintaining this equality between object
-          // literals challenging.
-          //
-          // To work around this, we implement a strategy that preserves the
-          // reference to the original configuration object (`currentExports.config`),
-          // replacing any newly created configuration objects (`nextExports.config`)
-          // with it. This ensures that the HMR mechanism perceives the
-          // configuration as unchanged.
-          const injectionPattern = /import\.meta\.hot\.accept[\s\S]+if\s\(!nextExports\)\s+return;/gu;
-          if (injectionPattern.test(modifiedCode)) {
-            modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
-              injectionPattern.lastIndex,
-            )}`;
-          }
-        } else {
-          // In production mode, the function name is assigned as name to the function itself to avoid minification
-          const functionNames = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(modifiedCode);
-
-          if (functionNames?.length) {
-            const [, functionName] = functionNames;
-            modifiedCode += `Object.defineProperty(${functionName}, 'name', { value: '${functionName}' });\n`;
-          }
-        }
-
+      if (!id.startsWith(_viewsDirPosix) || basename(id).startsWith('_')) {
+        return undefined;
+      }
+      if (isDevMode) {
+        // Side-effect import installs window.__getReactRefreshIgnoredExports
+        // so vite-plugin-react v6 ignores the `config` export when validating
+        // the Fast Refresh boundary. Without this, editing a view that exports
+        // `config` falls back to a full page reload.
         return {
-          code: modifiedCode,
+          code: `import ${JSON.stringify(REFRESH_IGNORE_VIRTUAL_ID)};\n${code}`,
+          map: null,
         };
       }
-
-      return undefined;
+      // In production mode, the function name is assigned as name to the
+      // function itself to avoid minification.
+      const match = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(code);
+      if (!match || match[1] === 'function') {
+        return undefined;
+      }
+      const [, functionName] = match;
+      return {
+        code: `${code}\nObject.defineProperty(${functionName}, 'name', { value: ${JSON.stringify(functionName)} });\n`,
+        map: null,
+      };
     },
   };
 }
