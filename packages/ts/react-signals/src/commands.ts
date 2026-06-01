@@ -12,6 +12,8 @@ export type SignalCommand = Readonly<{
   commandId: Id;
   targetNodeId: Id;
   '@type': string;
+  accepted?: boolean;
+  reason?: string;
 }>;
 
 /**
@@ -162,6 +164,48 @@ export const ListPosition = {
 };
 
 /**
+ * A signal command that removes all children from a node.
+ */
+export type ClearCommand = CreateCommandType<'clear'>;
+
+export function createClearCommand(targetNodeId: Id): ClearCommand {
+  return {
+    commandId: randomId(),
+    targetNodeId,
+    '@type': 'clear',
+  };
+}
+
+/**
+ * A signal command that stores a value in a child node with a given map key.
+ */
+export type PutCommand<V> = CreateCommandType<'put', { key: string; value: V }>;
+
+export function createPutCommand<V>(targetNodeId: Id, key: string, value: V): PutCommand<V> {
+  return {
+    commandId: randomId(),
+    targetNodeId,
+    '@type': 'put',
+    key,
+    value,
+  };
+}
+
+/**
+ * A signal command that removes a child node by map key.
+ */
+export type RemoveByKeyCommand = CreateCommandType<'removeKey', { key: string }>;
+
+export function createRemoveByKeyCommand(targetNodeId: Id, key: string): RemoveByKeyCommand {
+  return {
+    commandId: randomId(),
+    targetNodeId,
+    '@type': 'removeKey',
+    key,
+  };
+}
+
+/**
  * A signal command that moves a child to a new position in a list.
  */
 export type AdoptAtCommand = CreateCommandType<
@@ -302,4 +346,16 @@ export function isRemoveCommand(command: unknown): command is RemoveCommand {
 
 export function isSnapshotCommand(command: unknown): command is SnapshotCommand {
   return isSignalCommand(command) && command['@type'] === 'snapshot';
+}
+
+export function isClearCommand(command: unknown): command is ClearCommand {
+  return isSignalCommand(command) && command['@type'] === 'clear';
+}
+
+export function isPutCommand<V>(command: unknown): command is PutCommand<V> {
+  return isSignalCommand(command) && command['@type'] === 'put';
+}
+
+export function isRemoveByKeyCommand(command: unknown): command is RemoveByKeyCommand {
+  return isSignalCommand(command) && command['@type'] === 'removeKey';
 }
