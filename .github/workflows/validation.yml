@@ -15,7 +15,6 @@ on:
       - 'scripts/generator/templates/**/*.md'
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
