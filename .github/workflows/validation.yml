@@ -74,7 +74,7 @@ jobs:
           find packages/java/tests -path */src/main/resources/vaadin-core-versions.json -print0 | xargs -0 tar rf workspace.tar
           find scripts/prepare/results -print0 | xargs -0 tar rf workspace.tar
           tar rf workspace.tar $(find packages/ts -name node_modules -prune -o -print | git check-ignore --stdin)
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: saved-workspace
           path: workspace.tar
@@ -95,7 +95,7 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -122,7 +122,7 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -155,7 +155,7 @@ jobs:
     steps:
       - name: Install Chrome
         id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
       - name: Checkout Project Code
         uses: actions/checkout@v5
         with:
@@ -163,7 +163,7 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -216,7 +216,7 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -244,7 +244,7 @@ jobs:
               -Pproduction \
               verify
           )
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs-it-${{ matrix.os }}-${{ matrix.it-modules }}
@@ -274,7 +274,7 @@ jobs:
           fetch-depth: 0
       - name: Setup
         uses: ./.github/actions/setup
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: saved-workspace
       - name: Restore Workspace
@@ -295,7 +295,7 @@ jobs:
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
         run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
           name: saved-outputs-gradle-${{ matrix.os }}
@@ -317,7 +317,7 @@ jobs:
       - test-gradle
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v5
+        uses: actions/upload-artifact/merge@v6
         with:
           name: saved-outputs
           pattern: saved-outputs-*
