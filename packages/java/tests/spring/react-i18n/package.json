@@ -21,17 +21,17 @@
     "lit": "3.3.3",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-router": "7.15.1"
+    "react-router": "7.16.0"
   },
   "devDependencies": {
-    "@babel/core": "7.29.0",
-    "@babel/plugin-transform-react-jsx-development": "7.27.1",
-    "@babel/preset-react": "7.28.5",
-    "@babel/types": "7.29.0",
+    "@babel/core": "7.29.7",
+    "@babel/plugin-transform-react-jsx-development": "7.29.7",
+    "@babel/preset-react": "7.29.7",
+    "@babel/types": "7.29.7",
     "@preact/signals-react-transform": "0.8.1",
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
-    "@rollup/pluginutils": "5.3.0",
+    "@rollup/pluginutils": "5.4.0",
     "@types/node": "25.9.1",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
@@ -53,8 +53,8 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.0.14",
-    "vite-plugin-checker": "0.13.0"
+    "vite": "8.0.16",
+    "vite-plugin-checker": "0.14.1"
   },
   "vaadin": {
     "dependencies": {
@@ -76,17 +76,17 @@
       "lit": "3.3.3",
       "react": "19.2.6",
       "react-dom": "19.2.6",
-      "react-router": "7.15.1"
+      "react-router": "7.16.0"
     },
     "devDependencies": {
-      "@babel/core": "7.29.0",
-      "@babel/plugin-transform-react-jsx-development": "7.27.1",
-      "@babel/preset-react": "7.28.5",
-      "@babel/types": "7.29.0",
+      "@babel/core": "7.29.7",
+      "@babel/plugin-transform-react-jsx-development": "7.29.7",
+      "@babel/preset-react": "7.29.7",
+      "@babel/types": "7.29.7",
       "@preact/signals-react-transform": "0.8.1",
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
-      "@rollup/pluginutils": "5.3.0",
+      "@rollup/pluginutils": "5.4.0",
       "@types/node": "25.9.1",
       "@types/react": "19.2.15",
       "@types/react-dom": "19.2.3",
@@ -108,10 +108,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.0.14",
-      "vite-plugin-checker": "0.13.0"
+      "vite": "8.0.16",
+      "vite-plugin-checker": "0.14.1"
     },
-    "hash": "3a8ec183c92f67c2569c52c20ee19eb0358fc2cf5128890813b960510f0973bb",
+    "hash": "50911b4b14a01147498d69edbb8ce154f3dbc1bdaa3f571333bd8287a9202186",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0-beta1",
       "@vaadin/accordion": "25.2.0-beta1",
