@@ -43,7 +43,7 @@
     "prettier": "$prettier"
   },
   "devDependencies": {
-    "@babel/core": "7.29.0",
+    "@babel/core": "7.29.7",
     "@nx/js": "20.4.5",
     "@open-wc/testing": "4.0.0",
     "@preact/signals-react-transform": "0.8.1",
@@ -103,7 +103,7 @@
     "prettier": "3.5.1",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "react-router": "7.15.1",
+    "react-router": "7.16.0",
     "simple-git-hooks": "2.11.1",
     "sinon": "19.0.2",
     "sinon-chai": "4.0.0",
@@ -111,7 +111,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.35.0",
     "typescript": "6.0.3",
-    "vite": "8.0.14",
+    "vite": "8.0.16",
     "vitest": "3.1.1"
   }
 }
