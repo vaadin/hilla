@@ -80,16 +80,16 @@
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "@vaadin/vertical-layout": "25.1.3",
     "@vaadin/virtual-list": "25.1.3",
-    "lit": "3.3.2",
+    "lit": "3.3.3",
     "mobx": "6.3.3"
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
-    "@babel/types": "7.28.5",
+    "@babel/types": "7.28.6",
     "@preact/signals-react-transform": "0.8.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.3.0",
-    "@types/node": "25.5.0",
+    "@types/node": "25.5.2",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -108,7 +108,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.3.3",
+    "vite": "7.3.5",
     "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
@@ -190,16 +190,16 @@
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "@vaadin/vertical-layout": "24.8.0-alpha4",
       "@vaadin/virtual-list": "24.8.0-alpha4",
-      "lit": "3.3.2",
+      "lit": "3.3.3",
       "mobx": "6.3.3"
     },
     "devDependencies": {
       "@babel/preset-react": "7.28.5",
-      "@babel/types": "7.28.5",
+      "@babel/types": "7.28.6",
       "@preact/signals-react-transform": "0.8.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.3.0",
-      "@types/node": "25.5.0",
+      "@types/node": "25.5.2",
       "@vaadin/hilla-generator-cli": "25.1.5",
       "@vaadin/hilla-generator-core": "25.1.5",
       "@vaadin/hilla-generator-plugin-backbone": "25.1.5",
@@ -218,10 +218,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.3",
+      "vite": "7.3.5",
       "vite-plugin-checker": "0.12.0"
     },
-    "hash": "9fe592e831473ec5706af9e5c92a7838542b2c0b3fa859101c5f3e57999b1db4",
+    "hash": "14fd88a52c6bf43bfeac3301aaf28c9ef5a7881c79ee74095aec7c82751bd4f6",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@vaadin/a11y-base": "$@vaadin/a11y-base",
