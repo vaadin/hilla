@@ -7,15 +7,15 @@
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/hilla-frontend": "file:../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../ts/lit-form",
-    "@vaadin/icon": "24.10.3",
-    "@vaadin/icons": "24.10.3",
-    "@vaadin/polymer-legacy-adapter": "24.10.3",
+    "@vaadin/icon": "24.10.4",
+    "@vaadin/icons": "24.10.4",
+    "@vaadin/polymer-legacy-adapter": "24.10.4",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "24.10.3",
-    "@vaadin/vaadin-lumo-styles": "24.10.3",
-    "@vaadin/vaadin-themable-mixin": "24.10.3",
+    "@vaadin/tooltip": "24.10.4",
+    "@vaadin/vaadin-lumo-styles": "24.10.4",
+    "@vaadin/vaadin-themable-mixin": "24.10.4",
     "construct-style-sheets-polyfill": "3.1.0",
-    "lit": "3.3.2"
+    "lit": "3.3.3"
   },
   "devDependencies": {
     "@babel/preset-react": "7.28.5",
@@ -34,7 +34,7 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../ts/generator-utils",
-    "@vitejs/plugin-react": "5.1.3",
+    "@vitejs/plugin-react": "5.1.4",
     "glob": "12.0.0",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
@@ -42,7 +42,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.3.2",
+    "vite": "7.3.5",
     "vite-plugin-checker": "0.12.0"
   },
   "vaadin": {
