@@ -50,6 +50,14 @@
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
             </dependency>
+
+            <!-- Resolve antlr4-runtime convergence: hibernate-core pulls 4.13.2,
+                 spring-data-jpa pulls 4.13.0 -->
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.13.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
