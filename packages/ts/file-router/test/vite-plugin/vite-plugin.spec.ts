@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { existsSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -225,6 +226,9 @@ describe('@vaadin/hilla-file-router', () => {
     });
 
     describe('transform', () => {
+      const VIRTUAL_ID = 'virtual:hilla-file-router-refresh-ignore';
+      const RESOLVED_VIRTUAL_ID = `\0${VIRTUAL_ID}`;
+
       type TransformFn = (code: string, id: string) => { code: string } | undefined;
 
       function transform(code: string, id: string): { code: string } | undefined {
@@ -241,9 +245,8 @@ export default function MyView(): ReactElement { return <div></div>; }
         const result = transform(viewFileCode, id);
         expect(result).to.exist;
         expect(result!.code).to.contain(viewFileCode);
-        expect(result!.code).to.contain(`views.add(${JSON.stringify(id)});`);
-        expect(result!.code).to.contain('window.__getReactRefreshIgnoredExports');
-        expect(result!.code).to.contain("'config'");
+        expect(result!.code).to.contain(`import ${JSON.stringify(VIRTUAL_ID)};`);
+        expect(result!.code).to.contain(`.add(${JSON.stringify(id)});`);
       });
 
       it('should not inject to private view files', () => {
@@ -261,7 +264,112 @@ export default function MyView(): ReactElement { return <div></div>; }
       it('should not inject to view directory files with other extensions', () => {
         const id = fileURLToPath(new URL('styles.css', viewsDir)).replaceAll('\\', '/');
         const result = transform('.my-view { color: red; }', id);
-        expect(result!.code).to.not.contain('window.__getReactRefreshIgnoredExports');
+        expect(result!.code).to.not.contain(VIRTUAL_ID);
+      });
+
+      describe('refresh ignore virtual module', () => {
+        function resolveId(source: string): string | undefined {
+          return (plugin.resolveId as (source: string) => string | undefined)(source);
+        }
+
+        function load(id: string): string | undefined {
+          return (plugin.load as (id: string) => string | undefined)(id);
+        }
+
+        it('should map the virtual module id to its resolved form', () => {
+          expect(resolveId(VIRTUAL_ID)).to.equal(RESOLVED_VIRTUAL_ID);
+          expect(resolveId('something-else')).to.equal(undefined);
+        });
+
+        it('should load the React Refresh hook installer for the resolved virtual module id', () => {
+          const code = load(RESOLVED_VIRTUAL_ID);
+          expect(code).to.be.a('string');
+          expect(code).to.contain('window.__getReactRefreshIgnoredExports');
+          expect(code).to.contain("'config'");
+          expect(load('/some/other/id')).to.equal(undefined);
+        });
+
+        describe('installed hook', () => {
+          type RefreshIgnoredExportsHook = (ctx: { id: string }) => readonly string[];
+          type FakeWindow = {
+            __HILLA_FILE_ROUTER_VIEWS__?: Set<string>;
+            __getReactRefreshIgnoredExports?: RefreshIgnoredExportsHook;
+          };
+
+          function installHook(fakeWindow: FakeWindow): RefreshIgnoredExportsHook {
+            runInNewContext(load(RESOLVED_VIRTUAL_ID)!, { window: fakeWindow });
+            return fakeWindow.__getReactRefreshIgnoredExports!;
+          }
+
+          it('should ignore the config export of registered view modules only', () => {
+            const id = fileURLToPath(new URL('file.tsx', viewsDir)).replaceAll('\\', '/');
+            const hook = installHook({ __HILLA_FILE_ROUTER_VIEWS__: new Set([id]) });
+            expect(hook({ id })).to.deep.equal(['config']);
+            expect(hook({ id: '/elsewhere/file.tsx' })).to.deep.equal([]);
+          });
+
+          it('should return no ignored exports before any view module is registered', () => {
+            const hook = installHook({});
+            expect(hook({ id: '/any/file.tsx' })).to.deep.equal([]);
+          });
+
+          it('should chain with a pre-existing hook', () => {
+            const id = fileURLToPath(new URL('file.tsx', viewsDir)).replaceAll('\\', '/');
+            const hook = installHook({
+              __HILLA_FILE_ROUTER_VIEWS__: new Set([id]),
+              __getReactRefreshIgnoredExports: () => ['preExisting'],
+            });
+            expect(hook({ id })).to.deep.equal(['preExisting', 'config']);
+            expect(hook({ id: '/elsewhere/file.tsx' })).to.deep.equal(['preExisting']);
+          });
+        });
+      });
+
+      describe('production mode', () => {
+        let prodPlugin: ReturnType<typeof vitePluginFileSystemRouter>;
+        let prodViewsDir: URL;
+
+        beforeAll(async () => {
+          const prodRootDir = await createTmpDir();
+          prodViewsDir = new URL('frontend/views/', prodRootDir);
+          prodPlugin = vitePluginFileSystemRouter({ isDevMode: false });
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error: the configResolved method could be either a function or an object.
+          prodPlugin.configResolved({
+            logger: { info: sinon.spy(), warn: sinon.spy(), error: sinon.spy() },
+            root: fileURLToPath(prodRootDir),
+            build: { outDir: fileURLToPath(new URL('dist/', prodRootDir)) },
+          });
+        });
+
+        function prodTransform(code: string, id: string): { code: string } | undefined {
+          return (prodPlugin.transform as TransformFn)(code, id);
+        }
+
+        it('should not inject React Refresh ignored exports registration', () => {
+          const id = fileURLToPath(new URL('file.tsx', prodViewsDir)).replaceAll('\\', '/');
+          const result = prodTransform('export default function MyView() {}', id);
+          expect(result!.code).to.not.contain(VIRTUAL_ID);
+        });
+
+        it('should preserve the name of a named default export', () => {
+          const id = fileURLToPath(new URL('file.tsx', prodViewsDir)).replaceAll('\\', '/');
+          const result = prodTransform('export default function MyView() {}', id);
+          expect(result!.code).to.contain("Object.defineProperty(MyView, 'name', { value: 'MyView' });");
+        });
+
+        it('should preserve the name of a named default class export', () => {
+          const id = fileURLToPath(new URL('file.tsx', prodViewsDir)).replaceAll('\\', '/');
+          const result = prodTransform('export default class MyView extends Component {}', id);
+          expect(result!.code).to.contain("Object.defineProperty(MyView, 'name', { value: 'MyView' });");
+        });
+
+        it('should not modify anonymous default exports', () => {
+          const id = fileURLToPath(new URL('file.tsx', prodViewsDir)).replaceAll('\\', '/');
+          const code = 'export default function () {}';
+          const result = prodTransform(code, id);
+          expect(result!.code).to.equal(code);
+        });
       });
     });
 
