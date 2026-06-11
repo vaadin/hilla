@@ -77,14 +77,14 @@
     <swagger.core.version>2.2.38</swagger.core.version>
     <swagger.models.version>2.2.38</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson2.version>2.21.2</jackson2.version>
+    <jackson2.version>2.21.4</jackson2.version>
     <jackson-annotations.version>2.21</jackson-annotations.version>
     <jackson.version>3.1.0</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.2-SNAPSHOT</flow.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <spring.boot.version>4.1.0-RC1</spring.boot.version>
+    <spring.boot.version>4.1.0</spring.boot.version>
     <testbench.version>25.2.0-beta1</testbench.version>
     <jakarta.validation.version>3.1.1</jakarta.validation.version>
     <jakarta.annotation.api.version>3.0.0</jakarta.annotation.api.version>
@@ -92,7 +92,7 @@
     <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
     <hibernate.validator.version>8.0.2.Final</hibernate.validator.version>
     <jaxb.version>4.0.4</jaxb.version>
-    <github.javaparser.core.version>3.28.1</github.javaparser.core.version>
+    <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
     <kotlin.version>2.1.21</kotlin.version>
