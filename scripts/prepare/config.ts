@@ -28,8 +28,7 @@ export interface Transformer {
   transformVersions(versions: Versions, version: string, isPrerelease: boolean): Versions;
 }
 
-// TODO: compute this number when we maintain multiple hilla branches
-export let branch = 'main';
+let branch = 'main';
 
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
