@@ -4,8 +4,38 @@ import type { TransformResult } from 'rollup';
 import type { EnvironmentModuleNode, HotUpdateOptions, Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
-const INJECTION =
-  "if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {nextExports = { ...nextExports, config: currentExports.config };}";
+/**
+ * Creates a code snippet that excludes the `config` export of a route file
+ * from the React Fast Refresh boundary validation.
+ *
+ * React Fast Refresh (the HMR mechanism of `@vitejs/plugin-react`) requires
+ * all exports of a module to be React components; otherwise, an update
+ * invalidates the module and causes a full page reload. Route files, however,
+ * are allowed to export a static `config` object in addition to the React
+ * component. To keep Fast Refresh working for them, each route file is
+ * registered in the `__getReactRefreshIgnoredExports` hook of the React
+ * Refresh runtime, so that its `config` export is skipped during the refresh
+ * boundary validation. Updates to the `config` contents are propagated
+ * separately through the regenerated `file-routes.ts` module.
+ *
+ * @param id - The module id of the route file, as seen by the Vite transform
+ * pipeline. The React Refresh runtime receives the same id at runtime.
+ */
+function createReactRefreshConfigExclusion(id: string): string {
+  return `;if (typeof window !== 'undefined') {
+  const views = (window.__HILLA_FILE_ROUTER_VIEWS__ ??= new Set());
+  views.add(${JSON.stringify(id)});
+  if (!window.__HILLA_FILE_ROUTER_REFRESH_HOOK_INSTALLED__) {
+    window.__HILLA_FILE_ROUTER_REFRESH_HOOK_INSTALLED__ = true;
+    const previousHook = window.__getReactRefreshIgnoredExports;
+    window.__getReactRefreshIgnoredExports = ({ id }) => {
+      const ignoredExports = previousHook?.({ id }) ?? [];
+      return views.has(id) ? [...ignoredExports, 'config'] : ignoredExports;
+    };
+  }
+}
+`;
+}
 
 /**
  * The options for the Vite file-based router plugin.
@@ -162,22 +192,9 @@ export default function vitePluginFileSystemRouter({
       let modifiedCode = code;
       if (id.startsWith(_viewsDirPosix) && !basename(id).startsWith('_')) {
         if (isDevMode) {
-          // To enable HMR for route files with exported configurations, we need
-          // to address a limitation in `react-refresh`. This library requires
-          // strict equality (`===`) for non-component exports. However, the
-          // dynamic nature of HMR makes maintaining this equality between object
-          // literals challenging.
-          //
-          // To work around this, we implement a strategy that preserves the
-          // reference to the original configuration object (`currentExports.config`),
-          // replacing any newly created configuration objects (`nextExports.config`)
-          // with it. This ensures that the HMR mechanism perceives the
-          // configuration as unchanged.
-          const injectionPattern = /import\.meta\.hot\.accept[\s\S]+if\s\(!nextExports\)\s+return;/gu;
-          if (injectionPattern.test(modifiedCode)) {
-            modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
-              injectionPattern.lastIndex,
-            )}`;
+          const [path] = id.split('?');
+          if (extensions.some((ext) => path!.endsWith(ext))) {
+            modifiedCode += createReactRefreshConfigExclusion(id);
           }
         } else {
           // In production mode, the function name is assigned as name to the function itself to avoid minification

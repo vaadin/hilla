@@ -224,6 +224,47 @@ describe('@vaadin/hilla-file-router', () => {
       expect(existsSync(fileRoutesJsonModule.file!)).to.be.true;
     });
 
+    describe('transform', () => {
+      type TransformFn = (code: string, id: string) => { code: string } | undefined;
+
+      function transform(code: string, id: string): { code: string } | undefined {
+        return (plugin.transform as TransformFn)(code, id);
+      }
+
+      const viewFileCode = `import { ReactElement } from 'react';
+export const config = { menu: { exclude: true } };
+export default function MyView(): ReactElement { return <div></div>; }
+`;
+
+      it('should inject React Refresh ignored exports registration to view files in dev mode', () => {
+        const id = fileURLToPath(new URL('file.tsx', viewsDir)).replaceAll('\\', '/');
+        const result = transform(viewFileCode, id);
+        expect(result).to.exist;
+        expect(result!.code).to.contain(viewFileCode);
+        expect(result!.code).to.contain(`views.add(${JSON.stringify(id)});`);
+        expect(result!.code).to.contain('window.__getReactRefreshIgnoredExports');
+        expect(result!.code).to.contain("'config'");
+      });
+
+      it('should not inject to private view files', () => {
+        const id = fileURLToPath(new URL('_private.tsx', viewsDir)).replaceAll('\\', '/');
+        const result = transform(viewFileCode, id);
+        expect(result).to.equal(undefined);
+      });
+
+      it('should not inject to files outside the views directory', () => {
+        const id = fileURLToPath(new URL('../other/file.tsx', viewsDir)).replaceAll('\\', '/');
+        const result = transform(viewFileCode, id);
+        expect(result).to.equal(undefined);
+      });
+
+      it('should not inject to view directory files with other extensions', () => {
+        const id = fileURLToPath(new URL('styles.css', viewsDir)).replaceAll('\\', '/');
+        const result = transform('.my-view { color: red; }', id);
+        expect(result!.code).to.not.contain('window.__getReactRefreshIgnoredExports');
+      });
+    });
+
     it('should not regenerate files when another file is updated', async () => {
       const someJsonModule = createMockEnvironmentModuleNode('something.json', generatedDir);
       someJsonModule.importers.add(fileRoutesTsModule);
