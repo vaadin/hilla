@@ -29,7 +29,7 @@ export interface Transformer {
 }
 
 // TODO: compute this number when we maintain multiple hilla branches
-export const branch = 'main';
+export let branch = 'main';
 
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
@@ -48,6 +48,12 @@ export const remote = {
   src: new URL(`platform/${branch}/scripts/generator/src/`, repoUrl),
   versions: new URL(`platform/${branch}/versions.json`, repoUrl),
 };
+
+export function setBranch(newBranch: string): void {
+  branch = newBranch;
+  remote.src = new URL(`platform/${branch}/scripts/generator/src/`, repoUrl);
+  remote.versions = new URL(`platform/${branch}/versions.json`, repoUrl);
+}
 
 export const destination = {
   versions: [

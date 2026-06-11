@@ -2,8 +2,17 @@
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
-import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
+import { componentOptions, destination, local, remote, root, setBranch, type Versions } from './config.js';
 import generate from './generate.js';
+
+// Parse CLI arguments for branch parameter
+const args = process.argv.slice(2);
+const branchArg = args.find((arg) => arg.startsWith('--branch='));
+const targetBranch = branchArg ? branchArg.split('=')[1] : 'main';
+
+// Configure branch before fetching
+setBranch(targetBranch);
+console.log(`Fetching versions from platform branch: ${targetBranch}`);
 
 const [{ version }, versions] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
