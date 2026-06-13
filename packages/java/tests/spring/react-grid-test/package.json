@@ -19,9 +19,9 @@
     "@vaadin/vaadin-themable-mixin": "25.2.0-beta2",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "lit": "3.3.3",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "react-router": "7.16.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-router": "7.17.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -32,8 +32,8 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.1",
-    "@types/react": "19.2.15",
+    "@types/node": "25.9.3",
+    "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
@@ -74,9 +74,9 @@
       "@vaadin/vaadin-themable-mixin": "25.2.0-beta2",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "lit": "3.3.3",
-      "react": "19.2.6",
-      "react-dom": "19.2.6",
-      "react-router": "7.16.0"
+      "react": "19.2.7",
+      "react-dom": "19.2.7",
+      "react-router": "7.17.0"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
@@ -87,8 +87,8 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.1",
-      "@types/react": "19.2.15",
+      "@types/node": "25.9.3",
+      "@types/react": "19.2.17",
       "@types/react-dom": "19.2.3",
       "@vaadin/hilla-generator-cli": "25.2.0-beta1",
       "@vaadin/hilla-generator-core": "25.2.0-beta1",
@@ -111,7 +111,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.1"
     },
-    "hash": "341558cf093ae4c7d6544f18369ea58f8e1d98180eca8094b9f271783d8d62a2",
+    "hash": "5f62b4e61998f55e8d3bbe7d287d227e8a36a0b5236e2478883812da62994230",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0-beta2",
       "@vaadin/accordion": "25.2.0-beta2",
