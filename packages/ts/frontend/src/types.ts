@@ -1,4 +1,13 @@
-import type { ConnectionIndicator, ConnectionStateStore } from '@vaadin/common-frontend';
+/**
+ * Minimal shape of the connection state store that Vaadin Flow exposes on the
+ * global `window.Vaadin` object. Hilla only reports loading progress to it; the
+ * store itself is provided by Flow at runtime (it is not created by Hilla).
+ */
+export interface ConnectionStateStore {
+  loadingStarted(): void;
+  loadingFinished(): void;
+  loadingFailed(): void;
+}
 
 export interface VaadinRegistration {
   readonly is: string;
@@ -11,7 +20,6 @@ export interface VaadinFlow {
 
 export interface Vaadin {
   readonly Flow?: VaadinFlow;
-  readonly connectionIndicator?: ConnectionIndicator;
   readonly connectionState?: ConnectionStateStore;
   registrations?: VaadinRegistration[];
 }
