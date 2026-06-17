@@ -6,12 +6,12 @@
     "@vaadin/common-frontend": "0.0.22",
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
-    "@vaadin/icon": "25.2.0-rc1",
-    "@vaadin/icons": "25.2.0-rc1",
+    "@vaadin/icon": "25.2.0-rc2",
+    "@vaadin/icons": "25.2.0-rc2",
     "@vaadin/router": "2.0.1",
-    "@vaadin/tooltip": "25.2.0-rc1",
-    "@vaadin/vaadin-lumo-styles": "25.2.0-rc1",
-    "@vaadin/vaadin-themable-mixin": "25.2.0-rc1",
+    "@vaadin/tooltip": "25.2.0-rc2",
+    "@vaadin/vaadin-lumo-styles": "25.2.0-rc2",
+    "@vaadin/vaadin-themable-mixin": "25.2.0-rc2",
     "lit": "3.3.3"
   },
   "devDependencies": {
@@ -55,12 +55,12 @@
       "@vaadin/common-frontend": "0.0.22",
       "@vaadin/hilla-frontend": "25.2.0-beta1",
       "@vaadin/hilla-lit-form": "25.2.0-beta1",
-      "@vaadin/icon": "25.2.0-rc1",
-      "@vaadin/icons": "25.2.0-rc1",
+      "@vaadin/icon": "25.2.0-rc2",
+      "@vaadin/icons": "25.2.0-rc2",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.2.0-rc1",
-      "@vaadin/vaadin-lumo-styles": "25.2.0-rc1",
-      "@vaadin/vaadin-themable-mixin": "25.2.0-rc1",
+      "@vaadin/tooltip": "25.2.0-rc2",
+      "@vaadin/vaadin-lumo-styles": "25.2.0-rc2",
+      "@vaadin/vaadin-themable-mixin": "25.2.0-rc2",
       "lit": "3.3.3"
     },
     "devDependencies": {
@@ -99,7 +99,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "a62e257a461896e66b5da0f45a41330cae7b7761c9f7b0d8baf07bfc12b24ed0",
+    "hash": "ccaedbe9fbaffc4310936b4b5f91ecdc8ae712788eea225558ef382cac581cf6",
     "overrides": {
       "@vaadin/common-frontend": "$@vaadin/common-frontend",
       "@vaadin/icon": "$@vaadin/icon",
