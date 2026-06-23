@@ -21,7 +21,7 @@
     "lit": "3.3.3",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-router": "7.17.0"
+    "react-router": "7.18.0"
   },
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
@@ -29,7 +29,7 @@
     "@preact/signals-react-transform": "0.8.1",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "25.9.3",
+    "@types/node": "25.9.4",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -51,7 +51,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "7.3.5",
-    "vite-plugin-checker": "0.14.1"
+    "vite-plugin-checker": "0.14.4"
   },
   "vaadin": {
     "dependencies": {
@@ -73,7 +73,7 @@
       "lit": "3.3.3",
       "react": "19.2.7",
       "react-dom": "19.2.7",
-      "react-router": "7.17.0"
+      "react-router": "7.18.0"
     },
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
@@ -81,7 +81,7 @@
       "@preact/signals-react-transform": "0.8.1",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "25.9.3",
+      "@types/node": "25.9.4",
       "@types/react": "19.2.17",
       "@types/react-dom": "19.2.3",
       "@vaadin/hilla-generator-cli": "25.1.7",
@@ -103,9 +103,9 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "7.3.5",
-      "vite-plugin-checker": "0.14.1"
+      "vite-plugin-checker": "0.14.4"
     },
-    "hash": "b99ee1183f7f4d1acc325bcfc11f802d81454ec946394f9915e080cc508d720a",
+    "hash": "3b8452909a5c0b5509aa666ea80be69fea6aa8bc3510855571dc78a7365c92d4",
     "overrides": {
       "@vaadin/a11y-base": "25.1.4",
       "@vaadin/accordion": "25.1.4",
