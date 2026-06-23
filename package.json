@@ -101,14 +101,14 @@
     "prettier": "3.5.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-router": "7.17.0",
+    "react-router": "7.18.0",
     "simple-git-hooks": "2.11.1",
     "sinon": "19.0.2",
     "sinon-chai": "4.0.0",
     "sync-request": "6.1.0",
     "tsx": "4.19.3",
     "type-fest": "4.35.0",
-    "typescript": "5.8.3",
+    "typescript": "5.9.3",
     "vite": "6.4.3",
     "vitest": "3.1.1"
   }
