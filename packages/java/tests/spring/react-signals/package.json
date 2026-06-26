@@ -46,7 +46,7 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.0.2",
+    "@vitejs/plugin-react": "6.0.3",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.0.1",
@@ -101,7 +101,7 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.2.0-beta1",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.2.0-beta1",
       "@vaadin/hilla-generator-utils": "25.2.0-beta1",
-      "@vitejs/plugin-react": "6.0.2",
+      "@vitejs/plugin-react": "6.0.3",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.0.1",
@@ -111,7 +111,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.4"
     },
-    "hash": "ab75aaff4904b5ebf4a6ac5b24df05b0bb27ae7eeab2a578b4c5bc8f75147135",
+    "hash": "b83afc4ff7877714b1d6b172d0fe165050c1eede226dd29c73e4d0d3bb764b39",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0",
       "@vaadin/accordion": "25.2.0",
