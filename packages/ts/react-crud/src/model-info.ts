@@ -92,7 +92,7 @@ export function _generateHeader(path: string): string {
     .replace(/^./u, (match) => match.toUpperCase());
 }
 
-const getPropertyNames = (model: DetachedModelConstructor<AbstractModel>): string[] => {
+const getPropertyNames = (model: AbstractModel['constructor']): string[] => {
   const propertyNames: string[] = [];
 
   for (let proto = model; proto !== ObjectModel; proto = Object.getPrototypeOf(proto)) {
@@ -149,7 +149,7 @@ export class ModelInfo {
     if (!model) {
       return [];
     }
-    return getPropertyNames(model.constructor as any)
+    return getPropertyNames(model.constructor)
       .map((name) => {
         const effectivePath = path ? `${path}.${name}` : name;
         return this.getProperty(effectivePath);

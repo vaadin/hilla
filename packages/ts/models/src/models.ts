@@ -92,8 +92,7 @@ export type EnumModel<T extends typeof Enum> = Model<
 
 export const EnumModel: EnumModel<typeof Enum> = new CoreModelBuilder<(typeof Enum)[keyof typeof Enum]>(Model)
   .name('Enum')
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  .define($enum, { value: {} as typeof Enum })
+  .define<typeof $enum, typeof Enum>($enum, { value: {} })
   .defaultValueProvider((self) => Object.values(self[$enum])[0])
   .build();
 

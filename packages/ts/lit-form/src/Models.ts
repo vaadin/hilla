@@ -125,7 +125,7 @@ export abstract class AbstractModel<T = unknown> {
       throw new TypeError('Value is undefined');
     }
 
-    return value! as T;
+    return value!;
   }
 }
 

@@ -5,7 +5,7 @@ import { traverse } from '@vaadin/hilla-generator-utils/ast.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ast, { createTransformer } from 'tsc-template';
+import ast, { createTransformer } from '@vaadin/hilla-generator-utils/tsc-template.js';
 import {
   factory,
   isTypeReferenceNode,

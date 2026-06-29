@@ -107,7 +107,7 @@ export class ConstraintBuilder<V = unknown, const N extends string = string, A e
     NonAttributedConstraint = Object.defineProperties(NonAttributedConstraint, {
       name: { value: name },
       [$assertSupportedModel]: { value: assertSupportedModel },
-    }) as NonAttributedConstraint<V | undefined, N, A>;
+    });
 
     return NonAttributedConstraint as NonAttributedConstraint<V | undefined, N, A>;
   }

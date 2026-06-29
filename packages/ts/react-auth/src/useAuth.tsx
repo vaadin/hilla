@@ -266,6 +266,6 @@ export function configureAuth<TUser>(
 
   return {
     AuthProvider: PreconfiguredAuthProvider,
-    useAuth: useAuth as AuthHook<TUser>,
+    useAuth,
   };
 }

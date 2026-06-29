@@ -1,7 +1,6 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage, TransferTypeMaker } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { Writable } from 'type-fest';
 import { factory, type Identifier } from 'typescript';
 
 type ReplacedTypeMaker = (schema?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => TransferTypeMaker;
@@ -61,7 +60,7 @@ export default class TransferTypesPlugin extends Plugin {
     if (components?.schemas) {
       const keys = Object.keys(replacedTypes);
 
-      (components as Writable<typeof components>).schemas = Object.fromEntries(
+      components.schemas = Object.fromEntries(
         Object.entries(components.schemas).filter(([key]) => !keys.includes(key)),
       );
     }

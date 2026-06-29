@@ -1,5 +1,4 @@
 /* eslint-disable no-new */
-import { ConnectionState, ConnectionStateStore } from '@vaadin/common-frontend';
 import chaiAsPromised from 'chai-as-promised';
 import chaiLike from 'chai-like';
 import fetchMock from 'fetch-mock';
@@ -38,6 +37,24 @@ chai.use(chaiAsPromised);
 chai.use(chaiLike);
 chai.use(sinonChai);
 
+// At runtime the connection state store is provided by Vaadin Flow; Hilla only
+// reports loading progress to it. These tests only verify Hilla's contract -
+// which store methods it calls and when - so the store is a spy stub rather than
+// a reimplementation of Flow's state-transition logic.
+type ConnectionStateStoreStub = {
+  loadingStarted: sinon.SinonSpy;
+  loadingFinished: sinon.SinonSpy;
+  loadingFailed: sinon.SinonSpy;
+};
+
+function createConnectionStateStoreStub(): ConnectionStateStoreStub {
+  return {
+    loadingStarted: sinon.fake(),
+    loadingFinished: sinon.fake(),
+    loadingFailed: sinon.fake(),
+  };
+}
+
 // `connectClient.call` adds the host and context to the endpoint request.
 // we need to add this origin when configuring fetch-mock
 const base = window.location.origin;
@@ -51,6 +68,7 @@ const $wnd = window as TestVaadinWindow;
 describe('@vaadin/hilla-frontend', () => {
   describe('ConnectClient', () => {
     let myMiddleware: MiddlewareFunction;
+    let connectionStateStore: ConnectionStateStoreStub;
 
     beforeAll(() => {
       fetchMock.mockGlobal();
@@ -64,7 +82,7 @@ describe('@vaadin/hilla-frontend', () => {
       subscribeStub.resetHistory();
       myMiddleware = async (ctx, next) => next(ctx);
 
-      const connectionStateStore = new ConnectionStateStore(ConnectionState.CONNECTED);
+      connectionStateStore = createConnectionStateStoreStub();
       $wnd.Vaadin = { connectionState: connectionStateStore };
       localStorage.clear();
     });
@@ -82,14 +100,16 @@ describe('@vaadin/hilla-frontend', () => {
       expect(client).to.be.instanceOf(ConnectClient);
     });
 
-    it('should not transition connection state if Flow loaded', () => {
+    it('should not touch connection state on browser offline events', () => {
       new ConnectClient();
       $wnd.Vaadin!.Flow = {};
       $wnd.Vaadin!.Flow.clients = {};
       $wnd.Vaadin!.Flow.clients.TypeScript = {};
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
       dispatchEvent(new Event('offline'));
-      expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+      // Connection state on offline/online is managed by Flow, not Hilla.
+      expect(connectionStateStore.loadingStarted).to.not.be.called;
+      expect(connectionStateStore.loadingFinished).to.not.be.called;
+      expect(connectionStateStore.loadingFailed).to.not.be.called;
     });
 
     describe('constructor options', () => {
@@ -178,32 +198,31 @@ describe('@vaadin/hilla-frontend', () => {
         expect(fetchMock.callHistory.lastCall()?.options).to.include({ method: 'POST' });
       });
 
-      it('should set connection state to LOADING followed by CONNECTED on successful fetch', async () => {
-        const stateChangeListener = sinon.fake();
-        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
-
+      it('should report loading started then finished on successful fetch', async () => {
         await client.call('FooEndpoint', 'fooMethod');
-        expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTED);
+        expect(connectionStateStore.loadingStarted).to.be.calledOnce;
+        expect(connectionStateStore.loadingFinished).to.be.calledOnce;
+        expect(connectionStateStore.loadingStarted).to.be.calledBefore(connectionStateStore.loadingFinished);
+        expect(connectionStateStore.loadingFailed).to.not.be.called;
       });
 
-      it('should not set connection state for muted requests', async () => {
-        const stateChangeListener = sinon.fake();
-        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
-
+      it('should not report connection state for muted requests', async () => {
         await client.call('FooEndpoint', 'fooMethod', {}, { mute: true });
-        expect(stateChangeListener).to.not.be.called;
+        expect(connectionStateStore.loadingStarted).to.not.be.called;
+        expect(connectionStateStore.loadingFinished).to.not.be.called;
+        expect(connectionStateStore.loadingFailed).to.not.be.called;
       });
 
-      it('should set connection state to CONNECTION_LOST on network failure', async () => {
-        const stateChangeListener = sinon.fake();
-        $wnd.Vaadin?.connectionState?.addStateChangeListener(stateChangeListener);
+      it('should report loading failed on network failure', async () => {
         fetchMock.post(`${base}/connect/FooEndpoint/reject`, Promise.reject(new TypeError('Network failure')));
         try {
           await client.call('FooEndpoint', 'reject');
         } catch {
           // expected
         } finally {
-          expect(stateChangeListener).to.be.calledWithExactly(ConnectionState.LOADING, ConnectionState.CONNECTION_LOST);
+          expect(connectionStateStore.loadingStarted).to.be.calledOnce;
+          expect(connectionStateStore.loadingFailed).to.be.calledOnce;
+          expect(connectionStateStore.loadingFinished).to.not.be.called;
         }
       });
 
@@ -221,7 +240,7 @@ describe('@vaadin/hilla-frontend', () => {
         await expect(called).to.be.rejectedWith(DOMException, 'The operation was aborted.');
       });
 
-      it('should  set connection state to CONNECTED upon server error', async () => {
+      it('should report loading finished (not failed) upon server error', async () => {
         const body = 'Unexpected error';
         const errorResponse = new Response(body, {
           status: 500,
@@ -234,7 +253,9 @@ describe('@vaadin/hilla-frontend', () => {
         } catch {
           // expected
         } finally {
-          expect($wnd.Vaadin?.connectionState?.state).to.equal(ConnectionState.CONNECTED);
+          // The server responded, so it is not a connectivity failure.
+          expect(connectionStateStore.loadingFinished).to.be.calledOnce;
+          expect(connectionStateStore.loadingFailed).to.not.be.called;
         }
       });
 
