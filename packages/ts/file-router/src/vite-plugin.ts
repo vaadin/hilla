@@ -4,8 +4,50 @@ import type { TransformResult } from 'rollup';
 import type { EnvironmentModuleNode, HotUpdateOptions, Logger, Plugin } from 'vite';
 import { generateRuntimeFiles, type RuntimeFileUrls } from './vite-plugin/generateRuntimeFiles.js';
 
-const INJECTION =
-  "if (Object.keys(nextExports).length === 2 && 'default' in nextExports && 'config' in nextExports) {nextExports = { ...nextExports, config: currentExports.config };}";
+const REFRESH_IGNORE_VIRTUAL_ID = 'virtual:hilla-file-router-refresh-ignore';
+const RESOLVED_REFRESH_IGNORE_VIRTUAL_ID = `\0${REFRESH_IGNORE_VIRTUAL_ID}`;
+
+/**
+ * Installs the `__getReactRefreshIgnoredExports` hook of the React Refresh
+ * runtime.
+ *
+ * React Fast Refresh (the HMR mechanism of `@vitejs/plugin-react`) requires
+ * all exports of a module to be React components; otherwise, an update
+ * invalidates the module and causes a full page reload. Route files, however,
+ * are allowed to export a static `config` object in addition to the React
+ * component. To keep Fast Refresh working for them, each route file is
+ * registered in `window.__HILLA_FILE_ROUTER_VIEWS__`, and the hook excludes
+ * the `config` export of registered modules from the refresh boundary
+ * validation. Updates to the `config` contents are propagated separately
+ * through the regenerated `file-routes.ts` module.
+ *
+ * The hook is delivered as a virtual module imported by every route file, so
+ * Vite evaluates it once per application boot.
+ */
+const REFRESH_IGNORE_INSTALLER = `if (typeof window !== 'undefined') {
+  const previousHook = window.__getReactRefreshIgnoredExports;
+  window.__getReactRefreshIgnoredExports = ({ id }) => {
+    const ignoredExports = previousHook?.({ id }) ?? [];
+    return window.__HILLA_FILE_ROUTER_VIEWS__?.has(id) ? [...ignoredExports, 'config'] : ignoredExports;
+  };
+}
+`;
+
+/**
+ * Creates a code snippet that registers a route file for the exclusion of its
+ * `config` export from the React Fast Refresh boundary validation.
+ *
+ * @param id - The module id of the route file, as seen by the Vite transform
+ * pipeline. The React Refresh runtime receives the same id at runtime.
+ */
+function createReactRefreshConfigExclusion(id: string): string {
+  return `
+;import ${JSON.stringify(REFRESH_IGNORE_VIRTUAL_ID)};
+if (typeof window !== 'undefined') {
+  (window.__HILLA_FILE_ROUTER_VIEWS__ ??= new Set()).add(${JSON.stringify(id)});
+}
+`;
+}
 
 /**
  * The options for the Vite file-based router plugin.
@@ -99,6 +141,12 @@ export default function vitePluginFileSystemRouter({
     async buildStart() {
       await _generateRuntimeFiles();
     },
+    resolveId(source) {
+      return source === REFRESH_IGNORE_VIRTUAL_ID ? RESOLVED_REFRESH_IGNORE_VIRTUAL_ID : undefined;
+    },
+    load(id) {
+      return id === RESOLVED_REFRESH_IGNORE_VIRTUAL_ID ? REFRESH_IGNORE_INSTALLER : undefined;
+    },
     async hotUpdate({ file, modules }: HotUpdateOptions): Promise<void | EnvironmentModuleNode[]> {
       const fileUrlString = String(pathToFileURL(file));
 
@@ -162,30 +210,21 @@ export default function vitePluginFileSystemRouter({
       let modifiedCode = code;
       if (id.startsWith(_viewsDirPosix) && !basename(id).startsWith('_')) {
         if (isDevMode) {
-          // To enable HMR for route files with exported configurations, we need
-          // to address a limitation in `react-refresh`. This library requires
-          // strict equality (`===`) for non-component exports. However, the
-          // dynamic nature of HMR makes maintaining this equality between object
-          // literals challenging.
-          //
-          // To work around this, we implement a strategy that preserves the
-          // reference to the original configuration object (`currentExports.config`),
-          // replacing any newly created configuration objects (`nextExports.config`)
-          // with it. This ensures that the HMR mechanism perceives the
-          // configuration as unchanged.
-          const injectionPattern = /import\.meta\.hot\.accept[\s\S]+if\s\(!nextExports\)\s+return;/gu;
-          if (injectionPattern.test(modifiedCode)) {
-            modifiedCode = `${modifiedCode.substring(0, injectionPattern.lastIndex)}${INJECTION}${modifiedCode.substring(
-              injectionPattern.lastIndex,
-            )}`;
+          const [path] = id.split('?');
+          if (extensions.some((ext) => path!.endsWith(ext))) {
+            modifiedCode += createReactRefreshConfigExclusion(id);
           }
         } else {
           // In production mode, the function name is assigned as name to the function itself to avoid minification
-          const functionNames = /export\s+default\s+(?:function\s+)?(\w+)/u.exec(modifiedCode);
+          const functionNames = /export\s+default\s+(?:(?:function|class)\s+)?(\w+)/u.exec(modifiedCode);
 
           if (functionNames?.length) {
             const [, functionName] = functionNames;
-            modifiedCode += `Object.defineProperty(${functionName}, 'name', { value: '${functionName}' });\n`;
+            // For anonymous default exports, the keyword itself is captured
+            // instead of a name, so there is nothing to preserve.
+            if (functionName !== 'function' && functionName !== 'class') {
+              modifiedCode += `Object.defineProperty(${functionName}, 'name', { value: '${functionName}' });\n`;
+            }
           }
         }
 
