@@ -108,7 +108,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
-    "vite": "7.3.5",
+    "vite": "7.3.6",
     "vite-plugin-checker": "0.14.4"
   },
   "vaadin": {
@@ -218,10 +218,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
-      "vite": "7.3.5",
+      "vite": "7.3.6",
       "vite-plugin-checker": "0.14.4"
     },
-    "hash": "a35e2bbae3fce42d32ffb5a4eacf79eb2d23358401b789fd916e833c59881274",
+    "hash": "502433c619e1e3c258800476ad5f4d45f4956fc14f9bdbc9a1c9ac80dfa203b2",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@vaadin/a11y-base": "$@vaadin/a11y-base",
