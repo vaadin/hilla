@@ -35,6 +35,22 @@ runs:
         key: ${{ inputs.cache-version }}-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ inputs.cache-version }}-${{ runner.os }}-maven-
+    - name: Evict stale Flow SNAPSHOTs
+      # actions/cache restores the whole ~/.m2 tree, including Flow
+      # SNAPSHOT jars (flow-server, flow-build-tools, flow-plugin-base,
+      # flow-client, flow-push, ...) that drift across nightly Vaadin
+      # publishes but that the cache never re-saves once the primary
+      # key is hit. Wipe SNAPSHOT directories under com/vaadin/flow-*/
+      # so Maven/Gradle re-fetch the current SNAPSHOT from
+      # vaadin-prereleases on the next resolve. Hilla-local test
+      # artifacts (fix-lumo, hilla-*, csrf, ...) live under other
+      # com/vaadin/* subdirs and are intentionally left in place.
+      shell: bash
+      run: |
+        if [ -d ~/.m2/repository/com/vaadin ]; then
+          find ~/.m2/repository/com/vaadin -type d -name '*-SNAPSHOT' \
+               -path '*/flow-*/*-SNAPSHOT' -prune -print -exec rm -rf {} +
+        fi
     - name: Cache node_modules
       uses: actions/cache@v5
       id: cache-node_modules
