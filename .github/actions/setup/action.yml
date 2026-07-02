@@ -35,6 +35,20 @@ runs:
         key: ${{ inputs.cache-version }}-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ inputs.cache-version }}-${{ runner.os }}-maven-
+    - name: Evict stale Vaadin SNAPSHOTs
+      # actions/cache restores the whole ~/.m2 tree, including Vaadin
+      # SNAPSHOT jars (flow-server, flow-build-tools, hilla-*, vaadin-*)
+      # that drift across nightly Vaadin publishes but that the cache
+      # never re-saves once the primary key is hit. Wipe SNAPSHOT
+      # directories under com/vaadin/ so Maven/Gradle re-fetch the
+      # current SNAPSHOT from vaadin-prereleases on the next resolve.
+      # Released versions under com/vaadin/ and the rest of the cache
+      # are untouched.
+      shell: bash
+      run: |
+        if [ -d ~/.m2/repository/com/vaadin ]; then
+          find ~/.m2/repository/com/vaadin -type d -name '*-SNAPSHOT' -prune -print -exec rm -rf {} +
+        fi
     - name: Cache node_modules
       uses: actions/cache@v5
       id: cache-node_modules
