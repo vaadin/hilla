@@ -25,7 +25,7 @@
     "lit": "3.3.3",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-router": "7.18.0"
+    "react-router": "7.18.1"
   },
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
@@ -81,7 +81,7 @@
       "lit": "3.3.3",
       "react": "19.2.7",
       "react-dom": "19.2.7",
-      "react-router": "7.18.0"
+      "react-router": "7.18.1"
     },
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
@@ -113,7 +113,7 @@
       "vite": "6.4.3",
       "vite-plugin-checker": "0.14.4"
     },
-    "hash": "4865b6f89aee5a263a36e4f285e76f5af39090c027a3896b7b2cad859ee5fa3b",
+    "hash": "f8651aa955972e0f713d28b8d99183e80f597be8a16e18ed0e153675d00819f7",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/a11y-base": "24.9.17",
