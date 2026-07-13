@@ -55,10 +55,10 @@
       "@vaadin/common-frontend": "0.0.23",
       "@vaadin/hilla-frontend": "25.3.0-alpha3",
       "@vaadin/hilla-lit-form": "25.3.0-alpha3",
-      "@vaadin/icon": "25.2.3",
-      "@vaadin/icons": "25.2.3",
+      "@vaadin/icon": "25.2.4",
+      "@vaadin/icons": "25.2.4",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.2.3",
+      "@vaadin/tooltip": "25.2.4",
       "@vaadin/vaadin-lumo-styles": "25.3.0-alpha3",
       "@vaadin/vaadin-themable-mixin": "25.3.0-alpha3",
       "lit": "3.3.3"
