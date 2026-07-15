@@ -99,34 +99,19 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "da7df4338ca1f9b35f2b42c945920331ce896ed1e3586e9c6c443231b4c4101f",
-    "overrides": {
-      "@vaadin/common-frontend": "$@vaadin/common-frontend",
-      "@vaadin/icon": "$@vaadin/icon",
-      "@vaadin/icons": "$@vaadin/icons",
-      "@vaadin/router": "$@vaadin/router",
-      "@vaadin/tooltip": "$@vaadin/tooltip",
-      "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
-      "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
-      "lit": "$lit",
-      "workbox-build": {
-        "glob": "13.0.6"
-      }
-    }
+    "hash": "43a0a274ec9b152fa4796483eccbcea385d22c6cdea8f8cdb8260b91cb009d02"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
-    "lit": "$lit",
-    "@vaadin/router": "$@vaadin/router",
-    "@vaadin/hilla-frontend": "$@vaadin/hilla-frontend",
-    "@vaadin/hilla-lit-form": "$@vaadin/hilla-lit-form",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
+    "lit": "$lit",
+    "@vaadin/router": "$@vaadin/router",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
-    "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
-    "@vaadin/tooltip": "$@vaadin/tooltip",
     "workbox-build": {
       "glob": "13.0.6"
-    }
+    },
+    "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
+    "@vaadin/tooltip": "$@vaadin/tooltip"
   }
 }
