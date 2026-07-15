@@ -77,9 +77,9 @@
     <swagger.core.version>2.2.38</swagger.core.version>
     <swagger.models.version>2.2.38</swagger.models.version>
     <swagger.parser.v3.version>2.1.15</swagger.parser.v3.version>
-    <jackson2.version>2.21.4</jackson2.version>
-    <jackson-annotations.version>2.21</jackson-annotations.version>
-    <jackson.version>3.1.0</jackson.version>
+    <jackson2.version>2.22.1</jackson2.version>
+    <jackson-annotations.version>2.22</jackson-annotations.version>
+    <jackson.version>3.1.5</jackson.version>
     <junit.version>5.10.1</junit.version>
     <mockito.version>4.5.0</mockito.version>
     <flow.version>25.3-SNAPSHOT</flow.version>
@@ -95,7 +95,7 @@
     <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
-    <kotlin.version>2.1.21</kotlin.version>
+    <kotlin.version>2.4.0</kotlin.version>
   </properties>
 
   <organization>
