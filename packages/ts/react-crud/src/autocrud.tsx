@@ -1,4 +1,5 @@
-import type { AbstractModel, DetachedModelConstructor, Value } from '@vaadin/hilla-lit-form';
+import type { AbstractModel, DetachedModelConstructor, ProvisionalModel, Value } from '@vaadin/hilla-lit-form';
+import type { Model } from '@vaadin/hilla-models';
 import { Button } from '@vaadin/react-components/Button.js';
 import { SplitLayout } from '@vaadin/react-components/SplitLayout.js';
 import { type JSX, type ReactNode, useId, useRef, useState } from 'react';
@@ -19,7 +20,7 @@ export type AutoCrudFormHeaderRenderer<TItem> = (
 
 export type AutoCrudToolbarRenderer = (defaultContent: ReactNode) => ReactNode;
 
-export type AutoCrudFormProps<TModel extends AbstractModel> = Omit<
+export type AutoCrudFormProps<TModel extends ProvisionalModel> = Omit<
   Partial<AutoFormProps<TModel>>,
   'disabled' | 'item' | 'model' | 'onDeleteSuccess' | 'onSubmitSuccess' | 'service'
 > &
@@ -41,7 +42,7 @@ export type AutoCrudGridProps<TItem> = Omit<
   'model' | 'onActiveItemChanged' | 'selectedItems' | 'service'
 >;
 
-export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = ComponentStyleProps &
+export type AutoCrudProps<TModel extends ProvisionalModel = ProvisionalModel> = ComponentStyleProps &
   Readonly<{
     /**
      * The service to use for fetching the data, as well saving and deleting
@@ -66,7 +67,7 @@ export type AutoCrudProps<TModel extends AbstractModel = AbstractModel> = Compon
      * have a type that is supported. Use the `formProps.visibleFields`
      * option to customize which fields to show and in which order.
      */
-    model: DetachedModelConstructor<TModel>;
+    model: DetachedModelConstructor<TModel & AbstractModel> | (TModel & Model);
     /**
      * The property to use to detect an item's ID. The item ID is required for
      * deleting items via the `CrudService.delete` method as well as keeping the
@@ -124,7 +125,7 @@ function defaultFormHeaderRenderer<TItem>(editedItem: TItem | null, disabled: bo
  * <AutoCrud service={PersonService} model={PersonModel} />
  * ```
  */
-export function AutoCrud<TModel extends AbstractModel>({
+export function AutoCrud<TModel extends ProvisionalModel>({
   service,
   model,
   itemIdProperty,
@@ -168,7 +169,7 @@ export function AutoCrud<TModel extends AbstractModel>({
       <AutoGrid
         {...gridProps}
         service={service}
-        model={model as DetachedModelConstructor<AbstractModel<Value<TModel>>>}
+        model={model as DetachedModelConstructor<AbstractModel<Value<TModel>>> | Model<Value<TModel>>}
         itemIdProperty={itemIdProperty}
         selectedItems={item && item !== emptyItem ? [item] : []}
         onActiveItemChanged={(e) => {
