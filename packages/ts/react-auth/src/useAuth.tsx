@@ -6,7 +6,7 @@ import {
   type LogoutOptions,
   UnauthorizedResponseError,
 } from '@vaadin/hilla-frontend';
-import { type Context, createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
+import { type Context, createContext, type Dispatch, useContext, useEffect, useReducer, useRef } from 'react';
 
 type LoginFunction = (username: string, password: string, options?: LoginOptions) => Promise<LoginResult>;
 type LogoutFunction = () => Promise<void>;
@@ -184,6 +184,7 @@ const getDefaultRoles = (user: unknown) => {
 
 function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthProviderProps<TUser>) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const initialAuthentication = useRef<Promise<void> | undefined>(undefined);
   const authenticate = createAuthenticateThunk(dispatch, getAuthenticatedUser);
   const unauthenticate = createUnauthenticateThunk(dispatch);
 
@@ -221,7 +222,7 @@ function AuthProvider<TUser>({ children, getAuthenticatedUser, config }: AuthPro
   }
 
   useEffect(() => {
-    authenticate().catch(() => {
+    initialAuthentication.current ??= authenticate().catch(() => {
       // Do nothing
     });
   }, []);
@@ -266,6 +267,6 @@ export function configureAuth<TUser>(
 
   return {
     AuthProvider: PreconfiguredAuthProvider,
-    useAuth: useAuth as AuthHook<TUser>,
+    useAuth,
   };
 }

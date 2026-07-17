@@ -27,6 +27,7 @@ export default async function applyLayouts(
     const availableLayouts: readonly LayoutMeta[] = JSON.parse(layoutContents);
     const layoutPaths = availableLayouts.map((layout) => strip(layout.path));
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
     return transformTree<readonly RouteMeta[], readonly RouteMeta[], { path: string }>(
       routeMeta,
       { path: '' },

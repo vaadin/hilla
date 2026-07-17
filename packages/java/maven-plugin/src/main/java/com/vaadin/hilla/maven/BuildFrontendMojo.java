@@ -74,6 +74,9 @@ public class BuildFrontendMojo extends
     @Parameter
     private String mainClass;
 
+    @Parameter
+    private String[] sourceClasses;
+
     @Override
     protected void executeInternal()
             throws MojoExecutionException, MojoFailureException {
@@ -93,6 +96,11 @@ public class BuildFrontendMojo extends
     @Override
     public String getMainClass() {
         return mainClass;
+    }
+
+    @Override
+    public String[] getSourceClasses() {
+        return sourceClasses;
     }
 
     @Override

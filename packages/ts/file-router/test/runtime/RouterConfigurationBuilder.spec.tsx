@@ -110,7 +110,7 @@ describe('RouterBuilder', () => {
                 path: '/test',
                 children: [
                   {
-                    path: '/child-test',
+                    path: 'child-test',
                     element: <div>ChildTest</div>,
                   },
                 ],
@@ -119,7 +119,7 @@ describe('RouterBuilder', () => {
                 path: '/next-test',
                 children: [
                   {
-                    path: '/next-child-test',
+                    path: 'next-child-test',
                     element: <div>ChildTest</div>,
                   },
                 ],
@@ -128,7 +128,7 @@ describe('RouterBuilder', () => {
                 path: '/cases',
                 children: [
                   {
-                    path: '/index',
+                    path: 'index',
                     children: [
                       {
                         index: true,
@@ -137,7 +137,7 @@ describe('RouterBuilder', () => {
                     ],
                   },
                   {
-                    path: '/wildcard',
+                    path: 'wildcard',
                     children: [
                       {
                         path: '*',
@@ -146,7 +146,7 @@ describe('RouterBuilder', () => {
                     ],
                   },
                   {
-                    path: '/optional',
+                    path: 'optional',
                     children: [
                       {
                         path: ':optional?',
@@ -187,7 +187,7 @@ describe('RouterBuilder', () => {
               path: '/test',
               children: [
                 {
-                  path: '/child-test',
+                  path: 'child-test',
                   element: <div>ChildTest</div>,
                 },
                 ...serverRoutes,
@@ -197,7 +197,7 @@ describe('RouterBuilder', () => {
               path: '/next-test',
               children: [
                 {
-                  path: '/next-child-test',
+                  path: 'next-child-test',
                   element: <div>ChildTest</div>,
                 },
                 ...serverRoutes,
@@ -209,7 +209,7 @@ describe('RouterBuilder', () => {
                 // If we already have an index route, all we want is to add a
                 // server wildcard
                 {
-                  path: '/index',
+                  path: 'index',
                   children: [
                     {
                       index: true,
@@ -221,7 +221,7 @@ describe('RouterBuilder', () => {
                 // If we already have a wildcard route, all we want is to add a
                 // server index.
                 {
-                  path: '/wildcard',
+                  path: 'wildcard',
                   children: [
                     {
                       path: '*',
@@ -234,7 +234,7 @@ describe('RouterBuilder', () => {
                 // wildcard to cover complicated cases like
                 // "/optional/something/else/deeply/nested"
                 {
-                  path: '/optional',
+                  path: 'optional',
                   children: [
                     {
                       path: ':optional?',
@@ -693,21 +693,21 @@ describe('RouterBuilder', () => {
             path: '/deep-skip',
             children: [
               {
-                path: '/deep-skip-1',
+                path: 'deep-skip-1',
                 children: [
                   {
-                    path: '/deep-skip-2',
+                    path: 'deep-skip-2',
                     handle: {
                       skipLayouts: true,
                     },
                   },
                   {
-                    path: '/deep-skip-excluded-1',
+                    path: 'deep-skip-excluded-1',
                   },
                 ],
               },
               {
-                path: '/deep-skip-excluded-2',
+                path: 'deep-skip-excluded-2',
               },
             ],
           },
@@ -718,13 +718,13 @@ describe('RouterBuilder', () => {
             },
             children: [
               {
-                path: '/flow-skip-1',
+                path: 'flow-skip-1',
                 handle: {
                   skipLayouts: true,
                 },
               },
               {
-                path: '/flow-skip-sibling',
+                path: 'flow-skip-sibling',
               },
             ],
           },
@@ -750,7 +750,7 @@ describe('RouterBuilder', () => {
                   },
                   children: [
                     {
-                      path: '/flow-skip-1',
+                      path: 'flow-skip-1',
                       handle: {
                         skipLayouts: true,
                       },
@@ -769,10 +769,10 @@ describe('RouterBuilder', () => {
               path: '/deep-skip',
               children: [
                 {
-                  path: '/deep-skip-1',
+                  path: 'deep-skip-1',
                   children: [
                     {
-                      path: '/deep-skip-2',
+                      path: 'deep-skip-2',
                       handle: { skipLayouts: true },
                     },
                   ],
@@ -794,7 +794,7 @@ describe('RouterBuilder', () => {
               },
               children: [
                 {
-                  path: '/flow-skip-sibling',
+                  path: 'flow-skip-sibling',
                 },
               ],
             },
@@ -813,15 +813,15 @@ describe('RouterBuilder', () => {
           path: '/deep-skip',
           children: [
             {
-              path: '/deep-skip-1',
+              path: 'deep-skip-1',
               children: [
                 {
-                  path: '/deep-skip-excluded-1',
+                  path: 'deep-skip-excluded-1',
                 },
               ],
             },
             {
-              path: '/deep-skip-excluded-2',
+              path: 'deep-skip-excluded-2',
             },
           ],
         },

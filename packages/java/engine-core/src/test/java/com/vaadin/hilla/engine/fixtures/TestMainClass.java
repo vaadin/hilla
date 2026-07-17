@@ -13,7 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.signals;
+package com.vaadin.hilla.engine.fixtures;
 
-public record ListSignal<T>() {
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * Test entry point of the Spring Boot application.
+ */
+@SpringBootApplication()
+public class TestMainClass {
+
+    public static void main(String[] args) {
+        SpringApplication.run(TestMainClass.class, args);
+    }
+
 }

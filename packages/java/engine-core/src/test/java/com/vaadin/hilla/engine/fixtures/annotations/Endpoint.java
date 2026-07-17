@@ -13,7 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.signals;
+package com.vaadin.hilla.engine.fixtures.annotations;
 
-public record ValueSignal<T>() {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.springframework.stereotype.Component;
+
+/**
+ * Test annotation to mark endpoint classes. Supports optional value for custom
+ * endpoint names.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Component
+public @interface Endpoint {
+    String value() default "";
 }

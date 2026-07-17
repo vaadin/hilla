@@ -35,10 +35,7 @@ export function template<T>(
   let sourceFile = ts.createSourceFile('f.ts', code, ts.ScriptTarget.Latest, false);
 
   if (transformers) {
-    [sourceFile] = ts.transform<SourceFile>(
-      sourceFile,
-      transformers as Array<TransformerFactory<SourceFile>>,
-    ).transformed;
+    [sourceFile] = ts.transform(sourceFile, transformers as Array<TransformerFactory<SourceFile>>).transformed;
   }
 
   return selector?.(sourceFile.statements) ?? sourceFile.statements;

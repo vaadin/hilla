@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>hilla-project</artifactId>
-        <version>25.1-SNAPSHOT</version>
+        <version>25.3-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <artifactId>hilla-endpoint</artifactId>
-    <version>25.1-SNAPSHOT</version>
+    <version>25.3-SNAPSHOT</version>
     <name>Hilla Endpoint</name>
     <packaging>jar</packaging>
 
@@ -35,10 +35,6 @@
 
         <!-- Project dependencies -->
 
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>signals</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
@@ -146,18 +142,6 @@
         <dependency>
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <!-- Jackson 2 dependencies needed by Swagger (which still uses Jackson 2) -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson2.version}</version>
         </dependency>
 
         <!-- Needed for security annotations and checks -->

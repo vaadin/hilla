@@ -1,7 +1,7 @@
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ast from 'tsc-template';
+import ast from '@vaadin/hilla-generator-utils/tsc-template.js';
 import {
   type CallExpression,
   createPrinter,

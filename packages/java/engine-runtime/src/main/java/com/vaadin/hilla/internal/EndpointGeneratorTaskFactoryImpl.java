@@ -45,6 +45,7 @@ public class EndpointGeneratorTaskFactoryImpl
         settings.setForceAlternativeNode(options.isRequireHomeNodeExec());
         settings.setUseGlobalPnpm(options.isUseGlobalPnpm());
         settings.setNodeVersion(options.getNodeVersion());
+        settings.setNodeFolder(options.getNodeFolder());
 
         return new FrontendTools(settings);
     }

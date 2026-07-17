@@ -68,10 +68,13 @@ public final class TransferTypesPlugin
         classMap.put(ArrayNode.class.getName(), List.class);
         classMap.put("org.springframework.web.multipart.MultipartFile",
                 File.class);
-        classMap.put("com.vaadin.signals.Signal", Signal.class);
-        classMap.put("com.vaadin.signals.ValueSignal", ValueSignal.class);
-        classMap.put("com.vaadin.signals.NumberSignal", NumberSignal.class);
-        classMap.put("com.vaadin.signals.ListSignal", ListSignal.class);
+        classMap.put("com.vaadin.flow.signals.Signal", Signal.class);
+        classMap.put("com.vaadin.flow.signals.shared.SharedValueSignal",
+                ValueSignal.class);
+        classMap.put("com.vaadin.flow.signals.shared.SharedNumberSignal",
+                NumberSignal.class);
+        classMap.put("com.vaadin.flow.signals.shared.SharedListSignal",
+                ListSignal.class);
     }
 
     @Override

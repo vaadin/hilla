@@ -30,6 +30,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -75,6 +76,19 @@ public class EngineAutoConfigurationTest {
     }
 
     @Test
+    public void shouldUseLookupWhenSourceClassesIsEmpty() throws Exception {
+        var classFinder = mock(ClassFinder.class);
+        when(classFinder
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class));
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder).sourceClasses(List.of())
+                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        assertEquals(List.of(EndpointFromClassFinder.class),
+                conf.getBrowserCallableFinder().find(conf));
+    }
+
+    @Test
     public void shouldUseAotWhenNoClassFinder() throws Exception {
         // classFinder is null by default in configuration
         var conf = EngineAutoConfiguration.getDefault();
@@ -96,6 +110,63 @@ public class EngineAutoConfigurationTest {
         var conf = new EngineAutoConfiguration.Builder()
                 .classFinder(classFinder)
                 .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
+            when(AotBrowserCallableFinder.find(conf))
+                    .thenReturn(List.of(EndpointFromAot.class));
+            assertEquals(List.of(EndpointFromAot.class),
+                    conf.getBrowserCallableFinder().find(conf));
+        }
+    }
+
+    @Test
+    public void shouldUseAotWhenMainClassIsSet() throws Exception {
+        var classFinder = mock(ClassFinder.class);
+        when(classFinder
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class,
+                        EndpointFromClassFinderWithCustomName.class));
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder).mainClass("com.example.Main")
+                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
+            when(AotBrowserCallableFinder.find(conf))
+                    .thenReturn(List.of(EndpointFromAot.class));
+            assertEquals(List.of(EndpointFromAot.class),
+                    conf.getBrowserCallableFinder().find(conf));
+        }
+    }
+
+    @Test
+    public void shouldUseAotWhenSourceClassesIsSet() throws Exception {
+        var classFinder = mock(ClassFinder.class);
+        when(classFinder
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class,
+                        EndpointFromClassFinderWithCustomName.class));
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder)
+                .sourceClasses(List.of("com.example.Config"))
+                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
+            when(AotBrowserCallableFinder.find(conf))
+                    .thenReturn(List.of(EndpointFromAot.class));
+            assertEquals(List.of(EndpointFromAot.class),
+                    conf.getBrowserCallableFinder().find(conf));
+        }
+    }
+
+    @Test
+    public void shouldPreventSourceClassesListMutation() throws Exception {
+        var sourceClasses = new ArrayList<>(List.of("com.example.Config"));
+        var classFinder = mock(ClassFinder.class);
+        when(classFinder
+                .getAnnotatedClasses((Class<? extends Annotation>) any()))
+                .thenReturn(Set.of(EndpointFromClassFinder.class,
+                        EndpointFromClassFinderWithCustomName.class));
+        var conf = new EngineAutoConfiguration.Builder()
+                .classFinder(classFinder).sourceClasses(sourceClasses)
+                .endpointAnnotations(BrowserCallableEndpoint.class).build();
+        sourceClasses.clear(); // should have no effect
         try (var aotMock = mockStatic(AotBrowserCallableFinder.class)) {
             when(AotBrowserCallableFinder.find(conf))
                     .thenReturn(List.of(EndpointFromAot.class));
@@ -158,6 +229,7 @@ public class EngineAutoConfigurationTest {
         var groupId = "test.group";
         var artifactId = "test-artifact";
         var mainClass = "com.example.Main";
+        var sourceClasses = List.of("com.example.Config");
         var productionMode = true;
         var nodeCommand = "node-custom";
         var classFinder = mock(ClassFinder.class);
@@ -172,9 +244,9 @@ public class EngineAutoConfigurationTest {
                 .buildDir(buildDir).classesDirs(classesDirs)
                 .classpath(classpathStrings).generator(generator).parser(parser)
                 .outputDir(outputDir).groupId(groupId).artifactId(artifactId)
-                .mainClass(mainClass).productionMode(productionMode)
-                .nodeCommand(nodeCommand).classFinder(classFinder)
-                .classLoader(classLoader)
+                .mainClass(mainClass).sourceClasses(sourceClasses)
+                .productionMode(productionMode).nodeCommand(nodeCommand)
+                .classFinder(classFinder).classLoader(classLoader)
                 .browserCallableFinder(browserCallableFinder)
                 .endpointAnnotations(endpointAnnotation)
                 .endpointExposedAnnotations(endpointExposedAnnotation).build();
@@ -192,6 +264,7 @@ public class EngineAutoConfigurationTest {
         assertEquals(groupId, config.getGroupId());
         assertEquals(artifactId, config.getArtifactId());
         assertEquals(mainClass, config.getMainClass());
+        assertEquals(sourceClasses, config.getSourceClasses());
         assertTrue(config.isProductionMode());
         assertEquals(nodeCommand, config.getNodeCommand());
         assertSame(classFinder, config.getClassFinder());

@@ -26,6 +26,10 @@ class FormValidationsForKotlinEntitiesIT : ChromeBrowserTest() {
         Assert.assertEquals("must not be blank",
             firstnameField.getPropertyString("errorMessage"))
 
+        // Wait for the invalid-state re-render to settle before typing;
+        // otherwise the shadow-DOM <input> can be briefly non-interactable.
+        waitUntil { firstnameField.getPropertyBoolean("invalid") == true }
+        firstnameField.focus()
         firstnameField.sendKeys("John")
         saveButton.click()
         Assert.assertEquals("", firstnameField.getPropertyString("errorMessage"))

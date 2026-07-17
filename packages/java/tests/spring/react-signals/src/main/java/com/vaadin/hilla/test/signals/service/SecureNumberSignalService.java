@@ -19,38 +19,38 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.signals.NumberSignal;
 
 @BrowserCallable
 public class SecureNumberSignalService {
 
-    private final NumberSignal userCounter = new NumberSignal(20d);
-    private final NumberSignal adminCounter = new NumberSignal(30d);
+    private final SharedNumberSignal userCounter = new SharedNumberSignal(20d);
+    private final SharedNumberSignal adminCounter = new SharedNumberSignal(30d);
 
     @PermitAll
-    public NumberSignal userCounter() {
+    public SharedNumberSignal userCounter() {
         return userCounter;
     }
 
     @RolesAllowed("ADMIN")
-    public NumberSignal adminCounter() {
+    public SharedNumberSignal adminCounter() {
         return adminCounter;
     }
 
     @AnonymousAllowed
     public Long fetchUserCounterValue() {
-        return userCounter.value().longValue();
+        return userCounter.get().longValue();
     }
 
     @AnonymousAllowed
     public Long fetchAdminCounterValue() {
-        return adminCounter.value().longValue();
+        return adminCounter.get().longValue();
     }
 
     @AnonymousAllowed
     public void resetCounters() {
-        userCounter.value(20d);
-        adminCounter.value(30d);
+        userCounter.set(20d);
+        adminCounter.set(30d);
     }
 }

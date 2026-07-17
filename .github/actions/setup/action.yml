@@ -10,30 +10,54 @@ inputs:
     description: Java version
     required: true
     default: '21'
+  cache-version:
+    description: Cache version prefix — increment to bust all stale caches
+    required: false
+    default: 'v1'
 
 runs:
   using: composite
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: ${{ inputs.node-version }}
         cache: npm
     - name: Setup Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: ${{ inputs.java-version }}
         distribution: 'temurin'
-        cache: maven
+    - name: Cache Maven repository
+      uses: actions/cache@v5
+      with:
+        path: ~/.m2/repository
+        key: ${{ inputs.cache-version }}-${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ inputs.cache-version }}-${{ runner.os }}-maven-
+    - name: Evict stale Vaadin SNAPSHOTs
+      # actions/cache restores the whole ~/.m2 tree, including Vaadin
+      # SNAPSHOT jars (flow-server, flow-build-tools, hilla-*, vaadin-*)
+      # that drift across nightly Vaadin publishes but that the cache
+      # never re-saves once the primary key is hit. Wipe SNAPSHOT
+      # directories under com/vaadin/ so Maven/Gradle re-fetch the
+      # current SNAPSHOT from vaadin-prereleases on the next resolve.
+      # Released versions under com/vaadin/ and the rest of the cache
+      # are untouched.
+      shell: bash
+      run: |
+        if [ -d ~/.m2/repository/com/vaadin ]; then
+          find ~/.m2/repository/com/vaadin -type d -name '*-SNAPSHOT' -prune -print -exec rm -rf {} +
+        fi
     - name: Cache node_modules
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       id: cache-node_modules
       with:
         path: |
           node_modules
           packages/ts/*/node_modules
-        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+        key: ${{ inputs.cache-version }}-${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
     - name: Install npm dependencies
       if: ${{ steps.cache-node_modules.outputs.cache-hit != 'true' }}
       shell: bash
-      run: npm ci
+      run: npm ci --ignore-scripts

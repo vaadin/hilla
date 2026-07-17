@@ -27,11 +27,11 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import com.vaadin.flow.signals.shared.AbstractSharedSignal;
 import com.vaadin.hilla.AuthenticationUtil;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.EndpointInvoker;
 import com.vaadin.hilla.EndpointRegistry;
-import com.vaadin.signals.AbstractSignal;
 
 /**
  * Proxy for the accessing the SignalRegistry.
@@ -63,7 +63,7 @@ public class SecureSignalsRegistry {
                 .getSecurityHolderRoleChecker();
         checkAccess(endpointName, methodName, principal, isInRole);
 
-        AbstractSignal<?> signal = (AbstractSignal<?>) invoker
+        AbstractSharedSignal<?> signal = (AbstractSharedSignal<?>) invoker
                 .invoke(endpointName, methodName, body, principal, isInRole);
         endpointMethods.put(clientSignalId,
                 new EndpointMethod(endpointName, methodName));

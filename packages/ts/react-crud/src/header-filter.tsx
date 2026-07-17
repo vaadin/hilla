@@ -197,7 +197,7 @@ export function NumberHeaderFilter(): ReactElement {
         theme="small"
         placeholder={filterPlaceholder ?? 'Filter...'}
         onInput={(e) => {
-          const fieldValue = ((e as InputEvent).target as TextFieldElement).value;
+          const fieldValue = (e.target as TextFieldElement).value;
           setInputValue(fieldValue);
         }}
       />

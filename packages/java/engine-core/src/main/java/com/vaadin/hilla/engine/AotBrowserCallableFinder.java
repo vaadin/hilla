@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +38,7 @@ import tools.jackson.databind.ObjectMapper;
 public class AotBrowserCallableFinder {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AotBrowserCallableFinder.class);
+    private static final String SPRING_APPLICATION_CLASS_NAME = "org.springframework.boot.SpringApplication";
     private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.autoconfigure.SpringBootApplication";
     private static final String SPRING_AOT_PROCESSOR = "org.springframework.boot.SpringApplicationAotProcessor";
 
@@ -82,6 +82,7 @@ public class AotBrowserCallableFinder {
     private static String determineApplicationClass(
             EngineAutoConfiguration engineConfiguration) {
         var mainClass = engineConfiguration.getMainClass();
+        var sourceClasses = engineConfiguration.getSourceClasses();
         if (mainClass != null) {
             return mainClass;
         }
@@ -96,6 +97,14 @@ public class AotBrowserCallableFinder {
                             return null;
                         }
                     }).filter(Objects::nonNull).findFirst().orElse(null);
+            if (mainClass == null && !sourceClasses.isEmpty()) {
+                LOGGER.debug(
+                        "The Spring Boot application main class is not found. "
+                                + "The \"sourceClasses\" configuration "
+                                + "will be used for finding Hilla browser "
+                                + "callable endpoints.");
+                mainClass = SPRING_APPLICATION_CLASS_NAME;
+            }
             if (mainClass == null) {
                 LOGGER.debug(
                         "This project has not been recognized as a Spring Boot"
@@ -123,18 +132,26 @@ public class AotBrowserCallableFinder {
         var classpath = engineConfiguration.getClasspath().stream()
                 .filter(Files::exists).toList();
 
-        var settings = Stream.of("-cp",
+        var args = new ArrayList<>(List.of("-cp",
                 classpath.stream().map(AotBrowserCallableFinder::quotePath)
                         .collect(Collectors.joining(File.pathSeparator)),
-                SPRING_AOT_PROCESSOR, applicationClass,
-                quotePath(aotOutput.resolve("sources")),
-                quotePath(aotOutput.resolve("resources")),
-                quotePath(classesDirectory), engineConfiguration.getGroupId(),
-                engineConfiguration.getArtifactId()).toList();
+                SPRING_AOT_PROCESSOR, applicationClass));
+        args.add(quotePath(aotOutput.resolve("sources")));
+        args.add(quotePath(aotOutput.resolve("resources")));
+        args.add(quotePath(classesDirectory));
+        args.add(engineConfiguration.getGroupId());
+        args.add(engineConfiguration.getArtifactId());
+        if (SPRING_APPLICATION_CLASS_NAME.equals(applicationClass)
+                && !engineConfiguration.getSourceClasses().isEmpty()) {
+            // Use explicit Spring bean sources from configuration
+            var sources = String.join(",",
+                    engineConfiguration.getSourceClasses());
+            args.add("--spring.main.sources=" + sources);
+        }
 
         var argsFile = engineConfiguration.getBuildDir()
                 .resolve("hilla-aot-args.txt");
-        Files.write(argsFile, settings);
+        Files.write(argsFile, args);
         var report = engineConfiguration.getBuildDir()
                 .resolve("hilla-aot-report.txt");
         var javaExecutable = ProcessHandle.current().info().command()

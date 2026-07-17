@@ -54,9 +54,7 @@ export { self, optional, array, constrained, meta } from './converters.js';
  * model.
  */
 export function attach<M extends Model>(this: void, model: M, targetProvider: () => Target<Value<M>>): M {
-  const _model = new CoreModelBuilder<Value<M>, Extensions<M>, { named: false }>(model)
-    .name(`@${model[$name]}`)
-    .build();
+  const _model = new CoreModelBuilder<Value<M>, Extensions<M>>(model).name(`@${model[$name]}`).build();
   defineProperty(_model, $owner, { get: targetProvider });
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion

@@ -1,5 +1,6 @@
 /// <reference types="vitest/node" />
 import { parseArgs } from 'node:util';
+import babel from '@rolldown/plugin-babel';
 import react from '@vitejs/plugin-react';
 import { mergeConfig, type ViteUserConfig } from 'vitest/config';
 import type { BrowserProviderOptions } from 'vitest/node';
@@ -45,9 +46,10 @@ export default mergeConfig(nodeConfig, {
     constructCss(),
     react({
       include: '**/*.tsx',
-      babel: {
-        plugins: [['module:@preact/signals-react-transform', { mode: 'all' }]],
-      },
+    }),
+    babel({
+      include: /\.[jt]sx$/,
+      plugins: [['module:@preact/signals-react-transform', { mode: 'all' }]],
     }),
   ],
   server: {

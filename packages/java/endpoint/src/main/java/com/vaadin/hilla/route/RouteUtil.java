@@ -17,12 +17,13 @@ package com.vaadin.hilla.route;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -204,17 +205,15 @@ public class RouteUtil implements FileRouterRequestUtil {
      */
     protected synchronized @Nullable AvailableViewInfo getRouteByPath(
             Map<String, AvailableViewInfo> availableRoutes, String path) {
-        final Set<String> routes = availableRoutes.keySet();
+        final Map<String, AvailableViewInfo> matchingRoutes = Map
+                .ofEntries(availableRoutes.entrySet().stream().flatMap(
+                        this::convertForAntPathMatcher).<Map.Entry<String, AvailableViewInfo>> toArray(
+                                Map.Entry[]::new));
         final AntPathMatcher pathMatcher = new AntPathMatcher();
         return Stream.of(addTrailingSlash(path), removeTrailingSlash(path))
-                .map(p -> {
-                    for (String route : routes) {
-                        if (pathMatcher.match(route, p)) {
-                            return availableRoutes.get(route);
-                        }
-                    }
-                    return null;
-                }).filter(Objects::nonNull).findFirst().orElse(null);
+                .flatMap(p -> matchingRoutes.keySet().stream()
+                        .filter(route -> pathMatcher.match(route, p)))
+                .findFirst().map(matchingRoutes::get).orElse(null);
     }
 
     private String addTrailingSlash(String path) {
@@ -223,5 +222,45 @@ public class RouteUtil implements FileRouterRequestUtil {
 
     private String removeTrailingSlash(String path) {
         return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+    }
+
+    private Stream<Map.Entry<String, AvailableViewInfo>> convertForAntPathMatcher(
+            Map.Entry<String, AvailableViewInfo> entry) {
+        var pathPattern = entry.getKey();
+        var route = entry.getValue();
+        var patterns = new ArrayList<>(List.of(""));
+        var pathParts = pathPattern.split("/");
+        for (int i = 0; i < pathParts.length; i++) {
+            var part = pathParts[i];
+            var partOptional = false;
+            if (part.startsWith(":")) {
+                // Handle URLPattern expressions
+                var name = part.substring(1);
+                if (name.endsWith("?")) {
+                    partOptional = true;
+                    name = name.substring(0, name.length() - 1);
+                }
+                part = "{" + name + "}";
+            }
+            // Join the part with the existing patterns. For optional parts,
+            // we duplicate the pattern with the part skipped.
+            if (i == 0) {
+                if (partOptional) {
+                    patterns.add(part);
+                } else {
+                    patterns.set(0, part);
+                }
+            } else {
+                var size = patterns.size();
+                for (var j = 0; j < size; j++) {
+                    var prior = patterns.get(j);
+                    if (partOptional) {
+                        patterns.add(prior);
+                    }
+                    patterns.set(j, prior + "/" + part);
+                }
+            }
+        }
+        return patterns.stream().map(pattern -> Map.entry(pattern, route));
     }
 }

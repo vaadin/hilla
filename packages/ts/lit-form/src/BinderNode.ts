@@ -648,10 +648,7 @@ export class BinderNode<M extends ProvisionalModel = ProvisionalModel> extends E
       if (forceInitialize || !this.parent) {
         value = createEmptyValue(this.model) as Value<M>;
         this.#setValueState(value, defaultValue === undefined ? value : defaultValue);
-      } else if (
-        this.parent.model instanceof BinderObjectModel &&
-        !(key in ((this.parent.value || {}) as Partial<Record<typeof key, Value<M>>>))
-      ) {
+      } else if (this.parent.model instanceof BinderObjectModel && !(key in Object(this.parent.value ?? {}))) {
         this.#setValueState(undefined, defaultValue === undefined ? value : defaultValue);
       }
     }

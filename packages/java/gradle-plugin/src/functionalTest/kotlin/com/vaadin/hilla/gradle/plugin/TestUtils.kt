@@ -243,6 +243,11 @@ class TestProject(val gradleVersion: String = "8.14") {
      */
     val settingsFile: File get() = File(dir, "settings.gradle")
 
+    /**
+     * The main `gradle.properties` file
+     */
+    val propertiesFile: File get() = File(dir, "gradle.properties")
+
     private fun createGradleRunner(debug: Boolean = true): GradleRunner = GradleRunner.create()
         .withProjectDir(dir)
         .withPluginClasspath()

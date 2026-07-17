@@ -62,6 +62,29 @@ class SingleModuleTest : AbstractGradleTest() {
         verifyEndpointsTsFileGeneratedProperly()
     }
 
+    @Test
+    fun `flow filterClasspath configuration is applied to vaadinPrepareFrontend and vaadinBuildFrontend`() {
+        createProject(productionMode = true, filterClasspath = true)
+
+        val buildResult: BuildResult = testProject.build("vaadinBuildFrontend", checkTasksSuccessful = false)
+
+        // The build output contains two "Passing this classpath" lines:
+        // 1st from vaadinPrepareFrontend, 2nd from vaadinBuildFrontend.
+        // With filterClasspath { include("com.vaadin:*") }, non-vaadin jars
+        // like spring-boot-starter-web should be excluded from both.
+        val classpathLines = buildResult.output.lines()
+            .filter { it.contains("Passing this classpath to NodeTasks.Builder") }
+
+        expect(false, "vaadinPrepareFrontend classpath should not contain spring-boot-starter-web " +
+                "when filterClasspath { include(\"com.vaadin:*\") } is set") {
+            classpathLines.first().contains("spring-boot-starter-web")
+        }
+        expect(false, "vaadinBuildFrontend classpath should not contain spring-boot-starter-web " +
+                "when filterClasspath { include(\"com.vaadin:*\") } is set") {
+            classpathLines.last().contains("spring-boot-starter-web")
+        }
+    }
+
     // configuration cache currently does not support tests running in debug mode
     @Test
     fun `hillaGenerate support Gradle configuration cache`() {
@@ -84,7 +107,56 @@ class SingleModuleTest : AbstractGradleTest() {
         assertContains(buildResult.output, "Reusing configuration cache")
     }
 
+    @Test
+    fun `hillaGenerate_supports_mainClass_property`() {
+        createProject(productionMode = true, withNpmInstall = true)
 
+        addHelloReactEndpoint()
+        addMainClass("TestApp")
+
+        testProject.propertiesFile.writeText("""
+            com.vaadin.hilla.mainClass=com.example.application.TestApp
+        """.trimIndent())
+
+        var buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
+
+        buildResult.expectTaskSucceded("hillaGenerate")
+
+        verifyOpenApiJsonFileGeneratedProperly()
+        verifyEndpointsTsFileGeneratedProperly()
+
+        // shorthand version
+        testProject.propertiesFile.writeText("""
+            mainClass=com.example.application.TestApp
+        """.trimIndent())
+
+        testProject.build("clean")
+        buildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
+
+        buildResult.expectTaskSucceded("hillaGenerate")
+
+        verifyOpenApiJsonFileGeneratedProperly()
+        verifyEndpointsTsFileGeneratedProperly()
+    }
+
+    @Test
+    fun `hillaGenerate_supports_sourceClasses_property`() {
+        createProject(productionMode = true, withNpmInstall = true)
+
+        addHelloReactEndpoint()
+        addConfigurationClass()
+
+        testProject.propertiesFile.writeText("""
+            com.vaadin.hilla.sourceClasses=com.example.application.LibraryConfiguration
+        """.trimIndent())
+
+        val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = true)
+
+        buildResult.expectTaskSucceded("hillaGenerate")
+
+        verifyOpenApiJsonFileGeneratedProperly()
+        verifyEndpointsTsFileGeneratedProperly()
+    }
 
     private fun verifyOpenApiJsonFileGeneratedProperly() {
         val openApiJsonFileName = "classes/hilla-openapi.json"
@@ -110,8 +182,8 @@ class SingleModuleTest : AbstractGradleTest() {
         }
     }
 
-    private fun addMainClass() : File {
-        val mainClassFile = testProject.newFile("src/main/java/com/example/application/MainClass.java",
+    private fun addMainClass(mainClassName: String = "MainClass") : File {
+        val mainClassFile = testProject.newFile("src/main/java/com/example/application/$mainClassName.java",
         """
             package com.example.application;
 
@@ -119,20 +191,41 @@ class SingleModuleTest : AbstractGradleTest() {
             import org.springframework.boot.autoconfigure.SpringBootApplication;
 
             @SpringBootApplication
-            public class MainClass {
+            public class $mainClassName {
 
                 public static void main(String[] args) {
-                    SpringApplication.run(MainClass.class, args);
+                    SpringApplication.run($mainClassName.class, args);
                 }
             }
         """.trimIndent())
-        expect(true, "Main class 'MainClass.java' should exist!") {
+        expect(true, "Main class '$mainClassName.java' should exist!") {
             mainClassFile.exists()
         }
         return mainClassFile
     }
 
-    private fun addHelloReactEndpoint() : File {
+    private fun addConfigurationClass() : File {
+        val configurationClassFile = testProject.newFile(
+            "src/main/java/com/example/application/LibraryConfiguration.java",
+            """
+            package com.example.application;
+
+            import org.springframework.context.annotation.Configuration;
+            import org.springframework.context.annotation.Import;
+
+            @Configuration
+            @Import({ HelloReactEndpoint.class }) 
+            public class LibraryConfiguration {
+            }
+        """.trimIndent()
+        )
+        expect(true, "Configuration class 'LibraryConfiguration.java' should exist!") {
+            configurationClassFile.exists()
+        }
+        return configurationClassFile
+    }
+
+        private fun addHelloReactEndpoint() : File {
         val endpointFile = testProject.newFile("src/main/java/com/example/application/HelloReactEndpoint.java",
         """
             package com.example.application;
@@ -162,7 +255,8 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     private fun createProject(withNpmInstall: Boolean = false, productionMode: Boolean = false,
-                              disableAllTasksToSimulateDryRun: Boolean = false) {
+                              disableAllTasksToSimulateDryRun: Boolean = false,
+                              filterClasspath: Boolean = false) {
 
         val npmInstallTask = if (withNpmInstall) {
             """
@@ -172,13 +266,13 @@ class SingleModuleTest : AbstractGradleTest() {
             """.trimIndent()
         } else ""
 
-        val productionBuild = if (productionMode) {
-            """
-                vaadin {
-                    productionMode = true
-                }
-            """.trimIndent()
-        } else ""
+        val vaadinBlock = buildList {
+            if (productionMode) add("    productionMode = true")
+            if (filterClasspath) add("    filterClasspath {\n        include(\"com.vaadin:*\")\n    }")
+        }.let { lines ->
+            if (lines.isEmpty()) ""
+            else "vaadin {\n${lines.joinToString("\n")}\n}"
+        }
 
         // We don't want to actually run the build in production,
         // but we just want to make sure of the task dependency.
@@ -218,7 +312,7 @@ class SingleModuleTest : AbstractGradleTest() {
 
             $npmInstallTask
 
-            $productionBuild
+            $vaadinBlock
 
             $disableAllTasks
 

@@ -22,39 +22,39 @@ import java.util.Optional;
 import org.springframework.context.annotation.DependsOn;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.signals.shared.SharedNumberSignal;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.signals.NumberSignal;
 
 @AnonymousAllowed
 @BrowserCallable
 @DependsOn("signalsConfiguration")
 public class NumberSignalService {
-    private final NumberSignal counter = new NumberSignal();
-    private final NumberSignal sharedValue = new NumberSignal(0.5);
+    private final SharedNumberSignal counter = new SharedNumberSignal();
+    private final SharedNumberSignal sharedValue = new SharedNumberSignal(0.5);
 
-    private final NumberSignal high = new NumberSignal(100.0);
-    private final NumberSignal low = new NumberSignal(-100.0);
+    private final SharedNumberSignal high = new SharedNumberSignal(100.0);
+    private final SharedNumberSignal low = new SharedNumberSignal(-100.0);
 
-    public NumberSignal counter() {
+    public SharedNumberSignal counter() {
         return counter;
     }
 
-    public NumberSignal sharedValue() {
+    public SharedNumberSignal sharedValue() {
         return sharedValue;
     }
 
     @NotNull
     public Double fetchSharedValue() {
-        return sharedValue.value();
+        return sharedValue.get();
     }
 
     @NotNull
     public Long fetchCounterValue() {
-        return Optional.ofNullable(counter.value()).map(Double::longValue)
+        return Optional.ofNullable(counter.get()).map(Double::longValue)
                 .orElse(null);
     }
 
-    public NumberSignal numberSignal(boolean isHigh) {
+    public SharedNumberSignal numberSignal(boolean isHigh) {
         return isHigh ? high : low;
     }
 }
