@@ -66,15 +66,15 @@ function determinePropertyType(model: ProvisionalModel): PropertyType {
   }
 
   // Otherwise detect by model instance
-  if (model instanceof BinderStringModel || model === StringModel || model instanceof StringModel) {
+  if (model instanceof BinderStringModel || model instanceof StringModel) {
     return 'string';
-  } else if (model instanceof BinderNumberModel || model === NumberModel || model instanceof NumberModel) {
+  } else if (model instanceof BinderNumberModel || model instanceof NumberModel) {
     return 'decimal';
-  } else if (model instanceof BinderBooleanModel || model === BooleanModel || model instanceof BooleanModel) {
+  } else if (model instanceof BinderBooleanModel || model instanceof BooleanModel) {
     return 'boolean';
-  } else if (model instanceof BinderEnumModel || model instanceof EnumModel || model instanceof EnumModel) {
+  } else if (model instanceof BinderEnumModel || model instanceof EnumModel) {
     return 'enum';
-  } else if (model instanceof BinderObjectModel || model === ObjectModel || model instanceof ObjectModel) {
+  } else if (model instanceof BinderObjectModel || model instanceof ObjectModel) {
     return 'object';
   }
 
