@@ -36,6 +36,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 
@@ -49,9 +50,6 @@ public abstract class EngineGenerateTask : DefaultTask() {
         group = "Vaadin"
         description = "Hilla Generate Task"
 
-        // we need the compiled classes:
-        dependsOn("classes")
-
         // Make sure to run this task before the `war`/`jar` tasks, so that
         // generated endpoints and models will end up packaged in the war/jar archive.
         // The inclusion rule itself is configured in the HillaPlugin class.
@@ -61,6 +59,21 @@ public abstract class EngineGenerateTask : DefaultTask() {
     }
 
     internal fun configure(project: Project) {
+        val vaadinExtension = VaadinFlowPluginExtension.get(project)
+
+        // We need the compiled classes and the processed resources, but not the
+        // `classes` lifecycle task itself: the production frontend bundle is
+        // registered as an extra output directory of the source set, which makes
+        // `classes` depend on `vaadinBuildFrontend`. Generating TypeScript must
+        // not trigger a frontend build, which would in addition run before the
+        // endpoints are generated.
+        val sourceSet = project.extensions.getByType(SourceSetContainer::class.java)
+            .getByName(vaadinExtension.sourceSetName.get())
+        dependsOn(sourceSet.compileJavaTaskName, sourceSet.processResourcesTaskName)
+        project.plugins.withId("org.jetbrains.kotlin.jvm") {
+            dependsOn(sourceSet.getCompileTaskName("kotlin"))
+        }
+
         groupId.set(project.group.toString())
         artifactId.set(project.name)
         mainClass.set(project.findProperty("com.vaadin.hilla.mainClass") as String?
@@ -69,7 +82,7 @@ public abstract class EngineGenerateTask : DefaultTask() {
             ?: emptyList())
         val engineConfig = HillaPlugin.createEngineConfiguration(
             project,
-            VaadinFlowPluginExtension.get(project)
+            vaadinExtension
         )
         engineConfigurationSettings.set(engineConfig.toInputs())
         effectiveConfig.set(PluginEffectiveConfiguration.get(project))
