@@ -63,6 +63,28 @@ class SingleModuleTest : AbstractGradleTest() {
     }
 
     @Test
+    fun `hillaGenerate does not trigger the production frontend build`() {
+        createProject(productionMode = true, disableAllTasksToSimulateDryRun = true)
+
+        addHelloReactEndpoint()
+        addMainClass()
+
+        val buildResult: BuildResult = testProject.build("hillaGenerate", checkTasksSuccessful = false)
+
+        expect(true, "hillaGenerate should depend on the compiled classes") {
+            buildResult.task(":compileJava") != null
+        }
+        // The production frontend bundle is registered as an extra output
+        // directory of the source set, which makes the `classes` lifecycle task
+        // depend on vaadinBuildFrontend. hillaGenerate must not be affected by
+        // that: the bundle would then be built before the endpoints exist, and
+        // the frontend files generated for the bundle are cleaned up afterwards.
+        expect(null, "hillaGenerate should not depend on vaadinBuildFrontend") {
+            buildResult.task(":vaadinBuildFrontend")
+        }
+    }
+
+    @Test
     fun `flow filterClasspath configuration is applied to vaadinPrepareFrontend and vaadinBuildFrontend`() {
         createProject(productionMode = true, filterClasspath = true)
 
