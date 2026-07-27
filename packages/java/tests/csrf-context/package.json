@@ -42,7 +42,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.1.3",
+    "vite": "8.0.16",
     "vite-plugin-checker": "0.14.4"
   },
   "vaadin": {
@@ -50,10 +50,10 @@
       "@vaadin/common-frontend": "0.0.23",
       "@vaadin/hilla-frontend": "25.3.0-alpha4",
       "@vaadin/hilla-lit-form": "25.3.0-alpha4",
-      "@vaadin/icon": "25.2.5",
-      "@vaadin/icons": "25.2.5",
+      "@vaadin/icon": "25.2.6",
+      "@vaadin/icons": "25.2.6",
       "@vaadin/router": "2.0.1",
-      "@vaadin/tooltip": "25.2.5",
+      "@vaadin/tooltip": "25.2.6",
       "@vaadin/vaadin-lumo-styles": "25.3.0-alpha6",
       "@vaadin/vaadin-themable-mixin": "25.3.0-alpha6",
       "lit": "3.3.3"
@@ -86,19 +86,19 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.1.3",
+      "vite": "8.0.16",
       "vite-plugin-checker": "0.14.4"
     },
-    "hash": "1e7e6cc1de5137de6bd4d0cfe133408445c09159db103b2ec72a1d3858b9614b"
+    "hash": "30b3c6fadfc44cd87753454aa602b0a5b24a49260e1d5df3a59775df5c3b5932"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
     "@vaadin/icon": "$@vaadin/icon",
     "@vaadin/icons": "$@vaadin/icons",
-    "lit": "$lit",
     "@vaadin/router": "$@vaadin/router",
-    "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
+    "@vaadin/tooltip": "$@vaadin/tooltip",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
-    "@vaadin/tooltip": "$@vaadin/tooltip"
+    "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
+    "lit": "$lit"
   }
 }
