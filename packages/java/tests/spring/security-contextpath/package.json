@@ -94,7 +94,7 @@
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.7",
-    "@preact/signals-react-transform": "0.8.1",
+    "@preact/signals-react-transform": "0.8.2",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -117,7 +117,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "7.3.6",
-    "vite-plugin-checker": "0.14.4"
+    "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
     "dependencies": {
@@ -207,7 +207,7 @@
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.7",
-      "@preact/signals-react-transform": "0.8.1",
+      "@preact/signals-react-transform": "0.8.2",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
       "@vaadin/hilla-generator-cli": "24.9.20",
@@ -230,9 +230,9 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "7.3.6",
-      "vite-plugin-checker": "0.14.4"
+      "vite-plugin-checker": "0.14.5"
     },
-    "hash": "2fa6eaa5c6b84ee0a7a7b82e8979489c30064d034ecdbb3c4918bfd0e69ed36d",
+    "hash": "6350646f3b2d2acd8269d4fb2c2df365c003c10e8e1e141285182511dbdd47f9",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@polymer/iron-icon": "$@polymer/iron-icon",

@@ -20,7 +20,7 @@
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.7",
-    "@preact/signals-react-transform": "0.8.1",
+    "@preact/signals-react-transform": "0.8.2",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
@@ -43,7 +43,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "7.3.6",
-    "vite-plugin-checker": "0.14.4",
+    "vite-plugin-checker": "0.14.5",
     "workbox-build": "7.4.1",
     "workbox-core": "7.4.1",
     "workbox-precaching": "7.4.1",
@@ -69,7 +69,7 @@
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.7",
-      "@preact/signals-react-transform": "0.8.1",
+      "@preact/signals-react-transform": "0.8.2",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
       "@vaadin/hilla-generator-cli": "24.9.20",
@@ -92,14 +92,14 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "7.3.6",
-      "vite-plugin-checker": "0.14.4",
+      "vite-plugin-checker": "0.14.5",
       "workbox-build": "7.4.1",
       "workbox-core": "7.4.1",
       "workbox-precaching": "7.4.1",
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "33f0c41ddf735f871c61dcbb3e3bbd7054900ea9b6feac4ab1c34dda202bc3dc",
+    "hash": "57660ed7a3fc34f45933347422773a1085d77d9f70cf77798c33bfbb94077b52",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/common-frontend": "$@vaadin/common-frontend",

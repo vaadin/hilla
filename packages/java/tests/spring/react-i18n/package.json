@@ -23,14 +23,14 @@
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "construct-style-sheets-polyfill": "3.1.0",
     "lit": "3.3.3",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "react-router": "7.18.1"
   },
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
     "@babel/types": "7.29.7",
-    "@preact/signals-react-transform": "0.8.1",
+    "@preact/signals-react-transform": "0.8.2",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
     "@types/react": "19.2.17",
@@ -55,7 +55,7 @@
     "transform-ast": "2.4.4",
     "typescript": "5.9.3",
     "vite": "7.3.6",
-    "vite-plugin-checker": "0.14.4"
+    "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
     "dependencies": {
@@ -79,14 +79,14 @@
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "construct-style-sheets-polyfill": "3.1.0",
       "lit": "3.3.3",
-      "react": "19.2.7",
-      "react-dom": "19.2.7",
+      "react": "19.2.8",
+      "react-dom": "19.2.8",
       "react-router": "7.18.1"
     },
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
       "@babel/types": "7.29.7",
-      "@preact/signals-react-transform": "0.8.1",
+      "@preact/signals-react-transform": "0.8.2",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
       "@types/react": "19.2.17",
@@ -111,9 +111,9 @@
       "transform-ast": "2.4.4",
       "typescript": "5.9.3",
       "vite": "7.3.6",
-      "vite-plugin-checker": "0.14.4"
+      "vite-plugin-checker": "0.14.5"
     },
-    "hash": "b167e2ff9af73c3e4c99bf77d2d2cc62abd05400fb8e50ad949a717f9d29d699",
+    "hash": "0fce635cfcf5c5287d0d414eb478f543e693838fca0f7f5dbc36226b1e4915bf",
     "overrides": {
       "@polymer/polymer": "$@polymer/polymer",
       "@vaadin/a11y-base": "24.9.17",
