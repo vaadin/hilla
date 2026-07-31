@@ -28,7 +28,7 @@ import {
   PersonModel,
   personService,
   PersonWithSimpleIdPropertyModel,
-  PersonWithoutIdPropertyModel,
+  NamedModel,
 } from './test-models-and-services.js';
 import { nextFrame } from './test-utils.js';
 
@@ -875,14 +875,7 @@ describe('@vaadin/hilla-react-crud', () => {
         // Model without discernible ID property
         form = await FormController.init(
           user,
-          render(
-            <AutoForm
-              service={service}
-              model={PersonWithoutIdPropertyModel}
-              item={person}
-              deleteButtonVisible={true}
-            />,
-          ).container,
+          render(<AutoForm service={service} model={NamedModel} item={person} deleteButtonVisible={true} />).container,
         );
         expect(form.queryButton('Delete...')).not.to.exist;
       });
