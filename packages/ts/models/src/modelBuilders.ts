@@ -172,6 +172,7 @@ export class ObjectModelBuilder<
 
       // eslint-disable-next-line no-restricted-syntax
       for (const key in m) {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         const keyModel = m[key as keyof Model<V, EX>] as Model;
         result[key] = keyModel[$optional] ? undefined : keyModel[$defaultValue];
         // defineProperty(result, key, {
