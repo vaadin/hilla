@@ -93,7 +93,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "7.29.7",
-    "@babel/types": "7.29.7",
+    "@babel/types": "7.29.8",
     "@preact/signals-react-transform": "0.8.2",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
@@ -206,7 +206,7 @@
     },
     "devDependencies": {
       "@babel/preset-react": "7.29.7",
-      "@babel/types": "7.29.7",
+      "@babel/types": "7.29.8",
       "@preact/signals-react-transform": "0.8.2",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
@@ -232,7 +232,7 @@
       "vite": "7.3.6",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "99efbe21ce4ac7242fee6e0b36a493c890f40f9a9ec24edb79a1d6a384150ac9",
+    "hash": "db97a487cd0671b92d16d70b906fe28d58071cddc77b2580d9354982090dc8cb",
     "overrides": {
       "@adobe/lit-mobx": "$@adobe/lit-mobx",
       "@polymer/iron-icon": "$@polymer/iron-icon",
