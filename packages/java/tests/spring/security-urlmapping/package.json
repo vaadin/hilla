@@ -93,7 +93,7 @@
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-react-jsx-development": "7.29.7",
     "@babel/preset-react": "7.29.7",
-    "@babel/types": "7.29.7",
+    "@babel/types": "7.29.8",
     "@preact/signals-react-transform": "0.8.2",
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
@@ -110,7 +110,7 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.0.4",
+    "@vitejs/plugin-react": "6.0.5",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.0.1",
@@ -207,7 +207,7 @@
       "@babel/core": "7.29.7",
       "@babel/plugin-transform-react-jsx-development": "7.29.7",
       "@babel/preset-react": "7.29.7",
-      "@babel/types": "7.29.7",
+      "@babel/types": "7.29.8",
       "@preact/signals-react-transform": "0.8.2",
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
@@ -224,7 +224,7 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.2.5",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.2.5",
       "@vaadin/hilla-generator-utils": "25.2.5",
-      "@vitejs/plugin-react": "6.0.4",
+      "@vitejs/plugin-react": "6.0.5",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.0.1",
@@ -234,7 +234,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "cea6ea0ac5b19a01eebae64f70f2b20337fbd745710e119e53a283cc8a299942"
+    "hash": "c32d3094d040a2dc433a9c11e7bad74ed93915a25cde5351e1a3f9863ce4d1ef"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
