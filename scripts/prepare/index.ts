@@ -2,8 +2,10 @@
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
-import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
+import { componentOptions, destination, local, platformBranch, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
+
+console.log(`Fetching versions from platform branch: ${platformBranch}`);
 
 const [{ version }, versions] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
