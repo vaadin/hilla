@@ -49,7 +49,31 @@ public abstract class TypeParameterModel extends AnnotatedAbstractModel
 
         return getName().equals(other.getName())
                 && getAnnotations().equals(other.getAnnotations())
-                && getBounds().equals(other.getBounds());
+                && boundsEqual(getBounds(), other.getBounds());
+    }
+
+    private static boolean boundsEqual(List<SignatureModel> bounds1,
+            List<SignatureModel> bounds2) {
+        if (bounds1.size() != bounds2.size()) {
+            return false;
+        }
+        for (int i = 0; i < bounds1.size(); i++) {
+            if (!boundEqual(bounds1.get(i), bounds2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean boundEqual(SignatureModel b1, SignatureModel b2) {
+        // Avoid infinite recursion when comparing F-bounded type variable
+        // bounds: TypeVariableModel.resolve() returns a TypeParameterModel
+        // whose equals() calls getBounds(), which may contain the same
+        // TypeVariableModel, creating a cycle.
+        if (b1 instanceof TypeVariableModel tvm1 && b2 instanceof TypeVariableModel tvm2) {
+            return tvm1.getName().equals(tvm2.getName());
+        }
+        return b1.equals(b2);
     }
 
     public List<SignatureModel> getBounds() {

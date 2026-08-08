@@ -89,6 +89,24 @@ public class TypeParameterModelTests {
                             .map(NamedModel::getName)
                             .collect(Collectors.toList()));
             break;
+        case "FBoundedTypeParameter":
+            // F-bounded: T extends FBound<T>
+            assertEquals(List.of(Sample.FBound.class.getName()),
+                    model.getBounds().stream().map(NamedModel.class::cast)
+                            .map(NamedModel::getName)
+                            .collect(Collectors.toList()));
+            break;
+        }
+    }
+
+    @DisplayName("It should not cause StackOverflow on F-bounded type parameter equals")
+    @ParameterizedTest(name = ModelProvider.testNamePattern)
+    @ArgumentsSource(ModelProvider.class)
+    public void should_NotStackOverflowOnFBoundedEquals(
+            TypeParameterModel model, ModelKind kind, String name) {
+        if ("FBoundedTypeParameter".equals(name)) {
+            // Self-equality must not cause StackOverflow
+            assertEquals(model, model);
         }
     }
 
@@ -198,13 +216,16 @@ public class TypeParameterModelTests {
         }
     }
 
-    static final class Sample<@Sample.Foo RegularTypeParameter, @Sample.Foo BoundedTypeParameter extends Sample.Bound> {
+    static final class Sample<@Sample.Foo RegularTypeParameter, @Sample.Foo BoundedTypeParameter extends Sample.Bound, @Sample.Foo FBoundedTypeParameter extends Sample.FBound<FBoundedTypeParameter>> {
         @Retention(RetentionPolicy.RUNTIME)
         @Target(ElementType.TYPE_USE)
         @interface Foo {
         }
 
         static class Bound {
+        }
+
+        interface FBound<T extends FBound<T>> {
         }
     }
 
