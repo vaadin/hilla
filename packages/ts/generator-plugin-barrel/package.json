@@ -52,6 +52,6 @@
     "@vaadin/hilla-generator-core": "25.3.0-alpha7",
     "@vaadin/hilla-generator-plugin-backbone": "25.3.0-alpha7",
     "@vaadin/hilla-generator-utils": "25.3.0-alpha7",
-    "typescript": "6.0.3"
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   }
 }
