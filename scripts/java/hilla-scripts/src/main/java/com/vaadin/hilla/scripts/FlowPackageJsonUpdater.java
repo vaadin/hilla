@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -49,6 +50,21 @@ public class FlowPackageJsonUpdater {
             .compile("/dependencies");
     private static final JsonPointer DEV_DEPENDENCIES = JsonPointer
             .compile("/devDependencies");
+
+    /**
+     * Dependencies that Hilla declares differently from Flow on purpose, and
+     * which must therefore keep their value when the rest is aligned.
+     * <p>
+     * Flow pins "typescript" to TypeScript 7, which ships the native compiler
+     * alone. Hilla needs the JavaScript compiler API as well, to build and
+     * print TypeScript sources in the generator, and so do typescript-eslint
+     * and the Nx js plugin. Hence "typescript" resolves to
+     * "@typescript/typescript6", whose binary is named "tsc6", and TypeScript 7
+     * is installed as "@typescript/native", which owns "tsc". Aligning the
+     * value would drop the API and leave two packages competing for "tsc". Keep
+     * "@typescript/native" in step with Flow manually.
+     */
+    private static final Set<String> NOT_ALIGNED = Set.of("typescript");
 
     private final Path packageJsonFile;
     private final ObjectNode tree;
@@ -95,6 +111,14 @@ public class FlowPackageJsonUpdater {
 
         if (value instanceof ObjectNode valueObject) {
             for (var field : valueObject.properties()) {
+                if (NOT_ALIGNED.contains(field.getKey())) {
+                    if (logger().isDebugEnabled()) {
+                        logger().debug(
+                                "Skipping update for {}, not aligned with Flow.",
+                                field.getKey());
+                    }
+                    continue;
+                }
                 updateTreeAt(pointer.appendProperty(field.getKey()),
                         field.getValue());
             }
