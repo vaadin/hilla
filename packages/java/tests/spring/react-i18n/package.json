@@ -52,7 +52,7 @@
     "rollup-plugin-visualizer": "7.0.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vite": "8.0.16",
     "vite-plugin-checker": "0.14.5"
   },
@@ -107,11 +107,11 @@
       "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "6.0.3",
+      "typescript": "7.0.2",
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "d454ac91803c479d8b943b0a14f6e1ff675e7691b516e77415aaf4639ff962fe"
+    "hash": "7b8a2bf000bc64e18d22cbb8c2eb80b939c7d864fa181df9870d30fe8a0247b4"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-alpha9",
