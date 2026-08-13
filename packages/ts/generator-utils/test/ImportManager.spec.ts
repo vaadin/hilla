@@ -1,5 +1,5 @@
+import ts from '@typescript/typescript6';
 import chaiLike from 'chai-like';
-import ts from 'typescript';
 import { beforeEach, chai, describe, expect, it } from 'vitest';
 import createSourceFile from '../src/createSourceFile.js';
 import ImportManager from '../src/dependencies/ImportManager.js';

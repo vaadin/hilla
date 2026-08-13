@@ -1,5 +1,12 @@
 /* eslint-disable symbol-description */
 import { dirname } from 'path/posix';
+import ts, {
+  type ClassDeclaration,
+  type ClassElement,
+  type Identifier,
+  type SourceFile,
+  type Statement,
+} from '@typescript/typescript6';
 import {
   convertFullyQualifiedNameToRelativePath,
   convertReferenceSchemaToPath,
@@ -17,13 +24,6 @@ import {
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, {
-  type ClassDeclaration,
-  type ClassElement,
-  type Identifier,
-  type SourceFile,
-  type Statement,
-} from 'typescript';
 import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
 import { type Context, createEmptyValueMaker, createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 

@@ -1,4 +1,4 @@
-import type { Statement } from 'typescript';
+import type { Statement } from '@typescript/typescript6';
 import type CodeConvertable from './CodeConvertable.js';
 
 export type StatementRecord<T extends Statement> = readonly [path: string, declaration: T];

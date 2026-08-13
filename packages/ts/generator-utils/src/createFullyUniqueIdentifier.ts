@@ -1,4 +1,4 @@
-import ts, { type GeneratedIdentifierFlags, type Identifier } from 'typescript';
+import ts, { type GeneratedIdentifierFlags, type Identifier } from '@typescript/typescript6';
 
 export default function createFullyUniqueIdentifier(name: string, flags?: GeneratedIdentifierFlags): Identifier {
   return ts.factory.createUniqueName(

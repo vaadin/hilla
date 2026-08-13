@@ -1,4 +1,5 @@
 import { dirname } from 'path/posix';
+import ts, { type SourceFile } from '@typescript/typescript6';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -8,7 +9,6 @@ import {
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type SourceFile } from 'typescript';
 
 export class SubTypesProcessor {
   readonly #typeName: string;

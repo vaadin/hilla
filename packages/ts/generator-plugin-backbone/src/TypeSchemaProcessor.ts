@@ -1,3 +1,4 @@
+import ts, { type TypeNode } from '@typescript/typescript6';
 import {
   type ArraySchema,
   convertFullyQualifiedNameToRelativePath,
@@ -20,7 +21,6 @@ import {
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type { TransferTypeMaker } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import ts, { type TypeNode } from 'typescript';
 import { findTypeArguments, findTypeVariable } from './utils.js';
 
 function createBoolean(): TypeNode {

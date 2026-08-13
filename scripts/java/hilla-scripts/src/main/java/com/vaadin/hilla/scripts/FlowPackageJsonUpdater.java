@@ -56,12 +56,12 @@ public class FlowPackageJsonUpdater {
      * which must therefore keep their value when the rest is aligned.
      * <p>
      * Flow pins "typescript" to TypeScript 7, which ships the native compiler
-     * alone. Hilla needs the JavaScript compiler API as well, to build and
-     * print TypeScript sources in the generator, and so do typescript-eslint
-     * and the Nx js plugin. Hence "typescript" resolves to
-     * "@typescript/typescript6", whose binary is named "tsc6", and TypeScript 7
-     * is installed as "@typescript/native", which owns "tsc". Aligning the
-     * value would drop the API and leave two packages competing for "tsc". Keep
+     * alone. Hilla's own sources import the JavaScript compiler API from
+     * "@typescript/typescript6" by name, but typescript-eslint, the Nx js
+     * plugin and the editors ask for "typescript", so the root keeps resolving
+     * that name to "@typescript/typescript6", whose binary is "tsc6", while
+     * TypeScript 7 is installed as "@typescript/native", which owns "tsc".
+     * Aligning the value would leave two packages competing for "tsc". Keep
      * "@typescript/native" in step with Flow manually.
      */
     private static final Set<String> NOT_ALIGNED = Set.of("typescript");

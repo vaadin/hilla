@@ -1,5 +1,5 @@
+import ts, { type SourceFile } from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts, { type SourceFile } from 'typescript';
 import { propertyNameToString } from './utils.js';
 
 export class TypeFixProcessor {

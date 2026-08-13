@@ -1,11 +1,11 @@
 /* eslint-disable max-params */
+import ts, { type Expression, type Statement, type TypeNode } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
-import ts, { type Expression, type Statement, type TypeNode } from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
 

@@ -65,6 +65,7 @@
     "@types/sinon-chai": "4.0.0",
     "@types/validator": "13.12.2",
     "@typescript/native": "npm:typescript@7.0.2",
+    "@typescript/typescript6": "6.0.2",
     "@vaadin/bundles": "25.2.0-alpha4",
     "@vaadin/react-components": "25.3.0-alpha10",
     "@vaadin/react-components-pro": "25.3.0-alpha10",

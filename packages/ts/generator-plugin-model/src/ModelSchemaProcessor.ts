@@ -1,3 +1,10 @@
+import ts, {
+  type Expression,
+  type Identifier,
+  type PropertyAssignment,
+  type TypeNode,
+  type TypeReferenceNode,
+} from '@typescript/typescript6';
 import {
   type ArraySchema,
   type BooleanSchema,
@@ -21,13 +28,6 @@ import {
   type StringSchema,
 } from '@vaadin/hilla-generator-core/Schema.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import ts, {
-  type Expression,
-  type Identifier,
-  type PropertyAssignment,
-  type TypeNode,
-  type TypeReferenceNode,
-} from 'typescript';
 import { process } from './MetadataProcessor.js';
 import { createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 import { hasValidationConstraints, ValidationConstraintProcessor } from './ValidationConstraintProcessor.js';

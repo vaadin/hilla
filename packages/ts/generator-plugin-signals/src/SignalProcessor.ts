@@ -1,11 +1,4 @@
 import { dirname, extname } from 'node:path';
-import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import { simplifyFullyQualifiedName } from '@vaadin/hilla-generator-core/Schema.js';
-import { traverse } from '@vaadin/hilla-generator-utils/ast.js';
-import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
-import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ast, { createTransformer } from '@vaadin/hilla-generator-utils/tsc-template.js';
 import {
   factory,
   isTypeReferenceNode,
@@ -23,7 +16,14 @@ import {
   isImportDeclaration,
   isUnionTypeNode,
   type PropertyAccessExpression,
-} from 'typescript';
+} from '@typescript/typescript6';
+import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
+import { simplifyFullyQualifiedName } from '@vaadin/hilla-generator-core/Schema.js';
+import { traverse } from '@vaadin/hilla-generator-utils/ast.js';
+import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
+import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
+import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
+import ast, { createTransformer } from '@vaadin/hilla-generator-utils/tsc-template.js';
 import { ARRAY_TYPES, COLLECTION_SIGNALS, GENERIC_SIGNALS } from './utils.js';
 
 const HILLA_REACT_SIGNALS = '@vaadin/hilla-react-signals';

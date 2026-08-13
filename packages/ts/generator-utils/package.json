@@ -57,8 +57,8 @@
     "access": "public"
   },
   "dependencies": {
+    "@typescript/typescript6": "6.0.2",
     "pino": "9.6.0",
-    "pino-pretty": "10.3.1",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
+    "pino-pretty": "10.3.1"
   }
 }
