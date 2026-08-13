@@ -112,7 +112,7 @@
     "rollup-plugin-visualizer": "7.0.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vite": "8.0.16",
     "vite-plugin-checker": "0.14.5"
   },
@@ -227,11 +227,11 @@
       "rollup-plugin-visualizer": "7.0.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
-      "typescript": "6.0.3",
+      "typescript": "7.0.2",
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "f5643dff06b3056f907b9ff4324dcb2ae15a9f4d0df45661aa54fc6855ca85a5"
+    "hash": "048987ac944e0bd411127e59e55def01163b0f6a99d942e5a7ad8fd1a1be6103"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
