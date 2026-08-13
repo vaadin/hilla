@@ -2,8 +2,10 @@
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { globIterate } from 'glob';
 import type { PackageJson } from 'type-fest';
-import { componentOptions, destination, local, remote, root, type Versions } from './config.js';
+import { componentOptions, destination, local, platformBranch, remote, root, type Versions } from './config.js';
 import generate from './generate.js';
+
+console.log(`Fetching versions from platform branch: ${platformBranch}`);
 
 const [{ version }, versions] = await Promise.all([
   readFile(local.versionedPackageJson, 'utf-8').then(JSON.parse) as Promise<PackageJson>,
@@ -51,6 +53,14 @@ const componentsVersion = versions.core['component-base'].jsVersion ?? '';
 const KNOWN_REACT_COMPONENT_PACKAGES = ['@vaadin/react-components', '@vaadin/react-components-pro'];
 const reactComponentsVersion = versions.react['react-components'].jsVersion ?? '';
 
+// Packages that are deliberately declared differently in the repository root
+// than in the workspaces, and which therefore must not be propagated from it.
+// The root aliases "typescript" to "@typescript/typescript6", so that the
+// native TypeScript 7, installed as "@typescript/native", owns the "tsc"
+// binary. The test projects model real applications and follow Flow's plain
+// "typescript" instead.
+const NOT_PROPAGATED = new Set(['typescript']);
+
 let rootPackageJson: PackageJson | undefined;
 
 function updateDependencyVersion(json: PackageJson, npmName: string, versionSpec: string) {
@@ -88,7 +98,7 @@ async function getPackageJsonWithUpdates(file: string): Promise<PackageJson> {
       ...Object.entries(rootPackageJson.dependencies ?? {}),
       ...Object.entries(rootPackageJson.devDependencies ?? {}),
     ]) {
-      if (!versionSpec) {
+      if (!versionSpec || NOT_PROPAGATED.has(packageName)) {
         continue;
       }
       updateDependencyVersion(json, packageName, versionSpec);
