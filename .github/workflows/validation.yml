@@ -243,7 +243,6 @@ jobs:
               -P\!it-modules \
               -Pit-modules-${{ matrix.it-modules }} \
               -Pproduction \
-              -Dvaadin.npm.minimumFrontendPackageAgeDays=0 \
               verify
           )
       - uses: actions/upload-artifact@v6
@@ -286,6 +285,19 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+      # The functional tests run the build under test with the Gradle version
+      # pinned in TestUtils.kt, which TestKit downloads into the Gradle user
+      # home. setup-gradle only caches wrapper zips, and TestKit deletes the
+      # zip once it has unpacked it, so without this the distribution is
+      # downloaded again on every run. Keep the version in sync with
+      # TestProject.gradleVersion in TestUtils.kt.
+      - name: Cache the Gradle distribution used by TestKit
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.GRADLE_USER_HOME || '~/.gradle' }}/wrapper/dists/gradle-8.14-bin
+          key: ${{ runner.os }}-testkit-gradle-dist-${{ hashFiles('packages/java/gradle-plugin/src/functionalTest/kotlin/com/vaadin/hilla/gradle/plugin/TestUtils.kt') }}
+          restore-keys: |
+            ${{ runner.os }}-testkit-gradle-dist-
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}
@@ -296,7 +308,7 @@ jobs:
       - name: Test gradle-plugin's functional tests
         run: ./packages/java/gradle-plugin/gradlew --info -p packages/java/gradle-plugin functionalTest
       - name: Gradle ITs
-        run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest -Dvaadin.npm.minimumFrontendPackageAgeDays=0
+        run: ./packages/java/tests/gradle/kotlin-gradle-test/gradlew --info --stacktrace -p packages/java/tests/gradle/kotlin-gradle-test clean integrationTest
       - uses: actions/upload-artifact@v6
         if: ${{ failure() || success() }}
         with:
