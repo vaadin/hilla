@@ -228,7 +228,7 @@ private const val DISTRIBUTION_DOWNLOAD_RETRY_DELAY_MILLIS = 5_000L
  * Used to test the plugin. Contains helpful utility methods to manipulate folders
  * and files in the project.
  */
-class TestProject {
+class TestProject(val gradleVersion: String = "8.7") {
     /**
      * The project root dir.
      */
@@ -249,7 +249,7 @@ class TestProject {
         .withPluginClasspath()
         .withDebug(debug) // use --debug to catch ReflectionsException: https://github.com/vaadin/vaadin-gradle-plugin/issues/99
         .forwardOutput()   // a must, otherwise ./gradlew check freezes on windows!
-        .withGradleVersion("8.7")
+        .withGradleVersion(gradleVersion)
 
     override fun toString(): String = "TestProject(dir=$dir)"
 
