@@ -95,7 +95,7 @@
     <github.javaparser.core.version>3.28.2</github.javaparser.core.version>
     <jetty.version>12.0.3</jetty.version>
     <atmosphere.version>3.0.5.slf4jvaadin1</atmosphere.version>
-    <kotlin.version>2.4.0</kotlin.version>
+    <kotlin.version>2.4.20-RC</kotlin.version>
   </properties>
 
   <organization>
