@@ -4,7 +4,7 @@ import { isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { globIterate as glob } from 'glob';
 import type { PackageJson } from 'type-fest';
-import { createCompilerHost, createProgram, type ParsedCommandLine, sys } from 'typescript';
+import { createCompilerHost, createProgram, type ParsedCommandLine, sys } from '@typescript/typescript6';
 import { compileCSS, replaceCSSImports } from './utils/compileCSS.js';
 import dir from './utils/dir.js';
 import injectRegister from './utils/injectRegister.js';

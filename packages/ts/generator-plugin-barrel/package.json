@@ -49,9 +49,9 @@
     "access": "public"
   },
   "dependencies": {
+    "@typescript/typescript6": "6.0.2",
     "@vaadin/hilla-generator-core": "25.3.0-alpha8",
     "@vaadin/hilla-generator-plugin-backbone": "25.3.0-alpha8",
-    "@vaadin/hilla-generator-utils": "25.3.0-alpha8",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
+    "@vaadin/hilla-generator-utils": "25.3.0-alpha8"
   }
 }

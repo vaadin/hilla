@@ -5,7 +5,7 @@ import ts, {
   type Statement,
   type TransformationContext,
   type TransformerFactory,
-} from 'typescript';
+} from '@typescript/typescript6';
 
 export type TemplateSelector<T> = (statements: readonly Statement[]) => T;
 

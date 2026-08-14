@@ -1,4 +1,12 @@
 import { dirname } from 'path/posix';
+import ts, {
+  type Identifier,
+  type InterfaceDeclaration,
+  type SourceFile,
+  type Statement,
+  type TypeElement,
+  type TypeParameterDeclaration,
+} from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import {
   type EnumSchema,
@@ -21,14 +29,6 @@ import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, {
-  type Identifier,
-  type InterfaceDeclaration,
-  type SourceFile,
-  type Statement,
-  type TypeElement,
-  type TypeParameterDeclaration,
-} from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import { findTypeParameters } from './utils.js';
 

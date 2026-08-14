@@ -1,9 +1,9 @@
 import { basename, dirname } from 'path';
+import type { SourceFile } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import type { SourceFile } from 'typescript';
 
 export default class BarrelProcessor {
   static readonly BARREL_FILE_NAME = 'endpoints';

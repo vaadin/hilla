@@ -66,10 +66,10 @@
     "access": "public"
   },
   "dependencies": {
+    "@typescript/typescript6": "6.0.2",
     "@apidevtools/swagger-parser": "10.1.1",
     "@vaadin/hilla-generator-utils": "25.3.0-alpha8",
     "meow": "13.2.0",
-    "openapi-types": "12.1.3",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
+    "openapi-types": "12.1.3"
   }
 }

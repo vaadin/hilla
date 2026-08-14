@@ -1,9 +1,9 @@
+import ts, { type SourceFile } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import createFullyUniqueIdentifier from '@vaadin/hilla-generator-utils/createFullyUniqueIdentifier.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type SourceFile } from 'typescript';
 
 export default class ClientProcessor {
   readonly #owner: Plugin;

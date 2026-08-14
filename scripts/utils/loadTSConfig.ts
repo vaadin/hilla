@@ -1,6 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { parseConfigFileTextToJson, type ParsedCommandLine, parseJsonConfigFileContent, sys } from 'typescript';
+import {
+  parseConfigFileTextToJson,
+  type ParsedCommandLine,
+  parseJsonConfigFileContent,
+  sys,
+} from '@typescript/typescript6';
 
 /**
  * Loads the TypeScript compiler options from a tsconfig file.

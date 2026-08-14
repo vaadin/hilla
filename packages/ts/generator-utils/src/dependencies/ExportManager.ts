@@ -1,4 +1,9 @@
-import ts, { type ExportAssignment, type ExportDeclaration, type Identifier, type Statement } from 'typescript';
+import ts, {
+  type ExportAssignment,
+  type ExportDeclaration,
+  type Identifier,
+  type Statement,
+} from '@typescript/typescript6';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { type StatementRecord } from './StatementRecordManager.js';

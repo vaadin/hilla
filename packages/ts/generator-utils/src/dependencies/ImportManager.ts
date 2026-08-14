@@ -1,4 +1,4 @@
-import ts, { type Identifier, type ImportDeclaration, type Statement } from 'typescript';
+import ts, { type Identifier, type ImportDeclaration, type Statement } from '@typescript/typescript6';
 import createFullyUniqueIdentifier from '../createFullyUniqueIdentifier.js';
 import type CodeConvertable from './CodeConvertable.js';
 import StatementRecordManager, { createComparator, type StatementRecord } from './StatementRecordManager.js';
