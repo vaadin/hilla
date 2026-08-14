@@ -48,14 +48,14 @@
   "vaadin": {
     "dependencies": {
       "@vaadin/common-frontend": "0.0.24",
-      "@vaadin/hilla-frontend": "25.2.6",
-      "@vaadin/hilla-lit-form": "25.2.6",
+      "@vaadin/hilla-frontend": "25.2.7",
+      "@vaadin/hilla-lit-form": "25.2.7",
       "@vaadin/icon": "25.2.7",
       "@vaadin/icons": "25.2.7",
       "@vaadin/router": "2.0.1",
       "@vaadin/tooltip": "25.2.7",
-      "@vaadin/vaadin-lumo-styles": "25.2.7",
-      "@vaadin/vaadin-themable-mixin": "25.2.7",
+      "@vaadin/vaadin-lumo-styles": "25.2.8",
+      "@vaadin/vaadin-themable-mixin": "25.2.8",
       "lit": "3.3.3"
     },
     "devDependencies": {
@@ -68,17 +68,17 @@
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
       "@types/node": "25.9.5",
-      "@vaadin/hilla-generator-cli": "25.2.6",
-      "@vaadin/hilla-generator-core": "25.2.6",
-      "@vaadin/hilla-generator-plugin-backbone": "25.2.6",
-      "@vaadin/hilla-generator-plugin-barrel": "25.2.6",
-      "@vaadin/hilla-generator-plugin-client": "25.2.6",
-      "@vaadin/hilla-generator-plugin-model": "25.2.6",
-      "@vaadin/hilla-generator-plugin-push": "25.2.6",
-      "@vaadin/hilla-generator-plugin-signals": "25.2.6",
-      "@vaadin/hilla-generator-plugin-subtypes": "25.2.6",
-      "@vaadin/hilla-generator-plugin-transfertypes": "25.2.6",
-      "@vaadin/hilla-generator-utils": "25.2.6",
+      "@vaadin/hilla-generator-cli": "25.2.7",
+      "@vaadin/hilla-generator-core": "25.2.7",
+      "@vaadin/hilla-generator-plugin-backbone": "25.2.7",
+      "@vaadin/hilla-generator-plugin-barrel": "25.2.7",
+      "@vaadin/hilla-generator-plugin-client": "25.2.7",
+      "@vaadin/hilla-generator-plugin-model": "25.2.7",
+      "@vaadin/hilla-generator-plugin-push": "25.2.7",
+      "@vaadin/hilla-generator-plugin-signals": "25.2.7",
+      "@vaadin/hilla-generator-plugin-subtypes": "25.2.7",
+      "@vaadin/hilla-generator-plugin-transfertypes": "25.2.7",
+      "@vaadin/hilla-generator-utils": "25.2.7",
       "@vitejs/plugin-react": "6.0.5",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
@@ -89,7 +89,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "649150377c6a21d84982c5ee21b1b7f639c0eff7dbab910a755dafb4e1f87952"
+    "hash": "c271e4ad7180de245b43839c438543eb08dcb92e78b5fc12701ef0706562c52c"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
