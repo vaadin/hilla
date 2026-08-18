@@ -108,7 +108,7 @@
     "@vitejs/plugin-react": "6.0.5",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "7.0.1",
+    "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
@@ -222,14 +222,14 @@
       "@vitejs/plugin-react": "6.0.5",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "7.0.1",
+      "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "6b3a744e5317beb1cf52b13c757056bbf4be17624967357d99b610ee2fd9fe99"
+    "hash": "083e245e578690245a84c0faa3f49776699664fabf62029a047ebc30a986e8a1"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
