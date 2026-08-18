@@ -38,7 +38,7 @@
     "@vitejs/plugin-react": "6.0.5",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
-    "rollup-plugin-visualizer": "7.0.1",
+    "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
@@ -82,14 +82,14 @@
       "@vitejs/plugin-react": "6.0.5",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
-      "rollup-plugin-visualizer": "7.0.1",
+      "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "f34d822ca3a24d634503e90c725a4a1a45cff2232e0dd6a84da5c78494e88f01"
+    "hash": "0f62f8c078e8b6f7676c0acb5872929d394726a205657eab06d49e118a0feb6d"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
