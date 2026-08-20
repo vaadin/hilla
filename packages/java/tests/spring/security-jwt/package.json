@@ -44,8 +44,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.3.0-alpha11",
-    "@vaadin/icon": "25.3.0-alpha11",
-    "@vaadin/icons": "25.3.0-alpha11",
+    "@vaadin/icon": "25.3.0-alpha12",
+    "@vaadin/icons": "25.3.0-alpha12",
     "@vaadin/input-container": "25.3.0-alpha11",
     "@vaadin/integer-field": "25.3.0-alpha11",
     "@vaadin/item": "25.3.0-alpha11",
@@ -79,7 +79,7 @@
     "@vaadin/text-area": "25.3.0-alpha11",
     "@vaadin/text-field": "25.3.0-alpha11",
     "@vaadin/time-picker": "25.3.0-alpha11",
-    "@vaadin/tooltip": "25.3.0-alpha11",
+    "@vaadin/tooltip": "25.3.0-alpha12",
     "@vaadin/upload": "25.3.0-alpha11",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.3.0-alpha11",
@@ -118,7 +118,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "7.0.2",
-    "vite": "8.0.16",
+    "vite": "8.2.1",
     "vite-plugin-checker": "0.14.5"
   },
   "vaadin": {
@@ -159,8 +159,8 @@
       "@vaadin/hilla-frontend": "25.3.0-alpha9",
       "@vaadin/hilla-lit-form": "25.3.0-alpha9",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.3.0-alpha11",
-      "@vaadin/icons": "25.3.0-alpha11",
+      "@vaadin/icon": "25.3.0-alpha12",
+      "@vaadin/icons": "25.3.0-alpha12",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -194,7 +194,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.3.0-alpha11",
+      "@vaadin/tooltip": "25.3.0-alpha12",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.3.0-alpha11",
@@ -233,10 +233,10 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "7.0.2",
-      "vite": "8.0.16",
+      "vite": "8.2.1",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "4471b7cdddb3d530223ef5c32ef3f58afe09874ffd0212a61fc4313d1988caf6"
+    "hash": "5adf63bc9e08aaf5d08021dc74dd715d4789ec5b5f82edeec9bc9bd805b65d64"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
