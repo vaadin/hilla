@@ -39,8 +39,8 @@
     "@vaadin/hilla-frontend": "file:../../../../ts/frontend",
     "@vaadin/hilla-lit-form": "file:../../../../ts/lit-form",
     "@vaadin/horizontal-layout": "25.3.0-alpha12",
-    "@vaadin/icon": "25.3.0-alpha12",
-    "@vaadin/icons": "25.3.0-alpha12",
+    "@vaadin/icon": "25.3.0-alpha13",
+    "@vaadin/icons": "25.3.0-alpha13",
     "@vaadin/input-container": "25.3.0-alpha12",
     "@vaadin/integer-field": "25.3.0-alpha12",
     "@vaadin/item": "25.3.0-alpha12",
@@ -74,7 +74,7 @@
     "@vaadin/text-area": "25.3.0-alpha12",
     "@vaadin/text-field": "25.3.0-alpha12",
     "@vaadin/time-picker": "25.3.0-alpha12",
-    "@vaadin/tooltip": "25.3.0-alpha12",
+    "@vaadin/tooltip": "25.3.0-alpha13",
     "@vaadin/upload": "25.3.0-alpha12",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
     "@vaadin/vaadin-lumo-styles": "25.3.0-alpha12",
@@ -154,8 +154,8 @@
       "@vaadin/hilla-frontend": "25.3.0-alpha9",
       "@vaadin/hilla-lit-form": "25.3.0-alpha9",
       "@vaadin/horizontal-layout": "24.8.0-alpha4",
-      "@vaadin/icon": "25.3.0-alpha12",
-      "@vaadin/icons": "25.3.0-alpha12",
+      "@vaadin/icon": "25.3.0-alpha13",
+      "@vaadin/icons": "25.3.0-alpha13",
       "@vaadin/input-container": "24.8.0-alpha4",
       "@vaadin/integer-field": "24.8.0-alpha4",
       "@vaadin/item": "24.8.0-alpha4",
@@ -189,7 +189,7 @@
       "@vaadin/text-area": "24.8.0-alpha4",
       "@vaadin/text-field": "24.8.0-alpha4",
       "@vaadin/time-picker": "24.8.0-alpha4",
-      "@vaadin/tooltip": "25.3.0-alpha12",
+      "@vaadin/tooltip": "25.3.0-alpha13",
       "@vaadin/upload": "24.8.0-alpha4",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
       "@vaadin/vaadin-lumo-styles": "25.3.0-alpha12",
@@ -231,7 +231,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "0172637ebf6d165e061466d31427c236e5285d8add967ff48ed081e15c89be4f"
+    "hash": "c12338fb7c671b3836bb04d07747465640124b2d04d377233637ef6dd18e9bbf"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
