@@ -10,8 +10,8 @@
     "@vaadin/icons": "25.3.0-alpha14",
     "@vaadin/router": "2.0.1",
     "@vaadin/tooltip": "25.3.0-alpha14",
-    "@vaadin/vaadin-lumo-styles": "25.3.0-alpha13",
-    "@vaadin/vaadin-themable-mixin": "25.3.0-alpha13",
+    "@vaadin/vaadin-lumo-styles": "25.3.0-alpha14",
+    "@vaadin/vaadin-themable-mixin": "25.3.0-alpha14",
     "lit": "3.3.3"
   },
   "devDependencies": {
@@ -54,8 +54,8 @@
       "@vaadin/icons": "25.3.0-alpha14",
       "@vaadin/router": "2.0.1",
       "@vaadin/tooltip": "25.3.0-alpha14",
-      "@vaadin/vaadin-lumo-styles": "25.3.0-alpha13",
-      "@vaadin/vaadin-themable-mixin": "25.3.0-alpha13",
+      "@vaadin/vaadin-lumo-styles": "25.3.0-alpha14",
+      "@vaadin/vaadin-themable-mixin": "25.3.0-alpha14",
       "lit": "3.3.3"
     },
     "devDependencies": {
