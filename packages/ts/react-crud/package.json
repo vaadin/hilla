@@ -57,8 +57,8 @@
     "@vaadin/hilla-frontend": "25.2.7",
     "@vaadin/hilla-lit-form": "25.2.7",
     "@vaadin/hilla-react-form": "25.2.7",
-    "@vaadin/vaadin-lumo-styles": "25.2.8",
-    "@vaadin/react-components": "25.2.8",
+    "@vaadin/vaadin-lumo-styles": "25.2.9",
+    "@vaadin/react-components": "25.2.9",
     "type-fest": "4.35.0"
   },
   "peerDependencies": {
