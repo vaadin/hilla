@@ -1,3 +1,4 @@
+import { argv, env } from 'node:process';
 
 export type Version = {
   javaVersion?: string;
@@ -29,7 +30,18 @@ export interface Transformer {
 }
 
 // TODO: compute this number when we maintain multiple hilla branches
-export const branch = '25.2';
+const branch = '25.2';
+
+// Parse CLI arguments for branch parameter
+const args = argv.slice(2);
+function getArgValue(argName: string): string | undefined {
+  const argPrefix = `--${argName}=`;
+  return args.find((arg) => arg.startsWith(argPrefix))?.substring(argPrefix.length);
+}
+// Also honour PLATFORM_BRANCH from the environment, so CI can point the
+// script at a branch without having to expand the npm build script itself.
+const envBranch = env.PLATFORM_BRANCH?.trim();
+export const platformBranch = getArgValue('platform-branch') ?? (envBranch || branch);
 
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
@@ -45,8 +57,8 @@ export const local = {
 
 export const remote = {
   // https://raw.githubusercontent.com/vaadin/platform/24.3.0/scripts/generator/src/writer.js
-  src: new URL(`platform/${branch}/scripts/generator/src/`, repoUrl),
-  versions: new URL(`platform/${branch}/versions.json`, repoUrl),
+  src: new URL(`platform/${platformBranch}/scripts/generator/src/`, repoUrl),
+  versions: new URL(`platform/${platformBranch}/versions.json`, repoUrl),
 };
 
 export const destination = {
