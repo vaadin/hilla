@@ -21,7 +21,7 @@
     "lit": "3.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-router": "7.18.2"
+    "react-router": "7.18.3"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -34,7 +34,7 @@
     "@rollup/pluginutils": "5.4.0",
     "@types/node": "25.9.5",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.5",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -46,7 +46,7 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.1.0",
+    "@vitejs/plugin-react": "6.1.1",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
@@ -76,7 +76,7 @@
       "lit": "3.3.3",
       "react": "19.2.8",
       "react-dom": "19.2.8",
-      "react-router": "7.18.2"
+      "react-router": "7.18.3"
     },
     "devDependencies": {
       "@babel/core": "7.29.7",
@@ -89,7 +89,7 @@
       "@rollup/pluginutils": "5.4.0",
       "@types/node": "25.9.5",
       "@types/react": "19.2.18",
-      "@types/react-dom": "19.2.4",
+      "@types/react-dom": "19.2.5",
       "@vaadin/hilla-generator-cli": "25.2.7",
       "@vaadin/hilla-generator-core": "25.2.7",
       "@vaadin/hilla-generator-plugin-backbone": "25.2.7",
@@ -101,7 +101,7 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.2.7",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.2.7",
       "@vaadin/hilla-generator-utils": "25.2.7",
-      "@vitejs/plugin-react": "6.1.0",
+      "@vitejs/plugin-react": "6.1.1",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
@@ -111,7 +111,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "87190e87b779eb00e06e554c61b4ef16b9b051bc885f3843e7965ab4b474e9ed"
+    "hash": "3b68788b1cd8c1318bbbf21bc9d28ae526f95a65537e9eae709603ef5c744ecb"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.2.9",
