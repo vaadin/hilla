@@ -110,7 +110,7 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.1.0",
+    "@vitejs/plugin-react": "6.1.1",
     "magic-string": "0.30.21",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
@@ -224,7 +224,7 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.2.7",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.2.7",
       "@vaadin/hilla-generator-utils": "25.2.7",
-      "@vitejs/plugin-react": "6.1.0",
+      "@vitejs/plugin-react": "6.1.1",
       "magic-string": "0.30.21",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
@@ -234,7 +234,7 @@
       "vite": "8.0.16",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "49f98e387681224b8ae604bbc13d5f67473c16a5733e6af4b9311c16aa07e1fb"
+    "hash": "eedbb2d59d31951886c248fc96446adad12f91d9401d5ef8528f75cbef4d88c1"
   },
   "overrides": {
     "@adobe/lit-mobx": "$@adobe/lit-mobx",
