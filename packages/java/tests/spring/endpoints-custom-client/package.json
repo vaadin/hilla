@@ -23,7 +23,7 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.2.0",
+    "@types/node": "26.4.0",
     "@vaadin/hilla-generator-cli": "file:../../../../ts/generator-cli",
     "@vaadin/hilla-generator-core": "file:../../../../ts/generator-core",
     "@vaadin/hilla-generator-plugin-backbone": "file:../../../../ts/generator-plugin-backbone",
@@ -35,8 +35,8 @@
     "@vaadin/hilla-generator-plugin-subtypes": "file:../../../../ts/generator-plugin-subtypes",
     "@vaadin/hilla-generator-plugin-transfertypes": "file:../../../../ts/generator-plugin-transfertypes",
     "@vaadin/hilla-generator-utils": "file:../../../../ts/generator-utils",
-    "@vitejs/plugin-react": "6.1.0",
-    "magic-string": "1.2.2",
+    "@vitejs/plugin-react": "6.1.1",
+    "magic-string": "1.2.3",
     "rollup-plugin-brotli": "3.1.0",
     "rollup-plugin-visualizer": "7.1.1",
     "strip-css-comments": "5.0.0",
@@ -67,7 +67,7 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.2.0",
+      "@types/node": "26.4.0",
       "@vaadin/hilla-generator-cli": "25.3.0-alpha10",
       "@vaadin/hilla-generator-core": "25.3.0-alpha10",
       "@vaadin/hilla-generator-plugin-backbone": "25.3.0-alpha10",
@@ -79,8 +79,8 @@
       "@vaadin/hilla-generator-plugin-subtypes": "25.3.0-alpha10",
       "@vaadin/hilla-generator-plugin-transfertypes": "25.3.0-alpha10",
       "@vaadin/hilla-generator-utils": "25.3.0-alpha10",
-      "@vitejs/plugin-react": "6.1.0",
-      "magic-string": "1.2.2",
+      "@vitejs/plugin-react": "6.1.1",
+      "magic-string": "1.2.3",
       "rollup-plugin-brotli": "3.1.0",
       "rollup-plugin-visualizer": "7.1.1",
       "strip-css-comments": "5.0.0",
@@ -89,7 +89,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "3679e62315b26197ac89e9cb2c9933c6fce9980d44dc9d84b6b2a0a4ec0b53f0"
+    "hash": "128fb93c2b8f68a6b26324c3af0db63b44df47ae3c8ea7d57a4ea25ed4cdcda8"
   },
   "overrides": {
     "@vaadin/common-frontend": "$@vaadin/common-frontend",
