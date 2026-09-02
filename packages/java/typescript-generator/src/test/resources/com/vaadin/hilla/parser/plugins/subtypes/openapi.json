@@ -222,6 +222,9 @@
           },
           {
             "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.HtmlEmailNotification"
+          },
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.MultipartSmsNotification"
           }
         ]
       },
@@ -260,6 +263,42 @@
               "kind": {
                 "type": "string",
                 "example": "html-email"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.MultipartSmsNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.SmsNotification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parts": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "kind": {
+                "type": "string",
+                "example": "multipart-sms"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.SmsNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Notification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "number": {
+                "type": "string",
+                "nullable": true
               }
             }
           }

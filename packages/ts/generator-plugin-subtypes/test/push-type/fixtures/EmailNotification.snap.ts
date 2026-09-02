@@ -1,6 +1,5 @@
 import type Notification_1 from "./Notification.js";
-interface EmailNotification extends Omit<Notification_1, "kind"> {
+interface EmailNotification extends Notification_1 {
     address?: string;
-    kind: "email";
 }
 export default EmailNotification;

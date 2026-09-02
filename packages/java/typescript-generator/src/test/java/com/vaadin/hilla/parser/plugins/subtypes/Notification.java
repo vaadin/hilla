@@ -20,13 +20,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * A hierarchy that uses a custom discriminator property, lists the base class
- * among its own subtypes and has a subtype that is not a direct descendant of
- * the base class.
+ * among its own subtypes and has subtypes that are not direct descendants of
+ * the base class, one of them below a class that is not a subtype itself.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "kind")
 @JsonSubTypes({ @JsonSubTypes.Type(value = Notification.class, name = "plain"),
         @JsonSubTypes.Type(value = EmailNotification.class, name = "email"),
-        @JsonSubTypes.Type(value = HtmlEmailNotification.class, name = "html-email") })
+        @JsonSubTypes.Type(value = HtmlEmailNotification.class, name = "html-email"),
+        @JsonSubTypes.Type(value = MultipartSmsNotification.class, name = "multipart-sms") })
 public class Notification {
     public String message;
 }

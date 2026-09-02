@@ -1,5 +1,5 @@
 import { dirname } from 'path/posix';
-import ts, { type SourceFile } from '@typescript/typescript6';
+import ts, { type SourceFile, type TypeNode } from '@typescript/typescript6';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -9,17 +9,21 @@ import {
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
+import type { Discriminator } from './utils.js';
+import { createDiscriminatedType, schemaKey } from './utils.js';
 
 export class SubTypesProcessor {
   readonly #typeName: string;
   readonly #source: SourceFile;
   readonly #oneOf: readonly ReferenceSchema[];
+  readonly #discriminator: Discriminator;
   readonly #dependencies: DependencyManager;
 
-  constructor(typeName: string, source: SourceFile, oneOf: readonly ReferenceSchema[]) {
+  constructor(typeName: string, source: SourceFile, oneOf: readonly ReferenceSchema[], discriminator: Discriminator) {
     this.#typeName = typeName;
     this.#source = source;
     this.#oneOf = oneOf;
+    this.#discriminator = discriminator;
     this.#dependencies = new DependencyManager(
       new PathManager({ extension: '.js', relativeTo: dirname(source.fileName) }),
     );
@@ -29,16 +33,22 @@ export class SubTypesProcessor {
     const { exports, imports, paths } = this.#dependencies;
 
     // import all subtypes and return them
-    const subTypes = this.#oneOf.map((schema) => {
+    const subTypes = this.#oneOf.map((schema): TypeNode => {
       const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
       const subType = convertReferenceSchemaToSpecifier(schema);
-      return imports.default.add(path, subType, true);
+      const type = ts.factory.createTypeReferenceNode(imports.default.add(path, subType, true));
+
+      // a subtype that is the supertype of another subtype keeps the
+      // discriminator open, so it has to be pinned here
+      const typeValue = this.#discriminator.openTypes.get(schemaKey(schema));
+
+      return typeValue === undefined
+        ? type
+        : createDiscriminatedType(type, this.#discriminator.propertyName, typeValue);
     });
 
     // create a union type from the subtypes
-    const union = ts.factory.createUnionTypeNode(
-      subTypes.map((subType) => ts.factory.createTypeReferenceNode(subType)),
-    );
+    const union = ts.factory.createUnionTypeNode(subTypes);
 
     // create the statement
     const { fileName, statements } = this.#source;
