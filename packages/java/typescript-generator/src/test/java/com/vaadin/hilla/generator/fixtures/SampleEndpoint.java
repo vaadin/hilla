@@ -45,6 +45,10 @@ public class SampleEndpoint {
         return null;
     }
 
+    public String describe(String firstName, String lastName, int age) {
+        return firstName + lastName + age;
+    }
+
     public String shadow(String init) {
         return init;
     }
