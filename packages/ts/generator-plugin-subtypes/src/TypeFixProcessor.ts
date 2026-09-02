@@ -1,13 +1,18 @@
 import ts, { type SourceFile } from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import { createPropertyName, propertyNameToString } from './utils.js';
+import { createDiscriminatorProperty, propertyNameToString } from './utils.js';
 
 export class TypeFixProcessor {
   readonly #source: SourceFile;
   readonly #discriminatorPropertyName: string;
-  readonly #typeValue: string;
+  readonly #typeValue: string | undefined;
 
-  constructor(source: ts.SourceFile, discriminatorPropertyName: string, typeValue: string) {
+  /**
+   * @param typeValue - the discriminator value of the type, or `undefined` when
+   * the property has to be dropped because the discriminator is applied in the
+   * union type instead.
+   */
+  constructor(source: ts.SourceFile, discriminatorPropertyName: string, typeValue: string | undefined) {
     this.#source = source;
     this.#discriminatorPropertyName = discriminatorPropertyName;
     this.#typeValue = typeValue;
@@ -17,19 +22,18 @@ export class TypeFixProcessor {
     const statements = this.#source.statements.map((statement) => {
       // search in the interface definition
       if (ts.isInterfaceDeclaration(statement)) {
-        const members = statement.members.map((member) => {
-          // search for the discriminator property and replace its type with a
-          // string literal
-          if (ts.isPropertySignature(member) && propertyNameToString(member.name) === this.#discriminatorPropertyName) {
-            return ts.factory.createPropertySignature(
-              undefined,
-              createPropertyName(this.#discriminatorPropertyName),
-              undefined,
-              ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(this.#typeValue)),
-            );
+        const members = statement.members.flatMap((member) => {
+          // search for the discriminator property
+          if (
+            !ts.isPropertySignature(member) ||
+            propertyNameToString(member.name) !== this.#discriminatorPropertyName
+          ) {
+            return [member];
           }
 
-          return member;
+          return this.#typeValue === undefined
+            ? []
+            : [createDiscriminatorProperty(this.#discriminatorPropertyName, this.#typeValue)];
         });
 
         return ts.factory.createInterfaceDeclaration(

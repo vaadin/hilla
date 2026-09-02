@@ -89,21 +89,19 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
-        // entity nodes whose superclass has a @JsonSubTypes annotation must
-        // have a discriminator property whose name and value come from the
-        // annotations
+        // entity nodes mentioned in a @JsonSubTypes annotation found anywhere
+        // in their class hierarchy must have a discriminator property whose
+        // value comes from the annotation
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = (Class<?>) entityNode.getSource().get();
 
-            var info = Optional.ofNullable(cls.getSuperclass())
-                    .flatMap(SubTypesPlugin::findSubTypesInfo);
+            var info = findSubTypesInfo(cls);
             var property = info.flatMap(SubTypesInfo::discriminatorProperty);
             var value = info.flatMap(i -> i.discriminatorValue(cls));
 
             if (property.isPresent() && value.isPresent()) {
-                addDiscriminatorProperty(
-                        (ComposedSchema) entityNode.getTarget(), property.get(),
+                addDiscriminatorProperty(entityNode.getTarget(), property.get(),
                         value.get());
             }
         }
@@ -153,25 +151,48 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .map(JsonSubTypes::value).stream().flatMap(Arrays::stream);
     }
 
+    /**
+     * Looks for the {@code @JsonTypeInfo} and {@code @JsonSubTypes}
+     * annotations, starting from the given class and then walking up its
+     * superclasses. Checking the class itself allows a class that declares the
+     * subtypes to be a subtype of itself, while walking up the hierarchy covers
+     * subtypes that are not direct descendants of the declaring class.
+     */
     private static Optional<SubTypesInfo> findSubTypesInfo(Class<?> cls) {
-        var typeInfo = cls.getAnnotation(JsonTypeInfo.class);
-        var subTypes = cls.getAnnotation(JsonSubTypes.class);
+        for (var current = cls; current != null; current = current
+                .getSuperclass()) {
+            var typeInfo = current.getAnnotation(JsonTypeInfo.class);
+            var subTypes = current.getAnnotation(JsonSubTypes.class);
 
-        return typeInfo != null && subTypes != null
-                ? Optional.of(new SubTypesInfo(typeInfo, subTypes))
-                : Optional.empty();
+            if (typeInfo != null && subTypes != null) {
+                return Optional.of(new SubTypesInfo(typeInfo, subTypes));
+            }
+        }
+
+        return Optional.empty();
     }
 
-    private static void addDiscriminatorProperty(ComposedSchema schema,
+    private static void addDiscriminatorProperty(Schema<?> schema,
             String property, String typeName) {
-        // the properties of the subtype itself are in the object schema of the
-        // `anyOf` list
-        schema.getAnyOf().stream().filter(ObjectSchema.class::isInstance)
-                .map(ObjectSchema.class::cast).forEach(s -> {
-                    var discriminator = new StringSchema();
-                    discriminator.setExample(typeName);
-                    s.addProperty(property, discriminator);
-                });
+        // a subtype is rendered as a composed schema, where the properties of
+        // the subtype itself are in the object schema of the `anyOf` list,
+        // while a class that declares the subtypes is a plain object schema
+        if (schema instanceof ComposedSchema composedSchema
+                && composedSchema.getAnyOf() != null) {
+            composedSchema.getAnyOf().stream()
+                    .filter(ObjectSchema.class::isInstance)
+                    .map(ObjectSchema.class::cast)
+                    .forEach(s -> s.addProperty(property,
+                            discriminatorSchema(typeName)));
+        } else {
+            schema.addProperty(property, discriminatorSchema(typeName));
+        }
+    }
+
+    private static StringSchema discriminatorSchema(String typeName) {
+        var schema = new StringSchema();
+        schema.setExample(typeName);
+        return schema;
     }
 
     /**

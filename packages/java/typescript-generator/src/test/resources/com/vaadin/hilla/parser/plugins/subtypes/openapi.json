@@ -201,6 +201,10 @@
           "message": {
             "type": "string",
             "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "example": "plain"
           }
         }
       },
@@ -211,10 +215,16 @@
         },
         "oneOf": [
           {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Notification"
+          },
+          {
             "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.EmailNotification"
           },
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.SmsNotification"
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.HtmlEmailNotification"
+          },
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.MultipartSmsNotification"
           }
         ]
       },
@@ -238,6 +248,46 @@
           }
         ]
       },
+      "com.vaadin.hilla.parser.plugins.subtypes.HtmlEmailNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.EmailNotification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "html": {
+                "type": "string",
+                "nullable": true
+              },
+              "kind": {
+                "type": "string",
+                "example": "html-email"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.MultipartSmsNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.SmsNotification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parts": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "kind": {
+                "type": "string",
+                "example": "multipart-sms"
+              }
+            }
+          }
+        ]
+      },
       "com.vaadin.hilla.parser.plugins.subtypes.SmsNotification": {
         "anyOf": [
           {
@@ -249,10 +299,6 @@
               "number": {
                 "type": "string",
                 "nullable": true
-              },
-              "kind": {
-                "type": "string",
-                "example": "sms"
               }
             }
           }
