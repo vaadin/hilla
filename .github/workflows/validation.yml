@@ -26,13 +26,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  # Superseded pull request runs are cancelled, but a push run is now the only
-  # thing that validates the Windows Gradle leg (see the `test-gradle` matrix),
-  # so give every push and manual run its own group and let it finish - two
-  # merges landing close together would otherwise leave a commit range without
-  # any Windows validation, and a cancelled run reads as neutral rather than
-  # failing, so nobody would notice.
-  group: ${{ github.head_ref || github.run_id }}
+  group: ${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
