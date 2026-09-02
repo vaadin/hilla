@@ -92,6 +92,7 @@ public final class FullStackGenerator {
             .of(Endpoint.class);
     private List<Class<? extends Annotation>> endpointExposedAnnotations = List
             .of(EndpointExposed.class);
+    private boolean clientFileIncluded;
 
     FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
         this.resourceLoader = new ResourceLoader(testClass);
@@ -154,6 +155,19 @@ public final class FullStackGenerator {
     public FullStackGenerator withClasspathOf(Class<?>... classes) {
         extraClasspath.addAll(List.of(classes));
         return this;
+    }
+
+    /**
+     * Includes the generated client file in the comparison. It is the same for
+     * every endpoint, so it is left out unless a test is about it.
+     */
+    public FullStackGenerator withClientFile() {
+        this.clientFileIncluded = true;
+        return this;
+    }
+
+    boolean isClientFileIncluded() {
+        return clientFileIncluded;
     }
 
     /**

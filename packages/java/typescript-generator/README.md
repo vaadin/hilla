@@ -86,6 +86,9 @@ assertTypescriptMatchesSnapshot(
         generator(BasicEndpoint.class).withPlugin(configuredPlugin));
 ```
 
+The generated client file is identical for every endpoint, so it is left out
+of the comparison unless a test asks for it with `withClientFile()`.
+
 The `snapshots` folder belongs to the package of the test, not to the test
 class, so keep one full-stack test class per package: two of them in the same
 package would share, and overwrite, the same expected files.

@@ -49,6 +49,11 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <p>
+ * The generated client file is the same for every endpoint, so it is left out
+ * of the comparison unless a test asks for it with
+ * {@link FullStackGenerator#withClientFile()}.
+ *
+ * <p>
  * The folder belongs to the package of the test rather than to the test class,
  * so there should be only one such test class per package: two of them would
  * share, and overwrite, the same expected files.
@@ -60,6 +65,14 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractFullStackTest {
     static final String SNAPSHOTS_DIR = "snapshots";
+
+    /**
+     * The generated client, which is the same for every endpoint and is
+     * therefore only compared by the tests which are about it.
+     *
+     * @see FullStackGenerator#withClientFile()
+     */
+    private static final String CLIENT_FILE = "connect-client.default.ts";
 
     private static final String UPDATE_SNAPSHOTS_PROPERTY = "hilla.test.updateSnapshots";
 
@@ -87,7 +100,11 @@ public abstract class AbstractFullStackTest {
      */
     protected void assertTypescriptMatchesSnapshot(
             FullStackGenerator generator) {
-        var generated = generator.generate();
+        var generated = new LinkedHashMap<>(generator.generate());
+
+        if (!generator.isClientFileIncluded()) {
+            generated.remove(CLIENT_FILE);
+        }
 
         if (isUpdatingSnapshots()) {
             updateSnapshots(generator, generated);
