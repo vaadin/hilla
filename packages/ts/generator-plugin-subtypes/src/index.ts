@@ -5,6 +5,10 @@ import { ModelFixProcessor } from './ModelFixProcessor.js';
 import { SubTypesProcessor } from './SubTypesProcessor.js';
 import { TypeFixProcessor } from './TypeFixProcessor.js';
 
+// the property name used by Jackson unless `@JsonTypeInfo` specifies another
+// one: kept as a fallback for OpenAPI documents without a `discriminator`
+const DEFAULT_DISCRIMINATOR = '@type';
+
 export default class SubTypesPlugin extends Plugin {
   declare ['constructor']: typeof SubTypesPlugin;
 
@@ -35,6 +39,9 @@ export default class SubTypesPlugin extends Plugin {
         const newSource = new SubTypesProcessor(baseKey, source, baseComponent.oneOf).process();
         sources.splice(sources.indexOf(source), 1, newSource);
 
+        // `@JsonTypeInfo` may use any property name as the discriminator
+        const discriminatorPropertyName = baseComponent.discriminator?.propertyName ?? DEFAULT_DISCRIMINATOR;
+
         // mentioned types in the oneOf need to be fixed as well
         baseComponent.oneOf.forEach((schema) => {
           if ('$ref' in schema) {
@@ -42,18 +49,21 @@ export default class SubTypesPlugin extends Plugin {
             Object.entries(components).forEach(([subKey, subComponent]) => {
               if ('anyOf' in subComponent && subKey === path.substring('#/components/schemas/'.length)) {
                 subComponent.anyOf?.forEach((s) => {
-                  if ('properties' in s && '@type' in s.properties! && 'example' in s.properties['@type']) {
-                    const typeValue = s.properties['@type'].example as string;
+                  const property = 'properties' in s ? s.properties?.[discriminatorPropertyName] : undefined;
+
+                  if (property && 'example' in property) {
+                    const typeValue = property.example as string;
                     const subFn = `${convertFullyQualifiedNameToRelativePath(subKey)}.ts`;
                     const subSource = sources.find(({ fileName }) => fileName === subFn)!;
-                    // fix the source to replace the @type property name with a quoted string
-                    const fixedSource = new TypeFixProcessor(subSource, typeValue).process();
+                    // fix the source to replace the discriminator property type
+                    // with a string literal
+                    const fixedSource = new TypeFixProcessor(subSource, discriminatorPropertyName, typeValue).process();
                     sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
-                    // fix the model to remove the @type property
+                    // fix the model to remove the discriminator property
                     const modelFn = `${convertFullyQualifiedNameToRelativePath(subKey)}Model.ts`;
                     const modelSource = sources.find(({ fileName }) => fileName === modelFn)!;
-                    const fixedModelSource = new ModelFixProcessor(modelSource).process();
+                    const fixedModelSource = new ModelFixProcessor(modelSource, discriminatorPropertyName).process();
                     sources.splice(sources.indexOf(modelSource), 1, fixedModelSource);
                   }
                 });
