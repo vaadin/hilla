@@ -105,8 +105,8 @@ public class SecureSignalsRegistry {
         EndpointRegistry.VaadinEndpointData endpointData = invoker
                 .getVaadinEndpointData(endpointName);
         Method method = getMethod(endpointData, methodName);
-        var checkError = invoker.checkAccess(endpointData, method, principal,
-                isInRole);
+        var checkError = invoker.checkAccess(endpointName, endpointData, method,
+                principal, isInRole);
         if (checkError != null) {
             var message = String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",

@@ -95,7 +95,7 @@ public class EndpointRegistry {
         this.endpointNameChecker = endpointNameChecker;
     }
 
-    private static String getEndpointNameForClass(Class<?> beanType) {
+    static String getEndpointNameForClass(Class<?> beanType) {
         // BrowserCallable has no value so this works
         return Optional.ofNullable(beanType.getAnnotation(Endpoint.class))
                 .map(Endpoint::value).filter(value -> !value.isEmpty())

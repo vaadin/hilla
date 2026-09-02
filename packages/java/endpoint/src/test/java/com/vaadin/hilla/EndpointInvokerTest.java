@@ -54,6 +54,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
+import com.vaadin.hilla.auth.EndpointInvocation;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
@@ -267,11 +268,14 @@ public class EndpointInvokerTest {
                 "the published object should be a MethodInvocation so that "
                         + "existing Spring Security listeners can consume it",
                 event.object() instanceof MethodInvocation);
-        var invocation = (MethodInvocation) event.object();
+        var invocation = (EndpointInvocation) event.object();
+        assertEquals("SecuredEndpoint", invocation.getEndpointName());
+        assertEquals("secured", invocation.getMethodName());
         assertEquals(SecuredEndpoint.class.getMethod("secured"),
                 invocation.getMethod());
         assertEquals("the request payload must not be exposed in the event", 0,
                 invocation.getArguments().length);
+        assertThrows(UnsupportedOperationException.class, invocation::proceed);
     }
 
     @Test
