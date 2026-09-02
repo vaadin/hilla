@@ -106,7 +106,7 @@ public final class FullStackGenerator {
     private boolean clientFileIncluded;
     private String snapshotsPackage;
 
-    FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
+    public FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
         this.resourceLoader = new ResourceLoader(testClass);
         try {
             this.targetDir = resourceLoader.findTargetDirPath();
