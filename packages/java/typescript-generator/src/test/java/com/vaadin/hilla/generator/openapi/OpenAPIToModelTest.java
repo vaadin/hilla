@@ -43,8 +43,8 @@ public class OpenAPIToModelTest {
         assertEquals("SampleEndpoint", endpoint.name());
         assertEquals(SampleEndpoint.class.getName(), endpoint.javaClass());
         assertEquals(
-                List.of("count", "counts", "find", "greet", "names", "ping",
-                        "shadow"),
+                List.of("count", "counts", "describe", "find", "greet", "names",
+                        "ping", "shadow"),
                 endpoint.methods().stream().map(MethodModel::name).toList());
     }
 
@@ -83,8 +83,16 @@ public class OpenAPIToModelTest {
 
     @Test
     public void should_KeepTheParametersInOrderWithTheirNames() {
-        assertEquals(List.of("id"), method("find").parameters().stream()
-                .map(ParameterModel::name).toList());
+        var parameters = method("describe").parameters();
+
+        assertEquals(List.of("firstName", "lastName", "age"),
+                parameters.stream().map(ParameterModel::name).toList());
+        assertEquals(
+                List.of(new TypeModel.Scalar(TypeModel.ScalarKind.STRING, true),
+                        new TypeModel.Scalar(TypeModel.ScalarKind.STRING, true),
+                        new TypeModel.Scalar(TypeModel.ScalarKind.NUMBER,
+                                false)),
+                parameters.stream().map(ParameterModel::type).toList());
     }
 
     private MethodModel method(String name) {
