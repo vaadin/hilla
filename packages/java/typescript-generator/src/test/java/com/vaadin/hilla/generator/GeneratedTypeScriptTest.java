@@ -22,6 +22,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.hilla.generator.fixtures.SampleEndpoint;
+import com.vaadin.hilla.generator.fixtures.ShadowingEndpoint;
+import com.vaadin.hilla.generator.model.EndpointModel;
 import com.vaadin.hilla.generator.openapi.OpenAPIToModel;
 import com.vaadin.hilla.generator.typescript.BarrelWriter;
 import com.vaadin.hilla.generator.typescript.ClientWriter;
@@ -33,9 +35,8 @@ import com.vaadin.hilla.parser.testutils.FullStackGenerator;
  * from the class itself.
  */
 public class GeneratedTypeScriptTest {
-    private final List<com.vaadin.hilla.generator.model.EndpointModel> endpoints = OpenAPIToModel
-            .endpoints(new FullStackGenerator(GeneratedTypeScriptTest.class,
-                    SampleEndpoint.class).parse());
+    private final List<EndpointModel> endpoints = endpointsOf(
+            SampleEndpoint.class);
 
     @Test
     public void should_WriteTheEndpoint() {
@@ -55,6 +56,15 @@ public class GeneratedTypeScriptTest {
 
                         export async function counts(init?: EndpointRequestInit): Promise<Record<string, number | undefined> | undefined> {
                           return client.call('SampleEndpoint', 'counts', {}, init);
+                        }
+
+                        export async function describe(
+                          firstName: string | undefined,
+                          lastName: string | undefined,
+                          age: number,
+                          init?: EndpointRequestInit,
+                        ): Promise<string | undefined> {
+                          return client.call('SampleEndpoint', 'describe', { firstName, lastName, age }, init);
                         }
 
                         export async function find(id: string | undefined, init?: EndpointRequestInit): Promise<Sample | undefined> {
@@ -81,6 +91,27 @@ public class GeneratedTypeScriptTest {
     }
 
     @Test
+    public void should_NotLetAParameterShadowWhatTheFileNeedsForItself() {
+        var endpoint = endpointsOf(ShadowingEndpoint.class).get(0);
+
+        assertEquals(
+                """
+                        import type { EndpointRequestInit } from '@vaadin/hilla-frontend';
+                        import client_1 from './connect-client.default.js';
+
+                        export async function echo(
+                          client: string | undefined,
+                          init: string | undefined,
+                          _init?: EndpointRequestInit,
+                        ): Promise<string | undefined> {
+                          return client_1.call('ShadowingEndpoint', 'echo', { client, init }, _init);
+                        }
+                        """,
+                new EndpointWriter(ClientWriter.MODULE_SPECIFIER)
+                        .write(endpoint).content());
+    }
+
+    @Test
     public void should_WriteTheClient() {
         assertEquals("""
                 import { ConnectClient } from '@vaadin/hilla-frontend';
@@ -98,5 +129,11 @@ public class GeneratedTypeScriptTest {
 
                 export { SampleEndpoint };
                 """, new BarrelWriter().write(endpoints).content());
+    }
+
+    private static List<EndpointModel> endpointsOf(Class<?> endpoint) {
+        return OpenAPIToModel.endpoints(
+                new FullStackGenerator(GeneratedTypeScriptTest.class, endpoint)
+                        .parse());
     }
 }

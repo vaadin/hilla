@@ -71,8 +71,12 @@ final class ImportRegistry {
         return lines;
     }
 
-    boolean isEmpty() {
-        return modules.isEmpty();
+    /**
+     * Claims a name which is used in the file for something other than an
+     * import, so that no import is given that name and shadows it.
+     */
+    void reserve(String name) {
+        usedNames.add(name);
     }
 
     private Module module(String module) {
