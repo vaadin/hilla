@@ -219,13 +219,16 @@ fun addConfigurationsToSettingsForUsingPluginFromLocalRepo(testProject: TestProj
     )
 }
 
+private const val DISTRIBUTION_DOWNLOAD_ATTEMPTS = 3
+private const val DISTRIBUTION_DOWNLOAD_RETRY_DELAY_MILLIS = 5_000L
+
 /**
  * A testing Gradle project, created in a temporary directory.
  *
  * Used to test the plugin. Contains helpful utility methods to manipulate folders
  * and files in the project.
  */
-class TestProject {
+class TestProject(val gradleVersion: String = "8.7") {
     /**
      * The project root dir.
      */
@@ -246,7 +249,7 @@ class TestProject {
         .withPluginClasspath()
         .withDebug(debug) // use --debug to catch ReflectionsException: https://github.com/vaadin/vaadin-gradle-plugin/issues/99
         .forwardOutput()   // a must, otherwise ./gradlew check freezes on windows!
-        .withGradleVersion("8.7")
+        .withGradleVersion(gradleVersion)
 
     override fun toString(): String = "TestProject(dir=$dir)"
 
@@ -298,9 +301,11 @@ class TestProject {
         expect(true, "$buildFile doesn't exist, can't run build") { buildFile.exists() }
 
         println("$dir/./gradlew ${args.joinToString(" ")}")
-        val result: BuildResult = createGradleRunner(debug)
-            .withArguments(args.toList() + "--stacktrace" + "--info")
-            .build()
+        val result: BuildResult = retryingDistributionDownload {
+            createGradleRunner(debug)
+                .withArguments(args.toList() + "--stacktrace" + "--info")
+                .build()
+        }
 
         if (checkTasksSuccessful) {
             for (arg: String in args) {
@@ -318,10 +323,48 @@ class TestProject {
      */
     fun buildAndFail(vararg args: String, debug: Boolean = true): BuildResult {
         println("$dir/./gradlew ${args.joinToString(" ")}")
-        return createGradleRunner(debug)
+        return retryingDistributionDownload {
+            createGradleRunner(debug)
                 .withArguments(args.toList() + "--stacktrace" + "--info")
                 .buildAndFail()
+        }
     }
+
+    /**
+     * TestKit runs the build with the [gradleVersion] distribution, which it
+     * downloads from `services.gradle.org` into its own working directory. The
+     * download is not shared with the Gradle distribution used to build this
+     * project, so it happens on every CI run and a hiccup in the network fails
+     * the test before the build is even started. Retry those, so a failed
+     * download doesn't fail an otherwise healthy build.
+     */
+    private fun <T> retryingDistributionDownload(runBuild: () -> T): T {
+        repeat(DISTRIBUTION_DOWNLOAD_ATTEMPTS - 1) { attempt ->
+            try {
+                return runBuild()
+            } catch (e: Exception) {
+                if (!e.isDistributionDownloadFailure()) {
+                    throw e
+                }
+                println("Downloading the Gradle $gradleVersion distribution failed " +
+                        "(attempt ${attempt + 1} of $DISTRIBUTION_DOWNLOAD_ATTEMPTS), retrying in " +
+                        "$DISTRIBUTION_DOWNLOAD_RETRY_DELAY_MILLIS ms: ${e.message}")
+                Thread.sleep(DISTRIBUTION_DOWNLOAD_RETRY_DELAY_MILLIS)
+            }
+        }
+        return runBuild()
+    }
+
+    /**
+     * Matches the failures reported while installing the distribution and while
+     * connecting to it, e.g. `Could not install Gradle distribution from '...'`
+     * and `Could not fetch model of type 'BuildEnvironment' using connection to
+     * Gradle distribution '...'`. A failing build under test never reports
+     * those.
+     */
+    private fun Throwable.isDistributionDownloadFailure(): Boolean =
+        generateSequence(this, Throwable::cause)
+            .any { it.message?.contains("Gradle distribution") == true }
 
     /**
      * Creates a file in the temporary test project.
