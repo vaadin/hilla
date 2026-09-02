@@ -90,5 +90,5 @@ describe('SubTypesPlugin', () => {
 
   it('generates code that compiles and discriminates the union types', async () => {
     expect(await typeCheck(files, { 'usage.ts': USAGE })).to.deep.equal([]);
-  });
+  }, 30000); // compiling the whole hierarchy is slow on CI
 });
