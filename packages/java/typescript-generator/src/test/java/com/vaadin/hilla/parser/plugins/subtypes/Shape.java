@@ -15,23 +15,15 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@Endpoint
-public class SubTypesEndpoint {
-
-    public BaseEvent sendEvent() {
-        return new AddEvent();
-    }
-
-    public void receiveEvent(BaseEvent event) {
-    }
-
-    public Notification sendNotification() {
-        return new EmailNotification();
-    }
-
-    public Shape sendShape() {
-        return new Circle(1);
-    }
+/**
+ * A hierarchy whose supertype is an interface, which the subtypes do not extend
+ * in the generated TypeScript.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "shape")
+@JsonSubTypes({ @JsonSubTypes.Type(value = Circle.class, name = "circle"),
+        @JsonSubTypes.Type(value = Square.class, name = "square") })
+public sealed interface Shape permits Circle, Square {
 }

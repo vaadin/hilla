@@ -1,6 +1,6 @@
 import ts, { type SourceFile } from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import { propertyNameToString } from './utils.js';
+import { propertyNameToString, removeUnusedImports } from './utils.js';
 
 export class ModelFixProcessor {
   readonly #source: SourceFile;
@@ -32,6 +32,6 @@ export class ModelFixProcessor {
       return statement;
     });
 
-    return createSourceFile(statements, this.#source.fileName);
+    return createSourceFile(removeUnusedImports(statements), this.#source.fileName);
   }
 }

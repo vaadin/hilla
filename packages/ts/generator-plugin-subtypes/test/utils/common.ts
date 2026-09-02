@@ -19,6 +19,8 @@ const TYPE_CHECK_OPTIONS: ts.CompilerOptions = {
   module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler,
   noEmit: true,
+  // the generated sources must not leave imports behind
+  noUnusedLocals: true,
   skipLibCheck: true,
   strict: true,
   target: ts.ScriptTarget.ES2022,

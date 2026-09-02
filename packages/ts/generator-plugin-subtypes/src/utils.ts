@@ -58,3 +58,59 @@ export function createDiscriminatedType(type: TypeNode, propertyName: string, ty
     ]),
   );
 }
+
+/**
+ * Removes the imports that are not referenced anymore, which happens when the
+ * discriminator property was the only user of a model type.
+ */
+export function removeUnusedImports(statements: readonly ts.Statement[]): readonly ts.Statement[] {
+  const used = new Set<string>();
+
+  function collect(node: ts.Node): void {
+    if (ts.isIdentifier(node)) {
+      used.add(node.text);
+    }
+
+    ts.forEachChild(node, collect);
+  }
+
+  statements.filter((statement) => !ts.isImportDeclaration(statement)).forEach(collect);
+
+  function keepBindings(bindings: ts.NamedImportBindings | undefined): ts.NamedImportBindings | undefined {
+    if (!bindings || !ts.isNamedImports(bindings)) {
+      return bindings;
+    }
+
+    const elements = bindings.elements.filter((element) => used.has(element.name.text));
+
+    return elements.length === 0 ? undefined : ts.factory.updateNamedImports(bindings, elements);
+  }
+
+  return statements.flatMap((statement) => {
+    if (!ts.isImportDeclaration(statement) || !statement.importClause) {
+      return [statement];
+    }
+
+    const { name, namedBindings, phaseModifier } = statement.importClause;
+    const keptName = name && used.has(name.text) ? name : undefined;
+    const keptBindings = keepBindings(namedBindings);
+
+    if (keptName === name && keptBindings === namedBindings) {
+      return [statement];
+    }
+
+    if (!keptName && !keptBindings) {
+      return [];
+    }
+
+    return [
+      ts.factory.updateImportDeclaration(
+        statement,
+        statement.modifiers,
+        ts.factory.updateImportClause(statement.importClause, phaseModifier, keptName, keptBindings),
+        statement.moduleSpecifier,
+        statement.attributes,
+      ),
+    ];
+  });
+}
