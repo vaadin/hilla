@@ -41,23 +41,25 @@ import com.vaadin.hilla.parser.testutils.ResourceLoader;
  * beyond the browser callable classes themselves.
  *
  * <p>
- * A test case is a package owning a {@code snapshots} folder in the test
- * resources: the browser callable classes of that package and of its
- * subpackages are generated together, and the result is compared against the
- * snapshots. Adding a case is therefore a matter of adding a package with an
- * endpoint in it and running the tests once with
- * {@code -Dhilla.test.updateSnapshots}; no test class is involved.
+ * A test case is the outermost package holding browser callable classes: those
+ * classes, together with the ones of its subpackages, are generated and the
+ * result is compared against the {@code snapshots} folder of the package in the
+ * test resources. Adding a case is therefore a matter of adding a package with
+ * an endpoint in it and running the tests once with
+ * {@code -Dhilla.test.updateSnapshots}, which creates the snapshots; no test
+ * class is involved.
  *
  * <p>
  * A case which needs more than that, such as a configured plugin or an
  * assertion which is not about the generated files, has its own test class
- * extending {@link AbstractFullStackTest} in its package. Such packages are
- * skipped here, so that every case is covered exactly once.
+ * extending {@link AbstractFullStackTest} in its package. Such a package is
+ * skipped here, and its classes are left out of the surrounding case, so that
+ * every endpoint is covered exactly once.
  */
 public class EndpointGenerationTest extends AbstractFullStackTest {
-    private static final String ROOT_PACKAGE = "com.vaadin.hilla.parser";
-    private static final String ENDPOINT_ANNOTATION = ROOT_PACKAGE
-            + ".testutils.annotations.Endpoint";
+    private static final String ROOT_PACKAGE = EndpointGenerationTest.class
+            .getPackageName();
+    private static final String ENDPOINT_ANNOTATION = "com.vaadin.hilla.parser.testutils.annotations.Endpoint";
     private static final String SNAPSHOTS_DIR = "snapshots";
 
     @ParameterizedTest(name = "{0}")
@@ -70,48 +72,34 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
     }
 
     static Stream<Arguments> should_GenerateTheExpectedTypeScript() {
-        var testCases = findTestCases();
-
         try (var scan = scan()) {
-            var packagesWithTestClass = packagesWithTestClass(scan);
-            var endpoints = scan.getClassesWithAnnotation(ENDPOINT_ANNOTATION)
-                    .loadClasses();
+            var endpoints = endpoints(scan);
+            var withTestClass = packagesWithTestClass(scan);
 
-            return testCases.stream().filter(
-                    testCase -> !packagesWithTestClass.contains(testCase))
+            return findTestCases(endpoints).stream()
+                    .filter(testCase -> !withTestClass.contains(testCase))
                     .map(testCase -> Arguments.of(testCase,
-                            endpointsOf(testCase, testCases, endpoints)))
+                            endpointsOf(testCase, endpoints, withTestClass)))
                     .toList().stream();
         }
     }
 
     /**
-     * Guards against a case which is covered neither here nor by a test class
-     * of its own, which is what happens when a package with an endpoint is
-     * added without generating its snapshots.
+     * Guards against a snapshots folder which is no longer the expected output
+     * of anything, which is what is left behind when the endpoints of a case
+     * are removed or moved.
      */
     @Test
-    public void should_CoverEveryBrowserCallableClass() {
-        var testCases = findTestCases();
-
+    public void should_NotHaveStaleSnapshots() {
         try (var scan = scan()) {
-            var packagesWithTestClass = packagesWithTestClass(scan);
+            var testCases = findTestCases(endpoints(scan));
 
-            var uncovered = scan.getClassesWithAnnotation(ENDPOINT_ANNOTATION)
-                    .getNames().stream()
-                    // The parser core has tests of its own, which are not
-                    // about the generated TypeScript
-                    .filter(name -> isInside(name,
-                            EndpointGenerationTest.class.getPackageName()))
-                    .filter(name -> Stream
-                            .concat(testCases.stream(),
-                                    packagesWithTestClass.stream())
-                            .noneMatch(pkg -> isInside(name, pkg)))
-                    .sorted().toList();
+            var stale = findSnapshotPackages().stream()
+                    .filter(pkg -> !testCases.contains(pkg)).sorted().toList();
 
-            assertTrue(uncovered.isEmpty(),
-                    () -> "There is neither a snapshots folder nor a test class"
-                            + " covering " + uncovered);
+            assertTrue(stale.isEmpty(),
+                    () -> "There is no browser callable class left to generate"
+                            + " the snapshots of " + stale);
         }
     }
 
@@ -120,55 +108,84 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
                 .acceptPackages(ROOT_PACKAGE).scan();
     }
 
+    private static List<Class<?>> endpoints(ScanResult scan) {
+        return scan.getClassesWithAnnotation(ENDPOINT_ANNOTATION).loadClasses();
+    }
+
+    /**
+     * The packages which have a test class of their own, matched exactly: a
+     * test class covers its own package, never a whole subtree.
+     */
     private static List<String> packagesWithTestClass(ScanResult scan) {
         return scan.getSubclasses(AbstractFullStackTest.class).getNames()
                 .stream()
                 .filter(name -> !name
                         .equals(EndpointGenerationTest.class.getName()))
-                .map(name -> name.substring(0, name.lastIndexOf('.'))).toList();
+                .map(EndpointGenerationTest::packageOf).distinct().toList();
     }
 
     /**
-     * Finds the packages owning a snapshots folder, which are the test cases.
+     * Finds the test cases, which are the packages holding browser callable
+     * classes and having no such package above them: a case covers its own
+     * subpackages, which is what lets an endpoint refer to entities, or to
+     * other endpoints, kept next to it.
      */
-    private static List<String> findTestCases() {
+    private static List<String> findTestCases(List<Class<?>> endpoints) {
+        var packages = endpoints.stream()
+                .map(endpoint -> packageOf(endpoint.getName())).distinct()
+                .sorted().toList();
+
+        return packages.stream().filter(pkg -> packages.stream()
+                .noneMatch(other -> isInside(pkg, other))).toList();
+    }
+
+    /**
+     * Collects the browser callable classes of a test case: the ones of its
+     * package and of its subpackages, except those covered by a test class of
+     * their own.
+     */
+    private static List<Class<?>> endpointsOf(String testCase,
+            List<Class<?>> endpoints, List<String> packagesWithTestClass) {
+        var covered = packagesWithTestClass.stream()
+                .filter(pkg -> isInside(pkg, testCase)).toList();
+
+        return endpoints.stream()
+                .filter(endpoint -> isInside(endpoint.getName(), testCase))
+                .filter(endpoint -> covered.stream()
+                        .noneMatch(pkg -> isInside(endpoint.getName(), pkg)))
+                .sorted(Comparator.comparing(Class::getName)).toList();
+    }
+
+    /**
+     * Finds the packages owning a snapshots folder in the test resources.
+     */
+    private static List<String> findSnapshotPackages() {
         var resources = moduleDir()
                 .resolve(Path.of("src", "test", "resources"));
         var root = resources.resolve(ROOT_PACKAGE.replace('.', '/'));
 
         try (var paths = Files.walk(root)) {
-            return paths.filter(Files::isDirectory)
-                    .filter(path -> SNAPSHOTS_DIR
-                            .equals(path.getFileName().toString()))
+            return paths.filter(Files::isDirectory).filter(
+                    path -> SNAPSHOTS_DIR.equals(path.getFileName().toString()))
                     .map(path -> resources.relativize(path.getParent())
                             .toString().replace(java.io.File.separatorChar, '.')
                             .replace('/', '.'))
-                    .sorted().toList();
+                    .toList();
         } catch (IOException e) {
             throw new UncheckedIOException(
-                    "Unable to look for test cases in " + root, e);
+                    "Unable to look for snapshots in " + root, e);
         }
     }
 
     /**
-     * Collects the browser callable classes of a test case: the ones of its
-     * package and of its subpackages, except those belonging to a nested test
-     * case.
+     * Whether the given class or package is the given package or below it.
      */
-    private static List<Class<?>> endpointsOf(String testCase,
-            List<String> testCases, List<Class<?>> endpoints) {
-        var nested = testCases.stream()
-                .filter(other -> isInside(other, testCase)).toList();
-
-        return endpoints.stream()
-                .filter(endpoint -> isInside(endpoint.getName(), testCase))
-                .filter(endpoint -> nested.stream().noneMatch(
-                        other -> isInside(endpoint.getName(), other)))
-                .sorted(Comparator.comparing(Class::getName)).toList();
-    }
-
     private static boolean isInside(String name, String packageName) {
         return name.startsWith(packageName + ".");
+    }
+
+    private static String packageOf(String className) {
+        return className.substring(0, className.lastIndexOf('.'));
     }
 
     private static Path moduleDir() {
