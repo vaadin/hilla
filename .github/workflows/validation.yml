@@ -261,10 +261,20 @@ jobs:
     timeout-minutes: 25
     strategy:
       fail-fast: false
+      # The Windows leg takes ~11 minutes while every other validation job is
+      # done in 5, so it alone decides how long a PR waits. It guards
+      # path-separator and file-locking behaviour, which rarely changes, so run
+      # it on pushes to main and the release branches (i.e. on every merge) and
+      # on workflow_dispatch, but not on pull requests. To get it on a PR, add
+      # the `run-windows-tests` label and then push, or re-run the workflow
+      # manually: the labels are read from the event payload, so they have to
+      # be set before the run starts.
       matrix:
-        include:
-          - os: ubuntu-latest
-          - os: windows-latest
+        os: >-
+          ${{ fromJSON(github.event_name == 'pull_request'
+          && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
+          && '["ubuntu-latest"]'
+          || '["ubuntu-latest", "windows-latest"]') }}
     runs-on: ${{ matrix.os }}
 
     steps:
