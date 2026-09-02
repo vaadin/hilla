@@ -54,9 +54,13 @@ import org.slf4j.LoggerFactory;
  * {@link FullStackGenerator#withClientFile()}.
  *
  * <p>
- * The folder belongs to the package of the test rather than to the test class,
- * so there should be only one such test class per package: two of them would
- * share, and overwrite, the same expected files.
+ * Most cases need no test class at all: {@code EndpointGenerationTest}
+ * discovers every package owning a snapshots folder and generates from the
+ * browser callable classes it contains. Extend this class only for a case which
+ * needs more, such as a configured plugin, and put it in the package of the
+ * case, which excludes the package from the discovered ones. The snapshots
+ * folder belongs to the package rather than to the test class, so there can be
+ * only one such test class per package.
  *
  * <p>
  * Snapshots can be recreated from the current generator output by running the
@@ -110,7 +114,13 @@ public abstract class AbstractFullStackTest {
             updateSnapshots(generator, generated);
         }
 
-        new TypeScriptComparator().compare(readSnapshots(generator), generated);
+        try {
+            new TypeScriptComparator().compare(readSnapshots(generator),
+                    generated);
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    getSnapshotsDir(generator) + ": " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -130,7 +140,8 @@ public abstract class AbstractFullStackTest {
         return value != null && !"false".equalsIgnoreCase(value);
     }
 
-    private Map<String, String> readSnapshots(FullStackGenerator generator) {
+    private static Map<String, String> readSnapshots(
+            FullStackGenerator generator) {
         var snapshotsDir = getSnapshotsDir(generator);
 
         if (!Files.isDirectory(snapshotsDir)) {
@@ -161,7 +172,7 @@ public abstract class AbstractFullStackTest {
         }
     }
 
-    private void updateSnapshots(FullStackGenerator generator,
+    private static void updateSnapshots(FullStackGenerator generator,
             Map<String, String> generated) {
         var snapshotsDir = getSnapshotsDir(generator);
         LOGGER.info("Updating the snapshots in {}", snapshotsDir);
@@ -220,10 +231,10 @@ public abstract class AbstractFullStackTest {
      * copy in the build folder, so that updated snapshots are not lost on the
      * next build.
      */
-    private Path getSnapshotsDir(FullStackGenerator generator) {
+    private static Path getSnapshotsDir(FullStackGenerator generator) {
         return generator.getModuleDir()
                 .resolve(Path.of("src", "test", "resources"))
-                .resolve(getClass().getPackageName().replace('.', '/'))
+                .resolve(generator.getSnapshotsPackage().replace('.', '/'))
                 .resolve(SNAPSHOTS_DIR);
     }
 

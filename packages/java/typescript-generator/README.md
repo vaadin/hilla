@@ -61,40 +61,43 @@ The generator is tested through its externally visible contract: a set of
 browser callable Java classes must produce exactly the expected TypeScript
 files, with the expected content, in the expected locations.
 
-A test extends `AbstractFullStackTest` and names the classes to generate from:
+A test case is a package with a `snapshots` folder in the test resources. The
+browser callable classes of that package, and of its subpackages, are
+generated together and every generated file is compared against the snapshots.
+A generated file without a snapshot fails the test, and so does a snapshot
+without a generated file. `EndpointGenerationTest` discovers the cases and
+runs them, so **adding a case takes no test class at all**: add a package with
+an endpoint in it and run the tests once with
+`-Dhilla.test.updateSnapshots`.
+
+Every case runs through the whole plugin chain, in the production order, so
+what a test verifies is always what a real application would get.
+
+A case which needs more than the endpoint classes has its own test class
+extending `AbstractFullStackTest` in its package, which excludes it from the
+discovered ones so that it is covered exactly once. That is how the
+configuration options of a plugin are covered:
 
 ```java
-public class SimpleTypeTest extends AbstractFullStackTest {
+public class BasicTest extends AbstractFullStackTest {
     @Test
-    public void should_UseAppropriateSchema_When_SimpleTypesAreUsed() {
-        assertTypescriptMatchesSnapshot(SimpleTypeEndpoint.class);
+    public void should_ApplyNonNullAnnotation() {
+        var plugin = new NonnullPlugin();
+        plugin.setConfiguration(configuration);
+
+        assertTypescriptMatchesSnapshot(
+                generator(BasicEndpoint.class).withPlugin(plugin));
     }
 }
 ```
 
-The complete pipeline is executed with the same parser and generator plugins as
-a real application, and every generated file is compared against the TypeScript
-files in the `snapshots` folder of the test resources of the test package. A
-generated file without a snapshot fails the test, and so does a snapshot
-without a generated file.
-
-Every test runs through the whole plugin chain: there is no way to run a test
-with a subset of the plugins, so what a test verifies is always what a real
-application would get. A test can replace a plugin of the chain with a
-configured instance of the same plugin, which is how the configuration options
-of a plugin are covered, and it can extend the scanned classpath:
-
-```java
-assertTypescriptMatchesSnapshot(
-        generator(BasicEndpoint.class).withPlugin(configuredPlugin));
-```
+A plugin can only be replaced by a configured instance of the same plugin: a
+test cannot run a subset of the chain. An endpoint which is covered neither by
+a snapshots folder nor by a test class fails the build.
 
 The generated client file is identical for every endpoint, so it is left out
-of the comparison unless a test asks for it with `withClientFile()`.
-
-The `snapshots` folder belongs to the package of the test, not to the test
-class, so keep one full-stack test class per package: two of them in the same
-package would share, and overwrite, the same expected files.
+of the comparison and verified once, by the test which asks for it with
+`withClientFile()`.
 
 Snapshots are recreated from the current generator output by running the tests
 with `-Dhilla.test.updateSnapshots`. The resulting diff is the specification

@@ -32,6 +32,7 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 
 import com.vaadin.flow.internal.FrontendUtils;
@@ -91,13 +92,19 @@ public final class FullStackGenerator {
             "@vaadin/hilla-generator-plugin-signals",
             "@vaadin/hilla-generator-plugin-subtypes");
 
+    /**
+     * Types which the endpoints of a test may refer to and which the parser has
+     * to be able to find, in addition to the test classes themselves.
+     */
+    private static final List<Class<?>> SCANNED_TYPES = List.of(Flux.class,
+            EndpointSubscription.class, Pageable.class);
+
     private final ResourceLoader resourceLoader;
     private final Path targetDir;
     private final List<Class<?>> endpointClasses;
     private final List<Plugin> plugins = defaultParserPlugins();
-    private final List<Class<?>> extraClasspath = new ArrayList<>(
-            List.of(Flux.class, EndpointSubscription.class));
     private boolean clientFileIncluded;
+    private String snapshotsPackage;
 
     FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
         this.resourceLoader = new ResourceLoader(testClass);
@@ -108,6 +115,7 @@ public final class FullStackGenerator {
                     e);
         }
         this.endpointClasses = List.of(endpointClasses);
+        this.snapshotsPackage = testClass.getPackageName();
     }
 
     /**
@@ -135,12 +143,17 @@ public final class FullStackGenerator {
     }
 
     /**
-     * Adds the location of the given classes to the classpath scanned by the
-     * parser.
+     * Reads the expected files from the snapshots folder of the given package
+     * instead of the one of the test class. Needed by tests which cover more
+     * than one package.
      */
-    public FullStackGenerator withClasspathOf(Class<?>... classes) {
-        extraClasspath.addAll(List.of(classes));
+    public FullStackGenerator withSnapshotsIn(String packageName) {
+        this.snapshotsPackage = packageName;
         return this;
+    }
+
+    String getSnapshotsPackage() {
+        return snapshotsPackage;
     }
 
     /**
@@ -170,7 +183,7 @@ public final class FullStackGenerator {
      */
     public OpenAPI parse() {
         try {
-            var classPath = ResourceLoader.getClasspath(extraClasspath.stream()
+            var classPath = ResourceLoader.getClasspath(SCANNED_TYPES.stream()
                     .map(ResourceLoader::new).collect(Collectors.toList()));
             var parser = new Parser()
                     .classPath(classPath.split(File.pathSeparator))
