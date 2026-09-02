@@ -1,0 +1,30 @@
+import type ValidationData_1 from "./ValidationData.js";
+interface ValidationData {
+    assertFalse?: string;
+    assertTrue?: string;
+    decimalMax: number;
+    decimalMin: number;
+    digits?: string;
+    email?: string;
+    future?: string;
+    isNull?: string;
+    list?: Array<string | undefined>;
+    max?: number;
+    min?: number;
+    negative: number;
+    negativeOrZero: number;
+    notBlank?: string;
+    notEmpty?: string;
+    notNull?: string;
+    notNullEntity?: ValidationData_1;
+    past?: string;
+    pattern?: string;
+    positive: number;
+    positiveOrZero: number;
+    size?: string;
+    size1?: string;
+    withConstraintsOnSetter?: string;
+    withGetter?: string;
+    withSetter?: string;
+}
+export default ValidationData;

@@ -55,6 +55,44 @@ com.vaadin.hilla.parser
 - `hilla-maven-plugin` - Maven build integration
 - `hilla-endpoint` - Endpoint processing
 
+## Tests
+
+The generator is tested through its externally visible contract: a set of
+browser callable Java classes must produce exactly the expected TypeScript
+files, with the expected content, in the expected locations.
+
+A test extends `AbstractFullStackTest` and names the classes to generate from:
+
+```java
+public class SimpleTypeTest extends AbstractFullStackTest {
+    @Test
+    public void should_UseAppropriateSchema_When_SimpleTypesAreUsed() {
+        assertTypescriptMatchesSnapshot(SimpleTypeEndpoint.class);
+    }
+}
+```
+
+The complete pipeline is executed with the same parser and generator plugins as
+a real application, and every generated file is compared against the TypeScript
+files in the `snapshots` folder of the test resources of the test package. A
+generated file without a snapshot fails the test, and so does a snapshot
+without a generated file.
+
+Use `generator(...)` instead when a test needs a specifically configured
+plugin or an extended classpath:
+
+```java
+assertTypescriptMatchesSnapshot(
+        generator(BasicEndpoint.class).withPlugin(configuredPlugin));
+```
+
+Snapshots are recreated from the current generator output by running the tests
+with `-Dhilla.test.updateSnapshots`. The resulting diff is the specification
+of what the generator produces and must always be reviewed.
+
+Note that the tests run the TypeScript generator, so the npm packages need to
+be built first (`npm ci && npm run build` in the repository root).
+
 ## Build
 
 ```bash
