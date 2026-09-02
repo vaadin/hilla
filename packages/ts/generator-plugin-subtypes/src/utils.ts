@@ -60,8 +60,9 @@ export function createDiscriminatedType(type: TypeNode, propertyName: string, ty
 }
 
 /**
- * Removes the imports that are not referenced anymore, which happens when the
- * discriminator property was the only user of a model type.
+ * Removes the named imports that are not referenced anymore, which happens when
+ * the discriminator property was the only user of a model type. The default
+ * import of a generated model is its entity type, which is always used.
  */
 export function removeUnusedImports(statements: readonly ts.Statement[]): readonly ts.Statement[] {
   const used = new Set<string>();
@@ -76,41 +77,35 @@ export function removeUnusedImports(statements: readonly ts.Statement[]): readon
 
   statements.filter((statement) => !ts.isImportDeclaration(statement)).forEach(collect);
 
-  function keepBindings(bindings: ts.NamedImportBindings | undefined): ts.NamedImportBindings | undefined {
+  return statements.map((statement) => {
+    if (!ts.isImportDeclaration(statement) || !statement.importClause) {
+      return statement;
+    }
+
+    const { importClause } = statement;
+    const bindings = importClause.namedBindings;
+
     if (!bindings || !ts.isNamedImports(bindings)) {
-      return bindings;
+      return statement;
     }
 
     const elements = bindings.elements.filter((element) => used.has(element.name.text));
 
-    return elements.length === 0 ? undefined : ts.factory.updateNamedImports(bindings, elements);
-  }
-
-  return statements.flatMap((statement) => {
-    if (!ts.isImportDeclaration(statement) || !statement.importClause) {
-      return [statement];
+    if (elements.length === bindings.elements.length) {
+      return statement;
     }
 
-    const { name, namedBindings, phaseModifier } = statement.importClause;
-    const keptName = name && used.has(name.text) ? name : undefined;
-    const keptBindings = keepBindings(namedBindings);
-
-    if (keptName === name && keptBindings === namedBindings) {
-      return [statement];
-    }
-
-    if (!keptName && !keptBindings) {
-      return [];
-    }
-
-    return [
-      ts.factory.updateImportDeclaration(
-        statement,
-        statement.modifiers,
-        ts.factory.updateImportClause(statement.importClause, phaseModifier, keptName, keptBindings),
-        statement.moduleSpecifier,
-        statement.attributes,
+    return ts.factory.updateImportDeclaration(
+      statement,
+      statement.modifiers,
+      ts.factory.updateImportClause(
+        importClause,
+        importClause.phaseModifier,
+        importClause.name,
+        ts.factory.updateNamedImports(bindings, elements),
       ),
-    ];
+      statement.moduleSpecifier,
+      statement.attributes,
+    );
   });
 }
