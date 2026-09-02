@@ -17,19 +17,13 @@ package com.vaadin.hilla.parser.plugins.nonnull.nullable;
 
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPluginConfig;
 import com.vaadin.hilla.parser.plugins.nonnull.nullable.nonNullApi.NullableNonNullEndpoint;
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
 public class NullableTest extends AbstractFullStackTest {
     @Test
     public void should_ApplyNullableAnnotation() {
-        var plugin = new NonnullPlugin();
-        plugin.setConfiguration(new NonnullPluginConfig());
-
-        assertTypescriptMatchesSnapshot(
-                generator(NullableEndpoint.class, NullableNonNullEndpoint.class)
-                        .withPlugin(plugin));
+        assertTypescriptMatchesSnapshot(NullableEndpoint.class,
+                NullableNonNullEndpoint.class);
     }
 }

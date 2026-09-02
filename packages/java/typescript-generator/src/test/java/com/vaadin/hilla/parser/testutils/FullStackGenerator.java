@@ -70,6 +70,15 @@ public final class FullStackGenerator {
     private static final String KOTLIN_NULLABILITY_PLUGIN = "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin";
 
     /**
+     * The annotations by which the test endpoints are recognized.
+     */
+    private static final List<Class<? extends Annotation>> ENDPOINT_ANNOTATIONS = List
+            .of(Endpoint.class);
+
+    private static final List<Class<? extends Annotation>> ENDPOINT_EXPOSED_ANNOTATIONS = List
+            .of(EndpointExposed.class);
+
+    /**
      * The TypeScript generator plugins, in the order used in production.
      */
     private static final List<String> GENERATOR_PLUGINS = List.of(
@@ -88,10 +97,6 @@ public final class FullStackGenerator {
     private final List<Plugin> plugins = defaultParserPlugins();
     private final List<Class<?>> extraClasspath = new ArrayList<>(
             List.of(Flux.class, EndpointSubscription.class));
-    private List<Class<? extends Annotation>> endpointAnnotations = List
-            .of(Endpoint.class);
-    private List<Class<? extends Annotation>> endpointExposedAnnotations = List
-            .of(EndpointExposed.class);
     private boolean clientFileIncluded;
 
     FullStackGenerator(Class<?> testClass, Class<?>... endpointClasses) {
@@ -106,45 +111,26 @@ public final class FullStackGenerator {
     }
 
     /**
-     * Uses the given plugin instead of the default instance of the same plugin
-     * class, keeping the position in the plugin order. Plugins which are not
-     * part of the default set are appended.
+     * Uses the given configured plugin instead of the default instance of the
+     * same plugin class. The chain itself is not affected: every test runs
+     * through all the plugins, in the production order, so that only the
+     * configuration of a plugin can differ from a real application.
      *
      * @param plugin
-     *            a configured parser plugin
+     *            a configured instance of one of the plugins of the chain
      */
     public FullStackGenerator withPlugin(Plugin plugin) {
         var index = plugins.stream().map(Object::getClass).toList()
                 .indexOf(plugin.getClass());
 
-        if (index >= 0) {
-            plugins.set(index, plugin);
-        } else {
-            plugins.add(plugin);
+        if (index < 0) {
+            throw new IllegalArgumentException(plugin.getClass().getSimpleName()
+                    + " is not part of the plugin chain, so it cannot"
+                    + " be configured for a test");
         }
 
-        return this;
-    }
+        plugins.set(index, plugin);
 
-    /**
-     * Uses the given annotations to detect browser callable classes instead of
-     * the default test {@code @Endpoint} annotation.
-     */
-    @SafeVarargs
-    public final FullStackGenerator withEndpointAnnotations(
-            Class<? extends Annotation>... annotations) {
-        this.endpointAnnotations = List.of(annotations);
-        return this;
-    }
-
-    /**
-     * Uses the given annotations to detect exposed superclasses instead of the
-     * default test {@code @EndpointExposed} annotation.
-     */
-    @SafeVarargs
-    public final FullStackGenerator withEndpointExposedAnnotations(
-            Class<? extends Annotation>... annotations) {
-        this.endpointExposedAnnotations = List.of(annotations);
         return this;
     }
 
@@ -188,8 +174,8 @@ public final class FullStackGenerator {
                     .map(ResourceLoader::new).collect(Collectors.toList()));
             var parser = new Parser()
                     .classPath(classPath.split(File.pathSeparator))
-                    .endpointAnnotations(endpointAnnotations)
-                    .endpointExposedAnnotations(endpointExposedAnnotations);
+                    .endpointAnnotations(ENDPOINT_ANNOTATIONS)
+                    .endpointExposedAnnotations(ENDPOINT_EXPOSED_ANNOTATIONS);
             plugins.forEach(parser::addPlugin);
 
             return parser.execute(endpointClasses);

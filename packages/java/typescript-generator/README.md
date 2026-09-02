@@ -78,8 +78,11 @@ files in the `snapshots` folder of the test resources of the test package. A
 generated file without a snapshot fails the test, and so does a snapshot
 without a generated file.
 
-Use `generator(...)` instead when a test needs a specifically configured
-plugin or an extended classpath:
+Every test runs through the whole plugin chain: there is no way to run a test
+with a subset of the plugins, so what a test verifies is always what a real
+application would get. A test can replace a plugin of the chain with a
+configured instance of the same plugin, which is how the configuration options
+of a plugin are covered, and it can extend the scanned classpath:
 
 ```java
 assertTypescriptMatchesSnapshot(
