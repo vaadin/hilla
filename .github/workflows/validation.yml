@@ -26,7 +26,13 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
+  # Superseded pull request runs are cancelled, but a push run is now the only
+  # thing that validates the Windows Gradle leg (see the `test-gradle` matrix),
+  # so give every push and manual run its own group and let it finish - two
+  # merges landing close together would otherwise leave a commit range without
+  # any Windows validation, and a cancelled run reads as neutral rather than
+  # failing, so nobody would notice.
+  group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -266,9 +272,11 @@ jobs:
       # path-separator and file-locking behaviour, which rarely changes, so run
       # it on pushes to main and the release branches (i.e. on every merge) and
       # on workflow_dispatch, but not on pull requests. To get it on a PR, add
-      # the `run-windows-tests` label and then push, or re-run the workflow
-      # manually: the labels are read from the event payload, so they have to
-      # be set before the run starts.
+      # the `run-windows-tests` label and then push a commit; `labeled` is not
+      # among the pull_request types above, and re-running an existing run
+      # replays the original event payload, so neither picks up a label added
+      # after the fact. Running the workflow manually on the branch also runs
+      # both legs, label or not.
       matrix:
         os: >-
           ${{ fromJSON(github.event_name == 'pull_request'
