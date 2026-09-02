@@ -4,17 +4,19 @@ import { propertyNameToString } from './utils.js';
 
 export class ModelFixProcessor {
   readonly #source: SourceFile;
+  readonly #propertyName: string;
 
-  constructor(source: SourceFile) {
+  constructor(source: SourceFile, propertyName: string) {
     this.#source = source;
+    this.#propertyName = propertyName;
   }
 
   process(): SourceFile {
     const statements = this.#source.statements.map((statement) => {
-      // filter out the @type property from all models
+      // filter out the discriminator property from all models
       if (ts.isClassDeclaration(statement)) {
         const members = statement.members.filter(
-          (member) => !(ts.isGetAccessor(member) && propertyNameToString(member.name) === '@type'),
+          (member) => !(ts.isGetAccessor(member) && propertyNameToString(member.name) === this.#propertyName),
         );
 
         return ts.factory.createClassDeclaration(

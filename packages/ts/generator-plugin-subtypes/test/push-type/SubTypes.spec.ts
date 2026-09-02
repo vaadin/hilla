@@ -2,52 +2,59 @@
 import BackbonePlugin from '@vaadin/hilla-generator-plugin-backbone/index.js';
 import ModelPlugin from '@vaadin/hilla-generator-plugin-model/index.js';
 import sinonChai from 'sinon-chai';
-import { chai, describe, expect, it } from 'vitest';
+import { beforeAll, chai, describe, expect, it } from 'vitest';
 import SubTypesPlugin from '../../src/index.js';
-import { createGenerator, loadInput } from '../utils/common.js';
+import { createGenerator, loadInput, pathBase } from '../utils/common.js';
 
 chai.use(sinonChai);
 
+const sectionName = 'SubTypes';
+
 describe('SubTypesPlugin', () => {
+  let files: readonly File[];
+
+  beforeAll(async () => {
+    const generator = createGenerator([BackbonePlugin, ModelPlugin, SubTypesPlugin]);
+    const input = await loadInput(sectionName, import.meta.url);
+    files = await generator.process(input);
+  });
+
+  async function expectSource(name: string): Promise<void> {
+    const file = files.find((f) => f.name === name)!;
+    expect(file, name).to.exist;
+    await expect(await file.text()).toMatchFileSnapshot(
+      `fixtures/${name.split('/').pop()!.replace('.ts', '.snap.ts')}`,
+    );
+  }
+
   describe('when the entity has `oneOf`', () => {
     it('generates as union type', async () => {
-      const sectionName = 'SubTypes';
-      const generator = createGenerator([BackbonePlugin, ModelPlugin, SubTypesPlugin]);
-      const input = await loadInput(sectionName, import.meta.url);
-      const files = await generator.process(input);
-      expect(files.length).to.equal(10);
+      // the union type model is not generated, the other files are
+      expect(files.map((f) => f.name)).to.not.include(`${pathBase}/BaseEventUnionModel.ts`);
+      await expectSource(`${sectionName}Endpoint.ts`);
+      await expectSource(`${pathBase}/BaseEventUnion.ts`);
+      await expectSource(`${pathBase}/BaseEvent.ts`);
+      await expectSource(`${pathBase}/AddEvent.ts`);
+    });
 
-      const t = await files[1].text();
-      expect(t).to.exist;
+    it('removes the discriminator from the model', async () => {
+      await expectSource(`${pathBase}/AddEventModel.ts`);
+    });
+  });
 
-      const endpointFile = files.find((f) => f.name === 'SubTypesEndpoint.ts')!;
-      expect(endpointFile).to.exist;
-      await expect(await endpointFile.text()).toMatchFileSnapshot(`fixtures/${sectionName}Endpoint.snap.ts`);
-      expect(endpointFile.name).to.equal(`${sectionName}Endpoint.ts`);
+  describe('when `@JsonTypeInfo` defines a custom property', () => {
+    it('uses that property as the discriminator', async () => {
+      await expectSource(`${pathBase}/NotificationUnion.ts`);
+      await expectSource(`${pathBase}/EmailNotification.ts`);
+      await expectSource(`${pathBase}/NotificationModel.ts`);
+    });
 
-      const baseEventUnionFile = files.find(
-        (f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/BaseEventUnion.ts',
-      )!;
-      expect(baseEventUnionFile).to.exist;
-      await expect(await baseEventUnionFile.text()).toMatchFileSnapshot('fixtures/BaseEventUnion.snap.ts');
-      expect(baseEventUnionFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/BaseEventUnion.ts');
+    it('adds the discriminator to the type that declares the subtypes', async () => {
+      await expectSource(`${pathBase}/Notification.ts`);
+    });
 
-      const baseEventFile = files.find((f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/BaseEvent.ts')!;
-      expect(baseEventFile).to.exist;
-      await expect(await baseEventFile.text()).toMatchFileSnapshot('fixtures/BaseEvent.snap.ts');
-      expect(baseEventFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/BaseEvent.ts');
-
-      const addEventFile = files.find((f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/AddEvent.ts')!;
-      expect(addEventFile).to.exist;
-      await expect(await addEventFile.text()).toMatchFileSnapshot('fixtures/AddEvent.snap.ts');
-      expect(addEventFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/AddEvent.ts');
-
-      const addEventModelFile = files.find(
-        (f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/AddEventModel.ts',
-      )!;
-      expect(addEventModelFile).to.exist;
-      await expect(await addEventModelFile.text()).toMatchFileSnapshot('fixtures/AddEventModel.snap.ts');
-      expect(addEventModelFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/AddEventModel.ts');
+    it('adds the discriminator to indirect subtypes', async () => {
+      await expectSource(`${pathBase}/HtmlEmailNotification.ts`);
     });
   });
 });

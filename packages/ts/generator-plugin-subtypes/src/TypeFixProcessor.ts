@@ -1,14 +1,18 @@
 import ts, { type SourceFile } from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import { propertyNameToString } from './utils.js';
+import { createPropertyName, propertyNameToString } from './utils.js';
 
 export class TypeFixProcessor {
   readonly #source: SourceFile;
   readonly #typeValue: string;
+  readonly #propertyName: string;
+  readonly #omitInheritedProperty: boolean;
 
-  constructor(source: ts.SourceFile, typeValue: string) {
+  constructor(source: ts.SourceFile, typeValue: string, propertyName: string, omitInheritedProperty: boolean) {
     this.#source = source;
     this.#typeValue = typeValue;
+    this.#propertyName = propertyName;
+    this.#omitInheritedProperty = omitInheritedProperty;
   }
 
   process(): SourceFile {
@@ -16,11 +20,12 @@ export class TypeFixProcessor {
       // search in the interface definition
       if (ts.isInterfaceDeclaration(statement)) {
         const members = statement.members.map((member) => {
-          // search for the @type property and replace it with a quoted string
-          if (ts.isPropertySignature(member) && propertyNameToString(member.name) === '@type') {
+          // search for the discriminator property and replace its type with a
+          // string literal
+          if (ts.isPropertySignature(member) && propertyNameToString(member.name) === this.#propertyName) {
             return ts.factory.createPropertySignature(
               undefined,
-              ts.factory.createStringLiteral('@type'),
+              createPropertyName(this.#propertyName),
               undefined,
               ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(this.#typeValue)),
             );
@@ -33,7 +38,7 @@ export class TypeFixProcessor {
           statement.modifiers,
           statement.name,
           statement.typeParameters,
-          statement.heritageClauses,
+          this.#fixHeritageClauses(statement.heritageClauses),
           members,
         );
       }
@@ -42,5 +47,34 @@ export class TypeFixProcessor {
     });
 
     return createSourceFile(statements, this.#source.fileName);
+  }
+
+  /**
+   * When the supertype declares the discriminator too, its value there is a
+   * different string literal, so the property has to be omitted from the
+   * inherited type to keep the generated interface valid.
+   */
+  #fixHeritageClauses(
+    heritageClauses: ts.NodeArray<ts.HeritageClause> | undefined,
+  ): readonly ts.HeritageClause[] | undefined {
+    if (!this.#omitInheritedProperty || !heritageClauses) {
+      return heritageClauses;
+    }
+
+    return heritageClauses.map((clause) =>
+      ts.factory.updateHeritageClause(
+        clause,
+        clause.types.map((type) => {
+          if (!ts.isIdentifier(type.expression)) {
+            return type;
+          }
+
+          return ts.factory.createExpressionWithTypeArguments(ts.factory.createIdentifier('Omit'), [
+            ts.factory.createTypeReferenceNode(type.expression, type.typeArguments),
+            ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(this.#propertyName)),
+          ]);
+        }),
+      ),
+    );
   }
 }
