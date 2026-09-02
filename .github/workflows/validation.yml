@@ -269,8 +269,9 @@ jobs:
       # the `run-windows-tests` label and then push a commit; `labeled` is not
       # among the pull_request types above, and re-running an existing run
       # replays the original event payload, so neither picks up a label added
-      # after the fact. Running the workflow manually on the branch also runs
-      # both legs, label or not.
+      # after the fact. Dispatching the workflow manually on the branch runs
+      # both legs too, but it lands in the same concurrency group as the pull
+      # request's own runs, so the two cancel each other - prefer the label.
       matrix:
         os: >-
           ${{ fromJSON(github.event_name == 'pull_request'
