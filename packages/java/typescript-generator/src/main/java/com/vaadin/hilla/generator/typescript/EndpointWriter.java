@@ -38,6 +38,11 @@ public final class EndpointWriter {
      */
     private static final int MAX_WIDTH = 120;
 
+    /**
+     * What follows the signature on its line.
+     */
+    private static final String BODY_START = " {";
+
     private final String clientModule;
 
     /**
@@ -52,6 +57,13 @@ public final class EndpointWriter {
     public GeneratedFile write(EndpointModel endpoint) {
         var imports = new ImportRegistry();
         var types = new TypeWriter(imports, "");
+
+        // The parameters are named by the Java method, so the imports have to
+        // give way to them rather than the other way around
+        endpoint.methods().stream().map(MethodModel::parameters)
+                .flatMap(List::stream).map(ParameterModel::name)
+                .forEach(imports::reserve);
+
         var client = imports.importDefault(clientModule, "client", false);
 
         var methods = endpoint.methods().stream().map(
@@ -89,8 +101,8 @@ public final class EndpointWriter {
                 + method.name() + "', " + packParameters(method.parameters())
                 + ", " + init + ");";
 
-        return signature(method.name(), parameters, returnType) + " {\n  "
-                + call + "\n}";
+        return signature(method.name(), parameters, returnType) + BODY_START
+                + "\n  " + call + "\n}";
     }
 
     private static String signature(String name, List<String> parameters,
@@ -99,7 +111,8 @@ public final class EndpointWriter {
                 + String.join(", ", parameters) + "): Promise<" + returnType
                 + ">";
 
-        if (oneLine.length() <= MAX_WIDTH) {
+        // The body follows on the same line, so it counts towards the width
+        if (oneLine.length() + BODY_START.length() <= MAX_WIDTH) {
             return oneLine;
         }
 
