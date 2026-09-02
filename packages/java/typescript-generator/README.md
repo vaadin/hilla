@@ -16,6 +16,20 @@ This module consolidates the following previously separate modules:
 - **parser-jvm-plugin-subtypes** - Polymorphic type handling
 - **parser-jvm-plugin-transfertypes** - Data transfer object processing
 
+## Generating TypeScript in Java
+
+The endpoint TypeScript is being moved from the Node generator into this
+module. The parser still produces OpenAPI, so `com.vaadin.hilla.generator.openapi`
+converts it into the model in `com.vaadin.hilla.generator.model`: plain records
+holding what the writers need, with the questions a Java type raises, such as
+whether a value can be absent, already answered. The model exists only while a
+generation runs; nothing writes it to a file.
+
+`com.vaadin.hilla.generator.typescript` writes the files from that model, by
+concatenating strings. So far it covers the client, the endpoints and the
+barrel; entities, models and signals still come from the Node generator, which
+is what the pipeline runs.
+
 ## Architecture
 
 ### Core Components
@@ -27,6 +41,11 @@ This module consolidates the following previously separate modules:
 ### Package Structure
 
 ```
+com.vaadin.hilla.generator
+├── model/             - What the generator needs to know, as plain records
+├── openapi/           - Builds that model out of the OpenAPI the parser produces
+└── typescript/        - Writes the TypeScript files
+
 com.vaadin.hilla.parser
 ├── core/              - Core parsing infrastructure
 ├── models/            - OpenAPI model classes
