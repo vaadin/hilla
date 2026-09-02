@@ -4,7 +4,7 @@ import { createDiscriminatorProperty, propertyNameToString } from './utils.js';
 
 export class TypeFixProcessor {
   readonly #source: SourceFile;
-  readonly #propertyName: string;
+  readonly #discriminatorPropertyName: string;
   readonly #typeValue: string | undefined;
 
   /**
@@ -12,9 +12,9 @@ export class TypeFixProcessor {
    * the property has to be dropped because the discriminator is applied in the
    * union type instead.
    */
-  constructor(source: ts.SourceFile, propertyName: string, typeValue: string | undefined) {
+  constructor(source: ts.SourceFile, discriminatorPropertyName: string, typeValue: string | undefined) {
     this.#source = source;
-    this.#propertyName = propertyName;
+    this.#discriminatorPropertyName = discriminatorPropertyName;
     this.#typeValue = typeValue;
   }
 
@@ -24,13 +24,16 @@ export class TypeFixProcessor {
       if (ts.isInterfaceDeclaration(statement)) {
         const members = statement.members.flatMap((member) => {
           // search for the discriminator property
-          if (!ts.isPropertySignature(member) || propertyNameToString(member.name) !== this.#propertyName) {
+          if (
+            !ts.isPropertySignature(member) ||
+            propertyNameToString(member.name) !== this.#discriminatorPropertyName
+          ) {
             return [member];
           }
 
           return this.#typeValue === undefined
             ? []
-            : [createDiscriminatorProperty(this.#propertyName, this.#typeValue)];
+            : [createDiscriminatorProperty(this.#discriminatorPropertyName, this.#typeValue)];
         });
 
         return ts.factory.createInterfaceDeclaration(

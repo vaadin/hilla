@@ -47,13 +47,13 @@ function superTypeKey(component: Schema | undefined): string | undefined {
  * Returns the value of the discriminator property declared by the type itself,
  * which the Java parser stores as the `example` of that property.
  */
-function discriminatorValue(component: Schema | undefined, propertyName: string): string | undefined {
+function discriminatorValue(component: Schema | undefined, discriminatorPropertyName: string): string | undefined {
   if (!component) {
     return undefined;
   }
 
   for (const schema of ownSchemas(component)) {
-    const property = schema.properties?.[propertyName];
+    const property = schema.properties?.[discriminatorPropertyName];
 
     if (property && 'example' in property && typeof property.example === 'string') {
       return property.example;
@@ -69,7 +69,11 @@ function discriminatorValue(component: Schema | undefined, propertyName: string)
  * would otherwise neither extend it nor be usable as its model type. Their own
  * discriminator value is applied in the union type instead.
  */
-function findOpenTypes(components: Components, keys: readonly string[], propertyName: string): Map<string, string> {
+function findOpenTypes(
+  components: Components,
+  keys: readonly string[],
+  discriminatorPropertyName: string,
+): Map<string, string> {
   const openTypes = new Map<string, string>();
 
   keys.forEach((key) => {
@@ -81,7 +85,9 @@ function findOpenTypes(components: Components, keys: readonly string[], property
       }
 
       visited.add(superKey);
-      const value = keys.includes(superKey) ? discriminatorValue(components[superKey], propertyName) : undefined;
+      const value = keys.includes(superKey)
+        ? discriminatorValue(components[superKey], discriminatorPropertyName)
+        : undefined;
 
       if (value !== undefined) {
         openTypes.set(superKey, value);
@@ -93,8 +99,8 @@ function findOpenTypes(components: Components, keys: readonly string[], property
 }
 
 function fixSubType(sources: SourceFile[], components: Components, subKey: string, discriminator: Discriminator): void {
-  const { propertyName, openTypes } = discriminator;
-  const typeValue = discriminatorValue(components[subKey], propertyName);
+  const { propertyName: discriminatorPropertyName, openTypes } = discriminator;
+  const typeValue = discriminatorValue(components[subKey], discriminatorPropertyName);
 
   if (typeValue === undefined) {
     return;
@@ -106,7 +112,7 @@ function fixSubType(sources: SourceFile[], components: Components, subKey: strin
   // or to drop it when the union type pins it instead
   const fixedSource = new TypeFixProcessor(
     subSource,
-    propertyName,
+    discriminatorPropertyName,
     openTypes.has(subKey) ? undefined : typeValue,
   ).process();
   sources.splice(sources.indexOf(subSource), 1, fixedSource);
@@ -114,7 +120,7 @@ function fixSubType(sources: SourceFile[], components: Components, subKey: strin
   // fix the model to remove the discriminator property
   const modelFn = `${convertFullyQualifiedNameToRelativePath(subKey)}Model.ts`;
   const modelSource = sources.find(({ fileName }) => fileName === modelFn)!;
-  const fixedModelSource = new ModelFixProcessor(modelSource, propertyName).process();
+  const fixedModelSource = new ModelFixProcessor(modelSource, discriminatorPropertyName).process();
   sources.splice(sources.indexOf(modelSource), 1, fixedModelSource);
 }
 
@@ -143,9 +149,12 @@ export default class SubTypesPlugin extends Plugin {
         baseComponent.oneOf.every((schema) => isReferenceSchema(schema))
       ) {
         // `@JsonTypeInfo` may use any property name as the discriminator
-        const propertyName = baseComponent.discriminator?.propertyName ?? DEFAULT_DISCRIMINATOR;
+        const discriminatorPropertyName = baseComponent.discriminator?.propertyName ?? DEFAULT_DISCRIMINATOR;
         const subKeys = baseComponent.oneOf.map(schemaKey);
-        const discriminator = { openTypes: findOpenTypes(components, subKeys, propertyName), propertyName };
+        const discriminator = {
+          openTypes: findOpenTypes(components, subKeys, discriminatorPropertyName),
+          propertyName: discriminatorPropertyName,
+        };
 
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
         const source = sources.find(({ fileName }) => fileName === fn)!;

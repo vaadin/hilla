@@ -4,11 +4,11 @@ import { propertyNameToString } from './utils.js';
 
 export class ModelFixProcessor {
   readonly #source: SourceFile;
-  readonly #propertyName: string;
+  readonly #discriminatorPropertyName: string;
 
-  constructor(source: SourceFile, propertyName: string) {
+  constructor(source: SourceFile, discriminatorPropertyName: string) {
     this.#source = source;
-    this.#propertyName = propertyName;
+    this.#discriminatorPropertyName = discriminatorPropertyName;
   }
 
   process(): SourceFile {
@@ -16,7 +16,8 @@ export class ModelFixProcessor {
       // filter out the discriminator property from all models
       if (ts.isClassDeclaration(statement)) {
         const members = statement.members.filter(
-          (member) => !(ts.isGetAccessor(member) && propertyNameToString(member.name) === this.#propertyName),
+          (member) =>
+            !(ts.isGetAccessor(member) && propertyNameToString(member.name) === this.#discriminatorPropertyName),
         );
 
         return ts.factory.createClassDeclaration(
