@@ -95,11 +95,25 @@ public class EndpointRegistry {
         this.endpointNameChecker = endpointNameChecker;
     }
 
-    static String getEndpointNameForClass(Class<?> beanType) {
+    private static String getEndpointNameForClass(Class<?> beanType) {
+        return getCanonicalEndpointNameForClass(beanType)
+                .toLowerCase(Locale.ENGLISH);
+    }
+
+    /**
+     * Gets the endpoint name of the given endpoint class as it is declared,
+     * without the case normalization that is applied to the name the endpoints
+     * are registered and looked up with.
+     *
+     * @param beanType
+     *            the endpoint class
+     * @return the declared endpoint name
+     */
+    static String getCanonicalEndpointNameForClass(Class<?> beanType) {
         // BrowserCallable has no value so this works
         return Optional.ofNullable(beanType.getAnnotation(Endpoint.class))
                 .map(Endpoint::value).filter(value -> !value.isEmpty())
-                .orElse(beanType.getSimpleName()).toLowerCase(Locale.ENGLISH);
+                .orElse(beanType.getSimpleName());
     }
 
     String registerEndpoint(Object endpointBean) {

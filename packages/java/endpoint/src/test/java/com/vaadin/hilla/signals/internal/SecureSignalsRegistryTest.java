@@ -179,7 +179,7 @@ public class SecureSignalsRegistryTest {
             throws Exception {
         EndpointInvoker invoker = Mockito.mock(EndpointInvoker.class);
         when(invoker.checkAccess(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any(), Mockito.any())).thenReturn("Access denied");
+                Mockito.any())).thenReturn("Access denied");
         fakeMethodExistenceOn(invoker);
         return invoker;
     }

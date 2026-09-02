@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -276,6 +277,29 @@ public class EndpointInvokerTest {
         assertEquals("the request payload must not be exposed in the event", 0,
                 invocation.getArguments().length);
         assertThrows(UnsupportedOperationException.class, invocation::proceed);
+    }
+
+    @Test
+    public void when_noAuthorizationEventPublisherIsDefined_accessIsStillDenied()
+            throws Exception {
+        var contextWithoutPublisher = Mockito.mock(ApplicationContext.class);
+        when(contextWithoutPublisher.getBean(AuthorizationEventPublisher.class))
+                .thenThrow(new NoSuchBeanDefinitionException(
+                        AuthorizationEventPublisher.class));
+        var invoker = new EndpointInvoker(contextWithoutPublisher,
+                new JacksonObjectMapperFactory.Json().build(),
+                explicitNullableTypeChecker, servletContext, endpointRegistry) {
+            protected EndpointAccessChecker getAccessChecker() {
+                return endpointAccessChecker;
+            }
+        };
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        when(endpointAccessChecker.check(any(Method.class), any(), any()))
+                .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
+
+        assertThrows(EndpointHttpException.class,
+                () -> invoker.invoke("SecuredEndpoint", "secured", body,
+                        principal, requestMock::isUserInRole));
     }
 
     @Test

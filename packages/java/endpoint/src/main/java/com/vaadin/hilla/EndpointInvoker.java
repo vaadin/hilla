@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -86,6 +87,7 @@ public class EndpointInvoker {
     private final ExplicitNullableTypeChecker explicitNullableTypeChecker;
     private final ServletContext servletContext;
     private final Validator validator;
+    private volatile Optional<AuthorizationEventPublisher> authorizationEventPublisher;
 
     /**
      * Creates an instance of this bean.
@@ -397,15 +399,6 @@ public class EndpointInvoker {
         }
     }
 
-    public String checkAccess(EndpointRegistry.VaadinEndpointData endpointData,
-            Method methodToInvoke, Principal principal,
-            Function<String, Boolean> rolesChecker) {
-        var endpointName = EndpointRegistry.getEndpointNameForClass(
-                ClassUtils.getUserClass(endpointData.getEndpointObject()));
-        return checkAccess(endpointName, endpointData, methodToInvoke,
-                principal, rolesChecker);
-    }
-
     /**
      * Checks that the given user is allowed to call the given endpoint method.
      * <p>
@@ -415,8 +408,6 @@ public class EndpointInvoker {
      * carrying an {@link EndpointInvocation} is published, so that endpoint
      * calls can be audited the same way as Spring method security invocations.
      *
-     * @param endpointName
-     *            the name of the endpoint
      * @param endpointData
      *            the data of the endpoint to check
      * @param methodToInvoke
@@ -427,8 +418,7 @@ public class EndpointInvoker {
      *            a function for checking if a user is in a given role
      * @return an error message if the access is denied, {@code null} otherwise
      */
-    public String checkAccess(String endpointName,
-            EndpointRegistry.VaadinEndpointData endpointData,
+    public String checkAccess(EndpointRegistry.VaadinEndpointData endpointData,
             Method methodToInvoke, Principal principal,
             Function<String, Boolean> rolesChecker) {
         var methodDeclaringClass = methodToInvoke.getDeclaringClass();
@@ -444,29 +434,21 @@ public class EndpointInvoker {
                     rolesChecker);
         }
         if (checkError != null) {
-            publishAuthorizationDeniedEvent(endpointName, endpointData,
+            publishAuthorizationDeniedEvent(invokedEndpointClass, endpointData,
                     methodToInvoke, principal);
         }
         return checkError;
     }
 
-    private void publishAuthorizationDeniedEvent(String endpointName,
+    private void publishAuthorizationDeniedEvent(Class<?> invokedEndpointClass,
             EndpointRegistry.VaadinEndpointData endpointData,
             Method methodToInvoke, Principal principal) {
-        AuthorizationEventPublisher publisher;
-        try {
-            publisher = applicationContext
-                    .getBean(AuthorizationEventPublisher.class);
-        } catch (Exception e) {
-            getLogger().debug(
-                    "No AuthorizationEventPublisher found in Spring Context, "
-                            + "authorization denied events are not published",
-                    e);
-            return;
-        }
+        var publisher = getAuthorizationEventPublisher().orElse(null);
         if (publisher == null) {
             return;
         }
+        var endpointName = EndpointRegistry
+                .getCanonicalEndpointNameForClass(invokedEndpointClass);
         Supplier<Authentication> authentication = () -> {
             if (principal instanceof Authentication auth) {
                 return auth;
@@ -485,6 +467,24 @@ public class EndpointInvoker {
         }
     }
 
+    private Optional<AuthorizationEventPublisher> getAuthorizationEventPublisher() {
+        var publisher = authorizationEventPublisher;
+        if (publisher == null) {
+            try {
+                publisher = Optional.ofNullable(applicationContext
+                        .getBean(AuthorizationEventPublisher.class));
+            } catch (Exception e) {
+                getLogger().debug(
+                        "AuthorizationEventPublisher not found in Spring Context, "
+                                + "authorization denied events are not published",
+                        e);
+                publisher = Optional.empty();
+            }
+            authorizationEventPublisher = publisher;
+        }
+        return publisher;
+    }
+
     private Object invokeVaadinEndpointMethod(String endpointName,
             String methodName, Method methodToInvoke, ObjectNode body,
             VaadinEndpointData vaadinEndpointData, Principal principal,
@@ -492,8 +492,8 @@ public class EndpointInvoker {
             throws EndpointHttpException {
         HillaStats.reportEndpointActive();
 
-        var checkError = checkAccess(endpointName, vaadinEndpointData,
-                methodToInvoke, principal, rolesChecker);
+        var checkError = checkAccess(vaadinEndpointData, methodToInvoke,
+                principal, rolesChecker);
         if (checkError != null) {
             var message = String.format(
                     "Endpoint '%s' method '%s' request cannot be accessed, reason: '%s'",
