@@ -86,6 +86,10 @@ assertTypescriptMatchesSnapshot(
         generator(BasicEndpoint.class).withPlugin(configuredPlugin));
 ```
 
+The `snapshots` folder belongs to the package of the test, not to the test
+class, so keep one full-stack test class per package: two of them in the same
+package would share, and overwrite, the same expected files.
+
 Snapshots are recreated from the current generator output by running the tests
 with `-Dhilla.test.updateSnapshots`. The resulting diff is the specification
 of what the generator produces and must always be reviewed.

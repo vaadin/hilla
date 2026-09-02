@@ -63,8 +63,9 @@ public final class FullStackGenerator {
             .getLogger(FullStackGenerator.class);
 
     /**
-     * The name of the Kotlin nullability plugin, which is only loaded when
-     * Kotlin is available, exactly like in {@code ParserConfiguration}.
+     * The name of the Kotlin nullability plugin, which is only loaded when both
+     * the plugin and {@code kotlin-reflect} are available, following the same
+     * rule as {@code ParserConfiguration}.
      */
     private static final String KOTLIN_NULLABILITY_PLUGIN = "com.vaadin.hilla.parser.plugins.nonnull.kotlin.KotlinNullabilityPlugin";
 
@@ -190,10 +191,16 @@ public final class FullStackGenerator {
                 new MultipartFileCheckerPlugin(), new TransferTypesPlugin()));
 
         try {
-            plugins.add((Plugin) Class.forName(KOTLIN_NULLABILITY_PLUGIN)
-                    .getDeclaredConstructor().newInstance());
-        } catch (ReflectiveOperationException e) {
-            LOGGER.debug("Kotlin nullability plugin is not available", e);
+            var pluginClass = Class.forName(KOTLIN_NULLABILITY_PLUGIN);
+
+            // Check that a class from kotlin-reflect is available:
+            Class.forName("kotlin.reflect.KClass");
+
+            plugins.add((Plugin) pluginClass.getDeclaredConstructor()
+                    .newInstance());
+        } catch (Throwable e) {
+            LOGGER.debug("Kotlin nullability plugin is not going to be loaded",
+                    e);
         }
 
         plugins.addAll(List.of(new NonnullPlugin(), new SubTypesPlugin(),

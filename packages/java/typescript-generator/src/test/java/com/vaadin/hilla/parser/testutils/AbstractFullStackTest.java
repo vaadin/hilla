@@ -49,6 +49,11 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <p>
+ * The folder belongs to the package of the test rather than to the test class,
+ * so there should be only one such test class per package: two of them would
+ * share, and overwrite, the same expected files.
+ *
+ * <p>
  * Snapshots can be recreated from the current generator output by running the
  * tests with {@code -Dhilla.test.updateSnapshots}. Always review the resulting
  * diff: it is the specification of what the generator produces.
@@ -104,7 +109,8 @@ public abstract class AbstractFullStackTest {
     }
 
     private static boolean isUpdatingSnapshots() {
-        return System.getProperty(UPDATE_SNAPSHOTS_PROPERTY) != null;
+        var value = System.getProperty(UPDATE_SNAPSHOTS_PROPERTY);
+        return value != null && !"false".equalsIgnoreCase(value);
     }
 
     private Map<String, String> readSnapshots(FullStackGenerator generator) {
@@ -144,16 +150,7 @@ public abstract class AbstractFullStackTest {
         LOGGER.info("Updating the snapshots in {}", snapshotsDir);
 
         try {
-            if (Files.isDirectory(snapshotsDir)) {
-                try (var files = Files.walk(snapshotsDir)) {
-                    for (var path : files.sorted(Comparator.reverseOrder())
-                            .toList()) {
-                        if (!path.equals(snapshotsDir)) {
-                            Files.delete(path);
-                        }
-                    }
-                }
-            }
+            deleteExistingSnapshots(snapshotsDir);
 
             for (var entry : generated.entrySet()) {
                 var path = snapshotsDir.resolve(entry.getKey());
@@ -163,6 +160,41 @@ public abstract class AbstractFullStackTest {
         } catch (IOException e) {
             throw new IllegalStateException(
                     "Unable to update the snapshots in " + snapshotsDir, e);
+        }
+    }
+
+    /**
+     * Removes the snapshots of a previous run, but nothing else: the folder may
+     * also contain files which are not snapshots.
+     */
+    private static void deleteExistingSnapshots(Path snapshotsDir)
+            throws IOException {
+        if (!Files.isDirectory(snapshotsDir)) {
+            return;
+        }
+
+        try (var files = Files.walk(snapshotsDir)) {
+            for (var path : files.filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".ts")).toList()) {
+                Files.delete(path);
+            }
+        }
+
+        // Snapshots are generated into a folder structure which mirrors the
+        // package of the entity, so leftover folders have to go as well
+        try (var files = Files.walk(snapshotsDir)) {
+            for (var path : files.sorted(Comparator.reverseOrder()).toList()) {
+                if (!path.equals(snapshotsDir) && Files.isDirectory(path)
+                        && isEmpty(path)) {
+                    Files.delete(path);
+                }
+            }
+        }
+    }
+
+    private static boolean isEmpty(Path dir) throws IOException {
+        try (var entries = Files.list(dir)) {
+            return entries.findAny().isEmpty();
         }
     }
 
