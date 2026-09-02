@@ -55,12 +55,12 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * Most cases need no test class at all: {@code EndpointGenerationTest}
- * discovers every package owning a snapshots folder and generates from the
- * browser callable classes it contains. Extend this class only for a case which
- * needs more, such as a configured plugin, and put it in the package of the
- * case, which excludes the package from the discovered ones. The snapshots
- * folder belongs to the package rather than to the test class, so there can be
- * only one such test class per package.
+ * discovers every package holding browser callable classes and generates from
+ * them. Extend this class only for a case which needs more, such as a
+ * configured plugin, and put it in the package of the case, which excludes the
+ * package from the discovered ones. The snapshots folder belongs to the package
+ * rather than to the test class, so there can be only one such test class per
+ * package.
  *
  * <p>
  * Snapshots can be recreated from the current generator output by running the
@@ -145,9 +145,11 @@ public abstract class AbstractFullStackTest {
         var snapshotsDir = getSnapshotsDir(generator);
 
         if (!Files.isDirectory(snapshotsDir)) {
-            throw new AssertionError("The snapshots folder " + snapshotsDir
-                    + " does not exist. Run the tests with -D"
-                    + UPDATE_SNAPSHOTS_PROPERTY + " to create it.");
+            // The folder is named by the caller, which adds it to the
+            // message of any assertion error
+            throw new AssertionError("there is no snapshots folder yet. Run"
+                    + " the tests with -D" + UPDATE_SNAPSHOTS_PROPERTY
+                    + " to create it.");
         }
 
         try (var files = Files.walk(snapshotsDir)) {
