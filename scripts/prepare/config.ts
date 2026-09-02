@@ -1,4 +1,4 @@
-import { argv } from "node:process";
+import { argv, env } from "node:process";
 
 export type Version = {
   javaVersion?: string;
@@ -38,7 +38,10 @@ function getArgValue(argName: string): string | undefined {
   const arg = args.find((arg) => arg.startsWith(argPrefix))
   return arg?.substring(argPrefix.length)
 }
-export const platformBranch = getArgValue('platform-branch') ?? branch;
+// Also honour PLATFORM_BRANCH from the environment, so CI can point the
+// script at a branch without having to expand the npm build script itself.
+const envBranch = env.PLATFORM_BRANCH?.trim();
+export const platformBranch = getArgValue('platform-branch') ?? (envBranch || branch);
 
 export const repoUrl = new URL('https://raw.githubusercontent.com/vaadin/');
 export const root = new URL('../../', import.meta.url);
