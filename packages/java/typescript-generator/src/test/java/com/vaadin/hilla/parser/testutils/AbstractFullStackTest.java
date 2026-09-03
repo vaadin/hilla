@@ -37,6 +37,12 @@ import org.slf4j.LoggerFactory;
  * without a generated file.
  *
  * <p>
+ * The folder mirrors the output folder, except that the package of the test
+ * case is left out of the path of a file which belongs to it: the snapshots
+ * folder already sits in that package, and repeating it made the paths too long
+ * for a checkout on Windows.
+ *
+ * <p>
  * Usage:
  *
  * <pre>
@@ -110,13 +116,15 @@ public abstract class AbstractFullStackTest {
             generated.remove(CLIENT_FILE);
         }
 
+        var snapshots = toSnapshotPaths(generator, generated);
+
         if (isUpdatingSnapshots()) {
-            updateSnapshots(generator, generated);
+            updateSnapshots(generator, snapshots);
         }
 
         try {
             new TypeScriptComparator().compare(readSnapshots(generator),
-                    generated);
+                    snapshots);
         } catch (AssertionError e) {
             throw new AssertionError(
                     getSnapshotsDir(generator) + ": " + e.getMessage(), e);
@@ -133,6 +141,41 @@ public abstract class AbstractFullStackTest {
      */
     protected FullStackGenerator generator(Class<?>... endpointClasses) {
         return new FullStackGenerator(getClass(), endpointClasses);
+    }
+
+    /**
+     * Maps the generated files to their place in the snapshots folder, which
+     * leaves out the package of the test case.
+     *
+     * <p>
+     * A generated file is stored under the package of the type it belongs to,
+     * and the snapshots folder already sits in the package of the test case, so
+     * mirroring the output folder as it is would repeat that package. It made
+     * the deepest paths longer than the 260 characters Windows allows a program
+     * which has not opted into long paths, which broke the checkout of the
+     * repository. A file of any other package, such as a mapped Spring Data
+     * type, keeps its full path.
+     */
+    private static Map<String, String> toSnapshotPaths(
+            FullStackGenerator generator, Map<String, String> generated) {
+        var prefix = generator.getSnapshotsPackage().replace('.', '/') + "/";
+        var snapshots = new LinkedHashMap<String, String>();
+
+        generated.forEach((path, content) -> {
+            var snapshotPath = path.startsWith(prefix)
+                    ? path.substring(prefix.length())
+                    : path;
+
+            if (snapshots.containsKey(snapshotPath)) {
+                throw new IllegalStateException(
+                        "The generated file " + path + " shares the snapshot "
+                                + snapshotPath + " with another one");
+            }
+
+            snapshots.put(snapshotPath, content);
+        });
+
+        return snapshots;
     }
 
     private static boolean isUpdatingSnapshots() {
