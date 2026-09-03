@@ -39,8 +39,9 @@ function ownSchemas(component: Schema): readonly OpenAPIV3.SchemaObject[] {
  * Returns the values that the discriminator property of the type accepts: the
  * Java parser stores them as the `enum` of that property, the own value of the
  * type first, followed by the values of the subtypes below it, which narrow the
- * discriminator further. The `example`, which holds the own value alone, is the
- * fallback for documents without an `enum`.
+ * discriminator further. The property is left alone when the values are
+ * missing, as pinning a type to its own value alone would clash with the
+ * subtypes below it.
  */
 function discriminatorValues(
   component: Schema | undefined,
@@ -55,10 +56,6 @@ function discriminatorValues(
 
     if (property && 'enum' in property && property.enum?.length) {
       return property.enum.filter((value): value is string => typeof value === 'string');
-    }
-
-    if (property && 'example' in property && typeof property.example === 'string') {
-      return [property.example];
     }
   }
 
