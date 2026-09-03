@@ -5,35 +5,32 @@ import { createDiscriminatorProperty, propertyNameToString } from './utils.js';
 export class TypeFixProcessor {
   readonly #source: SourceFile;
   readonly #discriminatorPropertyName: string;
-  readonly #typeValue: string | undefined;
+  readonly #typeValues: readonly string[];
 
   /**
-   * @param typeValue - the discriminator value of the type, or `undefined` when
-   * the property has to be dropped because the discriminator is applied in the
-   * union type instead.
+   * @param typeValues - the discriminator values the type accepts: its own
+   * value, followed by the values of the subtypes below it, if any.
    */
-  constructor(source: ts.SourceFile, discriminatorPropertyName: string, typeValue: string | undefined) {
+  constructor(source: ts.SourceFile, discriminatorPropertyName: string, typeValues: readonly string[]) {
     this.#source = source;
     this.#discriminatorPropertyName = discriminatorPropertyName;
-    this.#typeValue = typeValue;
+    this.#typeValues = typeValues;
   }
 
   process(): SourceFile {
     const statements = this.#source.statements.map((statement) => {
       // search in the interface definition
       if (ts.isInterfaceDeclaration(statement)) {
-        const members = statement.members.flatMap((member) => {
+        const members = statement.members.map((member) => {
           // search for the discriminator property
           if (
             !ts.isPropertySignature(member) ||
             propertyNameToString(member.name) !== this.#discriminatorPropertyName
           ) {
-            return [member];
+            return member;
           }
 
-          return this.#typeValue === undefined
-            ? []
-            : [createDiscriminatorProperty(this.#discriminatorPropertyName, this.#typeValue)];
+          return createDiscriminatorProperty(this.#discriminatorPropertyName, this.#typeValues);
         });
 
         return ts.factory.createInterfaceDeclaration(

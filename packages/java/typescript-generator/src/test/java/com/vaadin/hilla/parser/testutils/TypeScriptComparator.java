@@ -16,10 +16,10 @@
 package com.vaadin.hilla.parser.testutils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Utility for comparing generated TypeScript files against expected snapshots.
@@ -29,8 +29,11 @@ public class TypeScriptComparator {
     /**
      * Compare expected and actual TypeScript files.
      *
-     * Only verifies that expected snapshot files are present and match.
-     * Additional generated files (not in snapshots) are allowed and ignored.
+     * <p>
+     * The comparison is exact: every expected file must be generated with the
+     * expected content, and no other file may be generated. This makes the
+     * snapshots a complete description of the generator output, including the
+     * location of each file.
      *
      * @param expected
      *            Map of file name to content (expected snapshots)
@@ -44,24 +47,28 @@ public class TypeScriptComparator {
         List<String> errors = new ArrayList<>();
 
         // Check for missing files - expected files MUST be present
-        Set<String> expectedFiles = new HashSet<>(expected.keySet());
-        Set<String> actualFiles = new HashSet<>(actual.keySet());
+        Set<String> expectedFiles = new TreeSet<>(expected.keySet());
+        Set<String> actualFiles = new TreeSet<>(actual.keySet());
 
-        Set<String> missingFiles = new HashSet<>(expectedFiles);
+        Set<String> missingFiles = new TreeSet<>(expectedFiles);
         missingFiles.removeAll(actualFiles);
 
         if (!missingFiles.isEmpty()) {
-            errors.add("Missing expected files: " + missingFiles);
+            errors.add("Expected files which have not been generated: "
+                    + missingFiles);
         }
 
-        // Note: We intentionally do NOT check for extra files.
-        // Tests only verify specific files they care about (snapshots).
-        // Additional generated files (like connect-client.default.ts,
-        // endpoints.ts)
-        // are allowed and will be ignored if not in the snapshots directory.
+        Set<String> unexpectedFiles = new TreeSet<>(actualFiles);
+        unexpectedFiles.removeAll(expectedFiles);
+
+        if (!unexpectedFiles.isEmpty()) {
+            errors.add("Generated files without a snapshot: " + unexpectedFiles
+                    + ". Run the tests with -Dhilla.test.updateSnapshots if the"
+                    + " new files are expected.");
+        }
 
         // Compare content of common files
-        Set<String> commonFiles = new HashSet<>(expectedFiles);
+        Set<String> commonFiles = new TreeSet<>(expectedFiles);
         commonFiles.retainAll(actualFiles);
 
         for (String fileName : commonFiles) {

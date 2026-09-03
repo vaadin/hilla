@@ -5,12 +5,13 @@ const SCHEMA_PREFIX = '#/components/schemas/';
 
 /**
  * The discriminator of a union type: the name of the property that holds it,
- * and the value of each subtype that does not declare the property itself,
- * mapped by schema name.
+ * and the values that the property accepts in each subtype, mapped by schema
+ * name. The own value of a subtype comes first, followed by the values of the
+ * subtypes below it.
  */
 export type Discriminator = Readonly<{
   propertyName: string;
-  openTypes: ReadonlyMap<string, string>;
+  values: ReadonlyMap<string, readonly string[]>;
 }>;
 const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/u;
 
@@ -34,27 +35,33 @@ export function createPropertyName(name: string): PropertyName {
 }
 
 /**
- * Creates the property signature that pins the discriminator to the value of a
- * single subtype, e. g. `"@type": "add"`.
+ * Creates the property signature that restricts the discriminator to the given
+ * values, e. g. `"@type": "add"`. A subtype that is also the supertype of
+ * another subtype accepts more than one value, as the discriminator is narrowed
+ * further down the hierarchy.
  */
-export function createDiscriminatorProperty(propertyName: string, typeValue: string): ts.PropertySignature {
+export function createDiscriminatorProperty(propertyName: string, typeValues: readonly string[]): ts.PropertySignature {
+  const literals = typeValues.map((typeValue) =>
+    ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(typeValue)),
+  );
+
   return ts.factory.createPropertySignature(
     undefined,
     createPropertyName(propertyName),
     undefined,
-    ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(typeValue)),
+    literals.length === 1 ? literals[0] : ts.factory.createUnionTypeNode(literals),
   );
 }
 
 /**
- * Creates a type that pins the discriminator of an otherwise open type, e. g.
- * `(BaseEvent & { "@type": "base" })`.
+ * Creates a type that pins the discriminator of a type accepting more than one
+ * value, e. g. `(BaseEvent & { "@type": "base" })`.
  */
 export function createDiscriminatedType(type: TypeNode, propertyName: string, typeValue: string): TypeNode {
   return ts.factory.createParenthesizedType(
     ts.factory.createIntersectionTypeNode([
       type,
-      ts.factory.createTypeLiteralNode([createDiscriminatorProperty(propertyName, typeValue)]),
+      ts.factory.createTypeLiteralNode([createDiscriminatorProperty(propertyName, [typeValue])]),
     ]),
   );
 }

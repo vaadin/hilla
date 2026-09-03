@@ -35,19 +35,18 @@ function ownSchemas(component: Schema): readonly OpenAPIV3.SchemaObject[] {
     : [component];
 }
 
-function superTypeKey(component: Schema | undefined): string | undefined {
-  if (!component || isReferenceSchema(component) || !component.anyOf) {
-    return undefined;
-  }
-
-  return component.anyOf.filter(isReferenceSchema).map(schemaKey)[0];
-}
-
 /**
- * Returns the value of the discriminator property declared by the type itself,
- * which the Java parser stores as the `example` of that property.
+ * Returns the values that the discriminator property of the type accepts: the
+ * Java parser stores them as the `enum` of that property, the own value of the
+ * type first, followed by the values of the subtypes below it, which narrow the
+ * discriminator further. The property is left alone when the values are
+ * missing, as pinning a type to its own value alone would clash with the
+ * subtypes below it.
  */
-function discriminatorValue(component: Schema | undefined, discriminatorPropertyName: string): string | undefined {
+function discriminatorValues(
+  component: Schema | undefined,
+  discriminatorPropertyName: string,
+): readonly string[] | undefined {
   if (!component) {
     return undefined;
   }
@@ -55,8 +54,8 @@ function discriminatorValue(component: Schema | undefined, discriminatorProperty
   for (const schema of ownSchemas(component)) {
     const property = schema.properties?.[discriminatorPropertyName];
 
-    if (property && 'example' in property && typeof property.example === 'string') {
-      return property.example;
+    if (property && 'enum' in property && property.enum?.length) {
+      return property.enum.filter((value): value is string => typeof value === 'string');
     }
   }
 
@@ -64,57 +63,43 @@ function discriminatorValue(component: Schema | undefined, discriminatorProperty
 }
 
 /**
- * Returns the subtypes that are a supertype of another subtype. Their interface
- * has to stay open, as a subtype narrows the discriminator to another value and
- * would otherwise neither extend it nor be usable as its model type. Their own
- * discriminator value is applied in the union type instead.
+ * Returns the values that the discriminator accepts in each subtype, mapped by
+ * schema name. A subtype that is also the supertype of another subtype accepts
+ * more than one value: pinning it to its own value would leave the subtype
+ * unable to extend it, or to be used as the type parameter of its model, so the
+ * union type pins the own value of such a subtype instead.
  */
-function findOpenTypes(
+function findDiscriminatorValues(
   components: Components,
   keys: readonly string[],
   discriminatorPropertyName: string,
-): Map<string, string> {
-  const openTypes = new Map<string, string>();
+): Map<string, readonly string[]> {
+  const values = new Map<string, readonly string[]>();
 
   keys.forEach((key) => {
-    const visited = new Set<string>([key]);
+    const subTypeValues = discriminatorValues(components[key], discriminatorPropertyName);
 
-    for (let superKey = superTypeKey(components[key]); superKey; superKey = superTypeKey(components[superKey])) {
-      if (visited.has(superKey)) {
-        break;
-      }
-
-      visited.add(superKey);
-      const value = keys.includes(superKey)
-        ? discriminatorValue(components[superKey], discriminatorPropertyName)
-        : undefined;
-
-      if (value !== undefined) {
-        openTypes.set(superKey, value);
-      }
+    if (subTypeValues?.length) {
+      values.set(key, subTypeValues);
     }
   });
 
-  return openTypes;
+  return values;
 }
 
-function fixSubType(sources: SourceFile[], components: Components, subKey: string, discriminator: Discriminator): void {
-  const { propertyName: discriminatorPropertyName, openTypes } = discriminator;
-  const typeValue = discriminatorValue(components[subKey], discriminatorPropertyName);
+function fixSubType(sources: SourceFile[], subKey: string, discriminator: Discriminator): void {
+  const { propertyName: discriminatorPropertyName, values } = discriminator;
+  const typeValues = values.get(subKey);
 
-  if (typeValue === undefined) {
+  if (!typeValues) {
     return;
   }
 
   const subFn = `${convertFullyQualifiedNameToRelativePath(subKey)}.ts`;
   const subSource = sources.find(({ fileName }) => fileName === subFn)!;
-  // fix the source to turn the discriminator property into a string literal,
-  // or to drop it when the union type pins it instead
-  const fixedSource = new TypeFixProcessor(
-    subSource,
-    discriminatorPropertyName,
-    openTypes.has(subKey) ? undefined : typeValue,
-  ).process();
+  // fix the source to turn the discriminator property into the string literals
+  // that the type accepts
+  const fixedSource = new TypeFixProcessor(subSource, discriminatorPropertyName, typeValues).process();
   sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
   // fix the model to remove the discriminator property
@@ -152,8 +137,8 @@ export default class SubTypesPlugin extends Plugin {
         const discriminatorPropertyName = baseComponent.discriminator?.propertyName ?? DEFAULT_DISCRIMINATOR;
         const subKeys = baseComponent.oneOf.map(schemaKey);
         const discriminator = {
-          openTypes: findOpenTypes(components, subKeys, discriminatorPropertyName),
           propertyName: discriminatorPropertyName,
+          values: findDiscriminatorValues(components, subKeys, discriminatorPropertyName),
         };
 
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
@@ -164,7 +149,7 @@ export default class SubTypesPlugin extends Plugin {
 
         // mentioned types in the oneOf need to be fixed as well
         subKeys.forEach((subKey) => {
-          fixSubType(sources, components, subKey, discriminator);
+          fixSubType(sources, subKey, discriminator);
         });
 
         // remove the union type model file
