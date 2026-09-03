@@ -35,10 +35,18 @@ public class TypeScriptComparator {
      * snapshots a complete description of the generator output, including the
      * location of each file.
      *
+     * <p>
+     * A file is keyed by its path in the snapshots folder rather than by its
+     * path in the output folder. The two differ for a file which belongs to the
+     * package of the test case, as that package is left out of the former, so
+     * the imports of a compared file are the only place where an output path
+     * appears in full. {@link AbstractFullStackTest} maps between the two and
+     * rejects two generated files which would share a snapshot.
+     *
      * @param expected
-     *            Map of file name to content (expected snapshots)
+     *            Map of snapshot path to content (expected snapshots)
      * @param actual
-     *            Map of file name to content (generated files)
+     *            Map of snapshot path to content (generated files)
      * @throws AssertionError
      *             if files don't match
      */
