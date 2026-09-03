@@ -73,6 +73,31 @@
           }
         }
       }
+    },
+    "/SubTypesEndpoint/sendNotification": {
+      "post": {
+        "tags": [
+          "SubTypesEndpoint"
+        ],
+        "operationId": "SubTypesEndpoint_sendNotification_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Notification"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -88,6 +113,9 @@
       },
       "com.vaadin.hilla.parser.plugins.subtypes.BaseEventUnion": {
         "type": "object",
+        "discriminator": {
+          "propertyName": "@type"
+        },
         "oneOf": [
           {
             "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.AddEvent"
@@ -162,6 +190,69 @@
               "@type": {
                 "type": "string",
                 "example": "delete"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.Notification": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.NotificationUnion": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.EmailNotification"
+          },
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.SmsNotification"
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.EmailNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Notification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "nullable": true
+              },
+              "kind": {
+                "type": "string",
+                "example": "email"
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.SmsNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Notification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "number": {
+                "type": "string",
+                "nullable": true
+              },
+              "kind": {
+                "type": "string",
+                "example": "sms"
               }
             }
           }
