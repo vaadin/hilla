@@ -64,19 +64,37 @@ function discriminatorValue(component: Schema | undefined, discriminatorProperty
 }
 
 /**
- * Returns the subtypes that are a supertype of another subtype. Their interface
- * has to stay open, as a subtype narrows the discriminator to another value and
- * would otherwise neither extend it nor be usable as its model type. Their own
- * discriminator value is applied in the union type instead.
+ * Returns the discriminator values that each subtype accepts: its own value,
+ * followed by the values of the subtypes below it. A subtype that is also the
+ * supertype of another subtype therefore keeps a union of literals, as pinning
+ * it to its own value would leave the subtype unable to extend it, or to be
+ * used as the type parameter of its model. The union type pins the own value of
+ * such a subtype instead.
  */
-function findOpenTypes(
+function findDiscriminatorValues(
   components: Components,
   keys: readonly string[],
   discriminatorPropertyName: string,
-): Map<string, string> {
-  const openTypes = new Map<string, string>();
+): Map<string, string[]> {
+  const values = new Map<string, string[]>();
 
   keys.forEach((key) => {
+    const value = discriminatorValue(components[key], discriminatorPropertyName);
+
+    if (value !== undefined) {
+      values.set(key, [value]);
+    }
+  });
+
+  keys.forEach((key) => {
+    const value = values.get(key)?.[0];
+
+    if (value === undefined) {
+      return;
+    }
+
+    // the whole reference chain is followed, so that a class which is not a
+    // subtype itself does not hide the subtypes above it
     const visited = new Set<string>([key]);
 
     for (let superKey = superTypeKey(components[key]); superKey; superKey = superTypeKey(components[superKey])) {
@@ -85,36 +103,26 @@ function findOpenTypes(
       }
 
       visited.add(superKey);
-      const value = keys.includes(superKey)
-        ? discriminatorValue(components[superKey], discriminatorPropertyName)
-        : undefined;
-
-      if (value !== undefined) {
-        openTypes.set(superKey, value);
-      }
+      values.get(superKey)?.push(value);
     }
   });
 
-  return openTypes;
+  return values;
 }
 
-function fixSubType(sources: SourceFile[], components: Components, subKey: string, discriminator: Discriminator): void {
-  const { propertyName: discriminatorPropertyName, openTypes } = discriminator;
-  const typeValue = discriminatorValue(components[subKey], discriminatorPropertyName);
+function fixSubType(sources: SourceFile[], subKey: string, discriminator: Discriminator): void {
+  const { propertyName: discriminatorPropertyName, values } = discriminator;
+  const typeValues = values.get(subKey);
 
-  if (typeValue === undefined) {
+  if (!typeValues) {
     return;
   }
 
   const subFn = `${convertFullyQualifiedNameToRelativePath(subKey)}.ts`;
   const subSource = sources.find(({ fileName }) => fileName === subFn)!;
-  // fix the source to turn the discriminator property into a string literal,
-  // or to drop it when the union type pins it instead
-  const fixedSource = new TypeFixProcessor(
-    subSource,
-    discriminatorPropertyName,
-    openTypes.has(subKey) ? undefined : typeValue,
-  ).process();
+  // fix the source to turn the discriminator property into the string literals
+  // that the type accepts
+  const fixedSource = new TypeFixProcessor(subSource, discriminatorPropertyName, typeValues).process();
   sources.splice(sources.indexOf(subSource), 1, fixedSource);
 
   // fix the model to remove the discriminator property
@@ -152,8 +160,8 @@ export default class SubTypesPlugin extends Plugin {
         const discriminatorPropertyName = baseComponent.discriminator?.propertyName ?? DEFAULT_DISCRIMINATOR;
         const subKeys = baseComponent.oneOf.map(schemaKey);
         const discriminator = {
-          openTypes: findOpenTypes(components, subKeys, discriminatorPropertyName),
           propertyName: discriminatorPropertyName,
+          values: findDiscriminatorValues(components, subKeys, discriminatorPropertyName),
         };
 
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
@@ -164,7 +172,7 @@ export default class SubTypesPlugin extends Plugin {
 
         // mentioned types in the oneOf need to be fixed as well
         subKeys.forEach((subKey) => {
-          fixSubType(sources, components, subKey, discriminator);
+          fixSubType(sources, subKey, discriminator);
         });
 
         // remove the union type model file

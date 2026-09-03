@@ -73,9 +73,9 @@ describe('SubTypesPlugin', () => {
       await expectSource(`${pathBase}/HtmlEmailNotification.ts`);
     });
 
-    it('keeps a subtype that is a supertype of another subtype open', async () => {
-      // the discriminator of those types is pinned in the union type instead,
-      // as it is narrowed to another value further down the hierarchy
+    it('widens the discriminator of a subtype that is also a supertype', async () => {
+      // those types accept the values of the subtypes below them as well, and
+      // the union type pins their own value instead
       await expectSource(`${pathBase}/Notification.ts`);
       await expectSource(`${pathBase}/NotificationModel.ts`);
       await expectSource(`${pathBase}/EmailNotification.ts`);

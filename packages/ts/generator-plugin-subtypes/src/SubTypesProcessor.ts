@@ -38,13 +38,13 @@ export class SubTypesProcessor {
       const subType = convertReferenceSchemaToSpecifier(schema);
       const type = ts.factory.createTypeReferenceNode(imports.default.add(path, subType, true));
 
-      // a subtype that is the supertype of another subtype keeps the
-      // discriminator open, so it has to be pinned here
-      const typeValue = this.#discriminator.openTypes.get(schemaKey(schema));
+      // a subtype that is the supertype of another subtype accepts the values
+      // of the subtypes below it too, so its own value has to be pinned here
+      const typeValues = this.#discriminator.values.get(schemaKey(schema)) ?? [];
 
-      return typeValue === undefined
-        ? type
-        : createDiscriminatedType(type, this.#discriminator.propertyName, typeValue);
+      return typeValues.length > 1
+        ? createDiscriminatedType(type, this.#discriminator.propertyName, typeValues[0])
+        : type;
     });
 
     // create a union type from the subtypes
