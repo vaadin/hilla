@@ -142,7 +142,10 @@
               },
               "@type": {
                 "type": "string",
-                "example": "add"
+                "example": "add",
+                "enum": [
+                  "add"
+                ]
               }
             }
           }
@@ -166,7 +169,10 @@
               },
               "@type": {
                 "type": "string",
-                "example": "update"
+                "example": "update",
+                "enum": [
+                  "update"
+                ]
               }
             }
           }
@@ -189,7 +195,10 @@
               },
               "@type": {
                 "type": "string",
-                "example": "delete"
+                "example": "delete",
+                "enum": [
+                  "delete"
+                ]
               }
             }
           }
@@ -204,7 +213,13 @@
           },
           "kind": {
             "type": "string",
-            "example": "plain"
+            "example": "plain",
+            "enum": [
+              "plain",
+              "email",
+              "html-email",
+              "multipart-sms"
+            ]
           }
         }
       },
@@ -242,7 +257,11 @@
               },
               "kind": {
                 "type": "string",
-                "example": "email"
+                "example": "email",
+                "enum": [
+                  "email",
+                  "html-email"
+                ]
               }
             }
           }
@@ -262,7 +281,10 @@
               },
               "kind": {
                 "type": "string",
-                "example": "html-email"
+                "example": "html-email",
+                "enum": [
+                  "html-email"
+                ]
               }
             }
           }
@@ -282,7 +304,10 @@
               },
               "kind": {
                 "type": "string",
-                "example": "multipart-sms"
+                "example": "multipart-sms",
+                "enum": [
+                  "multipart-sms"
+                ]
               }
             }
           }

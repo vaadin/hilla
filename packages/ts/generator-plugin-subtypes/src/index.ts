@@ -35,19 +35,17 @@ function ownSchemas(component: Schema): readonly OpenAPIV3.SchemaObject[] {
     : [component];
 }
 
-function superTypeKey(component: Schema | undefined): string | undefined {
-  if (!component || isReferenceSchema(component) || !component.anyOf) {
-    return undefined;
-  }
-
-  return component.anyOf.filter(isReferenceSchema).map(schemaKey)[0];
-}
-
 /**
- * Returns the value of the discriminator property declared by the type itself,
- * which the Java parser stores as the `example` of that property.
+ * Returns the values that the discriminator property of the type accepts: the
+ * Java parser stores them as the `enum` of that property, the own value of the
+ * type first, followed by the values of the subtypes below it, which narrow the
+ * discriminator further. The `example`, which holds the own value alone, is the
+ * fallback for documents without an `enum`.
  */
-function discriminatorValue(component: Schema | undefined, discriminatorPropertyName: string): string | undefined {
+function discriminatorValues(
+  component: Schema | undefined,
+  discriminatorPropertyName: string,
+): readonly string[] | undefined {
   if (!component) {
     return undefined;
   }
@@ -55,8 +53,12 @@ function discriminatorValue(component: Schema | undefined, discriminatorProperty
   for (const schema of ownSchemas(component)) {
     const property = schema.properties?.[discriminatorPropertyName];
 
+    if (property && 'enum' in property && property.enum?.length) {
+      return property.enum.filter((value): value is string => typeof value === 'string');
+    }
+
     if (property && 'example' in property && typeof property.example === 'string') {
-      return property.example;
+      return [property.example];
     }
   }
 
@@ -64,46 +66,24 @@ function discriminatorValue(component: Schema | undefined, discriminatorProperty
 }
 
 /**
- * Returns the discriminator values that each subtype accepts: its own value,
- * followed by the values of the subtypes below it. A subtype that is also the
- * supertype of another subtype therefore keeps a union of literals, as pinning
- * it to its own value would leave the subtype unable to extend it, or to be
- * used as the type parameter of its model. The union type pins the own value of
- * such a subtype instead.
+ * Returns the values that the discriminator accepts in each subtype, mapped by
+ * schema name. A subtype that is also the supertype of another subtype accepts
+ * more than one value: pinning it to its own value would leave the subtype
+ * unable to extend it, or to be used as the type parameter of its model, so the
+ * union type pins the own value of such a subtype instead.
  */
 function findDiscriminatorValues(
   components: Components,
   keys: readonly string[],
   discriminatorPropertyName: string,
-): Map<string, string[]> {
-  const values = new Map<string, string[]>();
+): Map<string, readonly string[]> {
+  const values = new Map<string, readonly string[]>();
 
   keys.forEach((key) => {
-    const value = discriminatorValue(components[key], discriminatorPropertyName);
+    const subTypeValues = discriminatorValues(components[key], discriminatorPropertyName);
 
-    if (value !== undefined) {
-      values.set(key, [value]);
-    }
-  });
-
-  keys.forEach((key) => {
-    const value = values.get(key)?.[0];
-
-    if (value === undefined) {
-      return;
-    }
-
-    // the whole reference chain is followed, so that a class which is not a
-    // subtype itself does not hide the subtypes above it
-    const visited = new Set<string>([key]);
-
-    for (let superKey = superTypeKey(components[key]); superKey; superKey = superTypeKey(components[superKey])) {
-      if (visited.has(superKey)) {
-        break;
-      }
-
-      visited.add(superKey);
-      values.get(superKey)?.push(value);
+    if (subTypeValues?.length) {
+      values.set(key, subTypeValues);
     }
   });
 
