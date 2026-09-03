@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.github.classgraph.ClassGraph;
@@ -61,6 +62,25 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
             .getPackageName();
     private static final String ENDPOINT_ANNOTATION = "com.vaadin.hilla.parser.testutils.annotations.Endpoint";
     private static final String SNAPSHOTS_DIR = "snapshots";
+
+    /**
+     * The longest path Windows accepts from a program which has not opted into
+     * long paths, including the terminating null character.
+     */
+    private static final int WINDOWS_MAX_PATH = 260;
+
+    /**
+     * The room left for the folder the repository is cloned into, such as
+     * {@code C:\Users\Someone\projects\hilla\}. The CI runner uses
+     * {@code D:\a\hilla\hilla\}, which is much shorter.
+     */
+    private static final int CLONE_DIR_BUDGET = 60;
+
+    /**
+     * The location of this module in the repository, needed to measure a path
+     * the way a clone of the repository sees it.
+     */
+    private static final String MODULE_PATH = "packages/java/typescript-generator/";
 
     @ParameterizedTest(name = "{0}")
     @MethodSource
@@ -101,6 +121,41 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
                     () -> "There is no browser callable class left to generate"
                             + " the snapshots of " + stale);
         }
+    }
+
+    /**
+     * Guards against snapshots which cannot be checked out on Windows, where a
+     * path longer than {@value #WINDOWS_MAX_PATH} characters is rejected unless
+     * every tool involved has opted into long paths. The snapshots are the
+     * deepest files of the repository by far, because a generated file is
+     * stored under the package of the type it belongs to.
+     */
+    @Test
+    public void should_KeepSnapshotPathsWithinTheWindowsLimit() {
+        var budget = WINDOWS_MAX_PATH - CLONE_DIR_BUDGET;
+        var moduleDir = moduleDir();
+
+        var tooLong = findSnapshotDirs().stream().flatMap(dir -> {
+            try (var paths = Files.walk(dir)) {
+                return paths.filter(Files::isRegularFile).toList().stream();
+            } catch (IOException e) {
+                throw new UncheckedIOException(
+                        "Unable to read the snapshots in " + dir, e);
+            }
+        }).map(path -> MODULE_PATH + moduleDir.relativize(path).toString()
+                .replace(java.io.File.separatorChar, '/'))
+                .filter(path -> path.length() > budget)
+                .sorted(Comparator.comparingInt(String::length).reversed())
+                .toList();
+
+        assertTrue(tooLong.isEmpty(),
+                () -> tooLong.size() + " snapshots have a path longer than "
+                        + budget + " characters, which leaves no room for the"
+                        + " folder the repository is cloned into on Windows."
+                        + " The longest ones are:"
+                        + tooLong.stream().limit(3).map(
+                                path -> "\n  (" + path.length() + ") " + path)
+                                .collect(Collectors.joining()));
     }
 
     private static ScanResult scan() {
@@ -160,21 +215,33 @@ public class EndpointGenerationTest extends AbstractFullStackTest {
      * Finds the packages owning a snapshots folder in the test resources.
      */
     private static List<String> findSnapshotPackages() {
-        var resources = moduleDir()
-                .resolve(Path.of("src", "test", "resources"));
-        var root = resources.resolve(ROOT_PACKAGE.replace('.', '/'));
+        var resources = testResourcesDir();
+
+        return findSnapshotDirs().stream()
+                .map(dir -> resources.relativize(dir.getParent()).toString()
+                        .replace(java.io.File.separatorChar, '.')
+                        .replace('/', '.'))
+                .toList();
+    }
+
+    /**
+     * Finds the snapshots folders of the test resources.
+     */
+    private static List<Path> findSnapshotDirs() {
+        var root = testResourcesDir().resolve(ROOT_PACKAGE.replace('.', '/'));
 
         try (var paths = Files.walk(root)) {
             return paths.filter(Files::isDirectory).filter(
                     path -> SNAPSHOTS_DIR.equals(path.getFileName().toString()))
-                    .map(path -> resources.relativize(path.getParent())
-                            .toString().replace(java.io.File.separatorChar, '.')
-                            .replace('/', '.'))
                     .toList();
         } catch (IOException e) {
             throw new UncheckedIOException(
                     "Unable to look for snapshots in " + root, e);
         }
+    }
+
+    private static Path testResourcesDir() {
+        return moduleDir().resolve(Path.of("src", "test", "resources"));
     }
 
     /**

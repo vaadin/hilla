@@ -74,6 +74,15 @@ folder left without endpoints to generate it fails the build.
 Every case runs through the whole plugin chain, in the production order, so
 what a test verifies is always what a real application would get.
 
+The snapshots folder mirrors the output folder, with one exception: a
+generated file is stored under the package of the type it belongs to, and the
+folder already sits in the package of the test case, so that package is left
+out of the path. A file of any other package, such as a mapped Spring Data
+type, keeps its full path. Repeating the package made the deepest paths longer
+than the 260 characters Windows allows a program which has not opted into long
+paths, which broke the checkout of the repository;
+`should_KeepSnapshotPathsWithinTheWindowsLimit` guards against that returning.
+
 A case which needs more than the endpoint classes has its own test class
 extending `AbstractFullStackTest` in its package. That package is skipped by
 the discovery, and its classes are left out of the surrounding case, so that
