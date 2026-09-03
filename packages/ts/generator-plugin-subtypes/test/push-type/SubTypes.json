@@ -142,7 +142,10 @@
               },
               "@type": {
                 "type": "string",
-                "example": "add"
+                "example": "add",
+                "enum": [
+                  "add"
+                ]
               }
             }
           }
@@ -166,7 +169,10 @@
               },
               "@type": {
                 "type": "string",
-                "example": "update"
+                "example": "update",
+                "enum": [
+                  "update"
+                ]
               }
             }
           }
@@ -189,7 +195,10 @@
               },
               "@type": {
                 "type": "string",
-                "example": "delete"
+                "example": "delete",
+                "enum": [
+                  "delete"
+                ]
               }
             }
           }
@@ -201,6 +210,16 @@
           "message": {
             "type": "string",
             "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "example": "plain",
+            "enum": [
+              "plain",
+              "email",
+              "html-email",
+              "multipart-sms"
+            ]
           }
         }
       },
@@ -211,10 +230,16 @@
         },
         "oneOf": [
           {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Notification"
+          },
+          {
             "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.EmailNotification"
           },
           {
-            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.SmsNotification"
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.HtmlEmailNotification"
+          },
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.MultipartSmsNotification"
           }
         ]
       },
@@ -232,7 +257,57 @@
               },
               "kind": {
                 "type": "string",
-                "example": "email"
+                "example": "email",
+                "enum": [
+                  "email",
+                  "html-email"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.HtmlEmailNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.EmailNotification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "html": {
+                "type": "string",
+                "nullable": true
+              },
+              "kind": {
+                "type": "string",
+                "example": "html-email",
+                "enum": [
+                  "html-email"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.MultipartSmsNotification": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.SmsNotification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parts": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "kind": {
+                "type": "string",
+                "example": "multipart-sms",
+                "enum": [
+                  "multipart-sms"
+                ]
               }
             }
           }
@@ -249,10 +324,6 @@
               "number": {
                 "type": "string",
                 "nullable": true
-              },
-              "kind": {
-                "type": "string",
-                "example": "sms"
               }
             }
           }

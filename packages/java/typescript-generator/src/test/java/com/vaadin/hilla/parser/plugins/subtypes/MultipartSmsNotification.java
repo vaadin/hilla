@@ -15,11 +15,7 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-/**
- * An intermediate class that is not mentioned in {@code @JsonSubTypes}, so it
- * gets no discriminator of its own.
- */
-public class SmsNotification extends Notification {
+public class MultipartSmsNotification extends SmsNotification {
 
-    public String number;
+    public int parts;
 }
