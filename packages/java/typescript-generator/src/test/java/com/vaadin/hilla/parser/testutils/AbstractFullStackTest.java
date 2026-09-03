@@ -15,345 +15,275 @@
  */
 package com.vaadin.hilla.parser.testutils;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-
-import com.vaadin.hilla.EndpointSubscription;
-import com.vaadin.hilla.parser.core.Parser;
-import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.model.ModelPlugin;
-import com.vaadin.hilla.parser.plugins.nonnull.NonnullPlugin;
-import com.vaadin.hilla.parser.plugins.subtypes.SubTypesPlugin;
-import com.vaadin.hilla.parser.plugins.transfertypes.MultipartFileCheckerPlugin;
-import com.vaadin.hilla.parser.plugins.transfertypes.TransferTypesPlugin;
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
-import com.vaadin.hilla.parser.testutils.annotations.EndpointExposed;
 
 /**
- * Abstract base class for full-stack tests that verify Java → TypeScript code
- * generation.
+ * Base class for tests which verify that a set of browser callable Java classes
+ * produces the expected TypeScript files.
  *
  * <p>
- * This class provides a simplified testing approach where all common
- * configuration is pre-configured:
- * <ul>
- * <li>All plugins (Backbone, TransferTypes, Model, Nonnull, SubTypes,
- * MultipartFileChecker)</li>
- * <li>Extended classpath (includes Flux and EndpointSubscription)</li>
- * <li>Both @Endpoint and @EndpointExposed annotations</li>
- * </ul>
+ * The expected files are stored as plain TypeScript files in a
+ * {@code snapshots} folder next to the test resources of the test class. Both
+ * the content and the location of every generated file are verified: a
+ * generated file without a snapshot fails the test, and so does a snapshot
+ * without a generated file.
  *
  * <p>
- * Usage example:
+ * The folder mirrors the output folder, except that the package of the test
+ * case is left out of the path of a file which belongs to it: the snapshots
+ * folder already sits in that package, and repeating it made the paths too long
+ * for a checkout on Windows.
+ *
+ * <p>
+ * Usage:
  *
  * <pre>
  * public class MyEndpointTest extends AbstractFullStackTest {
  *     &#64;Test
- *     public void should_GenerateCorrectTypeScript() throws Exception {
+ *     public void should_GenerateCorrectTypeScript() {
  *         assertTypescriptMatchesSnapshot(MyEndpoint.class);
  *     }
  * }
  * </pre>
+ *
+ * <p>
+ * The generated client file is the same for every endpoint, so it is left out
+ * of the comparison unless a test asks for it with
+ * {@link FullStackGenerator#withClientFile()}.
+ *
+ * <p>
+ * Most cases need no test class at all: {@code EndpointGenerationTest}
+ * discovers every package holding browser callable classes and generates from
+ * them. Extend this class only for a case which needs more, such as a
+ * configured plugin, and put it in the package of the case, which excludes the
+ * package from the discovered ones. The snapshots folder belongs to the package
+ * rather than to the test class, so there can be only one such test class per
+ * package.
+ *
+ * <p>
+ * Snapshots can be recreated from the current generator output by running the
+ * tests with {@code -Dhilla.test.updateSnapshots}. Always review the resulting
+ * diff: it is the specification of what the generator produces.
  */
 public abstract class AbstractFullStackTest {
+    static final String SNAPSHOTS_DIR = "snapshots";
+
+    /**
+     * The generated client, which is the same for every endpoint and is
+     * therefore only compared by the tests which are about it.
+     *
+     * @see FullStackGenerator#withClientFile()
+     */
+    private static final String CLIENT_FILE = "connect-client.default.ts";
+
+    private static final String UPDATE_SNAPSHOTS_PROPERTY = "hilla.test.updateSnapshots";
+
     private static final Logger LOGGER = LoggerFactory
             .getLogger(AbstractFullStackTest.class);
 
-    private final ResourceLoader resourceLoader;
-    private final Path targetDir;
-    private final ObjectMapper objectMapper;
+    /**
+     * Generates TypeScript for the given browser callable classes and verifies
+     * it against the snapshots of this test.
+     *
+     * @param endpointClasses
+     *            the browser callable classes to generate from
+     */
+    protected void assertTypescriptMatchesSnapshot(
+            Class<?>... endpointClasses) {
+        assertTypescriptMatchesSnapshot(generator(endpointClasses));
+    }
 
-    protected AbstractFullStackTest() {
+    /**
+     * Verifies the output of a customized generator against the snapshots of
+     * this test.
+     *
+     * @param generator
+     *            the generator, as returned by {@link #generator(Class...)}
+     */
+    protected void assertTypescriptMatchesSnapshot(
+            FullStackGenerator generator) {
+        var generated = new LinkedHashMap<>(generator.generate());
+
+        if (!generator.isClientFileIncluded()) {
+            generated.remove(CLIENT_FILE);
+        }
+
+        var snapshots = toSnapshotPaths(generator, generated);
+
+        if (isUpdatingSnapshots()) {
+            updateSnapshots(generator, snapshots);
+        }
+
         try {
-            this.resourceLoader = new ResourceLoader(getClass());
-            this.targetDir = resourceLoader.findTargetDirPath();
-
-            // Use Jackson 2 ObjectMapper for OpenAPI serialization
-            this.objectMapper = Json.mapper();
-            this.objectMapper
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(
-                    "Failed to initialize AbstractFullStackTest", e);
+            new TypeScriptComparator().compare(readSnapshots(generator),
+                    snapshots);
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    getSnapshotsDir(generator) + ": " + e.getMessage(), e);
         }
     }
 
     /**
-     * Execute the full Java → TypeScript pipeline and verify the generated
-     * TypeScript matches the expected snapshots.
+     * Creates a generator for the given browser callable classes, which can be
+     * customized before being passed to
+     * {@link #assertTypescriptMatchesSnapshot(FullStackGenerator)}.
      *
      * @param endpointClasses
-     *            The endpoint classes to process
-     * @throws Exception
-     *             if the test fails
+     *            the browser callable classes to generate from
      */
-    protected void assertTypescriptMatchesSnapshot(Class<?>... endpointClasses)
-            throws Exception {
-        // Build extended classpath that includes all required dependencies
-        var classpath = ResourceLoader.getClasspath(Arrays.stream(
-                new Class<?>[] { Flux.class, EndpointSubscription.class })
-                .map(ResourceLoader::new).collect(Collectors.toList()));
-
-        // Parse Java → OpenAPI with all plugins
-        var openAPI = new Parser()
-                .classPath(classpath.split(File.pathSeparator))
-                .endpointAnnotations(List.of(Endpoint.class))
-                .endpointExposedAnnotations(List.of(EndpointExposed.class))
-                .addPlugin(new BackbonePlugin())
-                .addPlugin(new TransferTypesPlugin())
-                .addPlugin(new ModelPlugin()).addPlugin(new NonnullPlugin())
-                .addPlugin(new SubTypesPlugin())
-                .addPlugin(new MultipartFileCheckerPlugin())
-                .execute(Arrays.asList(endpointClasses));
-
-        // OpenAPI → TypeScript, then verify against snapshots
-        var generated = executeFullStack(openAPI);
-        assertTypescriptMatches(generated, getSnapshotsDir());
+    protected FullStackGenerator generator(Class<?>... endpointClasses) {
+        return new FullStackGenerator(getClass(), endpointClasses);
     }
 
-    // Standard Hilla generator plugins in the correct loading order
-    private static final List<String> GENERATOR_PLUGINS = List.of(
-            "@vaadin/hilla-generator-plugin-transfertypes",
-            "@vaadin/hilla-generator-plugin-backbone",
-            "@vaadin/hilla-generator-plugin-client",
-            "@vaadin/hilla-generator-plugin-model",
-            "@vaadin/hilla-generator-plugin-barrel",
-            "@vaadin/hilla-generator-plugin-push",
-            "@vaadin/hilla-generator-plugin-signals",
-            "@vaadin/hilla-generator-plugin-subtypes");
-
     /**
-     * Execute the full stack: Java → OpenAPI → TypeScript
+     * Maps the generated files to their place in the snapshots folder, which
+     * leaves out the package of the test case.
      *
-     * @param openAPI
-     *            The OpenAPI specification to process
-     * @return The generated TypeScript files
-     * @throws FullStackExecutionException
-     *             if generation fails
+     * <p>
+     * A generated file is stored under the package of the type it belongs to,
+     * and the snapshots folder already sits in the package of the test case, so
+     * mirroring the output folder as it is would repeat that package. It made
+     * the deepest paths longer than the 260 characters Windows allows a program
+     * which has not opted into long paths, which broke the checkout of the
+     * repository. A file of any other package, such as a mapped Spring Data
+     * type, keeps its full path.
      */
-    private GeneratedFiles executeFullStack(OpenAPI openAPI)
-            throws FullStackExecutionException {
-        Path tempDir = null;
-        Path tempFile = null;
-        try {
-            // Serialize OpenAPI to JSON
-            String openAPIJson = objectMapper.writeValueAsString(openAPI);
+    private static Map<String, String> toSnapshotPaths(
+            FullStackGenerator generator, Map<String, String> generated) {
+        var prefix = generator.getSnapshotsPackage().replace('.', '/') + "/";
+        var snapshots = new LinkedHashMap<String, String>();
 
-            // Find the CLI executable using require.resolve pattern
-            Path cliPath = resolveCliPath();
+        generated.forEach((path, content) -> {
+            var snapshotPath = path.startsWith(prefix)
+                    ? path.substring(prefix.length())
+                    : path;
 
-            // Create temp output directory and OpenAPI file
-            tempDir = Files.createTempDirectory("hilla-test-output");
-            tempFile = Files.createTempFile("openapi", ".json");
-            Files.writeString(tempFile, openAPIJson);
-
-            // Build CLI command with all plugins
-            var command = new java.util.ArrayList<String>();
-            command.add("node");
-            command.add(cliPath.toString());
-            command.add(tempFile.toAbsolutePath().toString());
-            command.add("-o");
-            command.add(tempDir.toAbsolutePath().toString());
-            for (String plugin : GENERATOR_PLUGINS) {
-                command.add("-p");
-                command.add(plugin);
+            if (snapshots.containsKey(snapshotPath)) {
+                throw new IllegalStateException(
+                        "The generated file " + path + " shares the snapshot "
+                                + snapshotPath + " with another one");
             }
 
-            LOGGER.debug("Executing CLI: {}", String.join(" ", command));
+            snapshots.put(snapshotPath, content);
+        });
 
-            // Execute the CLI
-            com.vaadin.flow.internal.FrontendUtils.executeCommand(command,
-                    pb -> pb.directory(targetDir.toFile()));
+        return snapshots;
+    }
 
-            // Read generated files from output directory
-            Map<String, String> files = new HashMap<>();
-            final Path outputDir = tempDir;
-            Files.walk(outputDir).filter(Files::isRegularFile)
-                    .filter(p -> p.toString().endsWith(".ts")).forEach(path -> {
+    private static boolean isUpdatingSnapshots() {
+        var value = System.getProperty(UPDATE_SNAPSHOTS_PROPERTY);
+        return value != null && !"false".equalsIgnoreCase(value);
+    }
+
+    private static Map<String, String> readSnapshots(
+            FullStackGenerator generator) {
+        var snapshotsDir = getSnapshotsDir(generator);
+
+        if (!Files.isDirectory(snapshotsDir)) {
+            // The folder is named by the caller, which adds it to the
+            // message of any assertion error
+            throw new AssertionError("there is no snapshots folder yet. Run"
+                    + " the tests with -D" + UPDATE_SNAPSHOTS_PROPERTY
+                    + " to create it.");
+        }
+
+        try (var files = Files.walk(snapshotsDir)) {
+            var snapshots = new LinkedHashMap<String, String>();
+
+            files.filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".ts")).sorted()
+                    .forEach(path -> {
                         try {
-                            String relativePath = outputDir.relativize(path)
-                                    .toString();
-                            String content = Files.readString(path);
-                            files.put(relativePath, content);
+                            snapshots.put(relativize(snapshotsDir, path),
+                                    Files.readString(path));
                         } catch (IOException e) {
-                            throw new RuntimeException(
-                                    "Failed to read generated file: " + path,
-                                    e);
+                            throw new IllegalStateException(
+                                    "Unable to read the snapshot " + path, e);
                         }
                     });
 
-            LOGGER.info("Generated {} TypeScript files", files.size());
-            return new GeneratedFiles(files);
-
-        } catch (JsonProcessingException e) {
-            throw new FullStackExecutionException(
-                    "Failed to serialize OpenAPI to JSON", e);
-        } catch (com.vaadin.flow.internal.FrontendUtils.CommandExecutionException e) {
-            throw new FullStackExecutionException(
-                    "Failed to execute TypeScript generator CLI", e);
+            return snapshots;
         } catch (IOException e) {
-            throw new FullStackExecutionException(
-                    "Failed during full-stack execution", e);
-        } finally {
-            // Clean up temp files
-            try {
-                if (tempFile != null) {
-                    Files.deleteIfExists(tempFile);
-                }
-                if (tempDir != null) {
-                    deleteRecursively(tempDir);
-                }
-            } catch (IOException e) {
-                LOGGER.warn("Failed to clean up temp files", e);
-            }
+            throw new IllegalStateException(
+                    "Unable to read the snapshots in " + snapshotsDir, e);
         }
     }
 
-    /**
-     * Resolve the path to the Hilla generator CLI executable using Node's
-     * require.resolve.
-     *
-     * @see <a href=
-     *      "https://github.com/vaadin/flow/blob/main/flow-server/src/main/java/com/vaadin/flow/server/frontend/FrontendTools.java">
-     *      Flow's FrontendTools.getNpmPackageExecutable</a>
-     */
-    private Path resolveCliPath() throws FullStackExecutionException {
+    private static void updateSnapshots(FullStackGenerator generator,
+            Map<String, String> generated) {
+        var snapshotsDir = getSnapshotsDir(generator);
+        LOGGER.info("Updating the snapshots in {}", snapshotsDir);
+
         try {
-            String script = """
-                    var path = require('path');
-                    var jsonPath = require.resolve('@vaadin/hilla-generator-cli/package.json');
-                    var json = require(jsonPath);
-                    console.log(path.resolve(path.dirname(jsonPath), json.bin['tsgen']));
-                    """;
-            String cliPath = com.vaadin.flow.internal.FrontendUtils
-                    .executeCommand(List.of("node", "--eval", script),
-                            pb -> pb.directory(targetDir.toFile()))
-                    .trim();
-            return Path.of(cliPath);
-        } catch (com.vaadin.flow.internal.FrontendUtils.CommandExecutionException e) {
-            throw new FullStackExecutionException("Failed to resolve CLI path",
-                    e);
+            deleteExistingSnapshots(snapshotsDir);
+
+            for (var entry : generated.entrySet()) {
+                var path = snapshotsDir.resolve(entry.getKey());
+                Files.createDirectories(path.getParent());
+                Files.writeString(path, entry.getValue());
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Unable to update the snapshots in " + snapshotsDir, e);
         }
     }
 
     /**
-     * Recursively delete a directory and its contents.
+     * Removes the snapshots of a previous run, but nothing else: the folder may
+     * also contain files which are not snapshots.
      */
-    private void deleteRecursively(Path path) throws IOException {
-        if (Files.isDirectory(path)) {
-            try (var entries = Files.list(path)) {
-                for (Path entry : entries.toList()) {
-                    deleteRecursively(entry);
+    private static void deleteExistingSnapshots(Path snapshotsDir)
+            throws IOException {
+        if (!Files.isDirectory(snapshotsDir)) {
+            return;
+        }
+
+        try (var files = Files.walk(snapshotsDir)) {
+            for (var path : files.filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".ts")).toList()) {
+                Files.delete(path);
+            }
+        }
+
+        // Snapshots are generated into a folder structure which mirrors the
+        // package of the entity, so leftover folders have to go as well
+        try (var files = Files.walk(snapshotsDir)) {
+            for (var path : files.sorted(Comparator.reverseOrder()).toList()) {
+                if (!path.equals(snapshotsDir) && Files.isDirectory(path)
+                        && isEmpty(path)) {
+                    Files.delete(path);
                 }
             }
         }
-        Files.deleteIfExists(path);
     }
 
-    /**
-     * Assert that generated TypeScript matches expected snapshots.
-     *
-     * @param generated
-     *            The generated files
-     * @param snapshotsDir
-     *            Directory containing expected .ts files
-     * @throws AssertionError
-     *             if files don't match
-     */
-    private void assertTypescriptMatches(GeneratedFiles generated,
-            Path snapshotsDir) throws IOException {
-        if (!Files.exists(snapshotsDir)) {
-            throw new AssertionError(
-                    "Snapshots directory does not exist: " + snapshotsDir);
-        }
-
-        // Read all expected files
-        Map<String, String> expected = new HashMap<>();
-        Files.walk(snapshotsDir).filter(Files::isRegularFile)
-                .filter(p -> p.toString().endsWith(".ts")).forEach(path -> {
-                    try {
-                        String relativePath = snapshotsDir.relativize(path)
-                                .toString();
-                        String content = Files.readString(path);
-                        expected.put(relativePath, content);
-                    } catch (IOException e) {
-                        throw new RuntimeException(
-                                "Failed to read snapshot: " + path, e);
-                    }
-                });
-
-        // Compare generated vs expected
-        TypeScriptComparator comparator = new TypeScriptComparator();
-        comparator.compare(expected, generated.getFiles());
-    }
-
-    /**
-     * Get the snapshots directory for the test class.
-     */
-    private Path getSnapshotsDir() throws URISyntaxException, IOException {
-        return resourceLoader.find("snapshots").toPath();
-    }
-
-    /**
-     * Container for generated TypeScript files.
-     */
-    private static class GeneratedFiles {
-        private final Map<String, String> files;
-
-        public GeneratedFiles(Map<String, String> files) {
-            this.files = Collections.unmodifiableMap(files);
-        }
-
-        public Map<String, String> getFiles() {
-            return files;
-        }
-
-        public String getFile(String name) {
-            return files.get(name);
-        }
-
-        public boolean hasFile(String name) {
-            return files.containsKey(name);
-        }
-
-        public int getFileCount() {
-            return files.size();
-        }
-
-        public List<String> getFileNames() {
-            return files.keySet().stream().sorted()
-                    .collect(Collectors.toList());
+    private static boolean isEmpty(Path dir) throws IOException {
+        try (var entries = Files.list(dir)) {
+            return entries.findAny().isEmpty();
         }
     }
 
     /**
-     * Exception thrown when full-stack execution fails.
+     * The snapshots are read from and written to the sources rather than to the
+     * copy in the build folder, so that updated snapshots are not lost on the
+     * next build.
      */
-    private static class FullStackExecutionException extends Exception {
-        public FullStackExecutionException(String message) {
-            super(message);
-        }
+    private static Path getSnapshotsDir(FullStackGenerator generator) {
+        return generator.getModuleDir()
+                .resolve(Path.of("src", "test", "resources"))
+                .resolve(generator.getSnapshotsPackage().replace('.', '/'))
+                .resolve(SNAPSHOTS_DIR);
+    }
 
-        public FullStackExecutionException(String message, Throwable cause) {
-            super(message, cause);
-        }
+    private static String relativize(Path dir, Path path) {
+        return dir.relativize(path).toString().replace('\\', '/');
     }
 }

@@ -19,13 +19,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -74,6 +74,13 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                                 }
                             });
                         });
+
+                // expose the name of the discriminator property, so that the
+                // TypeScript generator does not have to guess it
+                findSubTypesInfo(cls)
+                        .flatMap(SubTypesInfo::discriminatorProperty)
+                        .ifPresent(property -> schema.setDiscriminator(
+                                new Discriminator().propertyName(property)));
             }
 
             // attach the schema to the openapi
@@ -82,29 +89,22 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     (OpenAPI) nodePath.getParentPath().getNode().getTarget());
         }
 
-        // entity nodes whose superclass has a @JsonSubTypes annotation must
-        // have a @type property whose value comes from the annotation
+        // entity nodes mentioned in a @JsonSubTypes annotation found anywhere
+        // in their class hierarchy must have a discriminator property whose
+        // values come from the annotation
         if (nodePath.getNode() instanceof EntityNode) {
             var entityNode = (EntityNode) nodePath.getNode();
             var cls = (Class<?>) entityNode.getSource().get();
 
-            Optional.ofNullable(cls.getSuperclass())
-                    .map(SubTypesPlugin::getJsonSubTypes).stream()
-                    .flatMap(Function.identity())
-                    .filter(t -> cls.equals(t.value())).findAny()
-                    .ifPresent(t -> {
-                        var schema = (ComposedSchema) entityNode.getTarget();
-                        schema.getAnyOf().stream()
-                                .filter(s -> s instanceof ObjectSchema)
-                                .map(ObjectSchema.class::cast)
-                                .forEach(s -> s.addProperty("@type",
-                                        new StringSchema() {
-                                            {
-                                                setType("string");
-                                                setExample(t.name());
-                                            }
-                                        }));
-                    });
+            var info = findSubTypesInfo(cls);
+            var property = info.flatMap(SubTypesInfo::discriminatorProperty);
+            var values = info.map(i -> i.discriminatorValues(cls))
+                    .orElseGet(List::of);
+
+            if (property.isPresent() && !values.isEmpty()) {
+                addDiscriminatorProperty(entityNode.getTarget(), property.get(),
+                        values);
+            }
         }
     }
 
@@ -150,6 +150,120 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 .map(c -> c.getAnnotationsByType(JsonSubTypes.class))
                 .filter(a -> a.length > 0).map(a -> a[0])
                 .map(JsonSubTypes::value).stream().flatMap(Arrays::stream);
+    }
+
+    /**
+     * Looks for the {@code @JsonTypeInfo} and {@code @JsonSubTypes}
+     * annotations, starting from the given class and then walking up its
+     * superclasses. Checking the class itself allows a class that declares the
+     * subtypes to be a subtype of itself, while walking up the hierarchy covers
+     * subtypes that are not direct descendants of the declaring class.
+     */
+    private static Optional<SubTypesInfo> findSubTypesInfo(Class<?> cls) {
+        for (var current = cls; current != null; current = current
+                .getSuperclass()) {
+            var typeInfo = current.getAnnotation(JsonTypeInfo.class);
+            var subTypes = current.getAnnotation(JsonSubTypes.class);
+
+            if (typeInfo != null && subTypes != null) {
+                return Optional.of(new SubTypesInfo(typeInfo, subTypes));
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private static void addDiscriminatorProperty(Schema<?> schema,
+            String property, List<String> values) {
+        // a subtype is rendered as a composed schema, where the properties of
+        // the subtype itself are in the object schema of the `anyOf` list,
+        // while a class that declares the subtypes is a plain object schema
+        if (schema instanceof ComposedSchema composedSchema
+                && composedSchema.getAnyOf() != null) {
+            composedSchema.getAnyOf().stream()
+                    .filter(ObjectSchema.class::isInstance)
+                    .map(ObjectSchema.class::cast)
+                    .forEach(s -> s.addProperty(property,
+                            discriminatorSchema(values)));
+        } else {
+            schema.addProperty(property, discriminatorSchema(values));
+        }
+    }
+
+    /**
+     * The schema of the discriminator property: it accepts the value of the
+     * type itself, which comes first and is kept as the example, along with the
+     * values of the subtypes below it.
+     */
+    private static StringSchema discriminatorSchema(List<String> values) {
+        var schema = new StringSchema();
+        schema.setExample(values.get(0));
+        values.forEach(schema::addEnumItem);
+        return schema;
+    }
+
+    /**
+     * The {@code @JsonTypeInfo} and {@code @JsonSubTypes} annotations that
+     * apply to a class.
+     */
+    private record SubTypesInfo(JsonTypeInfo typeInfo, JsonSubTypes subTypes) {
+        /**
+         * Returns the name of the property that holds the type discriminator,
+         * or an empty optional if the type information is not serialized as a
+         * property of the object itself.
+         */
+        Optional<String> discriminatorProperty() {
+            var include = typeInfo.include();
+
+            if (include != JsonTypeInfo.As.PROPERTY
+                    && include != JsonTypeInfo.As.EXISTING_PROPERTY) {
+                return Optional.empty();
+            }
+
+            var property = typeInfo.property();
+
+            return property.isBlank()
+                    ? Optional
+                            .ofNullable(typeInfo.use().getDefaultPropertyName())
+                    : Optional.of(property);
+        }
+
+        /**
+         * Returns the values of the type discriminator that the given class
+         * accepts: its own value, followed by the values of the subtypes below
+         * it, which narrow the discriminator further. The list is empty if the
+         * class is not mentioned among the subtypes.
+         */
+        List<String> discriminatorValues(Class<?> cls) {
+            var own = Arrays.stream(subTypes.value())
+                    .filter(type -> cls.equals(type.value())).findAny()
+                    .map(SubTypesInfo::discriminatorValue);
+
+            if (own.isEmpty()) {
+                return List.of();
+            }
+
+            return Stream.concat(own.stream(),
+                    Arrays.stream(subTypes.value())
+                            .filter(type -> !cls.equals(type.value())
+                                    && cls.isAssignableFrom(type.value()))
+                            .map(SubTypesInfo::discriminatorValue))
+                    .toList();
+        }
+
+        /**
+         * Returns the value of the type discriminator for the given subtype,
+         * which defaults to the simple class name when the annotation does not
+         * specify a name.
+         */
+        private static String discriminatorValue(JsonSubTypes.Type type) {
+            if (!type.name().isEmpty()) {
+                return type.name();
+            }
+
+            return type.names().length > 0 ? type.names()[0]
+                    : type.value().getSimpleName();
+        }
     }
 
     /**

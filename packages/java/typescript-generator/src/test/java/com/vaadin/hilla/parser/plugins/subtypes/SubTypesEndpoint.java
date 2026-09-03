@@ -26,4 +26,8 @@ public class SubTypesEndpoint {
 
     public void receiveEvent(BaseEvent event) {
     }
+
+    public Notification sendNotification() {
+        return new EmailNotification();
+    }
 }
