@@ -55,6 +55,58 @@ com.vaadin.hilla.parser
 - `hilla-maven-plugin` - Maven build integration
 - `hilla-endpoint` - Endpoint processing
 
+## Tests
+
+The generator is tested through its externally visible contract: a set of
+browser callable Java classes must produce exactly the expected TypeScript
+files, with the expected content, in the expected locations.
+
+A test case is the outermost package holding browser callable classes. Those
+classes, together with the ones of its subpackages, are generated and every
+generated file is compared against the `snapshots` folder of the package in
+the test resources. A generated file without a snapshot fails the test, and so
+does a snapshot without a generated file. `EndpointGenerationTest` discovers
+the cases and runs them, so **adding a case takes no test class at all**: add
+a package with an endpoint in it and run the tests once with
+`-Dhilla.test.updateSnapshots`, which creates the snapshots. A snapshots
+folder left without endpoints to generate it fails the build.
+
+Every case runs through the whole plugin chain, in the production order, so
+what a test verifies is always what a real application would get.
+
+A case which needs more than the endpoint classes has its own test class
+extending `AbstractFullStackTest` in its package. That package is skipped by
+the discovery, and its classes are left out of the surrounding case, so that
+every endpoint is covered exactly once. That is how the
+configuration options of a plugin are covered:
+
+```java
+public class BasicTest extends AbstractFullStackTest {
+    @Test
+    public void should_ApplyNonNullAnnotation() {
+        var plugin = new NonnullPlugin();
+        plugin.setConfiguration(configuration);
+
+        assertTypescriptMatchesSnapshot(
+                generator(BasicEndpoint.class).withPlugin(plugin));
+    }
+}
+```
+
+A plugin can only be replaced by a configured instance of the same plugin: a
+test cannot run a subset of the chain.
+
+The generated client file is identical for every endpoint, so it is left out
+of the comparison and verified once, by the test which asks for it with
+`withClientFile()`.
+
+Snapshots are recreated from the current generator output by running the tests
+with `-Dhilla.test.updateSnapshots`. The resulting diff is the specification
+of what the generator produces and must always be reviewed.
+
+Note that the tests run the TypeScript generator, so the npm packages need to
+be built first (`npm ci && npm run build` in the repository root).
+
 ## Build
 
 ```bash
