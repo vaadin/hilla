@@ -1,3 +1,4 @@
+import type { SourceFile, Statement } from '@typescript/typescript6';
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
@@ -5,7 +6,6 @@ import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js'
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import { OpenAPIV3 } from 'openapi-types';
-import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {

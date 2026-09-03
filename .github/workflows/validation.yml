@@ -6,7 +6,7 @@ defaults:
 
 on:
   push:
-    branches: [main, '25.1', '25.0', '24.9', '2.5', '1.5']
+    branches: [main, '25.2', '25.1', '24.10', '24.9', '2.5', '1.5']
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -139,7 +139,7 @@ jobs:
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         if: ${{ env.COVFILES != '' && !github.event.pull_request.head.repo.fork }}
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -183,7 +183,7 @@ jobs:
           echo "COVFILES=$COVFILES" >> $GITHUB_ENV
       - name: Send Coverage to Codecov
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.COVFILES }}
@@ -261,10 +261,23 @@ jobs:
     timeout-minutes: 25
     strategy:
       fail-fast: false
+      # The Windows leg takes ~11 minutes while every other validation job is
+      # done in 5, so it alone decides how long a PR waits. It guards
+      # path-separator and file-locking behaviour, which rarely changes, so run
+      # it on pushes to main and the release branches (i.e. on every merge) and
+      # on workflow_dispatch, but not on pull requests. To get it on a PR, add
+      # the `run-windows-tests` label and then push a commit; `labeled` is not
+      # among the pull_request types above, and re-running an existing run
+      # replays the original event payload, so neither picks up a label added
+      # after the fact. Dispatching the workflow manually on the branch runs
+      # both legs too, but it lands in the same concurrency group as the pull
+      # request's own runs, so the two cancel each other - prefer the label.
       matrix:
-        include:
-          - os: ubuntu-latest
-          - os: windows-latest
+        os: >-
+          ${{ fromJSON(github.event_name == 'pull_request'
+          && !contains(github.event.pull_request.labels.*.name, 'run-windows-tests')
+          && '["ubuntu-latest"]'
+          || '["ubuntu-latest", "windows-latest"]') }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -285,6 +298,19 @@ jobs:
           tar cf - .m2 | (cd ~ && tar xf -)
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+      # The functional tests run the build under test with the Gradle version
+      # pinned in TestUtils.kt, which TestKit downloads into the Gradle user
+      # home. setup-gradle only caches wrapper zips, and TestKit deletes the
+      # zip once it has unpacked it, so without this the distribution is
+      # downloaded again on every run. Keep the version in sync with
+      # TestProject.gradleVersion in TestUtils.kt.
+      - name: Cache the Gradle distribution used by TestKit
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.GRADLE_USER_HOME || '~/.gradle' }}/wrapper/dists/gradle-8.14-bin
+          key: ${{ runner.os }}-testkit-gradle-dist-${{ hashFiles('packages/java/gradle-plugin/src/functionalTest/kotlin/com/vaadin/hilla/gradle/plugin/TestUtils.kt') }}
+          restore-keys: |
+            ${{ runner.os }}-testkit-gradle-dist-
       - name: Set TB License
         run: |
           TB_LICENSE=${{secrets.TB_LICENSE}}

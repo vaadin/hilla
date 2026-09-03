@@ -1,7 +1,7 @@
+import type { SourceFile } from '@typescript/typescript6';
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
 

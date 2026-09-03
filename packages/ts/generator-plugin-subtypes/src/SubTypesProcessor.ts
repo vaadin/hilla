@@ -1,4 +1,5 @@
 import { dirname } from 'path/posix';
+import ts, { type SourceFile } from '@typescript/typescript6';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -8,7 +9,6 @@ import {
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts, { type SourceFile } from 'typescript';
 
 export class SubTypesProcessor {
   readonly #typeName: string;
@@ -40,14 +40,15 @@ export class SubTypesProcessor {
       subTypes.map((subType) => ts.factory.createTypeReferenceNode(subType)),
     );
 
-    // create the statement
-    const { fileName, statements } = this.#source;
+    // create the statement: the source is fully replaced, as whatever the
+    // backbone plugin made of a schema that only has a `oneOf` is of no use
+    const { fileName } = this.#source;
     const unionTypeName = `${simplifyFullyQualifiedName(this.#typeName)}`;
     const unionIdentifier = ts.factory.createIdentifier(unionTypeName);
     const statement = ts.factory.createTypeAliasDeclaration(undefined, unionIdentifier, undefined, union);
 
     exports.default.set(unionTypeName);
 
-    return createSourceFile([...imports.toCode(), ...statements, statement, ...exports.toCode()], fileName);
+    return createSourceFile([...imports.toCode(), statement, ...exports.toCode()], fileName);
   }
 }

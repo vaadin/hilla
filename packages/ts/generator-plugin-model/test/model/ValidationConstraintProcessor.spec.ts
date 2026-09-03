@@ -1,6 +1,6 @@
+import ts, { type NewExpression } from '@typescript/typescript6';
 import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
 import sinon from 'sinon';
-import ts, { type NewExpression } from 'typescript';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   hasValidationConstraints,

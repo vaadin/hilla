@@ -1,5 +1,5 @@
+import ts, { type ObjectLiteralExpression, type PropertyAssignment } from '@typescript/typescript6';
 import type { Schema } from '@vaadin/hilla-generator-core/Schema.js';
-import ts, { type ObjectLiteralExpression, type PropertyAssignment } from 'typescript';
 
 interface Annotation {
   name: string;

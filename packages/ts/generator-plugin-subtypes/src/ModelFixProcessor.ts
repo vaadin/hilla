@@ -1,20 +1,23 @@
+import ts, { type SourceFile } from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts, { type SourceFile } from 'typescript';
 import { propertyNameToString } from './utils.js';
 
 export class ModelFixProcessor {
   readonly #source: SourceFile;
+  readonly #discriminatorPropertyName: string;
 
-  constructor(source: SourceFile) {
+  constructor(source: SourceFile, discriminatorPropertyName: string) {
     this.#source = source;
+    this.#discriminatorPropertyName = discriminatorPropertyName;
   }
 
   process(): SourceFile {
     const statements = this.#source.statements.map((statement) => {
-      // filter out the @type property from all models
+      // filter out the discriminator property from all models
       if (ts.isClassDeclaration(statement)) {
         const members = statement.members.filter(
-          (member) => !(ts.isGetAccessor(member) && propertyNameToString(member.name) === '@type'),
+          (member) =>
+            !(ts.isGetAccessor(member) && propertyNameToString(member.name) === this.#discriminatorPropertyName),
         );
 
         return ts.factory.createClassDeclaration(

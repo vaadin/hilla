@@ -1,8 +1,8 @@
+import ts from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import memoize from '@vaadin/hilla-generator-utils/memoize.js';
-import ts from 'typescript';
 
 const initParameterTypeName = 'EndpointRequestInit';
 

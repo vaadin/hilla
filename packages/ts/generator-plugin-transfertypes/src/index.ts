@@ -1,7 +1,7 @@
+import { factory, type Identifier } from '@typescript/typescript6';
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage, TransferTypeMaker } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import { factory, type Identifier } from 'typescript';
 
 type ReplacedTypeMaker = (schema?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => TransferTypeMaker;
 

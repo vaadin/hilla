@@ -1,12 +1,12 @@
-import type { NonComposedRegularSchema, Schema } from '@vaadin/hilla-generator-core/Schema.js';
-import { template, transform } from '@vaadin/hilla-generator-utils/ast.js';
 import ts, {
   type Expression,
   type Identifier,
   type NewExpression,
   type Statement,
   type VariableStatement,
-} from 'typescript';
+} from '@typescript/typescript6';
+import type { NonComposedRegularSchema, Schema } from '@vaadin/hilla-generator-core/Schema.js';
+import { template, transform } from '@vaadin/hilla-generator-utils/ast.js';
 
 export type ValidationConstrainedSchema = NonComposedRegularSchema &
   Readonly<{ 'x-validation-constraints': readonly ValidationConstraint[] }>;

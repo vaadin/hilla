@@ -1,8 +1,8 @@
+import type { SourceFile } from '@typescript/typescript6';
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
 import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.js';
 import BackbonePlugin, { BackbonePluginSourceType } from '@vaadin/hilla-generator-plugin-backbone';
 import PluginError from '@vaadin/hilla-generator-utils/PluginError.js';
-import type { SourceFile } from 'typescript';
 import BarrelProcessor from './BarrelProcessor.js';
 
 export default class BarrelPlugin extends Plugin {

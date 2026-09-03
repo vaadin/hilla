@@ -1,13 +1,15 @@
+import ts, { type SourceFile } from '@typescript/typescript6';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts, { type SourceFile } from 'typescript';
-import { propertyNameToString } from './utils.js';
+import { createPropertyName, propertyNameToString } from './utils.js';
 
 export class TypeFixProcessor {
   readonly #source: SourceFile;
+  readonly #discriminatorPropertyName: string;
   readonly #typeValue: string;
 
-  constructor(source: ts.SourceFile, typeValue: string) {
+  constructor(source: ts.SourceFile, discriminatorPropertyName: string, typeValue: string) {
     this.#source = source;
+    this.#discriminatorPropertyName = discriminatorPropertyName;
     this.#typeValue = typeValue;
   }
 
@@ -16,11 +18,12 @@ export class TypeFixProcessor {
       // search in the interface definition
       if (ts.isInterfaceDeclaration(statement)) {
         const members = statement.members.map((member) => {
-          // search for the @type property and replace it with a quoted string
-          if (ts.isPropertySignature(member) && propertyNameToString(member.name) === '@type') {
+          // search for the discriminator property and replace its type with a
+          // string literal
+          if (ts.isPropertySignature(member) && propertyNameToString(member.name) === this.#discriminatorPropertyName) {
             return ts.factory.createPropertySignature(
               undefined,
-              ts.factory.createStringLiteral('@type'),
+              createPropertyName(this.#discriminatorPropertyName),
               undefined,
               ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(this.#typeValue)),
             );

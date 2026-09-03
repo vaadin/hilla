@@ -114,8 +114,32 @@ tasks.register('bootStart') {
 		}
 		// Store the process for later termination:
 		project.ext.applicationProcess = process
-		// Wait enough for the application to start:
-		sleep(10000)
+		// Wait until the application answers, rather than assuming it needs a
+		// fixed amount of time. A slower machine used to leave the tests
+		// connecting to nothing, which surfaced as every test failing with a
+		// connection error instead of as an application that was still starting.
+		def url = URI.create('http://localhost:8888/').toURL()
+		def startTimeoutMs = 120000
+		def deadline = System.currentTimeMillis() + startTimeoutMs
+		while (true) {
+			if (!process.isAlive()) {
+				throw new GradleException("The application exited with code ${process.exitValue()} before it started serving requests.")
+			}
+			try {
+				def connection = (HttpURLConnection) url.openConnection()
+				connection.connectTimeout = 2000
+				connection.readTimeout = 2000
+				def status = connection.responseCode
+				connection.disconnect()
+				logger.info("The application is serving requests at ${url} (HTTP ${status}).")
+				break
+			} catch (IOException e) {
+				if (System.currentTimeMillis() > deadline) {
+					throw new GradleException("The application did not start serving requests at ${url} within ${startTimeoutMs / 1000} seconds: ${e}")
+				}
+				sleep(500)
+			}
+		}
 	}
 }
 
