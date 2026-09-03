@@ -15,7 +15,7 @@ describe('SubTypesPlugin', () => {
       const generator = createGenerator([BackbonePlugin, ModelPlugin, SubTypesPlugin]);
       const input = await loadInput(sectionName, import.meta.url);
       const files = await generator.process(input);
-      expect(files.length).to.equal(10);
+      expect(files.length).to.equal(17);
 
       const t = await files[1].text();
       expect(t).to.exist;
@@ -48,6 +48,31 @@ describe('SubTypesPlugin', () => {
       expect(addEventModelFile).to.exist;
       await expect(await addEventModelFile.text()).toMatchFileSnapshot('fixtures/AddEventModel.snap.ts');
       expect(addEventModelFile.name).to.equal('com/vaadin/hilla/parser/plugins/subtypes/AddEventModel.ts');
+    });
+  });
+
+  describe('when `@JsonTypeInfo` defines a custom property', () => {
+    it('uses that property as the discriminator', async () => {
+      const sectionName = 'SubTypes';
+      const generator = createGenerator([BackbonePlugin, ModelPlugin, SubTypesPlugin]);
+      const input = await loadInput(sectionName, import.meta.url);
+      const files = await generator.process(input);
+
+      const unionFile = files.find((f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/NotificationUnion.ts')!;
+      expect(unionFile).to.exist;
+      await expect(await unionFile.text()).toMatchFileSnapshot('fixtures/NotificationUnion.snap.ts');
+
+      const notificationFile = files.find(
+        (f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/EmailNotification.ts',
+      )!;
+      expect(notificationFile).to.exist;
+      await expect(await notificationFile.text()).toMatchFileSnapshot('fixtures/EmailNotification.snap.ts');
+
+      const notificationModelFile = files.find(
+        (f) => f.name === 'com/vaadin/hilla/parser/plugins/subtypes/EmailNotificationModel.ts',
+      )!;
+      expect(notificationModelFile).to.exist;
+      await expect(await notificationModelFile.text()).toMatchFileSnapshot('fixtures/EmailNotificationModel.snap.ts');
     });
   });
 });
