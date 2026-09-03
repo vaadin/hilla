@@ -79,12 +79,15 @@ export async function typeCheck(
   };
 
   const program = ts.createProgram([...sources.keys()], TYPE_CHECK_OPTIONS, host);
+  const prefix = `${root}/`;
 
   return ts
     .getPreEmitDiagnostics(program)
     .filter((diagnostic) => !diagnostic.file || sources.has(diagnostic.file.fileName))
-    .map(
-      (diagnostic) =>
-        `${diagnostic.file?.fileName.replace(`${root}/`, '') ?? ''}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ')}`,
-    );
+    .map((diagnostic) => {
+      const name = diagnostic.file?.fileName.replace(prefix, '') ?? '';
+      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ');
+
+      return `${name}: ${message}`;
+    });
 }
