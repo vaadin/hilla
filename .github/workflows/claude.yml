@@ -47,7 +47,7 @@ jobs:
 
       - name: Install Chrome
         id: setup-chrome
-        uses: browser-actions/setup-chrome@v2
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
 
       # Node.js, JDK 21, Maven and node_modules caches, `npm ci`. Nothing is
       # built up front; Claude builds what a task needs (see the instructions
@@ -56,17 +56,24 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Install TestBench license
-        if: env.TB_LICENSE != ''
         env:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
+          # The guard cannot live in `if`: neither the secrets context nor the
+          # step's own env is available to a step condition.
+          if [ -z "$TB_LICENSE" ]; then
+            echo 'TB_LICENSE is not set, skipping'
+            exit 0
+          fi
           mkdir -p ~/.vaadin
           user="${TB_LICENSE%%/*}"
           key="${TB_LICENSE#*/}"
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Run Claude Code
-        uses: vaadin/github-actions/claude-code@main
+        # Pinned to a commit of the shared action's main branch; bump the pin to
+        # pick up changes there.
+        uses: vaadin/github-actions/claude-code@2a6fabc668c09424c29ca789789e9bf0720de8ee # main
         env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         with:

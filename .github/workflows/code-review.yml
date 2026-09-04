@@ -105,6 +105,10 @@ jobs:
         with:
           ref: refs/pull/${{ env.PR_NUMBER }}/head
           fetch-depth: 1
+          # The checked out tree is untrusted PR code, and the job token can
+          # write issues and pull requests; the review action gets its token
+          # through `github-token` instead.
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v5
@@ -112,7 +116,9 @@ jobs:
           node-version: '24'
 
       - name: Run code review
-        uses: vaadin/github-actions/code-review@main
+        # Pinned to a commit of the shared action's main branch; bump the pin to
+        # pick up changes there.
+        uses: vaadin/github-actions/code-review@2a6fabc668c09424c29ca789789e9bf0720de8ee # main
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           pr-number: ${{ env.PR_NUMBER }}
