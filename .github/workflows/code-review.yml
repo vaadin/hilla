@@ -105,6 +105,10 @@ jobs:
         with:
           ref: refs/pull/${{ env.PR_NUMBER }}/head
           fetch-depth: 1
+          # The checked out tree is untrusted PR code, and the job token can
+          # write issues and pull requests; the review action gets its token
+          # through `github-token` instead.
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v5

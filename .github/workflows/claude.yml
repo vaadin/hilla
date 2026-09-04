@@ -56,10 +56,15 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Install TestBench license
-        if: env.TB_LICENSE != ''
         env:
           TB_LICENSE: ${{ secrets.TB_LICENSE }}
         run: |
+          # The guard cannot live in `if`: neither the secrets context nor the
+          # step's own env is available to a step condition.
+          if [ -z "$TB_LICENSE" ]; then
+            echo 'TB_LICENSE is not set, skipping'
+            exit 0
+          fi
           mkdir -p ~/.vaadin
           user="${TB_LICENSE%%/*}"
           key="${TB_LICENSE#*/}"
