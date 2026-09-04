@@ -41,6 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
@@ -267,7 +268,8 @@ public class EndpointInvokerTest {
     @Test
     public void when_accessIsDenied_authorizationDeniedEventIsPublished()
             throws Exception {
-        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        var endpoint = new SecuredEndpoint();
+        endpointRegistry.registerEndpoint(endpoint);
         when(endpointAccessChecker.check(any(Method.class), any(), any()))
                 .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
 
@@ -289,6 +291,9 @@ public class EndpointInvokerTest {
         assertEquals("secured", invocation.getMethodName());
         assertEquals(SecuredEndpoint.class.getMethod("secured"),
                 invocation.getMethod());
+        assertSame("the event should identify the endpoint bean the call was "
+                + "addressed to", endpoint, invocation.getThis());
+        assertSame(invocation.getMethod(), invocation.getStaticPart());
         assertEquals("the request payload must not be exposed in the event", 0,
                 invocation.getArguments().length);
         assertThrows(UnsupportedOperationException.class, invocation::proceed);
@@ -458,6 +463,30 @@ public class EndpointInvokerTest {
         assertEquals(2, authorizationEventPublisher.events.size());
         Mockito.verify(context, Mockito.times(1))
                 .getBean(AuthorizationEventPublisher.class);
+    }
+
+    @Test
+    public void when_theAuthorizationEventPublisherLookupFails_itIsRetried()
+            throws Exception {
+        var context = Mockito.mock(ApplicationContext.class);
+        when(context.getBean(AuthorizationEventPublisher.class))
+                .thenThrow(new BeanCreationException(
+                        "the publisher bean is not ready yet"))
+                .thenReturn(authorizationEventPublisher);
+        var invoker = createInvoker(context);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        for (var i = 0; i < 2; i++) {
+            assertThrows(EndpointHttpException.class,
+                    () -> invoker.invoke("securedendpoint", "secured", body,
+                            principal, requestMock::isUserInRole));
+        }
+
+        assertEquals(
+                "an unexpected lookup failure should not turn the events "
+                        + "off for good",
+                1, authorizationEventPublisher.events.size());
     }
 
     private void denyAccessToTheEndpointMethod() {

@@ -43,6 +43,8 @@ import java.util.stream.Stream;
 import com.googlecode.gentyref.GenericTypeReflector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
@@ -473,12 +475,27 @@ public class EndpointInvoker {
             try {
                 publisher = Optional.ofNullable(applicationContext
                         .getBean(AuthorizationEventPublisher.class));
-            } catch (Exception e) {
+            } catch (NoUniqueBeanDefinitionException e) {
+                getLogger().warn(
+                        "Multiple AuthorizationEventPublisher beans are defined and none of them is primary, "
+                                + "authorization denied events are not published",
+                        e);
+                publisher = Optional.empty();
+            } catch (NoSuchBeanDefinitionException e) {
                 getLogger().debug(
                         "AuthorizationEventPublisher not found in Spring Context, "
                                 + "authorization denied events are not published",
                         e);
                 publisher = Optional.empty();
+            } catch (Exception e) {
+                // an unexpected failure may be transient, so it is logged and
+                // the bean is looked up again on the next denied call instead
+                // of turning the events off for good
+                getLogger().warn(
+                        "Looking up the AuthorizationEventPublisher bean failed, "
+                                + "this authorization denied event is not published",
+                        e);
+                return Optional.empty();
             }
             authorizationEventPublisher = publisher;
         }
