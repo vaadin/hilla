@@ -15,8 +15,10 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -155,19 +157,35 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     /**
      * Looks for the {@code @JsonTypeInfo} and {@code @JsonSubTypes}
      * annotations, starting from the given class and then walking up its
-     * superclasses. Checking the class itself allows a class that declares the
+     * hierarchy. Checking the class itself allows a class that declares the
      * subtypes to be a subtype of itself, while walking up the hierarchy covers
-     * subtypes that are not direct descendants of the declaring class.
+     * subtypes that are not direct descendants of the declaring class, as well
+     * as those whose supertype is an interface.
      */
     private static Optional<SubTypesInfo> findSubTypesInfo(Class<?> cls) {
-        for (var current = cls; current != null; current = current
-                .getSuperclass()) {
+        var queue = new ArrayDeque<Class<?>>();
+        var visited = new HashSet<Class<?>>();
+        queue.add(cls);
+
+        while (!queue.isEmpty()) {
+            var current = queue.remove();
+
+            if (!visited.add(current)) {
+                continue;
+            }
+
             var typeInfo = current.getAnnotation(JsonTypeInfo.class);
             var subTypes = current.getAnnotation(JsonSubTypes.class);
 
             if (typeInfo != null && subTypes != null) {
                 return Optional.of(new SubTypesInfo(typeInfo, subTypes));
             }
+
+            if (current.getSuperclass() != null) {
+                queue.add(current.getSuperclass());
+            }
+
+            queue.addAll(List.of(current.getInterfaces()));
         }
 
         return Optional.empty();
