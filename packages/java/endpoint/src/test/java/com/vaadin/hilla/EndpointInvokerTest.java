@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
@@ -41,8 +44,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -99,6 +104,7 @@ public class EndpointInvokerTest {
 
     private EndpointInvoker endpointInvoker;
     private EndpointRegistry endpointRegistry;
+    private ListAppender<ILoggingEvent> endpointInvokerLog;
 
     @Before
     public void setUp() {
@@ -116,6 +122,26 @@ public class EndpointInvokerTest {
     @After
     public void tearDown() {
         SecurityContextHolder.clearContext();
+        if (endpointInvokerLog != null) {
+            var logger = (ch.qos.logback.classic.Logger) LoggerFactory
+                    .getLogger(EndpointInvoker.class);
+            logger.detachAppender(endpointInvokerLog);
+            logger.setLevel(null);
+            endpointInvokerLog = null;
+        }
+    }
+
+    /**
+     * Records everything the invoker logs, down to debug level, so that a
+     * message that is expected at a given level cannot be downgraded unnoticed.
+     */
+    private void captureEndpointInvokerLog() {
+        var logger = (ch.qos.logback.classic.Logger) LoggerFactory
+                .getLogger(EndpointInvoker.class);
+        endpointInvokerLog = new ListAppender<>();
+        endpointInvokerLog.start();
+        logger.addAppender(endpointInvokerLog);
+        logger.setLevel(Level.DEBUG);
     }
 
     private EndpointInvoker createInvoker(ApplicationContext context) {
@@ -487,6 +513,41 @@ public class EndpointInvokerTest {
                 "an unexpected lookup failure should not turn the events "
                         + "off for good",
                 1, authorizationEventPublisher.events.size());
+    }
+
+    @Test
+    public void when_multipleAuthorizationEventPublishersAreDefined_theAmbiguityIsReportedOnce()
+            throws Exception {
+        var context = Mockito.mock(ApplicationContext.class);
+        when(context.getBean(AuthorizationEventPublisher.class))
+                .thenThrow(new NoUniqueBeanDefinitionException(
+                        AuthorizationEventPublisher.class, 2,
+                        "two publisher beans are defined"));
+        var invoker = createInvoker(context);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+        captureEndpointInvokerLog();
+
+        for (var i = 0; i < 2; i++) {
+            assertThrows(EndpointHttpException.class,
+                    () -> invoker.invoke("securedendpoint", "secured", body,
+                            principal, requestMock::isUserInRole));
+        }
+
+        var messages = endpointInvokerLog.list.stream().filter(event -> event
+                .getFormattedMessage().contains("AuthorizationEventPublisher"))
+                .toList();
+        assertEquals(
+                "an ambiguous publisher bean should be reported once, not on "
+                        + "every denied call",
+                1, messages.size());
+        // NoUniqueBeanDefinitionException extends
+        // NoSuchBeanDefinitionException, so catching the latter first would
+        // silently downgrade this to debug
+        assertEquals(
+                "a misconfigured publisher bean must not be hidden at debug level",
+                Level.WARN, messages.get(0).getLevel());
+        assertEquals(0, authorizationEventPublisher.events.size());
     }
 
     private void denyAccessToTheEndpointMethod() {
