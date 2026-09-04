@@ -47,7 +47,7 @@ jobs:
 
       - name: Install Chrome
         id: setup-chrome
-        uses: browser-actions/setup-chrome@v2
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
 
       # Node.js, JDK 21, Maven and node_modules caches, `npm ci`. Nothing is
       # built up front; Claude builds what a task needs (see the instructions
@@ -66,7 +66,9 @@ jobs:
           echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
 
       - name: Run Claude Code
-        uses: vaadin/github-actions/claude-code@main
+        # Pinned to a commit of the shared action's main branch; bump the pin to
+        # pick up changes there.
+        uses: vaadin/github-actions/claude-code@2a6fabc668c09424c29ca789789e9bf0720de8ee # main
         env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         with:
