@@ -334,12 +334,23 @@ public class EndpointInvokerTest {
                         AuthorizationEventPublisher.class));
         var invoker = createInvoker(contextWithoutPublisher);
         endpointRegistry.registerEndpoint(new SecuredEndpoint());
-        when(endpointAccessChecker.check(any(Method.class), any(), any()))
-                .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
+        denyAccessToTheEndpointMethod();
+        captureEndpointInvokerLog();
 
-        assertThrows(EndpointHttpException.class,
-                () -> invoker.invoke("SecuredEndpoint", "secured", body,
-                        principal, requestMock::isUserInRole));
+        for (var i = 0; i < 2; i++) {
+            assertThrows(EndpointHttpException.class,
+                    () -> invoker.invoke("SecuredEndpoint", "secured", body,
+                            principal, requestMock::isUserInRole));
+        }
+
+        var messages = endpointInvokerLog.list.stream().filter(event -> event
+                .getFormattedMessage().contains("AuthorizationEventPublisher"))
+                .toList();
+        assertEquals("a missing publisher bean should be reported once, not on "
+                + "every denied call", 1, messages.size());
+        // not opting in to the events is the normal case, so it must stay a
+        // debug detail instead of being reported as a problem
+        assertEquals(Level.DEBUG, messages.get(0).getLevel());
     }
 
     @Test
