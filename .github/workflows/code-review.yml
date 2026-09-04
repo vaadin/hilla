@@ -1,0 +1,122 @@
+name: Code Review
+
+# Reviews a pull request, triggered automatically when a PR is opened or marked
+# ready for review (eligibility rules on the job condition), or on request by a
+# "/code-review" PR comment or a review request for vaadin-review-bot.
+# The review itself lives in the shared vaadin/github-actions/code-review
+# action (prepared review inputs, the Claude review, posting the findings as
+# one review); this workflow owns the triggers, eligibility rules, and the
+# reaction to the trigger.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, ready_for_review, review_requested]
+    branches: [main]
+
+env:
+  PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+
+jobs:
+  check:
+    # Eligibility is a cheap `if` pre-filter plus an authoritative org-membership
+    # check in the job. Requested reviews (comment, review request) only check
+    # who asked. Auto triggers (opened, ready for review) additionally skip
+    # drafts, chore PRs, and known bots. The pre-filter allows CONTRIBUTOR
+    # because on pull_request events the author_association of a private org
+    # member is reported as CONTRIBUTOR; the org-membership API call in the job
+    # is what actually confirms access. PRs opened by the totally-not-ai app
+    # (agent-created PRs) are reviewed too: the app is not an org member, so the
+    # job allows it explicitly.
+    if: |
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       github.event.comment.body == '/code-review' &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request' &&
+       github.event.action == 'review_requested' &&
+       github.event.requested_reviewer.login == 'vaadin-review-bot') ||
+      (github.event_name == 'pull_request' &&
+       contains(fromJSON('["opened", "ready_for_review"]'), github.event.action) &&
+       github.event.pull_request.draft == false &&
+       !contains(fromJSON('["dependabot[bot]", "vaadin-bot"]'), github.event.pull_request.user.login) &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
+       !startsWith(github.event.pull_request.title, 'chore:') &&
+       !startsWith(github.event.pull_request.title, 'chore('))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      eligible: ${{ steps.access.outputs.eligible }}
+    steps:
+      - name: Check org membership
+        id: access
+        env:
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT || github.token }}
+          REQUESTER: ${{ github.event.sender.login }}
+        run: |
+          if [ "$REQUESTER" = "totally-not-ai[bot]" ] ||
+             gh api "orgs/${{ github.repository_owner }}/members/$REQUESTER" --silent; then
+            echo "eligible=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  review:
+    needs: check
+    if: needs.check.outputs.eligible == 'true'
+    # One review per PR at a time; a re-trigger queues instead of aborting a run
+    # that may be mid-posting. Group is enforced on the job level instead of the
+    # workflow: newer workflow runs in the same group cancel previous ones that
+    # haven't started yet. This can lead to a scenario where opening a PR and
+    # assigning reviewers at the same time can cause workflows that would pass
+    # the check pre-condition to get canceled by workflows whose condition would
+    # not pass.
+    concurrency:
+      group: code-review-${{ github.event.issue.number || github.event.pull_request.number }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      # Required by actions/checkout
+      contents: read
+      # Required to react to the trigger comment
+      issues: write
+      # Required to post the review
+      pull-requests: write
+    steps:
+      - name: React to trigger
+        env:
+          GH_TOKEN: ${{ secrets.VAADIN_REVIEW_BOT || github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            target="issues/comments/${{ github.event.comment.id }}"
+          else
+            target="issues/$PR_NUMBER"
+          fi
+          gh api "repos/${{ github.repository }}/$target/reactions" \
+            -f content=eyes
+
+      # The review session is read-only and never builds or runs anything, so
+      # only Node is needed (for the action's own scripts and the Claude Code
+      # CLI); no JDK, Maven, or npm dependencies.
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Run code review
+        uses: vaadin/github-actions/code-review@main
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          pr-number: ${{ env.PR_NUMBER }}
+          github-token: ${{ secrets.VAADIN_REVIEW_BOT || github.token }}
+          reference-repos: |
+            vaadin/flow | the Vaadin Flow framework (Java). Consult it to understand the server-side APIs that Hilla's endpoint layer, dev mode and build plugins integrate with (VaadinService, frontend build tooling, dev server, and so on).
+          upload-execution-log: ${{ vars.CLAUDE_DEBUG }}
