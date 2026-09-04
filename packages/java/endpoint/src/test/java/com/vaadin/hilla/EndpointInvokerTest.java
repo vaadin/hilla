@@ -17,6 +17,7 @@ package com.vaadin.hilla;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import tools.jackson.databind.node.ObjectNode;
@@ -57,6 +60,7 @@ import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.auth.EndpointInvocation;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
+import com.vaadin.hilla.signals.internal.SecureSignalsRegistry;
 
 @SpringBootTest(classes = { ServletContextTestSetup.class,
         EndpointProperties.class, JacksonProperties.class,
@@ -105,7 +109,16 @@ public class EndpointInvokerTest {
 
         endpointRegistry = new EndpointRegistry(endpointNameChecker);
 
-        endpointInvoker = new EndpointInvoker(applicationContext,
+        endpointInvoker = createInvoker(applicationContext);
+    }
+
+    @After
+    public void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private EndpointInvoker createInvoker(ApplicationContext context) {
+        return new EndpointInvoker(context,
                 new JacksonObjectMapperFactory.Json().build(),
                 explicitNullableTypeChecker, servletContext, endpointRegistry) {
             protected EndpointAccessChecker getAccessChecker() {
@@ -258,12 +271,14 @@ public class EndpointInvokerTest {
         when(endpointAccessChecker.check(any(Method.class), any(), any()))
                 .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
 
+        // invoked with a differently cased name than the one the endpoint
+        // declares, to pin that the audited name comes from the endpoint class
+        // and not from the request
         assertThrows(EndpointHttpException.class,
-                () -> endpointInvoker.invoke("SecuredEndpoint", "secured", body,
+                () -> endpointInvoker.invoke("securedendpoint", "secured", body,
                         principal, requestMock::isUserInRole));
 
-        assertEquals(1, authorizationEventPublisher.events.size());
-        var event = authorizationEventPublisher.events.get(0);
+        var event = singlePublishedEvent();
         assertFalse(event.result().isGranted());
         assertTrue(
                 "the published object should be a MethodInvocation so that "
@@ -286,13 +301,7 @@ public class EndpointInvokerTest {
         when(contextWithoutPublisher.getBean(AuthorizationEventPublisher.class))
                 .thenThrow(new NoSuchBeanDefinitionException(
                         AuthorizationEventPublisher.class));
-        var invoker = new EndpointInvoker(contextWithoutPublisher,
-                new JacksonObjectMapperFactory.Json().build(),
-                explicitNullableTypeChecker, servletContext, endpointRegistry) {
-            protected EndpointAccessChecker getAccessChecker() {
-                return endpointAccessChecker;
-            }
-        };
+        var invoker = createInvoker(contextWithoutPublisher);
         endpointRegistry.registerEndpoint(new SecuredEndpoint());
         when(endpointAccessChecker.check(any(Method.class), any(), any()))
                 .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
@@ -311,6 +320,158 @@ public class EndpointInvokerTest {
                 requestMock::isUserInRole);
 
         assertEquals(0, authorizationEventPublisher.events.size());
+    }
+
+    @Test
+    public void when_principalIsAnAuthentication_eventCarriesIt()
+            throws Exception {
+        var authentication = Mockito.mock(Authentication.class);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        assertThrows(EndpointHttpException.class,
+                () -> endpointInvoker.invoke("securedendpoint", "secured", body,
+                        authentication, requestMock::isUserInRole));
+
+        assertSame(authentication,
+                singlePublishedEvent().authentication().get());
+    }
+
+    @Test
+    public void when_principalIsNotAnAuthentication_eventCarriesTheSecurityContextAuthentication()
+            throws Exception {
+        var authentication = Mockito.mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        assertThrows(EndpointHttpException.class,
+                () -> endpointInvoker.invoke("securedendpoint", "secured", body,
+                        principal, requestMock::isUserInRole));
+
+        assertSame(authentication,
+                singlePublishedEvent().authentication().get());
+    }
+
+    @Endpoint("CustomNamedEndpoint")
+    static class EndpointWithCustomName {
+        public void secured() {
+        }
+    }
+
+    @Test
+    public void when_endpointDeclaresAName_eventCarriesTheDeclaredName()
+            throws Exception {
+        endpointRegistry.registerEndpoint(new EndpointWithCustomName());
+        denyAccessToTheEndpointMethod();
+
+        assertThrows(EndpointHttpException.class,
+                () -> endpointInvoker.invoke("customnamedendpoint", "secured",
+                        body, principal, requestMock::isUserInRole));
+
+        assertEquals("CustomNamedEndpoint",
+                publishedInvocation().getEndpointName());
+    }
+
+    @EndpointExposed
+    static class ExposedParentEndpoint {
+        public void inherited() {
+        }
+    }
+
+    @Endpoint
+    static class InheritingEndpoint extends ExposedParentEndpoint {
+    }
+
+    @Test
+    public void when_accessIsDeniedForTheEndpointClass_authorizationDeniedEventIsPublished()
+            throws Exception {
+        endpointRegistry.registerEndpoint(new InheritingEndpoint());
+        when(endpointAccessChecker.check(any(Class.class), any(), any()))
+                .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
+
+        assertThrows(EndpointHttpException.class,
+                () -> endpointInvoker.invoke("inheritingendpoint", "inherited",
+                        body, principal, requestMock::isUserInRole));
+
+        var invocation = publishedInvocation();
+        assertEquals("InheritingEndpoint", invocation.getEndpointName());
+        assertEquals(ExposedParentEndpoint.class.getMethod("inherited"),
+                invocation.getMethod());
+    }
+
+    @Test
+    public void when_signalSubscriptionIsDenied_authorizationDeniedEventIsPublished()
+            throws Exception {
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+        var signalsRegistry = new SecureSignalsRegistry(endpointInvoker,
+                new JacksonObjectMapperFactory.Json().build());
+
+        assertThrows(EndpointHttpException.class,
+                () -> signalsRegistry.register("clientSignalId",
+                        "securedendpoint", "secured", body));
+
+        var invocation = publishedInvocation();
+        assertEquals(
+                "the audited endpoint name should be the same for endpoint "
+                        + "calls and signal subscriptions",
+                "SecuredEndpoint", invocation.getEndpointName());
+        assertEquals("secured", invocation.getMethodName());
+    }
+
+    @Test
+    public void when_publishingTheEventFails_accessIsStillDenied()
+            throws Exception {
+        var failingPublisher = Mockito.mock(AuthorizationEventPublisher.class);
+        Mockito.doThrow(new RuntimeException("the audit listener is broken"))
+                .when(failingPublisher)
+                .publishAuthorizationEvent(any(), any(), any());
+        var context = Mockito.mock(ApplicationContext.class);
+        when(context.getBean(AuthorizationEventPublisher.class))
+                .thenReturn(failingPublisher);
+        var invoker = createInvoker(context);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        assertThrows(EndpointHttpException.class,
+                () -> invoker.invoke("securedendpoint", "secured", body,
+                        principal, requestMock::isUserInRole));
+    }
+
+    @Test
+    public void authorizationEventPublisherIsLookedUpOnlyOnce()
+            throws Exception {
+        var context = Mockito.mock(ApplicationContext.class);
+        when(context.getBean(AuthorizationEventPublisher.class))
+                .thenReturn(authorizationEventPublisher);
+        var invoker = createInvoker(context);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        for (var i = 0; i < 2; i++) {
+            assertThrows(EndpointHttpException.class,
+                    () -> invoker.invoke("securedendpoint", "secured", body,
+                            principal, requestMock::isUserInRole));
+        }
+
+        assertEquals(2, authorizationEventPublisher.events.size());
+        Mockito.verify(context, Mockito.times(1))
+                .getBean(AuthorizationEventPublisher.class);
+    }
+
+    private void denyAccessToTheEndpointMethod() {
+        when(endpointAccessChecker.check(any(Method.class), any(), any()))
+                .thenReturn(EndpointAccessChecker.ACCESS_DENIED_MSG);
+    }
+
+    private PublishedEvent singlePublishedEvent() {
+        assertEquals(1, authorizationEventPublisher.events.size());
+        return authorizationEventPublisher.events.get(0);
+    }
+
+    private EndpointInvocation publishedInvocation() {
+        return (EndpointInvocation) singlePublishedEvent().object();
     }
 
     record PublishedEvent(Supplier<Authentication> authentication,
