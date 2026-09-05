@@ -1,0 +1,115 @@
+name: Claude Code
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude:
+    # Skip workflow if the comment does not tag claude or the author is not a
+    # maintainer. Having this check here ensures that this scenario does not
+    # even start a runner.
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.review.author_association))
+    runs-on: ubuntu-latest
+    permissions:
+      # Required by actions/checkout
+      contents: read
+      # Required by anthropics/claude-code-action to generate a short-lived
+      # app token (contents/pull_requests/issues: write) that is revoked at the
+      # end of the run. Thus, there should be no need to grant additional write
+      # permissions to the workflow itself.
+      id-token: write
+      # Required by github_ci MCP server, which uses the workflow token instead
+      # of the short-lived app token
+      actions: read
+    env:
+      # Same as in validation.yml: the browser-based Vitest tests drive the
+      # runner's Chrome (CHROME_BIN, set below) instead of a Playwright-managed
+      # browser, so no browser download is needed on `npm install`.
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+
+      # Node.js, JDK 21, Maven and node_modules caches, `npm ci`. Nothing is
+      # built up front; Claude builds what a task needs (see the instructions
+      # passed to the action below).
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Install TestBench license
+        env:
+          TB_LICENSE: ${{ secrets.TB_LICENSE }}
+        run: |
+          # The guard cannot live in `if`: neither the secrets context nor the
+          # step's own env is available to a step condition.
+          if [ -z "$TB_LICENSE" ]; then
+            echo 'TB_LICENSE is not set, skipping'
+            exit 0
+          fi
+          mkdir -p ~/.vaadin
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"${user}\",\"proKey\":\"${key}\"}" > ~/.vaadin/proKey
+
+      - name: Run Claude Code
+        # Pinned to a commit of the shared action's main branch; bump the pin to
+        # pick up changes there.
+        uses: vaadin/github-actions/claude-code@2a6fabc668c09424c29ca789789e9bf0720de8ee # main
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          reference-repos: |
+            vaadin/flow | the Vaadin Flow framework (Java). Consult it to understand the server-side APIs that Hilla's endpoint layer, dev mode and build plugins integrate with (VaadinService, frontend build tooling, dev server, and so on).
+          extra-allowed-tools: |
+            Bash(mvn:*)
+            Bash(npm ci)
+            Bash(npm install)
+            Bash(npm run:*)
+            Bash(npm test:*)
+            Bash(npx nx:*)
+            Bash(npx vitest:*)
+            Bash(npx tsc:*)
+            Bash(npx eslint:*)
+            Bash(npx prettier:*)
+            Bash(./gradlew:*)
+            Bash(./packages/java/gradle-plugin/gradlew:*)
+            Bash(./packages/java/tests/gradle/kotlin-gradle-test/gradlew:*)
+          extra-instructions: |
+            # Notes for running in CI
+
+            - npm dependencies are installed, but nothing is built. The
+              TypeScript packages import each other through their built output,
+              so run `npm run build` before testing a package that depends on
+              other `@vaadin/hilla-*` packages. Likewise, run
+              `mvn install -DskipTests` before testing a Java module that
+              depends on other modules of this repository.
+            - Chrome is available through `CHROME_BIN` for the browser-based
+              Vitest tests; the Node-based ones need nothing extra.
+            - Prefer targeted runs over the full suites: `npm test` inside a
+              single package under `packages/ts`, or `mvn test -pl :<artifactId>
+              -Dtest=<Class>` for a Java module. Do not run the integration
+              tests under `packages/java/tests` wholesale; they are split across
+              several CI jobs and take about 25 minutes each.
+            - Before committing, format Java with `mvn spotless:apply` and
+              TypeScript with `npm run lint:fix`.
+          upload-execution-log: ${{ vars.CLAUDE_DEBUG }}
