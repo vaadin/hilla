@@ -52,25 +52,27 @@ describe('@vaadin/hilla-react-signals', () => {
 
     it('should render value when signal is rendered', async () => {
       const numberSignal = new NumberSignal(42, config);
-      const result = render(<span>Value is {numberSignal}</span>);
+      const result = render(<span>Value is {numberSignal.value}</span>);
       await nextFrame();
       expect(result.container.textContent).to.equal('Value is 42');
     });
 
     it('should set the underlying value locally without waiting for server confirmation', () => {
       const numberSignal = new NumberSignal(undefined, config);
+      subscribeToSignalViaEffect(numberSignal);
       expect(numberSignal.value).to.be.undefined;
       numberSignal.value = 42;
       expect(numberSignal.value).to.equal(42);
 
       const anotherNumberSignal = new NumberSignal(undefined, config);
+      subscribeToSignalViaEffect(anotherNumberSignal);
 
       const results: Array<number | undefined> = [];
       effect(() => {
         results.push(anotherNumberSignal.value);
       });
       anotherNumberSignal.value = 42;
-      anotherNumberSignal.value += 1;
+      anotherNumberSignal.value = 43;
 
       expect(results).to.be.like([undefined, 42, 43]);
     });
@@ -184,6 +186,95 @@ describe('@vaadin/hilla-react-signals', () => {
       const numberSignal = new NumberSignal(42, config);
       subscribeToSignalViaEffect(numberSignal);
       await expect(numberSignal.incrementBy(0).result).to.be.fulfilled;
+    });
+
+    it('should apply optimistic increment immediately', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(10);
+      // Value should update before server confirms
+      expect(numberSignal.value).to.equal(52);
+    });
+
+    it('should skip re-applying own confirmed increment', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(10);
+      expect(numberSignal.value).to.equal(52);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+
+      // Server confirms our increment — value should not change again
+      simulateReceivedChange(subscription, {
+        commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 10,
+      } as IncrementCommand);
+
+      expect(numberSignal.value).to.equal(52);
+    });
+
+    it('should revert optimistic increment on rejection', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      const { result } = numberSignal.incrementBy(10);
+      result.catch(() => {});
+      expect(numberSignal.value).to.equal(52);
+
+      const [, , params] = client.call.firstCall.args;
+      const { commandId } = params!.command as { commandId: string };
+
+      simulateReceivedChange(subscription, {
+        commandId,
+        targetNodeId: '',
+        '@type': 'inc',
+        delta: 10,
+        accepted: false,
+        reason: 'conflict',
+      } as unknown as SignalCommand);
+
+      expect(numberSignal.value).to.equal(42);
+    });
+
+    it('should return the integer part of the value from valueAsInt()', () => {
+      const numberSignal = new NumberSignal(42.7, config);
+      expect(numberSignal.valueAsInt()).to.equal(42);
+
+      const negativeSignal = new NumberSignal(-3.9, config);
+      expect(negativeSignal.valueAsInt()).to.equal(-3);
+    });
+
+    it('should clear pending increments on snapshot', () => {
+      const numberSignal = new NumberSignal(42, config);
+      subscribeToSignalViaEffect(numberSignal);
+
+      numberSignal.incrementBy(10);
+      expect(numberSignal.value).to.equal(52);
+
+      // Snapshot resets everything
+      simulateReceivedChange(subscription, {
+        commandId: 'snapshot-id',
+        targetNodeId: '',
+        '@type': 'snapshot',
+        nodes: {
+          '': {
+            '@type': 'ValueSignal',
+            parent: null,
+            lastUpdate: null,
+            scopeOwner: null,
+            value: 100,
+            listChildren: [],
+            mapChildren: {},
+          },
+        },
+      } as unknown as SignalCommand);
+
+      expect(numberSignal.value).to.equal(100);
     });
   });
 });
