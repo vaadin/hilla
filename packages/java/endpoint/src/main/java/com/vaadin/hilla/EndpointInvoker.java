@@ -52,7 +52,6 @@ import org.springframework.lang.NonNullApi;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ClassUtils;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -409,6 +408,9 @@ public class EndpointInvoker {
      * {@link org.springframework.security.authorization.event.AuthorizationDeniedEvent}
      * carrying an {@link EndpointInvocation} is published, so that endpoint
      * calls can be audited the same way as Spring method security invocations.
+     * The event is published for denied calls of unauthenticated users as well,
+     * and, like in Spring, the authentication it supplies is the anonymous
+     * authentication of the user rather than <code>null</code>.
      *
      * @param endpointData
      *            the data of the endpoint to check
@@ -451,12 +453,9 @@ public class EndpointInvoker {
         }
         var endpointName = EndpointRegistry
                 .getCanonicalEndpointNameForClass(invokedEndpointClass);
-        Supplier<Authentication> authentication = () -> {
-            if (principal instanceof Authentication auth) {
-                return auth;
-            }
-            return SecurityContextHolder.getContext().getAuthentication();
-        };
+        Supplier<Authentication> authentication = principal instanceof Authentication auth
+                ? () -> auth
+                : AuthenticationUtil::getRequiredSecurityHolderAuthentication;
         var invocation = new EndpointInvocation(endpointName,
                 endpointData.getEndpointObject(), methodToInvoke);
         try {

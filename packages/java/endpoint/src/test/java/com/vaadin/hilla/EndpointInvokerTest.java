@@ -54,15 +54,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import tools.jackson.databind.node.ObjectNode;
 
 import com.vaadin.hilla.EndpointInvocationException.EndpointHttpException;
+import com.vaadin.hilla.EndpointInvocationException.EndpointUnauthorizedException;
 import com.vaadin.hilla.auth.EndpointAccessChecker;
 import com.vaadin.hilla.auth.EndpointInvocation;
 import com.vaadin.hilla.parser.jackson.JacksonObjectMapperFactory;
@@ -393,6 +397,41 @@ public class EndpointInvokerTest {
 
         assertSame(authentication,
                 singlePublishedEvent().authentication().get());
+    }
+
+    @Test
+    public void when_theUserIsAnonymous_eventCarriesTheAnonymousAuthentication()
+            throws Exception {
+        var anonymous = new AnonymousAuthenticationToken("key", "anonymousUser",
+                AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+        SecurityContextHolder.getContext().setAuthentication(anonymous);
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        // an anonymous call has no principal and is denied with 401, Spring
+        // publishes the event for those as well, with the anonymous token
+        assertThrows(EndpointUnauthorizedException.class,
+                () -> endpointInvoker.invoke("securedendpoint", "secured", body,
+                        null, requestMock::isUserInRole));
+
+        assertSame(anonymous, singlePublishedEvent().authentication().get());
+    }
+
+    @Test
+    public void when_thereIsNoAuthentication_theEventSupplierFailsLikeInSpring()
+            throws Exception {
+        endpointRegistry.registerEndpoint(new SecuredEndpoint());
+        denyAccessToTheEndpointMethod();
+
+        assertThrows(EndpointUnauthorizedException.class,
+                () -> endpointInvoker.invoke("securedendpoint", "secured", body,
+                        null, requestMock::isUserInRole));
+
+        // listeners are never handed a null authentication, they see the same
+        // failure Spring Security produces when the context is empty
+        var authentication = singlePublishedEvent().authentication();
+        assertThrows(AuthenticationCredentialsNotFoundException.class,
+                authentication::get);
     }
 
     @Endpoint("CustomNamedEndpoint")
