@@ -13,19 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.subtypes;
+package com.vaadin.hilla.parser.plugins.subtypes.typeids;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * A hierarchy whose type ids are built by Jackson from the name of the base
- * class, which the generator does not know: no discriminator property is
- * generated for it.
+ * A hierarchy whose type ids Jackson builds from the name of the base class,
+ * which is not known here: no discriminator is generated for it at all.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @JsonSubTypes.Type(value = TextPayload.class),
-        @JsonSubTypes.Type(value = BinaryPayload.class) })
-public class Payload {
+@JsonSubTypes({ @JsonSubTypes.Type(value = MinimalBase.Subtype.class),
+        @JsonSubTypes.Type(value = MinimalBase.OtherSubtype.class) })
+public class MinimalBase {
     public String id;
+
+    public static class Subtype extends MinimalBase {
+        public String note;
+    }
+
+    public static class OtherSubtype extends MinimalBase {
+        public int size;
+    }
 }

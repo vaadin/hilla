@@ -13,12 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.subtypes;
+package com.vaadin.hilla.parser.plugins.subtypes.typeids;
 
-/**
- * A subtype whose name is not on the subtype itself, but on its superclass.
- */
-public class NightlyJob extends RecurringJob {
+import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
 
-    public String hour;
+@Endpoint
+public class TypeIdsEndpoint {
+
+    public NameBase sendNamed() {
+        return new NameBase.Named();
+    }
+
+    public SimpleBase sendSimple() {
+        return new SimpleBase.Nested();
+    }
+
+    public MinimalBase sendMinimal() {
+        return new MinimalBase.Subtype();
+    }
 }

@@ -13,9 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.hilla.parser.plugins.subtypes;
+package com.vaadin.hilla.parser.plugins.subtypes.typeids;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,43 +30,40 @@ import tools.jackson.databind.json.JsonMapper;
 
 import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 
-public class SubTypesTest extends AbstractFullStackTest {
+/**
+ * Verifies the type ids that the generator gives to the subtypes of a
+ * polymorphic type. Which value ends up in the generated TypeScript is decided
+ * by the parser, so these hierarchies are only parsed: how a discriminator is
+ * rendered is covered by the snapshots of the surrounding package.
+ */
+public class TypeIdsTest extends AbstractFullStackTest {
     /**
      * The instances whose type id is checked: one per class mentioned in a
      * {@code @JsonSubTypes} annotation of the package.
      */
-    private static final List<Object> SUBTYPES = List.of(new AddEvent(),
-            new UpdateEvent(), new DeleteEvent(), new MoveEvent(),
-            new Notification(), new EmailNotification(),
-            new HtmlEmailNotification(), new MultipartSmsNotification(),
-            new BaseEvent.NestedEvent(), new Circle(1), new Square(1),
-            new BatchJob(), new CronJob(), new NightlyJob(),
-            new Job.InlineJob(), new TextPayload(), new BinaryPayload());
+    private static final List<Object> SUBTYPES = List.of(new NameBase.Named(),
+            new NameBase.Nested(), new SimpleBase.Nested(),
+            new SimpleBase.FromInterface(), new SimpleBase.FromSuperclass(),
+            new MinimalBase.Subtype(), new MinimalBase.OtherSubtype());
 
     /**
      * The subtypes that get no discriminator at all, because Jackson builds
      * their type ids from the name of the base class, which is not known here:
-     * the {@code Payload} hierarchy uses {@code Id.MINIMAL_CLASS}, so a
-     * generated property would hold values that the server never sends.
+     * a generated property would hold values that the server never sends.
      */
-    private static final List<String> WITHOUT_DISCRIMINATOR = List
-            .of("TextPayload", "BinaryPayload");
-
-    @Test
-    public void should_GenerateTheExpectedTypeScript() {
-        assertTypescriptMatchesSnapshot(SubTypesEndpoint.class);
-    }
+    private static final List<String> WITHOUT_DISCRIMINATOR = List.of("Subtype",
+            "OtherSubtype");
 
     /**
      * A discriminator is only useful if it holds the value that the server
-     * actually sends, which the snapshots cannot tell. Every generated
-     * discriminator is therefore compared with the JSON that Jackson produces
-     * for an instance of the type: a value that the server never sends leaves
-     * the TypeScript type unusable for the value it describes.
+     * actually sends. Every generated discriminator is therefore compared with
+     * the JSON that the Jackson mapper of an application produces for an
+     * instance of the type: a value that the server never sends leaves the
+     * TypeScript type unusable for the value it describes.
      */
     @Test
     public void should_DeclareTheTypeIdsThatJacksonSends() {
-        var openApi = generator(SubTypesEndpoint.class).parse();
+        var openApi = generator(TypeIdsEndpoint.class).parse();
         var mapper = new JsonMapper();
         var generated = new LinkedHashMap<String, String>();
         var serialized = new LinkedHashMap<String, String>();
@@ -93,6 +91,24 @@ public class SubTypesTest extends AbstractFullStackTest {
                 "Another set of subtypes than the expected one is left without"
                         + " a discriminator");
         assertEquals(serialized, generated);
+    }
+
+    /**
+     * A hierarchy whose type ids are unknown gets no property at all: an
+     * identifying property that the server never sends would be worse than none
+     * at all, as TypeScript would demand it from every value.
+     */
+    @Test
+    public void should_NotDeclareAnIdentifyingPropertyForUnknownTypeIds() {
+        var sources = generator(TypeIdsEndpoint.class).generate();
+        var path = MinimalBase.Subtype.class.getName().replace('.', '/')
+                .replace('$', '/') + ".ts";
+        var source = sources.get(path);
+
+        assertFalse(source.contains("@c"),
+                () -> "The generated " + path + " declares the property that"
+                        + " Jackson uses for a class based type id:\n"
+                        + source);
     }
 
     /**

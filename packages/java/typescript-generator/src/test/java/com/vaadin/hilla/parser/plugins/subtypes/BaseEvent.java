@@ -21,17 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @JsonSubTypes.Type(value = AddEvent.class, name = "add"),
         @JsonSubTypes.Type(value = UpdateEvent.class, name = "update"),
-        @JsonSubTypes.Type(value = DeleteEvent.class, name = "delete"),
-        @JsonSubTypes.Type(value = MoveEvent.class),
-        @JsonSubTypes.Type(value = BaseEvent.NestedEvent.class) })
+        @JsonSubTypes.Type(value = DeleteEvent.class, name = "delete") })
 public class BaseEvent {
     public int id;
-
-    /**
-     * A subtype with no name of its own: with {@code Id.NAME}, its id is the
-     * class name without the package, which keeps the enclosing class.
-     */
-    public static class NestedEvent extends BaseEvent {
-        public String item;
-    }
 }

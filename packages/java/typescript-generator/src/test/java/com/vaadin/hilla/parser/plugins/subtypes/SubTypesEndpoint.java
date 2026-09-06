@@ -31,14 +31,6 @@ public class SubTypesEndpoint {
         return new EmailNotification();
     }
 
-    public Job sendJob() {
-        return new BatchJob();
-    }
-
-    public Payload sendPayload() {
-        return new TextPayload();
-    }
-
     public Shape sendShape() {
         return new Circle(1);
     }
