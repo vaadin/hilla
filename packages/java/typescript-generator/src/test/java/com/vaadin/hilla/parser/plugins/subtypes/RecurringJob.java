@@ -15,11 +15,14 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-/**
- * A subtype whose name is not on the subtype itself, but on the interface it
- * implements, which comes before its superclass.
- */
-public class CronJob extends RecurringJob implements Scheduled {
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-    public String expression;
+/**
+ * An intermediate class that is not mentioned in {@code @JsonSubTypes} and
+ * whose name loses to the one of an interface, as it does in Jackson.
+ */
+@JsonTypeName("recurring")
+public abstract class RecurringJob extends Job {
+
+    public int intervalMinutes;
 }

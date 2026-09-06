@@ -15,12 +15,10 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -178,32 +176,28 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
 
     /**
      * Returns the given class followed by its supertypes, superclasses and
-     * interfaces alike, in breadth-first order: the same types from which
-     * Jackson collects the class annotations that apply to a type.
+     * interfaces alike: the same types, in the same order, from which Jackson
+     * collects the class annotations that apply to a type. The interfaces of a
+     * class come before its superclass, and each of them is followed by its own
+     * supertypes, so that the annotation closest to the class wins.
      */
     private static Stream<Class<?>> hierarchyOf(Class<?> cls) {
-        var hierarchy = new ArrayList<Class<?>>();
-        var queue = new ArrayDeque<Class<?>>();
-        var visited = new HashSet<Class<?>>();
-        queue.add(cls);
+        var hierarchy = new LinkedHashSet<Class<?>>();
+        collectHierarchy(cls, hierarchy);
+        return hierarchy.stream();
+    }
 
-        while (!queue.isEmpty()) {
-            var current = queue.remove();
-
-            if (!visited.add(current)) {
-                continue;
-            }
-
-            hierarchy.add(current);
-
-            if (current.getSuperclass() != null) {
-                queue.add(current.getSuperclass());
-            }
-
-            queue.addAll(List.of(current.getInterfaces()));
+    private static void collectHierarchy(Class<?> cls,
+            Set<Class<?>> hierarchy) {
+        if (cls == null || !hierarchy.add(cls)) {
+            return;
         }
 
-        return hierarchy.stream();
+        for (var iface : cls.getInterfaces()) {
+            collectHierarchy(iface, hierarchy);
+        }
+
+        collectHierarchy(cls.getSuperclass(), hierarchy);
     }
 
     private static void addDiscriminatorProperty(Schema<?> schema,
@@ -242,11 +236,11 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
     private record SubTypesInfo(JsonTypeInfo typeInfo, JsonSubTypes subTypes) {
         /**
          * The type id strategies whose values are known here: both take the id
-         * from the annotations and fall back to the simple class name. The ids
-         * of the class based strategies are built from the name of the base
-         * type, and those of a custom resolver are only known to the resolver
-         * itself, so no property is generated for them: leaving it out is
-         * better than declaring values that the server never sends.
+         * from the annotations and fall back to the name of the class itself.
+         * The ids of the class based strategies are built from the name of the
+         * base type, and those of a custom resolver are only known to the
+         * resolver itself, so no property is generated for them: leaving it out
+         * is better than declaring values that the server never sends.
          */
         private static final Set<JsonTypeInfo.Id> SUPPORTED_IDS = EnumSet
                 .of(JsonTypeInfo.Id.NAME, JsonTypeInfo.Id.SIMPLE_NAME);
@@ -285,7 +279,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         List<String> discriminatorValues(Class<?> cls) {
             var own = Arrays.stream(subTypes.value())
                     .filter(type -> cls.equals(type.value())).findAny()
-                    .map(SubTypesInfo::discriminatorValue);
+                    .map(this::discriminatorValue);
 
             if (own.isEmpty()) {
                 return List.of();
@@ -295,7 +289,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     Arrays.stream(subTypes.value())
                             .filter(type -> !cls.equals(type.value())
                                     && cls.isAssignableFrom(type.value()))
-                            .map(SubTypesInfo::discriminatorValue))
+                            .map(this::discriminatorValue))
                     .toList();
         }
 
@@ -304,9 +298,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
          * the name given in the {@code @JsonSubTypes.Type} annotation, then the
          * {@code @JsonTypeName} annotation of the subtype or of one of its
          * supertypes, which is where Jackson looks for it too, and finally the
-         * simple class name.
+         * name of the class itself.
          */
-        private static String discriminatorValue(JsonSubTypes.Type type) {
+        private String discriminatorValue(JsonSubTypes.Type type) {
             if (!type.name().isEmpty()) {
                 return type.name();
             }
@@ -319,7 +313,24 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                     .map(c -> c.getAnnotation(JsonTypeName.class))
                     .filter(Objects::nonNull).map(JsonTypeName::value)
                     .filter(name -> !name.isEmpty()).findFirst()
-                    .orElseGet(() -> type.value().getSimpleName());
+                    .orElseGet(() -> defaultTypeId(type.value()));
+        }
+
+        /**
+         * Returns the type id that Jackson builds from the name of the class
+         * when no annotation gives one: the simple name for
+         * {@code Id.SIMPLE_NAME}, and the binary name without its package for
+         * {@code Id.NAME}, which keeps the enclosing classes of a nested class,
+         * as in {@code Shape$Circle}.
+         */
+        private String defaultTypeId(Class<?> cls) {
+            if (typeInfo.use() == JsonTypeInfo.Id.SIMPLE_NAME) {
+                return cls.getSimpleName();
+            }
+
+            var name = cls.getName();
+
+            return name.substring(name.lastIndexOf('.') + 1);
         }
     }
 
