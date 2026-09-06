@@ -98,6 +98,31 @@
           }
         }
       }
+    },
+    "/SubTypesEndpoint/sendShape": {
+      "post": {
+        "tags": [
+          "SubTypesEndpoint"
+        ],
+        "operationId": "SubTypesEndpoint_sendShape_POST",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "nullable": true,
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Shape"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -312,6 +337,55 @@
             }
           }
         ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.Shape": {
+        "type": "object"
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.ShapeUnion": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "shape"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Circle"
+          },
+          {
+            "$ref": "#/components/schemas/com.vaadin.hilla.parser.plugins.subtypes.Square"
+          }
+        ]
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.Circle": {
+        "type": "object",
+        "properties": {
+          "radius": {
+            "type": "number",
+            "format": "double"
+          },
+          "shape": {
+            "type": "string",
+            "example": "circle",
+            "enum": [
+              "circle"
+            ]
+          }
+        }
+      },
+      "com.vaadin.hilla.parser.plugins.subtypes.Square": {
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "number",
+            "format": "double"
+          },
+          "shape": {
+            "type": "string",
+            "example": "square",
+            "enum": [
+              "square"
+            ]
+          }
+        }
       },
       "com.vaadin.hilla.parser.plugins.subtypes.SmsNotification": {
         "anyOf": [
