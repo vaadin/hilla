@@ -17,6 +17,7 @@ package com.vaadin.hilla.parser.plugins.subtypes.typeids;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,7 +34,8 @@ import com.vaadin.hilla.parser.testutils.AbstractFullStackTest;
 /**
  * Verifies the type ids that the generator gives to the subtypes of a
  * polymorphic type. Which value ends up in the generated TypeScript is decided
- * by the parser, so these hierarchies are only parsed: how a discriminator is
+ * by the parser, so these hierarchies are verified in the parsed document,
+ * except for the one that must get no property at all: how a discriminator is
  * rendered is covered by the snapshots of the surrounding package.
  */
 public class TypeIdsTest extends AbstractFullStackTest {
@@ -41,18 +43,19 @@ public class TypeIdsTest extends AbstractFullStackTest {
      * The instances whose type id is checked: one per class mentioned in a
      * {@code @JsonSubTypes} annotation of the package.
      */
-    private static final List<Object> SUBTYPES = List.of(new NameBase.Named(),
-            new NameBase.Nested(), new SimpleBase.Nested(),
-            new SimpleBase.FromInterface(), new SimpleBase.FromSuperclass(),
-            new MinimalBase.Subtype(), new MinimalBase.OtherSubtype());
+    private static final List<Object> SUBTYPES = List.of(new NameBase.Listed(),
+            new NameBase.Named(), new NameBase.Nested(),
+            new SimpleBase.Nested(), new SimpleBase.FromInterface(),
+            new SimpleBase.FromSuperclass(), new MinimalBase.Subtype(),
+            new MinimalBase.OtherSubtype());
 
     /**
      * The subtypes that get no discriminator at all, because Jackson builds
      * their type ids from the name of the base class, which is not known here:
      * a generated property would hold values that the server never sends.
      */
-    private static final List<String> WITHOUT_DISCRIMINATOR = List.of("Subtype",
-            "OtherSubtype");
+    private static final List<String> WITHOUT_DISCRIMINATOR = List
+            .of("MinimalBase$Subtype", "MinimalBase$OtherSubtype");
 
     /**
      * A discriminator is only useful if it holds the value that the server
@@ -60,6 +63,13 @@ public class TypeIdsTest extends AbstractFullStackTest {
      * the JSON that the Jackson mapper of an application produces for an
      * instance of the type: a value that the server never sends leaves the
      * TypeScript type unusable for the value it describes.
+     *
+     * <p>
+     * The value is written the way an endpoint writes its return value, from
+     * the object alone rather than from a declared type. It matters: with a
+     * declared type, Jackson resolves the id of a subtype from the
+     * {@code @JsonSubTypes} annotation of that type alone, and a name a subtype
+     * inherits from a supertype is not seen.
      */
     @Test
     public void should_DeclareTheTypeIdsThatJacksonSends() {
@@ -72,13 +82,13 @@ public class TypeIdsTest extends AbstractFullStackTest {
             var cls = instance.getClass();
 
             discriminatorProperty(openApi, cls).ifPresent(property -> {
-                generated.put(cls.getSimpleName(),
+                generated.put(nameOf(cls),
                         property + "="
                                 + discriminatorValue(openApi, cls, property)
                                         .orElse(null));
 
                 var json = mapper.readTree(mapper.writeValueAsString(instance));
-                serialized.put(cls.getSimpleName(),
+                serialized.put(nameOf(cls),
                         property + "=" + Optional.ofNullable(json.get(property))
                                 .map(node -> node.asString()).orElse(null));
             });
@@ -87,7 +97,7 @@ public class TypeIdsTest extends AbstractFullStackTest {
         assertEquals(WITHOUT_DISCRIMINATOR, SUBTYPES.stream()
                 .map(Object::getClass)
                 .filter(cls -> discriminatorProperty(openApi, cls).isEmpty())
-                .map(Class::getSimpleName).toList(),
+                .map(TypeIdsTest::nameOf).toList(),
                 "Another set of subtypes than the expected one is left without"
                         + " a discriminator");
         assertEquals(serialized, generated);
@@ -105,6 +115,8 @@ public class TypeIdsTest extends AbstractFullStackTest {
                 .replace('$', '/') + ".ts";
         var source = sources.get(path);
 
+        assertNotNull(source, () -> "The generator produced no " + path
+                + ", only " + sources.keySet());
         assertFalse(source.contains("@c"),
                 () -> "The generated " + path + " declares the property that"
                         + " Jackson uses for a class based type id:\n"
@@ -168,5 +180,15 @@ public class TypeIdsTest extends AbstractFullStackTest {
 
     private static Map<String, Schema> schemasOf(OpenAPI openApi) {
         return openApi.getComponents().getSchemas();
+    }
+
+    /**
+     * The name of the given class without its package, which tells the nested
+     * subtypes of two hierarchies apart, unlike the simple class name.
+     */
+    private static String nameOf(Class<?> cls) {
+        var name = cls.getName();
+
+        return name.substring(name.lastIndexOf('.') + 1);
     }
 }

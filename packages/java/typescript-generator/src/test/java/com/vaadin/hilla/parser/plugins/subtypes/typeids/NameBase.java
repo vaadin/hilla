@@ -24,10 +24,20 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * class name without its package.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @JsonSubTypes.Type(value = NameBase.Named.class),
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = NameBase.Listed.class, name = "listed"),
+        @JsonSubTypes.Type(value = NameBase.Named.class),
         @JsonSubTypes.Type(value = NameBase.Nested.class) })
 public class NameBase {
     public String id;
+
+    /**
+     * A subtype named where the subtypes are listed, which is the name Jackson
+     * uses when the subtype has none of its own.
+     */
+    public static class Listed extends NameBase {
+        public String tag;
+    }
 
     /**
      * A subtype with a name of its own.
