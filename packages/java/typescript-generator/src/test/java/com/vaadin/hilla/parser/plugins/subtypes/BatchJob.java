@@ -15,31 +15,7 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+public class BatchJob extends Job {
 
-@Endpoint
-public class SubTypesEndpoint {
-
-    public BaseEvent sendEvent() {
-        return new AddEvent();
-    }
-
-    public void receiveEvent(BaseEvent event) {
-    }
-
-    public Notification sendNotification() {
-        return new EmailNotification();
-    }
-
-    public Job sendJob() {
-        return new BatchJob();
-    }
-
-    public Payload sendPayload() {
-        return new TextPayload();
-    }
-
-    public Shape sendShape() {
-        return new Circle(1);
-    }
+    public int chunkSize;
 }

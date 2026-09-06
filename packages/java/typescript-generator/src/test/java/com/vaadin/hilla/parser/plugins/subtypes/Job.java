@@ -15,31 +15,16 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@Endpoint
-public class SubTypesEndpoint {
-
-    public BaseEvent sendEvent() {
-        return new AddEvent();
-    }
-
-    public void receiveEvent(BaseEvent event) {
-    }
-
-    public Notification sendNotification() {
-        return new EmailNotification();
-    }
-
-    public Job sendJob() {
-        return new BatchJob();
-    }
-
-    public Payload sendPayload() {
-        return new TextPayload();
-    }
-
-    public Shape sendShape() {
-        return new Circle(1);
-    }
+/**
+ * A hierarchy whose type ids are the simple class names, unless a subtype has a
+ * name of its own.
+ */
+@JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes({ @JsonSubTypes.Type(value = BatchJob.class),
+        @JsonSubTypes.Type(value = CronJob.class) })
+public class Job {
+    public String name;
 }

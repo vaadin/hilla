@@ -15,31 +15,12 @@
  */
 package com.vaadin.hilla.parser.plugins.subtypes;
 
-import com.vaadin.hilla.parser.testutils.annotations.Endpoint;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-@Endpoint
-public class SubTypesEndpoint {
-
-    public BaseEvent sendEvent() {
-        return new AddEvent();
-    }
-
-    public void receiveEvent(BaseEvent event) {
-    }
-
-    public Notification sendNotification() {
-        return new EmailNotification();
-    }
-
-    public Job sendJob() {
-        return new BatchJob();
-    }
-
-    public Payload sendPayload() {
-        return new TextPayload();
-    }
-
-    public Shape sendShape() {
-        return new Circle(1);
-    }
+/**
+ * Holds the name of the subtypes that implement it, the way Jackson resolves
+ * the class annotations of a type.
+ */
+@JsonTypeName("cron")
+public interface Scheduled {
 }

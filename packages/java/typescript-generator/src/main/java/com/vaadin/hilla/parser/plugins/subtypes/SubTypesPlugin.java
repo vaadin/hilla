@@ -16,11 +16,13 @@
 package com.vaadin.hilla.parser.plugins.subtypes;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -166,6 +168,21 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
      * as those whose supertype is an interface.
      */
     private static Optional<SubTypesInfo> findSubTypesInfo(Class<?> cls) {
+        return hierarchyOf(cls)
+                .filter(c -> c.getAnnotation(JsonTypeInfo.class) != null
+                        && c.getAnnotation(JsonSubTypes.class) != null)
+                .findFirst()
+                .map(c -> new SubTypesInfo(c.getAnnotation(JsonTypeInfo.class),
+                        c.getAnnotation(JsonSubTypes.class)));
+    }
+
+    /**
+     * Returns the given class followed by its supertypes, superclasses and
+     * interfaces alike, in breadth-first order: the same types from which
+     * Jackson collects the class annotations that apply to a type.
+     */
+    private static Stream<Class<?>> hierarchyOf(Class<?> cls) {
+        var hierarchy = new ArrayList<Class<?>>();
         var queue = new ArrayDeque<Class<?>>();
         var visited = new HashSet<Class<?>>();
         queue.add(cls);
@@ -177,12 +194,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 continue;
             }
 
-            var typeInfo = current.getAnnotation(JsonTypeInfo.class);
-            var subTypes = current.getAnnotation(JsonSubTypes.class);
-
-            if (typeInfo != null && subTypes != null) {
-                return Optional.of(new SubTypesInfo(typeInfo, subTypes));
-            }
+            hierarchy.add(current);
 
             if (current.getSuperclass() != null) {
                 queue.add(current.getSuperclass());
@@ -191,7 +203,7 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
             queue.addAll(List.of(current.getInterfaces()));
         }
 
-        return Optional.empty();
+        return hierarchy.stream();
     }
 
     private static void addDiscriminatorProperty(Schema<?> schema,
@@ -290,8 +302,9 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
         /**
          * Returns the value of the type discriminator for the given subtype:
          * the name given in the {@code @JsonSubTypes.Type} annotation, then the
-         * {@code @JsonTypeName} annotation of the subtype itself, and finally
-         * the simple class name.
+         * {@code @JsonTypeName} annotation of the subtype or of one of its
+         * supertypes, which is where Jackson looks for it too, and finally the
+         * simple class name.
          */
         private static String discriminatorValue(JsonSubTypes.Type type) {
             if (!type.name().isEmpty()) {
@@ -302,9 +315,10 @@ public final class SubTypesPlugin extends AbstractPlugin<PluginConfiguration> {
                 return type.names()[0];
             }
 
-            return Optional
-                    .ofNullable(type.value().getAnnotation(JsonTypeName.class))
-                    .map(JsonTypeName::value).filter(name -> !name.isEmpty())
+            return hierarchyOf(type.value())
+                    .map(c -> c.getAnnotation(JsonTypeName.class))
+                    .filter(Objects::nonNull).map(JsonTypeName::value)
+                    .filter(name -> !name.isEmpty()).findFirst()
                     .orElseGet(() -> type.value().getSimpleName());
         }
     }
